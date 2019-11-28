@@ -3,7 +3,9 @@ package org.ergoplatform.android
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.Parameters.MinFee
 import org.ergoplatform.appkit.config.ErgoToolConfig
+import java.io.File
 import java.io.FileNotFoundException
+import java.io.Reader
 import java.util.*
 
 
@@ -18,8 +20,8 @@ class ErgoFacade {
        * @return json string of the signed transaction
        */
       @Throws(FileNotFoundException::class)
-      fun sendTx(amountToSend: Long, configFileName: String?): String? {
-         val conf = ErgoToolConfig.load(configFileName)
+      fun sendTx(amountToSend: Long, configReader: Reader): String? {
+         val conf = ErgoToolConfig.load(configReader)
          val newBoxSpendingDelay = conf.parameters["newBoxSpendingDelay"]!!.toInt()
          val ownerAddress = Address.create(conf.parameters["ownerAddress"])
          val nodeConf = conf.node

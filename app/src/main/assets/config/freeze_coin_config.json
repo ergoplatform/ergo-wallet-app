@@ -1,0 +1,18 @@
+{
+  "node": {
+    "nodeApi": {
+      "apiUrl": "http://localhost:9051/",
+      "apiKey": "82344a18c24adc42b78f52c58facfdf19c8cc38858a5f22e68070959499076e1"
+    },
+    "wallet": {
+      "mnemonic": "slow silly start wash bundle suffer bulb ancient height spin express remind today effort helmet",
+      "password": "",
+      "mnemonicPassword": ""
+    },
+    "networkType": "TESTNET"
+  },
+  "parameters": {
+    "newBoxSpendingDelay": "30",
+    "ownerAddress": "3WzR39tWQ5cxxWWX6ys7wNdJKLijPeyaKgx72uqg9FJRBCdZPovL"
+  }
+}

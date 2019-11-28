@@ -1,5 +1,6 @@
 package org.ergoplatform.android
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +15,8 @@ import org.ergoplatform.android.dummy.DummyContent
 import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list_content.view.*
 import kotlinx.android.synthetic.main.item_list.*
+import java.io.File
+import java.io.InputStreamReader
 
 /**
  * An activity representing a list of Pings. This activity
@@ -25,6 +28,8 @@ import kotlinx.android.synthetic.main.item_list.*
  */
 class ItemListActivity : AppCompatActivity() {
 
+    private lateinit var mConfigPath: String
+    private lateinit var mAppContext: Context
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -38,8 +43,14 @@ class ItemListActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         toolbar.title = title
 
+        mAppContext = getApplicationContext()!!
+        mConfigPath = mAppContext.getApplicationInfo().dataDir + "/config";
+
         fab.setOnClickListener { view ->
-            ErgoFacade.sendTx(1000000000, "config.json")
+            val configPath = "config/freeze_coin_config.json"
+            val inputStream = mAppContext.getAssets().open(configPath)
+            val configReader = InputStreamReader(inputStream)
+            ErgoFacade.sendTx(1000000000, configReader)
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
