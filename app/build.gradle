@@ -9,11 +9,23 @@ android {
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "org.ergoplatform.android"
-        minSdkVersion 26
+        minSdkVersion 29
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    // Configure only for each module that uses Java 8
+    // language features (either in its source code or
+    // through dependencies).
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    // For Kotlin projects
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
     buildTypes {
         release {
@@ -21,7 +33,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
@@ -35,22 +47,22 @@ repositories {
         url = "https://oss.sonatype.org/content/repositories/snapshots/"
     }
 
-    ivy {
-        url = "${System.getProperties().getProperty("user.home")}/.ivy2/local"
-        layout("ivy")
-        patternLayout {
-            artifactPattern("${url}/[organisation]/[module]/[revision]/[type]s/[artifact](-[classifier])(.[ext])")
-        }
-    }
+//    ivy {
+//        url = "${System.getProperties().getProperty("user.home")}/.ivy2/local"
+//        layout("ivy")
+//        patternLayout {
+//            artifactPattern("${url}/[organisation]/[module]/[revision]/[type]s/[artifact](-[classifier])(.[ext])")
+//        }
+//    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.core:core-ktx:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.core:core-ktx:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'com.google.android.material:material:1.0.0'
 //    implementation(group: "org.ergoplatform", name: "ergo-appkit_2.12", version: "3.1.0", configuration: "compile") {
 //        sourceSets {
@@ -59,6 +71,6 @@ dependencies {
 //    }
 
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }

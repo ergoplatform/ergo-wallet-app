@@ -15,8 +15,10 @@ import org.ergoplatform.android.dummy.DummyContent
 import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list_content.view.*
 import kotlinx.android.synthetic.main.item_list.*
-import java.io.File
-import java.io.InputStreamReader
+import scorex.util.encode.Base58
+
+//import java.io.File
+//import java.io.InputStreamReader
 
 /**
  * An activity representing a list of Pings. This activity
@@ -49,9 +51,11 @@ class ItemListActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             val configPath = "config/freeze_coin_config.json"
             val inputStream = mAppContext.getAssets().open(configPath)
-            val configReader = InputStreamReader(inputStream)
-            ErgoFacade.sendTx(1000000000, configReader)
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//            val configReader = InputStreamReader(inputStream)
+//            ErgoFacade.sendTx(1000000000, configReader)
+            val bytes = Base58.decode("3WzR39tWQ5cxxWWX6ys7wNdJKLijPeyaKgx72uqg9FJRBCdZPovL")
+            val addr = Base58.encode(bytes.get())
+            Snackbar.make(view, "Addr: $addr", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
 
