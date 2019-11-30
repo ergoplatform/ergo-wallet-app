@@ -15,7 +15,12 @@ import org.ergoplatform.android.dummy.DummyContent
 import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list_content.view.*
 import kotlinx.android.synthetic.main.item_list.*
+import org.ergoplatform.ErgoAddressEncoder
 import scorex.util.encode.Base58
+import sigmastate.eval.RuntimeIRContext
+import sigmastate.lang.SigmaCompiler
+import sigmastate.lang.TransformingSigmaBuilder
+import sigmastate.lang.`TransformingSigmaBuilder$`
 
 //import java.io.File
 //import java.io.InputStreamReader
@@ -51,11 +56,14 @@ class ItemListActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             val configPath = "config/freeze_coin_config.json"
             val inputStream = mAppContext.getAssets().open(configPath)
+            val compiler = SigmaCompiler.apply(ErgoAddressEncoder.MainnetNetworkPrefix(), `TransformingSigmaBuilder$`.`MODULE$`)
+            val IR = RuntimeIRContext()
+            val tree = compiler.compile(scala.collection.`Map$`.`MODULE$`.empty(), "{ HEIGHT > 2000 }", IR)
 //            val configReader = InputStreamReader(inputStream)
 //            ErgoFacade.sendTx(1000000000, configReader)
             val bytes = Base58.decode("3WzR39tWQ5cxxWWX6ys7wNdJKLijPeyaKgx72uqg9FJRBCdZPovL")
             val addr = Base58.encode(bytes.get())
-            Snackbar.make(view, "Addr: $addr", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, "Addr: $addr, Tree: $tree", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
 
