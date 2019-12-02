@@ -1,5 +1,7 @@
 # Working notes
 
+Use 10.0.2.2 for default AVD and 10.0.3.2 for Genymotion
+
 ## References
 - [scala-sbt](https://github.com/scala-android/sbt-android)
 - [REFLECTIONS ON STARTING ANDROID PROJECT WITH SCALA](https://scalac.io/android-project-with-scala-reflections-on-starting/)
@@ -10,6 +12,7 @@
 - [Shrink, obfuscate, and optimize your app](https://developer.android.com/studio/build/shrink-code)
 - [ProGuard usage syntax](https://www.guardsquare.com/en/products/proguard/manual/usage)
 - [Why ProGuard](https://medium.com/androiddevelopers/troubleshooting-proguard-issues-on-android-bce9de4f8a74)
+- [Accessing localhost:port from Android emulator](https://stackoverflow.com/questions/6760585/accessing-localhostport-from-android-emulator)
 
 ## Issues
 - [Build on Android fails with ArrayIndexOutOfBoundsException: 65535](https://github.com/eclipse/eclipse-collections/issues/510)

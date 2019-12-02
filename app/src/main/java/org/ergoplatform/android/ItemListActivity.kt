@@ -57,6 +57,7 @@ class ItemListActivity : AppCompatActivity() {
                    val configReader = InputStreamReader(inputStream)
                    ErgoFacade.sendTx(1000000000, configReader)
                }
+               System.out.println(tx)
                Snackbar.make(view, "Tx: $tx", Snackbar.LENGTH_LONG)
                    .setAction("Action", null).show()
             }
