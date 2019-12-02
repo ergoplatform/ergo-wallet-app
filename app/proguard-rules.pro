@@ -31,6 +31,7 @@
 -keep class sigma.**
 -keep class scalan.**
 -keep class special.**
+-keep class special.collection.impl.CollsDefs$Coll$CollElem
 -keep class wrappers.**
 -keep class org.ergoplatform.restapi.**
 -keep class org.ergoplatform.appkit.**
@@ -39,8 +40,4 @@
 -keep class scala.collection.Traversable**
 -keep class scala.package**
 
--keep class scala.util.control.NoStackTrace
 
--keepclassmembers class * {
-    ** MODULE$;
-}
