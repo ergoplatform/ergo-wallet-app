@@ -37,8 +37,8 @@ class ErgoFacade {
             )
             val prover = ctx.newProverBuilder()
                .withMnemonic(
-                  nodeConf.wallet.mnemonic,
-                  nodeConf.wallet.password
+                  SecretString.create(nodeConf.wallet.mnemonic),
+                  SecretString.create(nodeConf.wallet.password)
                )
                .build()
             val txB = ctx.newTxBuilder()
