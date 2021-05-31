@@ -1,8 +1,8 @@
 {
   "node": {
     "nodeApi": {
-      "apiUrl": "http://10.0.2.2:9051/",
-      "apiKey": "82344a18c24adc42b78f52c58facfdf19c8cc38858a5f22e68070959499076e1"
+      "apiUrl": "http://213.239.193.208:9020/",
+      "apiKey": ""
     },
     "wallet": {
       "mnemonic": "slow silly start wash bundle suffer bulb ancient height spin express remind today effort helmet",
