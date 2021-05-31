@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -14,22 +13,29 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.android.ErgoFacade
-import org.ergoplatform.android.R
+import org.ergoplatform.android.databinding.FragmentWalletBinding
 import java.io.InputStreamReader
 
 class WalletFragment : Fragment() {
 
     private lateinit var walletViewModel: WalletViewModel
 
+    private var _binding: FragmentWalletBinding? = null
+
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+    private val binding get() = _binding!!
+
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         walletViewModel =
-                ViewModelProvider(this).get(WalletViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        val textView: TextView = root.findViewById(R.id.text_dashboard)
+            ViewModelProvider(this).get(WalletViewModel::class.java)
+        _binding = FragmentWalletBinding.inflate(inflater, container, false)
+        val root = binding.root
+        val textView = binding.textDashboard
         walletViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })

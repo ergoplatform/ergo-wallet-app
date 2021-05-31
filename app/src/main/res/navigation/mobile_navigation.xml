@@ -9,17 +9,17 @@
         android:id="@+id/navigation_wallet"
         android:name="org.ergoplatform.android.ui.wallet.WalletFragment"
         android:label="@string/title_wallet"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_wallet" />
 
     <fragment
         android:id="@+id/navigation_transactions"
         android:name="org.ergoplatform.android.ui.transactions.TransactionsFragment"
         android:label="@string/title_transactions"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_transactions" />
 
     <fragment
         android:id="@+id/navigation_settings"
         android:name="org.ergoplatform.android.ui.settings.SettingsFragment"
         android:label="@string/title_settings"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_settings" />
 </navigation>

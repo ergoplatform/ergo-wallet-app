@@ -21,7 +21,7 @@ class TransactionsFragment : Fragment() {
     ): View? {
         transactionsViewModel =
                 ViewModelProvider(this).get(TransactionsViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_home, container, false)
+        val root = inflater.inflate(R.layout.fragment_transactions, container, false)
         val textView: TextView = root.findViewById(R.id.text_home)
         transactionsViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
