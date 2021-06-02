@@ -10,4 +10,5 @@
     <string name="button_view_transactions">View transactions</string>
     <string name="button_receive">Receive</string>
     <string name="button_send">Send</string>
+    <string name="button_add_wallet">Add wallet</string>
 </resources>

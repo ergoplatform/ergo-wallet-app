@@ -19,6 +19,8 @@
         <item name="borderlessButtonStyle">@style/Widget.App.Button.TextButton</item>
         <item name="materialButtonOutlinedStyle">@style/Widget.App.Button.OutlinedButton</item>
         <item name="materialButtonStyle">@style/Widget.App.Button</item>
+
+        <item name="cardViewStyle">@style/Widget.App.CardView</item>
     </style>
 
     <style name="Widget.App.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
@@ -32,7 +34,13 @@
         <item name="android:textAppearance">@style/TextAppearance.App.Button</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:padding">10dp</item>
+        <item name="strokeColor">?attr/colorPrimary</item>
         <item name="shapeAppearance">@style/ShapeAppearance.App.Round</item>
+    </style>
+
+    <style name="Widget.App.Button.OutlinedButtonPrimary" parent="Widget.App.Button.OutlinedButton">
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
     </style>
 
     <style name="Widget.App.Button" parent="Widget.MaterialComponents.Button.Icon">
@@ -72,4 +80,9 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">24sp</item>
     </style>
+
+    <style name="Widget.App.CardView" parent="CardView">
+        <item name="cardCornerRadius">10dp</item>
+    </style>
+
 </resources>
