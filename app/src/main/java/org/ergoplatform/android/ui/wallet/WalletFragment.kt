@@ -35,10 +35,6 @@ class WalletFragment : Fragment() {
             ViewModelProvider(this).get(WalletViewModel::class.java)
         _binding = FragmentWalletBinding.inflate(inflater, container, false)
         val root = binding.root
-        val textView = binding.textDashboard
-        walletViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
         return root
     }
 
