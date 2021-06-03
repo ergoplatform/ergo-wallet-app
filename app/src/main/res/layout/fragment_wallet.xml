@@ -1,99 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.wallet.WalletFragment">
+    android:orientation="vertical">
 
-    <ScrollView
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/half_horizontal_margin"
+        android:background="?attr/colorSurface"
+        android:elevation="2dp">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?android:attr/listDivider"
-            android:orientation="vertical">
+            android:layout_margin="@dimen/activity_horizontal_margin">
 
-            <FrameLayout
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/ergo_logo"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/half_horizontal_margin"
-                android:background="?attr/colorOnPrimarySurface"
-                android:elevation="2dp">
+                android:src="@drawable/ic_ergologo"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/activity_horizontal_margin">
+            <TextView
+                android:id="@+id/ergo_price"
+                style="@style/TextAppearance.App.Fiat"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/synctime"
+                app:layout_constraintStart_toStartOf="@id/synctime"
+                tools:text="0000.00 EUR"
+                tools:visibility="visible" />
 
-                    <ImageView
-                        android:id="@+id/ergo_logo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_ergologo"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/synctime"
+                style="@style/TextAppearance.App.Fiat"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ergo_logo"
+                tools:text="last synced: " />
 
-                    <TextView
-                        android:id="@+id/ergo_price"
-                        style="@style/TextAppearance.App.Fiat"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="middle"
-                        android:singleLine="true"
-                        android:visibility="gone"
-                        app:layout_constraintBottom_toTopOf="@id/synctime"
-                        app:layout_constraintStart_toStartOf="@id/synctime"
-                        tools:text="0000.00 EUR"
-                        tools:visibility="visible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
 
-                    <TextView
-                        android:id="@+id/synctime"
-                        style="@style/TextAppearance.App.Fiat"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
-                        android:ellipsize="middle"
-                        android:singleLine="true"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/ergo_logo"
-                        tools:text="last synced: " />
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.wallet.WalletFragment">
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </FrameLayout>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <include
                 android:id="@+id/wallet_card"
                 layout="@layout/card_wallet" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/activity_horizontal_margin"
-                android:orientation="horizontal">
+        </ScrollView>
 
-                <Button
-                    android:id="@+id/add_wallet"
-                    style="@style/Widget.App.Button.OutlinedButtonPrimary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/half_horizontal_margin"
-                    android:layout_weight="1"
-                    android:text="@string/button_add_wallet" />
-
-                <Button
-                    android:id="@+id/settings"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/half_horizontal_margin"
-                    android:layout_weight="1"
-                    android:text="@string/title_settings" />
-            </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
-
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</LinearLayout>

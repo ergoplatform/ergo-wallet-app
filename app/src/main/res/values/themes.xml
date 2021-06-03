@@ -2,13 +2,14 @@
     <!-- Base application theme. -->
     <style name="Theme.ErgoWallet" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimary">@color/secondary</item>
         <item name="colorPrimaryDark">@color/primary</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorAccent">@color/primary</item>
         <item name="colorSecondary">@color/primary</item>
         <item name="colorOnSecondary">@color/white</item>
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:windowBackground">@color/lightgrey</item>
 
         <!-- Status bar color. -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
@@ -38,9 +39,9 @@
         <item name="shapeAppearance">@style/ShapeAppearance.App.Round</item>
     </style>
 
-    <style name="Widget.App.Button.OutlinedButtonPrimary" parent="Widget.App.Button.OutlinedButton">
+    <style name="Widget.App.Button.PrimaryTint" parent="Widget.App.Button">
         <item name="backgroundTint">?attr/colorPrimary</item>
-        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:textColor">@color/text_color_ondark</item>
     </style>
 
     <style name="Widget.App.Button" parent="Widget.MaterialComponents.Button.Icon">
@@ -67,7 +68,7 @@
     <style name="TextAppearance.App.Button" parent="TextAppearance.MaterialComponents.Button"></style>
 
     <style name="TextAppearance.App.Fiat" parent="">
-        <item name="android:textColor">@color/disabled</item>
+        <item name="android:textColor">@color/lightgrey</item>
         <item name="android:textSize">18sp</item>
     </style>
 
@@ -83,6 +84,12 @@
 
     <style name="Widget.App.CardView" parent="CardView">
         <item name="cardCornerRadius">10dp</item>
+    </style>
+
+    <style name="Widget.App.Group.Header" parent="">
+        <item name="android:background">?attr/colorSurface</item>
+        <item name="android:layout_marginBottom">@dimen/half_horizontal_margin</item>
+        <item name="android:elevation">2dp</item>
     </style>
 
 </resources>

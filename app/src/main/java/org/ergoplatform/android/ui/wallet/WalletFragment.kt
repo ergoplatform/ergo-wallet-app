@@ -35,6 +35,9 @@ class WalletFragment : Fragment() {
             ViewModelProvider(this).get(WalletViewModel::class.java)
         _binding = FragmentWalletBinding.inflate(inflater, container, false)
         val root = binding.root
+        binding.walletCard.walletSettings.setOnClickListener {
+            binding.ergoLogo.visibility = View.GONE
+        }
         return root
     }
 

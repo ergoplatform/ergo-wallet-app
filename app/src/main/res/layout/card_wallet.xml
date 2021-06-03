@@ -129,7 +129,7 @@
 
         <Button
             android:id="@+id/button_receive"
-            style="@style/Widget.App.Button.OutlinedButtonPrimary"
+            style="@style/Widget.App.Button.PrimaryTint"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/half_horizontal_margin"
@@ -154,6 +154,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/half_horizontal_margin"
+            android:enabled="false"
             android:text="@string/button_send"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_weight="100"

@@ -11,4 +11,6 @@
     <string name="button_receive">Receive</string>
     <string name="button_send">Send</string>
     <string name="button_add_wallet">Add wallet</string>
+    <string name="button_node_address">Node address</string>
+    <string name="button_display_currency">Display currency</string>
 </resources>
