@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     tools:context=".ui.wallet.AddWalletChooserFragmentDialog">
 
     <LinearLayout
@@ -11,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
         android:animateLayoutChanges="true"
+        android:gravity="center"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -20,9 +22,9 @@
 
         <androidx.cardview.widget.CardView
             android:id="@+id/card_create_wallet"
-            android:layout_marginVertical="@dimen/half_horizontal_margin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/half_horizontal_margin">
 
             <androidx.constraintlayout.widget.ConstraintLayout
 
@@ -39,7 +41,7 @@
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
                     android:text="@string/label_create_wallet"
-                    android:textColor="@color/primary"
+                    android:textColor="@color/darkgrey"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/image_create_wallet"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -58,20 +60,19 @@
                     style="@style/TexpAppearance.App.Body1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:maxLines="4"
+                    android:text="@string/desc_create_wallet"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/title_create_wallet"
-                    app:layout_constraintTop_toBottomOf="@id/title_create_wallet"
-                    tools:text="@tools:sample/lorem/random" />
+                    app:layout_constraintTop_toBottomOf="@id/title_create_wallet" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/card_restore_wallet"
-            android:layout_marginVertical="@dimen/half_horizontal_margin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/half_horizontal_margin">
 
             <androidx.constraintlayout.widget.ConstraintLayout
 
@@ -107,20 +108,19 @@
                     style="@style/TexpAppearance.App.Body1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:maxLines="4"
+                    android:text="@string/desc_restore_wallet"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/title_restore_wallet"
-                    app:layout_constraintTop_toBottomOf="@id/title_restore_wallet"
-                    tools:text="@tools:sample/lorem/random" />
+                    app:layout_constraintTop_toBottomOf="@id/title_restore_wallet" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/card_import_wallet"
-            android:layout_marginVertical="@dimen/half_horizontal_margin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/half_horizontal_margin">
 
             <androidx.constraintlayout.widget.ConstraintLayout
 
@@ -137,7 +137,7 @@
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
                     android:text="@string/label_import_wallet"
-                    android:textColor="@color/primary"
+                    android:textColor="@color/darkgrey"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/image_import_wallet"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -156,20 +156,19 @@
                     style="@style/TexpAppearance.App.Body1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:maxLines="4"
+                    android:text="@string/desc_import_wallet"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/title_import_wallet"
-                    app:layout_constraintTop_toBottomOf="@id/title_import_wallet"
-                    tools:text="@tools:sample/lorem/random" />
+                    app:layout_constraintTop_toBottomOf="@id/title_import_wallet" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/card_readonly_wallet"
-            android:layout_marginVertical="@dimen/half_horizontal_margin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/half_horizontal_margin">
 
             <androidx.constraintlayout.widget.ConstraintLayout
 
@@ -186,7 +185,7 @@
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
                     android:text="@string/label_readonly_wallet"
-                    android:textColor="@color/primary"
+                    android:textColor="@color/darkgrey"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/image_readonly_wallet"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -205,15 +204,14 @@
                     style="@style/TexpAppearance.App.Body1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:maxLines="4"
+                    android:text="@string/desc_readonly_wallet"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/title_readonly_wallet"
-                    app:layout_constraintTop_toBottomOf="@id/title_readonly_wallet"
-                    tools:text="@tools:sample/lorem/random" />
+                    app:layout_constraintTop_toBottomOf="@id/title_readonly_wallet" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.cardview.widget.CardView>
 
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

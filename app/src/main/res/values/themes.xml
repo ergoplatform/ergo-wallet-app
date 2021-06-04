@@ -4,16 +4,16 @@
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/secondary</item>
         <item name="colorPrimaryDark">@color/primary</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/textcolor</item>
         <item name="colorAccent">@color/primary</item>
         <item name="colorSecondary">@color/primary</item>
-        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorOnSecondary">@color/textcolor</item>
         <item name="android:textColor">@color/text_color</item>
-        <item name="android:windowBackground">@color/lightgrey</item>
+        <item name="android:windowBackground">@color/windowbackground</item>
 
         <!-- Status bar color. -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">?attr/colorSurface</item>
         <item name="android:windowLightStatusBar">@bool/isLight</item>
 
         <!-- Buttons -->
@@ -28,6 +28,7 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@color/windowbackground</item>
     </style>
 
     <style name="Widget.App.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">

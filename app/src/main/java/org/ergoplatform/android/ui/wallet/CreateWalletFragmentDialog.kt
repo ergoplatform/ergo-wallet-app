@@ -10,13 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentCreateWalletDialogBinding
+import org.ergoplatform.android.ui.FullScreenFragmentDialog
 
 /**
- * A simple [Fragment] subclass.
- * Use the [CreateWalletFragmentDialog.newInstance] factory method to
- * create an instance of this fragment.
+ * Create a new wallet
  */
-class CreateWalletFragmentDialog : DialogFragment() {
+class CreateWalletFragmentDialog : FullScreenFragmentDialog() {
 
     private var _binding: FragmentCreateWalletDialogBinding? = null
     private val binding get() = _binding!!
@@ -36,15 +35,4 @@ class CreateWalletFragmentDialog : DialogFragment() {
         return binding.root
     }
 
-    override fun getTheme(): Int {
-        return R.style.FullScreenDialogTheme
-    }
-
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return object : Dialog(requireActivity(), theme) {
-            override fun onBackPressed() {
-                // On backpress, do your stuff here.
-            }
-        }
-    }
 }

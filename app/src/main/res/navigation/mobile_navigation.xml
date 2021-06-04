@@ -37,6 +37,9 @@
             app:destination="@id/createWalletDialog"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_to_restoreWalletFragmentDialog"
+            app:destination="@id/restoreWalletFragmentDialog" />
     </dialog>
     <dialog
         android:id="@+id/createWalletDialog"
@@ -48,5 +51,14 @@
             app:destination="@id/navigation_wallet"
             app:popUpTo="@id/navigation_wallet"
             app:popUpToInclusive="true"/>
+    </dialog>
+    <dialog
+        android:id="@+id/restoreWalletFragmentDialog"
+        android:name="org.ergoplatform.android.ui.wallet.RestoreWalletFragmentDialog"
+        android:label="fragment_restore_wallet"
+        tools:layout="@layout/fragment_restore_wallet" >
+        <action
+            android:id="@+id/action_restoreWalletFragmentDialog_to_createWalletDialog"
+            app:destination="@id/createWalletDialog" />
     </dialog>
 </navigation>

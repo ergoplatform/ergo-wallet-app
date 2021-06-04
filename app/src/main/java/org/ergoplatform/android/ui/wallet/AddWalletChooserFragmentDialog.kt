@@ -8,11 +8,12 @@ import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.NavHostFragment
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentAddWalletChooserBinding
+import org.ergoplatform.android.ui.FullScreenFragmentDialog
 
 /**
- * Add fragment step 1: Chooser to import or add a new fragment
+ * Add wallet step 1: Chooser to import or add a new fragment
  */
-class AddWalletChooserFragmentDialog : DialogFragment() {
+class AddWalletChooserFragmentDialog : FullScreenFragmentDialog() {
 
     private var _binding: FragmentAddWalletChooserBinding? = null
 
@@ -30,11 +31,14 @@ class AddWalletChooserFragmentDialog : DialogFragment() {
             NavHostFragment.findNavController(requireParentFragment())
                 .navigate(R.id.action_to_createWalletDialog)
         }
+        binding.cardCreateWallet.isEnabled = false
+
+        binding.cardRestoreWallet.setOnClickListener {
+            NavHostFragment.findNavController(requireParentFragment())
+                .navigate(R.id.action_to_restoreWalletFragmentDialog)
+        }
+
         // Inflate the layout for this fragment
         return binding.root
-    }
-
-    override fun getTheme(): Int {
-        return R.style.FullScreenDialogTheme
     }
 }

@@ -2,7 +2,8 @@
 <resources>
     <color name="primary">#ff4221</color>
     <color name="secondary">#FFFFFFFF</color>
-    <color name="white">#FF000000</color>
+    <color name="textcolor">#FF000000</color>
     <color name="lightgrey">#888888</color>
     <color name="darkgrey">#BBBBBB</color>
+    <color name="windowbackground">#333333</color>
 </resources>
