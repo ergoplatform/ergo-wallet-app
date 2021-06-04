@@ -22,4 +22,21 @@
         android:name="org.ergoplatform.android.ui.settings.SettingsFragment"
         android:label="@string/title_settings"
         tools:layout="@layout/fragment_settings" />
+
+    <dialog
+        android:id="@+id/addWalletChooserFragment"
+        android:name="org.ergoplatform.android.ui.wallet.AddWalletChooserFragmentDialog"
+        android:label="fragment_add_wallet_chooser"
+        tools:layout="@layout/fragment_add_wallet_chooser" >
+        <action
+            android:id="@+id/action_to_addWalletCreateMnemonicDialog"
+            app:destination="@id/addWalletCreateMnemonicDialog"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </dialog>
+    <dialog
+        android:id="@+id/addWalletCreateMnemonicDialog"
+        android:name="org.ergoplatform.android.ui.wallet.CreateWalletFragmentDialog"
+        android:label="fragment_add_wallet_create_mnemonic_dialog"
+        tools:layout="@layout/fragment_create_wallet_dialog" />
 </navigation>
