@@ -1,3 +1,4 @@
+import org.ergoplatform.appkit.Address;
 import org.ergoplatform.appkit.NetworkType;
 
 public class StageConstants {
