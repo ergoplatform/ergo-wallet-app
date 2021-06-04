@@ -28,10 +28,6 @@ class SettingsFragment : Fragment() {
             ViewModelProvider(this).get(SettingsViewModel::class.java)
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
-        binding.addWallet.setOnClickListener { fabView ->
-            fabView.findNavController().navigate(R.id.addWalletChooserFragment)
-        }
-
         return binding.root
     }
 }

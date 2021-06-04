@@ -10,7 +10,12 @@
     <string name="button_view_transactions">View transactions</string>
     <string name="button_receive">Receive</string>
     <string name="button_send">Send</string>
-    <string name="button_add_wallet">Add wallet</string>
     <string name="button_node_address">Node address</string>
     <string name="button_display_currency">Display currency</string>
+
+    <string name="menu_add_wallet">Add wallet</string>
+    <string name="label_create_wallet">New wallet</string>
+    <string name="label_restore_wallet">Restore wallet</string>
+    <string name="label_import_wallet">Import wallet</string>
+    <string name="label_readonly_wallet">Read-only wallet</string>
 </resources>

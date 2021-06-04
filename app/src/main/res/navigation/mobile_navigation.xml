@@ -9,7 +9,11 @@
         android:id="@+id/navigation_wallet"
         android:name="org.ergoplatform.android.ui.wallet.WalletFragment"
         android:label="@string/title_wallet"
-        tools:layout="@layout/fragment_wallet" />
+        tools:layout="@layout/fragment_wallet" >
+        <action
+            android:id="@+id/action_to_addWalletChooserFragment"
+            app:destination="@id/addWalletChooserFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_transactions"
@@ -27,16 +31,22 @@
         android:id="@+id/addWalletChooserFragment"
         android:name="org.ergoplatform.android.ui.wallet.AddWalletChooserFragmentDialog"
         android:label="fragment_add_wallet_chooser"
-        tools:layout="@layout/fragment_add_wallet_chooser" >
+        tools:layout="@layout/fragment_add_wallet_chooser">
         <action
-            android:id="@+id/action_to_addWalletCreateMnemonicDialog"
-            app:destination="@id/addWalletCreateMnemonicDialog"
+            android:id="@+id/action_to_createWalletDialog"
+            app:destination="@id/createWalletDialog"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </dialog>
     <dialog
-        android:id="@+id/addWalletCreateMnemonicDialog"
+        android:id="@+id/createWalletDialog"
         android:name="org.ergoplatform.android.ui.wallet.CreateWalletFragmentDialog"
         android:label="fragment_add_wallet_create_mnemonic_dialog"
-        tools:layout="@layout/fragment_create_wallet_dialog" />
+        tools:layout="@layout/fragment_create_wallet_dialog">
+        <action
+            android:id="@+id/action_createWalletDialog_to_navigation_wallet"
+            app:destination="@id/navigation_wallet"
+            app:popUpTo="@id/navigation_wallet"
+            app:popUpToInclusive="true"/>
+    </dialog>
 </navigation>

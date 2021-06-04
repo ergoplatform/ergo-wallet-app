@@ -14,8 +14,8 @@
 
         <ImageView
             android:id="@+id/wallet_logo"
-            android:layout_width="58dp"
-            android:layout_height="58dp"
+            android:layout_width="@dimen/big_icon_size"
+            android:layout_height="@dimen/big_icon_size"
             android:contentDescription="@null"
             android:src="@drawable/ic_wallet_24"
             app:layout_constraintBottom_toBottomOf="@id/wallet_fiat"
@@ -24,13 +24,13 @@
 
         <TextView
             android:id="@+id/wallet_name"
+            style="@style/TexpAppearance.App.Body1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/activity_horizontal_margin"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="?attr/colorSecondary"
-            android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/wallet_settings"
             app:layout_constraintStart_toEndOf="@id/wallet_logo"

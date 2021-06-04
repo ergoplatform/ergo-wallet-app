@@ -26,9 +26,9 @@ class AddWalletChooserFragmentDialog : DialogFragment() {
     ): View? {
         _binding = FragmentAddWalletChooserBinding.inflate(inflater, container, false)
 
-        binding.ergoLogo.setOnClickListener { view ->
+        binding.cardCreateWallet.setOnClickListener { view ->
             NavHostFragment.findNavController(requireParentFragment())
-                .navigate(R.id.action_to_addWalletCreateMnemonicDialog)
+                .navigate(R.id.action_to_createWalletDialog)
         }
         // Inflate the layout for this fragment
         return binding.root
