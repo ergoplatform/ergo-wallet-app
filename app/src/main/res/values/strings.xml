@@ -22,4 +22,8 @@
     <string name="desc_import_wallet">Use a formerly exported or saved wallet file to import existing keys and addresses.</string>
     <string name="label_readonly_wallet">Read-only wallet</string>
     <string name="desc_readonly_wallet">Add a wallet address for view only. This won\'t save any keys saved on this device.</string>
+
+    <string name="desc_about">Brought to you by Benjamin Schulte, 2021</string>
+    <string name="desc_about_moreinfo">https://github.com/MrStahlfelge/ergo-android/\n
+    Need help? https://discord.gg/kj7s7nb</string>
 </resources>
