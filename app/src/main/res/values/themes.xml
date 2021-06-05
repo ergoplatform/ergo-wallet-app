@@ -22,6 +22,9 @@
         <item name="materialButtonStyle">@style/Widget.App.Button</item>
 
         <item name="cardViewStyle">@style/Widget.App.CardView</item>
+
+        <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>
+
     </style>
 
     <style name="FullScreenDialogTheme" parent="Theme.ErgoWallet">
@@ -61,11 +64,11 @@
     </style>
 
     <style name="ThemeOverlay.App.Button.TextButton" parent="">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">@dimen/body1_textsize</item>
     </style>
 
     <style name="ThemeOverlay.App.Button" parent="">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">@dimen/body1_textsize</item>
     </style>
 
     <style name="ShapeAppearance.App.Round" parent="ShapeAppearance.MaterialComponents.SmallComponent">
@@ -79,7 +82,7 @@
     </style>
 
     <style name="TexpAppearance.App.Body1" parent="">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">@dimen/body1_textsize</item>
     </style>
 
     <style name="TextAppearance.App.Headline1" parent="">
@@ -92,8 +95,23 @@
         <item name="android:textSize">24sp</item>
     </style>
 
+    <style name="TextAppearance.App.HeadlineCardView" parent="TextAppearance.App.Headline2">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/primary</item>
+
+    </style>
+
     <style name="Widget.App.CardView" parent="CardView">
         <item name="cardCornerRadius">10dp</item>
+    </style>
+
+    <style name="Widget.App.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.TextInputLayout</item>
+    </style>
+
+    <style name="ThemeOverlay.App.TextInputLayout" parent="@style/ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="android:textSize">@dimen/body1_textsize</item>
     </style>
 
     <style name="Widget.App.Group.Header" parent="">

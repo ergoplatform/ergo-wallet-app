@@ -3,15 +3,16 @@ package org.ergoplatform.android
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.Parameters.MinFee
 import org.ergoplatform.appkit.config.ErgoToolConfig
-import java.util.*
-import java.io.File
 import java.io.FileNotFoundException
 import java.io.Reader
+import java.util.*
 
 
 class ErgoFacade {
 
    companion object {
+      val MNEMONIC_WORDS_COUNT = 15
+
       /**
        * Create and send transaction creating a box with the given amount using parameters from the given config file.
        *

@@ -35,7 +35,7 @@
 
                 <TextView
                     android:id="@+id/title_create_wallet"
-                    style="@style/TextAppearance.App.Headline2"
+                    style="@style/TextAppearance.App.HeadlineCardView"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
@@ -83,13 +83,12 @@
 
                 <TextView
                     android:id="@+id/title_restore_wallet"
-                    style="@style/TextAppearance.App.Headline2"
+                    style="@style/TextAppearance.App.HeadlineCardView"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
                     android:text="@string/label_restore_wallet"
-                    android:textColor="@color/primary"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/image_restore_wallet"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -131,7 +130,7 @@
 
                 <TextView
                     android:id="@+id/title_import_wallet"
-                    style="@style/TextAppearance.App.Headline2"
+                    style="@style/TextAppearance.App.HeadlineCardView"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
@@ -179,7 +178,7 @@
 
                 <TextView
                     android:id="@+id/title_readonly_wallet"
-                    style="@style/TextAppearance.App.Headline2"
+                    style="@style/TextAppearance.App.HeadlineCardView"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
