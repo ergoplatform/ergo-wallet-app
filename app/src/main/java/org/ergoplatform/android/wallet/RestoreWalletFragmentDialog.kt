@@ -1,4 +1,4 @@
-package org.ergoplatform.android.ui.wallet
+package org.ergoplatform.android.wallet
 
 import android.os.Bundle
 import android.text.Editable

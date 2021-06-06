@@ -1,10 +1,9 @@
-package org.ergoplatform.android.ui.wallet
+package org.ergoplatform.android.wallet
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.NavHostFragment
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentAddWalletChooserBinding

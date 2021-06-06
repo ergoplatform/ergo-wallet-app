@@ -1,4 +1,4 @@
-package org.ergoplatform.android.ui.transactions
+package org.ergoplatform.android.transactions
 
 import android.os.Bundle
 import android.view.LayoutInflater

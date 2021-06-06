@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/navigation_wallet"
-        android:name="org.ergoplatform.android.ui.wallet.WalletFragment"
+        android:name="org.ergoplatform.android.wallet.WalletFragment"
         android:label="@string/title_wallet"
         tools:layout="@layout/fragment_wallet" >
         <action
@@ -17,19 +17,19 @@
 
     <fragment
         android:id="@+id/navigation_transactions"
-        android:name="org.ergoplatform.android.ui.transactions.TransactionsFragment"
+        android:name="org.ergoplatform.android.transactions.TransactionsFragment"
         android:label="@string/title_transactions"
         tools:layout="@layout/fragment_transactions" />
 
     <fragment
         android:id="@+id/navigation_settings"
-        android:name="org.ergoplatform.android.ui.settings.SettingsFragment"
+        android:name="org.ergoplatform.android.settings.SettingsFragment"
         android:label="@string/title_settings"
         tools:layout="@layout/fragment_settings" />
 
     <dialog
         android:id="@+id/addWalletChooserFragment"
-        android:name="org.ergoplatform.android.ui.wallet.AddWalletChooserFragmentDialog"
+        android:name="org.ergoplatform.android.wallet.AddWalletChooserFragmentDialog"
         android:label="fragment_add_wallet_chooser"
         tools:layout="@layout/fragment_add_wallet_chooser">
         <action
@@ -43,7 +43,7 @@
     </dialog>
     <dialog
         android:id="@+id/createWalletDialog"
-        android:name="org.ergoplatform.android.ui.wallet.CreateWalletFragmentDialog"
+        android:name="org.ergoplatform.android.wallet.CreateWalletFragmentDialog"
         android:label="fragment_add_wallet_create_mnemonic_dialog"
         tools:layout="@layout/fragment_create_wallet_dialog">
         <action
@@ -54,7 +54,7 @@
     </dialog>
     <dialog
         android:id="@+id/restoreWalletFragmentDialog"
-        android:name="org.ergoplatform.android.ui.wallet.RestoreWalletFragmentDialog"
+        android:name="org.ergoplatform.android.wallet.RestoreWalletFragmentDialog"
         android:label="fragment_restore_wallet"
         tools:layout="@layout/fragment_restore_wallet" >
         <action
