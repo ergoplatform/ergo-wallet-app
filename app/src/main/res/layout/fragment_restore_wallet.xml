@@ -34,7 +34,7 @@
 
             <TextView
                 android:id="@+id/desc_restore_wallet"
-                style="@style/TexpAppearance.App.Body1"
+                style="@style/TextAppearance.App.Body1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/activity_vertical_margin"

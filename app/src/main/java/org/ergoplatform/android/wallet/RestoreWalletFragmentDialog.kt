@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.navigation.fragment.NavHostFragment
 import org.ergoplatform.android.ErgoFacade
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentRestoreWalletBinding
@@ -37,7 +38,7 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
             override fun afterTextChanged(s: Editable?) {
                 val words = checkMnemonic()
 
-                if (words < ErgoFacade.MNEMONIC_WORDS_COUNT) {
+                if (words > 0 && words < ErgoFacade.MNEMONIC_WORDS_COUNT) {
                     binding.tvMnemonic.error = getString(
                         R.string.mnemonic_length_not_enough,
                         (ErgoFacade.MNEMONIC_WORDS_COUNT - words).toString()
@@ -62,13 +63,23 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
     }
 
     private fun checkMnemonic(): Int {
-        val words = binding.tvMnemonic.editText?.text?.trim()?.split(" ")?.size ?: 0
+        val mnemonic = getMnemonic()
+        val words = if (mnemonic.isEmpty()) 0 else mnemonic.split(" ").size
         return words
+    }
+
+    private fun getMnemonic(): String {
+        return binding.tvMnemonic.editText?.text?.trim()?.replace("\\s+".toRegex(), " ") ?: ""
     }
 
     private fun doRestore() {
         if (checkMnemonic() == ErgoFacade.MNEMONIC_WORDS_COUNT) {
-            dismiss()
+            NavHostFragment.findNavController(requireParentFragment())
+                .navigate(
+                    RestoreWalletFragmentDialogDirections.actionRestoreWalletFragmentDialogToSaveWalletFragmentDialog(
+                        getMnemonic()
+                    )
+                )
         }
     }
 

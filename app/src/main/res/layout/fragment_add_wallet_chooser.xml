@@ -57,7 +57,7 @@
 
                 <TextView
                     android:id="@+id/desc_create_wallet"
-                    style="@style/TexpAppearance.App.Body1"
+                    style="@style/TextAppearance.App.Body1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/desc_create_wallet"
@@ -104,7 +104,7 @@
 
                 <TextView
                     android:id="@+id/desc_restore_wallet"
-                    style="@style/TexpAppearance.App.Body1"
+                    style="@style/TextAppearance.App.Body1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/desc_restore_wallet"
@@ -152,7 +152,7 @@
 
                 <TextView
                     android:id="@+id/desc_import_wallet"
-                    style="@style/TexpAppearance.App.Body1"
+                    style="@style/TextAppearance.App.Body1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/desc_import_wallet"
@@ -200,7 +200,7 @@
 
                 <TextView
                     android:id="@+id/desc_readonly_wallet"
-                    style="@style/TexpAppearance.App.Body1"
+                    style="@style/TextAppearance.App.Body1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/desc_readonly_wallet"

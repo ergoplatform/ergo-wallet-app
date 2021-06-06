@@ -30,6 +30,19 @@
     <string name="mnemonic_length_not_enough">%1s words remaining</string>
     <string name="mnemonic_length_too_long">Too much words</string>
 
+    <!-- Save wallet -->
+    <string name="intro_save_wallet">Your public wallet address is:</string>
+    <string name="intro_save_wallet2">You can now choose how the wallet with its keys should be saved on this device.</string>
+    <string name="button_save_password_encrypted">Save password-encrypted</string>
+    <string name="desc_save_password_encrypted">You have to enter a password-phrase that you need to reenter every time you want to send funds.</string>
+    <string name="button_save_device_encrypted">Save device-encrypted</string>
+    <string name="desc_save_device_encrypted">You need to authenticate on your device to save the wallet and send funds.\n
+        Current authentication method: %1s</string>
+    <string name="device_enc_security_none">None</string>
+    <string name="device_enc_security_pass">Password, PIN or pattern</string>
+    <string name="device_enc_security_biometric_strong">Biometric with strong security</string>
+    <string name="device_enc_security_biometric_weak">Biometric, Class 2</string>
+
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, 2021</string>
     <string name="desc_about_moreinfo">https://github.com/MrStahlfelge/ergo-android/\n

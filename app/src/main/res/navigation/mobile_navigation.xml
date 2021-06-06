@@ -58,7 +58,21 @@
         android:label="fragment_restore_wallet"
         tools:layout="@layout/fragment_restore_wallet" >
         <action
-            android:id="@+id/action_restoreWalletFragmentDialog_to_createWalletDialog"
-            app:destination="@id/createWalletDialog" />
+            android:id="@+id/action_restoreWalletFragmentDialog_to_saveWalletFragmentDialog"
+            app:destination="@id/saveWalletFragmentDialog" />
+    </dialog>
+    <dialog
+        android:id="@+id/saveWalletFragmentDialog"
+        android:name="org.ergoplatform.android.wallet.SaveWalletFragmentDialog"
+        android:label="fragment_save_wallet_dialog"
+        tools:layout="@layout/fragment_save_wallet_dialog" >
+        <action
+            android:id="@+id/action_saveWalletFragmentDialog_to_navigation_wallet"
+            app:destination="@id/navigation_wallet"
+            app:popUpTo="@id/navigation_wallet"
+            app:popUpToInclusive="true" />
+        <argument
+            android:name="mnemonic"
+            app:argType="string" />
     </dialog>
 </navigation>

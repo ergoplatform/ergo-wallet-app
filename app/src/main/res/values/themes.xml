@@ -77,11 +77,11 @@
 
     <style name="TextAppearance.App.Button" parent="TextAppearance.MaterialComponents.Button"></style>
 
-    <style name="TextAppearance.App.Fiat" parent="TexpAppearance.App.Body1">
+    <style name="TextAppearance.App.Fiat" parent="TextAppearance.App.Body1">
         <item name="android:textColor">@color/lightgrey</item>
     </style>
 
-    <style name="TexpAppearance.App.Body1" parent="">
+    <style name="TextAppearance.App.Body1" parent="">
         <item name="android:textSize">@dimen/body1_textsize</item>
     </style>
 
