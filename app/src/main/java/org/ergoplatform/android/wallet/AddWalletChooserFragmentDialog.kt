@@ -28,13 +28,13 @@ class AddWalletChooserFragmentDialog : FullScreenFragmentDialog() {
 
         binding.cardCreateWallet.setOnClickListener { view ->
             NavHostFragment.findNavController(requireParentFragment())
-                .navigate(R.id.action_to_createWalletDialog)
+                .navigate(AddWalletChooserFragmentDialogDirections.actionToCreateWalletDialog())
         }
         binding.cardCreateWallet.isEnabled = false
 
         binding.cardRestoreWallet.setOnClickListener {
             NavHostFragment.findNavController(requireParentFragment())
-                .navigate(R.id.action_to_restoreWalletFragmentDialog)
+                .navigate(AddWalletChooserFragmentDialogDirections.actionToRestoreWalletFragmentDialog())
         }
 
         // Inflate the layout for this fragment

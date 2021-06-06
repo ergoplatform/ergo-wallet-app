@@ -53,7 +53,7 @@ class WalletFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_add_wallet -> {
-                findNavController().navigate(R.id.action_to_addWalletChooserFragment)
+                findNavController().navigate(WalletFragmentDirections.actionToAddWalletChooserFragment())
                 return true
             }
             else -> {

@@ -26,7 +26,7 @@ class CreateWalletFragmentDialog : FullScreenFragmentDialog() {
 
         binding.ergoLogo.setOnClickListener {
             NavHostFragment.findNavController(requireParentFragment())
-                .navigate(R.id.action_createWalletDialog_to_navigation_wallet)
+                .navigate(CreateWalletFragmentDialogDirections.actionCreateWalletDialogToNavigationWallet())
         }
 
         return binding.root
