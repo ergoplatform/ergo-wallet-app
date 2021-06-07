@@ -8,7 +8,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.biometric.BiometricManager
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
@@ -55,7 +60,28 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog() {
                 R.string.device_enc_security_pass
             else R.string.device_enc_security_none
 
-        binding.descDeviceEncryption.text = getString(R.string.desc_save_device_encrypted, getString(methodDesc))
+        binding.descDeviceEncryption.text =
+            getString(R.string.desc_save_device_encrypted, getString(methodDesc))
+
+        binding.buttonSavePassenc.setOnClickListener { saveToDb(true) }
+        binding.buttonSaveDeviceenc.setOnClickListener { saveToDb(false) }
+    }
+
+    private fun saveToDb(withDb: Boolean) {
+        val fromMnemonic = Address.fromMnemonic(
+            StageConstants.NETWORK_TYPE,
+            SecretString.create(args.mnemonic),
+            SecretString.create("")
+        )
+
+        val walletConfig =
+            WalletConfigDbEntity(0, "My wallet", fromMnemonic.ergoAddress.toString(), null)
+
+        GlobalScope.launch(Dispatchers.IO) {
+            AppDatabase.getInstance(requireContext()).walletDao().insertAll(walletConfig)
+        }
+        NavHostFragment.findNavController(requireParentFragment())
+            .navigate(SaveWalletFragmentDialogDirections.actionSaveWalletFragmentDialogToNavigationWallet())
     }
 
 }

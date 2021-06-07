@@ -46,7 +46,7 @@
                 android:text="@string/intro_save_wallet2" />
 
             <Button
-                android:id="@+id/button_receive"
+                android:id="@+id/button_save_passenc"
                 style="@style/Widget.App.Button.PrimaryTint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
                 android:text="@string/desc_save_password_encrypted" />
 
             <Button
-                android:id="@+id/button_restore"
+                android:id="@+id/button_save_deviceenc"
                 style="?attr/materialButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

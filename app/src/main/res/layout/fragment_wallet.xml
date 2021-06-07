@@ -56,19 +56,22 @@
     </FrameLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/recycler_parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".wallet.WalletFragment">
 
-        <ScrollView
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <include
-                android:id="@+id/wallet_card"
-                layout="@layout/card_wallet" />
-
-        </ScrollView>
+            android:layout_height="match_parent"
+            tools:listitem="@layout/card_wallet" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <include
+        android:id="@+id/empty_view"
+        layout="@layout/fragment_add_wallet_chooser"
+        android:visibility="gone" />
+
 </LinearLayout>
