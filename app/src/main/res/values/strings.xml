@@ -12,6 +12,8 @@
     <string name="button_send">Send</string>
     <string name="button_node_address">Node address</string>
     <string name="button_display_currency">Display currency</string>
+    <string name="label_last_sync">synced %1s</string>
+    <string name="label_last_sync_just_now">just now</string>
 
     <!-- add wallet -->
     <string name="menu_add_wallet">Add wallet</string>

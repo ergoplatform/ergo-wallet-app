@@ -17,8 +17,9 @@ class NodeConnector() {
 
     val isRefreshing: MutableLiveData<Boolean> = MutableLiveData()
     val refreshNum: MutableLiveData<Int> = MutableLiveData()
-    private var lastRefresMs: Long = 0
-    val service: ErgoApi
+    var lastRefresMs: Long = 0
+        private set
+    private val service: ErgoApi
 
     init {
         val retrofit = Retrofit.Builder()
@@ -51,6 +52,8 @@ class NodeConnector() {
         if (!(isRefreshing.value ?: false)) {
             isRefreshing.postValue(true)
             GlobalScope.launch(Dispatchers.IO) {
+                var hadError = false
+
                 // Refresh Ergo fiat value
 
 
@@ -75,9 +78,13 @@ class NodeConnector() {
                 } catch (t: Throwable) {
                     Log.e("Nodeconnector", "Error", t)
                     // TODO report to user
+                    hadError = true
                 }
 
-                lastRefresMs = System.currentTimeMillis()
+                if (!hadError) {
+                    lastRefresMs = System.currentTimeMillis()
+                }
+                refreshNum.postValue(refreshNum.value?.and(1) ?: 0)
                 isRefreshing.postValue(false)
             }
         }

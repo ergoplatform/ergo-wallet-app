@@ -1,8 +1,10 @@
 package org.ergoplatform.android.wallet
 
+import StageConstants
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.format.DateUtils
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -78,7 +80,22 @@ class WalletFragment : Fragment() {
         }
         nodeConnector.isRefreshing.observe(viewLifecycleOwner, { isRefreshing ->
             binding.swipeRefreshLayout.isRefreshing = isRefreshing
+
+            if (!isRefreshing) {
+                refreshTimeSinceSyncLabel()
+            }
         })
+    }
+
+    private fun refreshTimeSinceSyncLabel() {
+        val nodeConnector = NodeConnector.getInstance()
+        val lastRefresMs = nodeConnector.lastRefresMs
+        binding.synctime.text = if (lastRefresMs > 0) getString(
+            R.string.label_last_sync,
+            if (System.currentTimeMillis() - lastRefresMs < 1000L) getString(R.string.label_last_sync_just_now) else
+                DateUtils.getRelativeTimeSpanString(lastRefresMs)
+        )
+        else null
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -100,6 +117,7 @@ class WalletFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        refreshTimeSinceSyncLabel()
         NodeConnector.getInstance().refreshWhenNeeded(requireContext())
     }
 
@@ -149,6 +167,12 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         binding.walletName.text = wallet.walletConfig.displayName
         binding.walletBalance.text = (wallet.state?.balance ?: 0).toString()
         binding.walletTransactions.text = (wallet.state?.transactions ?: 0).toString()
+
+        val unconfirmed = (wallet.state?.unconfirmedBalance ?: 0) - (wallet.state?.balance ?: 0)
+        binding.walletUnconfirmed.text = unconfirmed.toString()
+        binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
+        binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
+
         binding.buttonViewTransactions.setOnClickListener {
             val browserIntent = Intent(
                 Intent.ACTION_VIEW,
