@@ -20,6 +20,11 @@
 -dontwarn javax.annotation.ParametersAreNonnullByDefault
 
 -keep class com.google.gson.**
+-keep class org.ergoplatform.api.**
+-keepclassmembers,allowobfuscation class * {
+  @com.google.gson.annotations.SerializedName <fields>;
+}
+
 -keep class sigmastate.**
 -keep class sigma.**
 -keep class scalan.**
@@ -32,9 +37,6 @@
 -keep class scala.util.control.**
 -keep class scala.collection.Traversable**
 -keep class scala.package**
-
--keep class org.ergoplatform.api.**
-
 
 -keep class * extends androidx.room.RoomDatabase
 -keep @androidx.room.Entity class *
