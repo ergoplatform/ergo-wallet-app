@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.NodeConnector
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
@@ -32,7 +33,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentSaveWalletDialogBinding.inflate(inflater, container, false)
 
@@ -79,6 +80,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog() {
 
         GlobalScope.launch(Dispatchers.IO) {
             AppDatabase.getInstance(requireContext()).walletDao().insertAll(walletConfig)
+            NodeConnector.getInstance().invalidateCache()
         }
         NavHostFragment.findNavController(requireParentFragment())
             .navigate(SaveWalletFragmentDialogDirections.actionSaveWalletFragmentDialogToNavigationWallet())

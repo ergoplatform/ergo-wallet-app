@@ -1,5 +1,7 @@
 package org.ergoplatform.android.wallet
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -15,10 +17,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.ErgoFacade
+import org.ergoplatform.android.NodeConnector
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
 import java.io.InputStreamReader
+
 
 class WalletFragment : Fragment() {
 
@@ -56,7 +60,7 @@ class WalletFragment : Fragment() {
                 { walletList ->
                     walletAdapter.walletList = walletList
 
-                    binding.recyclerParent.visibility =
+                    binding.swipeRefreshLayout.visibility =
                         if (walletList.isEmpty()) View.GONE else View.VISIBLE
                     binding.emptyView.root.visibility =
                         if (walletList.isEmpty()) View.VISIBLE else View.GONE
@@ -65,6 +69,16 @@ class WalletFragment : Fragment() {
         binding.emptyView.cardRestoreWallet.setOnClickListener {
             findNavController().navigate(R.id.restoreWalletFragmentDialog)
         }
+
+        val nodeConnector = NodeConnector.getInstance()
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            if (!nodeConnector.refreshByUser(requireContext())) {
+                binding.swipeRefreshLayout.isRefreshing = false
+            }
+        }
+        nodeConnector.isRefreshing.observe(viewLifecycleOwner, { isRefreshing ->
+            binding.swipeRefreshLayout.isRefreshing = isRefreshing
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -82,6 +96,11 @@ class WalletFragment : Fragment() {
                 return super.onOptionsItemSelected(item)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        NodeConnector.getInstance().refreshWhenNeeded(requireContext())
     }
 
     private fun runOnErgo() {
@@ -131,7 +150,11 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         binding.walletBalance.text = (wallet.state?.balance ?: 0).toString()
         binding.walletTransactions.text = (wallet.state?.transactions ?: 0).toString()
         binding.buttonViewTransactions.setOnClickListener {
-
+            val browserIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(StageConstants.EXPLORER_WEB_ADDRESS + "en/addresses/" + wallet.walletConfig.publicAddress)
+            )
+            binding.root.context.startActivity(browserIntent)
         }
     }
 

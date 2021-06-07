@@ -33,6 +33,8 @@
 -keep class scala.collection.Traversable**
 -keep class scala.package**
 
+-keep class org.ergoplatform.api.**
+
 
 -keep class * extends androidx.room.RoomDatabase
 -keep @androidx.room.Entity class *

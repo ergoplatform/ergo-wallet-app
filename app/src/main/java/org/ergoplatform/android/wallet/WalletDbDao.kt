@@ -19,7 +19,7 @@ interface WalletDbDao {
     suspend fun loadWalletById(id: Int): WalletConfigDbEntity
 
     @Query("SELECT * FROM wallet_configs")
-    fun getAllFlow(): Flow<List<WalletConfigDbEntity>>
+    fun getAllSync(): List<WalletConfigDbEntity>
 
     @Query("SELECT * FROM wallet_configs")
     fun getAllLiveData(): LiveData<List<WalletConfigDbEntity>>
@@ -29,6 +29,6 @@ interface WalletDbDao {
     fun getWalletsWithStates(): LiveData<List<WalletDbEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWalletState(walletState: WalletStateDbEntity)
+    suspend fun insertWalletStates(vararg walletStates: WalletStateDbEntity)
 
 }

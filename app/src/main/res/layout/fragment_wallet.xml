@@ -56,7 +56,7 @@
     </FrameLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/recycler_parent"
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".wallet.WalletFragment">
