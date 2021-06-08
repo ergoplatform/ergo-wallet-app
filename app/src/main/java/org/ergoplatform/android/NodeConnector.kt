@@ -19,6 +19,8 @@ class NodeConnector() {
     val refreshNum: MutableLiveData<Int> = MutableLiveData()
     var lastRefresMs: Long = 0
         private set
+    var lastHadError: Boolean = false
+        private set
     private val service: ErgoApi
 
     init {
@@ -84,6 +86,7 @@ class NodeConnector() {
                 if (!hadError) {
                     lastRefresMs = System.currentTimeMillis()
                 }
+                lastHadError = hadError
                 refreshNum.postValue(refreshNum.value?.and(1) ?: 0)
                 isRefreshing.postValue(false)
             }

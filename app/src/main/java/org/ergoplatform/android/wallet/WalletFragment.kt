@@ -79,6 +79,7 @@ class WalletFragment : Fragment() {
             binding.swipeRefreshLayout.isRefreshing = isRefreshing
 
             if (!isRefreshing) {
+                binding.connectionError.visibility = if (nodeConnector.lastHadError) View.VISIBLE else View.INVISIBLE
                 refreshTimeSinceSyncLabel()
             }
         })

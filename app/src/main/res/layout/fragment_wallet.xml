@@ -18,14 +18,30 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/activity_horizontal_margin">
 
-            <ImageView
+            <FrameLayout
                 android:id="@+id/ergo_logo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_ergologo"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_ergologo" />
+
+                <ImageView
+                    android:id="@+id/connection_error"
+                    android:layout_width="30dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|bottom"
+                    android:src="@drawable/ic_cloud_off_24"
+                    android:visibility="invisible"
+                    app:tint="@color/primary"
+                    tools:visibility="visible" />
+
+            </FrameLayout>
 
             <org.fabiomsr.moneytextview.MoneyTextView
                 android:id="@+id/ergo_price"
