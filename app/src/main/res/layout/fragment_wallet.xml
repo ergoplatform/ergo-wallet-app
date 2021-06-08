@@ -27,15 +27,24 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
+                    android:id="@+id/ergo_logo_back"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_ergologo" />
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_ergologo_bg" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_ergologo_sigma" />
 
                 <ImageView
                     android:id="@+id/connection_error"
                     android:layout_width="30dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end|bottom"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_cloud_off_24"
                     android:visibility="invisible"
                     app:tint="@color/primary"

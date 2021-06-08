@@ -6,6 +6,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -70,17 +72,37 @@ class WalletFragment : Fragment() {
         }
 
         val nodeConnector = NodeConnector.getInstance()
+        val rotateAnimation =
+            AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_indefinitely)
+        rotateAnimation.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {
+
+            }
+
+            override fun onAnimationEnd(animation: Animation?) {
+
+            }
+
+            override fun onAnimationRepeat(animation: Animation?) {
+                if (nodeConnector.isRefreshing.value == false) {
+                    binding.ergoLogoBack.clearAnimation()
+                }
+            }
+
+        })
         binding.swipeRefreshLayout.setOnRefreshListener {
             if (!nodeConnector.refreshByUser(requireContext())) {
                 binding.swipeRefreshLayout.isRefreshing = false
             }
         }
         nodeConnector.isRefreshing.observe(viewLifecycleOwner, { isRefreshing ->
-            binding.swipeRefreshLayout.isRefreshing = isRefreshing
-
             if (!isRefreshing) {
+                binding.swipeRefreshLayout.isRefreshing = false
                 binding.connectionError.visibility = if (nodeConnector.lastHadError) View.VISIBLE else View.INVISIBLE
                 refreshTimeSinceSyncLabel()
+            } else {
+                binding.ergoLogoBack.clearAnimation()
+                binding.ergoLogoBack.startAnimation(rotateAnimation)
             }
         })
     }
@@ -90,7 +112,7 @@ class WalletFragment : Fragment() {
         val lastRefresMs = nodeConnector.lastRefresMs
         binding.synctime.text = if (lastRefresMs > 0) getString(
             R.string.label_last_sync,
-            if (System.currentTimeMillis() - lastRefresMs < 1000L) getString(R.string.label_last_sync_just_now) else
+            if (System.currentTimeMillis() - lastRefresMs < 60000L) getString(R.string.label_last_sync_just_now) else
                 DateUtils.getRelativeTimeSpanString(lastRefresMs)
         )
         else null
