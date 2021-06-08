@@ -27,17 +27,20 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
+            <org.fabiomsr.moneytextview.MoneyTextView
                 android:id="@+id/ergo_price"
-                style="@style/TextAppearance.App.Fiat"
+                style="@style/MoneyTextViewFiatStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:ellipsize="middle"
                 android:singleLine="true"
                 android:visibility="gone"
+                app:baseTextColor="@color/lightgrey"
+
                 app:layout_constraintBottom_toTopOf="@id/synctime"
                 app:layout_constraintStart_toStartOf="@id/synctime"
-                tools:text="0000.00 EUR"
+                tools:amount="10.12"
+                tools:symbol="EUR"
                 tools:visibility="visible" />
 
             <TextView

@@ -17,10 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.ErgoFacade
-import org.ergoplatform.android.NodeConnector
-import org.ergoplatform.android.R
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
 import java.io.InputStreamReader
@@ -165,11 +162,11 @@ class WalletAdapter : RecyclerView.Adapter<WalletViewHolder>() {
 class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder(binding.root) {
     fun bind(wallet: WalletDbEntity) {
         binding.walletName.text = wallet.walletConfig.displayName
-        binding.walletBalance.text = (wallet.state?.balance ?: 0).toString()
+        binding.walletBalance.amount = nanoErgsToErgs(wallet.state?.balance ?: 0)
         binding.walletTransactions.text = (wallet.state?.transactions ?: 0).toString()
 
         val unconfirmed = (wallet.state?.unconfirmedBalance ?: 0) - (wallet.state?.balance ?: 0)
-        binding.walletUnconfirmed.text = unconfirmed.toString()
+        binding.walletUnconfirmed.amount = nanoErgsToErgs(unconfirmed)
         binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
 

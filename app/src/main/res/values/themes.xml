@@ -87,17 +87,17 @@
 
     <style name="TextAppearance.App.Headline1" parent="">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">30sp</item>
+        <item name="android:textSize">@dimen/headline1_textsize</item>
     </style>
 
     <style name="TextAppearance.App.Headline2" parent="">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">@dimen/headline2_textsize</item>
     </style>
 
     <style name="TextAppearance.App.HeadlineCardView" parent="TextAppearance.App.Headline2">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">@dimen/headline2_textsize</item>
         <item name="android:textColor">@color/primary</item>
 
     </style>

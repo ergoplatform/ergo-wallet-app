@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MoneyTextView">
+        <attr name="format" format="string"/>
+        <attr name="symbol" format="string"/>
+        <attr name="amount" format="float"/>
+        <attr name="symbolMargin" format="dimension"/>
+        <attr name="decimalMargin" format="dimension"/>
+        <attr name="decimalSeparator" format="string"/>
+
+        <attr name="baseTextSize" format="dimension"/>
+        <attr name="baseTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+        </attr>
+
+        <attr name="symbolTextSize" format="dimension"/>
+        <attr name="symbolTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+        </attr>
+
+        <attr name="decimalDigitsTextSize" format="dimension"/>
+        <attr name="decimalDigitsTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+        </attr>
+
+        <attr name="symbolGravity">
+            <flag name="start" value="0x01"/>
+            <flag name="end" value="0x02"/>
+            <flag name="top" value="0x04"/>
+            <flag name="bottom" value="0x08"/>
+        </attr>
+
+        <attr name="decimalGravity" format="enum">
+            <enum name="top" value="4"/>
+            <enum name="bottom" value="8"/>
+        </attr>
+
+        <attr name="gravity">
+            <enum name="left" value="0x01"/>
+            <enum name="right" value="0x02"/>
+            <enum name="top" value="0x04"/>
+            <enum name="bottom" value="0x08"/>
+            <enum name="centerVertical" value="0x16"/>
+            <enum name="centerHorizontal" value="0x32"/>
+            <enum name="center" value="0x48"/>
+        </attr>
+
+        <attr name="baseTextColor" format="color"/>
+        <attr name="symbolTextColor" format="color"/>
+        <attr name="decimalTextColor" format="color"/>
+
+        <attr name="includeDecimalSeparator" format="boolean"/>
+        <attr name="decimalUnderline" format="boolean"/>
+        <attr name="fontPath" format="string"/>
+    </declare-styleable>
+
+</resources>

@@ -7,6 +7,11 @@ import java.io.FileNotFoundException
 import java.io.Reader
 import java.util.*
 
+fun nanoErgsToErgs(nanoErgs: Long): Float {
+   val milliErgs = nanoErgs / (1000L * 1000L)
+   val ergs = milliErgs.toFloat() / 1000f
+   return ergs
+}
 
 class ErgoFacade {
 

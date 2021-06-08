@@ -10,7 +10,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/activity_horizontal_margin">
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:animateLayoutChanges="true">
 
         <ImageView
             android:id="@+id/wallet_logo"
@@ -47,31 +48,30 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
+        <org.fabiomsr.moneytextview.MoneyTextView
             android:id="@+id/wallet_balance"
-            style="@style/TextAppearance.App.Headline1"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="middle"
-            android:singleLine="true"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:baseTextSize="@dimen/headline1_textsize"
+            app:baseTextStyle="bold"
+            app:decimalDigitsTextSize="@dimen/body1_textsize"
+            app:decimalMargin="4dp"
             app:layout_constraintStart_toStartOf="@id/wallet_name"
             app:layout_constraintTop_toBottomOf="@id/wallet_name"
-            tools:text="0000.0000 ERG" />
+            app:symbolMargin="6dp"
+            tools:amount="191256.45" />
 
-        <TextView
+        <org.fabiomsr.moneytextview.MoneyTextView
             android:id="@+id/wallet_fiat"
-            style="@style/TextAppearance.App.Fiat"
-            android:layout_width="0dp"
+            style="@style/MoneyTextViewFiatStyle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-5sp"
-            android:ellipsize="middle"
-            android:singleLine="true"
             android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:baseTextColor="@color/lightgrey"
             app:layout_constraintStart_toStartOf="@id/wallet_balance"
             app:layout_constraintTop_toBottomOf="@id/wallet_balance"
-            tools:text="0000.00 EUR"
+            tools:amount="1912564.531"
+            tools:symbol="EUR"
             tools:visibility="visible" />
 
         <TextView
@@ -93,16 +93,20 @@
             app:layout_constraintStart_toEndOf="@id/wallet_transactions"
             app:layout_constraintTop_toTopOf="@id/wallet_transactions" />
 
-        <TextView
+        <org.fabiomsr.moneytextview.MoneyTextView
             android:id="@+id/wallet_unconfirmed"
-            style="@style/TextAppearance.App.Headline2"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:visibility="gone"
+            app:baseTextSize="@dimen/headline2_textsize"
+            app:baseTextStyle="bold"
+            app:decimalDigitsTextSize="14sp"
+            app:decimalMargin="4dp"
             app:layout_constraintStart_toStartOf="@id/wallet_name"
             app:layout_constraintTop_toBottomOf="@id/wallet_transactions"
-            tools:text="123.2546 ERG"
+            app:symbolMargin="4dp"
+            tools:amount="-123.2536"
             tools:visibility="visible" />
 
         <TextView
@@ -110,9 +114,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/half_horizontal_margin"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="@string/label_unconfirmed"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/wallet_unconfirmed"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/wallet_unconfirmed"
             app:layout_constraintTop_toTopOf="@id/wallet_unconfirmed"
             tools:visibility="visible" />
