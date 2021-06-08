@@ -27,7 +27,7 @@ fun getExplorerPaymentRequestAddress(
     val encoding = "utf-8"
     return "https://explorer.ergoplatform.com/payment-request?address=" +
             URLEncoder.encode(address, encoding) +
-            "&amount=" + amount.toString() + "&description=" +
+            "&amount=" + URLEncoder.encode(amount.toString(), encoding) + "&description=" +
             URLEncoder.encode(
                 description, encoding
             )

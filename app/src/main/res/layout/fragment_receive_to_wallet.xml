@@ -55,7 +55,8 @@
                     android:layout_height="250dp"
                     android:layout_marginVertical="@dimen/activity_vertical_margin"
                     android:contentDescription="@string/label_qr_code"
-                    app:layout_constraintTop_toBottomOf="@id/wallet_name" />
+                    app:layout_constraintTop_toBottomOf="@id/wallet_name"
+                    tools:src="@drawable/ic_copy_24" />
 
                 <TextView
                     android:id="@+id/public_address"
@@ -63,11 +64,10 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textAppearance="@style/TextAppearance.App.Headline2"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/button_copy"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/qr_code"
-                    tools:text="jkkljkljkljkljkljdjkldkljdjld" />
+                    tools:text="Very long public address, will be 3 lines long" />
 
                 <ImageButton
                     android:id="@+id/button_copy"
@@ -79,9 +79,43 @@
                     app:layout_constraintBottom_toBottomOf="@id/public_address"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@id/public_address" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/amount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:hint="@string/label_amount"
+                    app:layout_constraintTop_toBottomOf="@id/public_address">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:imeOptions="actionNext"
+                        android:inputType="numberDecimal" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/purpose"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/half_horizontal_margin"
+                    android:hint="@string/label_purpose"
+                    app:layout_constraintTop_toBottomOf="@id/amount">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:imeOptions="actionDone"
+                        android:inputType="text"
+                        android:maxLines="1" />
+
+                </com.google.android.material.textfield.TextInputLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
-
 
     </ScrollView>
 

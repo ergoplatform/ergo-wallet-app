@@ -3,6 +3,8 @@ package org.ergoplatform.android.transactions
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +37,10 @@ class ReceiveToWalletFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         _binding = FragmentReceiveToWalletBinding.inflate(inflater, container, false)
+
+        binding.amount.editText?.addTextChangedListener(MyTextWatcher())
+        binding.purpose.editText?.addTextChangedListener(MyTextWatcher())
+
         return binding.root
     }
 
@@ -67,13 +73,35 @@ class ReceiveToWalletFragment : Fragment() {
     }
 
     private fun refreshQrCode() {
-        binding.walletName.text?.let {
+        binding.publicAddress.text?.let {
+            val amountStr = binding.amount.editText?.text.toString()
+            val amountVal = if (amountStr.isEmpty()) 0f else amountStr.toFloat()
+
             setQrCodeToImageView(
                 binding.qrCode,
-                getExplorerPaymentRequestAddress(it.toString(), 2.5f, "hallo test"),
+                getExplorerPaymentRequestAddress(
+                    it.toString(),
+                    amountVal,
+                    binding.purpose.editText?.text.toString()
+                ),
                 400,
                 400
             )
         }
+    }
+
+    inner class MyTextWatcher : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+        }
+
+        override fun afterTextChanged(s: Editable?) {
+            refreshQrCode()
+        }
+
     }
 }
