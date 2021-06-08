@@ -13,6 +13,13 @@
         <action
             android:id="@+id/action_to_addWalletChooserFragment"
             app:destination="@id/addWalletChooserFragment" />
+        <action
+            android:id="@+id/action_navigation_wallet_to_receiveToWalletFragment"
+            app:destination="@id/receiveToWalletFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -75,4 +82,13 @@
             android:name="mnemonic"
             app:argType="string" />
     </dialog>
+    <fragment
+        android:id="@+id/receiveToWalletFragment"
+        android:name="org.ergoplatform.android.transactions.ReceiveToWalletFragment"
+        android:label="fragment_receive_to_wallet"
+        tools:layout="@layout/fragment_receive_to_wallet" >
+        <argument
+            android:name="wallet_id"
+            app:argType="integer" />
+    </fragment>
 </navigation>

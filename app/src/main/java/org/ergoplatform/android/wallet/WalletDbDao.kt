@@ -16,7 +16,7 @@ interface WalletDbDao {
     suspend fun update(walletConfig: WalletConfigDbEntity)
 
     @Query("SELECT * FROM wallet_configs WHERE id = :id")
-    suspend fun loadWalletById(id: Int): WalletConfigDbEntity
+    suspend fun loadWalletById(id: Int): WalletConfigDbEntity?
 
     @Query("SELECT * FROM wallet_configs")
     fun getAllSync(): List<WalletConfigDbEntity>

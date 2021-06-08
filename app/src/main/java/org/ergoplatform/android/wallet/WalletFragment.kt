@@ -9,7 +9,9 @@ import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.findFragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -98,7 +100,8 @@ class WalletFragment : Fragment() {
         nodeConnector.isRefreshing.observe(viewLifecycleOwner, { isRefreshing ->
             if (!isRefreshing) {
                 binding.swipeRefreshLayout.isRefreshing = false
-                binding.connectionError.visibility = if (nodeConnector.lastHadError) View.VISIBLE else View.INVISIBLE
+                binding.connectionError.visibility =
+                    if (nodeConnector.lastHadError) View.VISIBLE else View.INVISIBLE
                 refreshTimeSinceSyncLabel()
             } else {
                 binding.ergoLogoBack.clearAnimation()
@@ -143,6 +146,7 @@ class WalletFragment : Fragment() {
 
     private fun runOnErgo() {
         val configPath = "config/freeze_coin_config.json"
+        // do not use globalscope
         GlobalScope.launch(Dispatchers.Main) {
             val tx = withContext(Dispatchers.IO) {
                 val inputStream = requireContext().assets.open(configPath)
@@ -199,6 +203,15 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
                 Uri.parse(StageConstants.EXPLORER_WEB_ADDRESS + "en/addresses/" + wallet.walletConfig.publicAddress)
             )
             binding.root.context.startActivity(browserIntent)
+        }
+
+        binding.buttonReceive.setOnClickListener {
+            NavHostFragment.findNavController(itemView.findFragment())
+                .navigate(
+                    WalletFragmentDirections.actionNavigationWalletToReceiveToWalletFragment(
+                        wallet.walletConfig.id
+                    )
+                )
         }
     }
 
