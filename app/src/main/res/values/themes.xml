@@ -33,6 +33,7 @@
     </style>
 
     <style name="CustomBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
+        <item name="behavior_peekHeight">512dp</item>
         <item name="shapeAppearanceOverlay">@style/CustomShapeAppearanceBottomSheetDialog</item>
     </style>
 
