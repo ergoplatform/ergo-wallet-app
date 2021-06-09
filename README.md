@@ -5,9 +5,11 @@ Appkit](https://github.com/aslesarenko/ergo-appkit) can be used to develop Ergo 
 
 
 # TODO
-Amount input filter https://stackoverflow.com/a/13716371/7487013
-Security https://stackoverflow.com/a/62445439/7487013
-Gradle verify dependencies
-
-Fixes:
-API < 26: https://github.com/ergoplatform/ergo-appkit/issues/82
+[ ] Biometric Auth Security https://stackoverflow.com/a/62445439/7487013
+[ ] CoinGecko Fiat value request
+[ ] Edit/Delete/Export for Wallets
+[ ] Generate new wallets
+[ ] Amount input filter https://stackoverflow.com/a/13716371/7487013
+[ ] Gradle verify dependencies
+[ ] API < 26: https://github.com/ergoplatform/ergo-appkit/issues/82
+[ ] Change to appkit's secret storage https://github.com/ergoplatform/ergo-appkit/issues/84

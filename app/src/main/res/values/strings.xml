@@ -13,6 +13,7 @@
     <string name="label_qr_code">QR Code</string>
     <string name="label_amount">Amount</string>
     <string name="label_purpose">Purpose</string>
+    <string name="label_share">Share</string>
 
     <!-- Wallet -->
     <string name="label_transactions">transactions</string>

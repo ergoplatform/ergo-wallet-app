@@ -2,12 +2,11 @@ package org.ergoplatform.android.transactions
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
@@ -30,6 +29,11 @@ class ReceiveToWalletFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args: ReceiveToWalletFragmentArgs by navArgs()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -72,22 +76,53 @@ class ReceiveToWalletFragment : Fragment() {
         }
     }
 
-    private fun refreshQrCode() {
-        binding.publicAddress.text?.let {
-            val amountStr = binding.amount.editText?.text.toString()
-            val amountVal = if (amountStr.isEmpty()) 0f else amountStr.toFloat()
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_receive_to_wallet, menu)
+    }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_share) {
+
+            getTextToShare()?.let {
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, it)
+                    type = "text/plain"
+                }
+
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
+            }
+
+            return true
+        } else
+            return super.onOptionsItemSelected(item)
+    }
+
+    private fun refreshQrCode() {
+        getTextToShare()?.let {
             setQrCodeToImageView(
                 binding.qrCode,
-                getExplorerPaymentRequestAddress(
-                    it.toString(),
-                    amountVal,
-                    binding.purpose.editText?.text.toString()
-                ),
+                it,
                 400,
                 400
             )
         }
+    }
+
+    private fun getTextToShare(): String? {
+        binding.publicAddress.text?.let {
+            val amountStr = binding.amount.editText?.text.toString()
+            val amountVal = if (amountStr.isEmpty()) 0f else amountStr.toFloat()
+
+            return getExplorerPaymentRequestAddress(
+                it.toString(),
+                amountVal,
+                binding.purpose.editText?.text.toString()
+            )
+        }
+        return null
     }
 
     inner class MyTextWatcher : TextWatcher {
