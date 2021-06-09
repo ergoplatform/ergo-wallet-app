@@ -9,7 +9,6 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:layout_marginBottom="@dimen/half_horizontal_margin"
         android:background="?attr/colorSurface"
         android:elevation="2dp">
 
@@ -22,10 +21,11 @@
 
     </FrameLayout>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -117,6 +117,6 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>
