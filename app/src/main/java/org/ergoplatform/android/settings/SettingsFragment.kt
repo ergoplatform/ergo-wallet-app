@@ -24,13 +24,20 @@ class SettingsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         settingsViewModel =
             ViewModelProvider(this).get(SettingsViewModel::class.java)
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
-        binding.labelVersion.text = BuildConfig.VERSION_NAME + " (Build " + BuildConfig.VERSION_CODE + ")"
+        binding.labelVersion.text =
+            BuildConfig.VERSION_NAME + " (Build " + BuildConfig.VERSION_CODE + ")"
 
         return binding.root
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

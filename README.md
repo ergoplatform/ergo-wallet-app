@@ -5,9 +5,9 @@ Appkit](https://github.com/aslesarenko/ergo-appkit) can be used to develop Ergo 
 
 
 # TODO
-https://github.com/BlacKCaT27/CurrencyEditText
+Amount input filter https://stackoverflow.com/a/13716371/7487013
 Security https://stackoverflow.com/a/62445439/7487013
-QR https://github.com/journeyapps/zxing-android-embedded
+Gradle verify dependencies
 
 Fixes:
 API < 26: https://github.com/ergoplatform/ergo-appkit/issues/82

@@ -83,4 +83,8 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

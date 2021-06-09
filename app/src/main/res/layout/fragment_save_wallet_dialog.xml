@@ -67,6 +67,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:elegantTextHeight="true"
+                android:enabled="false"
                 android:text="@string/button_save_device_encrypted" />
 
             <TextView

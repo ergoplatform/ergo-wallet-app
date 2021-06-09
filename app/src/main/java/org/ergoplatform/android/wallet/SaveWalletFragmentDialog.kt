@@ -17,14 +17,18 @@ import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.NodeConnector
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
+import org.ergoplatform.android.serializeSecrets
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
+import org.ergoplatform.android.ui.PasswordDialogCallback
+import org.ergoplatform.android.ui.PasswordDialogFragment
+import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.SecretString
 
 /**
  * Dialog to save a created or restored wallet
  */
-class SaveWalletFragmentDialog : FullScreenFragmentDialog() {
+class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallback {
     private var _binding: FragmentSaveWalletDialogBinding? = null
     private val binding get() = _binding!!
 
@@ -64,11 +68,16 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog() {
         binding.descDeviceEncryption.text =
             getString(R.string.desc_save_device_encrypted, getString(methodDesc))
 
-        binding.buttonSavePassenc.setOnClickListener { saveToDb(true) }
-        binding.buttonSaveDeviceenc.setOnClickListener { saveToDb(false) }
+        binding.buttonSavePassenc.setOnClickListener {
+            PasswordDialogFragment().show(
+                childFragmentManager,
+                null
+            )
+        }
+        binding.buttonSaveDeviceenc.setOnClickListener { TODO() }
     }
 
-    private fun saveToDb(withDb: Boolean) {
+    private fun saveToDb(encType: Int, secretStorage: ByteArray) {
         val fromMnemonic = Address.fromMnemonic(
             StageConstants.NETWORK_TYPE,
             SecretString.create(args.mnemonic),
@@ -76,7 +85,13 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog() {
         )
 
         val walletConfig =
-            WalletConfigDbEntity(0, "My wallet", fromMnemonic.ergoAddress.toString(), null)
+            WalletConfigDbEntity(
+                0,
+                "My wallet",
+                fromMnemonic.ergoAddress.toString(),
+                encType,
+                secretStorage
+            )
 
         GlobalScope.launch(Dispatchers.IO) {
             AppDatabase.getInstance(requireContext()).walletDao().insertAll(walletConfig)
@@ -86,4 +101,23 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog() {
             .navigate(SaveWalletFragmentDialogDirections.actionSaveWalletFragmentDialogToNavigationWallet())
     }
 
+    override fun onPasswordEntered(password: String?): String? {
+        if (password == null || password.length < 8) {
+            return getString(R.string.err_password)
+        } else {
+            saveToDb(
+                1,
+                AesEncryptionManager.encryptData(
+                    password,
+                    serializeSecrets(args.mnemonic).toByteArray()
+                )
+            )
+            return null
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

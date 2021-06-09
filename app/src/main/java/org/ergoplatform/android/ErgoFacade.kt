@@ -1,5 +1,7 @@
 package org.ergoplatform.android
 
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.Parameters.MinFee
 import org.ergoplatform.appkit.config.ErgoToolConfig
@@ -11,6 +13,13 @@ fun nanoErgsToErgs(nanoErgs: Long): Float {
    val milliErgs = nanoErgs / (1000L * 1000L)
    val ergs = milliErgs.toFloat() / 1000f
    return ergs
+}
+
+fun serializeSecrets(mnemonic: String): String {
+   val gson = Gson()
+   val root = JsonObject()
+   root.addProperty("mnemonic", mnemonic)
+   return gson.toJson(root)
 }
 
 class ErgoFacade {

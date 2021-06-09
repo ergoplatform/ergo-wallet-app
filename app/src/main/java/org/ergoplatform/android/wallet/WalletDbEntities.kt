@@ -7,7 +7,8 @@ data class WalletConfigDbEntity(
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo(name = "display_name") val displayName: String?,
     @ColumnInfo(name = "public_address") val publicAddress: String?,
-    @ColumnInfo(name = "secret_storage") val secretStorage: String?,
+    @ColumnInfo(name = "enc_type") val encryptionType: Int?,
+    @ColumnInfo(name = "secret_storage") val secretStorage: ByteArray?,
 )
 
 @Entity(tableName = "wallet_states")
