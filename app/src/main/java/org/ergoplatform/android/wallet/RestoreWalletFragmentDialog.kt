@@ -13,6 +13,8 @@ import org.ergoplatform.android.ErgoFacade
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentRestoreWalletBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
+import org.ergoplatform.android.ui.forceShowSoftKeyboard
+import org.ergoplatform.android.ui.hideForcedSoftKeyboard
 
 /**
  * Restores a formerly generated wallet from mnemonic
@@ -62,6 +64,12 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
         return binding.root
     }
 
+    override fun onResume() {
+        super.onResume()
+        binding.tvMnemonic.editText?.requestFocus()
+        forceShowSoftKeyboard(requireContext())
+    }
+
     private fun checkMnemonic(): Int {
         val mnemonic = getMnemonic()
         val words = if (mnemonic.isEmpty()) 0 else mnemonic.split(" ").size
@@ -74,6 +82,7 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
 
     private fun doRestore() {
         if (checkMnemonic() == ErgoFacade.MNEMONIC_WORDS_COUNT) {
+            hideForcedSoftKeyboard(requireContext(), binding.tvMnemonic.editText!!)
             NavHostFragment.findNavController(requireParentFragment())
                 .navigate(
                     RestoreWalletFragmentDialogDirections.actionRestoreWalletFragmentDialogToSaveWalletFragmentDialog(

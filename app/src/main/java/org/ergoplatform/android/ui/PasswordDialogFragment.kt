@@ -42,6 +42,7 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
     override fun onResume() {
         super.onResume()
         binding.editPassword.editText?.requestFocus()
+        forceShowSoftKeyboard(requireContext())
     }
 
     private fun buttonDone() {
@@ -50,8 +51,10 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
 
         if (error != null)
             binding.editPassword.error = error
-        else
+        else {
+            hideForcedSoftKeyboard(requireContext(), binding.editPassword.editText!!)
             dismiss()
+        }
     }
 
     override fun onDestroyView() {
