@@ -68,6 +68,7 @@
     <string name="error_transaction">Could not send transaction</string>
     <string name="error_password_empty">Please enter a valid password</string>
     <string name="error_password_wrong">Wrong password</string>
+    <string name="desc_transaction_send">Transaction was sent successfully and awaits confirmation. Transaction ID:</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, 2021</string>

@@ -44,8 +44,10 @@ class SendFundsViewModel : ViewModel() {
         value = 0f
     }
     val grossAmount: LiveData<Float> = _grossAmount
-    val _paymentDoneLiveData = SingleLiveEvent<PaymentResult>()
+    private val _paymentDoneLiveData = SingleLiveEvent<PaymentResult>()
     val paymentDoneLiveData: LiveData<PaymentResult> = _paymentDoneLiveData
+    private val _txId = MutableLiveData<String>()
+    val txId: LiveData<String> = _txId
 
 
     fun initWallet(ctx: Context, walletId: Int) {
@@ -98,17 +100,20 @@ class SendFundsViewModel : ViewModel() {
             }
 
             viewModelScope.launch {
-                val sendErgoTx: String?
+                val ergoTxId: String?
                 withContext(Dispatchers.IO) {
-                    sendErgoTx = sendErgoTx(
+                    ergoTxId = sendErgoTx(
                         Address.create(receiverAddress), ergsToNanoErgs(amountToSend),
                         mnemonic, ""
                     )
                 }
                 _lockInterface.postValue(false)
-                val success = sendErgoTx != null && !sendErgoTx.isEmpty()
+                val success = ergoTxId != null && ergoTxId.isNotEmpty()
                 if (success) {
                     NodeConnector.getInstance().invalidateCache()
+                    // TODO workaround for https://github.com/ergoplatform/ergo-appkit/issues/86
+                    val txIdWithoutQuotes = ergoTxId!!.removeSurrounding("\"")
+                    _txId.postValue(txIdWithoutQuotes)
                 }
                 _paymentDoneLiveData.postValue(if (success) PaymentResult.SUCCESS else PaymentResult.ERROR)
             }

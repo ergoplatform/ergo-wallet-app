@@ -1,5 +1,6 @@
 package org.ergoplatform.android.transactions
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -29,7 +30,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         viewModel =
             ViewModelProvider(this).get(SendFundsViewModel::class.java)
 
@@ -60,15 +61,32 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             dialog?.setCancelable(!it)
         })
         viewModel.paymentDoneLiveData.observe(viewLifecycleOwner, {
-            when (it) {
-                PaymentResult.SUCCESS -> dismiss()
-                PaymentResult.ERROR -> Snackbar.make(
+            if (it == PaymentResult.ERROR) {
+                Snackbar.make(
                     requireView(),
                     R.string.error_transaction,
                     Snackbar.LENGTH_LONG
                 ).show()
             }
         })
+        viewModel.txId.observe(viewLifecycleOwner, {
+            binding.cardviewTxEdit.visibility = View.GONE
+            binding.cardviewTxDone.visibility = View.VISIBLE
+            binding.labelTxId.text = it
+        })
+        binding.buttonShareTx.setOnClickListener {
+            val txUrl =
+                StageConstants.EXPLORER_WEB_ADDRESS + "en/transactions/" + binding.labelTxId.text.toString()
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, txUrl)
+                type = "text/plain"
+            }
+
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
+        }
+        binding.buttonDismiss.setOnClickListener { dismiss() }
 
         binding.buttonSend.setOnClickListener {
             startPayment()
@@ -126,7 +144,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         _binding = null
     }
 
-    inner class MyTextWatcher(val textInputLayout: TextInputLayout) : TextWatcher {
+    inner class MyTextWatcher(private val textInputLayout: TextInputLayout) : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
         }

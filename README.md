@@ -7,7 +7,8 @@ Appkit](https://github.com/aslesarenko/ergo-appkit) can be used to develop Ergo 
 # TODO
 [ ] Biometric Auth Security https://stackoverflow.com/a/62445439/7487013
 [ ] QR scan for sending
-[ ] Success landing screen when payment is done
+[ ] Show error reasons for sending transaction (no unspent boxes)
+[ ] Prevent sending transaction when there are unconfirmed transactions (does not work)
 [ ] CoinGecko Fiat value request
 [ ] Edit/Delete/Export for Wallets
 [ ] Generate new wallets
