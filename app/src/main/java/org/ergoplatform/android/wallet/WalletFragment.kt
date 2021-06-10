@@ -5,32 +5,25 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.findFragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.ergoplatform.android.*
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.NodeConnector
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
-import java.io.InputStreamReader
+import org.ergoplatform.android.nanoErgsToErgs
 
 
 class WalletFragment : Fragment() {
-
-    private lateinit var walletViewModel: WalletViewModel
 
     private var _binding: FragmentWalletBinding? = null
 
@@ -48,8 +41,6 @@ class WalletFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        walletViewModel =
-            ViewModelProvider(this).get(WalletViewModel::class.java)
         _binding = FragmentWalletBinding.inflate(inflater, container, false)
         binding.recyclerview.layoutManager = LinearLayoutManager(requireContext())
         return binding.root
@@ -145,21 +136,6 @@ class WalletFragment : Fragment() {
         NodeConnector.getInstance().refreshWhenNeeded(requireContext())
     }
 
-    private fun runOnErgo() {
-        val configPath = "config/freeze_coin_config.json"
-        // do not use globalscope
-        GlobalScope.launch(Dispatchers.Main) {
-            val tx = withContext(Dispatchers.IO) {
-                val inputStream = requireContext().assets.open(configPath)
-                val configReader = InputStreamReader(inputStream)
-                ErgoFacade.sendTx(1000000000, configReader)
-            }
-            System.out.println(tx)
-            Snackbar.make(requireView(), "Tx: $tx", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -215,6 +191,16 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
             NavHostFragment.findNavController(itemView.findFragment())
                 .navigate(
                     WalletFragmentDirections.actionNavigationWalletToReceiveToWalletFragment(
+                        wallet.walletConfig.id
+                    )
+                )
+        }
+
+        binding.buttonSend.isEnabled = wallet.walletConfig.secretStorage != null
+        binding.buttonSend.setOnClickListener {
+            NavHostFragment.findNavController(itemView.findFragment())
+                .navigate(
+                    WalletFragmentDirections.actionNavigationWalletToSendFundsFragment(
                         wallet.walletConfig.id
                     )
                 )

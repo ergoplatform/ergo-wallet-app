@@ -3,6 +3,8 @@
     <string name="title_transactions">Transactions</string>
     <string name="title_wallet">Wallet</string>
     <string name="title_settings">Settings</string>
+    <string name="format_erg">###,##0.0000</string>
+    <string name="format_fiat">###,##0.00</string>
 
     <string name="hint_password">Please enter your send funds password</string>
     <string name="err_password">Password needs to have at least 8 characters</string>
@@ -55,6 +57,17 @@
     <string name="device_enc_security_pass">Password, PIN or pattern</string>
     <string name="device_enc_security_biometric_strong">Biometric with strong security</string>
     <string name="device_enc_security_biometric_weak">Biometric, Class 2</string>
+
+    <!-- Send funds -->
+    <string name="desc_send_funds">Enter the receiver address and amount to send, or scan a QR code.</string>
+    <string name="label_receiver_address">Receiver address</string>
+    <string name="label_scan_qr">Scan QR code</string>
+    <string name="desc_fee">Fee: %1s ERG</string>
+    <string name="error_receiver_address">Please enter a valid ERG address</string>
+    <string name="error_amount">Please enter a valid amount</string>
+    <string name="error_transaction">Could not send transaction</string>
+    <string name="error_password_empty">Please enter a valid password</string>
+    <string name="error_password_wrong">Wrong password</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, 2021</string>

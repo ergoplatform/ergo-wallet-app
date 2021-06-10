@@ -56,7 +56,7 @@
                     android:layout_marginVertical="@dimen/activity_vertical_margin"
                     android:contentDescription="@string/label_qr_code"
                     app:layout_constraintTop_toBottomOf="@id/wallet_name"
-                    tools:src="@drawable/ic_copy_24" />
+                    tools:src="@drawable/ic_qr_code_24" />
 
                 <TextView
                     android:id="@+id/public_address"

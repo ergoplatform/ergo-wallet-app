@@ -12,12 +12,14 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
 import org.ergoplatform.android.getExplorerPaymentRequestAddress
 import org.ergoplatform.android.setQrCodeToImageView
+import org.ergoplatform.android.ui.inputTextToFloat
 
 
 /**
@@ -69,8 +71,8 @@ class ReceiveToWalletFragment : Fragment() {
                     val clip = ClipData.newPlainText("", wallet.publicAddress)
                     clipboard?.setPrimaryClip(clip)
 
-                    Toast.makeText(requireContext(), R.string.label_copied, Toast.LENGTH_SHORT)
-                        .show()
+                    Snackbar.make(requireView(), R.string.label_copied, Snackbar.LENGTH_LONG)
+                        .setAnchorView(R.id.nav_view).show()
                 }
             }
         }
@@ -114,7 +116,7 @@ class ReceiveToWalletFragment : Fragment() {
     private fun getTextToShare(): String? {
         binding.publicAddress.text?.let {
             val amountStr = binding.amount.editText?.text.toString()
-            val amountVal = if (amountStr.isEmpty()) 0f else amountStr.toFloat()
+            val amountVal = inputTextToFloat(amountStr)
 
             return getExplorerPaymentRequestAddress(
                 it.toString(),

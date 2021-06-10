@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.navigation.fragment.NavHostFragment
-import org.ergoplatform.android.ErgoFacade
+import org.ergoplatform.android.MNEMONIC_WORDS_COUNT
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentRestoreWalletBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
@@ -40,12 +40,12 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
             override fun afterTextChanged(s: Editable?) {
                 val words = checkMnemonic()
 
-                if (words > 0 && words < ErgoFacade.MNEMONIC_WORDS_COUNT) {
+                if (words > 0 && words < MNEMONIC_WORDS_COUNT) {
                     binding.tvMnemonic.error = getString(
                         R.string.mnemonic_length_not_enough,
-                        (ErgoFacade.MNEMONIC_WORDS_COUNT - words).toString()
+                        (MNEMONIC_WORDS_COUNT - words).toString()
                     )
-                } else if (words > ErgoFacade.MNEMONIC_WORDS_COUNT) {
+                } else if (words > MNEMONIC_WORDS_COUNT) {
                     binding.tvMnemonic.error = getString(R.string.mnemonic_length_too_long)
                 } else
                     binding.tvMnemonic.error = null
@@ -81,7 +81,7 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
     }
 
     private fun doRestore() {
-        if (checkMnemonic() == ErgoFacade.MNEMONIC_WORDS_COUNT) {
+        if (checkMnemonic() == MNEMONIC_WORDS_COUNT) {
             hideForcedSoftKeyboard(requireContext(), binding.tvMnemonic.editText!!)
             NavHostFragment.findNavController(requireParentFragment())
                 .navigate(

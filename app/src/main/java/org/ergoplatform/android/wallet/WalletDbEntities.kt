@@ -2,6 +2,9 @@ package org.ergoplatform.android.wallet
 
 import androidx.room.*
 
+val ENC_TYPE_PASSWORD = 1
+val ENC_TYPE_DEVICE = 2
+
 @Entity(tableName = "wallet_configs")
 data class WalletConfigDbEntity(
     @PrimaryKey(autoGenerate = true) val id: Int,

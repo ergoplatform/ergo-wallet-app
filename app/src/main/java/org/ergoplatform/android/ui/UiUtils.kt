@@ -18,3 +18,11 @@ fun hideForcedSoftKeyboard(context: Context, editText: EditText) {
         InputMethodManager::class.java
     )?.hideSoftInputFromWindow(editText.getWindowToken(), 0);
 }
+
+fun inputTextToFloat(amountStr: String?): Float {
+    try {
+        return if (amountStr == null || amountStr.isEmpty()) 0f else amountStr.toFloat()
+    } catch (t: Throwable) {
+        return 0f
+    }
+}

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="MoneyTextViewDefaultStyle">
-        <item name="format">###,##0.0000</item>
+        <item name="format">@string/format_erg</item>
         <item name="symbol">ERG</item>
         <item name="baseTextSize">@dimen/body1_textsize</item>
         <item name="baseTextColor">@color/secondary</item>
@@ -16,7 +16,7 @@
 
 
     <style name="MoneyTextViewFiatStyle" parent="MoneyTextViewDefaultStyle">
-        <item name="format">###,##0.00</item>
+        <item name="format">@string/format_fiat</item>
     </style>
 
 </resources>

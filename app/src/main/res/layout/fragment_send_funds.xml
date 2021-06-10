@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/activity_horizontal_margin">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/wallet_name"
+                    style="@style/TextAppearance.App.Headline2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="?attr/colorSecondary"
+                    app:layout_constraintEnd_toStartOf="@id/button_scan"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="My wallet" />
+
+                <TextView
+                    android:id="@+id/desc"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:text="@string/desc_send_funds"
+                    app:layout_constraintEnd_toEndOf="@id/wallet_name"
+                    app:layout_constraintStart_toStartOf="@id/wallet_name"
+                    app:layout_constraintTop_toBottomOf="@id/wallet_name" />
+
+                <ImageButton
+                    android:id="@+id/button_scan"
+                    style="@style/Widget.App.Button.TextButton"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/label_scan_qr"
+                    android:src="@drawable/ic_qr_code_24"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/amount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:hint="@string/label_amount"
+                    app:layout_constraintEnd_toEndOf="@id/tv_receiver"
+                    app:layout_constraintStart_toStartOf="@id/tv_receiver"
+                    app:layout_constraintTop_toBottomOf="@id/tv_receiver">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:imeOptions="actionDone"
+                        android:inputType="numberDecimal" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tv_receiver"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/half_horizontal_margin"
+                    android:hint="@string/label_receiver_address"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/desc">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:imeOptions="actionNext"
+                        android:inputType="text"
+                        android:maxLines="1" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/tv_fee"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="@dimen/half_horizontal_margin"
+                    android:text="@string/desc_fee"
+                    app:layout_constraintEnd_toStartOf="@id/button_send"
+                    app:layout_constraintStart_toStartOf="@id/amount"
+                    app:layout_constraintTop_toBottomOf="@id/amount" />
+
+                <org.fabiomsr.moneytextview.MoneyTextView
+                    android:id="@+id/gross_amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/half_horizontal_margin"
+                    app:baseTextSize="@dimen/headline1_textsize"
+                    app:baseTextStyle="bold"
+                    app:decimalDigitsTextSize="@dimen/body1_textsize"
+                    app:decimalMargin="4dp"
+                    app:layout_constraintBottom_toBottomOf="@id/button_send"
+                    app:layout_constraintEnd_toStartOf="@id/button_send"
+                    app:layout_constraintTop_toTopOf="@id/button_send"
+                    app:symbolMargin="6dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_send"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:elegantTextHeight="true"
+                    android:text="@string/button_send"
+                    app:icon="@drawable/ic_send_24"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_fee" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <FrameLayout
+        android:id="@+id/lock_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha=".8"
+            android:background="@color/lightgrey" />
+
+        <ProgressBar
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
+    </FrameLayout>
+</FrameLayout>

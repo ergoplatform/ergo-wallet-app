@@ -106,7 +106,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
             return getString(R.string.err_password)
         } else {
             saveToDb(
-                1,
+                ENC_TYPE_PASSWORD,
                 AesEncryptionManager.encryptData(
                     password,
                     serializeSecrets(args.mnemonic).toByteArray()
