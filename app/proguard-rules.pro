@@ -25,19 +25,26 @@
   @com.google.gson.annotations.SerializedName <fields>;
 }
 
--keep class sigmastate.**
--keep class sigma.**
--keep class scalan.**
--keep class special.**
--keep class special.collection.impl.CollsDefs$Coll$CollElem
--keep class wrappers.**
--keep class org.ergoplatform.restapi.**
--keep class org.ergoplatform.appkit.**
--keep class scorex.util.encode.**
--keep class scala.util.control.**
--keep class scala.collection.Traversable**
--keep class scala.package**
+-keep class sigmastate.**  { *; }
+-keep class sigma.**  { *; }
+-keep class scalan.**  { *; }
+-keep class special.**  { *; }
+-keep class wrappers.**  { *; }
+-keep class org.ergoplatform.restapi.**  { *; }
+-keep class org.ergoplatform.appkit.**  { *; }
+-keep class scorex.util.encode.** { *; }
+-keep class scala.util.control.** { *; }
+-keep class scala.collection.** { *; }
+-keep class scala.package** { *; }
+-keep class fastparse.** { *; }
 
 -keep class * extends androidx.room.RoomDatabase
 -keep @androidx.room.Entity class *
 -dontwarn androidx.room.paging.**
+
+-ignorewarnings
+
+-dontwarn scala.**
+-dontobfuscate
+-dontoptimize
+-dontpreverify
