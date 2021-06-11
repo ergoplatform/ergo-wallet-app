@@ -217,7 +217,7 @@
             android:background="@color/lightgrey" />
 
         <ProgressBar
-            android:layout_width="100dp"
+            android:layout_width="60dp"
             android:layout_height="match_parent"
             android:layout_gravity="center" />
     </FrameLayout>

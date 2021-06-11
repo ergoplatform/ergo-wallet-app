@@ -29,8 +29,7 @@ class SettingsFragment : Fragment() {
             ViewModelProvider(this).get(SettingsViewModel::class.java)
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
-        binding.labelVersion.text =
-            BuildConfig.VERSION_NAME + " (Build " + BuildConfig.VERSION_CODE + ")"
+        binding.labelVersion.text = BuildConfig.VERSION_NAME
 
         return binding.root
     }
