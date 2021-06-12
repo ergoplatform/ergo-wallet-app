@@ -13,8 +13,8 @@ android {
         applicationId "org.ergoplatform.android"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 2101
-        versionName "0.1.2101"
+        versionCode 2102
+        versionName "0.1.2102"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
