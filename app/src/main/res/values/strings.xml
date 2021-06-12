@@ -16,6 +16,7 @@
     <string name="label_amount">Amount</string>
     <string name="label_purpose">Purpose</string>
     <string name="label_share">Share</string>
+    <string name="error_sdk26required">Sorry, this functionality requires Android 8.0 or later.</string>
 
     <!-- Wallet -->
     <string name="label_transactions">transactions</string>

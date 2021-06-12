@@ -3,6 +3,7 @@ package org.ergoplatform.android.wallet
 import StageConstants
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.*
@@ -15,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.NodeConnector
 import org.ergoplatform.android.R
@@ -63,7 +65,12 @@ class WalletFragment : Fragment() {
                 })
 
         binding.emptyView.cardRestoreWallet.setOnClickListener {
-            findNavController().navigate(R.id.restoreWalletFragmentDialog)
+            if (Build.VERSION.SDK_INT < 26) {
+                Snackbar.make(requireView(), R.string.error_sdk26required, Snackbar.LENGTH_LONG)
+                    .setAnchorView(R.id.nav_view).show()
+            } else {
+                findNavController().navigate(R.id.restoreWalletFragmentDialog)
+            }
         }
         binding.emptyView.cardReadonlyWallet.setOnClickListener {
             NavHostFragment.findNavController(requireParentFragment())
