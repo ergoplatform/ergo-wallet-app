@@ -45,7 +45,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/half_horizontal_margin"
-                android:hint="@string/label_wallet_address">
+                android:hint="@string/label_wallet_address"
+                app:endIconDrawable="@drawable/ic_qr_code_24"
+                app:endIconMode="custom">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"

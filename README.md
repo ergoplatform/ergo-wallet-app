@@ -8,7 +8,7 @@ Visit the [Ergo Discord](https://discord.gg/kj7s7nb) for more information.
 
 
 # TODO
-- [ ] QR scan for sending and add read-only wallet by address
+- [X] QR scan for sending and add read-only wallet by address
 - [X] minSdk 24 for read-only wallets
 - [ ] CoinGecko Fiat value request
 - [ ] Edit/Delete/Export for Wallets

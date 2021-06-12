@@ -11,9 +11,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
+import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.formatErgsToString
+import org.ergoplatform.android.parseContentFromQrCode
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.PasswordDialogCallback
 import org.ergoplatform.android.ui.inputTextToFloat
@@ -44,7 +46,9 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
         viewModel.initWallet(requireContext(), args.walletId)
 
-        viewModel.walletName.observe(viewLifecycleOwner, { binding.walletName.text = getString(R.string.label_send_from, it) })
+        viewModel.walletName.observe(
+            viewLifecycleOwner,
+            { binding.walletName.text = getString(R.string.label_send_from, it) })
         viewModel.feeAmount.observe(viewLifecycleOwner, {
             binding.tvFee.text = getString(
                 R.string.desc_fee,
@@ -92,19 +96,27 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             startPayment()
         }
 
+        binding.buttonScan.setOnClickListener {
+            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+        }
+
         binding.tvReceiver.editText?.setText(viewModel.receiverAddress)
         if (viewModel.amountToSend > 0) {
-            binding.amount.editText?.setText(
-                formatErgsToString(
-                    viewModel.amountToSend,
-                    requireContext()
-                )
-            )
+            setAmountEdittext(viewModel.amountToSend)
         }
 
         binding.amount.editText?.addTextChangedListener(MyTextWatcher(binding.amount))
         binding.tvReceiver.editText?.addTextChangedListener(MyTextWatcher(binding.tvReceiver))
 
+    }
+
+    private fun setAmountEdittext(amountToSend: Float) {
+        binding.amount.editText?.setText(
+            formatErgsToString(
+                amountToSend,
+                requireContext()
+            )
+        )
     }
 
     private fun startPayment() {
@@ -137,6 +149,19 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         val amountStr = binding.amount.editText?.text.toString()
         viewModel.amountToSend = inputTextToFloat(amountStr)
 
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            result.contents?.let {
+                val content = parseContentFromQrCode(it)
+                content?.let { binding.tvReceiver.editText?.setText(content.address) }
+                content?.amount?.let { amount -> if (amount > 0) setAmountEdittext(amount) }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     override fun onDestroyView() {
