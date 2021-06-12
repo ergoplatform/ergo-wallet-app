@@ -60,6 +60,7 @@
 
     <!-- Send funds -->
     <string name="desc_send_funds">Enter the receiver address and amount to send, or scan a QR code.</string>
+    <string name="label_send_from">From: %1s</string>
     <string name="label_receiver_address">Receiver address</string>
     <string name="label_scan_qr">Scan QR code</string>
     <string name="desc_fee">Fee: %1s ERG</string>

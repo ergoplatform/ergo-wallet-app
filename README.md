@@ -20,4 +20,7 @@ Visit the [Ergo Discord](https://discord.gg/kj7s7nb) for more information.
 - [ ] Gradle verify dependencies
 - [ ] API < 26: https://github.com/ergoplatform/ergo-appkit/issues/82
 - [ ] Change to appkit's secret storage https://github.com/ergoplatform/ergo-appkit/issues/84
--  [ ] Transactions list and details
+
+And further more
+- [ ] Address book
+- [ ] In app transactions list and details

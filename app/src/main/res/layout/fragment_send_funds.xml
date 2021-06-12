@@ -20,28 +20,38 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/activity_horizontal_margin"
+                android:animateLayoutChanges="true"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/wallet_name"
+                    android:id="@+id/label_title"
                     style="@style/TextAppearance.App.Headline2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/activity_vertical_margin"
                     android:ellipsize="end"
                     android:maxLines="1"
+                    android:text="@string/button_send"
                     android:textColor="?attr/colorSecondary"
                     app:layout_constraintEnd_toStartOf="@id/button_scan"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:text="My wallet" />
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/wallet_name"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="@id/label_title"
+                    app:layout_constraintStart_toStartOf="@id/label_title"
+                    app:layout_constraintTop_toBottomOf="@id/label_title"
+                    tools:text="@string/label_send_from" />
 
                 <TextView
                     android:id="@+id/desc"
                     style="@style/TextAppearance.App.Body1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:text="@string/desc_send_funds"
                     app:layout_constraintEnd_toEndOf="@id/wallet_name"
                     app:layout_constraintStart_toStartOf="@id/wallet_name"
