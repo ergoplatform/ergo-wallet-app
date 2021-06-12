@@ -21,6 +21,7 @@ import org.ergoplatform.android.serializeSecrets
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.PasswordDialogCallback
 import org.ergoplatform.android.ui.PasswordDialogFragment
+import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.SecretString
@@ -98,7 +99,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
             NodeConnector.getInstance().invalidateCache()
         }
         NavHostFragment.findNavController(requireParentFragment())
-            .navigate(SaveWalletFragmentDialogDirections.actionSaveWalletFragmentDialogToNavigationWallet())
+            .navigateSafe(SaveWalletFragmentDialogDirections.actionSaveWalletFragmentDialogToNavigationWallet())
     }
 
     override fun onPasswordEntered(password: String?): String? {

@@ -5,9 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.NavHostFragment
-import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentCreateWalletDialogBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
+import org.ergoplatform.android.ui.navigateSafe
 
 /**
  * Create a new wallet
@@ -26,7 +26,7 @@ class CreateWalletFragmentDialog : FullScreenFragmentDialog() {
 
         binding.ergoLogo.setOnClickListener {
             NavHostFragment.findNavController(requireParentFragment())
-                .navigate(CreateWalletFragmentDialogDirections.actionCreateWalletDialogToNavigationWallet())
+                .navigateSafe(CreateWalletFragmentDialogDirections.actionCreateWalletDialogToNavigationWallet())
         }
 
         return binding.root

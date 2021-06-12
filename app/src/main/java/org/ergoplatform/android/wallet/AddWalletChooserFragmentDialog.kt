@@ -5,9 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.NavHostFragment
-import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentAddWalletChooserBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
+import org.ergoplatform.android.ui.navigateSafe
 
 /**
  * Add wallet step 1: Chooser to import or add a new fragment
@@ -28,13 +28,13 @@ class AddWalletChooserFragmentDialog : FullScreenFragmentDialog() {
 
         binding.cardCreateWallet.setOnClickListener { view ->
             NavHostFragment.findNavController(requireParentFragment())
-                .navigate(AddWalletChooserFragmentDialogDirections.actionToCreateWalletDialog())
+                .navigateSafe(AddWalletChooserFragmentDialogDirections.actionToCreateWalletDialog())
         }
         binding.cardCreateWallet.isEnabled = false
 
         binding.cardRestoreWallet.setOnClickListener {
             NavHostFragment.findNavController(requireParentFragment())
-                .navigate(AddWalletChooserFragmentDialogDirections.actionToRestoreWalletFragmentDialog())
+                .navigateSafe(AddWalletChooserFragmentDialogDirections.actionToRestoreWalletFragmentDialog())
         }
 
         // Inflate the layout for this fragment

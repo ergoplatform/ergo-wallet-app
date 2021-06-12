@@ -21,6 +21,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
 import org.ergoplatform.android.nanoErgsToErgs
+import org.ergoplatform.android.ui.navigateSafe
 
 
 class WalletFragment : Fragment() {
@@ -62,7 +63,7 @@ class WalletFragment : Fragment() {
                 })
 
         binding.emptyView.cardRestoreWallet.setOnClickListener {
-            findNavController().navigate(R.id.restoreWalletFragmentDialog)
+            findNavController().navigateSafe(R.id.restoreWalletFragmentDialog)
         }
 
         val nodeConnector = NodeConnector.getInstance()
@@ -121,7 +122,7 @@ class WalletFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_add_wallet -> {
-                findNavController().navigate(WalletFragmentDirections.actionToAddWalletChooserFragment())
+                findNavController().navigateSafe(WalletFragmentDirections.actionToAddWalletChooserFragment())
                 return true
             }
             else -> {
@@ -189,7 +190,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
 
         binding.buttonReceive.setOnClickListener {
             NavHostFragment.findNavController(itemView.findFragment())
-                .navigate(
+                .navigateSafe(
                     WalletFragmentDirections.actionNavigationWalletToReceiveToWalletFragment(
                         wallet.walletConfig.id
                     )
@@ -199,7 +200,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         binding.buttonSend.isEnabled = wallet.walletConfig.secretStorage != null
         binding.buttonSend.setOnClickListener {
             NavHostFragment.findNavController(itemView.findFragment())
-                .navigate(
+                .navigateSafe(
                     WalletFragmentDirections.actionNavigationWalletToSendFundsFragment(
                         wallet.walletConfig.id
                     )
