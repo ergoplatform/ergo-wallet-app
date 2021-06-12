@@ -36,7 +36,7 @@
             app:layout_constraintEnd_toStartOf="@id/wallet_settings"
             app:layout_constraintStart_toEndOf="@id/wallet_logo"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="My wallet" />
+            tools:text="@string/label_wallet_default" />
 
         <ImageView
             android:id="@+id/wallet_settings"

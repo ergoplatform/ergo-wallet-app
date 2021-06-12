@@ -47,7 +47,7 @@
                     android:maxLines="1"
                     android:textColor="?attr/colorSecondary"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:text="My wallet" />
+                    tools:text="@string/label_wallet_default" />
 
                 <ImageView
                     android:id="@+id/qr_code"

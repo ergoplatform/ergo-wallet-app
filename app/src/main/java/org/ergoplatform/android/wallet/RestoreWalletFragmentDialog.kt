@@ -28,7 +28,7 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentRestoreWalletBinding.inflate(inflater, container, false)
 
         binding.tvMnemonic.editText?.setImeOptions(EditorInfo.IME_ACTION_DONE)

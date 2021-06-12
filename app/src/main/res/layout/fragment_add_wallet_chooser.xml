@@ -119,6 +119,7 @@
             android:id="@+id/card_import_wallet"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:layout_marginVertical="@dimen/half_horizontal_margin">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -184,7 +185,6 @@
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
                     android:text="@string/label_readonly_wallet"
-                    android:textColor="@color/darkgrey"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/image_readonly_wallet"
                     app:layout_constraintTop_toTopOf="parent" />

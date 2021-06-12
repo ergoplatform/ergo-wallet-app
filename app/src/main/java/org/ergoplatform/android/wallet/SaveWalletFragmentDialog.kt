@@ -88,7 +88,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         val walletConfig =
             WalletConfigDbEntity(
                 0,
-                "My wallet",
+                getString(R.string.label_wallet_default),
                 fromMnemonic.ergoAddress.toString(),
                 encType,
                 secretStorage

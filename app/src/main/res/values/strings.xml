@@ -27,6 +27,7 @@
     <string name="button_display_currency">Display currency</string>
     <string name="label_last_sync">synced %1s</string>
     <string name="label_last_sync_just_now">just now</string>
+    <string name="label_wallet_default">My wallet</string>
 
     <!-- add wallet -->
     <string name="menu_add_wallet">Add wallet</string>
@@ -38,6 +39,10 @@
     <string name="desc_import_wallet">Use a formerly exported or saved wallet file to import existing keys and addresses.</string>
     <string name="label_readonly_wallet">Read-only wallet</string>
     <string name="desc_readonly_wallet">Add a wallet address for view only. This won\'t save any keys on this device.</string>
+
+    <!-- add readonly wallet -->
+    <string name="intro_add_readonly">Enter your public wallet address to add this wallet in read-only mode.</string>
+    <string name="label_wallet_address">Wallet address</string>
 
     <!-- Restore wallet -->
     <string name="intro_restore_wallet">Enter your 15 words Ergo wallet mnemonic to regenerate the wallet.</string>

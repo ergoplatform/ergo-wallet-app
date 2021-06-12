@@ -50,6 +50,9 @@
         <action
             android:id="@+id/action_to_restoreWalletFragmentDialog"
             app:destination="@id/restoreWalletFragmentDialog" />
+        <action
+            android:id="@+id/action_addWalletChooserFragment_to_addReadOnlyWalletFragmentDialog"
+            app:destination="@id/addReadOnlyWalletFragmentDialog" />
     </dialog>
     <dialog
         android:id="@+id/createWalletDialog"
@@ -102,5 +105,13 @@
         <argument
             android:name="wallet_id"
             app:argType="integer" />
+    </dialog>
+    <dialog
+        android:id="@+id/addReadOnlyWalletFragmentDialog"
+        android:name="org.ergoplatform.android.wallet.AddReadOnlyWalletFragmentDialog"
+        android:label="AddReadOnlyWalletFragmentDialog" >
+        <action
+            android:id="@+id/action_addReadOnlyWalletFragmentDialog_to_wallet_list"
+            app:destination="@id/navigation_wallet" />
     </dialog>
 </navigation>

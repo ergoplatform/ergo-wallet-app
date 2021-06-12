@@ -37,6 +37,11 @@ class AddWalletChooserFragmentDialog : FullScreenFragmentDialog() {
                 .navigateSafe(AddWalletChooserFragmentDialogDirections.actionToRestoreWalletFragmentDialog())
         }
 
+        binding.cardReadonlyWallet.setOnClickListener {
+            NavHostFragment.findNavController(requireParentFragment())
+                .navigateSafe(AddWalletChooserFragmentDialogDirections.actionAddWalletChooserFragmentToAddReadOnlyWalletFragmentDialog())
+        }
+
         // Inflate the layout for this fragment
         return binding.root
     }
