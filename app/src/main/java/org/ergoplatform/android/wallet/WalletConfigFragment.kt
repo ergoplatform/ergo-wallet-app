@@ -8,18 +8,19 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentWalletConfigBinding
-import org.ergoplatform.android.ui.hideForcedSoftKeyboard
+import org.ergoplatform.android.ui.*
 
 /**
  * Shows settings and details for a wallet
  */
-class WalletConfigFragment : Fragment() {
+class WalletConfigFragment : Fragment(), ConfirmationCallback {
 
     var _binding: FragmentWalletConfigBinding? = null
     private val binding get() = _binding!!
@@ -90,6 +91,26 @@ class WalletConfigFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.fragment_wallet_config, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_delete) {
+            val confirmationDialogFragment = ConfirmationDialogFragment()
+            val args = Bundle()
+            args.putString(ARG_CONFIRMATION_TEXT, getString(R.string.label_confirm_delete))
+            args.putString(ARG_BUTTON_YES_LABEL, getString(R.string.button_delete))
+            confirmationDialogFragment.arguments = args
+            confirmationDialogFragment.show(childFragmentManager, null)
+
+            return true
+        } else
+            return super.onOptionsItemSelected(item)
+    }
+
+    override fun onConfirm() {
+        // deletion was confirmed
+        viewModel.deleteWallet(requireContext(), args.walletId)
+        findNavController().navigateUp()
     }
 
     override fun onDestroyView() {

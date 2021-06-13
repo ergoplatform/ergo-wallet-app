@@ -9,8 +9,11 @@ interface WalletDbDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(vararg walletConfigs: WalletConfigDbEntity)
 
-    @Delete
-    suspend fun delete(walletConfig: WalletConfigDbEntity)
+    @Query("DELETE FROM wallet_configs WHERE id = :walletId")
+    suspend fun deleteWalletConfig(walletId: Int)
+
+    @Query("DELETE FROM wallet_states WHERE wallet_id = :walletId")
+    suspend fun deleteWalletState(walletId: Int)
 
     @Update
     suspend fun update(walletConfig: WalletConfigDbEntity)

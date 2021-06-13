@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
@@ -30,6 +31,15 @@ class WalletConfigViewModel : ViewModel() {
                 walletDao.update(newWalletConfig)
                 _snackbarEvent.postValue(R.string.label_changes_saved)
             }
+        }
+    }
+
+    fun deleteWallet(context: Context, walletId: Int) {
+        // GlobalScope to let deletion process when fragment is already dismissed
+        GlobalScope.launch {
+            val walletDao = AppDatabase.getInstance(context).walletDao()
+            walletDao.deleteWalletState(walletId)
+            walletDao.deleteWalletConfig(walletId)
         }
     }
 }
