@@ -63,12 +63,21 @@ fun isValidErgoAddress(addressString: String): Boolean {
 
 }
 
+fun getPublicErgoAddressFromMnemonic(mnemonic: String, index: Int = 0): String {
+    return Address.createEip3Address(
+        index,
+        StageConstants.NETWORK_TYPE,
+        SecretString.create(mnemonic),
+        SecretString.create("")
+    ).ergoAddress.toString()
+}
+
 /**
  * Create and send transaction creating a box with the given amount using parameters from the given config file.
  *
  * @param amountToSend   amount of NanoErg to put into new box
  */
-public fun sendErgoTx(
+fun sendErgoTx(
     recipient: Address,
     amountToSend: Long,
     mnemonic: String,
