@@ -82,6 +82,7 @@ fun sendErgoTx(
     amountToSend: Long,
     mnemonic: String,
     mnemonicPass: String,
+    derivedKeyIndex: Int = 0,
     nodeApiAddress: String = StageConstants.NODE_API_ADDRESS
 ): String? {
     try {
@@ -93,6 +94,7 @@ fun sendErgoTx(
                     SecretString.create(mnemonic),
                     SecretString.create(mnemonicPass)
                 )
+                .withEip3Secret(derivedKeyIndex)
                 .build()
             val unspent = ctx.getUnspentBoxesFor(prover.address)
             val boxesToSpend = BoxOperations.selectTop(unspent, totalToSpend)

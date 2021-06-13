@@ -98,7 +98,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
     implementation("androidx.biometric:biometric:1.1.0")
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1"
-    implementation ('org.ergoplatform:ergo-appkit_2.11:i87-eip3-3b60bc59-SNAPSHOT') {
+    implementation ('org.ergoplatform:ergo-appkit_2.11:i87-eip3-589f7aa3-SNAPSHOT') {
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
     }
     implementation "org.bouncycastle:bcprov-jdk15to18:1.66"
