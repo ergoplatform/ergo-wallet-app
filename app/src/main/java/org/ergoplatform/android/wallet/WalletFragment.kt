@@ -218,6 +218,15 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
                     )
                 )
         }
+
+        binding.walletSettings.setOnClickListener {
+            NavHostFragment.findNavController(itemView.findFragment())
+                .navigateSafe(
+                    WalletFragmentDirections.actionNavigationWalletToWalletConfigFragment(
+                        wallet.walletConfig.id
+                    )
+                )
+        }
     }
 
 }

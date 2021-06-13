@@ -10,6 +10,7 @@
     <string name="err_password">Password needs to have at least 8 characters</string>
     <string name="label_password">Password</string>
     <string name="button_done">Done</string>
+    <string name="button_apply">Apply</string>
     <string name="button_copy">Copy</string>
     <string name="label_copied">Copied!</string>
     <string name="label_qr_code">QR Code</string>
@@ -17,6 +18,8 @@
     <string name="label_purpose">Purpose</string>
     <string name="label_share">Share</string>
     <string name="error_sdk26required">Sorry, this functionality requires Android 8.0 or later.</string>
+    <string name="button_export">Export</string>
+    <string name="button_delete">Delete</string>
 
     <!-- Wallet -->
     <string name="label_transactions">transactions</string>
@@ -63,6 +66,11 @@
     <string name="device_enc_security_pass">Password, PIN or pattern</string>
     <string name="device_enc_security_biometric_strong">Biometric with strong security</string>
     <string name="device_enc_security_biometric_weak">Biometric, Class 2</string>
+
+    <!-- Wallet config/details -->
+    <string name="title_wallet_details">Wallet details</string>
+    <string name="label_wallet_name">Descriptive wallet name</string>
+    <string name="label_changes_saved">Changes saved</string>
 
     <!-- Send funds -->
     <string name="desc_send_funds">Enter the receiver address and amount to send, or scan a QR code.</string>

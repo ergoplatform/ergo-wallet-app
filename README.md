@@ -13,7 +13,7 @@ Visit the [Ergo Discord](https://discord.gg/kj7s7nb) for more information.
 - [ ] Biometric Auth Security https://stackoverflow.com/a/62445439/7487013
 - [ ] Show error reasons for sending transaction (no unspent boxes)
 - [ ] Prevent sending transaction when there are unconfirmed transactions (does not work)
-- [ ] Generate new wallets
+- [ ] Generate new wallets when https://github.com/ergoplatform/ergo-appkit/issues/87 is released
 - [ ] Prevent the same wallet being saved twice
 - [ ] Amount input filter https://stackoverflow.com/a/13716371/7487013
 - [ ] Gradle verify dependencies
