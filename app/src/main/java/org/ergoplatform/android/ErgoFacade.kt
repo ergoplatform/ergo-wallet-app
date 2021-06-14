@@ -1,16 +1,12 @@
 package org.ergoplatform.android
 
+import StageConstants
 import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
-import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.*
-import org.ergoplatform.appkit.Parameters.MinFee
-import org.ergoplatform.appkit.config.ErgoToolConfig
-import java.io.FileNotFoundException
-import java.io.Reader
 import java.text.DecimalFormat
 import java.util.*
 
@@ -68,7 +64,7 @@ fun isValidErgoAddress(addressString: String): Boolean {
  *
  * @param amountToSend   amount of NanoErg to put into new box
  */
-public fun sendErgoTx(
+fun sendErgoTx(
     recipient: Address,
     amountToSend: Long,
     mnemonic: String,
@@ -78,34 +74,17 @@ public fun sendErgoTx(
     try {
         val ergoClient = RestApiErgoClient.create(nodeApiAddress, StageConstants.NETWORK_TYPE, "")
         return ergoClient.execute { ctx: BlockchainContext ->
-            val totalToSpend = amountToSend + MinFee
             val prover = ctx.newProverBuilder()
                 .withMnemonic(
                     SecretString.create(mnemonic),
                     SecretString.create(mnemonicPass)
                 )
                 .build()
-            val unspent = ctx.getUnspentBoxesFor(prover.address)
-            val boxesToSpend = BoxOperations.selectTop(unspent, totalToSpend)
-            val txB = ctx.newTxBuilder()
-            val newBox = txB.outBoxBuilder()
-                .value(amountToSend)
-                .contract(
-                    ctx.compileContract(
-                        ConstantsBuilder.create()
-                            .item("recipientPk", recipient.publicKey)
-                            .build(),
-                        "{ recipientPk }"
-                    )
-                )
-                .build()
-            val tx = txB.boxesToSpend(boxesToSpend)
-                .outputs(newBox)
-                .fee(MinFee)
-                .sendChangeTo(prover.p2PKAddress)
-                .build()
-            val signed = prover.sign(tx)
-            val txId = ctx.sendTransaction(signed)
+            val jsonTransaction = BoxOperations.send(ctx, prover, recipient, amountToSend)
+
+            val jsonTree = JsonParser().parse(jsonTransaction)
+            val txId = (jsonTree as JsonObject).get("id").asString
+
             return@execute txId
         }
     } catch (t: Throwable) {

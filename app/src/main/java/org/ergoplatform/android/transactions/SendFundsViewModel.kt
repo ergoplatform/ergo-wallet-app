@@ -111,9 +111,7 @@ class SendFundsViewModel : ViewModel() {
                 val success = ergoTxId != null && ergoTxId.isNotEmpty()
                 if (success) {
                     NodeConnector.getInstance().invalidateCache()
-                    // TODO workaround for https://github.com/ergoplatform/ergo-appkit/issues/86
-                    val txIdWithoutQuotes = ergoTxId!!.removeSurrounding("\"")
-                    _txId.postValue(txIdWithoutQuotes)
+                    _txId.postValue(ergoTxId!!)
                 }
                 _paymentDoneLiveData.postValue(if (success) PaymentResult.SUCCESS else PaymentResult.ERROR)
             }
