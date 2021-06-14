@@ -10,7 +10,7 @@ Visit the [Ergo Discord](https://discord.gg/kj7s7nb) for more information.
 # TODO
 - [X] CoinGecko Fiat value request
 - [X] Edit/Delete for Wallets
-- [ ] Configurable fiat currency, add link to CoinGecko to about screen
+- [X] Configurable fiat currency, add link to CoinGecko to about screen
 - [ ] Biometric Auth Security https://stackoverflow.com/a/62445439/7487013
 - [ ] Export secrets/mnemonic
 - [ ] Show error reasons for sending transaction (no unspent boxes)

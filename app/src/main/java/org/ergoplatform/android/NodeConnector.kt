@@ -19,6 +19,7 @@ class NodeConnector() {
     val isRefreshing: MutableLiveData<Boolean> = MutableLiveData()
     val refreshNum: MutableLiveData<Int> = MutableLiveData()
     val fiatValue: MutableLiveData<Float> = MutableLiveData()
+    val currencies: MutableLiveData<List<String>> = MutableLiveData()
     var lastRefresMs: Long = 0
         private set
     var lastHadError: Boolean = false
@@ -67,12 +68,12 @@ class NodeConnector() {
                 var hadError = false
 
                 // Refresh Ergo fiat value
-                fiatCurrency = context.getSharedPreferences("ergowallet", Context.MODE_PRIVATE)
-                    .getString("fiatCurrency", "usd") ?: ""
+                fiatCurrency = getPrefDisplayCurrency(context)
 
                 if (fiatCurrency.isNotEmpty()) {
                     try {
-                        val currencyGetPrice = coingeckoApi.currencyGetPrice(fiatCurrency).execute().body()
+                        val currencyGetPrice =
+                            coingeckoApi.currencyGetPrice(fiatCurrency).execute().body()
                         fiatValue.postValue(currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f)
                     } catch (t: Throwable) {
                         Log.e("CoinGecko", "Error", t)
@@ -113,6 +114,20 @@ class NodeConnector() {
                 lastHadError = hadError
                 refreshNum.postValue(refreshNum.value?.and(1) ?: 0)
                 isRefreshing.postValue(false)
+            }
+        }
+    }
+
+    fun fetchCurrencies() {
+        // do this only once per session, won't change often
+        if (currencies.value == null) {
+            GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    val currencyList = coingeckoApi.currencies.execute().body()
+                    currencyList?.let { currencies.postValue(it) }
+                } catch (t: Throwable) {
+                    Log.e("CoinGecko", "Error", t)
+                }
             }
         }
     }

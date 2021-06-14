@@ -1,5 +1,7 @@
 package org.ergoplatform.api;
 
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
@@ -9,4 +11,7 @@ public interface CoinGeckoApi {
     Call<CoinGeckoPrice> currencyGetPrice(
             @Query("vs_currencies") String currency
     );
+
+    @GET("api/v3/simple/supported_vs_currencies")
+    Call<List<String>> getCurrencies();
 }

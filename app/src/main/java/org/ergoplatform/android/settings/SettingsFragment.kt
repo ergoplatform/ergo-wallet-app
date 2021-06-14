@@ -8,7 +8,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import org.ergoplatform.android.BuildConfig
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSettingsBinding
+import org.ergoplatform.android.getPrefDisplayCurrency
+import java.util.*
 
 class SettingsFragment : Fragment() {
 
@@ -34,6 +37,26 @@ class SettingsFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setDisplayCurrency()
+
+        binding.displayCurrency.setOnClickListener {
+            DisplayCurrencyListDialogFragment().show(childFragmentManager, null)
+        }
+    }
+
+    fun setDisplayCurrency() {
+        val displayCurrency =
+            getPrefDisplayCurrency(requireContext()).toUpperCase(Locale.getDefault())
+        binding.displayCurrency.setText(
+            getString(
+                R.string.button_display_currency,
+                if (displayCurrency.isNotEmpty()) displayCurrency else getString(R.string.label_none)
+            )
+        )
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
