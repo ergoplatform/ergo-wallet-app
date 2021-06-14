@@ -24,6 +24,7 @@ import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
 import org.ergoplatform.android.nanoErgsToErgs
 import org.ergoplatform.android.ui.navigateSafe
+import java.util.*
 
 
 class WalletFragment : Fragment() {
@@ -111,6 +112,15 @@ class WalletFragment : Fragment() {
             } else {
                 binding.ergoLogoBack.clearAnimation()
                 binding.ergoLogoBack.startAnimation(rotateAnimation)
+            }
+        })
+        nodeConnector.fiatValue.observe(viewLifecycleOwner, { value ->
+            if (value == 0f) {
+                binding.ergoPrice.visibility = View.GONE
+            } else {
+                binding.ergoPrice.visibility = View.VISIBLE
+                binding.ergoPrice.amount = value
+                binding.ergoPrice.setSymbol(nodeConnector.fiatCurrency.toUpperCase(Locale.getDefault()))
             }
         })
     }
@@ -226,6 +236,16 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
                         wallet.walletConfig.id
                     )
                 )
+        }
+
+        val nodeConnector = NodeConnector.getInstance()
+        val ergoPrice = nodeConnector.fiatValue.value ?: 0f
+        if (ergoPrice == 0f) {
+            binding.walletFiat.visibility = View.GONE
+        } else {
+            binding.walletFiat.visibility = View.VISIBLE
+            binding.walletFiat.amount = ergoPrice * binding.walletBalance.amount
+            binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.toUpperCase())
         }
     }
 

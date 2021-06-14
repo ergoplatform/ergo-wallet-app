@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.wallet.WalletStateDbEntity
+import org.ergoplatform.api.CoinGeckoApi
 import org.ergoplatform.api.ErgoApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -17,11 +18,15 @@ class NodeConnector() {
 
     val isRefreshing: MutableLiveData<Boolean> = MutableLiveData()
     val refreshNum: MutableLiveData<Int> = MutableLiveData()
+    val fiatValue: MutableLiveData<Float> = MutableLiveData()
     var lastRefresMs: Long = 0
         private set
     var lastHadError: Boolean = false
         private set
-    private val service: ErgoApi
+    var fiatCurrency: String = ""
+        private set
+    private val ergoApiService: ErgoApi
+    private val coingeckoApi: CoinGeckoApi
 
     init {
         val retrofit = Retrofit.Builder()
@@ -29,7 +34,12 @@ class NodeConnector() {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        service = retrofit.create(ErgoApi::class.java)
+        ergoApiService = retrofit.create(ErgoApi::class.java)
+
+        val retrofitCoinGecko = Retrofit.Builder().baseUrl("https://api.coingecko.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        coingeckoApi = retrofitCoinGecko.create(CoinGeckoApi::class.java)
     }
 
     fun invalidateCache() {
@@ -57,6 +67,20 @@ class NodeConnector() {
                 var hadError = false
 
                 // Refresh Ergo fiat value
+                fiatCurrency = context.getSharedPreferences("ergowallet", Context.MODE_PRIVATE)
+                    .getString("fiatCurrency", "usd") ?: ""
+
+                if (fiatCurrency.isNotEmpty()) {
+                    try {
+                        val currencyGetPrice = coingeckoApi.currencyGetPrice(fiatCurrency).execute().body()
+                        fiatValue.postValue(currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f)
+                    } catch (t: Throwable) {
+                        Log.e("CoinGecko", "Error", t)
+                        fiatValue.postValue(0f)
+                    }
+                } else {
+                    fiatValue.postValue(0f)
+                }
 
 
                 // Refresh wallet states
@@ -65,7 +89,7 @@ class NodeConnector() {
                     val walletDao = AppDatabase.getInstance(context).walletDao()
                     walletDao.getAllSync().forEach { walletConfig ->
                         val transactionsInfo =
-                            service.addressesIdGet(walletConfig.publicAddress).execute()
+                            ergoApiService.addressesIdGet(walletConfig.publicAddress).execute()
                                 .body()?.transactions
 
                         val newState = WalletStateDbEntity(
