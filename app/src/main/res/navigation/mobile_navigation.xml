@@ -23,6 +23,13 @@
         <action
             android:id="@+id/action_navigation_wallet_to_sendFundsFragment"
             app:destination="@id/sendFundsFragment" />
+        <action
+            android:id="@+id/action_navigation_wallet_to_walletConfigFragment"
+            app:destination="@id/walletConfigFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
 
     <fragment
@@ -114,4 +121,13 @@
             android:id="@+id/action_addReadOnlyWalletFragmentDialog_to_wallet_list"
             app:destination="@id/navigation_wallet" />
     </dialog>
+    <fragment
+        android:id="@+id/walletConfigFragment"
+        android:name="org.ergoplatform.android.wallet.WalletConfigFragment"
+        android:label="fragment_wallet_config"
+        tools:layout="@layout/fragment_wallet_config" >
+        <argument
+            android:name="wallet_id"
+            app:argType="integer" />
+    </fragment>
 </navigation>

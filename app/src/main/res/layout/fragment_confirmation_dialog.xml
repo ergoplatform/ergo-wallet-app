@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:background="?attr/colorSurface">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
+
+        <TextView
+            android:id="@+id/tv_prompt"
+            style="@style/TextAppearance.App.Headline2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/hint_password" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_yes"
+            style="@style/Widget.App.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_margin="@dimen/activity_vertical_margin"
+            android:elegantTextHeight="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_prompt"
+            tools:text="@string/button_yes" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_cancel"
+            style="@style/Widget.App.Button.PrimaryTint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginHorizontal="@dimen/half_horizontal_margin"
+            android:elegantTextHeight="true"
+            android:text="@string/label_cancel"
+            app:layout_constraintEnd_toStartOf="@id/button_yes"
+            app:layout_constraintTop_toTopOf="@id/button_yes" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>
