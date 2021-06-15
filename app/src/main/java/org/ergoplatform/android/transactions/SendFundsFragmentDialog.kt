@@ -1,5 +1,8 @@
 package org.ergoplatform.android.transactions
 
+import StageConstants
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -7,6 +10,8 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
@@ -65,12 +70,31 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             dialog?.setCancelable(!it)
         })
         viewModel.paymentDoneLiveData.observe(viewLifecycleOwner, {
-            if (it == PaymentResult.ERROR) {
-                Snackbar.make(
+            if (!it.success) {
+                val snackbar = Snackbar.make(
                     requireView(),
                     R.string.error_transaction,
                     Snackbar.LENGTH_LONG
-                ).show()
+                )
+                it.errorMsg?.let { errorMsg ->
+                    snackbar.setAction(
+                        R.string.label_details
+                    ) {
+                        AlertDialog.Builder(requireContext())
+                            .setMessage(errorMsg)
+                            .setPositiveButton(R.string.button_copy) { p, p1 ->
+                                val clipboard = ContextCompat.getSystemService(
+                                    requireContext(),
+                                    ClipboardManager::class.java
+                                )
+                                val clip = ClipData.newPlainText("", errorMsg)
+                                clipboard?.setPrimaryClip(clip)
+                            }
+                            .setNegativeButton(R.string.label_dismiss, null)
+                            .show();
+                    }
+                }
+                snackbar.show()
             }
         })
         viewModel.txId.observe(viewLifecycleOwner, {

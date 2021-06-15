@@ -70,7 +70,7 @@ fun sendErgoTx(
     mnemonic: String,
     mnemonicPass: String,
     nodeApiAddress: String = StageConstants.NODE_API_ADDRESS
-): String? {
+): TransactionResult {
     try {
         val ergoClient = RestApiErgoClient.create(nodeApiAddress, StageConstants.NETWORK_TYPE, "")
         return ergoClient.execute { ctx: BlockchainContext ->
@@ -85,10 +85,16 @@ fun sendErgoTx(
             val jsonTree = JsonParser().parse(jsonTransaction)
             val txId = (jsonTree as JsonObject).get("id").asString
 
-            return@execute txId
+            return@execute TransactionResult(txId.isNotEmpty(), txId)
         }
     } catch (t: Throwable) {
         Log.e("Send", "Error creating transaction", t)
-        return null
+        return TransactionResult(false, errorMsg = t.message)
     }
 }
+
+data class TransactionResult(
+    val success: Boolean,
+    val txId: String? = null,
+    val errorMsg: String? = null
+)

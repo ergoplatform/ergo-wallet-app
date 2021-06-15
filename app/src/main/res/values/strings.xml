@@ -23,6 +23,8 @@
     <string name="button_yes">Yes</string>
     <string name="label_cancel">Cancel</string>
     <string name="label_none">None</string>
+    <string name="label_details">Details</string>
+    <string name="label_dismiss">Dismiss</string>
 
     <!-- Wallet -->
     <string name="label_transactions">transactions</string>

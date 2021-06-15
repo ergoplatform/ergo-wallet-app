@@ -44,8 +44,8 @@ class SendFundsViewModel : ViewModel() {
         value = 0f
     }
     val grossAmount: LiveData<Float> = _grossAmount
-    private val _paymentDoneLiveData = SingleLiveEvent<PaymentResult>()
-    val paymentDoneLiveData: LiveData<PaymentResult> = _paymentDoneLiveData
+    private val _paymentDoneLiveData = SingleLiveEvent<TransactionResult>()
+    val paymentDoneLiveData: LiveData<TransactionResult> = _paymentDoneLiveData
     private val _txId = MutableLiveData<String>()
     val txId: LiveData<String> = _txId
 
@@ -100,20 +100,19 @@ class SendFundsViewModel : ViewModel() {
             }
 
             viewModelScope.launch {
-                val ergoTxId: String?
+                val ergoTxResult: TransactionResult
                 withContext(Dispatchers.IO) {
-                    ergoTxId = sendErgoTx(
+                    ergoTxResult = sendErgoTx(
                         Address.create(receiverAddress), ergsToNanoErgs(amountToSend),
                         mnemonic, ""
                     )
                 }
                 _lockInterface.postValue(false)
-                val success = ergoTxId != null && ergoTxId.isNotEmpty()
-                if (success) {
+                if (ergoTxResult.success) {
                     NodeConnector.getInstance().invalidateCache()
-                    _txId.postValue(ergoTxId!!)
+                    _txId.postValue(ergoTxResult.txId!!)
                 }
-                _paymentDoneLiveData.postValue(if (success) PaymentResult.SUCCESS else PaymentResult.ERROR)
+                _paymentDoneLiveData.postValue(ergoTxResult)
             }
 
             _lockInterface.postValue(true)
@@ -123,8 +122,4 @@ class SendFundsViewModel : ViewModel() {
 
         return false
     }
-}
-
-enum class PaymentResult {
-    NONE, SUCCESS, ERROR
 }
