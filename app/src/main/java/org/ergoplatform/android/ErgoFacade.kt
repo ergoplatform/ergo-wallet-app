@@ -91,7 +91,7 @@ fun sendErgoTx(
                 )
                 .withEip3Secret(derivedKeyIndex)
                 .build()
-            val jsonTransaction = BoxOperations.send(ctx, prover, recipient, amountToSend)
+            val jsonTransaction = BoxOperations.send(ctx, prover, true, recipient, amountToSend)
 
             val jsonTree = JsonParser().parse(jsonTransaction)
             val txId = (jsonTree as JsonObject).get("id").asString
