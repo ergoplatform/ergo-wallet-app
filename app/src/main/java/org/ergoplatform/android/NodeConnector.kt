@@ -19,7 +19,7 @@ class NodeConnector() {
     val isRefreshing: MutableLiveData<Boolean> = MutableLiveData()
     val refreshNum: MutableLiveData<Int> = MutableLiveData()
     val fiatValue: MutableLiveData<Float> = MutableLiveData()
-    val currencies: MutableLiveData<List<String>> = MutableLiveData()
+    val currencies: MutableLiveData<List<String>?> = MutableLiveData()
     var lastRefresMs: Long = 0
         private set
     var lastHadError: Boolean = false
@@ -120,13 +120,15 @@ class NodeConnector() {
 
     fun fetchCurrencies() {
         // do this only once per session, won't change often
-        if (currencies.value == null) {
+        if (currencies.value == null || currencies.value!!.isEmpty()) {
             GlobalScope.launch(Dispatchers.IO) {
                 try {
+                    currencies.postValue(null)
                     val currencyList = coingeckoApi.currencies.execute().body()
-                    currencyList?.let { currencies.postValue(it) }
+                    currencies.postValue(currencyList ?: emptyList())
                 } catch (t: Throwable) {
                     Log.e("CoinGecko", "Error", t)
+                    currencies.postValue(emptyList())
                 }
             }
         }

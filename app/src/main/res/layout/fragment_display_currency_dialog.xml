@@ -11,6 +11,16 @@
         android:layout_height="200dp"
         android:layout_gravity="center" />
 
+    <TextView
+        android:id="@+id/connection_error"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:gravity="center"
+        android:text="@string/label_cg_conn_error"
+        android:visibility="gone" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"

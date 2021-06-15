@@ -45,14 +45,20 @@ class DisplayCurrencyListDialogFragment : BottomSheetDialogFragment() {
             LinearLayoutManager(context)
 
         nodeConnector.currencies.observe(viewLifecycleOwner, {
-            val listWithNone = arrayListOf<String>()
-            listWithNone.add("")
-            listWithNone.addAll(it.sorted())
+            if (it != null && it.isNotEmpty()) {
+                val listWithNone = arrayListOf<String>()
+                listWithNone.add("")
+                listWithNone.addAll(it.sorted())
 
-            binding.list.adapter = DisplayCurrencyAdapter(listWithNone)
+                binding.list.adapter = DisplayCurrencyAdapter(listWithNone)
+                binding.list.visibility = View.VISIBLE
+            }
 
-            binding.list.visibility = View.VISIBLE
-            binding.progressCircular.visibility = View.GONE
+            binding.progressCircular.visibility = if (it == null) View.VISIBLE else View.GONE
+            binding.connectionError.visibility =
+                if (it != null && it.isEmpty()) View.VISIBLE else View.GONE
+            binding.list.visibility = if (it != null && it.isNotEmpty()) View.VISIBLE else View.GONE
+
         })
     }
 
@@ -88,7 +94,8 @@ class DisplayCurrencyListDialogFragment : BottomSheetDialogFragment() {
             val currency = items.get(position)
             holder.text.text =
                 if (currency.isEmpty()) getString(R.string.label_none) else currency.toUpperCase(
-                    Locale.getDefault())
+                    Locale.getDefault()
+                )
             holder.text.setOnClickListener { onChooseCurrency(currency) }
         }
 
