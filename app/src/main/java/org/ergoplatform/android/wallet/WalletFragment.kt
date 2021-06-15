@@ -57,7 +57,11 @@ class WalletFragment : Fragment() {
         AppDatabase.getInstance(requireContext()).walletDao().getWalletsWithStates()
             .observe(viewLifecycleOwner,
                 { walletList ->
-                    walletAdapter.walletList = walletList
+                    walletAdapter.walletList = walletList.sortedBy {
+                        it.walletConfig.displayName?.toLowerCase(
+                            Locale.getDefault()
+                        )
+                    }
 
                     binding.swipeRefreshLayout.visibility =
                         if (walletList.isEmpty()) View.GONE else View.VISIBLE
