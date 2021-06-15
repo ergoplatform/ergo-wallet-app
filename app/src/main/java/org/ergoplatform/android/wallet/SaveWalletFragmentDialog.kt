@@ -1,6 +1,5 @@
 package org.ergoplatform.android.wallet
 
-import StageConstants
 import android.app.KeyguardManager
 import android.content.Context
 import android.os.Bundle
@@ -13,18 +12,13 @@ import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.NodeConnector
-import org.ergoplatform.android.R
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
-import org.ergoplatform.android.serializeSecrets
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.PasswordDialogCallback
 import org.ergoplatform.android.ui.PasswordDialogFragment
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.api.AesEncryptionManager
-import org.ergoplatform.appkit.Address
-import org.ergoplatform.appkit.SecretString
 
 /**
  * Dialog to save a created or restored wallet
@@ -48,13 +42,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val fromMnemonic = Address.fromMnemonic(
-            StageConstants.NETWORK_TYPE,
-            SecretString.create(args.mnemonic),
-            SecretString.create("")
-        )
-
-        binding.publicAddress.text = fromMnemonic.ergoAddress.toString()
+        binding.publicAddress.text = getPublicErgoAddressFromMnemonic(args.mnemonic)
 
         val bmm = BiometricManager.from(requireContext())
         val methodDesc =
@@ -79,17 +67,11 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     }
 
     private fun saveToDb(encType: Int, secretStorage: ByteArray) {
-        val fromMnemonic = Address.fromMnemonic(
-            StageConstants.NETWORK_TYPE,
-            SecretString.create(args.mnemonic),
-            SecretString.create("")
-        )
-
         val walletConfig =
             WalletConfigDbEntity(
                 0,
                 getString(R.string.label_wallet_default),
-                fromMnemonic.ergoAddress.toString(),
+                getPublicErgoAddressFromMnemonic(args.mnemonic),
                 encType,
                 secretStorage
             )

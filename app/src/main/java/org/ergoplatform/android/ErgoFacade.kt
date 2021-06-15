@@ -59,6 +59,15 @@ fun isValidErgoAddress(addressString: String): Boolean {
 
 }
 
+fun getPublicErgoAddressFromMnemonic(mnemonic: String, index: Int = 0): String {
+    return Address.createEip3Address(
+        index,
+        StageConstants.NETWORK_TYPE,
+        SecretString.create(mnemonic),
+        SecretString.create("")
+    ).ergoAddress.toString()
+}
+
 /**
  * Create and send transaction creating a box with the given amount using parameters from the given config file.
  *
@@ -69,6 +78,7 @@ fun sendErgoTx(
     amountToSend: Long,
     mnemonic: String,
     mnemonicPass: String,
+    derivedKeyIndex: Int = 0,
     nodeApiAddress: String = StageConstants.NODE_API_ADDRESS
 ): TransactionResult {
     try {
@@ -79,8 +89,9 @@ fun sendErgoTx(
                     SecretString.create(mnemonic),
                     SecretString.create(mnemonicPass)
                 )
+                .withEip3Secret(derivedKeyIndex)
                 .build()
-            val jsonTransaction = BoxOperations.send(ctx, prover, recipient, amountToSend)
+            val jsonTransaction = BoxOperations.send(ctx, prover, true, recipient, amountToSend)
 
             val jsonTree = JsonParser().parse(jsonTransaction)
             val txId = (jsonTree as JsonObject).get("id").asString
