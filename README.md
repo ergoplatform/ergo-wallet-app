@@ -8,6 +8,7 @@ Visit the [Ergo Discord](https://discord.gg/kj7s7nb) for more information.
 
 
 # TODO
+- [X] Dark mode setting in settings
 - [ ] Biometric Auth Security https://stackoverflow.com/a/62445439/7487013
 - [ ] Generate new wallets
 - [ ] Export secrets/mnemonic

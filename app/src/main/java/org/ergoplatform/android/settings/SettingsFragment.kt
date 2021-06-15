@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import org.ergoplatform.android.BuildConfig
@@ -45,6 +47,37 @@ class SettingsFragment : Fragment() {
         binding.displayCurrency.setOnClickListener {
             DisplayCurrencyListDialogFragment().show(childFragmentManager, null)
         }
+
+        setDayNightModeButtonColor(AppCompatDelegate.getDefaultNightMode())
+        binding.darkModeSystem.setOnClickListener { changeDayNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) }
+        binding.darkModeDay.setOnClickListener { changeDayNightMode(AppCompatDelegate.MODE_NIGHT_NO) }
+        binding.darkModeNight.setOnClickListener { changeDayNightMode(AppCompatDelegate.MODE_NIGHT_YES) }
+    }
+
+    private fun changeDayNightMode(mode: Int) {
+        org.ergoplatform.android.changeDayNightMode(requireContext(), mode)
+        setDayNightModeButtonColor(mode)
+    }
+
+    private fun setDayNightModeButtonColor(mode: Int) {
+        binding.darkModeSystem.backgroundTintList =
+            ResourcesCompat.getColorStateList(
+                resources,
+                if (mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) R.color.primary else R.color.secondary,
+                null
+            )
+        binding.darkModeDay.backgroundTintList =
+            ResourcesCompat.getColorStateList(
+                resources,
+                if (mode == AppCompatDelegate.MODE_NIGHT_NO) R.color.primary else R.color.secondary,
+                null
+            )
+        binding.darkModeNight.backgroundTintList =
+            ResourcesCompat.getColorStateList(
+                resources,
+                if (mode == AppCompatDelegate.MODE_NIGHT_YES) R.color.primary else R.color.secondary,
+                null
+            )
     }
 
     fun setDisplayCurrency() {
