@@ -26,6 +26,7 @@
         <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>
 
         <item name="bottomSheetDialogTheme">@style/CustomBottomSheetDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
     </style>
 
     <style name="CustomBottomSheetDialog" parent="@style/ThemeOverlay.MaterialComponents.BottomSheetDialog">
@@ -138,4 +139,13 @@
         <item name="android:elevation">2dp</item>
     </style>
 
+    <!-- Alert dialog -->
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="materialAlertDialogTitleTextStyle">@style/Widget.App.DialogTitle</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/TextAppearance.App.Body1</item>
+    </style>
+
+    <style name="Widget.App.DialogTitle" parent="@style/MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:textAppearance">@style/TextAppearance.App.Headline2</item>
+    </style>
 </resources>
