@@ -9,7 +9,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.wallet.WalletStateDbEntity
 import org.ergoplatform.api.CoinGeckoApi
-import org.ergoplatform.api.ErgoApi
+import org.ergoplatform.explorer.client.DefaultApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -26,7 +26,7 @@ class NodeConnector() {
         private set
     var fiatCurrency: String = ""
         private set
-    private val ergoApiService: ErgoApi
+    private val ergoApiService: DefaultApi
     private val coingeckoApi: CoinGeckoApi
 
     init {
@@ -35,7 +35,7 @@ class NodeConnector() {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        ergoApiService = retrofit.create(ErgoApi::class.java)
+        ergoApiService = retrofit.create(DefaultApi::class.java)
 
         val retrofitCoinGecko = Retrofit.Builder().baseUrl("https://api.coingecko.com/")
             .addConverterFactory(GsonConverterFactory.create())
@@ -95,12 +95,12 @@ class NodeConnector() {
                     walletDao.getAllSync().forEach { walletConfig ->
                         walletConfig.publicAddress?.let {
                             val transactionsInfo =
-                                ergoApiService.addressesIdGet(walletConfig.publicAddress).execute()
-                                    .body()?.transactions
+                                ergoApiService.getApiV1AddressesP1BalanceTotal(walletConfig.publicAddress).execute()
+                                    .body()
 
                             val newState = WalletStateDbEntity(
-                                walletConfig.publicAddress, transactionsInfo?.confirmed,
-                                transactionsInfo?.confirmedBalance, transactionsInfo?.totalBalance
+                                walletConfig.publicAddress, 0, transactionsInfo?.confirmed?.nanoErgs,
+                                transactionsInfo?.unconfirmed?.nanoErgs
                             )
 
                             statesToSave.add(newState)

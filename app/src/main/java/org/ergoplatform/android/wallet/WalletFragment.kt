@@ -200,7 +200,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         binding.walletBalance.amount = nanoErgsToErgs(wallet.state?.balance ?: 0)
         binding.walletTransactions.text = (wallet.state?.transactions ?: 0).toString()
 
-        val unconfirmed = (wallet.state?.unconfirmedBalance ?: 0) - (wallet.state?.balance ?: 0)
+        val unconfirmed = (wallet.state?.unconfirmedBalance ?: 0)
         binding.walletUnconfirmed.amount = nanoErgsToErgs(unconfirmed)
         binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
