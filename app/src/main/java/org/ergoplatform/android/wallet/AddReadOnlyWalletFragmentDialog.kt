@@ -62,8 +62,12 @@ class AddReadOnlyWalletFragmentDialog : FullScreenFragmentDialog() {
                 )
 
             GlobalScope.launch(Dispatchers.IO) {
-                AppDatabase.getInstance(requireContext()).walletDao().insertAll(walletConfig)
-                NodeConnector.getInstance().invalidateCache()
+                val walletDao = AppDatabase.getInstance(requireContext()).walletDao()
+                val existingWallet = walletDao.loadWalletByAddress(walletAddress)
+                if (existingWallet == null) {
+                    walletDao.insertAll(walletConfig)
+                    NodeConnector.getInstance().invalidateCache()
+                }
             }
             NavHostFragment.findNavController(requireParentFragment())
                 .navigateSafe(AddReadOnlyWalletFragmentDialogDirections.actionAddReadOnlyWalletFragmentDialogToWalletList())

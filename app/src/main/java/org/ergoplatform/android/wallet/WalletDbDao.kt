@@ -12,14 +12,17 @@ interface WalletDbDao {
     @Query("DELETE FROM wallet_configs WHERE id = :walletId")
     suspend fun deleteWalletConfig(walletId: Int)
 
-    @Query("DELETE FROM wallet_states WHERE wallet_id = :walletId")
-    suspend fun deleteWalletState(walletId: Int)
+    @Query("DELETE FROM wallet_states WHERE public_address = :publicAddress")
+    suspend fun deleteWalletState(publicAddress: String)
 
     @Update
     suspend fun update(walletConfig: WalletConfigDbEntity)
 
     @Query("SELECT * FROM wallet_configs WHERE id = :id")
     suspend fun loadWalletById(id: Int): WalletConfigDbEntity?
+
+    @Query("SELECT * FROM wallet_configs WHERE public_address = :publicAddress")
+    suspend fun loadWalletByAddress(publicAddress: String): WalletConfigDbEntity?
 
     @Query("SELECT * FROM wallet_configs")
     fun getAllSync(): List<WalletConfigDbEntity>

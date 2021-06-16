@@ -67,18 +67,35 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     }
 
     private fun saveToDb(encType: Int, secretStorage: ByteArray) {
-        val walletConfig =
-            WalletConfigDbEntity(
-                0,
-                getString(R.string.label_wallet_default),
-                getPublicErgoAddressFromMnemonic(args.mnemonic),
-                encType,
-                secretStorage
-            )
+        val publicAddress = getPublicErgoAddressFromMnemonic(args.mnemonic)
 
         GlobalScope.launch(Dispatchers.IO) {
-            AppDatabase.getInstance(requireContext()).walletDao().insertAll(walletConfig)
-            NodeConnector.getInstance().invalidateCache()
+            // check if the wallet already exists
+            val walletDao = AppDatabase.getInstance(requireContext()).walletDao()
+            val existingWallet = walletDao.loadWalletByAddress(publicAddress)
+
+            if (existingWallet != null) {
+                // update enctype and secret storage
+                val walletConfig = WalletConfigDbEntity(
+                    existingWallet.id,
+                    existingWallet.displayName,
+                    existingWallet.publicAddress,
+                    encType,
+                    secretStorage
+                )
+                walletDao.update(walletConfig)
+            } else {
+                val walletConfig =
+                    WalletConfigDbEntity(
+                        0,
+                        getString(R.string.label_wallet_default),
+                        publicAddress,
+                        encType,
+                        secretStorage
+                    )
+                walletDao.insertAll(walletConfig)
+                NodeConnector.getInstance().invalidateCache()
+            }
         }
         NavHostFragment.findNavController(requireParentFragment())
             .navigateSafe(SaveWalletFragmentDialogDirections.actionSaveWalletFragmentDialogToNavigationWallet())

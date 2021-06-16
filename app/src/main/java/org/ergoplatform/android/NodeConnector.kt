@@ -89,16 +89,18 @@ class NodeConnector() {
                     val statesToSave = mutableListOf<WalletStateDbEntity>()
                     val walletDao = AppDatabase.getInstance(context).walletDao()
                     walletDao.getAllSync().forEach { walletConfig ->
-                        val transactionsInfo =
-                            ergoApiService.addressesIdGet(walletConfig.publicAddress).execute()
-                                .body()?.transactions
+                        walletConfig.publicAddress?.let {
+                            val transactionsInfo =
+                                ergoApiService.addressesIdGet(walletConfig.publicAddress).execute()
+                                    .body()?.transactions
 
-                        val newState = WalletStateDbEntity(
-                            walletConfig.id, transactionsInfo?.confirmed,
-                            transactionsInfo?.confirmedBalance, transactionsInfo?.totalBalance
-                        )
+                            val newState = WalletStateDbEntity(
+                                walletConfig.publicAddress, transactionsInfo?.confirmed,
+                                transactionsInfo?.confirmedBalance, transactionsInfo?.totalBalance
+                            )
 
-                        statesToSave.add(newState)
+                            statesToSave.add(newState)
+                        }
                     }
 
                     walletDao.insertWalletStates(*statesToSave.toTypedArray())

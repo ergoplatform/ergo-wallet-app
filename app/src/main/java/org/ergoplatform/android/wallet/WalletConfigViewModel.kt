@@ -38,8 +38,11 @@ class WalletConfigViewModel : ViewModel() {
         // GlobalScope to let deletion process when fragment is already dismissed
         GlobalScope.launch {
             val walletDao = AppDatabase.getInstance(context).walletDao()
-            walletDao.deleteWalletState(walletId)
-            walletDao.deleteWalletConfig(walletId)
+            val walletConfig = walletDao.loadWalletById(walletId)
+            walletConfig?.let {
+                walletConfig.publicAddress?.let { walletDao.deleteWalletState(it) }
+                walletDao.deleteWalletConfig(walletId)
+            }
         }
     }
 }
