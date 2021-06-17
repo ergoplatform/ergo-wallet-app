@@ -52,6 +52,17 @@
     <string name="intro_add_readonly">Enter your public wallet address to add this wallet in read-only mode.</string>
     <string name="label_wallet_address">Wallet address</string>
 
+    <!-- Create wallet -->
+    <string name="intro_create_wallet">This is your 15 words Ergo wallet mnemonic. Other names for these words are seed or
+        paper key.
+        With these 15 words, you can restore your wallet on other devices when you lost access on this one.\nIt is crucial
+    that you note this mnemonic and store it in a safe place.</string>
+    <string name="intro_confirm_create_wallet">To check if your notes are correct, enter two words of your mnemonic now:</string>
+    <string name="check_confirm_create_wallet">I understand that I am responsible to store my mnenomic in a safe place.
+    It is the only way to access my wallet if the keys stored on this device are not accessible.</string>
+    <string name="label_word_confirm_create_wallet">Word %1s</string>
+    <string name="error_word_confirm_create_wallet">Word not correct</string>
+
     <!-- Restore wallet -->
     <string name="intro_restore_wallet">Enter your 15 words Ergo wallet mnemonic to regenerate the wallet.</string>
     <string name="button_restore">Restore wallet</string>

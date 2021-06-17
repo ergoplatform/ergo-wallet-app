@@ -33,7 +33,6 @@ class AddWalletChooserFragmentDialog : FullScreenFragmentDialog() {
             NavHostFragment.findNavController(requireParentFragment())
                 .navigateSafe(AddWalletChooserFragmentDialogDirections.actionToCreateWalletDialog())
         }
-        binding.cardCreateWallet.isEnabled = false
 
         binding.cardRestoreWallet.setOnClickListener {
             if (Build.VERSION.SDK_INT < 26) {

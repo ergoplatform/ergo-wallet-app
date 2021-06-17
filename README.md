@@ -11,9 +11,9 @@ Visit the [Ergo Discord](https://discord.gg/kj7s7nb) for more information.
 - [X] Dark mode setting in settings
 - [X] Prevent same wallet being saved twice
 - [X] Biometric Auth Security https://stackoverflow.com/a/62445439/7487013
+- [X] Generate new wallets
+- [ ] Export mnemonic
 - [ ] Progress indicator when restoring wallet (slow on some devices)
-- [ ] Generate new wallets
-- [ ] Export secrets/mnemonic
 - [ ] Prevent sending transaction when there are unconfirmed transactions (does not work)
 - [ ] Gradle verify dependencies
 - [ ] API < 26 for all: https://github.com/ergoplatform/ergo-appkit/issues/82

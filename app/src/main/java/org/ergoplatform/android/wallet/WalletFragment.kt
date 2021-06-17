@@ -82,6 +82,11 @@ class WalletFragment : Fragment() {
                 .navigate(R.id.addReadOnlyWalletFragmentDialog)
         }
 
+        binding.emptyView.cardCreateWallet.setOnClickListener {
+            NavHostFragment.findNavController(requireParentFragment())
+                .navigate(R.id.createWalletDialog)
+        }
+
 
         val nodeConnector = NodeConnector.getInstance()
         val rotateAnimation =

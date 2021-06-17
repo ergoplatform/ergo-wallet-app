@@ -67,10 +67,8 @@
         android:label="fragment_add_wallet_create_mnemonic_dialog"
         tools:layout="@layout/fragment_create_wallet_dialog">
         <action
-            android:id="@+id/action_createWalletDialog_to_navigation_wallet"
-            app:destination="@id/navigation_wallet"
-            app:popUpTo="@id/navigation_wallet"
-            app:popUpToInclusive="true"/>
+            android:id="@+id/action_createWalletDialog_to_confirmCreateWalletFragment"
+            app:destination="@id/confirmCreateWalletFragment" />
     </dialog>
     <dialog
         android:id="@+id/restoreWalletFragmentDialog"
@@ -130,4 +128,16 @@
             android:name="wallet_id"
             app:argType="integer" />
     </fragment>
+    <dialog
+        android:id="@+id/confirmCreateWalletFragment"
+        android:name="org.ergoplatform.android.wallet.ConfirmCreateWalletFragment"
+        android:label="fragment_confirm_create_wallet"
+        tools:layout="@layout/fragment_confirm_create_wallet" >
+        <action
+            android:id="@+id/action_confirmCreateWalletFragment_to_saveWalletFragmentDialog"
+            app:destination="@id/saveWalletFragmentDialog" />
+        <argument
+            android:name="mnemonic"
+            app:argType="string" />
+    </dialog>
 </navigation>

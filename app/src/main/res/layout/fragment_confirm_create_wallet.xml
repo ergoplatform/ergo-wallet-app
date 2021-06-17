@@ -32,20 +32,54 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/desc_create_wallet"
+                android:id="@+id/desc_confirm_wallet"
                 style="@style/TextAppearance.App.Body1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:text="@string/intro_create_wallet" />
+                android:text="@string/intro_confirm_create_wallet" />
 
-            <TextView
-                android:id="@+id/tv_mnemonic"
-                style="@style/TextAppearance.App.Headline2"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/input_word_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/half_horizontal_margin"
+                app:errorEnabled="true"
+                tools:hint="@string/label_word_confirm_create_wallet">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:imeOptions="actionNext"
+                    android:inputType="text"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/input_word_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/half_horizontal_margin"
+                app:errorEnabled="true"
+                tools:hint="@string/label_word_confirm_create_wallet">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:imeOptions="actionDone"
+                    android:inputType="text"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <CheckBox
+                android:id="@+id/check_confirm_create_wallet"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/activity_vertical_margin"
-                tools:text="smart later gauge spring vivid recall finish car knife consider rough floor change repeat spring" />
+                android:text="@string/check_confirm_create_wallet"
+                android:textAppearance="@style/TextAppearance.App.Body1" />
 
             <Button
                 android:id="@+id/button_next_step"

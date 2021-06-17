@@ -8,9 +8,10 @@ import androidx.navigation.fragment.NavHostFragment
 import org.ergoplatform.android.databinding.FragmentCreateWalletDialogBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.appkit.Mnemonic
 
 /**
- * Create a new wallet
+ * Create a new wallet, step 1
  */
 class CreateWalletFragmentDialog : FullScreenFragmentDialog() {
 
@@ -20,16 +21,28 @@ class CreateWalletFragmentDialog : FullScreenFragmentDialog() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentCreateWalletDialogBinding.inflate(inflater, container, false)
 
-        binding.ergoLogo.setOnClickListener {
-            NavHostFragment.findNavController(requireParentFragment())
-                .navigateSafe(CreateWalletFragmentDialogDirections.actionCreateWalletDialogToNavigationWallet())
+        binding.buttonNextStep.setOnClickListener {
+            binding.tvMnemonic.text?.toString()?.let {
+                NavHostFragment.findNavController(requireParentFragment())
+                    .navigateSafe(
+                        CreateWalletFragmentDialogDirections.actionCreateWalletDialogToConfirmCreateWalletFragment(
+                            it
+                        )
+                    )
+            }
         }
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.tvMnemonic.text = Mnemonic.generateEnglishMnemonic()
     }
 
     override fun onDestroyView() {
