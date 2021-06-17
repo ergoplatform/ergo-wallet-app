@@ -10,7 +10,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
+import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
@@ -24,6 +24,7 @@ import org.ergoplatform.android.formatErgsToString
 import org.ergoplatform.android.parseContentFromQrCode
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.PasswordDialogCallback
+import org.ergoplatform.android.ui.hideForcedSoftKeyboard
 import org.ergoplatform.android.ui.inputTextToFloat
 
 /**
@@ -166,6 +167,41 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                 return null
         }
         return getString(R.string.error_password_empty)
+    }
+
+    fun showBiometricPrompt() {
+
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle(getString(R.string.title_authenticate))
+            .setConfirmationRequired(true) // don't send funds immediately when face is recognized
+            .setDeviceCredentialAllowed(true)
+            .build()
+
+        val callback = object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                try {
+                    viewModel.startPaymentUserAuth()
+                } catch (t: Throwable) {
+                    hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
+                    Snackbar.make(
+                        requireView(),
+                        getString(R.string.error_device_security, t.message),
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
+            }
+
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
+                Snackbar.make(
+                    requireView(),
+                    getString(R.string.error_device_security, errString),
+                    Snackbar.LENGTH_LONG
+                ).show()
+            }
+        }
+
+        BiometricPrompt(this, callback).authenticate(promptInfo)
     }
 
     private fun inputChangesToViewModel() {

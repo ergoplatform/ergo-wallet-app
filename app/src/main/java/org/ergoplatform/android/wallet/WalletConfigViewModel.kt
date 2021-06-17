@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.ui.SingleLiveEvent
+import org.ergoplatform.api.AesEncryptionManager
 
 class WalletConfigViewModel : ViewModel() {
     private val _snackbarEvent = SingleLiveEvent<Int>()
@@ -42,6 +43,11 @@ class WalletConfigViewModel : ViewModel() {
             walletConfig?.let {
                 walletConfig.publicAddress?.let { walletDao.deleteWalletState(it) }
                 walletDao.deleteWalletConfig(walletId)
+
+                // After we deleted a wallet, we can prune the keystore if it is not needed
+                if (walletDao.getAllSync().filter { it.encryptionType == ENC_TYPE_DEVICE }.isEmpty()) {
+                    AesEncryptionManager.emptyKeystore()
+                }
             }
         }
     }

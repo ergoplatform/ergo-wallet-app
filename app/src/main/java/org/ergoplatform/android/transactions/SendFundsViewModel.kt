@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import org.ergoplatform.android.*
 import org.ergoplatform.android.ui.PasswordDialogFragment
 import org.ergoplatform.android.ui.SingleLiveEvent
+import org.ergoplatform.android.wallet.ENC_TYPE_DEVICE
 import org.ergoplatform.android.wallet.ENC_TYPE_PASSWORD
 import org.ergoplatform.android.wallet.WalletConfigDbEntity
 import org.ergoplatform.api.AesEncryptionManager
@@ -80,6 +81,8 @@ class SendFundsViewModel : ViewModel() {
                 fragment.childFragmentManager,
                 null
             )
+        } else if (wallet?.encryptionType == ENC_TYPE_DEVICE) {
+            fragment.showBiometricPrompt()
         }
     }
 
@@ -99,21 +102,7 @@ class SendFundsViewModel : ViewModel() {
                 return false
             }
 
-            viewModelScope.launch {
-                val ergoTxResult: TransactionResult
-                withContext(Dispatchers.IO) {
-                    ergoTxResult = sendErgoTx(
-                        Address.create(receiverAddress), ergsToNanoErgs(amountToSend),
-                        mnemonic, ""
-                    )
-                }
-                _lockInterface.postValue(false)
-                if (ergoTxResult.success) {
-                    NodeConnector.getInstance().invalidateCache()
-                    _txId.postValue(ergoTxResult.txId!!)
-                }
-                _paymentDoneLiveData.postValue(ergoTxResult)
-            }
+            startPaymentWithMnemonicAsync(mnemonic)
 
             _lockInterface.postValue(true)
 
@@ -121,5 +110,39 @@ class SendFundsViewModel : ViewModel() {
         }
 
         return false
+    }
+
+    fun startPaymentUserAuth() {
+        // we don't handle exceptions here by intention: we throw them back to the fragment which
+        // will show a snackbar to give the user a hint what went wrong
+        wallet?.secretStorage?.let {
+            val mnemonic: String?
+
+            val decryptData = AesEncryptionManager.decryptDataWithDeviceKey(it)
+            mnemonic = deserializeSecrets(String(decryptData!!))
+
+            startPaymentWithMnemonicAsync(mnemonic!!)
+
+            _lockInterface.postValue(true)
+
+        }
+    }
+
+    private fun startPaymentWithMnemonicAsync(mnemonic: String) {
+        viewModelScope.launch {
+            val ergoTxResult: TransactionResult
+            withContext(Dispatchers.IO) {
+                ergoTxResult = sendErgoTx(
+                    Address.create(receiverAddress), ergsToNanoErgs(amountToSend),
+                    mnemonic, ""
+                )
+            }
+            _lockInterface.postValue(false)
+            if (ergoTxResult.success) {
+                NodeConnector.getInstance().invalidateCache()
+                _txId.postValue(ergoTxResult.txId!!)
+            }
+            _paymentDoneLiveData.postValue(ergoTxResult)
+        }
     }
 }
