@@ -70,6 +70,11 @@ class WalletConfigFragment : Fragment(), ConfirmationCallback {
             }
         }
 
+        binding.inputWalletName.editText?.setOnEditorActionListener { _, _, _ ->
+            binding.buttonApply.callOnClick()
+            true
+        }
+
         binding.buttonApply.setOnClickListener {
             hideForcedSoftKeyboard(requireContext(), binding.inputWalletName.editText!!)
             viewModel.saveChanges(
