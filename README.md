@@ -2,6 +2,8 @@
 
 Ergo Wallet for Android, built on top of [Ergo Appkit](https://github.com/aslesarenko/ergo-appkit).
 
+<img src="https://user-images.githubusercontent.com/26038055/122617266-38b02980-d08c-11eb-8cd7-a33d9984d002.png" width="250">
+
 You need at least Android 7 to run Ergo Wallet.
 
 Features:
