@@ -4,12 +4,14 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
 import android.view.*
+import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
@@ -20,7 +22,7 @@ import org.ergoplatform.android.ui.*
 /**
  * Shows settings and details for a wallet
  */
-class WalletConfigFragment : Fragment(), ConfirmationCallback {
+class WalletConfigFragment : Fragment(), ConfirmationCallback, PasswordDialogCallback {
 
     var _binding: FragmentWalletConfigBinding? = null
     private val binding get() = _binding!!
@@ -84,6 +86,10 @@ class WalletConfigFragment : Fragment(), ConfirmationCallback {
             )
         }
 
+        binding.buttonExport.setOnClickListener {
+            viewModel.prepareDisplayMnemonic(this, args.walletId)
+        }
+
         viewModel.snackbarEvent.observe(
             viewLifecycleOwner,
             {
@@ -116,6 +122,57 @@ class WalletConfigFragment : Fragment(), ConfirmationCallback {
         // deletion was confirmed
         viewModel.deleteWallet(requireContext(), args.walletId)
         findNavController().navigateUp()
+    }
+
+    override fun onPasswordEntered(password: String?): String? {
+        password?.let {
+            val mnemonic = viewModel.decryptMnemonicWithPass(password)
+            if (mnemonic == null) {
+                return getString(R.string.error_password_wrong)
+            } else {
+                displayMnemonic(mnemonic)
+                return null
+            }
+        }
+        return getString(R.string.error_password_empty)
+    }
+
+    fun showBiometricPrompt() {
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle(getString(R.string.title_authenticate))
+            .setConfirmationRequired(true) // don't display immediately when face is recognized
+            .setDeviceCredentialAllowed(true)
+            .build()
+
+        val callback = object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                try {
+                    val mnemonic = viewModel.decryptMnemonicWithUserAuth()
+                    displayMnemonic(mnemonic!!)
+                } catch (t: Throwable) {
+                    Snackbar.make(
+                        requireView(),
+                        getString(R.string.error_device_security, t.message),
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
+            }
+
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                Snackbar.make(
+                    requireView(),
+                    getString(R.string.error_device_security, errString),
+                    Snackbar.LENGTH_LONG
+                ).show()
+            }
+        }
+
+        BiometricPrompt(this, callback).authenticate(promptInfo)
+    }
+
+    private fun displayMnemonic(mnemonic: String) {
+        MaterialAlertDialogBuilder(requireContext()).setMessage(mnemonic)
+            .setPositiveButton(R.string.button_done, null).show()
     }
 
     override fun onDestroyView() {

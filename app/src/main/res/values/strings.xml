@@ -18,7 +18,6 @@
     <string name="label_purpose">Purpose</string>
     <string name="label_share">Share</string>
     <string name="error_sdk26required">Sorry, this functionality requires Android 8.0 or later.</string>
-    <string name="button_export">Export</string>
     <string name="button_delete">Delete</string>
     <string name="button_yes">Yes</string>
     <string name="label_cancel">Cancel</string>
@@ -58,7 +57,7 @@
         With these 15 words, you can restore your wallet on other devices when you lost access on this one.\nIt is crucial
     that you note this mnemonic and store it in a safe place.</string>
     <string name="intro_confirm_create_wallet">To check if your notes are correct, enter two words of your mnemonic now:</string>
-    <string name="check_confirm_create_wallet">I understand that I am responsible to store my mnenomic in a safe place.
+    <string name="check_confirm_create_wallet">I understand that I am responsible to store my mnemonic in a safe place.
     It is the only way to access my wallet if the keys stored on this device are not accessible.</string>
     <string name="label_word_confirm_create_wallet">Word %1s</string>
     <string name="error_word_confirm_create_wallet">Word not correct</string>
@@ -86,6 +85,8 @@
     <string name="label_wallet_name">Descriptive wallet name</string>
     <string name="label_changes_saved">Changes saved</string>
     <string name="label_confirm_delete">Are you sure you want to erase the wallet from this device?\nThis can\'t be undone.</string>
+    <string name="desc_display_mnemonic">You can display your mnemonic (seed phrase, paper key) in case you lost your backup or to check if your backup is correct.</string>
+    <string name="button_display_mnemonic">Display mnemonic</string>
 
     <!-- Send funds -->
     <string name="desc_send_funds">Enter the receiver address and amount to send, or scan a QR code.</string>
