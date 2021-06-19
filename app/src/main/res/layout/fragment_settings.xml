@@ -20,6 +20,7 @@
             android:layout_height="90dp"
             android:layout_gravity="center"
             android:layout_margin="@dimen/activity_horizontal_margin"
+            android:contentDescription="@null"
             android:src="@drawable/ic_ergologo"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -62,96 +63,100 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        android:orientation="vertical"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/screen_header">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/activity_vertical_margin"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/TextAppearance.App.Body1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/half_horizontal_margin"
-                    android:autoLink="web"
-                    android:gravity="center"
-                    android:text="@string/desc_coingecko" />
-
-                <Button
-                    android:id="@+id/display_currency"
-                    style="@style/Widget.App.Button.PrimaryTint"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/activity_vertical_margin"
-                    tools:text="@string/button_display_currency" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/activity_vertical_margin">
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:orientation="vertical">
 
-            <LinearLayout
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/activity_vertical_margin"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/half_horizontal_margin"
+                        android:autoLink="web"
+                        android:gravity="center"
+                        android:text="@string/desc_coingecko" />
+
+                    <Button
+                        android:id="@+id/display_currency"
+                        style="@style/Widget.App.Button.PrimaryTint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/activity_vertical_margin"
+                        tools:text="@string/button_display_currency" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/activity_vertical_margin"
-                android:orientation="vertical">
+                android:layout_marginTop="@dimen/activity_vertical_margin">
 
-                <TextView
-                    style="@style/TextAppearance.App.Body1"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/half_horizontal_margin"
-                    android:autoLink="web"
-                    android:gravity="center"
-                    android:text="@string/desc_dark_mode" />
+                    android:layout_margin="@dimen/activity_vertical_margin"
+                    android:orientation="vertical">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dark_mode_system"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/activity_vertical_margin"
-                    android:text="@string/button_dark_mode_system" />
-
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/activity_vertical_margin"
-                    android:orientation="horizontal">
+                    <TextView
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/half_horizontal_margin"
+                        android:autoLink="web"
+                        android:gravity="center"
+                        android:text="@string/desc_dark_mode" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/dark_mode_day"
-                        android:layout_width="0dp"
+                        android:id="@+id/dark_mode_system"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/half_horizontal_margin"
-                        android:layout_weight="1"
-                        android:text="@string/button_dark_mode_day" />
+                        android:layout_marginHorizontal="@dimen/activity_vertical_margin"
+                        android:text="@string/button_dark_mode_system" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/dark_mode_night"
-                        android:layout_width="0dp"
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/half_horizontal_margin"
-                        android:layout_weight="1"
-                        android:text="@string/button_dark_mode_night" />
-                </androidx.appcompat.widget.LinearLayoutCompat>
-                android:text="@string/button_dark_mode_day" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-    </LinearLayout>
+                        android:layout_marginHorizontal="@dimen/activity_vertical_margin"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/dark_mode_day"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/half_horizontal_margin"
+                            android:layout_weight="1"
+                            android:text="@string/button_dark_mode_day" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/dark_mode_night"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/half_horizontal_margin"
+                            android:layout_weight="1"
+                            android:text="@string/button_dark_mode_night" />
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
