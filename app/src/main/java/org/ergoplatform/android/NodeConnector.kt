@@ -66,22 +66,26 @@ class NodeConnector() {
             isRefreshing.postValue(true)
             GlobalScope.launch(Dispatchers.IO) {
                 var hadError = false
+                var didSync = false
 
                 // Refresh Ergo fiat value
                 fiatCurrency = getPrefDisplayCurrency(context)
 
+                var fFiatValue = fiatValue.value ?: 0f
                 if (fiatCurrency.isNotEmpty()) {
                     try {
                         val currencyGetPrice =
                             coingeckoApi.currencyGetPrice(fiatCurrency).execute().body()
-                        fiatValue.postValue(currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f)
+                        fFiatValue = currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f
                     } catch (t: Throwable) {
                         Log.e("CoinGecko", "Error", t)
-                        fiatValue.postValue(0f)
+                        // don't set to zero here, keep last value in case of connection error
                     }
                 } else {
-                    fiatValue.postValue(0f)
+                    fFiatValue = 0f
                 }
+                saveLastFiatValue(context, fFiatValue)
+                fiatValue.postValue(fFiatValue)
 
 
                 // Refresh wallet states
@@ -104,14 +108,16 @@ class NodeConnector() {
                     }
 
                     walletDao.insertWalletStates(*statesToSave.toTypedArray())
+                    didSync = statesToSave.isNotEmpty()
                 } catch (t: Throwable) {
                     Log.e("Nodeconnector", "Error", t)
                     // TODO report to user
                     hadError = true
                 }
 
-                if (!hadError) {
+                if (!hadError && didSync) {
                     lastRefresMs = System.currentTimeMillis()
+                    saveLastRefreshMs(context, lastRefresMs)
                 }
                 lastHadError = hadError
                 refreshNum.postValue(refreshNum.value?.and(1) ?: 0)
@@ -134,6 +140,12 @@ class NodeConnector() {
                 }
             }
         }
+    }
+
+    fun loadPreferenceValues(context: Context) {
+        lastRefresMs = getLastRefreshMs(context)
+        fiatCurrency = getPrefDisplayCurrency(context)
+        fiatValue.postValue(getLastFiatValue(context))
     }
 
     companion object {

@@ -8,5 +8,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         AppCompatDelegate.setDefaultNightMode(getDayNightMode(applicationContext))
+        NodeConnector.getInstance().loadPreferenceValues(applicationContext)
     }
 }

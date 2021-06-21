@@ -27,3 +27,19 @@ fun changeDayNightMode(context: Context, @AppCompatDelegate.NightMode mode: Int)
     getSharedPrefs(context).edit().putInt("dayNightMode", mode).apply()
     AppCompatDelegate.setDefaultNightMode(mode)
 }
+
+fun getLastRefreshMs(context: Context): Long {
+    return getSharedPrefs(context).getLong("lastRefreshMs", 0)
+}
+
+fun saveLastRefreshMs(context: Context, time: Long) {
+    getSharedPrefs(context).edit().putLong("lastRefreshMs", time).apply()
+}
+
+fun getLastFiatValue(context: Context): Float {
+    return getSharedPrefs(context).getFloat("fiatValue", 0f)
+}
+
+fun saveLastFiatValue(context: Context, value: Float) {
+    getSharedPrefs(context).edit().putFloat("fiatValue", value).apply()
+}
