@@ -36,9 +36,6 @@ class RestoreWalletTest {
         val cardView = onView(withId(R.id.card_restore_wallet))
         cardView.perform(scrollTo(), click())
 
-        val materialButton = onView(withId(R.id.button_restore))
-        materialButton.perform(click())
-
         val textInputEditText = onView(
             allOf(
                 childAtPosition(
