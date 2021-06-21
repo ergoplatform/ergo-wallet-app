@@ -30,13 +30,17 @@ class AddWalletChooserFragmentDialog : FullScreenFragmentDialog() {
         _binding = FragmentAddWalletChooserBinding.inflate(inflater, container, false)
 
         binding.cardCreateWallet.setOnClickListener {
-            NavHostFragment.findNavController(requireParentFragment())
-                .navigateSafe(AddWalletChooserFragmentDialogDirections.actionToCreateWalletDialog())
+            if (Build.VERSION.SDK_INT < 26) {
+                showSdk26Error()
+            } else {
+                NavHostFragment.findNavController(requireParentFragment())
+                    .navigateSafe(AddWalletChooserFragmentDialogDirections.actionToCreateWalletDialog())
+            }
         }
 
         binding.cardRestoreWallet.setOnClickListener {
             if (Build.VERSION.SDK_INT < 26) {
-                Snackbar.make(requireView(), R.string.error_sdk26required, Snackbar.LENGTH_LONG).show()
+                showSdk26Error()
             } else {
                 NavHostFragment.findNavController(requireParentFragment())
                     .navigateSafe(AddWalletChooserFragmentDialogDirections.actionToRestoreWalletFragmentDialog())
@@ -50,6 +54,10 @@ class AddWalletChooserFragmentDialog : FullScreenFragmentDialog() {
 
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    private fun showSdk26Error() {
+        Snackbar.make(requireView(), R.string.error_sdk26required, Snackbar.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {

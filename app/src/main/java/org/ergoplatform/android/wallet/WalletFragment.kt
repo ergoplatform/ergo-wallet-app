@@ -71,8 +71,7 @@ class WalletFragment : Fragment() {
 
         binding.emptyView.cardRestoreWallet.setOnClickListener {
             if (Build.VERSION.SDK_INT < 26) {
-                Snackbar.make(requireView(), R.string.error_sdk26required, Snackbar.LENGTH_LONG)
-                    .setAnchorView(R.id.nav_view).show()
+                showSdk26Error()
             } else {
                 findNavController().navigate(R.id.restoreWalletFragmentDialog)
             }
@@ -83,8 +82,12 @@ class WalletFragment : Fragment() {
         }
 
         binding.emptyView.cardCreateWallet.setOnClickListener {
-            NavHostFragment.findNavController(requireParentFragment())
-                .navigate(R.id.createWalletDialog)
+            if (Build.VERSION.SDK_INT < 26) {
+                showSdk26Error()
+            } else {
+                NavHostFragment.findNavController(requireParentFragment())
+                    .navigate(R.id.createWalletDialog)
+            }
         }
 
 
@@ -132,6 +135,11 @@ class WalletFragment : Fragment() {
                 binding.ergoPrice.setSymbol(nodeConnector.fiatCurrency.toUpperCase(Locale.getDefault()))
             }
         })
+    }
+
+    private fun showSdk26Error() {
+        Snackbar.make(requireView(), R.string.error_sdk26required, Snackbar.LENGTH_LONG)
+            .setAnchorView(R.id.nav_view).show()
     }
 
     private fun refreshTimeSinceSyncLabel() {
