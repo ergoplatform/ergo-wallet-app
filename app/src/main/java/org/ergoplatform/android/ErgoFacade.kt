@@ -82,7 +82,7 @@ fun sendErgoTx(
     nodeApiAddress: String = StageConstants.NODE_API_ADDRESS
 ): TransactionResult {
     try {
-        val ergoClient = RestApiErgoClient.create(nodeApiAddress, StageConstants.NETWORK_TYPE, "")
+        val ergoClient = RestApiErgoClient.create(nodeApiAddress, StageConstants.NETWORK_TYPE, "", StageConstants.EXPLORER_API_ADDRESS)
         return ergoClient.execute { ctx: BlockchainContext ->
             val prover = ctx.newProverBuilder()
                 .withMnemonic(

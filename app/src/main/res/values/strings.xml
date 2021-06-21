@@ -17,7 +17,6 @@
     <string name="label_amount">Amount</string>
     <string name="label_purpose">Purpose</string>
     <string name="label_share">Share</string>
-    <string name="error_sdk26required">Sorry, this functionality requires Android 8.0 or later.</string>
     <string name="button_delete">Delete</string>
     <string name="button_yes">Yes</string>
     <string name="label_cancel">Cancel</string>
