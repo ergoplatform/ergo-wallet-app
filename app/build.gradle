@@ -63,6 +63,7 @@ android {
 
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         url = "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -99,9 +100,12 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
     implementation("androidx.biometric:biometric:1.1.0")
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1"
-    implementation ('org.ergoplatform:ergo-appkit_2.11:develop-1dd01ae6-SNAPSHOT') {
+    implementation ('org.ergoplatform:ergo-appkit_2.11:develop-273d99d8-SNAPSHOT') {
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
+        exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
     }
+    implementation "org.bitbucket.inkytonik.kiama:core_2.11:2.1.1"
+    implementation "org.bitbucket.inkytonik.kiama:library_2.11:2.1.1"
     implementation "org.bouncycastle:bcprov-jdk15to18:1.66"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation "androidx.room:room-runtime:$room_version"
