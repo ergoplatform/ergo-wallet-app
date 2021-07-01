@@ -31,7 +31,8 @@ Visit the [Ergo Discord](https://discord.gg/kj7s7nb) to give feedback.
 - [ ] Prevent sending transaction when there are unconfirmed transactions (transaction is discarded)
 - [ ] Check if assets are safe, filter unspent boxes
 - [ ] Support P2S addresses
-- [ ] API < 26 for all: https://github.com/ergoplatform/ergo-appkit/issues/82
+- [X] complete functionality for API < 26
+- [ ] switch to Explorer API v1
 
 ### And maybe in the future
 - [ ] Derive further addresses from master key
