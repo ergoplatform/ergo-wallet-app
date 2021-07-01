@@ -3,7 +3,6 @@ package org.ergoplatform.android.wallet
 import StageConstants
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.*
@@ -16,7 +15,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.NodeConnector
 import org.ergoplatform.android.R
@@ -70,11 +68,7 @@ class WalletFragment : Fragment() {
                 })
 
         binding.emptyView.cardRestoreWallet.setOnClickListener {
-            if (Build.VERSION.SDK_INT < 26) {
-                showSdk26Error()
-            } else {
-                findNavController().navigate(R.id.restoreWalletFragmentDialog)
-            }
+            findNavController().navigate(R.id.restoreWalletFragmentDialog)
         }
         binding.emptyView.cardReadonlyWallet.setOnClickListener {
             NavHostFragment.findNavController(requireParentFragment())
@@ -82,12 +76,8 @@ class WalletFragment : Fragment() {
         }
 
         binding.emptyView.cardCreateWallet.setOnClickListener {
-            if (Build.VERSION.SDK_INT < 26) {
-                showSdk26Error()
-            } else {
-                NavHostFragment.findNavController(requireParentFragment())
-                    .navigate(R.id.createWalletDialog)
-            }
+            NavHostFragment.findNavController(requireParentFragment())
+                .navigate(R.id.createWalletDialog)
         }
 
 
@@ -135,11 +125,6 @@ class WalletFragment : Fragment() {
                 binding.ergoPrice.setSymbol(nodeConnector.fiatCurrency.toUpperCase(Locale.getDefault()))
             }
         })
-    }
-
-    private fun showSdk26Error() {
-        Snackbar.make(requireView(), R.string.error_sdk26required, Snackbar.LENGTH_LONG)
-            .setAnchorView(R.id.nav_view).show()
     }
 
     private fun refreshTimeSinceSyncLabel() {

@@ -63,7 +63,9 @@ android {
 
 
 repositories {
+    mavenLocal()
     mavenCentral()
+    maven { url 'https://jitpack.io' }
     maven {
         url = "https://oss.sonatype.org/content/repositories/snapshots/"
     }
@@ -99,10 +101,16 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
     implementation("androidx.biometric:biometric:1.1.0")
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1"
-    implementation ('org.ergoplatform:ergo-appkit_2.11:4.0.5') {
+
+    implementation ('org.ergoplatform:ergo-appkit_2.11:develop-273d99d8-SNAPSHOT') {
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
+        exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
     }
+    // kiama needs an own build for JRE7 compatibility
+    implementation "com.github.MrStahlfelge.kiama:core_2.11:2.1.1"
+    implementation "com.github.MrStahlfelge.kiama:library_2.11:2.1.1"
     implementation "org.bouncycastle:bcprov-jdk15to18:1.66"
+
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation "androidx.room:room-runtime:$room_version"
     implementation("androidx.room:room-ktx:$room_version")

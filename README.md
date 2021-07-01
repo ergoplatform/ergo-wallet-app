@@ -21,14 +21,20 @@ See releases section for binaries (built on GitHub) and release notes. It is nor
 an unsafe app. GitHub builds the binaries with a certificate unknown to Google.
 Visit the [Ergo Discord](https://discord.gg/kj7s7nb) to give feedback.
 
-# TODO
-- [ ] Progress indicator when restoring wallet (slow on some devices)
-- [ ] Prevent sending transaction when there are unconfirmed transactions (does not work, transaction is discarded)
-- [ ] Check if assets are safe
-- [ ] Gradle verify dependencies
-- [ ] API < 26 for all: https://github.com/ergoplatform/ergo-appkit/issues/82
+## What's to come
 
-And maybe more
-- [ ] Derive addresses from master key
+### for first stable
+- [ ] Progress indicator when restoring wallet (slow on some devices)
+- [X] Gradle verify dependencies
+
+### Extend core functionality
+- [ ] Prevent sending transaction when there are unconfirmed transactions (transaction is discarded)
+- [ ] Check if assets are safe, filter unspent boxes
+- [ ] Support P2S addresses
+- [X] complete functionality for API < 26
+- [ ] switch to Explorer API v1
+
+### And maybe in the future
+- [ ] Derive further addresses from master key
 - [ ] Address book
 - [ ] In app transactions list and details

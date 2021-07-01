@@ -1,13 +1,10 @@
 package org.ergoplatform.android.wallet
 
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.NavHostFragment
-import com.google.android.material.snackbar.Snackbar
-import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentAddWalletChooserBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
@@ -30,21 +27,13 @@ class AddWalletChooserFragmentDialog : FullScreenFragmentDialog() {
         _binding = FragmentAddWalletChooserBinding.inflate(inflater, container, false)
 
         binding.cardCreateWallet.setOnClickListener {
-            if (Build.VERSION.SDK_INT < 26) {
-                showSdk26Error()
-            } else {
-                NavHostFragment.findNavController(requireParentFragment())
-                    .navigateSafe(AddWalletChooserFragmentDialogDirections.actionToCreateWalletDialog())
-            }
+            NavHostFragment.findNavController(requireParentFragment())
+                .navigateSafe(AddWalletChooserFragmentDialogDirections.actionToCreateWalletDialog())
         }
 
         binding.cardRestoreWallet.setOnClickListener {
-            if (Build.VERSION.SDK_INT < 26) {
-                showSdk26Error()
-            } else {
-                NavHostFragment.findNavController(requireParentFragment())
-                    .navigateSafe(AddWalletChooserFragmentDialogDirections.actionToRestoreWalletFragmentDialog())
-            }
+            NavHostFragment.findNavController(requireParentFragment())
+                .navigateSafe(AddWalletChooserFragmentDialogDirections.actionToRestoreWalletFragmentDialog())
         }
 
         binding.cardReadonlyWallet.setOnClickListener {
@@ -54,10 +43,6 @@ class AddWalletChooserFragmentDialog : FullScreenFragmentDialog() {
 
         // Inflate the layout for this fragment
         return binding.root
-    }
-
-    private fun showSdk26Error() {
-        Snackbar.make(requireView(), R.string.error_sdk26required, Snackbar.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {
