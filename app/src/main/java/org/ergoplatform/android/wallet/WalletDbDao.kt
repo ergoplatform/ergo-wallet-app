@@ -21,6 +21,10 @@ interface WalletDbDao {
     @Query("SELECT * FROM wallet_configs WHERE id = :id")
     suspend fun loadWalletById(id: Int): WalletConfigDbEntity?
 
+    @Transaction
+    @Query("SELECT * FROM wallet_configs WHERE id = :id")
+    suspend fun loadWalletWithStateById(id: Int): WalletDbEntity?
+
     @Query("SELECT * FROM wallet_configs WHERE public_address = :publicAddress")
     suspend fun loadWalletByAddress(publicAddress: String): WalletConfigDbEntity?
 

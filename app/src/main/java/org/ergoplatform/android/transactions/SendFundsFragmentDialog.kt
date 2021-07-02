@@ -56,6 +56,18 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         viewModel.walletName.observe(
             viewLifecycleOwner,
             { binding.walletName.text = getString(R.string.label_send_from, it) })
+        viewModel.walletBalance.observe(
+            viewLifecycleOwner,
+            {
+                binding.tvBalance.text = getString(
+                    R.string.label_wallet_balance,
+                    formatErgsToString(
+                        it,
+                        requireContext()
+                    )
+                )
+            }
+        )
         viewModel.feeAmount.observe(viewLifecycleOwner, {
             binding.tvFee.text = getString(
                 R.string.desc_fee,

@@ -37,6 +37,8 @@ class SendFundsViewModel : ViewModel() {
     val lockInterface: LiveData<Boolean> = _lockInterface
     private val _walletName = MutableLiveData<String>()
     val walletName: LiveData<String> = _walletName
+    private val _walletBalance = MutableLiveData<Float>()
+    val walletBalance: LiveData<Float> = _walletBalance
     private val _feeAmount = MutableLiveData<Float>().apply {
         value = nanoErgsToErgs(Parameters.MinFee)
     }
@@ -53,12 +55,14 @@ class SendFundsViewModel : ViewModel() {
 
     fun initWallet(ctx: Context, walletId: Int) {
         viewModelScope.launch {
-            wallet =
-                AppDatabase.getInstance(ctx).walletDao().loadWalletById(walletId)
+            val walletWithState =
+                AppDatabase.getInstance(ctx).walletDao().loadWalletWithStateById(walletId)
+            wallet = walletWithState?.walletConfig
 
             wallet?.displayName?.let {
                 _walletName.postValue(it)
             }
+            walletWithState?.state?.balance?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
         }
         calcGrossAmount()
     }
