@@ -32,6 +32,7 @@
     <string name="button_send">Send</string>
     <string name="button_display_currency">Display currency: %1s</string>
     <string name="label_last_sync">synced %1s</string>
+    <string name="label_erg_price">1 ERG ≈</string>
     <string name="label_last_sync_just_now">just now</string>
     <string name="label_wallet_default">My wallet</string>
 

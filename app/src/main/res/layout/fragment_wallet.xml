@@ -51,18 +51,29 @@
 
             </FrameLayout>
 
+            <TextView
+                android:id="@+id/label_ergo_price"
+                style="@style/TextAppearance.App.Fiat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="@string/label_erg_price"
+                app:layout_constraintBottom_toTopOf="@id/synctime"
+                app:layout_constraintStart_toStartOf="@id/synctime" />
+
             <org.fabiomsr.moneytextview.MoneyTextView
                 android:id="@+id/ergo_price"
                 style="@style/MoneyTextViewFiatStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="3sp"
                 android:ellipsize="middle"
                 android:singleLine="true"
                 android:visibility="gone"
-                app:baseTextColor="@color/lightgrey"
 
-                app:layout_constraintBottom_toTopOf="@id/synctime"
-                app:layout_constraintStart_toStartOf="@id/synctime"
+                app:baseTextColor="@color/lightgrey"
+                app:layout_constraintBottom_toBottomOf="@id/label_ergo_price"
+                app:layout_constraintStart_toEndOf="@id/label_ergo_price"
                 tools:amount="10.12"
                 tools:symbol="EUR"
                 tools:visibility="visible" />
