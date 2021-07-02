@@ -119,10 +119,9 @@
                 <TextView
                     android:id="@+id/tv_fee"
                     style="@style/TextAppearance.App.Body1"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginVertical="@dimen/half_horizontal_margin"
-                    app:layout_constraintEnd_toStartOf="@id/button_send"
                     app:layout_constraintStart_toStartOf="@id/amount"
                     app:layout_constraintTop_toBottomOf="@id/amount"
                     tools:text="@string/desc_fee" />
@@ -131,14 +130,14 @@
                     android:id="@+id/gross_amount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/half_horizontal_margin"
+                    android:layout_marginVertical="@dimen/activity_vertical_margin"
                     app:baseTextSize="@dimen/headline1_textsize"
                     app:baseTextStyle="bold"
                     app:decimalDigitsTextSize="@dimen/body1_textsize"
                     app:decimalMargin="4dp"
-                    app:layout_constraintBottom_toBottomOf="@id/button_send"
-                    app:layout_constraintEnd_toStartOf="@id/button_send"
-                    app:layout_constraintTop_toTopOf="@id/button_send"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_fee"
                     app:symbolMargin="6dp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -150,7 +149,7 @@
                     android:text="@string/button_send"
                     app:icon="@drawable/ic_send_24"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tv_fee" />
+                    app:layout_constraintTop_toBottomOf="@id/gross_amount" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
