@@ -124,6 +124,7 @@ class WalletFragment : Fragment() {
                 binding.ergoPrice.amount = value
                 binding.ergoPrice.setSymbol(nodeConnector.fiatCurrency.toUpperCase(Locale.getDefault()))
             }
+            binding.labelErgoPrice.visibility = binding.ergoPrice.visibility
         })
     }
 

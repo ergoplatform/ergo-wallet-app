@@ -54,6 +54,7 @@ The APK file can be installed on your Android device. If you do this for the fir
 
 ### for first stable
 - [ ] Progress indicator when restoring wallet (slow on some devices)
+- [ ] Password dialog with a second confirmation text field when setting up a wallet
 
 ### Extend core functionality
 - [ ] Prevent sending transaction when there are unconfirmed transactions (transaction is discarded)
