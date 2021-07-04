@@ -1,11 +1,17 @@
 package org.ergoplatform.android.ui
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPasswordDialogBinding
+
+const val ARG_SHOW_CONFIRMATION = "ARG_SHOW_CONFIRMATION"
 
 /**
  *
@@ -33,9 +39,18 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.buttonDone.setOnClickListener { buttonDone() }
-        binding.editPassword.editText?.setOnEditorActionListener { v, actionId, event ->
-            buttonDone()
-            true
+        val doneActionListener: (v: TextView, actionId: Int, event: KeyEvent?) -> Boolean =
+            { v, actionId, event ->
+                buttonDone()
+                true
+            }
+
+        if (arguments?.getBoolean(ARG_SHOW_CONFIRMATION) == true) {
+            binding.editPasswordConfirm.visibility = View.VISIBLE
+            binding.editPasswordConfirm.editText?.setOnEditorActionListener(doneActionListener)
+            binding.editPassword.editText?.imeOptions = EditorInfo.IME_ACTION_NEXT
+        } else {
+            binding.editPassword.editText?.setOnEditorActionListener(doneActionListener)
         }
     }
 
@@ -46,8 +61,19 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun buttonDone() {
+        val password = binding.editPassword.editText?.text?.toString()
+
+        if (binding.editPasswordConfirm.visibility == View.VISIBLE) {
+            val confirmPassword = binding.editPasswordConfirm.editText?.text?.toString()
+
+            if (password == null || !password.equals(confirmPassword)) {
+                binding.editPassword.error = getString(R.string.err_password_confirm)
+                return
+            }
+        }
+
         val error =
-            (parentFragment as? PasswordDialogCallback)?.onPasswordEntered(binding.editPassword.editText?.text?.toString())
+            (parentFragment as? PasswordDialogCallback)?.onPasswordEntered(password)
 
         if (error != null)
             binding.editPassword.error = error

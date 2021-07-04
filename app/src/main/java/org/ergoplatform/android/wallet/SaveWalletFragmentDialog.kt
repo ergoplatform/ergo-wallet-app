@@ -17,10 +17,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
-import org.ergoplatform.android.ui.FullScreenFragmentDialog
-import org.ergoplatform.android.ui.PasswordDialogCallback
-import org.ergoplatform.android.ui.PasswordDialogFragment
-import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.android.ui.*
 import org.ergoplatform.api.AesEncryptionManager
 
 /**
@@ -65,7 +62,11 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         }
 
         binding.buttonSavePassenc.setOnClickListener {
-            PasswordDialogFragment().show(
+            val passwordDialogFragment = PasswordDialogFragment()
+            val args = Bundle()
+            args.putBoolean(ARG_SHOW_CONFIRMATION, true)
+            passwordDialogFragment.arguments = args
+            passwordDialogFragment.show(
                 childFragmentManager,
                 null
             )

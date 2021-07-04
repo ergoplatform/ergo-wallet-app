@@ -9,6 +9,8 @@
     <string name="hint_password">Please enter your send funds password</string>
     <string name="err_password">Password needs to have at least 8 characters</string>
     <string name="label_password">Password</string>
+    <string name="label_password_confirm">Confirm password</string>
+    <string name="err_password_confirm">Passwords do not match</string>
     <string name="button_done">Done</string>
     <string name="button_apply">Apply</string>
     <string name="button_copy">Copy</string>
