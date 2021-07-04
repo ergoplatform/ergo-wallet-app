@@ -1,12 +1,14 @@
 package org.ergoplatform.android
 
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,10 +21,17 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        val appBarConfiguration = AppBarConfiguration(setOf(
-                R.id.navigation_wallet, R.id.navigation_settings))
+        val appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.navigation_wallet, R.id.navigation_settings
+            )
+        )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        KeyboardVisibilityEvent.registerEventListener(this, { isOpen ->
+            navView.visibility = if (isOpen) View.GONE else View.VISIBLE
+        })
     }
 
     override fun onSupportNavigateUp(): Boolean {

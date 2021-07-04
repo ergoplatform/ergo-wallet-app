@@ -17,6 +17,7 @@ Features:
 
 Current state: Ready for testing. You can test the app on testnet. Generate a new wallet and send
 yourself some test Ergos by visiting https://faucet.ergopool.io/payment/address/TESTNET_WALLET_ADDRESS
+(replace TESTNET_WALLET_ADDRESS with your actual P2PK address)
 
 Visit the [Ergo Discord](https://discord.gg/kj7s7nb) to give feedback.
 
@@ -55,6 +56,7 @@ The APK file can be installed on your Android device. If you do this for the fir
 ### for first stable
 - [ ] Progress indicator when restoring wallet (slow on some devices)
 - [ ] Password dialog with a second confirmation text field when setting up a wallet
+- [X] Improved layouts when soft keyboard is open
 
 ### Extend core functionality
 - [ ] Prevent sending transaction when there are unconfirmed transactions (transaction is discarded)
