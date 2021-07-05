@@ -43,7 +43,7 @@
     <string name="label_create_wallet">New wallet</string>
     <string name="desc_create_wallet">Creates a wallet (keys and an address) from a randomly generated mnemonic.</string>
     <string name="label_restore_wallet">Restore wallet</string>
-    <string name="desc_restore_wallet">Restores a wallet's keys and address from a mnemonic phrase.</string>
+    <string name="desc_restore_wallet">Restores a wallet\'s keys and address from a mnemonic phrase.</string>
     <string name="label_import_wallet">Import wallet</string>
     <string name="desc_import_wallet">Use an exported or saved wallet file to import an existing wallet (keys and addresses).</string>
     <string name="label_readonly_wallet">Read-only wallet</string>
@@ -113,7 +113,7 @@
     <string name="desc_coingecko">Ergo price powered by CoinGecko API, https://www.coingecko.com</string>
     <string name="label_cg_conn_error">Error connecting to CoinGecko, please try again later.</string>
     <string name="desc_dark_mode">Dark or light mode?</string>
-    <string name="button_dark_mode_system">Respect system</string>
+    <string name="button_dark_mode_system">System default</string>
     <string name="button_dark_mode_day">Light</string>
     <string name="button_dark_mode_night">Dark</string>
 </resources>
