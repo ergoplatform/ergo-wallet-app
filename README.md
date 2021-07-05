@@ -51,16 +51,19 @@ The APK file can be installed on your Android device. If you do this for the fir
 * Set up OpenJDK8 (not necessary when you installed Android Studio)
 * Run `./gradlew assembleDebug`
 
+### Tip the developer
+
+If you want to tip the developer for making this app, thanks in advance! Send your tips to
+[9ewA9T53dy5qvAkcR5jVCtbaDW2XgWzbLPs5H4uCJJavmA4fzDx](https://explorer.ergoplatform.com/payment-request?address=9ewA9T53dy5qvAkcR5jVCtbaDW2XgWzbLPs5H4uCJJavmA4fzDx&amount=0&description=)
+
 ## What's to come
 
 ### for first stable
 - [ ] Progress indicator when restoring wallet (slow on some devices)
-- [X] Password dialog with a second confirmation text field when setting up a wallet
-- [X] Improved layouts when soft keyboard is open
 
 ### Extend core functionality
 - [ ] Prevent sending transaction when there are unconfirmed transactions (transaction is discarded)
-- [X] Check if assets are safe -> done, they are
+- [ ] Filter unspent boxes with assets
 - [ ] Support P2S addresses
 - [ ] switch to Explorer API v1
 
