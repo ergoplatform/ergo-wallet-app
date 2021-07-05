@@ -41,9 +41,9 @@
     <!-- add wallet -->
     <string name="menu_add_wallet">Add wallet</string>
     <string name="label_create_wallet">New wallet</string>
-    <string name="desc_create_wallet">Creates a wallet with keys and address from a randomly generated mnemonic.</string>
+    <string name="desc_create_wallet">Creates a wallet with keys and an address from a randomly generated mnemonic.</string>
     <string name="label_restore_wallet">Restore wallet</string>
-    <string name="desc_restore_wallet">Regenerates a wallet with keys and address from its mnemonic.</string>
+    <string name="desc_restore_wallet">Regenerates a wallet with keys and an address from a mnemonic.</string>
     <string name="label_import_wallet">Import wallet</string>
     <string name="desc_import_wallet">Use a formerly exported or saved wallet file to import existing keys and addresses.</string>
     <string name="label_readonly_wallet">Read-only wallet</string>
@@ -54,21 +54,21 @@
     <string name="label_wallet_address">Wallet address</string>
 
     <!-- Create wallet -->
-    <string name="intro_create_wallet">This is your 15 words Ergo wallet mnemonic. Other names for these words are seed or
+    <string name="intro_create_wallet">This is your 15-word Ergo wallet mnemonic. These words are also known as a seed or
         paper key.
-        With these 15 words, you can restore your wallet on other devices when you lost access on this one.\nIt is crucial
+        With these 15 words, you can restore your wallet on other devices if you lose access to this one.\nIt is crucial
     that you note this mnemonic and store it in a safe place.</string>
     <string name="intro_confirm_create_wallet">To check if your notes are correct, enter two words of your mnemonic now:</string>
-    <string name="check_confirm_create_wallet">I understand that I am responsible to store my mnemonic in a safe place.
-    It is the only way to access my wallet if the keys stored on this device are not accessible.</string>
+    <string name="check_confirm_create_wallet">I understand that I am responsible for storing my mnemonic in a safe place.
+    It is the only way to access my wallet if the keys stored on this device are lost or inaccessible.</string>
     <string name="label_word_confirm_create_wallet">Word %1s</string>
     <string name="error_word_confirm_create_wallet">Word not correct</string>
 
     <!-- Restore wallet -->
-    <string name="intro_restore_wallet">Enter your 15 words Ergo wallet mnemonic to regenerate the wallet.</string>
+    <string name="intro_restore_wallet">Enter your 15-word Ergo wallet mnemonic to regenerate the wallet.</string>
     <string name="button_restore">Restore wallet</string>
     <string name="mnemonic_length_not_enough">%1s words remaining</string>
-    <string name="mnemonic_length_too_long">Too much words</string>
+    <string name="mnemonic_length_too_long">Too many words</string>
 
     <!-- Save wallet -->
     <string name="intro_save_wallet">Your public wallet address is:</string>
@@ -87,7 +87,7 @@
     <string name="label_wallet_name">Descriptive wallet name</string>
     <string name="label_changes_saved">Changes saved</string>
     <string name="label_confirm_delete">Are you sure you want to erase the wallet from this device?\nThis can\'t be undone.</string>
-    <string name="desc_display_mnemonic">You can display your mnemonic (seed phrase, paper key) in case you lost your backup or to check if your backup is correct.</string>
+    <string name="desc_display_mnemonic">You can display your mnemonic (seed phrase, paper key) in case you have lost your backup, or to check that your backup is correct.</string>
     <string name="button_display_mnemonic">Display mnemonic</string>
 
     <!-- Send funds -->
