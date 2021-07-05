@@ -7,7 +7,7 @@
     <string name="format_fiat">###,##0.00</string>
 
     <string name="hint_password">Please enter your send funds password</string>
-    <string name="err_password">Password needs to have at least 8 characters</string>
+    <string name="err_password">Passwords must be at least 8 characters long</string>
     <string name="label_password">Password</string>
     <string name="label_password_confirm">Confirm password</string>
     <string name="err_password_confirm">Passwords do not match</string>
@@ -41,38 +41,38 @@
     <!-- add wallet -->
     <string name="menu_add_wallet">Add wallet</string>
     <string name="label_create_wallet">New wallet</string>
-    <string name="desc_create_wallet">Creates a wallet with keys and address from a randomly generated mnemonic.</string>
+    <string name="desc_create_wallet">Creates a wallet (keys and an address) from a randomly generated mnemonic.</string>
     <string name="label_restore_wallet">Restore wallet</string>
-    <string name="desc_restore_wallet">Regenerates a wallet with keys and address from its mnemonic.</string>
+    <string name="desc_restore_wallet">Restores a wallet\'s keys and address from a mnemonic phrase.</string>
     <string name="label_import_wallet">Import wallet</string>
-    <string name="desc_import_wallet">Use a formerly exported or saved wallet file to import existing keys and addresses.</string>
+    <string name="desc_import_wallet">Use an exported or saved wallet file to import an existing wallet (keys and addresses).</string>
     <string name="label_readonly_wallet">Read-only wallet</string>
-    <string name="desc_readonly_wallet">Add a wallet address for view only. This won\'t save any keys on this device.</string>
+    <string name="desc_readonly_wallet">Add a wallet address in read-only mode. This won\'t save any keys on this device.</string>
 
     <!-- add readonly wallet -->
-    <string name="intro_add_readonly">Enter your public wallet address to add this wallet in read-only mode.</string>
+    <string name="intro_add_readonly">Enter your public wallet address to add the wallet in read-only mode.</string>
     <string name="label_wallet_address">Wallet address</string>
 
     <!-- Create wallet -->
-    <string name="intro_create_wallet">This is your 15 words Ergo wallet mnemonic. Other names for these words are seed or
+    <string name="intro_create_wallet">This is your 15-word Ergo wallet mnemonic. These words are also known as a seed phrase or
         paper key.
-        With these 15 words, you can restore your wallet on other devices when you lost access on this one.\nIt is crucial
-    that you note this mnemonic and store it in a safe place.</string>
-    <string name="intro_confirm_create_wallet">To check if your notes are correct, enter two words of your mnemonic now:</string>
-    <string name="check_confirm_create_wallet">I understand that I am responsible to store my mnemonic in a safe place.
-    It is the only way to access my wallet if the keys stored on this device are not accessible.</string>
+        With these 15 words, you can restore your wallet on other devices if you lose access to this one.\nIt is crucial
+    that you carefully write down all 15 words (with pen and paper) and store them in a safe place.</string>
+    <string name="intro_confirm_create_wallet">To confirm that your handwritten mnemonic is correct, enter two words of the phrase now:</string>
+    <string name="check_confirm_create_wallet">I understand that I am responsible for storing my mnemonic in a safe place.
+    It is the only way to access my wallet if the keys stored on this device are lost or inaccessible.</string>
     <string name="label_word_confirm_create_wallet">Word %1s</string>
     <string name="error_word_confirm_create_wallet">Word not correct</string>
 
     <!-- Restore wallet -->
-    <string name="intro_restore_wallet">Enter your 15 words Ergo wallet mnemonic to regenerate the wallet.</string>
+    <string name="intro_restore_wallet">Enter your 15-word Ergo wallet mnemonic to regenerate the wallet.</string>
     <string name="button_restore">Restore wallet</string>
     <string name="mnemonic_length_not_enough">%1s words remaining</string>
-    <string name="mnemonic_length_too_long">Too much words</string>
+    <string name="mnemonic_length_too_long">Too many words</string>
 
     <!-- Save wallet -->
     <string name="intro_save_wallet">Your public wallet address is:</string>
-    <string name="intro_save_wallet2">You can now choose how the wallet with its keys should be saved on this device.</string>
+    <string name="intro_save_wallet2">Choose how the wallet and keys should be saved on this device.</string>
     <string name="button_save_password_encrypted">Save password-encrypted</string>
     <string name="desc_save_password_encrypted">You have to enter a password-phrase that you need to reenter every time you want to send funds.</string>
     <string name="button_save_device_encrypted">Save device-encrypted</string>
@@ -87,7 +87,7 @@
     <string name="label_wallet_name">Descriptive wallet name</string>
     <string name="label_changes_saved">Changes saved</string>
     <string name="label_confirm_delete">Are you sure you want to erase the wallet from this device?\nThis can\'t be undone.</string>
-    <string name="desc_display_mnemonic">You can display your mnemonic (seed phrase, paper key) in case you lost your backup or to check if your backup is correct.</string>
+    <string name="desc_display_mnemonic">You can display your mnemonic (seed phrase, paper key) in case you have lost your backup, or to confirm that your backup is correct.</string>
     <string name="button_display_mnemonic">Display mnemonic</string>
 
     <!-- Send funds -->
@@ -113,7 +113,7 @@
     <string name="desc_coingecko">Ergo price powered by CoinGecko API, https://www.coingecko.com</string>
     <string name="label_cg_conn_error">Error connecting to CoinGecko, please try again later.</string>
     <string name="desc_dark_mode">Dark or light mode?</string>
-    <string name="button_dark_mode_system">Follow system</string>
+    <string name="button_dark_mode_system">System default</string>
     <string name="button_dark_mode_day">Light</string>
     <string name="button_dark_mode_night">Dark</string>
 </resources>
