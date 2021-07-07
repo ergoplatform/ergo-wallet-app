@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="top"
                     android:imeOptions="actionDone"
-                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:inputType="textMultiLine|textVisiblePassword"
                     android:lines="8" />
 
             </com.google.android.material.textfield.TextInputLayout>

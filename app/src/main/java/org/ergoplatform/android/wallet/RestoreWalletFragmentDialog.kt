@@ -2,12 +2,10 @@ package org.ergoplatform.android.wallet
 
 import android.os.Bundle
 import android.text.Editable
-import android.text.InputType
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import androidx.navigation.fragment.NavHostFragment
 import org.ergoplatform.android.MNEMONIC_WORDS_COUNT
 import org.ergoplatform.android.R
@@ -31,8 +29,6 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
     ): View {
         _binding = FragmentRestoreWalletBinding.inflate(inflater, container, false)
 
-        binding.tvMnemonic.editText?.setImeOptions(EditorInfo.IME_ACTION_DONE)
-        binding.tvMnemonic.editText?.setRawInputType(InputType.TYPE_CLASS_TEXT)
         binding.tvMnemonic.editText?.setOnEditorActionListener { v, actionId, event ->
             doRestore()
             true
