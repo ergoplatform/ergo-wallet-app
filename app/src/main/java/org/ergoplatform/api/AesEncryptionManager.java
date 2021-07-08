@@ -34,33 +34,32 @@ public class AesEncryptionManager {
     public static final String ANDROID_KEY_STORE = "AndroidKeyStore";
 
     /**
-     * This method will encrypt the given data
+     * This method will encrypt the given data using the given password.
      *
-     * @param key  : the password that will be used to encrypt the data
-     * @param data : the data that will be encrypted
+     * @param password the password that will be used to encrypt the data
+     * @param data     the data that will be encrypted
      * @return Encrypted data in a byte array
      */
-    public static byte[] encryptData(String key, byte[] data) throws NoSuchPaddingException,
+    public static byte[] encryptData(String password, byte[] data) throws NoSuchPaddingException,
             NoSuchAlgorithmException,
             InvalidAlgorithmParameterException,
             InvalidKeyException,
             BadPaddingException,
             IllegalBlockSizeException, InvalidKeySpecException {
 
-        //Prepare the nonce
+        // Prepare the initialization vector (IV, aka `salt`)
+        // IV should be 12 bytes
         SecureRandom secureRandom = new SecureRandom();
-
-        //Noonce should be 12 bytes
         byte[] iv = new byte[12];
         secureRandom.nextBytes(iv);
 
-        //Prepare your key/password
-        SecretKey secretKey = generateSecretKey(key, iv);
+        //Prepare your key based on the password and the salt
+        SecretKey secretKey = generateSecretKey(password, iv);
 
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         GCMParameterSpec parameterSpec = new GCMParameterSpec(128, iv);
 
-        //Encryption mode on!
+        //Initialize the cipher for encryption mode!
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, parameterSpec);
 
         return encryptWithCipher(data, iv, cipher);
@@ -104,9 +103,16 @@ public class AesEncryptionManager {
         return secretKey;
     }
 
+    /**
+     * Encrypts the given data using the given {@link Cipher} and the salt.
+     *
+     * @param data   data to be encrypted
+     * @param iv     initialization vector (aka salt)
+     * @param cipher which is initialized for encryption
+     * @return encrypted data packed with the salt.
+     */
     @NotNull
     private static byte[] encryptWithCipher(byte[] data, byte[] iv, Cipher cipher) throws BadPaddingException, IllegalBlockSizeException {
-
         //Encrypt the data
         byte[] encryptedData = cipher.doFinal(data);
 
@@ -119,7 +125,7 @@ public class AesEncryptionManager {
     }
 
 
-    public static byte[] decryptData(String key, byte[] encryptedData)
+    public static byte[] decryptData(String password, byte[] encryptedData)
             throws NoSuchPaddingException,
             NoSuchAlgorithmException,
             InvalidAlgorithmParameterException,
@@ -130,11 +136,10 @@ public class AesEncryptionManager {
 
         DecryptionData data = new DecryptionData(encryptedData);
 
-        //Prepare your key/password
-        SecretKey secretKey = generateSecretKey(key, data.iv);
+        //Prepare your key based on the password and the salt
+        SecretKey secretKey = generateSecretKey(password, data.iv);
 
         return decryptWithSecretKey(data, secretKey);
-
     }
 
     private static byte[] decryptWithSecretKey(DecryptionData data, SecretKey secretKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
@@ -148,7 +153,8 @@ public class AesEncryptionManager {
         return cipher.doFinal(data.cipherBytes);
     }
 
-    public static byte[] decryptDataWithDeviceKey(byte[] encryptedData) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, UnrecoverableEntryException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, InvalidAlgorithmParameterException, NoSuchPaddingException {
+    public static byte[] decryptDataWithDeviceKey(byte[] encryptedData)
+            throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, UnrecoverableEntryException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, InvalidAlgorithmParameterException, NoSuchPaddingException {
         DecryptionData data = new DecryptionData(encryptedData);
 
         final SecretKey secretKey = loadSecretDeviceKey();
@@ -167,8 +173,8 @@ public class AesEncryptionManager {
     /**
      * Function to generate a 128 bit key from the given password and iv
      *
-     * @param password
-     * @param iv
+     * @param password used to derive the secret key
+     * @param iv initialization vector (aka salt)
      * @return Secret key
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
@@ -198,19 +204,18 @@ public class AesEncryptionManager {
             //Wrap the data into a byte buffer to ease the reading process
             ByteBuffer byteBuffer = ByteBuffer.wrap(encryptedData);
 
-            int noonceSize = byteBuffer.getInt();
+            int nonceSize = byteBuffer.getInt();
 
             //Make sure that the file was encrypted properly
-            if (noonceSize < 12 || noonceSize >= 16) {
+            if (nonceSize < 12 || nonceSize >= 16) {
                 throw new IllegalArgumentException("Nonce size is incorrect. Make sure that the incoming data is an AES encrypted file.");
             }
-            iv = new byte[noonceSize];
+            iv = new byte[nonceSize];
             byteBuffer.get(iv);
 
             //get the rest of encrypted data
             cipherBytes = new byte[byteBuffer.remaining()];
             byteBuffer.get(cipherBytes);
-
         }
     }
 }

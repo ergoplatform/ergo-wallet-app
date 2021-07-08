@@ -53,21 +53,18 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
         viewModel.initWallet(requireContext(), args.walletId)
 
-        viewModel.walletName.observe(
-            viewLifecycleOwner,
-            { binding.walletName.text = getString(R.string.label_send_from, it) })
-        viewModel.walletBalance.observe(
-            viewLifecycleOwner,
-            {
-                binding.tvBalance.text = getString(
+        viewModel.walletName.observe(viewLifecycleOwner, {
+            binding.walletName.text = getString(R.string.label_send_from, it)
+        })
+        viewModel.walletBalance.observe(viewLifecycleOwner, {
+            binding.tvBalance.text = getString(
                     R.string.label_wallet_balance,
                     formatErgsToString(
                         it,
                         requireContext()
                     )
                 )
-            }
-        )
+        })
         viewModel.feeAmount.observe(viewLifecycleOwner, {
             binding.tvFee.text = getString(
                 R.string.desc_fee,
@@ -145,7 +142,6 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
         binding.amount.editText?.addTextChangedListener(MyTextWatcher(binding.amount))
         binding.tvReceiver.editText?.addTextChangedListener(MyTextWatcher(binding.tvReceiver))
-
     }
 
     private fun setAmountEdittext(amountToSend: Float) {
@@ -182,7 +178,6 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
     }
 
     fun showBiometricPrompt() {
-
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(getString(R.string.title_authenticate))
             .setConfirmationRequired(true) // don't send funds immediately when face is recognized
@@ -221,7 +216,6 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
         val amountStr = binding.amount.editText?.text.toString()
         viewModel.amountToSend = inputTextToFloat(amountStr)
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

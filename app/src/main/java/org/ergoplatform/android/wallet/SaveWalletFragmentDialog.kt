@@ -108,6 +108,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     }
 
     private fun saveToDb(encType: Int, secretStorage: ByteArray) {
+        // TODO avoid using mnemonic here, store and use publicAddress directly
         val publicAddress = getPublicErgoAddressFromMnemonic(args.mnemonic)
 
         GlobalScope.launch(Dispatchers.IO) {
