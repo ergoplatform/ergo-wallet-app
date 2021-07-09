@@ -20,7 +20,7 @@ class NodeConnector() {
     val refreshNum: MutableLiveData<Int> = MutableLiveData()
     val fiatValue: MutableLiveData<Float> = MutableLiveData()
     val currencies: MutableLiveData<List<String>?> = MutableLiveData()
-    var lastRefresMs: Long = 0
+    var lastRefreshMs: Long = 0
         private set
     var lastHadError: Boolean = false
         private set
@@ -44,11 +44,11 @@ class NodeConnector() {
     }
 
     fun invalidateCache() {
-        lastRefresMs = 0
+        lastRefreshMs = 0
     }
 
     fun refreshByUser(context: Context): Boolean {
-        if (System.currentTimeMillis() - lastRefresMs > 1000L * 10) {
+        if (System.currentTimeMillis() - lastRefreshMs > 1000L * 10) {
             refreshNow(context)
             return true
         } else
@@ -56,7 +56,7 @@ class NodeConnector() {
     }
 
     fun refreshWhenNeeded(context: Context) {
-        if (System.currentTimeMillis() - lastRefresMs > 1000L * 60) {
+        if (System.currentTimeMillis() - lastRefreshMs > 1000L * 60) {
             refreshNow(context)
         }
     }
@@ -116,8 +116,8 @@ class NodeConnector() {
                 }
 
                 if (!hadError && didSync) {
-                    lastRefresMs = System.currentTimeMillis()
-                    saveLastRefreshMs(context, lastRefresMs)
+                    lastRefreshMs = System.currentTimeMillis()
+                    saveLastRefreshMs(context, lastRefreshMs)
                 }
                 lastHadError = hadError
                 refreshNum.postValue(refreshNum.value?.and(1) ?: 0)
@@ -143,7 +143,7 @@ class NodeConnector() {
     }
 
     fun loadPreferenceValues(context: Context) {
-        lastRefresMs = getLastRefreshMs(context)
+        lastRefreshMs = getLastRefreshMs(context)
         fiatCurrency = getPrefDisplayCurrency(context)
         fiatValue.postValue(getLastFiatValue(context))
     }

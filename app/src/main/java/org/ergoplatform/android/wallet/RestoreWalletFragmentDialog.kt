@@ -29,7 +29,7 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
     ): View {
         _binding = FragmentRestoreWalletBinding.inflate(inflater, container, false)
 
-        binding.tvMnemonic.editText?.setOnEditorActionListener { v, actionId, event ->
+        binding.tvMnemonic.editText?.setOnEditorActionListener { _, _, _ ->
             doRestore()
             true
         }

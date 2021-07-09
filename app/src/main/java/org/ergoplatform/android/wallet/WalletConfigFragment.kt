@@ -138,7 +138,8 @@ class WalletConfigFragment : Fragment(), ConfirmationCallback, PasswordDialogCal
     }
 
     fun showBiometricPrompt() {
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+        // setDeviceCredentialAllowed is deprecated, but needed for older SDK level
+        @Suppress("DEPRECATION") val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(getString(R.string.title_authenticate))
             .setConfirmationRequired(true) // don't display immediately when face is recognized
             .setDeviceCredentialAllowed(true)

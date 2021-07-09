@@ -130,7 +130,7 @@ class WalletFragment : Fragment() {
 
     private fun refreshTimeSinceSyncLabel() {
         val nodeConnector = NodeConnector.getInstance()
-        val lastRefresMs = nodeConnector.lastRefresMs
+        val lastRefresMs = nodeConnector.lastRefreshMs
         binding.synctime.text = if (lastRefresMs > 0) getString(
             R.string.label_last_sync,
             if (System.currentTimeMillis() - lastRefresMs < 60000L) getString(R.string.label_last_sync_just_now) else

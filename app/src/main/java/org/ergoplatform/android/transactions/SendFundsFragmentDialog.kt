@@ -93,7 +93,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                     ) {
                         MaterialAlertDialogBuilder(requireContext())
                             .setMessage(errorMsg)
-                            .setPositiveButton(R.string.button_copy) { p, p1 ->
+                            .setPositiveButton(R.string.button_copy) { _, _ ->
                                 val clipboard = ContextCompat.getSystemService(
                                     requireContext(),
                                     ClipboardManager::class.java
@@ -102,7 +102,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                                 clipboard?.setPrimaryClip(clip)
                             }
                             .setNegativeButton(R.string.label_dismiss, null)
-                            .show();
+                            .show()
                     }
                 }
                 snackbar.show()
@@ -178,7 +178,8 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
     }
 
     fun showBiometricPrompt() {
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+        // setDeviceCredentialAllowed is deprecated on API 29, but needed for older levels
+        @Suppress("DEPRECATION") val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(getString(R.string.title_authenticate))
             .setConfirmationRequired(true) // don't send funds immediately when face is recognized
             .setDeviceCredentialAllowed(true)

@@ -40,7 +40,7 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
 
         binding.buttonDone.setOnClickListener { buttonDone() }
         val doneActionListener: (v: TextView, actionId: Int, event: KeyEvent?) -> Boolean =
-            { v, actionId, event ->
+            { _, _, _ ->
                 buttonDone()
                 true
             }

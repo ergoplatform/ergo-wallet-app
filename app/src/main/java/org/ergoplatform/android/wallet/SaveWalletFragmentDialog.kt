@@ -78,7 +78,8 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
 
     fun showBiometricPrompt() {
 
-        val promptInfo = PromptInfo.Builder()
+        // setDeviceCredentialAllowed is deprecated, but needed for older SDK level
+        @Suppress("DEPRECATION") val promptInfo = PromptInfo.Builder()
             .setTitle(getString(R.string.title_authenticate))
             .setConfirmationRequired(false)
             .setDeviceCredentialAllowed(true)
@@ -109,6 +110,15 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
 
     private fun saveToDb(encType: Int, secretStorage: ByteArray) {
         // TODO avoid using mnemonic here, store and use publicAddress directly
+        // Reason why this is not done: mnemonic is stored in arguments to allow Android to
+        // destroy and recreate this dialog without the loss of the mnemonic. Possible
+        // workarounds not implemented because of their drawbacks:
+        // - Storing it as a SecretString in a shared ViewModel for the wallet creation dialogs
+        //   Drawback: The ViewModel is reset when the destruction of the dialog is done due to low
+        //             memory, hence we could lose the mnemonic on low end devices
+        // - Use a static variable to store the mnemonic in a SecretString
+        //   Drawback: It is completely out of control when static variables get reset and the
+        //             variable might leak into a process reusing the JVM
         val publicAddress = getPublicErgoAddressFromMnemonic(args.mnemonic)
 
         GlobalScope.launch(Dispatchers.IO) {
@@ -117,7 +127,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
             val existingWallet = walletDao.loadWalletByAddress(publicAddress)
 
             if (existingWallet != null) {
-                // update enctype and secret storage
+                // update encType and secret storage
                 val walletConfig = WalletConfigDbEntity(
                     existingWallet.id,
                     existingWallet.displayName,
