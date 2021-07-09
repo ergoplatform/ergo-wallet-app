@@ -171,8 +171,10 @@ class WalletConfigFragment : Fragment(), ConfirmationCallback, PasswordDialogCal
     }
 
     private fun displayMnemonic(mnemonic: String) {
-        MaterialAlertDialogBuilder(requireContext()).setMessage(mnemonic)
-            .setPositiveButton(R.string.button_done, null).show()
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage(mnemonic)
+            .setPositiveButton(R.string.button_done, null)
+            .show()
     }
 
     override fun onDestroyView() {
