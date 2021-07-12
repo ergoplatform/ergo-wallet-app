@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,75 +7,91 @@
     android:fitsSystemWindows="true"
     tools:context=".wallet.RestoreWalletFragmentDialog">
 
-    <androidx.cardview.widget.CardView
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/card_view_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="@dimen/activity_horizontal_margin">
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        tools:visibility="visible">
 
-        <LinearLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:animateLayoutChanges="true"
-            android:orientation="vertical">
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/activity_horizontal_margin">
 
-            <TextView
-                style="@style/TextAppearance.App.Body1"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/half_horizontal_margin"
-                android:text="@string/intro_save_wallet" />
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:animateLayoutChanges="true"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/public_address"
-                style="@style/TextAppearance.App.Headline2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/half_horizontal_margin"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:drawablePadding="@dimen/half_horizontal_margin"
-                app:drawableStartCompat="@drawable/ic_ergologo"
-                tools:text="9ewA9T53dy5qvAkcR5jVCtbaDW2XgWzbLPs5H4uCJJavmA4fzDx" />
+                <TextView
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/half_horizontal_margin"
+                    android:text="@string/intro_save_wallet" />
 
-            <TextView
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_and_half"
-                android:text="@string/intro_save_wallet2" />
+                <TextView
+                    android:id="@+id/public_address"
+                    style="@style/TextAppearance.App.Headline2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/half_horizontal_margin"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:drawablePadding="@dimen/half_horizontal_margin"
+                    app:drawableStartCompat="@drawable/ic_ergologo"
+                    tools:text="9ewA9T53dy5qvAkcR5jVCtbaDW2XgWzbLPs5H4uCJJavmA4fzDx" />
 
-            <Button
-                android:id="@+id/button_save_passenc"
-                style="@style/Widget.App.Button.PrimaryTint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/button_save_password_encrypted" />
+                <TextView
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/margin_and_half"
+                    android:text="@string/intro_save_wallet2" />
 
-            <TextView
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_and_half"
-                android:text="@string/desc_save_password_encrypted" />
+                <Button
+                    android:id="@+id/button_save_passenc"
+                    style="@style/Widget.App.Button.PrimaryTint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/button_save_password_encrypted" />
 
-            <Button
-                android:id="@+id/button_save_deviceenc"
-                style="?attr/materialButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:elegantTextHeight="true"
-                android:text="@string/button_save_device_encrypted" />
+                <TextView
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/margin_and_half"
+                    android:text="@string/desc_save_password_encrypted" />
 
-            <TextView
-                android:id="@+id/desc_device_encryption"
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/desc_save_device_encrypted" />
+                <Button
+                    android:id="@+id/button_save_deviceenc"
+                    style="?attr/materialButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:elegantTextHeight="true"
+                    android:text="@string/button_save_device_encrypted" />
 
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-</androidx.core.widget.NestedScrollView>
+                <TextView
+                    android:id="@+id/desc_device_encryption"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/desc_save_device_encrypted" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </androidx.core.widget.NestedScrollView>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        tools:visibility="gone" />
+
+</FrameLayout>

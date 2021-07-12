@@ -9,12 +9,14 @@ import android.view.ViewGroup
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.PromptInfo
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
 import org.ergoplatform.android.ui.*
@@ -42,7 +44,16 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.publicAddress.text = getPublicErgoAddressFromMnemonic(args.mnemonic)
+        // firing up appkit for the first time needs some time on medium end devices, so do this on
+        // background thread while showing infinite progress bar
+        lifecycleScope.launch(Dispatchers.IO) {
+            val publicErgoAddressFromMnemonic = getPublicErgoAddressFromMnemonic(args.mnemonic)
+            withContext(Dispatchers.Main) {
+                binding.publicAddress.text = publicErgoAddressFromMnemonic
+                binding.cardViewContainer.visibility = View.VISIBLE
+                binding.progressBar.visibility = View.GONE
+            }
+        }
 
         val bmm = BiometricManager.from(requireContext())
         val methodDesc =
@@ -119,9 +130,10 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         // - Use a static variable to store the mnemonic in a SecretString
         //   Drawback: It is completely out of control when static variables get reset and the
         //             variable might leak into a process reusing the JVM
-        val publicAddress = getPublicErgoAddressFromMnemonic(args.mnemonic)
 
         GlobalScope.launch(Dispatchers.IO) {
+            val publicAddress = getPublicErgoAddressFromMnemonic(args.mnemonic)
+
             // check if the wallet already exists
             val walletDao = AppDatabase.getInstance(requireContext()).walletDao()
             val existingWallet = walletDao.loadWalletByAddress(publicAddress)

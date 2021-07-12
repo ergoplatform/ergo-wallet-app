@@ -59,7 +59,7 @@ If you want to tip the developer for making this app, thanks in advance! Send yo
 ## What's to come
 
 ### for first stable
-- [ ] Progress indicator when restoring wallet (slow on some devices)
+- [X] Progress indicator when restoring wallet (slow on some devices)
 
 ### Extend core functionality
 - [ ] Prevent sending transaction when there are unconfirmed transactions (transaction is discarded)
