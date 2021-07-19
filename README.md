@@ -15,7 +15,7 @@ Features:
 * adding read-only wallets to watch balance
 * Show wallet balance, configurable comparison fiat currency
 
-Current state: Ready for testing. You can test the app on testnet. Generate a new wallet and send
+Current state: We have a first stable version to use. If you want, you can test the app on testnet. Generate a new wallet and send
 yourself some test Ergos by visiting https://faucet.ergopool.io/payment/address/TESTNET_WALLET_ADDRESS
 (replace TESTNET_WALLET_ADDRESS with your actual P2PK address)
 
