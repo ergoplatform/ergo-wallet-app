@@ -7,12 +7,12 @@ Ergo Wallet for Android, built on top of [Ergo Appkit](https://github.com/aslesa
 You need at least Android 7 to run Ergo Wallet.
 
 Features:
-* generating wallets, restoring wallets in a way compatible to Yoroi and Ergo node
+* generating wallets, restoring wallets in a way compatible to Yoroi and Ergo node (only first address can be seen at the moment)
+* you can add read-only wallets without entering your secrets to watch balance
 * no need to make a full sync, this is a lightweight client
 * Requesting payments by showing QR code or sharing a link
 * Sending payments, manually or by scanning a QR code
 * Your secrets are stored password-encrypted or authentication-protected
-* adding read-only wallets to watch balance
 * Show wallet balance, configurable comparison fiat currency
 
 Current state: We have a first stable version to use. If you want, you can test the app on testnet. Generate a new wallet and send
@@ -37,6 +37,11 @@ much smaller and faster, however, you have to trust me.
 The APK file can be installed on your Android device. If you do this for the first time,
 [you can follow this guide](https://www.xda-developers.com/sideload-apps-how-to/).
 
+### Can I trust this app?
+
+The app was [audited by the Ergo team](https://twitter.com/ergoplatformorg/status/1417039106576633857). 
+If you still don't trust this app, you can add your wallets without giving your mnemonic. You won't be able to send funds then, but you can watch your balance.
+
 ### Build yourself
 
 #### Deploy to your phone with Android Studio
@@ -58,17 +63,14 @@ If you want to tip the developer for making this app, thanks in advance! Send yo
 
 ## What's to come
 
-### for first stable
-- [X] Progress indicator when restoring wallet (slow on some devices)
-
 ### Extend core functionality
 - [ ] Prevent sending transaction when there are unconfirmed transactions (transaction is discarded)
 - [ ] Filter unspent boxes with assets
 - [ ] Support P2S addresses
 - [ ] switch to Explorer API v1
+- [ ] Derive further addresses from master key
 
 ### And maybe in the future
-- [ ] Derive further addresses from master key
 - [ ] Address book
 - [ ] In app transactions list and details
 - [ ] Notifications for new transactions
