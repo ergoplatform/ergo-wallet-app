@@ -131,11 +131,12 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         //   Drawback: It is completely out of control when static variables get reset and the
         //             variable might leak into a process reusing the JVM
 
+        val context = requireContext()
         GlobalScope.launch(Dispatchers.IO) {
             val publicAddress = getPublicErgoAddressFromMnemonic(args.mnemonic)
 
             // check if the wallet already exists
-            val walletDao = AppDatabase.getInstance(requireContext()).walletDao()
+            val walletDao = AppDatabase.getInstance(context).walletDao()
             val existingWallet = walletDao.loadWalletByAddress(publicAddress)
 
             if (existingWallet != null) {
