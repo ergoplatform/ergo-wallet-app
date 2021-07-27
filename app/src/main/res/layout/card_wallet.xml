@@ -75,7 +75,7 @@
             tools:visibility="visible" />
 
         <TextView
-            android:id="@+id/wallet_transactions"
+            android:id="@+id/wallet_token_num"
             style="@style/TextAppearance.App.Headline2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -85,26 +85,26 @@
             tools:text="999" />
 
         <TextView
+            android:id="@+id/label_token_num"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/half_horizontal_margin"
-            android:text="@string/label_transactions"
-            app:layout_constraintBottom_toBottomOf="@id/wallet_transactions"
-            app:layout_constraintStart_toEndOf="@id/wallet_transactions"
-            app:layout_constraintTop_toTopOf="@id/wallet_transactions" />
+            android:text="@string/label_tokens"
+            app:layout_constraintBottom_toBottomOf="@id/wallet_token_num"
+            app:layout_constraintStart_toEndOf="@id/wallet_token_num"
+            app:layout_constraintTop_toTopOf="@id/wallet_token_num" />
 
         <org.fabiomsr.moneytextview.MoneyTextView
             android:id="@+id/wallet_unconfirmed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:visibility="gone"
             app:baseTextSize="@dimen/headline2_textsize"
             app:baseTextStyle="bold"
             app:decimalDigitsTextSize="14sp"
             app:decimalMargin="4dp"
             app:layout_constraintStart_toStartOf="@id/wallet_name"
-            app:layout_constraintTop_toBottomOf="@id/wallet_transactions"
+            app:layout_constraintTop_toBottomOf="@id/wallet_token_num"
             app:symbolMargin="4dp"
             tools:amount="-123.2536"
             tools:visibility="visible" />

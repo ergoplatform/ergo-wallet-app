@@ -39,5 +39,7 @@ abstract class AppDatabase : RoomDatabase() {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `wallet_states` (`public_address` TEXT NOT NULL, `transactions` INTEGER, `balance` INTEGER, `unconfirmed_balance` INTEGER, PRIMARY KEY(`public_address`))")
             }
         }
+
+        // TODO drop wallet_states.transactions and create wallet_states.tokens on next migration
     }
 }

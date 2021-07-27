@@ -27,7 +27,7 @@
     <string name="label_dismiss">Dismiss</string>
 
     <!-- Wallet -->
-    <string name="label_transactions">transactions</string>
+    <string name="label_tokens">tokens</string>
     <string name="label_unconfirmed">unconfirmed</string>
     <string name="button_view_transactions">View transactions</string>
     <string name="button_receive">Receive</string>

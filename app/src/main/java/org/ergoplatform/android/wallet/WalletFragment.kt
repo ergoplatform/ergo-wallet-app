@@ -198,12 +198,18 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
     fun bind(wallet: WalletDbEntity) {
         binding.walletName.text = wallet.walletConfig.displayName
         binding.walletBalance.amount = nanoErgsToErgs(wallet.state?.balance ?: 0)
-        binding.walletTransactions.text = (wallet.state?.transactions ?: 0).toString()
+
+        val tokenCount = wallet.state?.transactions ?: 0
+        binding.walletTokenNum.text = tokenCount.toString()
+        binding.walletTokenNum.visibility = if (tokenCount == 0) View.GONE else View.VISIBLE
+        binding.labelTokenNum.visibility = binding.walletTokenNum.visibility
 
         val unconfirmed = (wallet.state?.unconfirmedBalance ?: 0)
         binding.walletUnconfirmed.amount = nanoErgsToErgs(unconfirmed)
         binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
+        (binding.walletUnconfirmed.layoutParams as ViewGroup.MarginLayoutParams).topMargin =
+            if (binding.walletTokenNum.visibility == View.GONE) (binding.walletTokenNum.layoutParams as ViewGroup.MarginLayoutParams).topMargin else 0
 
         binding.buttonViewTransactions.setOnClickListener {
             val browserIntent = Intent(

@@ -64,10 +64,6 @@ If you want to tip the developer for making this app, thanks in advance! Send yo
 ## What's to come
 
 ### Extend core functionality
-- [ ] Prevent sending transaction when there are unconfirmed transactions (transaction is discarded)
-- [ ] Filter unspent boxes with assets
-- [ ] Support P2S addresses
-- [ ] switch to Explorer API v1
 - [ ] Derive further addresses from master key
 
 ### And maybe in the future

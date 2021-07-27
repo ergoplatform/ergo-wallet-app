@@ -17,6 +17,7 @@ data class WalletConfigDbEntity(
 @Entity(tableName = "wallet_states")
 data class WalletStateDbEntity(
     @PrimaryKey @ColumnInfo(name = "public_address") val publicAddress: String,
+    // the transactions field is currently holding the token count, see TODO in AppDataBase
     val transactions: Int?,
     val balance: Long?,
     @ColumnInfo(name = "unconfirmed_balance") val unconfirmedBalance: Long?

@@ -14,7 +14,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 
-class NodeConnector() {
+class NodeConnector {
 
     val isRefreshing: MutableLiveData<Boolean> = MutableLiveData()
     val refreshNum: MutableLiveData<Int> = MutableLiveData()
@@ -27,7 +27,7 @@ class NodeConnector() {
     var fiatCurrency: String = ""
         private set
     private val ergoApiService: DefaultApi
-    private val coingeckoApi: CoinGeckoApi
+    private val coinGeckoApi: CoinGeckoApi
 
     init {
         val retrofit = Retrofit.Builder()
@@ -40,7 +40,7 @@ class NodeConnector() {
         val retrofitCoinGecko = Retrofit.Builder().baseUrl("https://api.coingecko.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        coingeckoApi = retrofitCoinGecko.create(CoinGeckoApi::class.java)
+        coinGeckoApi = retrofitCoinGecko.create(CoinGeckoApi::class.java)
     }
 
     fun invalidateCache() {
@@ -75,7 +75,7 @@ class NodeConnector() {
                 if (fiatCurrency.isNotEmpty()) {
                     try {
                         val currencyGetPrice =
-                            coingeckoApi.currencyGetPrice(fiatCurrency).execute().body()
+                            coinGeckoApi.currencyGetPrice(fiatCurrency).execute().body()
                         fFiatValue = currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f
                     } catch (t: Throwable) {
                         Log.e("CoinGecko", "Error", t)
@@ -95,11 +95,14 @@ class NodeConnector() {
                     walletDao.getAllSync().forEach { walletConfig ->
                         walletConfig.publicAddress?.let {
                             val transactionsInfo =
-                                ergoApiService.getApiV1AddressesP1BalanceTotal(walletConfig.publicAddress).execute()
+                                ergoApiService.getApiV1AddressesP1BalanceTotal(walletConfig.publicAddress)
+                                    .execute()
                                     .body()
 
                             val newState = WalletStateDbEntity(
-                                walletConfig.publicAddress, 0, transactionsInfo?.confirmed?.nanoErgs,
+                                walletConfig.publicAddress,
+                                transactionsInfo?.confirmed?.tokens?.size ?: 0,
+                                transactionsInfo?.confirmed?.nanoErgs,
                                 transactionsInfo?.unconfirmed?.nanoErgs
                             )
 
@@ -110,7 +113,7 @@ class NodeConnector() {
                     walletDao.insertWalletStates(*statesToSave.toTypedArray())
                     didSync = statesToSave.isNotEmpty()
                 } catch (t: Throwable) {
-                    Log.e("Nodeconnector", "Error", t)
+                    Log.e("NodeConnector", "Error", t)
                     // TODO report to user
                     hadError = true
                 }
@@ -132,7 +135,7 @@ class NodeConnector() {
             GlobalScope.launch(Dispatchers.IO) {
                 try {
                     currencies.postValue(null)
-                    val currencyList = coingeckoApi.currencies.execute().body()
+                    val currencyList = coinGeckoApi.currencies.execute().body()
                     currencies.postValue(currencyList ?: emptyList())
                 } catch (t: Throwable) {
                     Log.e("CoinGecko", "Error", t)
