@@ -1,8 +1,8 @@
 # Ergo Wallet Android
 
-Ergo Wallet for Android, built on top of [Ergo Appkit](https://github.com/aslesarenko/ergo-appkit).
+<img src="https://user-images.githubusercontent.com/26038055/122617266-38b02980-d08c-11eb-8cd7-a33d9984d002.png" align="right"  width="250">
 
-<img src="https://user-images.githubusercontent.com/26038055/122617266-38b02980-d08c-11eb-8cd7-a33d9984d002.png" width="250">
+Ergo Wallet for Android, built on top of [Ergo Appkit](https://github.com/aslesarenko/ergo-appkit).
 
 You need at least Android 7 to run Ergo Wallet.
 
@@ -15,13 +15,12 @@ Features:
 * Your secrets are stored password-encrypted or authentication-protected
 * Show wallet balance, configurable comparison fiat currency
 
-Current state: We have a first stable version to use. If you want, you can test the app on testnet. Generate a new wallet and send
-yourself some test Ergos by visiting https://faucet.ergopool.io/payment/address/TESTNET_WALLET_ADDRESS
-(replace TESTNET_WALLET_ADDRESS with your actual P2PK address)
-
 Visit the [Ergo Discord](https://discord.gg/kj7s7nb) to give feedback.
 
+[<img alt="Get it on Google Play" height="80" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png">](https://play.google.com/store/apps/details?id=org.ergoplatform.android)
+
 ### Download and install
+
 You can download the app APKs from the [releases section](https://github.com/MrStahlfelge/ergo-wallet-android/releases).
 There are APKs available for Testnet and Mainnet, and as a debug build and release build.
 
@@ -61,12 +60,8 @@ If you still don't trust this app, you can add your wallets without giving your 
 If you want to tip the developer for making this app, thanks in advance! Send your tips to
 [9ewA9T53dy5qvAkcR5jVCtbaDW2XgWzbLPs5H4uCJJavmA4fzDx](https://explorer.ergoplatform.com/payment-request?address=9ewA9T53dy5qvAkcR5jVCtbaDW2XgWzbLPs5H4uCJJavmA4fzDx&amount=0&description=)
 
-## What's to come
+### Testing on Testnet
+You can test the testnet debug build on testnet. Generate a new wallet and send
+yourself some test Ergos by visiting https://faucet.ergopool.io/payment/address/TESTNET_WALLET_ADDRESS
+(replace TESTNET_WALLET_ADDRESS with your actual P2PK address)
 
-### Extend core functionality
-- [ ] Derive further addresses from master key
-
-### And maybe in the future
-- [ ] Address book
-- [ ] In app transactions list and details
-- [ ] Notifications for new transactions
