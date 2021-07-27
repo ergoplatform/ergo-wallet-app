@@ -2,6 +2,7 @@ package org.ergoplatform.android.settings
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,6 +42,9 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // makes the links clickable
+        binding.labelMoreInfo.movementMethod = LinkMovementMethod.getInstance()
 
         setDisplayCurrency()
 
