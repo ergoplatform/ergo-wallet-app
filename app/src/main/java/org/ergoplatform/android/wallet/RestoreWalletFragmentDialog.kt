@@ -7,13 +7,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.NavHostFragment
-import org.ergoplatform.android.MNEMONIC_WORDS_COUNT
+import org.ergoplatform.android.MNEMONIC_MIN_WORDS_COUNT
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentRestoreWalletBinding
+import org.ergoplatform.android.loadAppKitMnemonicWordList
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.forceShowSoftKeyboard
 import org.ergoplatform.android.ui.hideForcedSoftKeyboard
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.appkit.Mnemonic
+import org.ergoplatform.appkit.MnemonicValidationException
+import java.util.*
 
 /**
  * Restores a formerly generated wallet from mnemonic
@@ -22,6 +26,9 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
 
     private var _binding: FragmentRestoreWalletBinding? = null
     private val binding get() = _binding!!
+
+    private val wordList = loadAppKitMnemonicWordList()
+    private var isSecondButtonClick = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,15 +42,22 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
         }
         binding.tvMnemonic.editText?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                val words = checkMnemonic()
+                isSecondButtonClick = false
+                val words = countMnemonicWords()
 
-                if (words > 0 && words < MNEMONIC_WORDS_COUNT) {
+                // check for invalid words, but skip the last one when it is not completed yet
+                val hasInvalidWords = words > 0 && mnemonicToWords(getMnemonic())
+                    .dropLast(if (s.toString().endsWith(" ")) 0 else 1)
+                    .filter { word -> Collections.binarySearch(wordList, word) < 0 }
+                    .isNotEmpty()
+
+                if (hasInvalidWords) {
+                    binding.tvMnemonic.error = getString(R.string.mnemonic_unknown_words)
+                } else if (words > 0 && words < MNEMONIC_MIN_WORDS_COUNT) {
                     binding.tvMnemonic.error = getString(
                         R.string.mnemonic_length_not_enough,
-                        (MNEMONIC_WORDS_COUNT - words).toString()
+                        (MNEMONIC_MIN_WORDS_COUNT - words).toString()
                     )
-                } else if (words > MNEMONIC_WORDS_COUNT) {
-                    binding.tvMnemonic.error = getString(R.string.mnemonic_length_too_long)
                 } else
                     binding.tvMnemonic.error = null
             }
@@ -67,9 +81,9 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
         forceShowSoftKeyboard(requireContext())
     }
 
-    private fun checkMnemonic(): Int {
+    private fun countMnemonicWords(): Int {
         val mnemonic = getMnemonic()
-        val words = if (mnemonic.isEmpty()) 0 else mnemonic.split(" ").size
+        val words = if (mnemonic.isEmpty()) 0 else mnemonicToWords(mnemonic).size
         return words
     }
 
@@ -77,15 +91,40 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
         return binding.tvMnemonic.editText?.text?.trim()?.replace("\\s+".toRegex(), " ") ?: ""
     }
 
+    private fun mnemonicToWords(mnemonic: String): List<String> {
+        return mnemonic.split(" ")
+    }
+
     private fun doRestore() {
-        if (checkMnemonic() == MNEMONIC_WORDS_COUNT) {
+        val wordsCount = countMnemonicWords()
+        if (wordsCount >= MNEMONIC_MIN_WORDS_COUNT) {
             hideForcedSoftKeyboard(requireContext(), binding.tvMnemonic.editText!!)
-            NavHostFragment.findNavController(requireParentFragment())
-                .navigateSafe(
-                    RestoreWalletFragmentDialogDirections.actionRestoreWalletFragmentDialogToSaveWalletFragmentDialog(
-                        getMnemonic()
+
+            val mnemonic = getMnemonic()
+            var mnemonicIsValid = true
+
+            try {
+                Mnemonic.checkEnglishMnemonic(mnemonicToWords(mnemonic))
+            } catch (e: MnemonicValidationException) {
+                mnemonicIsValid = false
+            }
+
+            if (!isSecondButtonClick && !mnemonicIsValid) {
+                isSecondButtonClick = true
+                binding.tvMnemonic.error = getString(R.string.mnemonic_invalid)
+            } else {
+                NavHostFragment.findNavController(requireParentFragment())
+                    .navigateSafe(
+                        RestoreWalletFragmentDialogDirections.actionRestoreWalletFragmentDialogToSaveWalletFragmentDialog(
+                            mnemonic
+                        )
                     )
-                )
+            }
+        } else {
+            binding.tvMnemonic.error = getString(
+                R.string.mnemonic_length_not_enough,
+                (MNEMONIC_MIN_WORDS_COUNT - wordsCount).toString()
+            )
         }
     }
 

@@ -65,10 +65,11 @@
     <string name="error_word_confirm_create_wallet">Word not correct</string>
 
     <!-- Restore wallet -->
-    <string name="intro_restore_wallet">Enter your 15-word Ergo wallet mnemonic to regenerate the wallet.</string>
+    <string name="intro_restore_wallet">Enter your Ergo wallet mnemonic to regenerate the wallet.</string>
     <string name="button_restore">Restore wallet</string>
-    <string name="mnemonic_length_not_enough">%1s words remaining</string>
-    <string name="mnemonic_length_too_long">Too many words</string>
+    <string name="mnemonic_length_not_enough">Not enough words, add at least %1s more</string>
+    <string name="mnemonic_unknown_words">Mnemonic contains unknown words, check for typos</string>
+    <string name="mnemonic_invalid">Mnemonic validation failed. If you are sure it is entered correctly, you can tap again to proceed.</string>
 
     <!-- Save wallet -->
     <string name="intro_save_wallet">Your public wallet address is:</string>
