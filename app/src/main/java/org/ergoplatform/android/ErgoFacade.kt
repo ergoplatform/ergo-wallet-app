@@ -75,7 +75,7 @@ fun getPublicErgoAddressFromMnemonic(mnemonic: String, index: Int = 0): String {
  * loads the word list used to generate new mnemonics into a list
  */
 fun loadAppKitMnemonicWordList(): List<String> {
-    return JavaConversions.seqAsJavaList(WordList.load(Mnemonic.LANGUAGE_ID_ENGLISH).get().words().toList())
+    return JavaConversions.seqAsJavaList(WordList.load(Mnemonic.LANGUAGE_ID_ENGLISH).get().words())
 }
 
 /**
