@@ -4,11 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import org.ergoplatform.android.databinding.FragmentCreateWalletDialogBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.appkit.Mnemonic
 
 /**
  * Create a new wallet, step 1
@@ -22,6 +23,11 @@ class CreateWalletFragmentDialog : FullScreenFragmentDialog() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        dialog?.window?.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+
         // Inflate the layout for this fragment
         _binding = FragmentCreateWalletDialogBinding.inflate(inflater, container, false)
 
@@ -41,8 +47,8 @@ class CreateWalletFragmentDialog : FullScreenFragmentDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.tvMnemonic.text = Mnemonic.generateEnglishMnemonic()
+        binding.tvMnemonic.text =
+            ViewModelProvider(this).get(CreateWalletViewModel::class.java).mnemonic
     }
 
     override fun onDestroyView() {
