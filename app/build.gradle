@@ -103,7 +103,7 @@ dependencies {
     implementation("androidx.biometric:biometric:1.1.0")
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1"
 
-    implementation ('org.ergoplatform:ergo-appkit_2.11:d4cf012d-SNAPSHOT') {
+    implementation ('org.ergoplatform:ergo-appkit_2.11:develop-a47bd4e8-SNAPSHOT') {
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
         exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
     }
