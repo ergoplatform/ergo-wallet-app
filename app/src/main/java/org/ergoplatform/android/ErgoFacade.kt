@@ -7,10 +7,13 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.*
+import org.ergoplatform.wallet.mnemonic.WordList
+import scala.collection.JavaConversions
 import java.text.DecimalFormat
 import java.util.*
 
 val MNEMONIC_WORDS_COUNT = 15
+val MNEMONIC_MIN_WORDS_COUNT = 12
 
 fun nanoErgsToErgs(nanoErgs: Long): Float {
     val microErgs = nanoErgs / (1000L * 100L)
@@ -69,6 +72,13 @@ fun getPublicErgoAddressFromMnemonic(mnemonic: String, index: Int = 0): String {
 }
 
 /**
+ * loads the word list used to generate new mnemonics into a list
+ */
+fun loadAppKitMnemonicWordList(): List<String> {
+    return JavaConversions.seqAsJavaList(WordList.load(Mnemonic.LANGUAGE_ID_ENGLISH).get().words())
+}
+
+/**
  * Create and send transaction creating a box with the given amount using parameters from the given config file.
  *
  * @param amountToSend   amount of NanoErg to put into new box
@@ -78,11 +88,12 @@ fun sendErgoTx(
     amountToSend: Long,
     mnemonic: String,
     mnemonicPass: String,
-    derivedKeyIndex: Int = 0,
-    nodeApiAddress: String = StageConstants.NODE_API_ADDRESS
+    derivedKeyIndex: Int,
+    nodeApiAddress: String,
+    explorerApiAddress: String
 ): TransactionResult {
     try {
-        val ergoClient = RestApiErgoClient.create(nodeApiAddress, StageConstants.NETWORK_TYPE, "", StageConstants.EXPLORER_API_ADDRESS)
+        val ergoClient = RestApiErgoClient.create(nodeApiAddress, StageConstants.NETWORK_TYPE, "", explorerApiAddress)
         return ergoClient.execute { ctx: BlockchainContext ->
             val prover = ctx.newProverBuilder()
                 .withMnemonic(

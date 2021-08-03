@@ -56,6 +56,10 @@ class SettingsFragment : Fragment() {
         binding.darkModeSystem.setOnClickListener { changeDayNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) }
         binding.darkModeDay.setOnClickListener { changeDayNightMode(AppCompatDelegate.MODE_NIGHT_NO) }
         binding.darkModeNight.setOnClickListener { changeDayNightMode(AppCompatDelegate.MODE_NIGHT_YES) }
+
+        binding.buttonConnectionSettings.setOnClickListener {
+            ConnectionSettingsDialogFragment().show(childFragmentManager, null)
+        }
     }
 
     private fun changeDayNightMode(mode: Int) {
