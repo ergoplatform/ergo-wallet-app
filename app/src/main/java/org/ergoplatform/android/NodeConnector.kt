@@ -26,25 +26,35 @@ class NodeConnector {
         private set
     var fiatCurrency: String = ""
         private set
-    private val ergoApiService: DefaultApi
+    private var ergoApiService: DefaultApi? = null
     private val coinGeckoApi: CoinGeckoApi
 
     init {
-        val retrofit = Retrofit.Builder()
-            .baseUrl(StageConstants.EXPLORER_API_ADDRESS)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        ergoApiService = retrofit.create(DefaultApi::class.java)
-
         val retrofitCoinGecko = Retrofit.Builder().baseUrl("https://api.coingecko.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         coinGeckoApi = retrofitCoinGecko.create(CoinGeckoApi::class.java)
     }
 
+    private fun getOrInitErgoApiService(context: Context): DefaultApi {
+        if (ergoApiService == null) {
+
+            val retrofit = Retrofit.Builder()
+                .baseUrl(getPrefExplorerApiUrl(context))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+            ergoApiService = retrofit.create(DefaultApi::class.java)
+        }
+        return ergoApiService!!
+    }
+
     fun invalidateCache() {
         lastRefreshMs = 0
+    }
+
+    fun resetApiService() {
+        ergoApiService = null
     }
 
     fun refreshByUser(context: Context): Boolean {
@@ -95,7 +105,7 @@ class NodeConnector {
                     walletDao.getAllSync().forEach { walletConfig ->
                         walletConfig.publicAddress?.let {
                             val transactionsInfo =
-                                ergoApiService.getApiV1AddressesP1BalanceTotal(walletConfig.publicAddress)
+                                getOrInitErgoApiService(context).getApiV1AddressesP1BalanceTotal(walletConfig.publicAddress)
                                     .execute()
                                     .body()
 

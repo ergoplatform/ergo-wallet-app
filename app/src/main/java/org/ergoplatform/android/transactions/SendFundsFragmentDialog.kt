@@ -167,7 +167,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
     override fun onPasswordEntered(password: String?): String? {
         password?.let {
-            val success = viewModel.startPaymentWithPassword(password)
+            val success = viewModel.startPaymentWithPassword(password, requireContext())
             if (!success) {
                 return getString(R.string.error_password_wrong)
             } else
@@ -185,10 +185,12 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             .setDeviceCredentialAllowed(true)
             .build()
 
+        val context = requireContext()
+
         val callback = object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 try {
-                    viewModel.startPaymentUserAuth()
+                    viewModel.startPaymentUserAuth(context)
                 } catch (t: Throwable) {
                     hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
                     Snackbar.make(
