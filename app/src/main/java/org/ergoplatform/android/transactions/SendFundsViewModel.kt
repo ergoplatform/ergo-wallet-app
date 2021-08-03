@@ -90,7 +90,7 @@ class SendFundsViewModel : ViewModel() {
         }
     }
 
-    fun startPaymentWithPassword(password: String): Boolean {
+    fun startPaymentWithPassword(password: String, context: Context): Boolean {
         wallet?.secretStorage?.let {
             val mnemonic: String?
             try {
@@ -106,7 +106,7 @@ class SendFundsViewModel : ViewModel() {
                 return false
             }
 
-            startPaymentWithMnemonicAsync(mnemonic)
+            startPaymentWithMnemonicAsync(mnemonic, context)
 
             _lockInterface.postValue(true)
 
@@ -116,7 +116,7 @@ class SendFundsViewModel : ViewModel() {
         return false
     }
 
-    fun startPaymentUserAuth() {
+    fun startPaymentUserAuth(context: Context) {
         // we don't handle exceptions here by intention: we throw them back to the fragment which
         // will show a snackbar to give the user a hint what went wrong
         wallet?.secretStorage?.let {
@@ -125,20 +125,21 @@ class SendFundsViewModel : ViewModel() {
             val decryptData = AesEncryptionManager.decryptDataWithDeviceKey(it)
             mnemonic = deserializeSecrets(String(decryptData!!))
 
-            startPaymentWithMnemonicAsync(mnemonic!!)
+            startPaymentWithMnemonicAsync(mnemonic!!, context)
 
             _lockInterface.postValue(true)
 
         }
     }
 
-    private fun startPaymentWithMnemonicAsync(mnemonic: String) {
+    private fun startPaymentWithMnemonicAsync(mnemonic: String, context: Context) {
         viewModelScope.launch {
             val ergoTxResult: TransactionResult
             withContext(Dispatchers.IO) {
                 ergoTxResult = sendErgoTx(
                     Address.create(receiverAddress), ergsToNanoErgs(amountToSend),
-                    mnemonic, ""
+                    mnemonic, "", 0,
+                    getPrefNodeUrl(context), getPrefExplorerApiUrl(context)
                 )
             }
             _lockInterface.postValue(false)
