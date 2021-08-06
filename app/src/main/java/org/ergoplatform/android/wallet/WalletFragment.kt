@@ -208,8 +208,6 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         binding.walletUnconfirmed.amount = nanoErgsToErgs(unconfirmed)
         binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
-        (binding.walletUnconfirmed.layoutParams as ViewGroup.MarginLayoutParams).topMargin =
-            if (binding.walletTokenNum.visibility == View.GONE) (binding.walletTokenNum.layoutParams as ViewGroup.MarginLayoutParams).topMargin else 0
 
         binding.buttonViewTransactions.setOnClickListener {
             val browserIntent = Intent(

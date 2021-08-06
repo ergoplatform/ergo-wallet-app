@@ -81,7 +81,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/activity_vertical_margin"
             app:layout_constraintStart_toStartOf="@id/wallet_name"
-            app:layout_constraintTop_toBottomOf="@id/wallet_fiat"
+            app:layout_constraintTop_toBottomOf="@id/wallet_unconfirmed"
             tools:text="999" />
 
         <TextView
@@ -96,16 +96,15 @@
 
         <org.fabiomsr.moneytextview.MoneyTextView
             android:id="@+id/wallet_unconfirmed"
+            style="@style/MoneyTextViewDefaultStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
             app:baseTextSize="@dimen/headline2_textsize"
             app:baseTextStyle="bold"
-            app:decimalDigitsTextSize="14sp"
-            app:decimalMargin="4dp"
+            app:decimalMargin="3dp"
             app:layout_constraintStart_toStartOf="@id/wallet_name"
-            app:layout_constraintTop_toBottomOf="@id/wallet_token_num"
-            app:symbolMargin="4dp"
+            app:layout_constraintTop_toBottomOf="@id/wallet_fiat"
             tools:amount="-123.2536"
             tools:visibility="visible" />
 
@@ -132,7 +131,7 @@
             android:layout_marginTop="@dimen/margin_and_half"
             android:text="@string/button_view_transactions"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/wallet_unconfirmed" />
+            app:layout_constraintTop_toBottomOf="@id/label_token_num" />
 
         <Button
             android:id="@+id/button_receive"
