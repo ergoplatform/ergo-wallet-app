@@ -14,11 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
-import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.R
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
-import org.ergoplatform.android.getExplorerPaymentRequestAddress
-import org.ergoplatform.android.setQrCodeToImageView
 import org.ergoplatform.android.ui.inputTextToFloat
 
 
@@ -115,8 +112,7 @@ class ReceiveToWalletFragment : Fragment() {
 
     private fun getTextToShare(): String? {
         binding.publicAddress.text?.let {
-            val amountStr = binding.amount.editText?.text.toString()
-            val amountVal = inputTextToFloat(amountStr)
+            val amountVal = getInputAmount()
 
             return getExplorerPaymentRequestAddress(
                 it.toString(),
@@ -125,6 +121,12 @@ class ReceiveToWalletFragment : Fragment() {
             )
         }
         return null
+    }
+
+    private fun getInputAmount(): Float {
+        val amountStr = binding.amount.editText?.text.toString()
+        val amountVal = inputTextToFloat(amountStr)
+        return amountVal
     }
 
     inner class MyTextWatcher : TextWatcher {
@@ -138,6 +140,18 @@ class ReceiveToWalletFragment : Fragment() {
 
         override fun afterTextChanged(s: Editable?) {
             refreshQrCode()
+            val nodeConnector = NodeConnector.getInstance()
+            binding.tvFiat.visibility =
+                if (nodeConnector.fiatCurrency.isNotEmpty()) View.VISIBLE else View.GONE
+            binding.tvFiat.setText(
+                getString(
+                    R.string.label_fiat_amount,
+                    formatFiatToString(
+                        getInputAmount() * (nodeConnector.fiatValue.value ?: 0f),
+                        nodeConnector.fiatCurrency, requireContext()
+                    ),
+                )
+            )
         }
 
     }

@@ -31,6 +31,11 @@ fun formatErgsToString(ergs: Float, context: Context): String {
     return DecimalFormat(context.getString(R.string.format_erg)).format(ergs).replace(',', '.')
 }
 
+fun formatFiatToString(amount: Float, currency: String, context: Context): String {
+    return DecimalFormat(context.getString(R.string.format_fiat)).format(amount).replace(',', '.') +
+            " " + currency.toUpperCase(Locale.getDefault())
+}
+
 fun serializeSecrets(mnemonic: String): String {
     val gson = Gson()
     val root = JsonObject()
@@ -93,7 +98,12 @@ fun sendErgoTx(
     explorerApiAddress: String
 ): TransactionResult {
     try {
-        val ergoClient = RestApiErgoClient.create(nodeApiAddress, StageConstants.NETWORK_TYPE, "", explorerApiAddress)
+        val ergoClient = RestApiErgoClient.create(
+            nodeApiAddress,
+            StageConstants.NETWORK_TYPE,
+            "",
+            explorerApiAddress
+        )
         return ergoClient.execute { ctx: BlockchainContext ->
             val prover = ctx.newProverBuilder()
                 .withMnemonic(

@@ -117,13 +117,24 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
+                    android:id="@+id/tv_fiat"
+                    style="@style/TextAppearance.App.Fiat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="@id/amount"
+                    app:layout_constraintTop_toBottomOf="@id/amount"
+                    tools:text="@string/label_fiat_amount"
+                    tools:visibility="visible" />
+
+                <TextView
                     android:id="@+id/tv_fee"
                     style="@style/TextAppearance.App.Body1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginVertical="@dimen/half_horizontal_margin"
                     app:layout_constraintStart_toStartOf="@id/amount"
-                    app:layout_constraintTop_toBottomOf="@id/amount"
+                    app:layout_constraintTop_toBottomOf="@id/tv_fiat"
                     tools:text="@string/desc_fee" />
 
                 <org.fabiomsr.moneytextview.MoneyTextView
