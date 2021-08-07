@@ -28,7 +28,7 @@ class WalletConfigViewModel : ViewModel() {
                 val newWalletConfig = WalletConfigDbEntity(
                     it.id,
                     newWalletName ?: it.displayName,
-                    it.publicAddress,
+                    it.firstAddress,
                     it.encryptionType,
                     it.secretStorage
                 )
@@ -45,7 +45,11 @@ class WalletConfigViewModel : ViewModel() {
             val walletDao = AppDatabase.getInstance(context).walletDao()
             val walletConfig = walletDao.loadWalletById(walletId)
             walletConfig?.let {
-                walletConfig.publicAddress?.let { walletDao.deleteWalletState(it) }
+                walletConfig.firstAddress?.let { firstAddress ->
+                    walletDao.deleteWalletState(firstAddress)
+                    walletDao.deleteTokensByWallet(firstAddress)
+                    walletDao.deleteWalletAddresses(firstAddress)
+                }
                 walletDao.deleteWalletConfig(walletId)
 
                 // After we deleted a wallet, we can prune the keystore if it is not needed

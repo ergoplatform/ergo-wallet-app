@@ -6,11 +6,16 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import org.ergoplatform.android.wallet.WalletConfigDbEntity
-import org.ergoplatform.android.wallet.WalletDbDao
-import org.ergoplatform.android.wallet.WalletStateDbEntity
+import org.ergoplatform.android.wallet.*
 
-@Database(entities = arrayOf(WalletConfigDbEntity::class, WalletStateDbEntity::class), version = 2)
+@Database(
+    entities = arrayOf(
+        WalletConfigDbEntity::class,
+        WalletStateDbEntity::class,
+        WalletAddressDbEntity::class,
+        WalletTokenDbEntity::class
+    ), version = 3
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun walletDao(): WalletDbDao
 
@@ -29,6 +34,7 @@ abstract class AppDatabase : RoomDatabase() {
         private fun buildDatabase(context: Context): AppDatabase {
             return Room.databaseBuilder(context, AppDatabase::class.java, "ergowallet")
                 .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_2_3)
                 .build()
         }
 
@@ -40,6 +46,15 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        // TODO drop wallet_states.transactions and create wallet_states.tokens on next migration
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("DROP TABLE `wallet_states`")
+                // taken from AppDatabase_Impl :-)
+                database.execSQL("CREATE TABLE IF NOT EXISTS `wallet_states` (`public_address` TEXT NOT NULL, `wallet_first_address` TEXT NOT NULL, `balance` INTEGER, `unconfirmed_balance` INTEGER, PRIMARY KEY(`public_address`))")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `wallet_addresses` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wallet_first_address` TEXT NOT NULL, `index` INTEGER NOT NULL, `public_address` TEXT NOT NULL)")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `wallet_tokens` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `public_address` TEXT NOT NULL, `wallet_first_address` TEXT NOT NULL, `token_id` TEXT, `amount` INTEGER, `decimals` INTEGER, `name` TEXT)")
+                database.execSQL("ALTER TABLE wallet_configs ADD COLUMN `unfold_tokens` INTEGER NOT NULL DEFAULT 0")
+            }
+        }
     }
 }

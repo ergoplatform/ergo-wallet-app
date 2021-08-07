@@ -1,6 +1,5 @@
 package org.ergoplatform.android
 
-import StageConstants
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.wallet.WalletStateDbEntity
+import org.ergoplatform.android.wallet.WalletTokenDbEntity
 import org.ergoplatform.api.CoinGeckoApi
 import org.ergoplatform.explorer.client.DefaultApi
 import retrofit2.Retrofit
@@ -101,26 +101,46 @@ class NodeConnector {
                 // Refresh wallet states
                 try {
                     val statesToSave = mutableListOf<WalletStateDbEntity>()
+                    val tokenAddressesToDelete = mutableListOf<String>()
+                    val tokensToSave = mutableListOf<WalletTokenDbEntity>()
                     val walletDao = AppDatabase.getInstance(context).walletDao()
                     walletDao.getAllSync().forEach { walletConfig ->
-                        walletConfig.publicAddress?.let {
-                            val transactionsInfo =
-                                getOrInitErgoApiService(context).getApiV1AddressesP1BalanceTotal(walletConfig.publicAddress)
+                        walletConfig.firstAddress?.let {
+                            val balanceInfo =
+                                getOrInitErgoApiService(context).getApiV1AddressesP1BalanceTotal(
+                                    walletConfig.firstAddress
+                                )
                                     .execute()
                                     .body()
 
                             val newState = WalletStateDbEntity(
-                                walletConfig.publicAddress,
-                                transactionsInfo?.confirmed?.tokens?.size ?: 0,
-                                transactionsInfo?.confirmed?.nanoErgs,
-                                transactionsInfo?.unconfirmed?.nanoErgs
+                                walletConfig.firstAddress,
+                                walletConfig.firstAddress,
+                                balanceInfo?.confirmed?.nanoErgs,
+                                balanceInfo?.unconfirmed?.nanoErgs
                             )
 
                             statesToSave.add(newState)
+                            tokenAddressesToDelete.add(walletConfig.firstAddress)
+                            balanceInfo?.confirmed?.tokens?.forEach {
+                                tokensToSave.add(
+                                    WalletTokenDbEntity(
+                                        0,
+                                        walletConfig.firstAddress,
+                                        walletConfig.firstAddress,
+                                        it.tokenId,
+                                        it.amount,
+                                        it.decimals,
+                                        it.name
+                                    )
+                                )
+                            }
                         }
                     }
 
                     walletDao.insertWalletStates(*statesToSave.toTypedArray())
+                    tokenAddressesToDelete.forEach { walletDao.deleteTokensByAddress(it) }
+                    walletDao.insertWalletTokens(*tokensToSave.toTypedArray())
                     didSync = statesToSave.isNotEmpty()
                 } catch (t: Throwable) {
                     Log.e("NodeConnector", "Error", t)

@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
-import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -55,7 +54,7 @@ class ReceiveToWalletFragment : Fragment() {
                 AppDatabase.getInstance(requireContext()).walletDao().loadWalletById(args.walletId)
 
             wallet?.let {
-                binding.publicAddress.text = wallet.publicAddress
+                binding.publicAddress.text = wallet.firstAddress
                 binding.walletName.text = wallet.displayName
 
                 refreshQrCode()
@@ -65,7 +64,7 @@ class ReceiveToWalletFragment : Fragment() {
                         requireContext(),
                         ClipboardManager::class.java
                     )
-                    val clip = ClipData.newPlainText("", wallet.publicAddress)
+                    val clip = ClipData.newPlainText("", wallet.firstAddress)
                     clipboard?.setPrimaryClip(clip)
 
                     Snackbar.make(requireView(), R.string.label_copied, Snackbar.LENGTH_LONG)

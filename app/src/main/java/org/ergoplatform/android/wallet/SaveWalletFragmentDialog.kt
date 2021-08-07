@@ -180,7 +180,7 @@ private suspend fun suspendSaveToDb(
         val walletConfig = WalletConfigDbEntity(
             existingWallet.id,
             existingWallet.displayName,
-            existingWallet.publicAddress,
+            existingWallet.firstAddress,
             encType,
             secretStorage
         )

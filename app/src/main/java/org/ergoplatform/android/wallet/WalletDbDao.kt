@@ -12,8 +12,17 @@ interface WalletDbDao {
     @Query("DELETE FROM wallet_configs WHERE id = :walletId")
     suspend fun deleteWalletConfig(walletId: Int)
 
-    @Query("DELETE FROM wallet_states WHERE public_address = :publicAddress")
-    suspend fun deleteWalletState(publicAddress: String)
+    @Query("DELETE FROM wallet_states WHERE wallet_first_address = :firstAddress")
+    suspend fun deleteWalletState(firstAddress: String)
+
+    @Query("DELETE FROM wallet_tokens WHERE wallet_first_address = :publicAddress")
+    suspend fun deleteTokensByAddress(publicAddress: String)
+
+    @Query("DELETE FROM wallet_tokens WHERE wallet_first_address = :firstAddress")
+    suspend fun deleteTokensByWallet(firstAddress: String)
+
+    @Query("DELETE FROM wallet_addresses WHERE wallet_first_address = :firstAddress")
+    suspend fun deleteWalletAddresses(firstAddress: String)
 
     @Update
     suspend fun update(walletConfig: WalletConfigDbEntity)
@@ -25,8 +34,11 @@ interface WalletDbDao {
     @Query("SELECT * FROM wallet_configs WHERE id = :id")
     suspend fun loadWalletWithStateById(id: Int): WalletDbEntity?
 
-    @Query("SELECT * FROM wallet_configs WHERE public_address = :publicAddress")
-    suspend fun loadWalletByAddress(publicAddress: String): WalletConfigDbEntity?
+    @Query("SELECT * FROM wallet_configs WHERE public_address = :firstAddress")
+    suspend fun loadWalletByAddress(firstAddress: String): WalletConfigDbEntity?
+
+    @Query("SELECT * FROM wallet_addresses WHERE wallet_first_address = :firstAddress")
+    suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddressDbEntity>
 
     @Query("SELECT * FROM wallet_configs")
     fun getAllSync(): List<WalletConfigDbEntity>
@@ -40,5 +52,8 @@ interface WalletDbDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWalletStates(vararg walletStates: WalletStateDbEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertWalletTokens(vararg walletTokens: WalletTokenDbEntity)
 
 }

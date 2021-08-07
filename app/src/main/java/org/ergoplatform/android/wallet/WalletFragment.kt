@@ -197,14 +197,14 @@ class WalletAdapter : RecyclerView.Adapter<WalletViewHolder>() {
 class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder(binding.root) {
     fun bind(wallet: WalletDbEntity) {
         binding.walletName.text = wallet.walletConfig.displayName
-        binding.walletBalance.amount = nanoErgsToErgs(wallet.state?.balance ?: 0)
+        binding.walletBalance.amount = nanoErgsToErgs(wallet.state.map { it.balance ?: 0 }.sum())
 
-        val tokenCount = wallet.state?.transactions ?: 0
+        val tokenCount = wallet.tokens.size
         binding.walletTokenNum.text = tokenCount.toString()
         binding.walletTokenNum.visibility = if (tokenCount == 0) View.GONE else View.VISIBLE
         binding.labelTokenNum.visibility = binding.walletTokenNum.visibility
 
-        val unconfirmed = (wallet.state?.unconfirmedBalance ?: 0)
+        val unconfirmed = (wallet.state.map { it.unconfirmedBalance ?: 0}.sum())
         binding.walletUnconfirmed.amount = nanoErgsToErgs(unconfirmed)
         binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
@@ -212,7 +212,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         binding.buttonViewTransactions.setOnClickListener {
             val browserIntent = Intent(
                 Intent.ACTION_VIEW,
-                Uri.parse(StageConstants.EXPLORER_WEB_ADDRESS + "en/addresses/" + wallet.walletConfig.publicAddress)
+                Uri.parse(StageConstants.EXPLORER_WEB_ADDRESS + "en/addresses/" + wallet.walletConfig.firstAddress)
             )
             binding.root.context.startActivity(browserIntent)
         }

@@ -55,7 +55,7 @@ class WalletConfigFragment : Fragment(), ConfirmationCallback, PasswordDialogCal
                 AppDatabase.getInstance(requireContext()).walletDao().loadWalletById(args.walletId)
 
             wallet?.let {
-                binding.publicAddress.text = wallet.publicAddress
+                binding.publicAddress.text = wallet.firstAddress
                 binding.inputWalletName.editText?.setText(wallet.displayName)
 
                 binding.buttonCopy.setOnClickListener {
@@ -63,7 +63,7 @@ class WalletConfigFragment : Fragment(), ConfirmationCallback, PasswordDialogCal
                         requireContext(),
                         ClipboardManager::class.java
                     )
-                    val clip = ClipData.newPlainText("", wallet.publicAddress)
+                    val clip = ClipData.newPlainText("", wallet.firstAddress)
                     clipboard?.setPrimaryClip(clip)
 
                     Snackbar.make(requireView(), R.string.label_copied, Snackbar.LENGTH_LONG)
