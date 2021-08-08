@@ -3,6 +3,7 @@ package org.ergoplatform.android
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -103,7 +104,8 @@ class NodeConnector {
                     val statesToSave = mutableListOf<WalletStateDbEntity>()
                     val tokenAddressesToDelete = mutableListOf<String>()
                     val tokensToSave = mutableListOf<WalletTokenDbEntity>()
-                    val walletDao = AppDatabase.getInstance(context).walletDao()
+                    val database = AppDatabase.getInstance(context)
+                    val walletDao = database.walletDao()
                     walletDao.getAllSync().forEach { walletConfig ->
                         walletConfig.firstAddress?.let {
                             val balanceInfo =
@@ -138,9 +140,11 @@ class NodeConnector {
                         }
                     }
 
-                    walletDao.insertWalletStates(*statesToSave.toTypedArray())
-                    tokenAddressesToDelete.forEach { walletDao.deleteTokensByAddress(it) }
-                    walletDao.insertWalletTokens(*tokensToSave.toTypedArray())
+                    database.withTransaction {
+                        walletDao.insertWalletStates(*statesToSave.toTypedArray())
+                        tokenAddressesToDelete.forEach { walletDao.deleteTokensByAddress(it) }
+                        walletDao.insertWalletTokens(*tokensToSave.toTypedArray())
+                    }
                     didSync = statesToSave.isNotEmpty()
                 } catch (t: Throwable) {
                     Log.e("NodeConnector", "Error", t)

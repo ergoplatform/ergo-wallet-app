@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.withTransaction
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
@@ -42,15 +43,18 @@ class WalletConfigViewModel : ViewModel() {
     fun deleteWallet(context: Context, walletId: Int) {
         // GlobalScope to let deletion process when fragment is already dismissed
         GlobalScope.launch {
-            val walletDao = AppDatabase.getInstance(context).walletDao()
+            val database = AppDatabase.getInstance(context)
+            val walletDao = database.walletDao()
             val walletConfig = walletDao.loadWalletById(walletId)
             walletConfig?.let {
-                walletConfig.firstAddress?.let { firstAddress ->
-                    walletDao.deleteWalletState(firstAddress)
-                    walletDao.deleteTokensByWallet(firstAddress)
-                    walletDao.deleteWalletAddresses(firstAddress)
+                database.withTransaction {
+                    walletConfig.firstAddress?.let { firstAddress ->
+                        walletDao.deleteWalletState(firstAddress)
+                        walletDao.deleteTokensByWallet(firstAddress)
+                        walletDao.deleteWalletAddresses(firstAddress)
+                    }
+                    walletDao.deleteWalletConfig(walletId)
                 }
-                walletDao.deleteWalletConfig(walletId)
 
                 // After we deleted a wallet, we can prune the keystore if it is not needed
                 if (walletDao.getAllSync().filter { it.encryptionType == ENC_TYPE_DEVICE }
