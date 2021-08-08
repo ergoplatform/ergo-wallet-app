@@ -11,6 +11,7 @@ import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
 import java.text.DecimalFormat
 import java.util.*
+import kotlin.math.pow
 
 val MNEMONIC_WORDS_COUNT = 15
 val MNEMONIC_MIN_WORDS_COUNT = 12
@@ -34,6 +35,11 @@ fun formatErgsToString(ergs: Float, context: Context): String {
 fun formatFiatToString(amount: Float, currency: String, context: Context): String {
     return DecimalFormat(context.getString(R.string.format_fiat)).format(amount).replace(',', '.') +
             " " + currency.toUpperCase(Locale.getDefault())
+}
+
+fun formatLongToFloatWithDecimals(amount: Long, decimals: Int): String {
+    val valueToShow: Float = (amount.toFloat()) / (10f.pow(decimals))
+    return ("%." + decimals.toString() + "f").format(valueToShow)
 }
 
 fun serializeSecrets(mnemonic: String): String {

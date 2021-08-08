@@ -17,13 +17,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.NodeConnector
-import org.ergoplatform.android.R
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
-import org.ergoplatform.android.nanoErgsToErgs
 import org.ergoplatform.android.ui.navigateSafe
 import java.util.*
 import kotlin.math.pow
@@ -203,7 +200,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         binding.walletName.text = wallet.walletConfig.displayName
         binding.walletBalance.amount = nanoErgsToErgs(wallet.state.map { it.balance ?: 0 }.sum())
 
-        // Fill tokenheadline
+        // Fill token headline
         val tokenCount = wallet.tokens.size
         binding.walletTokenNum.text = tokenCount.toString()
         binding.walletTokenNum.visibility = if (tokenCount == 0) View.GONE else View.VISIBLE
@@ -285,10 +282,10 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         }
 
         // Fill token entries
-        if (wallet.walletConfig.unfoldTokens)
-            binding.walletTokenEntries.apply {
-                removeAllViews()
+        binding.walletTokenEntries.apply {
+            removeAllViews()
 
+            if (wallet.walletConfig.unfoldTokens) {
                 val maxTokensToShow = 5
                 val dontShowAll = wallet.tokens.size > maxTokensToShow
                 val tokensToShow =
@@ -305,11 +302,8 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
                         )
 
                     itemBinding.labelTokenName.text = it.name
-
-                    val decimals = it.decimals ?: 0
-                    val valueToShow: Float = (it.amount?.toFloat() ?: 0f) / (10f.pow(decimals))
-
-                    itemBinding.labelTokenVal.text = ("%." + decimals.toString() + "f").format(valueToShow)
+                    itemBinding.labelTokenVal.text =
+                        formatLongToFloatWithDecimals(it.amount ?: 0, it.decimals ?: 0)
                 }
 
                 // in case we don't show all items, add a hint that not all items were shown
@@ -326,6 +320,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
                         "+" + (wallet.tokens.size - maxTokensToShow + 1).toString()
                 }
             }
+        }
     }
 
 }
