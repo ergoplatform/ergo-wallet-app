@@ -28,6 +28,7 @@
 
     <!-- Wallet -->
     <string name="label_tokens">tokens</string>
+    <string name="label_more_tokens">more tokens</string>
     <string name="label_unconfirmed">unconfirmed</string>
     <string name="button_view_transactions">View transactions</string>
     <string name="button_receive">Receive</string>

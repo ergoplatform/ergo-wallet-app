@@ -27,6 +27,13 @@ interface WalletDbDao {
     @Update
     suspend fun update(walletConfig: WalletConfigDbEntity)
 
+    // used to only update unfoldTokens field while keeping the sensitive information save
+    // when more fields to update are needed in the future change to target entities:
+    //    https://stackoverflow.com/a/59834309/7487013
+    // not done for now because overhead for a single field
+    @Query("UPDATE wallet_configs SET unfold_tokens = :unfoldTokens WHERE id = :id")
+    suspend fun updateWalletTokensUnfold(id: Int, unfoldTokens: Boolean)
+
     @Query("SELECT * FROM wallet_configs WHERE id = :id")
     suspend fun loadWalletById(id: Int): WalletConfigDbEntity?
 

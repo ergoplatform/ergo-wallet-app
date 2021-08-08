@@ -43,6 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/title_settings"
             android:src="@drawable/ic_edit_24"
             app:layout_constraintBottom_toTopOf="@id/wallet_balance"
             app:layout_constraintEnd_toEndOf="parent"
@@ -83,6 +84,31 @@
             app:layout_constraintStart_toStartOf="@id/wallet_name"
             app:layout_constraintTop_toBottomOf="@id/wallet_unconfirmed"
             tools:text="999" />
+
+        <ImageView
+            android:id="@+id/wallet_token_unfold"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginEnd="@dimen/half_horizontal_margin"
+            android:contentDescription="@string/label_tokens"
+            android:src="@drawable/ic_add_circle_24"
+            app:layout_constraintBottom_toBottomOf="@id/wallet_token_num"
+            app:layout_constraintEnd_toStartOf="@id/wallet_token_num"
+            app:layout_constraintTop_toTopOf="@id/wallet_token_num"
+            app:tint="?android:textColor" />
+
+        <LinearLayout
+            android:id="@+id/wallet_token_entries"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/wallet_token_num"
+            app:layout_constraintTop_toBottomOf="@id/wallet_token_num">
+
+            <include layout="@layout/entry_wallet_token" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/label_token_num"
@@ -128,10 +154,10 @@
             style="@style/Widget.App.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_and_half"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
             android:text="@string/button_view_transactions"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/label_token_num" />
+            app:layout_constraintTop_toBottomOf="@id/wallet_token_entries" />
 
         <Button
             android:id="@+id/button_receive"
