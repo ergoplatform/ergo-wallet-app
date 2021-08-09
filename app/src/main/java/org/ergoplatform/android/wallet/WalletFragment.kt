@@ -23,7 +23,6 @@ import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
 import org.ergoplatform.android.ui.navigateSafe
 import java.util.*
-import kotlin.math.pow
 
 
 class WalletFragment : Fragment() {
@@ -303,7 +302,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
 
                     itemBinding.labelTokenName.text = it.name
                     itemBinding.labelTokenVal.text =
-                        formatLongToFloatWithDecimals(it.amount ?: 0, it.decimals ?: 0)
+                        formatTokenAmounts(it.amount ?: 0, it.decimals ?: 0, true)
                 }
 
                 // in case we don't show all items, add a hint that not all items were shown

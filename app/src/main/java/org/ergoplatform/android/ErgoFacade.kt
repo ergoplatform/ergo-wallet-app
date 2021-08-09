@@ -9,8 +9,10 @@ import com.google.gson.JsonParser
 import org.ergoplatform.appkit.*
 import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
+import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.util.*
+import kotlin.math.ln
 import kotlin.math.pow
 
 val MNEMONIC_WORDS_COUNT = 15
@@ -37,10 +39,37 @@ fun formatFiatToString(amount: Float, currency: String, context: Context): Strin
             " " + currency.toUpperCase(Locale.getDefault())
 }
 
-fun formatLongToFloatWithDecimals(amount: Long, decimals: Int): String {
-    val valueToShow: Float = (amount.toFloat()) / (10f.pow(decimals))
-    return ("%." + decimals.toString() + "f").format(valueToShow)
+/**
+ * Formats token (asset) amounts.
+ */
+fun formatTokenAmounts(
+    amount: Long,
+    decimals: Int,
+    formatWithPrettyReduction: Boolean = false
+): String {
+    val valueToShow: Float = longWithDecimalsToFloat(amount, decimals)
+
+    return if (valueToShow < 1000 || !formatWithPrettyReduction) {
+        ("%." + (Math.min(5, decimals)).toString() + "f").format(valueToShow)
+    } else {
+        formatFloatWithPrettyReduction(valueToShow)
+    }
 }
+
+fun formatFloatWithPrettyReduction(amount: Float): String {
+    val suffixChars = "KMGTPE"
+    val formatter = DecimalFormat("###.#")
+    formatter.roundingMode = RoundingMode.DOWN
+
+    return if (amount < 1000.0) formatter.format(amount)
+    else {
+        val exp = (ln(amount) / ln(1000.0)).toInt()
+        formatter.format(amount / 1000.0.pow(exp.toDouble())) + suffixChars[exp - 1]
+    }
+}
+
+fun longWithDecimalsToFloat(amount: Long, decimals: Int) =
+    (amount.toFloat()) / (10f.pow(decimals))
 
 fun serializeSecrets(mnemonic: String): String {
     val gson = Gson()

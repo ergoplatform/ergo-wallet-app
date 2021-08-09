@@ -13,9 +13,9 @@ interface WalletDbDao {
     suspend fun deleteWalletConfig(walletId: Int)
 
     @Query("DELETE FROM wallet_states WHERE wallet_first_address = :firstAddress")
-    suspend fun deleteWalletState(firstAddress: String)
+    suspend fun deleteWalletStates(firstAddress: String)
 
-    @Query("DELETE FROM wallet_tokens WHERE wallet_first_address = :publicAddress")
+    @Query("DELETE FROM wallet_tokens WHERE public_address = :publicAddress")
     suspend fun deleteTokensByAddress(publicAddress: String)
 
     @Query("DELETE FROM wallet_tokens WHERE wallet_first_address = :firstAddress")
@@ -48,10 +48,7 @@ interface WalletDbDao {
     suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddressDbEntity>
 
     @Query("SELECT * FROM wallet_configs")
-    fun getAllSync(): List<WalletConfigDbEntity>
-
-    @Query("SELECT * FROM wallet_configs")
-    fun getAllLiveData(): LiveData<List<WalletConfigDbEntity>>
+    fun getAllWalletConfigsSyncronous(): List<WalletConfigDbEntity>
 
     @Transaction
     @Query("SELECT * FROM wallet_configs")

@@ -106,7 +106,7 @@ class NodeConnector {
                     val tokensToSave = mutableListOf<WalletTokenDbEntity>()
                     val database = AppDatabase.getInstance(context)
                     val walletDao = database.walletDao()
-                    walletDao.getAllSync().forEach { walletConfig ->
+                    walletDao.getAllWalletConfigsSyncronous().forEach { walletConfig ->
                         walletConfig.firstAddress?.let {
                             val balanceInfo =
                                 getOrInitErgoApiService(context).getApiV1AddressesP1BalanceTotal(

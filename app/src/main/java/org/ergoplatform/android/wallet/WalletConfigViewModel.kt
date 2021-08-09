@@ -49,7 +49,7 @@ class WalletConfigViewModel : ViewModel() {
             walletConfig?.let {
                 database.withTransaction {
                     walletConfig.firstAddress?.let { firstAddress ->
-                        walletDao.deleteWalletState(firstAddress)
+                        walletDao.deleteWalletStates(firstAddress)
                         walletDao.deleteTokensByWallet(firstAddress)
                         walletDao.deleteWalletAddresses(firstAddress)
                     }
@@ -57,7 +57,7 @@ class WalletConfigViewModel : ViewModel() {
                 }
 
                 // After we deleted a wallet, we can prune the keystore if it is not needed
-                if (walletDao.getAllSync().filter { it.encryptionType == ENC_TYPE_DEVICE }
+                if (walletDao.getAllWalletConfigsSyncronous().filter { it.encryptionType == ENC_TYPE_DEVICE }
                         .isEmpty()) {
                     AesEncryptionManager.emptyKeystore()
                 }
