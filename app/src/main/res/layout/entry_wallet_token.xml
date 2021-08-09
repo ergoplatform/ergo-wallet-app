@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    tools:showIn="@layout/card_wallet">
+
+    <TextView
+        android:id="@+id/label_token_val"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textStyle="bold"
+        tools:text="1230000" />
+
+    <TextView
+        android:id="@+id/label_token_name"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="6dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        tools:text="Very long NFT name here" />
+
+
+</LinearLayout>

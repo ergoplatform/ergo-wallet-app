@@ -18,10 +18,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
-import org.ergoplatform.android.R
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
-import org.ergoplatform.android.formatErgsToString
-import org.ergoplatform.android.parseContentFromQrCode
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.PasswordDialogCallback
 import org.ergoplatform.android.ui.hideForcedSoftKeyboard
@@ -58,12 +56,12 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         })
         viewModel.walletBalance.observe(viewLifecycleOwner, {
             binding.tvBalance.text = getString(
-                    R.string.label_wallet_balance,
-                    formatErgsToString(
-                        it,
-                        requireContext()
-                    )
+                R.string.label_wallet_balance,
+                formatErgsToString(
+                    it,
+                    requireContext()
                 )
+            )
         })
         viewModel.feeAmount.observe(viewLifecycleOwner, {
             binding.tvFee.text = getString(
@@ -75,7 +73,21 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
             )
         })
-        viewModel.grossAmount.observe(viewLifecycleOwner, { binding.grossAmount.amount = it })
+        viewModel.grossAmount.observe(viewLifecycleOwner, {
+            binding.grossAmount.amount = it
+            val nodeConnector = NodeConnector.getInstance()
+            binding.tvFiat.visibility =
+                if (nodeConnector.fiatCurrency.isNotEmpty()) View.VISIBLE else View.GONE
+            binding.tvFiat.setText(
+                getString(
+                    R.string.label_fiat_amount,
+                    formatFiatToString(
+                        viewModel.amountToSend * (nodeConnector.fiatValue.value ?: 0f),
+                        nodeConnector.fiatCurrency, requireContext()
+                    ),
+                )
+            )
+        })
         viewModel.lockInterface.observe(viewLifecycleOwner, {
             binding.lockProgress.visibility = if (it) View.VISIBLE else View.GONE
             dialog?.setCancelable(!it)

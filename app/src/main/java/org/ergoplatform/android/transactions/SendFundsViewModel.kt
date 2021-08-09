@@ -62,7 +62,7 @@ class SendFundsViewModel : ViewModel() {
             wallet?.displayName?.let {
                 _walletName.postValue(it)
             }
-            walletWithState?.state?.balance?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
+            walletWithState?.state?.map { it.balance ?: 0 }?.sum()?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
         }
         calcGrossAmount()
     }
