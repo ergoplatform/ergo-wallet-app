@@ -11,6 +11,7 @@ import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.*
 import kotlin.math.ln
 import kotlin.math.pow
@@ -30,17 +31,25 @@ fun ergsToNanoErgs(ergs: Float): Long {
     return nanoergs
 }
 
+/**
+ * ERG is always formatted US-style (e.g. 1,000.00)
+ */
 fun formatErgsToString(ergs: Float, context: Context): String {
-    return DecimalFormat(context.getString(R.string.format_erg)).format(ergs).replace(',', '.')
+    return DecimalFormat(context.getString(R.string.format_erg), DecimalFormatSymbols(Locale.US)).format(ergs)
 }
 
+/**
+ * fiat is formatted according to users locale, because it is his local currency
+ */
 fun formatFiatToString(amount: Float, currency: String, context: Context): String {
-    return DecimalFormat(context.getString(R.string.format_fiat)).format(amount).replace(',', '.') +
+    return DecimalFormat(context.getString(R.string.format_fiat)).format(amount) +
             " " + currency.toUpperCase(Locale.getDefault())
 }
 
 /**
- * Formats token (asset) amounts.
+ * Formats token (asset) amounts, always formatted US-style
+ *
+ * @param formatWithPrettyReduction 1,120.00 becomes 1.1K, useful for displaying with less space
  */
 fun formatTokenAmounts(
     amount: Long,
@@ -50,7 +59,7 @@ fun formatTokenAmounts(
     val valueToShow: Float = longWithDecimalsToFloat(amount, decimals)
 
     return if (valueToShow < 1000 || !formatWithPrettyReduction) {
-        ("%." + (Math.min(5, decimals)).toString() + "f").format(valueToShow)
+        ("%." + (Math.min(5, decimals)).toString() + "f").format(Locale.US, valueToShow)
     } else {
         formatFloatWithPrettyReduction(valueToShow)
     }
@@ -58,7 +67,7 @@ fun formatTokenAmounts(
 
 fun formatFloatWithPrettyReduction(amount: Float): String {
     val suffixChars = "KMGTPE"
-    val formatter = DecimalFormat("###.#")
+    val formatter = DecimalFormat("###.#", DecimalFormatSymbols(Locale.US))
     formatter.roundingMode = RoundingMode.DOWN
 
     return if (amount < 1000.0) formatter.format(amount)

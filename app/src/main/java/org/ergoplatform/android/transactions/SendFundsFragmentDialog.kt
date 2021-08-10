@@ -161,7 +161,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             formatErgsToString(
                 amountToSend,
                 requireContext()
-            )
+            ).replace(",", "")
         )
     }
 
