@@ -14,10 +14,15 @@ import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.android.wallet.ENC_TYPE_DEVICE
 import org.ergoplatform.android.wallet.ENC_TYPE_PASSWORD
 import org.ergoplatform.android.wallet.WalletConfigDbEntity
+import org.ergoplatform.android.wallet.WalletTokenDbEntity
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.Address
+import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
 
+/**
+ * Holding state of the send funds screen (thus to be expected to get complicated)
+ */
 class SendFundsViewModel : ViewModel() {
     var wallet: WalletConfigDbEntity? = null
         private set
@@ -52,6 +57,12 @@ class SendFundsViewModel : ViewModel() {
     private val _txId = MutableLiveData<String>()
     val txId: LiveData<String> = _txId
 
+    val tokensAvail: ArrayList<WalletTokenDbEntity> = ArrayList()
+    val tokensChosen: ArrayList<ErgoToken> = ArrayList()
+
+    // the live data gets data posted on adding or removing tokens, not on every amount change
+    private val _tokensChosenLiveData = MutableLiveData<List<ErgoToken>>()
+    val tokensChosenLiveData: LiveData<List<ErgoToken>> = _tokensChosenLiveData
 
     fun initWallet(ctx: Context, walletId: Int) {
         viewModelScope.launch {
@@ -62,7 +73,11 @@ class SendFundsViewModel : ViewModel() {
             wallet?.displayName?.let {
                 _walletName.postValue(it)
             }
-            walletWithState?.state?.map { it.balance ?: 0 }?.sum()?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
+            walletWithState?.state?.map { it.balance ?: 0 }?.sum()
+                ?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
+            tokensAvail.clear()
+            walletWithState?.tokens?.let { tokensAvail.addAll(it) }
+            _tokensChosenLiveData.postValue(tokensChosen)
         }
         calcGrossAmount()
     }
@@ -148,6 +163,30 @@ class SendFundsViewModel : ViewModel() {
                 _txId.postValue(ergoTxResult.txId!!)
             }
             _paymentDoneLiveData.postValue(ergoTxResult)
+        }
+    }
+
+    /**
+     * @return list of tokens to choose from, that means available on the wallet and not already chosen
+     */
+    fun getTokensToChooseFrom(): List<WalletTokenDbEntity> {
+        val choosenIdsAsString = tokensChosen.map { it.id.toString() }
+
+        return tokensAvail.filter {
+            !choosenIdsAsString.contains(it.tokenId)
+        }
+    }
+
+    fun newTokenChoosen(tokenId: String) {
+        tokensChosen.add(ErgoToken(tokenId, 0))
+        _tokensChosenLiveData.postValue(tokensChosen)
+    }
+
+    fun removeToken(tokenId: String) {
+        val size = tokensChosen.size
+        tokensChosen.removeAll(tokensChosen.filter { it.id.toString().equals(tokenId) })
+        if (tokensChosen.size != size) {
+            _tokensChosenLiveData.postValue(tokensChosen)
         }
     }
 }

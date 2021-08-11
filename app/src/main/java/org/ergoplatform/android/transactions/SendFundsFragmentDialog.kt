@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputType
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +21,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
+import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.PasswordDialogCallback
 import org.ergoplatform.android.ui.hideForcedSoftKeyboard
@@ -51,6 +53,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
         viewModel.initWallet(requireContext(), args.walletId)
 
+        // Add observers
         viewModel.walletName.observe(viewLifecycleOwner, {
             binding.walletName.text = getString(R.string.label_send_from, it)
         })
@@ -87,6 +90,9 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                     ),
                 )
             )
+        })
+        viewModel.tokensChosenLiveData.observe(viewLifecycleOwner, {
+            refreshTokensList()
         })
         viewModel.lockInterface.observe(viewLifecycleOwner, {
             binding.lockProgress.visibility = if (it) View.VISIBLE else View.GONE
@@ -125,6 +131,8 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             binding.cardviewTxDone.visibility = View.VISIBLE
             binding.labelTxId.text = it
         })
+
+        // Add click listeners
         binding.buttonShareTx.setOnClickListener {
             val txUrl =
                 StageConstants.EXPLORER_WEB_ADDRESS + "en/transactions/" + binding.labelTxId.text.toString()
@@ -146,7 +154,16 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         binding.buttonScan.setOnClickListener {
             IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
         }
+        binding.buttonAddToken.setOnClickListener {
+            ChooseTokenListDialogFragment().show(childFragmentManager, null)
+        }
+        binding.amount.setEndIconOnClickListener {
+            setAmountEdittext(
+                (viewModel.walletBalance.value ?: 0f) - (viewModel.feeAmount.value ?: 0f)
+            )
+        }
 
+        // Init other stuff
         binding.tvReceiver.editText?.setText(viewModel.receiverAddress)
         if (viewModel.amountToSend > 0) {
             setAmountEdittext(viewModel.amountToSend)
@@ -154,6 +171,34 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
         binding.amount.editText?.addTextChangedListener(MyTextWatcher(binding.amount))
         binding.tvReceiver.editText?.addTextChangedListener(MyTextWatcher(binding.tvReceiver))
+    }
+
+    private fun refreshTokensList() {
+        val tokensAvail = viewModel.tokensAvail
+        val tokensChosen = viewModel.tokensChosen
+
+        binding.buttonAddToken.visibility =
+            if (tokensAvail.size > tokensChosen.size) View.VISIBLE else View.INVISIBLE
+        binding.tokensList.apply {
+            this.visibility =
+                if (tokensChosen.isNotEmpty()) View.VISIBLE else View.GONE
+            this.removeAllViews()
+            tokensChosen.forEach {
+                val ergoId = it.id.toString()
+                tokensAvail.filter { it.tokenId.equals(ergoId) }
+                    .firstOrNull()?.let { tokenDbEntity ->
+                        val itemBinding =
+                            FragmentSendFundsTokenItemBinding.inflate(layoutInflater, this, true)
+                        itemBinding.tvTokenName.text = tokenDbEntity.name
+                        itemBinding.inputTokenAmount.inputType =
+                            if (tokenDbEntity.decimals!! > 0) InputType.TYPE_NUMBER_FLAG_DECIMAL
+                            else InputType.TYPE_CLASS_NUMBER
+                        itemBinding.buttonTokenRemove.setOnClickListener {
+                            viewModel.removeToken(ergoId)
+                        }
+                    }
+            }
+        }
     }
 
     private fun setAmountEdittext(amountToSend: Float) {
