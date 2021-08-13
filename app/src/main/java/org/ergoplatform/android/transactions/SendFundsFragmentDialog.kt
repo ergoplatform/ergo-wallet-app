@@ -11,8 +11,10 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import androidx.core.view.descendants
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -26,6 +28,8 @@ import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.PasswordDialogCallback
 import org.ergoplatform.android.ui.hideForcedSoftKeyboard
 import org.ergoplatform.android.ui.inputTextToFloat
+import org.ergoplatform.android.wallet.WalletTokenDbEntity
+import kotlin.math.pow
 
 /**
  * Here's the place to send transactions
@@ -184,22 +188,41 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                 if (tokensChosen.isNotEmpty()) View.VISIBLE else View.GONE
             this.removeAllViews()
             tokensChosen.forEach {
-                val ergoId = it.id.toString()
+                val ergoId = it.key
                 tokensAvail.filter { it.tokenId.equals(ergoId) }
                     .firstOrNull()?.let { tokenDbEntity ->
                         val itemBinding =
                             FragmentSendFundsTokenItemBinding.inflate(layoutInflater, this, true)
                         itemBinding.tvTokenName.text = tokenDbEntity.name
                         itemBinding.inputTokenAmount.inputType =
-                            if (tokenDbEntity.decimals!! > 0) InputType.TYPE_NUMBER_FLAG_DECIMAL
+                            if (tokenDbEntity.decimals!! > 0) InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
                             else InputType.TYPE_CLASS_NUMBER
+                        itemBinding.inputTokenAmount.addTextChangedListener(
+                            TokenAmountWatcher(tokenDbEntity)
+                        )
+                        itemBinding.inputTokenAmount.setText(
+                            tokenAmountToText(it.value.value, tokenDbEntity.decimals)
+                        )
                         itemBinding.buttonTokenRemove.setOnClickListener {
                             viewModel.removeToken(ergoId)
+                        }
+                        itemBinding.buttonTokenAll.setOnClickListener {
+                            itemBinding.inputTokenAmount.setText(
+                                tokenAmountToText(tokenDbEntity.amount!!, tokenDbEntity.decimals)
+                            )
                         }
                     }
             }
         }
     }
+
+    private fun tokenAmountToText(amount: Long, decimals: Int) =
+        if (amount > 0)
+            formatTokenAmounts(
+                amount,
+                decimals
+            ).replace(",", "")
+        else ""
 
     private fun setAmountEdittext(amountToSend: Float) {
         binding.amount.editText?.setText(
@@ -217,6 +240,11 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         } else if (!viewModel.checkAmount()) {
             binding.amount.error = getString(R.string.error_amount)
             binding.amount.editText?.requestFocus()
+        } else if (!viewModel.checkTokens()) {
+            binding.labelTokenAmountError.visibility = View.VISIBLE
+            binding.tokensList.descendants.filter { it is EditText && it.text.isEmpty() }
+                .firstOrNull()
+                ?.requestFocus()
         } else {
             viewModel.preparePayment(this)
         }
@@ -308,6 +336,25 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         override fun afterTextChanged(s: Editable?) {
             textInputLayout.error = null
             inputChangesToViewModel()
+        }
+
+    }
+
+    inner class TokenAmountWatcher(private val token: WalletTokenDbEntity) : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+        }
+
+        override fun afterTextChanged(s: Editable?) {
+            viewModel.setTokenAmount(
+                token.tokenId!!,
+                (inputTextToFloat(s?.toString()) * 10f.pow(token.decimals!!)).toLong()
+            )
+            binding.labelTokenAmountError.visibility = View.GONE
         }
 
     }

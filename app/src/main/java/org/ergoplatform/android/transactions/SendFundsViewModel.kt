@@ -58,11 +58,11 @@ class SendFundsViewModel : ViewModel() {
     val txId: LiveData<String> = _txId
 
     val tokensAvail: ArrayList<WalletTokenDbEntity> = ArrayList()
-    val tokensChosen: ArrayList<ErgoToken> = ArrayList()
+    val tokensChosen: HashMap<String, ErgoToken> = HashMap()
 
     // the live data gets data posted on adding or removing tokens, not on every amount change
-    private val _tokensChosenLiveData = MutableLiveData<List<ErgoToken>>()
-    val tokensChosenLiveData: LiveData<List<ErgoToken>> = _tokensChosenLiveData
+    private val _tokensChosenLiveData = MutableLiveData<List<String>>()
+    val tokensChosenLiveData: LiveData<List<String>> = _tokensChosenLiveData
 
     fun initWallet(ctx: Context, walletId: Int) {
         viewModelScope.launch {
@@ -77,7 +77,7 @@ class SendFundsViewModel : ViewModel() {
                 ?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
             tokensAvail.clear()
             walletWithState?.tokens?.let { tokensAvail.addAll(it) }
-            _tokensChosenLiveData.postValue(tokensChosen)
+            _tokensChosenLiveData.postValue(tokensChosen.keys.toList())
         }
         calcGrossAmount()
     }
@@ -92,6 +92,10 @@ class SendFundsViewModel : ViewModel() {
 
     fun checkAmount(): Boolean {
         return amountToSend >= nanoErgsToErgs(Parameters.MinChangeValue)
+    }
+
+    fun checkTokens(): Boolean {
+        return tokensChosen.values.filter { it.value <= 0 }.isEmpty()
     }
 
     fun preparePayment(fragment: SendFundsFragmentDialog) {
@@ -153,6 +157,7 @@ class SendFundsViewModel : ViewModel() {
             withContext(Dispatchers.IO) {
                 ergoTxResult = sendErgoTx(
                     Address.create(receiverAddress), ergsToNanoErgs(amountToSend),
+                    tokensChosen.values.toList(),
                     mnemonic, "", 0,
                     getPrefNodeUrl(context), getPrefExplorerApiUrl(context)
                 )
@@ -170,23 +175,27 @@ class SendFundsViewModel : ViewModel() {
      * @return list of tokens to choose from, that means available on the wallet and not already chosen
      */
     fun getTokensToChooseFrom(): List<WalletTokenDbEntity> {
-        val choosenIdsAsString = tokensChosen.map { it.id.toString() }
-
         return tokensAvail.filter {
-            !choosenIdsAsString.contains(it.tokenId)
+            !tokensChosen.containsKey(it.tokenId)
         }
     }
 
     fun newTokenChoosen(tokenId: String) {
-        tokensChosen.add(ErgoToken(tokenId, 0))
-        _tokensChosenLiveData.postValue(tokensChosen)
+        tokensChosen.put(tokenId, ErgoToken(tokenId, 0))
+        _tokensChosenLiveData.postValue(tokensChosen.keys.toList())
     }
 
     fun removeToken(tokenId: String) {
         val size = tokensChosen.size
-        tokensChosen.removeAll(tokensChosen.filter { it.id.toString().equals(tokenId) })
+        tokensChosen.remove(tokenId)
         if (tokensChosen.size != size) {
-            _tokensChosenLiveData.postValue(tokensChosen)
+            _tokensChosenLiveData.postValue(tokensChosen.keys.toList())
+        }
+    }
+
+    fun setTokenAmount(tokenId: String, amount: Long) {
+        tokensChosen.get(tokenId)?.let {
+            tokensChosen.put(tokenId, ErgoToken(it.id, amount))
         }
     }
 }

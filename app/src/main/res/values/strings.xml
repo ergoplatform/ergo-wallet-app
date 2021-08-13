@@ -25,6 +25,7 @@
     <string name="label_none">None</string>
     <string name="label_details">Details</string>
     <string name="label_dismiss">Dismiss</string>
+    <string name="label_remove">Remove</string>
 
     <!-- Wallet -->
     <string name="label_tokens">tokens</string>
@@ -109,7 +110,9 @@
     <string name="title_authenticate">Authentication required</string>
     <string name="error_device_security">Security error: %1s</string>
     <string name="label_add_token">Token</string>
+    <string name="label_send_all">Send all</string>
     <string name="title_add_token">Choose token to send</string>
+    <string name="error_token_amount">Please enter valid amounts or remove token entries not to send</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, 2021</string>

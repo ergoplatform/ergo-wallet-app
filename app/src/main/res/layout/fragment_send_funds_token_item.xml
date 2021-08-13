@@ -11,12 +11,13 @@
         android:layout_width="42dp"
         android:layout_height="match_parent"
         android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@string/label_send_all"
         android:scaleType="center"
         android:src="@drawable/ic_use_all_24" />
 
     <EditText
         android:id="@+id/input_token_amount"
-        android:layout_width="80sp"
+        android:layout_width="85sp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/half_horizontal_margin"
         android:gravity="end"
@@ -38,7 +39,8 @@
         android:layout_width="48dp"
         android:layout_height="match_parent"
         android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@string/label_remove"
         android:scaleType="center"
-        android:src="@drawable/ic_delete_24" />
+        android:src="@drawable/ic_close_24" />
 
 </LinearLayout>
