@@ -201,7 +201,7 @@ class SendFundsViewModel : ViewModel() {
     }
 
     fun addTokensFromQr(tokens: HashMap<String, Double>) {
-        val size = tokensChosen.size
+        var changed = false
         tokens.forEach {
             val tokenId = it.key
             val amount = it.value
@@ -210,9 +210,10 @@ class SendFundsViewModel : ViewModel() {
             tokensAvail.filter { it.tokenId.equals(tokenId) }.firstOrNull()?.let {
                 val longAmount = (amount * 10.0.pow(it.decimals ?: 0)).toLong()
                 tokensChosen.put(tokenId, ErgoToken(tokenId, longAmount))
+                changed = true
             }
         }
-        if (tokensChosen.size != size) {
+        if (changed) {
             notifyTokensChosenChanged()
         }
     }
