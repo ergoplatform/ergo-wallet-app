@@ -19,6 +19,7 @@ import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
+import kotlin.math.pow
 
 /**
  * Holding state of the send funds screen (thus to be expected to get complicated)
@@ -77,7 +78,7 @@ class SendFundsViewModel : ViewModel() {
                 ?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
             tokensAvail.clear()
             walletWithState?.tokens?.let { tokensAvail.addAll(it) }
-            _tokensChosenLiveData.postValue(tokensChosen.keys.toList())
+            notifyTokensChosenChanged()
         }
         calcGrossAmount()
     }
@@ -182,14 +183,14 @@ class SendFundsViewModel : ViewModel() {
 
     fun newTokenChoosen(tokenId: String) {
         tokensChosen.put(tokenId, ErgoToken(tokenId, 0))
-        _tokensChosenLiveData.postValue(tokensChosen.keys.toList())
+        notifyTokensChosenChanged()
     }
 
     fun removeToken(tokenId: String) {
         val size = tokensChosen.size
         tokensChosen.remove(tokenId)
         if (tokensChosen.size != size) {
-            _tokensChosenLiveData.postValue(tokensChosen.keys.toList())
+            notifyTokensChosenChanged()
         }
     }
 
@@ -197,5 +198,26 @@ class SendFundsViewModel : ViewModel() {
         tokensChosen.get(tokenId)?.let {
             tokensChosen.put(tokenId, ErgoToken(it.id, amount))
         }
+    }
+
+    fun addTokensFromQr(tokens: HashMap<String, Double>) {
+        val size = tokensChosen.size
+        tokens.forEach {
+            val tokenId = it.key
+            val amount = it.value
+
+            // we need to check for existence here, QR code might have any String, not an ID
+            tokensAvail.filter { it.tokenId.equals(tokenId) }.firstOrNull()?.let {
+                val longAmount = (amount * 10.0.pow(it.decimals ?: 0)).toLong()
+                tokensChosen.put(tokenId, ErgoToken(tokenId, longAmount))
+            }
+        }
+        if (tokensChosen.size != size) {
+            notifyTokensChosenChanged()
+        }
+    }
+
+    private fun notifyTokensChosenChanged() {
+        _tokensChosenLiveData.postValue(tokensChosen.keys.toList())
     }
 }

@@ -204,7 +204,11 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                             tokenAmountToText(it.value.value, tokenDbEntity.decimals)
                         )
                         itemBinding.buttonTokenRemove.setOnClickListener {
-                            viewModel.removeToken(ergoId)
+                            if (itemBinding.inputTokenAmount.text.isEmpty()) {
+                                viewModel.removeToken(ergoId)
+                            } else {
+                                itemBinding.inputTokenAmount.text = null
+                            }
                         }
                         itemBinding.buttonTokenAll.setOnClickListener {
                             itemBinding.inputTokenAmount.setText(
@@ -311,8 +315,11 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         if (result != null) {
             result.contents?.let {
                 val content = parseContentFromQrCode(it)
-                content?.let { binding.tvReceiver.editText?.setText(content.address) }
-                content?.amount?.let { amount -> if (amount > 0) setAmountEdittext(amount) }
+                content?.let {
+                    binding.tvReceiver.editText?.setText(content.address)
+                    content.amount.let { amount -> if (amount > 0) setAmountEdittext(amount) }
+                    viewModel.addTokensFromQr(content.tokens)
+                }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)

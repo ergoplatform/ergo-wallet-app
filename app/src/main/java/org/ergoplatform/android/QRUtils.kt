@@ -50,6 +50,7 @@ fun parseContentFromQrCode(qrCode: String): QrCodeContent? {
         var address: String? = null
         var amount: Float = 0f
         var description: String = ""
+        val tokenMap: HashMap<String, Double> = HashMap()
 
         uriWithoutPrefix.split('&').forEach {
             if (it.startsWith(RECIPIENT_PARAM_PREFIX)) {
@@ -61,11 +62,21 @@ fun parseContentFromQrCode(qrCode: String): QrCodeContent? {
             } else if (it.startsWith(DESCRIPTION_PARAM_PREFIX)) {
                 description =
                     URLDecoder.decode(it.substring(DESCRIPTION_PARAM_PREFIX.length), URI_ENCODING)
+            } else if (it.contains('=')) {
+                // this could be a token
+                val keyVal = it.split("=")
+                try {
+                    val tokenId = keyVal.get(0)
+                    val tokenAmount = keyVal.get(1).toDouble()
+                    tokenMap.put(tokenId, tokenAmount)
+                } catch (t: Throwable) {
+                    // in this case, we haven't found a token :)
+                }
             }
         }
 
         if (address != null) {
-            return QrCodeContent(address!!, amount, description)
+            return QrCodeContent(address!!, amount, description, tokenMap)
         } else {
             // no recipient, no sense
             return null
@@ -81,5 +92,6 @@ fun parseContentFromQrCode(qrCode: String): QrCodeContent? {
 data class QrCodeContent(
     val address: String,
     val amount: Float = 0f,
-    val description: String = ""
+    val description: String = "",
+    val tokens: HashMap<String, Double> = HashMap(),
 )
