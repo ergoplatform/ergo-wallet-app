@@ -31,7 +31,8 @@ class WalletConfigViewModel : ViewModel() {
                     newWalletName ?: it.displayName,
                     it.firstAddress,
                     it.encryptionType,
-                    it.secretStorage
+                    it.secretStorage,
+                    it.unfoldTokens
                 )
 
                 walletDao.update(newWalletConfig)

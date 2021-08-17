@@ -17,6 +17,7 @@
             android:layout_margin="@dimen/activity_horizontal_margin">
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/activity_horizontal_margin"
@@ -83,6 +84,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:hint="@string/label_amount"
+                    app:endIconDrawable="@drawable/ic_use_all_24"
+                    app:endIconMode="custom"
                     app:layout_constraintEnd_toEndOf="@id/tv_receiver"
                     app:layout_constraintStart_toStartOf="@id/tv_receiver"
                     app:layout_constraintTop_toBottomOf="@id/tv_receiver">
@@ -151,16 +154,59 @@
                     app:layout_constraintTop_toBottomOf="@id/tv_fee"
                     app:symbolMargin="6dp" />
 
+                <LinearLayout
+                    android:id="@+id/tokens_list"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:animateLayoutChanges="true"
+                    android:orientation="vertical"
+                    android:padding="@dimen/half_horizontal_margin"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/gross_amount"
+                    app:layout_constraintWidth_max="600dp"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/label_token_amount_error"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                    android:gravity="center"
+                    android:text="@string/error_token_amount"
+                    android:textColor="?attr/colorError"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tokens_list" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_add_token"
+                    style="@style/Widget.App.Button.PrimaryTint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:elegantTextHeight="true"
+                    android:text="@string/label_add_token"
+                    app:icon="@drawable/ic_add_24"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/button_send" />
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_send"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
+                    android:layout_marginTop="@dimen/half_horizontal_margin"
                     android:elegantTextHeight="true"
+                    android:paddingStart="@dimen/margin_and_half"
+                    android:paddingEnd="@dimen/margin_and_half"
                     android:text="@string/button_send"
                     app:icon="@drawable/ic_send_24"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/gross_amount" />
+                    app:layout_constraintTop_toBottomOf="@id/label_token_amount_error" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
