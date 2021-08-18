@@ -15,12 +15,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.NodeConnector
-import org.ergoplatform.android.R
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.CardWalletBinding
+import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
-import org.ergoplatform.android.nanoErgsToErgs
 import org.ergoplatform.android.ui.navigateSafe
 import java.util.*
 
@@ -197,24 +197,32 @@ class WalletAdapter : RecyclerView.Adapter<WalletViewHolder>() {
 class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder(binding.root) {
     fun bind(wallet: WalletDbEntity) {
         binding.walletName.text = wallet.walletConfig.displayName
-        binding.walletBalance.amount = nanoErgsToErgs(wallet.state?.balance ?: 0)
+        binding.walletBalance.amount = nanoErgsToErgs(wallet.state.map { it.balance ?: 0 }.sum())
 
-        val tokenCount = wallet.state?.transactions ?: 0
+        // Fill token headline
+        val tokenCount = wallet.tokens.size
         binding.walletTokenNum.text = tokenCount.toString()
         binding.walletTokenNum.visibility = if (tokenCount == 0) View.GONE else View.VISIBLE
         binding.labelTokenNum.visibility = binding.walletTokenNum.visibility
+        binding.walletTokenUnfold.visibility = binding.walletTokenNum.visibility
+        binding.walletTokenEntries.visibility =
+            if (tokenCount == 0 || !wallet.walletConfig.unfoldTokens) View.GONE else View.VISIBLE
+        binding.walletTokenUnfold.setImageResource(
+            if (wallet.walletConfig.unfoldTokens)
+                R.drawable.ic_remove_circle_24 else R.drawable.ic_add_circle_24
+        )
 
-        val unconfirmed = (wallet.state?.unconfirmedBalance ?: 0)
+        // Fill unconfirmed fields
+        val unconfirmed = (wallet.state.map { it.unconfirmedBalance ?: 0 }.sum())
         binding.walletUnconfirmed.amount = nanoErgsToErgs(unconfirmed)
         binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
-        (binding.walletUnconfirmed.layoutParams as ViewGroup.MarginLayoutParams).topMargin =
-            if (binding.walletTokenNum.visibility == View.GONE) (binding.walletTokenNum.layoutParams as ViewGroup.MarginLayoutParams).topMargin else 0
 
+        // Set button listeners
         binding.buttonViewTransactions.setOnClickListener {
             val browserIntent = Intent(
                 Intent.ACTION_VIEW,
-                Uri.parse(StageConstants.EXPLORER_WEB_ADDRESS + "en/addresses/" + wallet.walletConfig.publicAddress)
+                Uri.parse(StageConstants.EXPLORER_WEB_ADDRESS + "en/addresses/" + wallet.walletConfig.firstAddress)
             )
             binding.root.context.startActivity(browserIntent)
         }
@@ -247,6 +255,21 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
                 )
         }
 
+        val launchUnfoldTokenFieldChange: (v: View) -> Unit = {
+            GlobalScope.launch {
+                AppDatabase.getInstance(it.context).walletDao().updateWalletTokensUnfold(
+                    wallet.walletConfig.id,
+                    !wallet.walletConfig.unfoldTokens
+                )
+                // we don't need to update UI here - the DB change will trigger a rebind of the card
+            }
+        }
+        binding.walletTokenUnfold.setOnClickListener(launchUnfoldTokenFieldChange)
+        binding.labelTokenNum.setOnClickListener(launchUnfoldTokenFieldChange)
+        binding.walletTokenNum.setOnClickListener(launchUnfoldTokenFieldChange)
+        binding.walletTokenEntries.setOnClickListener(launchUnfoldTokenFieldChange)
+
+        // Fill fiat value
         val nodeConnector = NodeConnector.getInstance()
         val ergoPrice = nodeConnector.fiatValue.value ?: 0f
         if (ergoPrice == 0f) {
@@ -255,6 +278,47 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
             binding.walletFiat.visibility = View.VISIBLE
             binding.walletFiat.amount = ergoPrice * binding.walletBalance.amount
             binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.toUpperCase())
+        }
+
+        // Fill token entries
+        binding.walletTokenEntries.apply {
+            removeAllViews()
+
+            if (wallet.walletConfig.unfoldTokens) {
+                val maxTokensToShow = 5
+                val dontShowAll = wallet.tokens.size > maxTokensToShow
+                val tokensToShow =
+                    (if (dontShowAll) wallet.tokens.subList(
+                        0,
+                        maxTokensToShow - 1
+                    ) else wallet.tokens)
+                tokensToShow.forEach {
+                    val itemBinding =
+                        EntryWalletTokenBinding.inflate(
+                            LayoutInflater.from(itemView.context),
+                            this,
+                            true
+                        )
+
+                    itemBinding.labelTokenName.text = it.name
+                    itemBinding.labelTokenVal.text =
+                        formatTokenAmounts(it.amount ?: 0, it.decimals ?: 0, true)
+                }
+
+                // in case we don't show all items, add a hint that not all items were shown
+                if (dontShowAll) {
+                    val itemBinding =
+                        EntryWalletTokenBinding.inflate(
+                            LayoutInflater.from(itemView.context),
+                            this,
+                            true
+                        )
+
+                    itemBinding.labelTokenName.setText(R.string.label_more_tokens)
+                    itemBinding.labelTokenVal.text =
+                        "+" + (wallet.tokens.size - maxTokensToShow + 1).toString()
+                }
+            }
         }
     }
 

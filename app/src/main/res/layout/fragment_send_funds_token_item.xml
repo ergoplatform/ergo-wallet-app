@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/button_token_all"
+        android:layout_width="42dp"
+        android:layout_height="match_parent"
+        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@string/label_send_all"
+        android:scaleType="center"
+        android:src="@drawable/ic_use_all_24" />
+
+    <EditText
+        android:id="@+id/input_token_amount"
+        android:layout_width="85sp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/half_horizontal_margin"
+        android:gravity="end"
+        android:inputType="numberDecimal"
+        tools:text="123.45" />
+
+    <TextView
+        android:id="@+id/tv_token_name"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        tools:text="Token Name" />
+
+    <ImageView
+        android:id="@+id/button_token_remove"
+        android:layout_width="48dp"
+        android:layout_height="match_parent"
+        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@string/label_remove"
+        android:scaleType="center"
+        android:src="@drawable/ic_close_24" />
+
+</LinearLayout>

@@ -104,16 +104,24 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
                     )
 
                 } catch (t: Throwable) {
-                    Snackbar.make(
-                        requireView(),
-                        getString(R.string.error_device_security, t.message),
-                        Snackbar.LENGTH_LONG
-                    ).show()
+                    showSecurityErrorSnackbar(t)
                 }
             }
         }
 
-        BiometricPrompt(this, callback).authenticate(promptInfo)
+        try {
+            BiometricPrompt(this, callback).authenticate(promptInfo)
+        } catch (t: Throwable) {
+            showSecurityErrorSnackbar(t)
+        }
+    }
+
+    private fun showSecurityErrorSnackbar(t: Throwable) {
+        Snackbar.make(
+            requireView(),
+            getString(R.string.error_device_security, t.message),
+            Snackbar.LENGTH_LONG
+        ).show()
     }
 
     private fun saveToDbAndNavigateToWallet(encType: Int, secretStorage: ByteArray) {
@@ -180,7 +188,7 @@ private suspend fun suspendSaveToDb(
         val walletConfig = WalletConfigDbEntity(
             existingWallet.id,
             existingWallet.displayName,
-            existingWallet.publicAddress,
+            existingWallet.firstAddress,
             encType,
             secretStorage
         )

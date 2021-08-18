@@ -7,10 +7,15 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.*
+import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
+import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.*
+import kotlin.math.ln
+import kotlin.math.pow
 
 val MNEMONIC_WORDS_COUNT = 15
 val MNEMONIC_MIN_WORDS_COUNT = 12
@@ -27,9 +32,54 @@ fun ergsToNanoErgs(ergs: Float): Long {
     return nanoergs
 }
 
+/**
+ * ERG is always formatted US-style (e.g. 1,000.00)
+ */
 fun formatErgsToString(ergs: Float, context: Context): String {
-    return DecimalFormat(context.getString(R.string.format_erg)).format(ergs).replace(',', '.')
+    return DecimalFormat(context.getString(R.string.format_erg), DecimalFormatSymbols(Locale.US)).format(ergs)
 }
+
+/**
+ * fiat is formatted according to users locale, because it is his local currency
+ */
+fun formatFiatToString(amount: Float, currency: String, context: Context): String {
+    return DecimalFormat(context.getString(R.string.format_fiat)).format(amount) +
+            " " + currency.toUpperCase(Locale.getDefault())
+}
+
+/**
+ * Formats token (asset) amounts, always formatted US-style
+ *
+ * @param formatWithPrettyReduction 1,120.00 becomes 1.1K, useful for displaying with less space
+ */
+fun formatTokenAmounts(
+    amount: Long,
+    decimals: Int,
+    formatWithPrettyReduction: Boolean = false
+): String {
+    val valueToShow: Double = longWithDecimalsToDouble(amount, decimals)
+
+    return if (valueToShow < 1000 || !formatWithPrettyReduction) {
+        ("%." + (Math.min(5, decimals)).toString() + "f").format(Locale.US, valueToShow)
+    } else {
+        formatDoubleWithPrettyReduction(valueToShow)
+    }
+}
+
+fun formatDoubleWithPrettyReduction(amount: Double): String {
+    val suffixChars = "KMGTPE"
+    val formatter = DecimalFormat("###.#", DecimalFormatSymbols(Locale.US))
+    formatter.roundingMode = RoundingMode.DOWN
+
+    return if (amount < 1000.0) formatter.format(amount)
+    else {
+        val exp = (ln(amount) / ln(1000.0)).toInt()
+        formatter.format(amount / 1000.0.pow(exp.toDouble())) + suffixChars[exp - 1]
+    }
+}
+
+fun longWithDecimalsToDouble(amount: Long, decimals: Int) =
+    (amount.toDouble()) / (10.0.pow(decimals))
 
 fun serializeSecrets(mnemonic: String): String {
     val gson = Gson()
@@ -86,6 +136,7 @@ fun loadAppKitMnemonicWordList(): List<String> {
 fun sendErgoTx(
     recipient: Address,
     amountToSend: Long,
+    tokensToSend: List<ErgoToken>,
     mnemonic: String,
     mnemonicPass: String,
     derivedKeyIndex: Int,
@@ -93,7 +144,12 @@ fun sendErgoTx(
     explorerApiAddress: String
 ): TransactionResult {
     try {
-        val ergoClient = RestApiErgoClient.create(nodeApiAddress, StageConstants.NETWORK_TYPE, "", explorerApiAddress)
+        val ergoClient = RestApiErgoClient.create(
+            nodeApiAddress,
+            StageConstants.NETWORK_TYPE,
+            "",
+            explorerApiAddress
+        )
         return ergoClient.execute { ctx: BlockchainContext ->
             val prover = ctx.newProverBuilder()
                 .withMnemonic(
@@ -102,10 +158,15 @@ fun sendErgoTx(
                 )
                 .withEip3Secret(derivedKeyIndex)
                 .build()
-            val jsonTransaction = BoxOperations.send(ctx, prover, true, recipient, amountToSend)
 
-            val jsonTree = JsonParser().parse(jsonTransaction)
-            val txId = (jsonTree as JsonObject).get("id").asString
+            val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
+            val signed = BoxOperations.putToContractTx(
+                ctx, prover, true,
+                contract, amountToSend, tokensToSend
+            )
+            ctx.sendTransaction(signed)
+
+            val txId = signed.id
 
             return@execute TransactionResult(txId.isNotEmpty(), txId)
         }

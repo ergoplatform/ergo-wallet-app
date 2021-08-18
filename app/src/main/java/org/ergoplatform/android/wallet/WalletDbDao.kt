@@ -12,11 +12,27 @@ interface WalletDbDao {
     @Query("DELETE FROM wallet_configs WHERE id = :walletId")
     suspend fun deleteWalletConfig(walletId: Int)
 
-    @Query("DELETE FROM wallet_states WHERE public_address = :publicAddress")
-    suspend fun deleteWalletState(publicAddress: String)
+    @Query("DELETE FROM wallet_states WHERE wallet_first_address = :firstAddress")
+    suspend fun deleteWalletStates(firstAddress: String)
+
+    @Query("DELETE FROM wallet_tokens WHERE public_address = :publicAddress")
+    suspend fun deleteTokensByAddress(publicAddress: String)
+
+    @Query("DELETE FROM wallet_tokens WHERE wallet_first_address = :firstAddress")
+    suspend fun deleteTokensByWallet(firstAddress: String)
+
+    @Query("DELETE FROM wallet_addresses WHERE wallet_first_address = :firstAddress")
+    suspend fun deleteWalletAddresses(firstAddress: String)
 
     @Update
     suspend fun update(walletConfig: WalletConfigDbEntity)
+
+    // used to only update unfoldTokens field while keeping the sensitive information save
+    // when more fields to update are needed in the future change to target entities:
+    //    https://stackoverflow.com/a/59834309/7487013
+    // not done for now because overhead for a single field
+    @Query("UPDATE wallet_configs SET unfold_tokens = :unfoldTokens WHERE id = :id")
+    suspend fun updateWalletTokensUnfold(id: Int, unfoldTokens: Boolean)
 
     @Query("SELECT * FROM wallet_configs WHERE id = :id")
     suspend fun loadWalletById(id: Int): WalletConfigDbEntity?
@@ -25,14 +41,14 @@ interface WalletDbDao {
     @Query("SELECT * FROM wallet_configs WHERE id = :id")
     suspend fun loadWalletWithStateById(id: Int): WalletDbEntity?
 
-    @Query("SELECT * FROM wallet_configs WHERE public_address = :publicAddress")
-    suspend fun loadWalletByAddress(publicAddress: String): WalletConfigDbEntity?
+    @Query("SELECT * FROM wallet_configs WHERE public_address = :firstAddress")
+    suspend fun loadWalletByAddress(firstAddress: String): WalletConfigDbEntity?
+
+    @Query("SELECT * FROM wallet_addresses WHERE wallet_first_address = :firstAddress")
+    suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddressDbEntity>
 
     @Query("SELECT * FROM wallet_configs")
-    fun getAllSync(): List<WalletConfigDbEntity>
-
-    @Query("SELECT * FROM wallet_configs")
-    fun getAllLiveData(): LiveData<List<WalletConfigDbEntity>>
+    fun getAllWalletConfigsSyncronous(): List<WalletConfigDbEntity>
 
     @Transaction
     @Query("SELECT * FROM wallet_configs")
@@ -40,5 +56,8 @@ interface WalletDbDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWalletStates(vararg walletStates: WalletStateDbEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertWalletTokens(vararg walletTokens: WalletTokenDbEntity)
 
 }

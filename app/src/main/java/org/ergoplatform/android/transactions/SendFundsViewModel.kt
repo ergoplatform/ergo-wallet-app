@@ -14,10 +14,16 @@ import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.android.wallet.ENC_TYPE_DEVICE
 import org.ergoplatform.android.wallet.ENC_TYPE_PASSWORD
 import org.ergoplatform.android.wallet.WalletConfigDbEntity
+import org.ergoplatform.android.wallet.WalletTokenDbEntity
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.Address
+import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
+import kotlin.math.pow
 
+/**
+ * Holding state of the send funds screen (thus to be expected to get complicated)
+ */
 class SendFundsViewModel : ViewModel() {
     var wallet: WalletConfigDbEntity? = null
         private set
@@ -52,6 +58,12 @@ class SendFundsViewModel : ViewModel() {
     private val _txId = MutableLiveData<String>()
     val txId: LiveData<String> = _txId
 
+    val tokensAvail: ArrayList<WalletTokenDbEntity> = ArrayList()
+    val tokensChosen: HashMap<String, ErgoToken> = HashMap()
+
+    // the live data gets data posted on adding or removing tokens, not on every amount change
+    private val _tokensChosenLiveData = MutableLiveData<List<String>>()
+    val tokensChosenLiveData: LiveData<List<String>> = _tokensChosenLiveData
 
     fun initWallet(ctx: Context, walletId: Int) {
         viewModelScope.launch {
@@ -62,7 +74,11 @@ class SendFundsViewModel : ViewModel() {
             wallet?.displayName?.let {
                 _walletName.postValue(it)
             }
-            walletWithState?.state?.balance?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
+            walletWithState?.state?.map { it.balance ?: 0 }?.sum()
+                ?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
+            tokensAvail.clear()
+            walletWithState?.tokens?.let { tokensAvail.addAll(it) }
+            notifyTokensChosenChanged()
         }
         calcGrossAmount()
     }
@@ -77,6 +93,10 @@ class SendFundsViewModel : ViewModel() {
 
     fun checkAmount(): Boolean {
         return amountToSend >= nanoErgsToErgs(Parameters.MinChangeValue)
+    }
+
+    fun checkTokens(): Boolean {
+        return tokensChosen.values.filter { it.value <= 0 }.isEmpty()
     }
 
     fun preparePayment(fragment: SendFundsFragmentDialog) {
@@ -138,6 +158,7 @@ class SendFundsViewModel : ViewModel() {
             withContext(Dispatchers.IO) {
                 ergoTxResult = sendErgoTx(
                     Address.create(receiverAddress), ergsToNanoErgs(amountToSend),
+                    tokensChosen.values.toList(),
                     mnemonic, "", 0,
                     getPrefNodeUrl(context), getPrefExplorerApiUrl(context)
                 )
@@ -149,5 +170,55 @@ class SendFundsViewModel : ViewModel() {
             }
             _paymentDoneLiveData.postValue(ergoTxResult)
         }
+    }
+
+    /**
+     * @return list of tokens to choose from, that means available on the wallet and not already chosen
+     */
+    fun getTokensToChooseFrom(): List<WalletTokenDbEntity> {
+        return tokensAvail.filter {
+            !tokensChosen.containsKey(it.tokenId)
+        }
+    }
+
+    fun newTokenChoosen(tokenId: String) {
+        tokensChosen.put(tokenId, ErgoToken(tokenId, 0))
+        notifyTokensChosenChanged()
+    }
+
+    fun removeToken(tokenId: String) {
+        val size = tokensChosen.size
+        tokensChosen.remove(tokenId)
+        if (tokensChosen.size != size) {
+            notifyTokensChosenChanged()
+        }
+    }
+
+    fun setTokenAmount(tokenId: String, amount: Long) {
+        tokensChosen.get(tokenId)?.let {
+            tokensChosen.put(tokenId, ErgoToken(it.id, amount))
+        }
+    }
+
+    fun addTokensFromQr(tokens: HashMap<String, Double>) {
+        var changed = false
+        tokens.forEach {
+            val tokenId = it.key
+            val amount = it.value
+
+            // we need to check for existence here, QR code might have any String, not an ID
+            tokensAvail.filter { it.tokenId.equals(tokenId) }.firstOrNull()?.let {
+                val longAmount = (amount * 10.0.pow(it.decimals ?: 0)).toLong()
+                tokensChosen.put(tokenId, ErgoToken(tokenId, longAmount))
+                changed = true
+            }
+        }
+        if (changed) {
+            notifyTokensChosenChanged()
+        }
+    }
+
+    private fun notifyTokensChosenChanged() {
+        _tokensChosenLiveData.postValue(tokensChosen.keys.toList())
     }
 }
