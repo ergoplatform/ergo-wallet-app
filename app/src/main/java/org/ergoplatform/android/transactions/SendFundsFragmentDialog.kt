@@ -52,7 +52,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.initWallet(requireContext(), args.walletId)
+        viewModel.initWallet(requireContext(), args.walletId, args.paymentRequest)
 
         // Add observers
         viewModel.walletName.observe(viewLifecycleOwner, {

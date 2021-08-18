@@ -95,6 +95,8 @@
     <string name="button_display_mnemonic">Display mnemonic</string>
 
     <!-- Send funds -->
+    <string name="desc_choose_wallet">Please choose the wallet to send from:</string>
+    <string name="label_to">to</string>
     <string name="desc_send_funds">Enter the receiver address and amount to send, or scan a QR code.</string>
     <string name="label_send_from">From: %1s</string>
     <string name="label_wallet_balance">Balance: %1s ERG</string>
