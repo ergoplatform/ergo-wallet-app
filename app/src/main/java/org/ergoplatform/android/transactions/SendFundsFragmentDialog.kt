@@ -183,6 +183,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
         binding.buttonAddToken.visibility =
             if (tokensAvail.size > tokensChosen.size) View.VISIBLE else View.INVISIBLE
+        binding.labelTokenAmountError.visibility = View.GONE
         binding.tokensList.apply {
             this.visibility =
                 if (tokensChosen.isNotEmpty()) View.VISIBLE else View.GONE

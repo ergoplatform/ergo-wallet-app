@@ -120,7 +120,7 @@
         This project is <a href="https://github.com/MrStahlfelge/ergo-wallet-android">open source software</a>\n
     Find help on <a href="https://discord.gg/kj7s7nb">Discord</a> or <a href="https://t.me/ergosupport">Telegram</a>
         </string>
-    <string name="desc_coingecko">Ergo price powered by CoinGecko API, https://www.coingecko.com</string>
+    <string name="desc_coingecko">Ergo price powered by <a href="https://www.coingecko.com">CoinGecko</a></string>
     <string name="label_cg_conn_error">Error connecting to CoinGecko, please try again later.</string>
     <string name="desc_dark_mode">Dark or light mode?</string>
     <string name="button_dark_mode_system">System default</string>

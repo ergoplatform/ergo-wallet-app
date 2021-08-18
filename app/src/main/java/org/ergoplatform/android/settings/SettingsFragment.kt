@@ -45,6 +45,7 @@ class SettingsFragment : Fragment() {
 
         // makes the links clickable
         binding.labelMoreInfo.movementMethod = LinkMovementMethod.getInstance()
+        binding.labelCoingecko.movementMethod = LinkMovementMethod.getInstance()
 
         setDisplayCurrency()
 

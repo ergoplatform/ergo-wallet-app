@@ -57,16 +57,16 @@ fun formatTokenAmounts(
     decimals: Int,
     formatWithPrettyReduction: Boolean = false
 ): String {
-    val valueToShow: Float = longWithDecimalsToFloat(amount, decimals)
+    val valueToShow: Double = longWithDecimalsToDouble(amount, decimals)
 
     return if (valueToShow < 1000 || !formatWithPrettyReduction) {
         ("%." + (Math.min(5, decimals)).toString() + "f").format(Locale.US, valueToShow)
     } else {
-        formatFloatWithPrettyReduction(valueToShow)
+        formatDoubleWithPrettyReduction(valueToShow)
     }
 }
 
-fun formatFloatWithPrettyReduction(amount: Float): String {
+fun formatDoubleWithPrettyReduction(amount: Double): String {
     val suffixChars = "KMGTPE"
     val formatter = DecimalFormat("###.#", DecimalFormatSymbols(Locale.US))
     formatter.roundingMode = RoundingMode.DOWN
@@ -78,8 +78,8 @@ fun formatFloatWithPrettyReduction(amount: Float): String {
     }
 }
 
-fun longWithDecimalsToFloat(amount: Long, decimals: Int) =
-    (amount.toFloat()) / (10f.pow(decimals))
+fun longWithDecimalsToDouble(amount: Long, decimals: Int) =
+    (amount.toDouble()) / (10.0.pow(decimals))
 
 fun serializeSecrets(mnemonic: String): String {
     val gson = Gson()
