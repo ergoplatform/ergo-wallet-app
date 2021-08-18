@@ -24,10 +24,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
-import org.ergoplatform.android.ui.FullScreenFragmentDialog
-import org.ergoplatform.android.ui.PasswordDialogCallback
-import org.ergoplatform.android.ui.hideForcedSoftKeyboard
-import org.ergoplatform.android.ui.inputTextToFloat
+import org.ergoplatform.android.ui.*
 import org.ergoplatform.android.wallet.WalletTokenDbEntity
 import kotlin.math.pow
 
@@ -360,7 +357,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         override fun afterTextChanged(s: Editable?) {
             viewModel.setTokenAmount(
                 token.tokenId!!,
-                (inputTextToFloat(s?.toString()) * 10f.pow(token.decimals!!)).toLong()
+                (inputTextToDouble(s?.toString()) * 10.0.pow(token.decimals!!)).toLong()
             )
             binding.labelTokenAmountError.visibility = View.GONE
         }

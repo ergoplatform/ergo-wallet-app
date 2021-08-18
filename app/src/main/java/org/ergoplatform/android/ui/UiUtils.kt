@@ -34,6 +34,14 @@ fun inputTextToFloat(amountStr: String?): Float {
     }
 }
 
+fun inputTextToDouble(amountStr: String?): Double {
+    try {
+        return if (amountStr == null || amountStr.isEmpty()) 0.0 else amountStr.toDouble()
+    } catch (t: Throwable) {
+        return 0.0
+    }
+}
+
 /**
  * prevents crashes when a button is tapped twice, see
  * https://stackoverflow.com/questions/51060762/illegalargumentexception-navigation-destination-xxx-is-unknown-to-this-navcontr
