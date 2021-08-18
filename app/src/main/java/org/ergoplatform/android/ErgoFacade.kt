@@ -7,6 +7,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.*
+import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
 import java.math.RoundingMode
@@ -135,6 +136,7 @@ fun loadAppKitMnemonicWordList(): List<String> {
 fun sendErgoTx(
     recipient: Address,
     amountToSend: Long,
+    tokensToSend: List<ErgoToken>,
     mnemonic: String,
     mnemonicPass: String,
     derivedKeyIndex: Int,
@@ -156,10 +158,15 @@ fun sendErgoTx(
                 )
                 .withEip3Secret(derivedKeyIndex)
                 .build()
-            val jsonTransaction = BoxOperations.send(ctx, prover, true, recipient, amountToSend)
 
-            val jsonTree = JsonParser().parse(jsonTransaction)
-            val txId = (jsonTree as JsonObject).get("id").asString
+            val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
+            val signed = BoxOperations.putToContractTx(
+                ctx, prover, true,
+                contract, amountToSend, tokensToSend
+            )
+            ctx.sendTransaction(signed)
+
+            val txId = signed.id
 
             return@execute TransactionResult(txId.isNotEmpty(), txId)
         }
