@@ -47,17 +47,21 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
 
         val content = parseContentFromQuery(query)
         binding.receiverAddress.text = content?.address
-        binding.grossAmount.amount = content?.amount ?: 0f
+        val amount = content?.amount ?: 0f
+        binding.grossAmount.amount = amount
+        binding.grossAmount.visibility = if (amount > 0f) View.VISIBLE else View.GONE
 
         AppDatabase.getInstance(requireContext()).walletDao().getWalletsWithStates()
             .observe(viewLifecycleOwner, {
                 binding.listWallets.removeAllViews()
 
-                if (it.size == 1) {
+                val walletsWithoutReadonly = it.filter { it.walletConfig.secretStorage != null }
+
+                if (walletsWithoutReadonly.size == 1) {
                     // immediately switch to send funds screen
                     navigateToSendFundsScreen(it.first().walletConfig.id, true)
                 }
-                it.forEach { wallet ->
+                walletsWithoutReadonly.forEach { wallet ->
                     val itemBinding = FragmentSendFundsWalletChooserItemBinding.inflate(
                         layoutInflater, binding.listWallets, true
                     )

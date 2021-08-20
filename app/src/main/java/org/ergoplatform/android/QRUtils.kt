@@ -69,6 +69,9 @@ fun parseContentFromQuery(query: String): QrCodeContent? {
         } else if (it.startsWith(AMOUNT_PARAM_PREFIX)) {
             amount = URLDecoder.decode(it.substring(AMOUNT_PARAM_PREFIX.length), URI_ENCODING)
                 .toFloatOrNull() ?: 0f
+            if (amount.isNaN()) {
+                amount = 0f
+            }
         } else if (it.startsWith(DESCRIPTION_PARAM_PREFIX)) {
             description =
                 URLDecoder.decode(it.substring(DESCRIPTION_PARAM_PREFIX.length), URI_ENCODING)
