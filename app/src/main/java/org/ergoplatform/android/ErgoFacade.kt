@@ -20,14 +20,14 @@ import kotlin.math.pow
 val MNEMONIC_WORDS_COUNT = 15
 val MNEMONIC_MIN_WORDS_COUNT = 12
 
-fun nanoErgsToErgs(nanoErgs: Long): Float {
+fun nanoErgsToErgs(nanoErgs: Long): Double {
     val microErgs = nanoErgs / (1000L * 100L)
-    val ergs = microErgs.toFloat() / 10000f
+    val ergs = microErgs.toDouble() / 10000.0
     return ergs
 }
 
-fun ergsToNanoErgs(ergs: Float): Long {
-    val microErgs = (ergs * 10000f).toLong()
+fun ergsToNanoErgs(ergs: Double): Long {
+    val microErgs = (ergs * 10000.0).toLong()
     val nanoergs = microErgs * 100L * 1000L
     return nanoergs
 }
@@ -35,14 +35,14 @@ fun ergsToNanoErgs(ergs: Float): Long {
 /**
  * ERG is always formatted US-style (e.g. 1,000.00)
  */
-fun formatErgsToString(ergs: Float, context: Context): String {
+fun formatErgsToString(ergs: Double, context: Context): String {
     return DecimalFormat(context.getString(R.string.format_erg), DecimalFormatSymbols(Locale.US)).format(ergs)
 }
 
 /**
  * fiat is formatted according to users locale, because it is his local currency
  */
-fun formatFiatToString(amount: Float, currency: String, context: Context): String {
+fun formatFiatToString(amount: Double, currency: String, context: Context): String {
     return DecimalFormat(context.getString(R.string.format_fiat)).format(amount) +
             " " + currency.toUpperCase(Locale.getDefault())
 }

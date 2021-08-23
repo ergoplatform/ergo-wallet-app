@@ -33,7 +33,7 @@ class SendFundsViewModel : ViewModel() {
             field = value
             calcGrossAmount()
         }
-    var amountToSend: Float = 0f
+    var amountToSend: Double = 0.0
         set(value) {
             field = value
             calcGrossAmount()
@@ -43,16 +43,16 @@ class SendFundsViewModel : ViewModel() {
     val lockInterface: LiveData<Boolean> = _lockInterface
     private val _walletName = MutableLiveData<String>()
     val walletName: LiveData<String> = _walletName
-    private val _walletBalance = MutableLiveData<Float>()
-    val walletBalance: LiveData<Float> = _walletBalance
-    private val _feeAmount = MutableLiveData<Float>().apply {
+    private val _walletBalance = MutableLiveData<Double>()
+    val walletBalance: LiveData<Double> = _walletBalance
+    private val _feeAmount = MutableLiveData<Double>().apply {
         value = nanoErgsToErgs(Parameters.MinFee)
     }
-    val feeAmount: LiveData<Float> = _feeAmount
-    private val _grossAmount = MutableLiveData<Float>().apply {
-        value = 0f
+    val feeAmount: LiveData<Double> = _feeAmount
+    private val _grossAmount = MutableLiveData<Double>().apply {
+        value = 0.0
     }
-    val grossAmount: LiveData<Float> = _grossAmount
+    val grossAmount: LiveData<Double> = _grossAmount
     private val _paymentDoneLiveData = SingleLiveEvent<TransactionResult>()
     val paymentDoneLiveData: LiveData<TransactionResult> = _paymentDoneLiveData
     private val _txId = MutableLiveData<String>()

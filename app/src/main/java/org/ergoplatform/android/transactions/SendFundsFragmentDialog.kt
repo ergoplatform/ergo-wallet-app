@@ -86,7 +86,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                 getString(
                     R.string.label_fiat_amount,
                     formatFiatToString(
-                        viewModel.amountToSend * (nodeConnector.fiatValue.value ?: 0f),
+                        viewModel.amountToSend * (nodeConnector.fiatValue.value ?: 0f).toDouble(),
                         nodeConnector.fiatCurrency, requireContext()
                     ),
                 )
@@ -160,7 +160,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         }
         binding.amount.setEndIconOnClickListener {
             setAmountEdittext(
-                (viewModel.walletBalance.value ?: 0f) - (viewModel.feeAmount.value ?: 0f)
+                (viewModel.walletBalance.value ?: 0.0) - (viewModel.feeAmount.value ?: 0.0)
             )
         }
 
@@ -226,7 +226,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             ).replace(",", "")
         else ""
 
-    private fun setAmountEdittext(amountToSend: Float) {
+    private fun setAmountEdittext(amountToSend: Double) {
         binding.amount.editText?.setText(
             formatErgsToString(
                 amountToSend,
@@ -305,7 +305,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         viewModel.receiverAddress = binding.tvReceiver.editText?.text?.toString() ?: ""
 
         val amountStr = binding.amount.editText?.text.toString()
-        viewModel.amountToSend = inputTextToFloat(amountStr)
+        viewModel.amountToSend = inputTextToDouble(amountStr)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

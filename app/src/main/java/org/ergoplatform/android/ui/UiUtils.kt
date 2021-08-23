@@ -26,14 +26,6 @@ fun hideForcedSoftKeyboard(context: Context, editText: EditText) {
     )?.hideSoftInputFromWindow(editText.getWindowToken(), 0)
 }
 
-fun inputTextToFloat(amountStr: String?): Float {
-    try {
-        return if (amountStr == null || amountStr.isEmpty()) 0f else amountStr.toFloat()
-    } catch (t: Throwable) {
-        return 0f
-    }
-}
-
 fun inputTextToDouble(amountStr: String?): Double {
     try {
         return if (amountStr.isNullOrEmpty()) 0.0 else amountStr.toDouble()

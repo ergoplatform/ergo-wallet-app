@@ -121,7 +121,7 @@ class WalletFragment : Fragment() {
                 binding.ergoPrice.visibility = View.GONE
             } else {
                 binding.ergoPrice.visibility = View.VISIBLE
-                binding.ergoPrice.amount = value
+                binding.ergoPrice.amount = value.toDouble()
                 binding.ergoPrice.setSymbol(nodeConnector.fiatCurrency.toUpperCase(Locale.getDefault()))
             }
             binding.labelErgoPrice.visibility = binding.ergoPrice.visibility

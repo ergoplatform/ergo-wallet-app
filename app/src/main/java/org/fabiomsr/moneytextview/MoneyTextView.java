@@ -41,7 +41,7 @@ public class MoneyTextView extends View {
     private Section       mIntegerSection;
     private Section       mDecimalSection;
     private char          mDecimalSeparator;
-    private float         mAmount;
+    private double        mAmount;
     private int           mGravity;
     private int           mSymbolGravity;
     private int           mDecimalGravity;
@@ -151,7 +151,7 @@ public class MoneyTextView extends View {
         setMeasuredDimension(mWidth, mHeight);
     }
 
-    public void setAmount(float amount) {
+    public void setAmount(double amount) {
         mAmount = amount;
         requestLayout();
     }
@@ -350,7 +350,7 @@ public class MoneyTextView extends View {
         invalidate();
     }
 
-    public float getAmount() {
+    public double getAmount() {
         return mAmount;
     }
 

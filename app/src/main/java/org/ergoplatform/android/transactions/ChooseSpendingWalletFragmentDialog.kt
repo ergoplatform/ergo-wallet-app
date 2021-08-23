@@ -47,9 +47,9 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
 
         val content = parseContentFromQuery(query)
         binding.receiverAddress.text = content?.address
-        val amount = content?.amount ?: 0f
+        val amount = content?.amount ?: 0.0
         binding.grossAmount.amount = amount
-        binding.grossAmount.visibility = if (amount > 0f) View.VISIBLE else View.GONE
+        binding.grossAmount.visibility = if (amount > 0.0) View.VISIBLE else View.GONE
 
         AppDatabase.getInstance(requireContext()).walletDao().getWalletsWithStates()
             .observe(viewLifecycleOwner, {
