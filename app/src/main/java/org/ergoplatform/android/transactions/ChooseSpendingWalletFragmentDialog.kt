@@ -59,7 +59,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
 
                 if (walletsWithoutReadonly.size == 1) {
                     // immediately switch to send funds screen
-                    navigateToSendFundsScreen(it.first().walletConfig.id, true)
+                    navigateToSendFundsScreen(walletsWithoutReadonly.first().walletConfig.id, true)
                 }
                 walletsWithoutReadonly.forEach { wallet ->
                     val itemBinding = FragmentSendFundsWalletChooserItemBinding.inflate(
