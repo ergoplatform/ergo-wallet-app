@@ -47,44 +47,51 @@ fun parseContentFromQrCode(qrCode: String): QrCodeContent? {
     if (qrCode.startsWith(PAYMENT_URI_PREFIX, true)) {
         // we have a payment uri
         val uriWithoutPrefix = qrCode.substring(PAYMENT_URI_PREFIX.length)
-        var address: String? = null
-        var amount: Float = 0f
-        var description: String = ""
-        val tokenMap: HashMap<String, Double> = HashMap()
-
-        uriWithoutPrefix.split('&').forEach {
-            if (it.startsWith(RECIPIENT_PARAM_PREFIX)) {
-                address =
-                    URLDecoder.decode(it.substring(RECIPIENT_PARAM_PREFIX.length), URI_ENCODING)
-            } else if (it.startsWith(AMOUNT_PARAM_PREFIX)) {
-                amount = URLDecoder.decode(it.substring(AMOUNT_PARAM_PREFIX.length), URI_ENCODING)
-                    .toFloatOrNull() ?: 0f
-            } else if (it.startsWith(DESCRIPTION_PARAM_PREFIX)) {
-                description =
-                    URLDecoder.decode(it.substring(DESCRIPTION_PARAM_PREFIX.length), URI_ENCODING)
-            } else if (it.contains('=')) {
-                // this could be a token
-                val keyVal = it.split("=")
-                try {
-                    val tokenId = keyVal.get(0)
-                    val tokenAmount = keyVal.get(1).toDouble()
-                    tokenMap.put(tokenId, tokenAmount)
-                } catch (t: Throwable) {
-                    // in this case, we haven't found a token :)
-                }
-            }
-        }
-
-        if (address != null) {
-            return QrCodeContent(address!!, amount, description, tokenMap)
-        } else {
-            // no recipient, no sense
-            return null
-        }
+        return parseContentFromQuery(uriWithoutPrefix)
 
     } else if (isValidErgoAddress(qrCode)) {
         return QrCodeContent(qrCode)
     } else {
+        return null
+    }
+}
+
+fun parseContentFromQuery(query: String): QrCodeContent? {
+    var address: String? = null
+    var amount = 0f
+    var description = ""
+    val tokenMap: HashMap<String, Double> = HashMap()
+
+    query.split('&').forEach {
+        if (it.startsWith(RECIPIENT_PARAM_PREFIX)) {
+            address =
+                URLDecoder.decode(it.substring(RECIPIENT_PARAM_PREFIX.length), URI_ENCODING)
+        } else if (it.startsWith(AMOUNT_PARAM_PREFIX)) {
+            amount = URLDecoder.decode(it.substring(AMOUNT_PARAM_PREFIX.length), URI_ENCODING)
+                .toFloatOrNull() ?: 0f
+            if (amount.isNaN()) {
+                amount = 0f
+            }
+        } else if (it.startsWith(DESCRIPTION_PARAM_PREFIX)) {
+            description =
+                URLDecoder.decode(it.substring(DESCRIPTION_PARAM_PREFIX.length), URI_ENCODING)
+        } else if (it.contains('=')) {
+            // this could be a token
+            val keyVal = it.split('=')
+            try {
+                val tokenId = keyVal.get(0)
+                val tokenAmount = keyVal.get(1).toDouble()
+                tokenMap.put(tokenId, tokenAmount)
+            } catch (t: Throwable) {
+                // in this case, we haven't found a token :)
+            }
+        }
+    }
+
+    if (address != null) {
+        return QrCodeContent(address!!, amount, description, tokenMap)
+    } else {
+        // no recipient, no sense
         return null
     }
 }

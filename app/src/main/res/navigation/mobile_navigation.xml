@@ -9,7 +9,7 @@
         android:id="@+id/navigation_wallet"
         android:name="org.ergoplatform.android.wallet.WalletFragment"
         android:label="@string/title_wallet"
-        tools:layout="@layout/fragment_wallet" >
+        tools:layout="@layout/fragment_wallet">
         <action
             android:id="@+id/action_to_addWalletChooserFragment"
             app:destination="@id/addWalletChooserFragment" />
@@ -74,7 +74,7 @@
         android:id="@+id/restoreWalletFragmentDialog"
         android:name="org.ergoplatform.android.wallet.RestoreWalletFragmentDialog"
         android:label="fragment_restore_wallet"
-        tools:layout="@layout/fragment_restore_wallet" >
+        tools:layout="@layout/fragment_restore_wallet">
         <action
             android:id="@+id/action_restoreWalletFragmentDialog_to_saveWalletFragmentDialog"
             app:destination="@id/saveWalletFragmentDialog" />
@@ -83,7 +83,7 @@
         android:id="@+id/saveWalletFragmentDialog"
         android:name="org.ergoplatform.android.wallet.SaveWalletFragmentDialog"
         android:label="fragment_save_wallet_dialog"
-        tools:layout="@layout/fragment_save_wallet_dialog" >
+        tools:layout="@layout/fragment_save_wallet_dialog">
         <action
             android:id="@+id/action_saveWalletFragmentDialog_to_navigation_wallet"
             app:destination="@id/navigation_wallet"
@@ -97,7 +97,7 @@
         android:id="@+id/receiveToWalletFragment"
         android:name="org.ergoplatform.android.transactions.ReceiveToWalletFragment"
         android:label="@string/button_receive"
-        tools:layout="@layout/fragment_receive_to_wallet" >
+        tools:layout="@layout/fragment_receive_to_wallet">
         <argument
             android:name="wallet_id"
             app:argType="integer" />
@@ -106,15 +106,20 @@
         android:id="@+id/sendFundsFragment"
         android:name="org.ergoplatform.android.transactions.SendFundsFragmentDialog"
         android:label="@string/button_send"
-        tools:layout="@layout/fragment_send_funds" >
+        tools:layout="@layout/fragment_send_funds">
         <argument
             android:name="wallet_id"
             app:argType="integer" />
+        <argument
+            android:name="paymentRequest"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
     </dialog>
     <dialog
         android:id="@+id/addReadOnlyWalletFragmentDialog"
         android:name="org.ergoplatform.android.wallet.AddReadOnlyWalletFragmentDialog"
-        android:label="AddReadOnlyWalletFragmentDialog" >
+        android:label="AddReadOnlyWalletFragmentDialog">
         <action
             android:id="@+id/action_addReadOnlyWalletFragmentDialog_to_wallet_list"
             app:destination="@id/navigation_wallet" />
@@ -123,7 +128,7 @@
         android:id="@+id/walletConfigFragment"
         android:name="org.ergoplatform.android.wallet.WalletConfigFragment"
         android:label="fragment_wallet_config"
-        tools:layout="@layout/fragment_wallet_config" >
+        tools:layout="@layout/fragment_wallet_config">
         <argument
             android:name="wallet_id"
             app:argType="integer" />
@@ -132,12 +137,27 @@
         android:id="@+id/confirmCreateWalletFragment"
         android:name="org.ergoplatform.android.wallet.ConfirmCreateWalletFragment"
         android:label="fragment_confirm_create_wallet"
-        tools:layout="@layout/fragment_confirm_create_wallet" >
+        tools:layout="@layout/fragment_confirm_create_wallet">
         <action
             android:id="@+id/action_confirmCreateWalletFragment_to_saveWalletFragmentDialog"
             app:destination="@id/saveWalletFragmentDialog" />
         <argument
             android:name="mnemonic"
             app:argType="string" />
+    </dialog>
+    <dialog
+        android:id="@+id/chooseSpendingWalletFragmentDialog"
+        android:name="org.ergoplatform.android.transactions.ChooseSpendingWalletFragmentDialog"
+        android:label="ChooseSpendingWalletFragmentDialog">
+        <action
+            android:id="@+id/action_chooseSpendingWalletFragmentDialog_to_sendFundsFragment"
+            app:destination="@id/sendFundsFragment">
+            <argument
+                android:name="paymentRequest"
+                app:nullable="false" />
+        </action>
+        <deepLink
+            android:id="@+id/deepLink"
+            app:uri="explorer.ergoplatform.com/payment-request" />
     </dialog>
 </navigation>

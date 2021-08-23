@@ -23,7 +23,7 @@ fun hideForcedSoftKeyboard(context: Context, editText: EditText) {
     ContextCompat.getSystemService(
         context,
         InputMethodManager::class.java
-    )?.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+    )?.hideSoftInputFromWindow(editText.getWindowToken(), 0)
 }
 
 fun inputTextToFloat(amountStr: String?): Float {
@@ -31,6 +31,14 @@ fun inputTextToFloat(amountStr: String?): Float {
         return if (amountStr == null || amountStr.isEmpty()) 0f else amountStr.toFloat()
     } catch (t: Throwable) {
         return 0f
+    }
+}
+
+fun inputTextToDouble(amountStr: String?): Double {
+    try {
+        return if (amountStr.isNullOrEmpty()) 0.0 else amountStr.toDouble()
+    } catch (t: Throwable) {
+        return 0.0
     }
 }
 
@@ -52,6 +60,6 @@ fun NavController.navigateSafe(
     }
 }
 
-fun NavController.navigateSafe(directions: NavDirections) {
-    navigateSafe(directions.actionId, directions.arguments)
+fun NavController.navigateSafe(directions: NavDirections, navOptions: NavOptions? = null) {
+    navigateSafe(directions.actionId, directions.arguments, navOptions)
 }
