@@ -36,7 +36,7 @@ fun inputTextToFloat(amountStr: String?): Float {
 
 fun inputTextToDouble(amountStr: String?): Double {
     try {
-        return if (amountStr == null || amountStr.isEmpty()) 0.0 else amountStr.toDouble()
+        return if (amountStr.isNullOrEmpty()) 0.0 else amountStr.toDouble()
     } catch (t: Throwable) {
         return 0.0
     }
