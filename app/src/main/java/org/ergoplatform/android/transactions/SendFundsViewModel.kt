@@ -65,7 +65,20 @@ class SendFundsViewModel : ViewModel() {
     private val _tokensChosenLiveData = MutableLiveData<List<String>>()
     val tokensChosenLiveData: LiveData<List<String>> = _tokensChosenLiveData
 
-    fun initWallet(ctx: Context, walletId: Int) {
+    fun initWallet(ctx: Context, walletId: Int, paymentRequest: String?) {
+        val firstInit = wallet == null
+
+        // on first init, we read an send payment request. Don't do it again on device rotation
+        // to not mess with user inputs
+        val content: QrCodeContent?
+        if (firstInit) {
+            content = paymentRequest?.let { parseContentFromQuery(paymentRequest) }
+            content?.let {
+                receiverAddress = content.address
+                amountToSend = content.amount
+            }
+        } else content = null
+
         viewModelScope.launch {
             val walletWithState =
                 AppDatabase.getInstance(ctx).walletDao().loadWalletWithStateById(walletId)
@@ -78,6 +91,7 @@ class SendFundsViewModel : ViewModel() {
                 ?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
             tokensAvail.clear()
             walletWithState?.tokens?.let { tokensAvail.addAll(it) }
+            content?.let { addTokensFromQr(content.tokens) }
             notifyTokensChosenChanged()
         }
         calcGrossAmount()

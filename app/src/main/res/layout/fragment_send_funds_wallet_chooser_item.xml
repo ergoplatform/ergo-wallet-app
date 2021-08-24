@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:orientation="horizontal"
+    android:paddingHorizontal="@dimen/activity_horizontal_margin"
+    android:paddingVertical="@dimen/half_horizontal_margin">
+
+    <TextView
+        android:id="@+id/wallet_name"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="?attr/colorSecondary"
+        android:textStyle="bold"
+        tools:text="@string/label_wallet_default" />
+
+    <org.fabiomsr.moneytextview.MoneyTextView
+        android:id="@+id/wallet_balance"
+        style="@style/MoneyTextViewDefaultStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:baseTextSize="@dimen/headline2_textsize"
+        app:baseTextStyle="bold"
+        app:decimalMargin="3dp"
+        tools:amount="-123.2536" />
+</LinearLayout>

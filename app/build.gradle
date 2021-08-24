@@ -13,8 +13,8 @@ android {
         applicationId "org.ergoplatform.android"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 2112
-        versionName "1.2.2112"
+        versionCode 2113
+        versionName "1.2.2113"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -118,6 +118,10 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
 
     implementation('com.journeyapps:zxing-android-embedded:4.2.0')
+
+    // newer okhttp version than pulled from dependencies to avoid StrictMode policy violation
+    implementation("com.squareup.okhttp3:okhttp:3.12.13")
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:3.12.13")
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
