@@ -21,6 +21,7 @@ import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
+import org.ergoplatform.android.ui.formatTokenAmounts
 import org.ergoplatform.android.ui.navigateSafe
 import java.util.*
 

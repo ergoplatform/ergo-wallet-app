@@ -15,6 +15,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
+import org.ergoplatform.android.ui.formatFiatToString
 import org.ergoplatform.android.ui.inputTextToDouble
 
 

@@ -222,7 +222,7 @@ class SendFundsViewModel : ViewModel() {
 
             // we need to check for existence here, QR code might have any String, not an ID
             tokensAvail.filter { it.tokenId.equals(tokenId) }.firstOrNull()?.let {
-                val longAmount = (amount * 10.0.pow(it.decimals ?: 0)).toLong()
+                val longAmount = doubleToLongWithDecimals (amount,it.decimals ?: 0)
                 tokensChosen.put(tokenId, ErgoToken(tokenId, longAmount))
                 changed = true
             }

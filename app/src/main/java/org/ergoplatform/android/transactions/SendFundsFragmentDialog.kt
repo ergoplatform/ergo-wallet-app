@@ -357,7 +357,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         override fun afterTextChanged(s: Editable?) {
             viewModel.setTokenAmount(
                 token.tokenId!!,
-                (inputTextToDouble(s?.toString()) * 10.0.pow(token.decimals!!)).toLong()
+                doubleToLongWithDecimals(inputTextToDouble(s?.toString()), token.decimals!!)
             )
             binding.labelTokenAmountError.visibility = View.GONE
         }
