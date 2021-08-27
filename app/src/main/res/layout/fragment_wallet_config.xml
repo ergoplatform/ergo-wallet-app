@@ -17,6 +17,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginHorizontal="50dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="@string/title_wallet_details" />
 
     </FrameLayout>
@@ -89,13 +92,35 @@
                     app:layout_constraintTop_toBottomOf="@id/input_wallet_name" />
 
                 <TextView
+                    android:id="@+id/desc_wallet_addresses"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_and_half"
+                    android:text="@string/desc_wallet_addresses"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/button_apply" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_addresses"
+                    style="@style/Widget.App.Button.PrimaryTint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:text="@string/title_wallet_addresses"
+                    android:enabled="false"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/desc_wallet_addresses" />
+
+                <TextView
                     android:id="@+id/display_mnemonic_desc"
                     style="@style/TextAppearance.App.Body1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margin_and_half"
                     android:text="@string/desc_display_mnemonic"
-                    app:layout_constraintTop_toBottomOf="@id/button_apply" />
+                    app:layout_constraintTop_toBottomOf="@id/button_addresses" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_export"
