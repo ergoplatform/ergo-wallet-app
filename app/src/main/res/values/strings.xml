@@ -97,6 +97,7 @@
     <!-- Wallet details -->
     <string name="title_wallet_addresses">Addresses</string>
     <string name="title_wallet_address">Address</string>
+    <string name="title_wallet_balance">Balance</string>
     <string name="desc_wallet_addresses">A wallet can have multiple public addresses, derived from the first address.</string>
 
     <!-- Send funds -->
