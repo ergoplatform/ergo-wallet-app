@@ -31,7 +31,6 @@
     <string name="label_tokens">tokens</string>
     <string name="label_more_tokens">more tokens</string>
     <string name="label_unconfirmed">unconfirmed</string>
-    <string name="button_view_transactions">View transactions</string>
     <string name="button_receive">Receive</string>
     <string name="button_send">Send</string>
     <string name="button_display_currency">Display currency: %1s</string>
@@ -99,6 +98,8 @@
     <string name="title_wallet_address">Address</string>
     <string name="title_wallet_balance">Balance</string>
     <string name="desc_wallet_addresses">A wallet can have multiple public addresses, derived from the first address.</string>
+    <string name="label_all_addresses">All %1d address(es)</string>
+    <string name="exporer_view_transactions">Tap to view transactions in Ergo Explorer — in-app transactions list will be added soon</string>
 
     <!-- Send funds -->
     <string name="desc_choose_wallet">Please choose the wallet to send from:</string>

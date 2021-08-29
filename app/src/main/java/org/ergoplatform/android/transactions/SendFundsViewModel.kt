@@ -11,15 +11,11 @@ import kotlinx.coroutines.withContext
 import org.ergoplatform.android.*
 import org.ergoplatform.android.ui.PasswordDialogFragment
 import org.ergoplatform.android.ui.SingleLiveEvent
-import org.ergoplatform.android.wallet.ENC_TYPE_DEVICE
-import org.ergoplatform.android.wallet.ENC_TYPE_PASSWORD
-import org.ergoplatform.android.wallet.WalletConfigDbEntity
-import org.ergoplatform.android.wallet.WalletTokenDbEntity
+import org.ergoplatform.android.wallet.*
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
-import kotlin.math.pow
 
 /**
  * Holding state of the send funds screen (thus to be expected to get complicated)
@@ -87,8 +83,7 @@ class SendFundsViewModel : ViewModel() {
             wallet?.displayName?.let {
                 _walletName.postValue(it)
             }
-            walletWithState?.state?.map { it.balance ?: 0 }?.sum()
-                ?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
+            walletWithState?.let { _walletBalance.postValue(nanoErgsToErgs(it.getBalanceForAllAddresses())) }
             tokensAvail.clear()
             walletWithState?.tokens?.let { tokensAvail.addAll(it) }
             content?.let { addTokensFromQr(content.tokens) }

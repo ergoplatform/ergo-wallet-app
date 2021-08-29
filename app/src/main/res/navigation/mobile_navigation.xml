@@ -32,14 +32,22 @@
             app:popExitAnim="@anim/slide_out_to_right" />
         <action
             android:id="@+id/action_navigation_wallet_to_navigation_wallet_details"
-            app:destination="@id/navigation_wallet_details" />
+            app:destination="@id/navigation_wallet_details"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_wallet_details"
         android:name="org.ergoplatform.android.wallet.WalletDetailsFragment"
         android:label="@string/title_transactions"
-        tools:layout="@layout/fragment_wallet_details" />
+        tools:layout="@layout/fragment_wallet_details">
+        <argument
+            android:name="wallet_id"
+            app:argType="integer" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_settings"

@@ -25,284 +25,333 @@
 
     </FrameLayout>
 
-    <androidx.core.widget.NestedScrollView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
+            <LinearLayout
+                style="@style/width_match_parent_max_500"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="@dimen/activity_horizontal_margin">
+                android:orientation="vertical">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="@dimen/activity_horizontal_margin">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/activity_horizontal_margin"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/image_addresses"
+                            android:layout_width="@dimen/medium_icon_size"
+                            android:layout_height="@dimen/medium_icon_size"
+                            android:contentDescription="@string/title_wallet_addresses"
+                            android:src="@drawable/ic_alt_route_24"
+                            app:layout_constraintBottom_toBottomOf="@id/public_address"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/wallet_address_title" />
+
+                        <TextView
+                            android:id="@+id/wallet_address_title"
+                            style="@style/TextAppearance.App.Body1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/title_wallet_address"
+                            android:textColor="?attr/colorSecondary"
+                            app:layout_constraintStart_toEndOf="@id/image_addresses"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/public_address"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="middle"
+                            android:gravity="start"
+                            android:maxLines="1"
+                            android:textAppearance="@style/TextAppearance.App.Headline2"
+                            app:drawableEndCompat="@drawable/ic_drop_down_24"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="@id/wallet_address_title"
+                            app:layout_constraintTop_toBottomOf="@id/wallet_address_title"
+                            tools:text="Very long public address, will be 3 lines long" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/activity_vertical_margin"
+                            android:orientation="horizontal"
+                            android:weightSum="3"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="@id/wallet_address_title"
+                            app:layout_constraintTop_toBottomOf="@id/public_address">
+
+                            <ImageView
+                                android:id="@+id/button_send"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="?selectableItemBackgroundBorderless"
+                                android:contentDescription="@string/title_settings"
+                                android:src="@drawable/ic_outgoing_24" />
+
+                            <ImageView
+                                android:id="@+id/button_receive"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="?selectableItemBackgroundBorderless"
+                                android:contentDescription="@string/title_settings"
+                                android:src="@drawable/ic_received_24" />
+
+                            <ImageView
+                                android:id="@+id/button_config_addresses"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="?selectableItemBackgroundBorderless"
+                                android:contentDescription="@string/title_settings"
+                                android:src="@drawable/ic_settings_24" />
+
+                        </LinearLayout>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/activity_horizontal_margin">
+
+                        <ImageView
+                            android:id="@+id/wallet_logo"
+                            android:layout_width="@dimen/medium_icon_size"
+                            android:layout_height="@dimen/medium_icon_size"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_ergologo"
+                            app:layout_constraintBottom_toBottomOf="@id/wallet_balance"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/title_balance"
+                            app:tint="?attr/colorControlNormal" />
+
+                        <TextView
+                            android:id="@+id/title_balance"
+                            style="@style/TextAppearance.App.Body1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/activity_horizontal_margin"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/title_wallet_balance"
+                            android:textColor="?attr/colorSecondary"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/wallet_logo"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <org.fabiomsr.moneytextview.MoneyTextView
+                            android:id="@+id/wallet_balance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:baseTextSize="@dimen/headline1_textsize"
+                            app:baseTextStyle="bold"
+                            app:decimalDigitsTextSize="@dimen/body1_textsize"
+                            app:decimalMargin="4dp"
+                            app:layout_constraintStart_toStartOf="@id/title_balance"
+                            app:layout_constraintTop_toBottomOf="@id/title_balance"
+                            app:symbolMargin="6dp"
+                            tools:amount="191256.45" />
+
+                        <org.fabiomsr.moneytextview.MoneyTextView
+                            android:id="@+id/wallet_fiat"
+                            style="@style/MoneyTextViewFiatStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:baseTextColor="@color/lightgrey"
+                            app:layout_constraintStart_toStartOf="@id/wallet_balance"
+                            app:layout_constraintTop_toBottomOf="@id/wallet_balance"
+                            tools:amount="1912564.531"
+                            tools:symbol="EUR"
+                            tools:visibility="visible" />
+
+                        <org.fabiomsr.moneytextview.MoneyTextView
+                            android:id="@+id/wallet_unconfirmed"
+                            style="@style/MoneyTextViewDefaultStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:baseTextSize="@dimen/headline2_textsize"
+                            app:baseTextStyle="bold"
+                            app:decimalMargin="3dp"
+                            app:layout_constraintStart_toStartOf="@id/title_balance"
+                            app:layout_constraintTop_toBottomOf="@id/wallet_fiat"
+                            tools:amount="-123.2536"
+                            tools:visibility="visible" />
+
+                        <TextView
+                            android:id="@+id/label_wallet_unconfirmed"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="@dimen/half_horizontal_margin"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/label_unconfirmed"
+                            android:visibility="gone"
+                            app:layout_constraintBottom_toBottomOf="@id/wallet_unconfirmed"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/wallet_unconfirmed"
+                            app:layout_constraintTop_toTopOf="@id/wallet_unconfirmed"
+                            tools:visibility="visible" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardview_tokens"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/activity_horizontal_margin"
-                    android:orientation="vertical">
+                    app:layout_constraintTop_toTopOf="parent">
 
-                    <ImageView
-                        android:id="@+id/image_addresses"
-                        android:layout_width="@dimen/big_icon_size"
-                        android:layout_height="@dimen/big_icon_size"
-                        android:contentDescription="@string/title_wallet_addresses"
-                        android:src="@drawable/ic_alt_route_24"
-                        app:layout_constraintBottom_toBottomOf="@id/public_address"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/wallet_address_title" />
-
-                    <TextView
-                        android:id="@+id/wallet_address_title"
-                        style="@style/TextAppearance.App.Headline2"
-                        android:layout_width="0dp"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="@string/title_wallet_address"
-                        android:textColor="?attr/colorSecondary"
-                        app:layout_constraintStart_toEndOf="@id/image_addresses"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/public_address"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="middle"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:textAppearance="@style/TextAppearance.App.Headline2"
-                        app:layout_constraintEnd_toStartOf="@id/button_choose_address"
-                        app:layout_constraintStart_toStartOf="@id/wallet_address_title"
-                        app:layout_constraintTop_toBottomOf="@id/wallet_address_title"
-                        tools:text="Very long public address, will be 3 lines long" />
-
-                    <ImageButton
-                        android:id="@+id/button_choose_address"
-                        style="@style/Widget.App.Button.TextButton"
-                        android:layout_width="40dp"
-                        android:layout_height="wrap_content"
-                        android:contentDescription="@string/title_wallet_addresses"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/ic_drop_down_24"
-                        app:layout_constraintBottom_toBottomOf="@id/public_address"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/public_address" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/half_horizontal_margin"
-                        android:orientation="horizontal"
-                        android:weightSum="3"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="@id/wallet_address_title"
-                        app:layout_constraintTop_toBottomOf="@id/public_address">
+                        android:layout_margin="@dimen/activity_horizontal_margin"
+                        android:animateLayoutChanges="true">
 
                         <ImageView
-                            android:id="@+id/button_send"
-                            android:layout_width="match_parent"
-                            android:layout_height="35dp"
-                            android:layout_weight="1"
+                            android:id="@+id/unfold_tokens"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:background="?selectableItemBackgroundBorderless"
-                            android:contentDescription="@string/title_settings"
-                            android:src="@drawable/ic_outgoing_24" />
+                            android:contentDescription="@string/label_tokens"
+                            android:src="@drawable/ic_chevron_down_24"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <ImageView
-                            android:id="@+id/button_receive"
-                            android:layout_width="match_parent"
-                            android:layout_height="35dp"
-                            android:layout_weight="1"
-                            android:background="?selectableItemBackgroundBorderless"
-                            android:contentDescription="@string/title_settings"
-                            android:src="@drawable/ic_received_24" />
+                            android:id="@+id/tokens_logo"
+                            android:layout_width="@dimen/medium_icon_size"
+                            android:layout_height="@dimen/medium_icon_size"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_tokens_24"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                        <ImageView
-                            android:id="@+id/button_config_addresses"
-                            android:layout_width="match_parent"
-                            android:layout_height="35dp"
-                            android:layout_weight="1"
-                            android:background="?selectableItemBackgroundBorderless"
-                            android:contentDescription="@string/title_settings"
-                            android:src="@drawable/ic_settings_24" />
+                        <TextView
+                            android:id="@+id/wallet_token_num"
+                            style="@style/TextAppearance.App.Headline2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/activity_horizontal_margin"
+                            app:layout_constraintStart_toEndOf="@id/tokens_logo"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="999" />
 
-                    </LinearLayout>
+                        <TextView
+                            android:id="@+id/label_token_num"
+                            style="@style/TextAppearance.App.Body1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="@dimen/half_horizontal_margin"
+                            android:text="@string/label_tokens"
+                            android:textColor="?attr/colorSecondary"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="@id/wallet_token_num"
+                            app:layout_constraintStart_toEndOf="@id/wallet_token_num"
+                            app:layout_constraintTop_toTopOf="@id/wallet_token_num" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.cardview.widget.CardView>
+                        <LinearLayout
+                            android:id="@+id/wallet_token_entries"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="@dimen/half_horizontal_margin"
+                            android:layout_marginTop="@dimen/half_horizontal_margin"
+                            android:orientation="vertical"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tokens_logo">
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
-                app:layout_constraintTop_toTopOf="parent">
+                            <include layout="@layout/entry_wallet_token" />
+                        </LinearLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_transactions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/activity_horizontal_margin"
-                    android:animateLayoutChanges="true">
+                    android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    app:layout_constraintTop_toTopOf="parent">
 
-                    <ImageView
-                        android:id="@+id/wallet_logo"
-                        android:layout_width="@dimen/big_icon_size"
-                        android:layout_height="@dimen/big_icon_size"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_ergologo"
-                        app:layout_constraintBottom_toBottomOf="@id/wallet_balance"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/title_balance"
-                        app:tint="?attr/colorControlNormal" />
-
-                    <TextView
-                        android:id="@+id/title_balance"
-                        style="@style/TextAppearance.App.Headline2"
-                        android:layout_width="0dp"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="@string/title_wallet_balance"
-                        android:textColor="?attr/colorSecondary"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/wallet_logo"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        android:layout_margin="@dimen/activity_horizontal_margin"
+                        android:animateLayoutChanges="true">
 
-                    <org.fabiomsr.moneytextview.MoneyTextView
-                        android:id="@+id/wallet_balance"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:baseTextSize="@dimen/headline1_textsize"
-                        app:baseTextStyle="bold"
-                        app:decimalDigitsTextSize="@dimen/body1_textsize"
-                        app:decimalMargin="4dp"
-                        app:layout_constraintStart_toStartOf="@id/title_balance"
-                        app:layout_constraintTop_toBottomOf="@id/title_balance"
-                        app:symbolMargin="6dp"
-                        tools:amount="191256.45" />
+                        <ImageView
+                            android:id="@+id/transactions_logo"
+                            android:layout_width="@dimen/medium_icon_size"
+                            android:layout_height="@dimen/medium_icon_size"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_transactions"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                    <org.fabiomsr.moneytextview.MoneyTextView
-                        android:id="@+id/wallet_fiat"
-                        style="@style/MoneyTextViewFiatStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        app:baseTextColor="@color/lightgrey"
-                        app:layout_constraintStart_toStartOf="@id/wallet_balance"
-                        app:layout_constraintTop_toBottomOf="@id/wallet_balance"
-                        tools:amount="1912564.531"
-                        tools:symbol="EUR"
-                        tools:visibility="visible" />
+                        <TextView
+                            android:id="@+id/title_transactions"
+                            style="@style/TextAppearance.App.Body1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/activity_horizontal_margin"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/title_transactions"
+                            android:textColor="?attr/colorSecondary"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/transactions_logo"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                    <org.fabiomsr.moneytextview.MoneyTextView
-                        android:id="@+id/wallet_unconfirmed"
-                        style="@style/MoneyTextViewDefaultStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        app:baseTextSize="@dimen/headline2_textsize"
-                        app:baseTextStyle="bold"
-                        app:decimalMargin="3dp"
-                        app:layout_constraintStart_toStartOf="@id/title_balance"
-                        app:layout_constraintTop_toBottomOf="@id/wallet_fiat"
-                        tools:amount="-123.2536"
-                        tools:visibility="visible" />
+                        <TextView
+                            style="@style/TextAppearance.App.Body1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/exporer_view_transactions"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="@id/title_transactions"
+                            app:layout_constraintTop_toBottomOf="@id/title_transactions" />
 
-                    <TextView
-                        android:id="@+id/label_wallet_unconfirmed"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/half_horizontal_margin"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="@string/label_unconfirmed"
-                        android:visibility="gone"
-                        app:layout_constraintBottom_toBottomOf="@id/wallet_unconfirmed"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/wallet_unconfirmed"
-                        app:layout_constraintTop_toTopOf="@id/wallet_unconfirmed"
-                        tools:visibility="visible" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/activity_horizontal_margin"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/activity_horizontal_margin"
-                    android:animateLayoutChanges="true">
-
-                    <ImageView
-                        android:id="@+id/unfold_tokens"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="?selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/label_tokens"
-                        android:src="@drawable/ic_chevron_down_24"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/tokens_logo"
-                        android:layout_width="@dimen/big_icon_size"
-                        android:layout_height="@dimen/big_icon_size"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_tokens_24"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/wallet_token_num"
-                        style="@style/TextAppearance.App.Headline2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        app:layout_constraintStart_toEndOf="@id/tokens_logo"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:text="999" />
-
-                    <TextView
-                        android:id="@+id/label_token_num"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/half_horizontal_margin"
-                        android:text="@string/label_tokens"
-                        app:layout_constraintBottom_toBottomOf="@id/wallet_token_num"
-                        app:layout_constraintStart_toEndOf="@id/wallet_token_num"
-                        app:layout_constraintTop_toTopOf="@id/wallet_token_num" />
-
-                    <LinearLayout
-                        android:id="@+id/wallet_token_entries"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/half_horizontal_margin"
-                        android:orientation="vertical"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tokens_logo">
-
-                        <include layout="@layout/entry_wallet_token" />
-                    </LinearLayout>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.cardview.widget.CardView>
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

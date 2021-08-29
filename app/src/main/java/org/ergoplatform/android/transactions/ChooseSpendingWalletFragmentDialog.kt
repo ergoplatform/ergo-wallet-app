@@ -14,6 +14,7 @@ import org.ergoplatform.android.nanoErgsToErgs
 import org.ergoplatform.android.parseContentFromQuery
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.android.wallet.getBalanceForAllAddresses
 
 
 /**
@@ -67,7 +68,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
                     )
 
                     itemBinding.walletBalance.amount =
-                        nanoErgsToErgs(wallet.state.map { it.balance ?: 0 }.sum())
+                        nanoErgsToErgs(wallet.getBalanceForAllAddresses())
                     itemBinding.walletName.text = wallet.walletConfig.displayName
 
                     itemBinding.root.setOnClickListener {

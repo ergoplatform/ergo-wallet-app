@@ -14,9 +14,11 @@
         <item name="decimalGravity">top</item>
     </style>
 
-
     <style name="MoneyTextViewFiatStyle" parent="MoneyTextViewDefaultStyle">
         <item name="format">@string/format_fiat</item>
     </style>
 
+    <style name="width_match_parent_max_500">
+        <item name="android:layout_width">match_parent</item>
+    </style>
 </resources>
