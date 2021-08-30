@@ -1,8 +1,5 @@
 package org.ergoplatform.android.wallet
 
-import StageConstants
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.*
@@ -21,7 +18,7 @@ import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
-import org.ergoplatform.android.ui.formatTokenAmounts
+import org.ergoplatform.android.tokens.inflateAndBindTokenView
 import org.ergoplatform.android.ui.navigateSafe
 import java.util.*
 
@@ -296,17 +293,9 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
                         0,
                         maxTokensToShow - 1
                     ) else tokens)
+                val layoutInflater = LayoutInflater.from(context)
                 tokensToShow.forEach {
-                    val itemBinding =
-                        EntryWalletTokenBinding.inflate(
-                            LayoutInflater.from(itemView.context),
-                            this,
-                            true
-                        )
-
-                    itemBinding.labelTokenName.text = it.name
-                    itemBinding.labelTokenVal.text =
-                        formatTokenAmounts(it.amount ?: 0, it.decimals ?: 0, true)
+                    inflateAndBindTokenView(it, this, layoutInflater)
                 }
 
                 // in case we don't show all items, add a hint that not all items were shown

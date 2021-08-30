@@ -1,18 +1,25 @@
 package org.ergoplatform.android.wallet
 
+import android.animation.LayoutTransition
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.NodeConnector
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.nanoErgsToErgs
+import org.ergoplatform.android.tokens.inflateAndBindTokenView
 
 class WalletDetailsFragment : Fragment() {
 
@@ -64,6 +71,9 @@ class WalletDetailsFragment : Fragment() {
             )
             binding.root.context.startActivity(browserIntent)
         }
+
+        // enable layout change animations after a short wait time
+        Handler(Looper.getMainLooper()).postDelayed({ enableLayoutChangeAnimations() }, 500)
     }
 
     private fun addressChanged(address: String?) {
@@ -105,11 +115,40 @@ class WalletDetailsFragment : Fragment() {
 
         // tokens
         binding.cardviewTokens.visibility = if (wallet.tokens.size > 0) View.VISIBLE else View.GONE
-        val tokensList = address?.let { wallet.getTokensForAddress(address) } ?: wallet.getTokensForAllAddresses()
+        val tokensList = address?.let { wallet.getTokensForAddress(address) }
+            ?: wallet.getTokensForAllAddresses()
         binding.walletTokenNum.text = tokensList.size.toString()
 
-        // TODO fill token entries
-        binding.walletTokenEntries.removeAllViews()
+        binding.walletTokenEntries.apply {
+            removeAllViews()
+            if (wallet.walletConfig.unfoldTokens) {
+                tokensList.forEach { inflateAndBindTokenView(it, this, layoutInflater) }
+            }
+        }
+
+        binding.unfoldTokens.setImageResource(
+            if (wallet.walletConfig.unfoldTokens)
+                R.drawable.ic_chevron_up_24 else R.drawable.ic_chevron_down_24
+        )
+        binding.cardviewTokens.setOnClickListener {
+            GlobalScope.launch {
+                AppDatabase.getInstance(it.context).walletDao().updateWalletTokensUnfold(
+                    wallet.walletConfig.id,
+                    !wallet.walletConfig.unfoldTokens
+                )
+                // we don't need to update UI here - the DB change will trigger a rebind of the card
+            }
+        }
+    }
+
+    private fun enableLayoutChangeAnimations() {
+        // set layout change animations. they are not set in the xml to avoid animations for the first
+        // time the layout is displayed
+        binding.layoutBalances.layoutTransition = LayoutTransition()
+        binding.layoutTokens.layoutTransition = LayoutTransition()
+        binding.layoutTokens.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        binding.layoutOuter.layoutTransition = LayoutTransition()
+        binding.layoutOuter.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
     }
 
     override fun onDestroyView() {

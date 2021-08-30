@@ -36,6 +36,7 @@
             android:layout_height="match_parent">
 
             <LinearLayout
+                android:id="@+id/layout_outer"
                 style="@style/width_match_parent_max_500"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -139,6 +140,7 @@
                     app:layout_constraintTop_toTopOf="parent">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_balances"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/activity_horizontal_margin">
@@ -235,10 +237,10 @@
                     app:layout_constraintTop_toTopOf="parent">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_tokens"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/activity_horizontal_margin"
-                        android:animateLayoutChanges="true">
+                        android:layout_margin="@dimen/activity_horizontal_margin">
 
                         <ImageView
                             android:id="@+id/unfold_tokens"
