@@ -2,7 +2,7 @@
 
 <img src="https://user-images.githubusercontent.com/26038055/131368542-0e401c2c-35e4-449c-8423-ea259b39614b.png" align="right"  width="250">
 
-Official Ergo Wallet for Android ([proof](https://ergoplatform.org/en/blog/2021-07-29-ergo-for-android-released/))
+Official Ergo Wallet for Android ([official announcement](https://ergoplatform.org/en/blog/2021-07-29-ergo-for-android-released/))
 
 [<img alt="Get it on Google Play" height="80" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png">](https://play.google.com/store/apps/details?id=org.ergoplatform.android)
 
@@ -22,7 +22,7 @@ Visit the [Ergo Discord](https://discord.gg/kj7s7nb) to give feedback.
 
 ### Download and install the APK manually
 
-Apart from Google Play, you can download the app APKs from the [releases section](https://github.com/MrStahlfelge/ergo-wallet-android/releases) to sideload.
+Apart from Google Play, you can download the app APKs from the [releases section](https://github.com/ergoplatform/ergo-wallet-android/releases) to sideload.
 There are APKs available for Testnet and Mainnet, and as a debug build and release build.
 
 **Debug builds** are built on GitHub.
