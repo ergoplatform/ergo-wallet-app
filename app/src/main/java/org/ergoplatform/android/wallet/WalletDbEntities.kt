@@ -40,6 +40,7 @@ data class WalletAddressDbEntity(
     @ColumnInfo(name = "wallet_first_address") val walletFirstAddress: String,
     @ColumnInfo(name = "index") val derivationIndex: Int,
     @ColumnInfo(name = "public_address") val publicAddress: String,
+    val label: String?,
 )
 
 data class WalletDbEntity(

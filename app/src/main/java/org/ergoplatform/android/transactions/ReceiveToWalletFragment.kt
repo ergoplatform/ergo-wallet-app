@@ -15,7 +15,8 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
-import org.ergoplatform.android.ui.inputTextToFloat
+import org.ergoplatform.android.ui.formatFiatToString
+import org.ergoplatform.android.ui.inputTextToDouble
 
 
 /**
@@ -122,9 +123,9 @@ class ReceiveToWalletFragment : Fragment() {
         return null
     }
 
-    private fun getInputAmount(): Float {
+    private fun getInputAmount(): Double {
         val amountStr = binding.amount.editText?.text.toString()
-        val amountVal = inputTextToFloat(amountStr)
+        val amountVal = inputTextToDouble(amountStr)
         return amountVal
     }
 
@@ -146,7 +147,7 @@ class ReceiveToWalletFragment : Fragment() {
                 getString(
                     R.string.label_fiat_amount,
                     formatFiatToString(
-                        getInputAmount() * (nodeConnector.fiatValue.value ?: 0f),
+                        getInputAmount() * (nodeConnector.fiatValue.value ?: 0f).toDouble(),
                         nodeConnector.fiatCurrency, requireContext()
                     ),
                 )

@@ -31,7 +31,6 @@
     <string name="label_tokens">tokens</string>
     <string name="label_more_tokens">more tokens</string>
     <string name="label_unconfirmed">unconfirmed</string>
-    <string name="button_view_transactions">View transactions</string>
     <string name="button_receive">Receive</string>
     <string name="button_send">Send</string>
     <string name="button_display_currency">Display currency: %1s</string>
@@ -86,13 +85,21 @@
     <string name="device_enc_security_biometric_strong">Biometric with strong security</string>
     <string name="device_enc_security_biometric_weak">Biometric, Class 2</string>
 
-    <!-- Wallet config/details -->
-    <string name="title_wallet_details">Wallet details</string>
+    <!-- Wallet config -->
+    <string name="title_wallet_details">Wallet configuration</string>
     <string name="label_wallet_name">Descriptive wallet name</string>
     <string name="label_changes_saved">Changes saved</string>
     <string name="label_confirm_delete">Are you sure you want to erase the wallet from this device?\nThis can\'t be undone.</string>
     <string name="desc_display_mnemonic">You can display your mnemonic (seed phrase, paper key) in case you have lost your backup, or to confirm that your backup is correct.</string>
     <string name="button_display_mnemonic">Display mnemonic</string>
+
+    <!-- Wallet details -->
+    <string name="title_wallet_addresses">Addresses</string>
+    <string name="title_wallet_address">Address</string>
+    <string name="title_wallet_balance">Balance</string>
+    <string name="desc_wallet_addresses">A wallet can have multiple public addresses, derived from the first address.</string>
+    <string name="label_all_addresses">All %1d address(es)</string>
+    <string name="exporer_view_transactions">Tap to view transactions in Ergo Explorer — in-app transactions list will be added soon</string>
 
     <!-- Send funds -->
     <string name="desc_choose_wallet">Please choose the wallet to send from:</string>

@@ -11,15 +11,11 @@ import kotlinx.coroutines.withContext
 import org.ergoplatform.android.*
 import org.ergoplatform.android.ui.PasswordDialogFragment
 import org.ergoplatform.android.ui.SingleLiveEvent
-import org.ergoplatform.android.wallet.ENC_TYPE_DEVICE
-import org.ergoplatform.android.wallet.ENC_TYPE_PASSWORD
-import org.ergoplatform.android.wallet.WalletConfigDbEntity
-import org.ergoplatform.android.wallet.WalletTokenDbEntity
+import org.ergoplatform.android.wallet.*
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
-import kotlin.math.pow
 
 /**
  * Holding state of the send funds screen (thus to be expected to get complicated)
@@ -33,7 +29,7 @@ class SendFundsViewModel : ViewModel() {
             field = value
             calcGrossAmount()
         }
-    var amountToSend: Float = 0f
+    var amountToSend: Double = 0.0
         set(value) {
             field = value
             calcGrossAmount()
@@ -43,16 +39,16 @@ class SendFundsViewModel : ViewModel() {
     val lockInterface: LiveData<Boolean> = _lockInterface
     private val _walletName = MutableLiveData<String>()
     val walletName: LiveData<String> = _walletName
-    private val _walletBalance = MutableLiveData<Float>()
-    val walletBalance: LiveData<Float> = _walletBalance
-    private val _feeAmount = MutableLiveData<Float>().apply {
+    private val _walletBalance = MutableLiveData<Double>()
+    val walletBalance: LiveData<Double> = _walletBalance
+    private val _feeAmount = MutableLiveData<Double>().apply {
         value = nanoErgsToErgs(Parameters.MinFee)
     }
-    val feeAmount: LiveData<Float> = _feeAmount
-    private val _grossAmount = MutableLiveData<Float>().apply {
-        value = 0f
+    val feeAmount: LiveData<Double> = _feeAmount
+    private val _grossAmount = MutableLiveData<Double>().apply {
+        value = 0.0
     }
-    val grossAmount: LiveData<Float> = _grossAmount
+    val grossAmount: LiveData<Double> = _grossAmount
     private val _paymentDoneLiveData = SingleLiveEvent<TransactionResult>()
     val paymentDoneLiveData: LiveData<TransactionResult> = _paymentDoneLiveData
     private val _txId = MutableLiveData<String>()
@@ -87,8 +83,7 @@ class SendFundsViewModel : ViewModel() {
             wallet?.displayName?.let {
                 _walletName.postValue(it)
             }
-            walletWithState?.state?.map { it.balance ?: 0 }?.sum()
-                ?.let { _walletBalance.postValue(nanoErgsToErgs(it)) }
+            walletWithState?.let { _walletBalance.postValue(nanoErgsToErgs(it.getBalanceForAllAddresses())) }
             tokensAvail.clear()
             walletWithState?.tokens?.let { tokensAvail.addAll(it) }
             content?.let { addTokensFromQr(content.tokens) }
@@ -222,7 +217,7 @@ class SendFundsViewModel : ViewModel() {
 
             // we need to check for existence here, QR code might have any String, not an ID
             tokensAvail.filter { it.tokenId.equals(tokenId) }.firstOrNull()?.let {
-                val longAmount = (amount * 10.0.pow(it.decimals ?: 0)).toLong()
+                val longAmount = doubleToLongWithDecimals (amount,it.decimals ?: 0)
                 tokensChosen.put(tokenId, ErgoToken(tokenId, longAmount))
                 changed = true
             }

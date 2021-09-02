@@ -7,209 +7,214 @@
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardview_tx_edit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="@dimen/activity_horizontal_margin">
+        <FrameLayout
+            style="@style/width_match_parent_max_500"
+            android:layout_height="wrap_content">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/container"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardview_tx_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/activity_horizontal_margin"
-                android:animateLayoutChanges="true"
-                android:orientation="vertical">
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/activity_horizontal_margin">
 
-                <TextView
-                    android:id="@+id/label_title"
-                    style="@style/TextAppearance.App.Headline2"
-                    android:layout_width="0dp"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/container"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/button_send"
-                    android:textColor="?attr/colorSecondary"
-                    app:layout_constraintEnd_toStartOf="@id/button_scan"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/wallet_name"
-                    style="@style/TextAppearance.App.Body1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="@id/label_title"
-                    app:layout_constraintStart_toStartOf="@id/label_title"
-                    app:layout_constraintTop_toBottomOf="@id/label_title"
-                    tools:text="@string/label_send_from" />
-
-                <TextView
-                    android:id="@+id/tv_balance"
-                    style="@style/TextAppearance.App.Body1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="@id/wallet_name"
-                    app:layout_constraintStart_toStartOf="@id/wallet_name"
-                    app:layout_constraintTop_toBottomOf="@id/wallet_name"
-                    tools:text="@string/label_wallet_balance" />
-
-                <TextView
-                    android:id="@+id/desc"
-                    style="@style/TextAppearance.App.Body1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:text="@string/desc_send_funds"
-                    app:layout_constraintEnd_toEndOf="@id/wallet_name"
-                    app:layout_constraintStart_toStartOf="@id/wallet_name"
-                    app:layout_constraintTop_toBottomOf="@id/tv_balance" />
-
-                <ImageButton
-                    android:id="@+id/button_scan"
-                    style="@style/Widget.App.Button.TextButton"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@string/label_scan_qr"
-                    android:src="@drawable/ic_qr_code_24"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/amount"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:hint="@string/label_amount"
-                    app:endIconDrawable="@drawable/ic_use_all_24"
-                    app:endIconMode="custom"
-                    app:layout_constraintEnd_toEndOf="@id/tv_receiver"
-                    app:layout_constraintStart_toStartOf="@id/tv_receiver"
-                    app:layout_constraintTop_toBottomOf="@id/tv_receiver">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="top"
-                        android:imeOptions="actionDone"
-                        android:inputType="numberDecimal" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tv_receiver"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/half_horizontal_margin"
-                    android:hint="@string/label_receiver_address"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/desc">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="top"
-                        android:imeOptions="actionNext"
-                        android:inputType="text"
-                        android:maxLines="1" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <TextView
-                    android:id="@+id/tv_fiat"
-                    style="@style/TextAppearance.App.Fiat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="@id/amount"
-                    app:layout_constraintTop_toBottomOf="@id/amount"
-                    tools:text="@string/label_fiat_amount"
-                    tools:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/tv_fee"
-                    style="@style/TextAppearance.App.Body1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginVertical="@dimen/half_horizontal_margin"
-                    app:layout_constraintStart_toStartOf="@id/amount"
-                    app:layout_constraintTop_toBottomOf="@id/tv_fiat"
-                    tools:text="@string/desc_fee" />
-
-                <org.fabiomsr.moneytextview.MoneyTextView
-                    android:id="@+id/gross_amount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginVertical="@dimen/activity_vertical_margin"
-                    app:baseTextSize="@dimen/headline1_textsize"
-                    app:baseTextStyle="bold"
-                    app:decimalDigitsTextSize="@dimen/body1_textsize"
-                    app:decimalMargin="4dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tv_fee"
-                    app:symbolMargin="6dp" />
-
-                <LinearLayout
-                    android:id="@+id/tokens_list"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:layout_margin="@dimen/activity_horizontal_margin"
                     android:animateLayoutChanges="true"
-                    android:orientation="vertical"
-                    android:padding="@dimen/half_horizontal_margin"
-                    android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/gross_amount"
-                    app:layout_constraintWidth_max="600dp"
-                    tools:visibility="visible" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/label_token_amount_error"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
-                    android:gravity="center"
-                    android:text="@string/error_token_amount"
-                    android:textColor="?attr/colorError"
-                    android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tokens_list" />
+                    <TextView
+                        android:id="@+id/label_title"
+                        style="@style/TextAppearance.App.Headline2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/button_send"
+                        android:textColor="?attr/colorSecondary"
+                        app:layout_constraintEnd_toStartOf="@id/button_scan"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_add_token"
-                    style="@style/Widget.App.Button.PrimaryTint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:elegantTextHeight="true"
-                    android:text="@string/label_add_token"
-                    app:icon="@drawable/ic_add_24"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/button_send" />
+                    <TextView
+                        android:id="@+id/wallet_name"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toEndOf="@id/label_title"
+                        app:layout_constraintStart_toStartOf="@id/label_title"
+                        app:layout_constraintTop_toBottomOf="@id/label_title"
+                        tools:text="@string/label_send_from" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_send"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="@dimen/half_horizontal_margin"
-                    android:elegantTextHeight="true"
-                    android:paddingStart="@dimen/margin_and_half"
-                    android:paddingEnd="@dimen/margin_and_half"
-                    android:text="@string/button_send"
-                    app:icon="@drawable/ic_send_24"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/label_token_amount_error" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+                    <TextView
+                        android:id="@+id/tv_balance"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toEndOf="@id/wallet_name"
+                        app:layout_constraintStart_toStartOf="@id/wallet_name"
+                        app:layout_constraintTop_toBottomOf="@id/wallet_name"
+                        tools:text="@string/label_wallet_balance" />
 
+                    <TextView
+                        android:id="@+id/desc"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/activity_vertical_margin"
+                        android:text="@string/desc_send_funds"
+                        app:layout_constraintEnd_toEndOf="@id/wallet_name"
+                        app:layout_constraintStart_toStartOf="@id/wallet_name"
+                        app:layout_constraintTop_toBottomOf="@id/tv_balance" />
+
+                    <ImageButton
+                        android:id="@+id/button_scan"
+                        style="@style/Widget.App.Button.TextButton"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/label_scan_qr"
+                        android:src="@drawable/ic_qr_code_24"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/amount"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/activity_vertical_margin"
+                        android:hint="@string/label_amount"
+                        app:endIconDrawable="@drawable/ic_use_all_24"
+                        app:endIconMode="custom"
+                        app:layout_constraintEnd_toEndOf="@id/tv_receiver"
+                        app:layout_constraintStart_toStartOf="@id/tv_receiver"
+                        app:layout_constraintTop_toBottomOf="@id/tv_receiver">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="top"
+                            android:imeOptions="actionDone"
+                            android:inputType="numberDecimal" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tv_receiver"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/half_horizontal_margin"
+                        android:hint="@string/label_receiver_address"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/desc">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="top"
+                            android:imeOptions="actionNext"
+                            android:inputType="text"
+                            android:maxLines="1" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/tv_fiat"
+                        style="@style/TextAppearance.App.Fiat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="@id/amount"
+                        app:layout_constraintTop_toBottomOf="@id/amount"
+                        tools:text="@string/label_fiat_amount"
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tv_fee"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="@dimen/half_horizontal_margin"
+                        app:layout_constraintStart_toStartOf="@id/amount"
+                        app:layout_constraintTop_toBottomOf="@id/tv_fiat"
+                        tools:text="@string/desc_fee" />
+
+                    <org.fabiomsr.moneytextview.MoneyTextView
+                        android:id="@+id/gross_amount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="@dimen/activity_vertical_margin"
+                        app:baseTextSize="@dimen/headline1_textsize"
+                        app:baseTextStyle="bold"
+                        app:decimalDigitsTextSize="@dimen/body1_textsize"
+                        app:decimalMargin="4dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_fee"
+                        app:symbolMargin="6dp" />
+
+                    <LinearLayout
+                        android:id="@+id/tokens_list"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/activity_vertical_margin"
+                        android:animateLayoutChanges="true"
+                        android:orientation="vertical"
+                        android:padding="@dimen/half_horizontal_margin"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/gross_amount"
+                        app:layout_constraintWidth_max="600dp"
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/label_token_amount_error"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                        android:gravity="center"
+                        android:text="@string/error_token_amount"
+                        android:textColor="?attr/colorError"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tokens_list" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_add_token"
+                        style="@style/Widget.App.Button.PrimaryTint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:elegantTextHeight="true"
+                        android:text="@string/label_add_token"
+                        app:icon="@drawable/ic_add_24"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/button_send" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_send"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="@dimen/half_horizontal_margin"
+                        android:elegantTextHeight="true"
+                        android:paddingStart="@dimen/margin_and_half"
+                        android:paddingEnd="@dimen/margin_and_half"
+                        android:text="@string/button_send"
+                        app:icon="@drawable/ic_send_24"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/label_token_amount_error" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+        </FrameLayout>
     </androidx.core.widget.NestedScrollView>
 
     <androidx.cardview.widget.CardView

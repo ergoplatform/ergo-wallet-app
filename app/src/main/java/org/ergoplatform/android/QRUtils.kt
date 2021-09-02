@@ -29,7 +29,7 @@ fun setQrCodeToImageView(imageViewQrCode: ImageView, text: String, width: Int, h
 
 fun getExplorerPaymentRequestAddress(
     address: String,
-    amount: Float = 0f,
+    amount: Double = 0.0,
     description: String = ""
 ): String {
     return PAYMENT_URI_PREFIX + RECIPIENT_PARAM_PREFIX + URLEncoder.encode(address, URI_ENCODING) +
@@ -58,7 +58,7 @@ fun parseContentFromQrCode(qrCode: String): QrCodeContent? {
 
 fun parseContentFromQuery(query: String): QrCodeContent? {
     var address: String? = null
-    var amount = 0f
+    var amount = 0.0
     var description = ""
     val tokenMap: HashMap<String, Double> = HashMap()
 
@@ -68,9 +68,9 @@ fun parseContentFromQuery(query: String): QrCodeContent? {
                 URLDecoder.decode(it.substring(RECIPIENT_PARAM_PREFIX.length), URI_ENCODING)
         } else if (it.startsWith(AMOUNT_PARAM_PREFIX)) {
             amount = URLDecoder.decode(it.substring(AMOUNT_PARAM_PREFIX.length), URI_ENCODING)
-                .toFloatOrNull() ?: 0f
+                .toDoubleOrNull() ?: 0.0
             if (amount.isNaN()) {
-                amount = 0f
+                amount = 0.0
             }
         } else if (it.startsWith(DESCRIPTION_PARAM_PREFIX)) {
             description =
@@ -98,7 +98,7 @@ fun parseContentFromQuery(query: String): QrCodeContent? {
 
 data class QrCodeContent(
     val address: String,
-    val amount: Float = 0f,
+    val amount: Double = 0.0,
     val description: String = "",
     val tokens: HashMap<String, Double> = HashMap(),
 )

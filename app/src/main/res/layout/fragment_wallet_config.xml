@@ -17,6 +17,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginHorizontal="50dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="@string/title_wallet_details" />
 
     </FrameLayout>
@@ -25,89 +28,117 @@
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:fillViewport="true">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="@dimen/activity_horizontal_margin">
+        <FrameLayout
+            style="@style/width_match_parent_max_500"
+            android:layout_height="wrap_content">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/activity_horizontal_margin"
-                android:orientation="vertical">
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/activity_horizontal_margin">
 
-                <TextView
-                    android:id="@+id/public_address"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textAppearance="@style/TextAppearance.App.Headline2"
-                    app:layout_constraintEnd_toStartOf="@id/button_copy"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:text="Very long public address, will be 3 lines long" />
-
-                <ImageButton
-                    android:id="@+id/button_copy"
-                    style="@style/Widget.App.Button.TextButton"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@string/button_copy"
-                    android:src="@drawable/ic_copy_24"
-                    app:layout_constraintBottom_toBottomOf="@id/public_address"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/public_address" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/input_wallet_name"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margin_and_half"
-                    android:hint="@string/label_wallet_name"
-                    app:endIconMode="clear_text"
-                    app:layout_constraintTop_toBottomOf="@id/public_address">
+                    android:layout_margin="@dimen/activity_horizontal_margin"
+                    android:orientation="vertical">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <TextView
+                        android:id="@+id/public_address"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textAppearance="@style/TextAppearance.App.Headline2"
+                        app:layout_constraintEnd_toStartOf="@id/button_copy"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Very long public address, will be 3 lines long" />
+
+                    <ImageButton
+                        android:id="@+id/button_copy"
+                        style="@style/Widget.App.Button.TextButton"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/button_copy"
+                        android:src="@drawable/ic_copy_24"
+                        app:layout_constraintBottom_toBottomOf="@id/public_address"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/public_address" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/input_wallet_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="top"
-                        android:imeOptions="actionDone"
-                        android:inputType="text"
-                        android:maxLines="1" />
+                        android:layout_marginTop="@dimen/margin_and_half"
+                        android:hint="@string/label_wallet_name"
+                        app:endIconMode="clear_text"
+                        app:layout_constraintTop_toBottomOf="@id/public_address">
 
-                </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="top"
+                            android:imeOptions="actionDone"
+                            android:inputType="text"
+                            android:maxLines="1" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_apply"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/button_apply"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/input_wallet_name" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
-                    android:id="@+id/display_mnemonic_desc"
-                    style="@style/TextAppearance.App.Body1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margin_and_half"
-                    android:text="@string/desc_display_mnemonic"
-                    app:layout_constraintTop_toBottomOf="@id/button_apply" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_apply"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/button_apply"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/input_wallet_name" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_export"
-                    style="@style/Widget.App.Button.PrimaryTint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:text="@string/button_display_mnemonic"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/display_mnemonic_desc" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+                    <TextView
+                        android:id="@+id/desc_wallet_addresses"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_and_half"
+                        android:text="@string/desc_wallet_addresses"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/button_apply" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_addresses"
+                        style="@style/Widget.App.Button.PrimaryTint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/activity_vertical_margin"
+                        android:enabled="false"
+                        android:text="@string/title_wallet_addresses"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/desc_wallet_addresses" />
+
+                    <TextView
+                        android:id="@+id/display_mnemonic_desc"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_and_half"
+                        android:text="@string/desc_display_mnemonic"
+                        app:layout_constraintTop_toBottomOf="@id/button_addresses" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_export"
+                        style="@style/Widget.App.Button.PrimaryTint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/activity_vertical_margin"
+                        android:text="@string/button_display_mnemonic"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/display_mnemonic_desc" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+        </FrameLayout>
 
     </androidx.core.widget.NestedScrollView>
 
