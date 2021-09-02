@@ -1,10 +1,10 @@
 # Ergo Wallet Android
 
-<img src="https://user-images.githubusercontent.com/26038055/122617266-38b02980-d08c-11eb-8cd7-a33d9984d002.png" align="right"  width="250">
+<img src="https://user-images.githubusercontent.com/26038055/131368542-0e401c2c-35e4-449c-8423-ea259b39614b.png" align="right"  width="250">
 
-Ergo Wallet for Android, built on top of [Ergo Appkit](https://github.com/aslesarenko/ergo-appkit).
+Official Ergo Wallet for Android ([official announcement](https://ergoplatform.org/en/blog/2021-07-29-ergo-for-android-released/))
 
-You need at least Android 7 to run Ergo Wallet.
+[<img alt="Get it on Google Play" height="80" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png">](https://play.google.com/store/apps/details?id=org.ergoplatform.android)
 
 Features:
 * generating wallets, restoring wallets in a way compatible to Yoroi and Ergo node (only first address can be seen at the moment)
@@ -12,16 +12,17 @@ Features:
 * no need to make a full sync, this is a lightweight client
 * Requesting payments by showing QR code or sharing a link
 * Sending payments, manually or by scanning a QR code
+* Displays and sends tokens and NFT
 * Your secrets are stored password-encrypted or authentication-protected
 * Show wallet balance, configurable comparison fiat currency
 
+You need at least Android 7 to run Ergo Wallet.
+
 Visit the [Ergo Discord](https://discord.gg/kj7s7nb) to give feedback.
 
-[<img alt="Get it on Google Play" height="80" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png">](https://play.google.com/store/apps/details?id=org.ergoplatform.android)
+### Download and install the APK manually
 
-### Download and install
-
-You can download the app APKs from the [releases section](https://github.com/MrStahlfelge/ergo-wallet-android/releases).
+Apart from Google Play, you can download the app APKs from the [releases section](https://github.com/ergoplatform/ergo-wallet-android/releases) to sideload.
 There are APKs available for Testnet and Mainnet, and as a debug build and release build.
 
 **Debug builds** are built on GitHub.
@@ -33,13 +34,8 @@ Because the certificate changes, you can't upgrade the app later - you need to u
 Google Play Protect warnings, you'll be able to upgrade without losing your data and the app is
 much smaller and faster, however, you have to trust me.
 
-The APK file can be installed on your Android device. If you do this for the first time,
+The APK file can be installed on your Android device. If you sideload for the first time,
 [you can follow this guide](https://www.xda-developers.com/sideload-apps-how-to/).
-
-### Can I trust this app?
-
-The app was [audited by the Ergo team](https://twitter.com/ergoplatformorg/status/1417039106576633857). 
-If you still don't trust this app, you can add your wallets without giving your mnemonic. You won't be able to send funds then, but you can watch your balance.
 
 ### Build yourself
 
