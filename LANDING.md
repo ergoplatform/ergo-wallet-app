@@ -25,7 +25,7 @@ Scan payment QR codes from other users or websites for a satisfying sending expe
 
 ## What this wallet is
 ### Secure 
-Your secrets are stored password-encrypted or authentication-protected. Every code change on the project is audited by an Ergo core team member.
+Your secrets are stored password-encrypted or authentication-protected. Every code change on the project is audited by at least one Ergo core team member.
 
 ### Open Source
 Check out the [GitHub project](https://github.com/MrStahlfelge/ergo-wallet-android).
