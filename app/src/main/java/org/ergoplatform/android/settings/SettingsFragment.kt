@@ -2,7 +2,6 @@ package org.ergoplatform.android.settings
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +13,7 @@ import org.ergoplatform.android.BuildConfig
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSettingsBinding
 import org.ergoplatform.android.getPrefDisplayCurrency
+import org.ergoplatform.android.ui.enableLinks
 import java.util.*
 
 class SettingsFragment : Fragment() {
@@ -44,8 +44,8 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // makes the links clickable
-        binding.labelMoreInfo.movementMethod = LinkMovementMethod.getInstance()
-        binding.labelCoingecko.movementMethod = LinkMovementMethod.getInstance()
+        binding.labelMoreInfo.enableLinks()
+        binding.labelCoingecko.enableLinks()
 
         setDisplayCurrency()
 

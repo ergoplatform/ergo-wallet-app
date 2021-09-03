@@ -6,7 +6,8 @@
     <string name="format_erg">###,##0.0000</string>
     <string name="format_fiat">###,##0.00</string>
 
-    <string name="hint_password">Please enter your send funds password</string>
+    <string name="hint_password">Please enter your spending password</string>
+    <string name="label_forgot_password"><a href="https://github.com/ergoplatform/ergo-wallet-android/wiki/FAQ#i-forgot-my-spending-password">Forgot your password?</a></string>
     <string name="err_password">Passwords must be at least 8 characters long</string>
     <string name="label_password">Password</string>
     <string name="label_password_confirm">Confirm password</string>

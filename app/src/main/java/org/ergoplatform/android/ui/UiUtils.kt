@@ -2,9 +2,11 @@ package org.ergoplatform.android.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.TextView
 import androidx.annotation.IdRes
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -32,6 +34,10 @@ fun hideForcedSoftKeyboard(context: Context, editText: EditText) {
         context,
         InputMethodManager::class.java
     )?.hideSoftInputFromWindow(editText.getWindowToken(), 0)
+}
+
+fun TextView.enableLinks() {
+    movementMethod = LinkMovementMethod.getInstance()
 }
 
 fun inputTextToDouble(amountStr: String?): Double {
