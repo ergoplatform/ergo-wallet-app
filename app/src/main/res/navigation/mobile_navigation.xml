@@ -47,6 +47,13 @@
         <argument
             android:name="wallet_id"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_navigation_wallet_details_to_walletAddressesFragment"
+            app:destination="@id/walletAddressesFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
 
     <fragment
@@ -143,6 +150,14 @@
         <argument
             android:name="wallet_id"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_walletConfigFragment_to_walletAddressesFragment"
+            app:destination="@id/walletAddressesFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
+
     </fragment>
     <dialog
         android:id="@+id/confirmCreateWalletFragment"
@@ -171,4 +186,12 @@
             android:id="@+id/deepLink"
             app:uri="explorer.ergoplatform.com/payment-request" />
     </dialog>
+    <fragment
+        android:id="@+id/walletAddressesFragment"
+        android:name="org.ergoplatform.android.wallet.WalletAddressesFragment"
+        android:label="WalletAddressesFragment" >
+        <argument
+            android:name="walletId"
+            app:argType="integer" />
+    </fragment>
 </navigation>

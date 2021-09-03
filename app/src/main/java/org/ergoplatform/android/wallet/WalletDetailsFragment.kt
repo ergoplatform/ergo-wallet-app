@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.nanoErgsToErgs
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
+import org.ergoplatform.android.ui.navigateSafe
 
 class WalletDetailsFragment : Fragment() {
 
@@ -70,6 +72,14 @@ class WalletDetailsFragment : Fragment() {
                 )
             )
             binding.root.context.startActivity(browserIntent)
+        }
+
+        binding.buttonConfigAddresses.setOnClickListener {
+            findNavController().navigateSafe(
+                WalletDetailsFragmentDirections.actionNavigationWalletDetailsToWalletAddressesFragment(
+                    walletDetailsViewModel.wallet!!.walletConfig.id
+                )
+            )
         }
 
         // enable layout change animations after a short wait time

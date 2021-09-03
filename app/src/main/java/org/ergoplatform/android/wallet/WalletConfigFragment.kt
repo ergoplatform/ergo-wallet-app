@@ -69,6 +69,14 @@ class WalletConfigFragment : Fragment(), ConfirmationCallback, PasswordDialogCal
                     Snackbar.make(requireView(), R.string.label_copied, Snackbar.LENGTH_LONG)
                         .setAnchorView(R.id.nav_view).show()
                 }
+
+                binding.buttonAddresses.setOnClickListener {
+                    findNavController().navigateSafe(
+                        WalletConfigFragmentDirections.actionWalletConfigFragmentToWalletAddressesFragment(
+                            wallet.id
+                        )
+                    )
+                }
             }
         }
 

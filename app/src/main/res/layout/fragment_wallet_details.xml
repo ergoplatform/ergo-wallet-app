@@ -83,7 +83,8 @@
                             android:ellipsize="middle"
                             android:gravity="start"
                             android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.App.Headline2"
+                            android:textAppearance="@style/TextAppearance.App.Body1"
+                            android:textStyle="bold"
                             app:drawableEndCompat="@drawable/ic_drop_down_24"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="@id/wallet_address_title"
@@ -126,7 +127,8 @@
                                 android:layout_weight="1"
                                 android:background="?selectableItemBackgroundBorderless"
                                 android:contentDescription="@string/title_settings"
-                                android:src="@drawable/ic_settings_24" />
+                                android:src="@drawable/ic_settings_24"
+                                app:tint="?android:textColor" />
 
                         </LinearLayout>
 

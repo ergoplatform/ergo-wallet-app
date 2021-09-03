@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        android:elevation="2dp"
+        android:minHeight="?android:attr/actionBarSize"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/TextAppearance.App.Headline1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="50dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/title_wallet_addresses" />
+
+    </FrameLayout>
+
+    <TextView
+        style="@style/width_match_parent_max_500"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/half_horizontal_margin"
+        android:gravity="center"
+        android:text="@string/desc_wallet_addresses" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        tools:listitem="@layout/card_wallet_address" />
+
+</LinearLayout>
