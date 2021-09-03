@@ -22,8 +22,7 @@ class WalletAddressesViewModel : ViewModel() {
                 // called every time something changes in the DB
                 wallet = it
 
-                // TODO make sure first address is included
-                _addresses.postValue(it.addresses)
+                _addresses.postValue(it.getSortedDerivedAddressesList())
             }
         }
     }

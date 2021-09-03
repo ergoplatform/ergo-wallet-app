@@ -33,7 +33,29 @@ fun WalletDbEntity.getDerivedAddress(idx: Int): String? {
     } else {
         return addresses.filter { it.derivationIndex == idx }.firstOrNull()?.publicAddress
     }
+}
 
+/**
+ * @return derived addresses list, making sure that 0 address is included and list ist sorted by idx
+ */
+fun WalletDbEntity.getSortedDerivedAddressesList(): List<WalletAddressDbEntity> {
+    val hasFirst = addresses.filter { it.derivationIndex == 0 }.isNotEmpty()
+    val retList = addresses.toMutableList()
+
+    if (!hasFirst) {
+        retList.add(
+            0,
+            WalletAddressDbEntity(
+                0,
+                walletConfig.firstAddress!!,
+                0,
+                walletConfig.firstAddress!!,
+                null
+            )
+        )
+    }
+
+    return retList.sortedBy { it.derivationIndex }
 }
 
 fun WalletDbEntity.getNumOfAddresses(): Int {

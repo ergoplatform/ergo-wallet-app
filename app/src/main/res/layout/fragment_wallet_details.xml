@@ -73,6 +73,7 @@
                             android:maxLines="1"
                             android:text="@string/title_wallet_address"
                             android:textColor="?attr/colorSecondary"
+                            android:textStyle="bold"
                             app:layout_constraintStart_toEndOf="@id/image_addresses"
                             app:layout_constraintTop_toTopOf="parent" />
 
