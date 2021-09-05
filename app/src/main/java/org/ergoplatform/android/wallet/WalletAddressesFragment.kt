@@ -4,22 +4,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.CardWalletAddressBinding
 import org.ergoplatform.android.databinding.FragmentWalletAddressesBinding
 import org.ergoplatform.android.nanoErgsToErgs
+import org.ergoplatform.android.ui.PasswordDialogCallback
+import org.ergoplatform.android.ui.PasswordDialogFragment
 
 
 /**
  * Manages wallet derived addresses
  */
-class WalletAddressesFragment : Fragment() {
+class WalletAddressesFragment : Fragment(), PasswordDialogCallback {
 
     var _binding: FragmentWalletAddressesBinding? = null
     val binding: FragmentWalletAddressesBinding get() = _binding!!
@@ -54,7 +58,57 @@ class WalletAddressesFragment : Fragment() {
         })
     }
 
-    class WalletAddressesAdapter : RecyclerView.Adapter<WalletAddressViewHolder>() {
+    fun showBiometricPrompt() {
+        // setDeviceCredentialAllowed is deprecated, but needed for older SDK level
+        @Suppress("DEPRECATION") val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle(getString(R.string.title_authenticate))
+            .setConfirmationRequired(true) // don't display immediately when face is recognized
+            .setDeviceCredentialAllowed(true)
+            .build()
+
+        val context = requireContext()
+
+        val callback = object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                try {
+                    viewModel.addAddressWithBiometricAuth(context, 1)
+                } catch (t: Throwable) {
+                    view?.let {
+                        Snackbar.make(
+                            it,
+                            getString(R.string.error_device_security, t.message),
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                view?.let {
+                    Snackbar.make(
+                        it,
+                        getString(R.string.error_device_security, errString),
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+
+        BiometricPrompt(this, callback).authenticate(promptInfo)
+    }
+
+    override fun onPasswordEntered(password: String?): String? {
+        password?.let {
+            if (!viewModel.addAddressWithPass(requireContext(), password, 1)) {
+                return getString(R.string.error_password_wrong)
+            } else {
+                return null
+            }
+        }
+        return getString(R.string.error_password_empty)
+    }
+
+    inner class WalletAddressesAdapter : RecyclerView.Adapter<WalletAddressViewHolder>() {
         var wallet: WalletDbEntity? = null
         var addressList: List<WalletAddressDbEntity> = emptyList()
             set(value) {
@@ -87,7 +141,7 @@ class WalletAddressesFragment : Fragment() {
         }
     }
 
-    class WalletAddressViewHolder(val binding: CardWalletAddressBinding) :
+    inner class WalletAddressViewHolder(val binding: CardWalletAddressBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bindAddress(dbEntity: WalletAddressDbEntity, wallet: WalletDbEntity) {
             val ctx = binding.root.context
@@ -125,6 +179,19 @@ class WalletAddressesFragment : Fragment() {
             binding.buttonMoreMenu.visibility = View.GONE
             binding.layoutNewAddress.visibility = View.VISIBLE
             binding.addressInformation.root.visibility = View.GONE
+
+            binding.buttonAddAddress.setOnClickListener {
+                viewModel.wallet?.walletConfig?.let {
+                    if (it.encryptionType == ENC_TYPE_PASSWORD) {
+                        PasswordDialogFragment().show(
+                            this@WalletAddressesFragment.childFragmentManager,
+                            null
+                        )
+                    } else if (it.encryptionType == ENC_TYPE_DEVICE) {
+                        showBiometricPrompt()
+                    }
+                }
+            }
         }
     }
 

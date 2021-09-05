@@ -307,7 +307,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                 try {
                     viewModel.startPaymentUserAuth(context)
                 } catch (t: Throwable) {
-                    hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
+                    hideForcedSoftKeyboard(context, binding.amount.editText!!)
                     Snackbar.make(
                         requireView(),
                         getString(R.string.error_device_security, t.message),
@@ -317,7 +317,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
+                hideForcedSoftKeyboard(context, binding.amount.editText!!)
                 Snackbar.make(
                     requireView(),
                     getString(R.string.error_device_security, errString),

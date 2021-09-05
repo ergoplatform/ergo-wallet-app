@@ -50,6 +50,9 @@ interface WalletDbDao {
     @Query("SELECT * FROM wallet_addresses WHERE wallet_first_address = :firstAddress")
     suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddressDbEntity>
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertWalletAddress(walletAddress: WalletAddressDbEntity)
+
     @Query("SELECT * FROM wallet_configs")
     fun getAllWalletConfigsSyncronous(): List<WalletConfigDbEntity>
 
