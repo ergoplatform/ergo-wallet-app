@@ -105,7 +105,8 @@
     <string name="label_wallet_main_address">Main address</string>
     <string name="label_wallet_address_derived">Derived address %1s</string>
     <string name="label_wallet_token_balance">%1s tokens</string>
-    <string name="desc_wallet_addresses">A wallet can have multiple public addresses, derived from the first address.</string>
+    <string name="desc_wallet_addresses">A wallet can have multiple public addresses, derived from the main address.</string>
+    <string name="button_add_address">Add derived address</string>
 
     <!-- Send funds -->
     <string name="desc_choose_wallet">Please choose the wallet to send from:</string>

@@ -11,112 +11,59 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
         android:layout_marginVertical="@dimen/half_horizontal_margin"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:animateLayoutChanges="true">
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/address_index"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:ellipsize="middle"
-                android:gravity="start"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.App.Headline1"
-                app:layout_constraintBottom_toBottomOf="@id/public_address"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="20" />
-
-            <TextView
-                android:id="@+id/address_label"
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/activity_horizontal_margin"
-                android:layout_marginEnd="@dimen/half_horizontal_margin"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="?attr/colorSecondary"
-                android:textStyle="bold"
-                app:drawableEndCompat="@drawable/ic_edit_24"
-                app:layout_constraintBottom_toTopOf="@id/public_address"
-                app:layout_constraintEnd_toStartOf="@id/button_delete"
-                app:layout_constraintStart_toEndOf="@id/address_index"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="@string/label_wallet_default" />
-
-            <TextView
-                android:id="@+id/public_address"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:ellipsize="middle"
-                android:gravity="start"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.App.Body1"
-                app:layout_constraintEnd_toEndOf="@id/address_label"
-                app:layout_constraintStart_toStartOf="@id/address_label"
-                app:layout_constraintTop_toBottomOf="@id/address_label"
-                tools:text="Very long public address, will be 3 lines long" />
+            <include
+                android:id="@+id/address_information"
+                layout="@layout/include_wallet_address_info" />
 
             <ImageView
-                android:id="@+id/button_delete"
+                android:id="@+id/button_more_menu"
                 android:layout_width="@dimen/medium_icon_size"
                 android:layout_height="@dimen/medium_icon_size"
+                android:layout_gravity="end"
                 android:background="?android:attr/selectableItemBackground"
-                android:contentDescription="@string/button_delete"
+                android:contentDescription="@null"
                 android:scaleType="center"
-                android:src="@drawable/ic_delete_24"
-                app:layout_constraintBottom_toBottomOf="@id/public_address"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <View
-                android:id="@+id/divider"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginVertical="@dimen/half_horizontal_margin"
-                android:background="@color/lightgrey"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/public_address" />
+                android:src="@drawable/ic_menu_more_vert_24" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:id="@+id/layout_new_address"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/half_horizontal_margin"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/divider">
-
-                <org.fabiomsr.moneytextview.MoneyTextView
-                    android:id="@+id/address_balance"
-                    style="@style/MoneyTextViewDefaultStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    app:baseTextSize="@dimen/headline2_textsize"
-                    app:baseTextStyle="bold"
-                    app:decimalMargin="3dp"
-                    tools:amount="-123.2536" />
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <TextView
-                    android:id="@+id/label_token_num"
                     style="@style/TextAppearance.App.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/margin_and_half"
+                    android:gravity="center"
+                    android:text="@string/desc_wallet_addresses" />
+
+                <Button
+                    android:id="@+id/button_send"
+                    style="?attr/materialButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="@dimen/margin_and_half"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textStyle="bold"
-                    tools:text="999 tokens" />
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginStart="@dimen/half_horizontal_margin"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:text="@string/button_add_address"
+                    app:icon="@drawable/ic_add_24" />
+
+
             </LinearLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </FrameLayout>
     </androidx.cardview.widget.CardView>
 </FrameLayout>

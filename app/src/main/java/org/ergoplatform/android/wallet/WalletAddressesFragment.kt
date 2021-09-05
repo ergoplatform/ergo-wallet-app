@@ -75,39 +75,56 @@ class WalletAddressesFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: WalletAddressViewHolder, position: Int) {
-            holder.bind(addressList.get(position), wallet)
+            if (position == addressList.size) {
+                holder.bindAddAddress()
+            } else {
+                holder.bindAddress(addressList[position], wallet!!)
+            }
         }
 
         override fun getItemCount(): Int {
-            // TODO add an extra item for "add another address"
-            return addressList.size
+            return addressList.size + 1
         }
     }
 
     class WalletAddressViewHolder(val binding: CardWalletAddressBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(dbEntity: WalletAddressDbEntity, wallet: WalletDbEntity?) {
+        fun bindAddress(dbEntity: WalletAddressDbEntity, wallet: WalletDbEntity) {
             val ctx = binding.root.context
             val isDerivedAddress = dbEntity.derivationIndex > 0
-            binding.addressIndex.visibility =
-                if (isDerivedAddress) View.VISIBLE else View.GONE
-            binding.addressIndex.text = dbEntity.derivationIndex.toString()
-            binding.addressLabel.text = dbEntity.label
-                ?: (if (isDerivedAddress) ctx.getString(
-                    R.string.label_wallet_address_derived,
-                    dbEntity.derivationIndex.toString()
-                ) else ctx.getString(R.string.label_wallet_main_address))
-            binding.publicAddress.text = dbEntity.publicAddress
-            binding.buttonDelete.visibility =
-                if (isDerivedAddress) View.VISIBLE else View.GONE
 
-            val state = wallet?.getStateForAddress(dbEntity.publicAddress)
-            val tokens = wallet?.getTokensForAddress(dbEntity.publicAddress)
-            binding.addressBalance.amount = nanoErgsToErgs(state?.balance ?: 0)
-            binding.labelTokenNum.visibility =
-                if (tokens.isNullOrEmpty()) View.GONE else View.VISIBLE
-            binding.labelTokenNum.text =
-                ctx.getString(R.string.label_wallet_token_balance, (tokens?.size ?: 0).toString())
+            binding.layoutNewAddress.visibility = View.GONE
+            binding.cardView.isClickable = true
+            binding.buttonMoreMenu.visibility = View.VISIBLE
+
+            binding.addressInformation.apply {
+                root.visibility = View.VISIBLE
+
+                addressIndex.visibility =
+                    if (isDerivedAddress) View.VISIBLE else View.GONE
+                addressIndex.text = dbEntity.derivationIndex.toString()
+                addressLabel.text = dbEntity.label
+                    ?: (if (isDerivedAddress) ctx.getString(
+                        R.string.label_wallet_address_derived,
+                        dbEntity.derivationIndex.toString()
+                    ) else ctx.getString(R.string.label_wallet_main_address))
+                publicAddress.text = dbEntity.publicAddress
+
+                val state = wallet.getStateForAddress(dbEntity.publicAddress)
+                val tokens = wallet.getTokensForAddress(dbEntity.publicAddress)
+                addressBalance.amount = nanoErgsToErgs(state?.balance ?: 0)
+                labelTokenNum.visibility =
+                    if (tokens.isNullOrEmpty()) View.GONE else View.VISIBLE
+                labelTokenNum.text =
+                    ctx.getString(R.string.label_wallet_token_balance, tokens.size.toString())
+            }
+        }
+
+        fun bindAddAddress() {
+            binding.cardView.isClickable = false
+            binding.buttonMoreMenu.visibility = View.GONE
+            binding.layoutNewAddress.visibility = View.VISIBLE
+            binding.addressInformation.root.visibility = View.GONE
         }
     }
 

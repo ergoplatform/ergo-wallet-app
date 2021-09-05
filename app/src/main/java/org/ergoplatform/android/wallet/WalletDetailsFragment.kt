@@ -6,9 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -31,6 +29,11 @@ class WalletDetailsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args: WalletDetailsFragmentArgs by navArgs()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -84,6 +87,24 @@ class WalletDetailsFragment : Fragment() {
 
         // enable layout change animations after a short wait time
         Handler(Looper.getMainLooper()).postDelayed({ enableLayoutChangeAnimations() }, 500)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_wallet_details, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_settings) {
+            findNavController().navigateSafe(
+                WalletDetailsFragmentDirections.actionNavigationWalletDetailsToWalletConfigFragment(
+                    walletDetailsViewModel.wallet!!.walletConfig.id
+                )
+            )
+
+            return true
+        } else
+            return super.onOptionsItemSelected(item)
     }
 
     private fun addressChanged(address: String?) {

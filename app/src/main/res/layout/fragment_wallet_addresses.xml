@@ -39,14 +39,6 @@
 
     </LinearLayout>
 
-    <TextView
-        style="@style/width_match_parent_max_500"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/margin_and_half"
-        android:layout_marginTop="@dimen/half_horizontal_margin"
-        android:gravity="center"
-        android:text="@string/desc_wallet_addresses" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
