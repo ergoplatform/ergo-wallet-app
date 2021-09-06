@@ -22,7 +22,7 @@ import org.ergoplatform.android.ui.*
 /**
  * Shows settings and details for a wallet
  */
-class WalletConfigFragment : Fragment(), ConfirmationCallback, PasswordDialogCallback {
+class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallback {
 
     var _binding: FragmentWalletConfigBinding? = null
     private val binding get() = _binding!!
@@ -132,51 +132,18 @@ class WalletConfigFragment : Fragment(), ConfirmationCallback, PasswordDialogCal
         findNavController().navigateUp()
     }
 
-    override fun onPasswordEntered(password: String?): String? {
-        password?.let {
-            val mnemonic = viewModel.decryptMnemonicWithPass(password)
-            if (mnemonic == null) {
-                return getString(R.string.error_password_wrong)
-            } else {
-                displayMnemonic(mnemonic)
-                return null
-            }
+    override fun proceedAuthFlowWithPassword(password: String): Boolean {
+        val mnemonic = viewModel.decryptMnemonicWithPass(password)
+        if (mnemonic == null) {
+            return false
+        } else {
+            displayMnemonic(mnemonic)
+            return true
         }
-        return getString(R.string.error_password_empty)
     }
-
-    fun showBiometricPrompt() {
-        // setDeviceCredentialAllowed is deprecated, but needed for older SDK level
-        @Suppress("DEPRECATION") val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(getString(R.string.title_authenticate))
-            .setConfirmationRequired(true) // don't display immediately when face is recognized
-            .setDeviceCredentialAllowed(true)
-            .build()
-
-        val callback = object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                try {
-                    val mnemonic = viewModel.decryptMnemonicWithUserAuth()
-                    displayMnemonic(mnemonic!!)
-                } catch (t: Throwable) {
-                    Snackbar.make(
-                        requireView(),
-                        getString(R.string.error_device_security, t.message),
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                }
-            }
-
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                Snackbar.make(
-                    requireView(),
-                    getString(R.string.error_device_security, errString),
-                    Snackbar.LENGTH_LONG
-                ).show()
-            }
-        }
-
-        BiometricPrompt(this, callback).authenticate(promptInfo)
+    override fun proceedAuthFlowFromBiometrics() {
+        val mnemonic = viewModel.decryptMnemonicWithUserAuth()
+        displayMnemonic(mnemonic!!)
     }
 
     private fun displayMnemonic(mnemonic: String) {

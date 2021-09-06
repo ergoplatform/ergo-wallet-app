@@ -196,6 +196,7 @@
                         android:layout_gravity="end"
                         android:elegantTextHeight="true"
                         android:text="@string/label_add_token"
+                        android:visibility="invisible"
                         app:icon="@drawable/ic_add_24"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="@id/button_send" />

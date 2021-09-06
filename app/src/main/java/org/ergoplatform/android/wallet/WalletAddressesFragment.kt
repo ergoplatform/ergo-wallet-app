@@ -5,28 +5,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
-import androidx.biometric.BiometricPrompt
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.CardWalletAddressBinding
 import org.ergoplatform.android.databinding.FragmentWalletAddressesBinding
 import org.ergoplatform.android.nanoErgsToErgs
-import org.ergoplatform.android.ui.PasswordDialogCallback
-import org.ergoplatform.android.ui.PasswordDialogFragment
+import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 
 
 /**
  * Manages wallet derived addresses
  */
-class WalletAddressesFragment : Fragment(), PasswordDialogCallback {
+class WalletAddressesFragment : AbstractAuthenticationFragment() {
 
-    var _binding: FragmentWalletAddressesBinding? = null
+    private var _binding: FragmentWalletAddressesBinding? = null
     val binding: FragmentWalletAddressesBinding get() = _binding!!
 
     private val args: WalletAddressesFragmentArgs by navArgs()
@@ -59,55 +55,12 @@ class WalletAddressesFragment : Fragment(), PasswordDialogCallback {
         })
     }
 
-    fun showBiometricPrompt() {
-        // setDeviceCredentialAllowed is deprecated, but needed for older SDK level
-        @Suppress("DEPRECATION") val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(getString(R.string.title_authenticate))
-            .setConfirmationRequired(true) // don't display immediately when face is recognized
-            .setDeviceCredentialAllowed(true)
-            .build()
-
-        val context = requireContext()
-
-        val callback = object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                try {
-                    viewModel.addAddressWithBiometricAuth(context)
-                } catch (t: Throwable) {
-                    view?.let {
-                        Snackbar.make(
-                            it,
-                            getString(R.string.error_device_security, t.message),
-                            Snackbar.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
-
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                view?.let {
-                    Snackbar.make(
-                        it,
-                        getString(R.string.error_device_security, errString),
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                }
-            }
-        }
-
-        BiometricPrompt(this, callback).authenticate(promptInfo)
+    override fun proceedAuthFlowFromBiometrics() {
+        viewModel.addAddressWithBiometricAuth(requireContext())
     }
 
-    override fun onPasswordEntered(password: String?): String? {
-        password?.let {
-            if (!viewModel.addAddressWithPass(requireContext(), password)) {
-                return getString(R.string.error_password_wrong)
-            } else {
-                return null
-            }
-        }
-        return getString(R.string.error_password_empty)
-    }
+    override fun proceedAuthFlowWithPassword(password: String) =
+        viewModel.addAddressWithPass(requireContext(), password)
 
     inner class WalletAddressesAdapter : RecyclerView.Adapter<WalletAddressViewHolder>() {
         var wallet: WalletDbEntity? = null
@@ -185,14 +138,7 @@ class WalletAddressesFragment : Fragment(), PasswordDialogCallback {
             binding.buttonAddAddress.setOnClickListener {
                 viewModel.numAddressesToAdd = getNumAddressesToAdd()
                 viewModel.wallet?.walletConfig?.let {
-                    if (it.encryptionType == ENC_TYPE_PASSWORD) {
-                        PasswordDialogFragment().show(
-                            this@WalletAddressesFragment.childFragmentManager,
-                            null
-                        )
-                    } else if (it.encryptionType == ENC_TYPE_DEVICE) {
-                        showBiometricPrompt()
-                    }
+                    startAuthFlow(it)
                 }
             }
             binding.sliderNumAddresses.progress = 0
