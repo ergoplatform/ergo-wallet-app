@@ -13,6 +13,7 @@ import org.ergoplatform.android.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.api.AesEncryptionManager
 
 class WalletAddressesViewModel : ViewModel() {
+    var numAddressesToAdd: Int = 1
     var wallet: WalletDbEntity? = null
         private set
 
@@ -39,7 +40,7 @@ class WalletAddressesViewModel : ViewModel() {
                 var nextIdx = 0
 
                 // find next free slot
-                val indices = sortedAddresses.map { it.derivationIndex }
+                val indices = sortedAddresses.map { it.derivationIndex }.toMutableList()
 
                 for (i in 1..number) {
                     while (indices.contains(nextIdx)) {
@@ -55,28 +56,29 @@ class WalletAddressesViewModel : ViewModel() {
                             nextAddress, null
                         )
                     )
+                    indices.add(nextIdx)
 
-                    // TODO make nodeconnector fetch the balance
+                    // TODO make NodeConnector fetch the balance
                 }
             }
         }
     }
 
-    fun addAddressWithBiometricAuth(ctx: Context, num: Int) {
+    fun addAddressWithBiometricAuth(ctx: Context) {
         wallet?.walletConfig?.secretStorage?.let {
             val decryptData = AesEncryptionManager.decryptDataWithDeviceKey(it)
             deserializeSecrets(String(decryptData!!))?.let { mnemonic ->
-                addNextAddresses(ctx, num, mnemonic)
+                addNextAddresses(ctx, numAddressesToAdd, mnemonic)
             }
         }
     }
 
-    fun addAddressWithPass(ctx: Context, password: String, num: Int): Boolean {
+    fun addAddressWithPass(ctx: Context, password: String): Boolean {
         wallet?.walletConfig?.secretStorage?.let {
             try {
                 val decryptData = AesEncryptionManager.decryptData(password, it)
                 deserializeSecrets(String(decryptData!!))?.let { mnemonic ->
-                    addNextAddresses(ctx, num, mnemonic)
+                    addNextAddresses(ctx, numAddressesToAdd, mnemonic)
                     return true
                 }
             } catch (t: Throwable) {

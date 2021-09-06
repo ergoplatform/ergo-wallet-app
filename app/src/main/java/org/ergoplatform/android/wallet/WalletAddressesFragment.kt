@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SeekBar
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -71,7 +72,7 @@ class WalletAddressesFragment : Fragment(), PasswordDialogCallback {
         val callback = object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 try {
-                    viewModel.addAddressWithBiometricAuth(context, 1)
+                    viewModel.addAddressWithBiometricAuth(context)
                 } catch (t: Throwable) {
                     view?.let {
                         Snackbar.make(
@@ -99,7 +100,7 @@ class WalletAddressesFragment : Fragment(), PasswordDialogCallback {
 
     override fun onPasswordEntered(password: String?): String? {
         password?.let {
-            if (!viewModel.addAddressWithPass(requireContext(), password, 1)) {
+            if (!viewModel.addAddressWithPass(requireContext(), password)) {
                 return getString(R.string.error_password_wrong)
             } else {
                 return null
@@ -137,7 +138,8 @@ class WalletAddressesFragment : Fragment(), PasswordDialogCallback {
         }
 
         override fun getItemCount(): Int {
-            return addressList.size + 1
+            // we always have main address, so when this is empty db has not loaded yet
+            return if (addressList.isEmpty()) 0 else addressList.size + 1
         }
     }
 
@@ -181,6 +183,7 @@ class WalletAddressesFragment : Fragment(), PasswordDialogCallback {
             binding.addressInformation.root.visibility = View.GONE
 
             binding.buttonAddAddress.setOnClickListener {
+                viewModel.numAddressesToAdd = getNumAddressesToAdd()
                 viewModel.wallet?.walletConfig?.let {
                     if (it.encryptionType == ENC_TYPE_PASSWORD) {
                         PasswordDialogFragment().show(
@@ -192,7 +195,35 @@ class WalletAddressesFragment : Fragment(), PasswordDialogCallback {
                     }
                 }
             }
+            binding.sliderNumAddresses.progress = 0
+            refreshAddButtonLabel()
+            binding.sliderNumAddresses.setOnSeekBarChangeListener(object :
+                SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    refreshAddButtonLabel()
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                }
+
+            })
         }
+
+        private fun refreshAddButtonLabel() {
+            val numAddresses = getNumAddressesToAdd()
+            binding.buttonAddAddress.text =
+                if (numAddresses <= 1) getString(R.string.button_add_address) else
+                    getString(R.string.button_add_addresses, numAddresses)
+        }
+
+        private fun getNumAddressesToAdd() = binding.sliderNumAddresses.progress + 1
     }
 
     override fun onDestroy() {

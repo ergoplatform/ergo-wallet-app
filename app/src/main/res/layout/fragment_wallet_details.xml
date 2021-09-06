@@ -236,8 +236,8 @@
                     android:id="@+id/cardview_tokens"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/activity_horizontal_margin"
-                    app:layout_constraintTop_toTopOf="parent">
+                    android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                    android:layout_marginTop="@dimen/activity_vertical_margin">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/layout_tokens"
@@ -309,10 +309,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:clickable="true"
                     android:focusable="true"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    app:layout_constraintTop_toTopOf="parent">
+                    android:foreground="?android:attr/selectableItemBackground">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"

@@ -49,6 +49,14 @@
                     android:gravity="center"
                     android:text="@string/desc_wallet_addresses" />
 
+                <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/slider_num_addresses"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/margin_and_half"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:max="9" />
+
                 <Button
                     android:id="@+id/button_add_address"
                     style="?attr/materialButtonStyle"
