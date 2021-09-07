@@ -86,7 +86,7 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
             if (position == addressList.size) {
                 holder.bindAddAddress()
             } else {
-                holder.bindAddress(addressList[position], wallet!!)
+                holder.bindAddressInfo(addressList[position], wallet!!)
             }
         }
 
@@ -98,13 +98,26 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
 
     inner class WalletAddressViewHolder(val binding: CardWalletAddressBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bindAddress(dbEntity: WalletAddressDbEntity, wallet: WalletDbEntity) {
+        fun bindAddressInfo(dbEntity: WalletAddressDbEntity, wallet: WalletDbEntity) {
             val ctx = binding.root.context
             val isDerivedAddress = dbEntity.derivationIndex > 0
 
             binding.layoutNewAddress.visibility = View.GONE
-            binding.cardView.isClickable = true
-            binding.buttonMoreMenu.visibility = View.VISIBLE
+            binding.cardView.isClickable = isDerivedAddress
+            binding.buttonMoreMenu.visibility = if (isDerivedAddress) View.VISIBLE else View.GONE
+
+            binding.cardView.setOnClickListener {
+                if (isDerivedAddress) {
+                    val detailDialogFragment = WalletAddressDetailsDialog()
+                    val args = Bundle()
+                    args.putInt(ARG_ADDRESS_ID, dbEntity.id)
+                    detailDialogFragment.arguments = args
+                    detailDialogFragment.show(
+                        childFragmentManager,
+                        null
+                    )
+                }
+            }
 
             binding.addressInformation.apply {
                 root.visibility = View.VISIBLE
@@ -134,6 +147,7 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
             binding.buttonMoreMenu.visibility = View.GONE
             binding.layoutNewAddress.visibility = View.VISIBLE
             binding.addressInformation.root.visibility = View.GONE
+            binding.cardView.setOnClickListener(null)
 
             binding.buttonAddAddress.setOnClickListener {
                 viewModel.numAddressesToAdd = getNumAddressesToAdd()

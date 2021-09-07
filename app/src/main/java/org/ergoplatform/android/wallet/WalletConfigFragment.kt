@@ -1,12 +1,7 @@
 package org.ergoplatform.android.wallet
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.os.Bundle
 import android.view.*
-import androidx.biometric.BiometricPrompt
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -59,15 +54,7 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
                 binding.inputWalletName.editText?.setText(wallet.displayName)
 
                 binding.buttonCopy.setOnClickListener {
-                    val clipboard = ContextCompat.getSystemService(
-                        requireContext(),
-                        ClipboardManager::class.java
-                    )
-                    val clip = ClipData.newPlainText("", wallet.firstAddress)
-                    clipboard?.setPrimaryClip(clip)
-
-                    Snackbar.make(requireView(), R.string.label_copied, Snackbar.LENGTH_LONG)
-                        .setAnchorView(R.id.nav_view).show()
+                    copyAddressToClipboard(wallet.firstAddress!!, requireContext(), requireView())
                 }
 
                 binding.buttonAddresses.setOnClickListener {
@@ -141,6 +128,7 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
             return true
         }
     }
+
     override fun proceedAuthFlowFromBiometrics() {
         val mnemonic = viewModel.decryptMnemonicWithUserAuth()
         displayMnemonic(mnemonic!!)

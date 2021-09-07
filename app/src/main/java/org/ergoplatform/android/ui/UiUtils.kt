@@ -1,9 +1,12 @@
 package org.ergoplatform.android.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.util.Log
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
@@ -13,6 +16,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
+import com.google.android.material.snackbar.Snackbar
 import org.ergoplatform.android.R
 import org.ergoplatform.android.longWithDecimalsToDouble
 import java.math.RoundingMode
@@ -52,7 +56,10 @@ fun inputTextToDouble(amountStr: String?): Double {
  * ERG is always formatted US-style (e.g. 1,000.00)
  */
 fun formatErgsToString(ergs: Double, context: Context): String {
-    return DecimalFormat(context.getString(R.string.format_erg), DecimalFormatSymbols(Locale.US)).format(ergs)
+    return DecimalFormat(
+        context.getString(R.string.format_erg),
+        DecimalFormatSymbols(Locale.US)
+    ).format(ergs)
 }
 
 /**
@@ -95,6 +102,20 @@ fun formatDoubleWithPrettyReduction(amount: Double): String {
 }
 
 /**
+ * Copies address to system clipboard and shows a Snackbar on given view
+ */
+fun copyAddressToClipboard(address: String, ctx: Context, view: View?) {
+    val clipboard = ContextCompat.getSystemService(ctx, ClipboardManager::class.java)
+    val clip = ClipData.newPlainText("", address)
+    clipboard?.setPrimaryClip(clip)
+
+    view?.let {
+        Snackbar.make(it, R.string.label_copied, Snackbar.LENGTH_LONG)
+            .setAnchorView(R.id.nav_view).show()
+    }
+}
+
+/**
  * prevents crashes when a button is tapped twice, see
  * https://stackoverflow.com/questions/51060762/illegalargumentexception-navigation-destination-xxx-is-unknown-to-this-navcontr
  */
@@ -108,7 +129,10 @@ fun NavController.navigateSafe(
     if (action != null && currentDestination?.id != action.destinationId) {
         navigate(resId, args, navOptions, navExtras)
     } else {
-        Log.e("Navigation error", "Could not find action to navigate to action from " + currentDestination?.toString())
+        Log.e(
+            "Navigation error",
+            "Could not find action to navigate to action from " + currentDestination?.toString()
+        )
     }
 }
 

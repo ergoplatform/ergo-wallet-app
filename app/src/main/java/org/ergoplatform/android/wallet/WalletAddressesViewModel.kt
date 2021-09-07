@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
@@ -25,7 +26,6 @@ class WalletAddressesViewModel : ViewModel() {
             AppDatabase.getInstance(ctx).walletDao().walletWithStateByIdAsFlow(walletId).collect {
                 // called every time something changes in the DB
                 wallet = it
-
                 _addresses.postValue(it.getSortedDerivedAddressesList())
             }
         }
@@ -35,30 +35,33 @@ class WalletAddressesViewModel : ViewModel() {
         viewModelScope.launch {
             val sortedAddresses = addresses.value
             sortedAddresses?.let {
-                val walletDao = AppDatabase.getInstance(ctx).walletDao()
+                val database = AppDatabase.getInstance(ctx)
+                val walletDao = database.walletDao()
 
                 var nextIdx = 0
 
                 // find next free slot
                 val indices = sortedAddresses.map { it.derivationIndex }.toMutableList()
 
-                for (i in 1..number) {
-                    while (indices.contains(nextIdx)) {
-                        nextIdx++
-                    }
+                database.withTransaction {
+                    for (i in 1..number) {
+                        while (indices.contains(nextIdx)) {
+                            nextIdx++
+                        }
 
-                    // okay, we have the next address idx - now get the address
-                    val nextAddress = getPublicErgoAddressFromMnemonic(mnemonic, nextIdx)
+                        // okay, we have the next address idx - now get the address
+                        val nextAddress = getPublicErgoAddressFromMnemonic(mnemonic, nextIdx)
 
-                    walletDao.insertWalletAddress(
-                        WalletAddressDbEntity(
-                            0, wallet!!.walletConfig.firstAddress!!, nextIdx,
-                            nextAddress, null
+                        walletDao.insertWalletAddress(
+                            WalletAddressDbEntity(
+                                0, wallet!!.walletConfig.firstAddress!!, nextIdx,
+                                nextAddress, null
+                            )
                         )
-                    )
-                    indices.add(nextIdx)
+                        indices.add(nextIdx)
 
-                    // TODO make NodeConnector fetch the balance
+                        // TODO make NodeConnector fetch the balance, maybe all at once
+                    }
                 }
             }
         }
