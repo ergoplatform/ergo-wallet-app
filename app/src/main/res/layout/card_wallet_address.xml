@@ -57,17 +57,28 @@
                     android:layout_marginTop="@dimen/activity_horizontal_margin"
                     android:max="9" />
 
-                <Button
-                    android:id="@+id/button_add_address"
-                    style="?attr/materialButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginStart="@dimen/half_horizontal_margin"
-                    android:layout_marginTop="@dimen/activity_horizontal_margin"
-                    android:text="@string/button_add_address"
-                    app:icon="@drawable/ic_add_24" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
+                    <Button
+                        android:id="@+id/button_add_address"
+                        style="?attr/materialButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="@dimen/half_horizontal_margin"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:text="@string/button_add_address"
+                        app:icon="@drawable/ic_add_24" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:visibility="invisible" />
+
+                </FrameLayout>
 
             </LinearLayout>
 

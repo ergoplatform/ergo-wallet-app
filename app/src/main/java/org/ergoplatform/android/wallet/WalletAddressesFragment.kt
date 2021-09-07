@@ -48,6 +48,10 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
         val walletAddressesAdapter = WalletAddressesAdapter()
         binding.recyclerview.adapter = walletAddressesAdapter
 
+        viewModel.lockProgress.observe(viewLifecycleOwner, {
+            walletAddressesAdapter.addAddrHolder?.setProgress(it)
+        })
+
         viewModel.addresses.observe(viewLifecycleOwner, {
             binding.walletName.text = viewModel.wallet?.walletConfig?.displayName
             walletAddressesAdapter.wallet = viewModel.wallet
@@ -63,6 +67,9 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
         viewModel.addAddressWithPass(requireContext(), password)
 
     inner class WalletAddressesAdapter : RecyclerView.Adapter<WalletAddressViewHolder>() {
+        // holder that holds the add address button, for showing the progress bar
+        var addAddrHolder: WalletAddressViewHolder? = null
+
         var wallet: WalletDbEntity? = null
         var addressList: List<WalletAddressDbEntity> = emptyList()
             set(value) {
@@ -85,6 +92,7 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
         override fun onBindViewHolder(holder: WalletAddressViewHolder, position: Int) {
             if (position == addressList.size) {
                 holder.bindAddAddress()
+                addAddrHolder = holder
             } else {
                 holder.bindAddressInfo(addressList[position], wallet!!)
             }
@@ -176,6 +184,11 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
                 }
 
             })
+        }
+
+        fun setProgress(locked: Boolean) {
+            binding.buttonAddAddress.visibility = if (locked) View.INVISIBLE else View.VISIBLE
+            binding.progressBar.visibility = if (locked) View.VISIBLE else View.INVISIBLE
         }
 
         private fun refreshAddButtonLabel() {

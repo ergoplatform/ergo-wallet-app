@@ -15,6 +15,9 @@ interface WalletDbDao {
     @Query("DELETE FROM wallet_states WHERE wallet_first_address = :firstAddress")
     suspend fun deleteWalletStates(firstAddress: String)
 
+    @Query("DELETE FROM wallet_states WHERE public_address = :publicAddress")
+    suspend fun deleteAddressState(publicAddress: String)
+
     @Query("DELETE FROM wallet_tokens WHERE public_address = :publicAddress")
     suspend fun deleteTokensByAddress(publicAddress: String)
 

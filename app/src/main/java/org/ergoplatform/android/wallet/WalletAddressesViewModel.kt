@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.withTransaction
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
@@ -21,6 +22,9 @@ class WalletAddressesViewModel : ViewModel() {
     private val _addresses = MutableLiveData<List<WalletAddressDbEntity>>()
     val addresses: LiveData<List<WalletAddressDbEntity>> = _addresses
 
+    private val _lockProgress = MutableLiveData<Boolean>()
+    val lockProgress: LiveData<Boolean> = _lockProgress
+
     fun init(ctx: Context, walletId: Int) {
         viewModelScope.launch {
             AppDatabase.getInstance(ctx).walletDao().walletWithStateByIdAsFlow(walletId).collect {
@@ -32,7 +36,9 @@ class WalletAddressesViewModel : ViewModel() {
     }
 
     private fun addNextAddresses(ctx: Context, number: Int, mnemonic: String) {
-        viewModelScope.launch {
+        // firing up appkit for the first time needs some time on medium end devices, so do this on
+        // background thread while showing infinite progress bar
+        viewModelScope.launch(Dispatchers.IO) {
             val sortedAddresses = addresses.value
             sortedAddresses?.let {
                 val database = AppDatabase.getInstance(ctx)
@@ -43,6 +49,7 @@ class WalletAddressesViewModel : ViewModel() {
                 // find next free slot
                 val indices = sortedAddresses.map { it.derivationIndex }.toMutableList()
 
+                _lockProgress.postValue(true)
                 database.withTransaction {
                     for (i in 1..number) {
                         while (indices.contains(nextIdx)) {
@@ -63,6 +70,7 @@ class WalletAddressesViewModel : ViewModel() {
                         // TODO make NodeConnector fetch the balance, maybe all at once
                     }
                 }
+                _lockProgress.postValue(false)
             }
         }
     }

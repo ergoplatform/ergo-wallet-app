@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
+import androidx.room.withTransaction
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -65,9 +66,16 @@ class WalletAddressDetailsDialog : BottomSheetDialogFragment() {
 
     private fun deleteAddress(addrId: Int) {
         GlobalScope.launch(Dispatchers.IO) {
-            AppDatabase.getInstance(requireContext()).walletDao().deleteWalletAddress(
-                addrId
-            )
+            val database = AppDatabase.getInstance(requireContext())
+            val walletDao = database.walletDao()
+            database.withTransaction {
+                val dbEntity = walletDao.loadWalletAddress(addrId)
+                dbEntity?.publicAddress?.let {
+                    walletDao.deleteAddressState(it)
+                    walletDao.deleteTokensByAddress(it)
+                }
+                walletDao.deleteWalletAddress(addrId)
+            }
         }
         dismiss()
     }
