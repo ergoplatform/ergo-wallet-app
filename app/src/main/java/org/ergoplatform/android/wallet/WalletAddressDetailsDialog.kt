@@ -11,6 +11,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.databinding.FragmentWalletAddressDetailsDialogBinding
+import org.ergoplatform.android.getAddressDerivationPath
 import org.ergoplatform.android.ui.copyAddressToClipboard
 
 const val ARG_ADDRESS_ID = "ARG_ADDRESS_ID"
@@ -56,6 +57,8 @@ class WalletAddressDetailsDialog : BottomSheetDialogFragment() {
                         requireContext(), null
                     )
                 }
+                binding.derivationPath.text =
+                    getAddressDerivationPath(walletAddress?.derivationIndex ?: 0)
             }
         }
     }

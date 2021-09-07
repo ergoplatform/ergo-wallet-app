@@ -27,6 +27,16 @@
             tools:text="Very long public address, will be 3 lines long" />
 
         <TextView
+            android:id="@+id/derivation_path"
+            style="@style/TextAppearance.App.Body1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/half_horizontal_margin"
+            android:gravity="center"
+            android:textStyle="bold"
+            tools:text="derivation path" />
+
+        <TextView
             style="@style/TextAppearance.App.Body1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
