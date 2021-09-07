@@ -149,12 +149,14 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
             binding.addressInformation.root.visibility = View.GONE
             binding.cardView.setOnClickListener(null)
 
+            val walletConfig = viewModel.wallet?.walletConfig
             binding.buttonAddAddress.setOnClickListener {
                 viewModel.numAddressesToAdd = getNumAddressesToAdd()
-                viewModel.wallet?.walletConfig?.let {
+                walletConfig?.let {
                     startAuthFlow(it)
                 }
             }
+            binding.buttonAddAddress.isEnabled = walletConfig?.secretStorage != null
             binding.sliderNumAddresses.progress = 0
             refreshAddButtonLabel()
             binding.sliderNumAddresses.setOnSeekBarChangeListener(object :

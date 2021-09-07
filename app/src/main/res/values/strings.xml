@@ -75,8 +75,9 @@
     <string name="mnemonic_invalid">Mnemonic validation failed. If you are sure it is entered correctly, you can tap again to proceed.</string>
 
     <!-- Save wallet -->
-    <string name="intro_save_wallet">Your public wallet address is:</string>
-    <string name="intro_save_wallet2">Choose how the wallet and keys should be saved on this device.</string>
+    <string name="intro_save_wallet">Your wallet\'s main public address is:</string>
+    <string name="intro_save_wallet2">You can add additional addresses later.\n\n
+        Choose now how the wallet and keys should be saved on this device.</string>
     <string name="button_save_password_encrypted">Save password-encrypted</string>
     <string name="desc_save_password_encrypted">You have to enter a password-phrase that you need to reenter every time you want to send funds.</string>
     <string name="button_save_device_encrypted">Save device-encrypted</string>
