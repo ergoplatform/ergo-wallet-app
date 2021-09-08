@@ -1,4 +1,4 @@
-package org.ergoplatform.android.wallet
+package org.ergoplatform.android.wallet.addresses
 
 import android.content.Context
 import androidx.lifecycle.LiveData
@@ -13,6 +13,9 @@ import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.NodeConnector
 import org.ergoplatform.android.deserializeSecrets
 import org.ergoplatform.android.getPublicErgoAddressFromMnemonic
+import org.ergoplatform.android.wallet.WalletAddressDbEntity
+import org.ergoplatform.android.wallet.WalletDbEntity
+import org.ergoplatform.android.wallet.getSortedDerivedAddressesList
 import org.ergoplatform.api.AesEncryptionManager
 
 class WalletAddressesViewModel : ViewModel() {

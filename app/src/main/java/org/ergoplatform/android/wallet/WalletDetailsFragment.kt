@@ -1,5 +1,6 @@
 package org.ergoplatform.android.wallet
 
+import StageConstants
 import android.animation.LayoutTransition
 import android.content.Intent
 import android.net.Uri
@@ -20,8 +21,11 @@ import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.nanoErgsToErgs
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
+import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
+import org.ergoplatform.android.wallet.addresses.getAddressLabel
 
-class WalletDetailsFragment : Fragment() {
+class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
     private lateinit var walletDetailsViewModel: WalletDetailsViewModel
 
@@ -85,6 +89,13 @@ class WalletDetailsFragment : Fragment() {
             )
         }
 
+        binding.layoutAddressLabels.setOnClickListener {
+            ChooseAddressListDialogFragment.newInstance(
+                walletDetailsViewModel.wallet!!.walletConfig.id,
+                true
+            ).show(childFragmentManager, null)
+        }
+
         // enable layout change animations after a short wait time
         Handler(Looper.getMainLooper()).postDelayed({ enableLayoutChangeAnimations() }, 500)
     }
@@ -107,6 +118,10 @@ class WalletDetailsFragment : Fragment() {
             return super.onOptionsItemSelected(item)
     }
 
+    override fun onAddressChosen(addressDerivationIdx: Int?) {
+        walletDetailsViewModel.selectedIdx = addressDerivationIdx
+    }
+
     private fun addressChanged(address: String?) {
         // The selected address changed. It is null for "all addresses"
 
@@ -115,19 +130,26 @@ class WalletDetailsFragment : Fragment() {
 
         binding.walletName.text = wallet.walletConfig.displayName
 
-        // fill address
-        //TODO insert label here and ellipsize end for labels
-        binding.publicAddress.text =
-            address ?: getString(R.string.label_all_addresses, wallet.getNumOfAddresses())
+        // fill address or label
+        if (address != null) {
+            val addressDbEntity =
+                wallet.getSortedDerivedAddressesList().find { it.publicAddress.equals(address) }
+            binding.addressLabel.text =
+                addressDbEntity?.getAddressLabel(requireContext())
+        } else {
+            binding.addressLabel.text =
+                getString(R.string.label_all_addresses, wallet.getNumOfAddresses())
+        }
 
         // fill balances
+        val addressState = address?.let { wallet.getStateForAddress(address) }
         val ergoAmount = nanoErgsToErgs(
-            address?.let { wallet.getStateForAddress(address) }?.balance
+            addressState?.balance
                 ?: wallet.getBalanceForAllAddresses()
         )
         binding.walletBalance.amount = ergoAmount
 
-        val unconfirmed = address?.let { wallet.getStateForAddress(address) }?.unconfirmedBalance
+        val unconfirmed = addressState?.unconfirmedBalance
             ?: wallet.getUnconfirmedBalanceForAllAddresses()
         binding.walletUnconfirmed.amount = nanoErgsToErgs(unconfirmed)
         binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
@@ -145,9 +167,9 @@ class WalletDetailsFragment : Fragment() {
         }
 
         // tokens
-        binding.cardviewTokens.visibility = if (wallet.tokens.size > 0) View.VISIBLE else View.GONE
         val tokensList = address?.let { wallet.getTokensForAddress(address) }
             ?: wallet.getTokensForAllAddresses()
+        binding.cardviewTokens.visibility = if (tokensList.size > 0) View.VISIBLE else View.GONE
         binding.walletTokenNum.text = tokensList.size.toString()
 
         binding.walletTokenEntries.apply {

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:background="?attr/colorSurface">
+
+    <TextView
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/activity_vertical_margin"
+        android:paddingVertical="@dimen/half_horizontal_margin"
+        android:text="@string/title_choose_address" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginBottom="@dimen/margin_and_half"
+        android:clipToPadding="false"
+        tools:listitem="@layout/fragment_choose_address_dialog_item" />
+</LinearLayout>

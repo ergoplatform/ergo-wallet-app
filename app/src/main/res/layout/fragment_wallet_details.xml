@@ -60,39 +60,47 @@
                             android:layout_height="@dimen/medium_icon_size"
                             android:contentDescription="@string/title_wallet_addresses"
                             android:src="@drawable/ic_alt_route_24"
-                            app:layout_constraintBottom_toBottomOf="@id/public_address"
+                            app:layout_constraintBottom_toBottomOf="@id/layout_address_labels"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="@id/wallet_address_title" />
+                            app:layout_constraintTop_toTopOf="@id/layout_address_labels" />
 
-                        <TextView
-                            android:id="@+id/wallet_address_title"
-                            style="@style/TextAppearance.App.Body1"
+                        <LinearLayout
+                            android:id="@+id/layout_address_labels"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:text="@string/title_wallet_address"
-                            android:textColor="?attr/colorSecondary"
-                            android:textStyle="bold"
-                            app:layout_constraintStart_toEndOf="@id/image_addresses"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <TextView
-                            android:id="@+id/public_address"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:ellipsize="middle"
-                            android:gravity="start"
-                            android:maxLines="1"
-                            android:paddingBottom="@dimen/half_horizontal_margin"
-                            android:textAppearance="@style/TextAppearance.App.Body1"
-                            android:textStyle="bold"
-                            app:drawableEndCompat="@drawable/ic_drop_down_24"
+                            android:layout_marginStart="@dimen/activity_horizontal_margin"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:orientation="vertical"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="@id/wallet_address_title"
-                            app:layout_constraintTop_toBottomOf="@id/wallet_address_title"
-                            tools:text="Very long public address, will be 3 lines long" />
+                            app:layout_constraintStart_toEndOf="@id/image_addresses"
+                            app:layout_constraintTop_toTopOf="parent">
+
+                            <TextView
+                                android:id="@+id/wallet_address_title"
+                                style="@style/TextAppearance.App.Body1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:text="@string/title_wallet_address"
+                                android:textColor="?attr/colorSecondary"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/address_label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:gravity="start"
+                                android:maxLines="1"
+                                android:paddingBottom="@dimen/half_horizontal_margin"
+                                android:textAppearance="@style/TextAppearance.App.Body1"
+                                android:textStyle="bold"
+                                app:drawableEndCompat="@drawable/ic_drop_down_24"
+                                tools:text="Address label" />
+
+
+                        </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -102,8 +110,8 @@
                             android:weightSum="3"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="@id/wallet_address_title"
-                            app:layout_constraintTop_toBottomOf="@id/public_address">
+                            app:layout_constraintStart_toStartOf="@id/layout_address_labels"
+                            app:layout_constraintTop_toBottomOf="@id/layout_address_labels">
 
                             <ImageView
                                 android:id="@+id/button_send"

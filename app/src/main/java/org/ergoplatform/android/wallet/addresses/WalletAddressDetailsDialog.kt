@@ -1,4 +1,4 @@
-package org.ergoplatform.android.wallet
+package org.ergoplatform.android.wallet.addresses
 
 import android.os.Bundle
 import android.view.LayoutInflater

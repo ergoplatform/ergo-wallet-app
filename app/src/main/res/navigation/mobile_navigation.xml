@@ -195,7 +195,7 @@
     </dialog>
     <fragment
         android:id="@+id/walletAddressesFragment"
-        android:name="org.ergoplatform.android.wallet.WalletAddressesFragment"
+        android:name="org.ergoplatform.android.wallet.addresses.WalletAddressesFragment"
         android:label="WalletAddressesFragment">
         <argument
             android:name="walletId"

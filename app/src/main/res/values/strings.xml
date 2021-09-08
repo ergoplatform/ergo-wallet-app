@@ -102,7 +102,7 @@
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Addresses</string>
-    <string name="title_wallet_address">Address</string>
+    <string name="title_wallet_address">Show content for</string>
     <string name="label_wallet_main_address">Main address</string>
     <string name="label_wallet_address_derived">Derived address %1s</string>
     <string name="label_wallet_token_balance">%1s tokens</string>
@@ -113,6 +113,7 @@
     <string name="hint_wallet_addr_label">Descriptive label (optional)</string>
     <string name="desc_wallet_addr_remove">You can remove this address from this app\'s view. It is still available
         on the Ergo Network, can receive payments and hold a balance. You can add it again at any time.</string>
+    <string name="title_choose_address">Choose an address</string>
 
     <!-- Send funds -->
     <string name="desc_choose_wallet">Please choose the wallet to send from:</string>

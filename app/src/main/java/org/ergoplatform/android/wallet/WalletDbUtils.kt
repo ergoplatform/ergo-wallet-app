@@ -26,12 +26,12 @@ fun WalletDbEntity.getTokensForAddress(address: String): List<WalletTokenDbEntit
 /**
  * @return derived address with given index
  */
-fun WalletDbEntity.getDerivedAddress(idx: Int): String? {
+fun WalletDbEntity.getDerivedAddress(derivationIdx: Int): String? {
     // edge case: index 0 is not (always) part of addresses table
-    if (idx == 0) {
+    if (derivationIdx == 0) {
         return walletConfig.firstAddress
     } else {
-        return addresses.filter { it.derivationIndex == idx }.firstOrNull()?.publicAddress
+        return addresses.filter { it.derivationIndex == derivationIdx }.firstOrNull()?.publicAddress
     }
 }
 

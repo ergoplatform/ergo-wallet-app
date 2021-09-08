@@ -1,4 +1,4 @@
-package org.ergoplatform.android.wallet
+package org.ergoplatform.android.wallet.addresses
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,8 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.CardWalletAddressBinding
 import org.ergoplatform.android.databinding.FragmentWalletAddressesBinding
-import org.ergoplatform.android.nanoErgsToErgs
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
+import org.ergoplatform.android.wallet.WalletAddressDbEntity
+import org.ergoplatform.android.wallet.WalletDbEntity
 
 
 /**
@@ -107,8 +108,7 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
     inner class WalletAddressViewHolder(val binding: CardWalletAddressBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bindAddressInfo(dbEntity: WalletAddressDbEntity, wallet: WalletDbEntity) {
-            val ctx = binding.root.context
-            val isDerivedAddress = dbEntity.derivationIndex > 0
+            val isDerivedAddress = dbEntity.isDerivedAddress()
 
             binding.layoutNewAddress.visibility = View.GONE
             binding.buttonMoreMenu.visibility = if (isDerivedAddress) View.VISIBLE else View.GONE
@@ -128,24 +128,7 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
 
             binding.addressInformation.apply {
                 root.visibility = View.VISIBLE
-
-                addressIndex.visibility =
-                    if (isDerivedAddress) View.VISIBLE else View.GONE
-                addressIndex.text = dbEntity.derivationIndex.toString()
-                addressLabel.text = dbEntity.label
-                    ?: (if (isDerivedAddress) ctx.getString(
-                        R.string.label_wallet_address_derived,
-                        dbEntity.derivationIndex.toString()
-                    ) else ctx.getString(R.string.label_wallet_main_address))
-                publicAddress.text = dbEntity.publicAddress
-
-                val state = wallet.getStateForAddress(dbEntity.publicAddress)
-                val tokens = wallet.getTokensForAddress(dbEntity.publicAddress)
-                addressBalance.amount = nanoErgsToErgs(state?.balance ?: 0)
-                labelTokenNum.visibility =
-                    if (tokens.isNullOrEmpty()) View.GONE else View.VISIBLE
-                labelTokenNum.text =
-                    ctx.getString(R.string.label_wallet_token_balance, tokens.size.toString())
+                fillAddressInformation(dbEntity, wallet)
             }
         }
 
