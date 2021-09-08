@@ -111,7 +111,6 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
             val isDerivedAddress = dbEntity.derivationIndex > 0
 
             binding.layoutNewAddress.visibility = View.GONE
-            binding.cardView.isClickable = isDerivedAddress
             binding.buttonMoreMenu.visibility = if (isDerivedAddress) View.VISIBLE else View.GONE
 
             binding.cardView.setOnClickListener {
@@ -151,7 +150,6 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
         }
 
         fun bindAddAddress() {
-            binding.cardView.isClickable = false
             binding.buttonMoreMenu.visibility = View.GONE
             binding.layoutNewAddress.visibility = View.VISIBLE
             binding.addressInformation.root.visibility = View.GONE
