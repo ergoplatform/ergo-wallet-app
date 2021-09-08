@@ -1,6 +1,7 @@
 package org.ergoplatform.android.wallet.addresses
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,7 +61,7 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
                 .loadWalletWithStateById(requireArguments().getInt(ARG_WALLET_ID))?.let {
                     binding.list.adapter = DisplayAddressesAdapter(
                         it,
-                        requireArguments().getBoolean(ARG_SHOW_ALL_ADDRESSES) && it.addresses.size > 1
+                        requireArguments().getBoolean(ARG_SHOW_ALL_ADDRESSES)
                     )
                 }
         }
@@ -76,6 +77,7 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
 
         fun bindAddress(address: WalletAddressDbEntity, wallet: WalletDbEntity) {
             binding.addressInformation.fillAddressInformation(address, wallet)
+            binding.addressInformation.addressIndex.visibility = View.GONE
             binding.root.setOnClickListener {
                 onChooseAddress(address.derivationIndex)
             }
@@ -92,26 +94,29 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
 
     private inner class DisplayAddressesAdapter(
         val wallet: WalletDbEntity,
-        val showAllAddresses: Boolean
+        showAllAddresses: Boolean
     ) :
         RecyclerView.Adapter<ViewHolder>() {
 
         val addresses = wallet.getSortedDerivedAddressesList()
+        val addAllAddresses = showAllAddresses && addresses.size > 1
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-            return ViewHolder(
-                FragmentChooseAddressDialogItemBinding.inflate(
-                    LayoutInflater.from(
-                        parent.context
-                    ), parent, false
-                )
+            val binding = FragmentChooseAddressDialogItemBinding.inflate(
+                LayoutInflater.from(
+                    parent.context
+                ), parent, false
             )
+            binding.addressInformation.divider.visibility = View.GONE
+            binding.addressInformation.publicAddress.visibility = View.GONE
+            binding.addressInformation.addressLabel.gravity = Gravity.CENTER_HORIZONTAL
+            return ViewHolder(binding)
 
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            if (!showAllAddresses) {
+            if (!addAllAddresses) {
                 val address = addresses.get(position)
                 holder.bindAddress(address, wallet)
             } else if (position > 0) {
@@ -123,7 +128,7 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
         }
 
         override fun getItemCount(): Int {
-            return if (showAllAddresses) addresses.size + 1 else addresses.size
+            return if (addAllAddresses) addresses.size + 1 else addresses.size
         }
     }
 

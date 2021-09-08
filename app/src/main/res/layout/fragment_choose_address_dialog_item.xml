@@ -3,15 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:background="?android:attr/selectableItemBackground"
+    android:orientation="vertical"
     tools:showIn="@layout/fragment_choose_address_dialog">
 
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/darkgrey" />
+        android:background="@color/lightgrey" />
 
     <include
         android:id="@+id/address_information"

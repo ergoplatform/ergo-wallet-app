@@ -20,7 +20,7 @@
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginTop="@dimen/half_horizontal_margin"
         android:layout_marginBottom="@dimen/margin_and_half"
         android:clipToPadding="false"
         tools:listitem="@layout/fragment_choose_address_dialog_item" />

@@ -42,8 +42,8 @@ fun IncludeWalletAddressInfoBinding.fillWalletAddressesInformation(
     val ctx = root.context
 
     addressIndex.visibility = View.GONE
-    addressLabel.text = wallet.walletConfig.displayName
-    publicAddress.text = ctx.getString(R.string.label_all_addresses, wallet.getNumOfAddresses())
+    addressLabel.text = ctx.getString(R.string.label_all_addresses, wallet.getNumOfAddresses())
+    publicAddress.text = wallet.walletConfig.displayName
 
     val tokenNum = wallet.getTokensForAllAddresses().size
     labelTokenNum.visibility = if (tokenNum == 0) View.GONE else View.VISIBLE
