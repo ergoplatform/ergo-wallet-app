@@ -121,7 +121,18 @@ class NodeConnector {
         }
     }
 
-    private suspend fun refreshWalletStates(context: Context): List<WalletStateDbEntity> {
+    fun refreshSingleAddresses(context: Context, addresses: List<String>) {
+        if (addresses.isNotEmpty()) {
+            GlobalScope.launch(Dispatchers.IO) {
+                refreshWalletStates(context, addresses)
+            }
+        }
+    }
+
+    private suspend fun refreshWalletStates(
+        context: Context,
+        addressFilter: List<String> = emptyList()
+    ): List<WalletStateDbEntity> {
         val statesToSave = mutableListOf<WalletStateDbEntity>()
         val tokenAddressesToDelete = mutableListOf<String>()
         val tokensToSave = mutableListOf<WalletTokenDbEntity>()
@@ -133,7 +144,11 @@ class NodeConnector {
                     walletDao.loadWalletAddresses(firstAddress), firstAddress
                 )
 
-                allAddresses.forEach { address ->
+                val refreshAddresses =
+                    if (addressFilter.isEmpty()) allAddresses
+                    else allAddresses.filter { addressFilter.contains(it.publicAddress) }
+
+                refreshAddresses.forEach { address ->
                     val balanceInfo =
                         getOrInitErgoApiService(context).getApiV1AddressesP1BalanceTotal(
                             address.publicAddress

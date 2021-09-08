@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.NodeConnector
 import org.ergoplatform.android.deserializeSecrets
 import org.ergoplatform.android.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.api.AesEncryptionManager
@@ -41,6 +42,7 @@ class WalletAddressesViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val sortedAddresses = addresses.value
             sortedAddresses?.let {
+                val addedAddresses = mutableListOf<String>()
                 val database = AppDatabase.getInstance(ctx)
                 val walletDao = database.walletDao()
 
@@ -66,11 +68,13 @@ class WalletAddressesViewModel : ViewModel() {
                             )
                         )
                         indices.add(nextIdx)
-
-                        // TODO make NodeConnector fetch the balance, maybe all at once
+                        addedAddresses.add(nextAddress)
                     }
                 }
                 _lockProgress.postValue(false)
+                // make NodeConnector fetch the balances of the added addresses, in case they
+                // were used before
+                NodeConnector.getInstance().refreshSingleAddresses(ctx, addedAddresses)
             }
         }
     }
