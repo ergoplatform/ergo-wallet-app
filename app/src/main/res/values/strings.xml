@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Ergo Wallet</string>
     <string name="title_transactions">Transactions</string>
-    <string name="title_wallet">Wallet</string>
+    <string name="title_wallets">Wallets</string>
     <string name="title_settings">Settings</string>
     <string name="format_erg">###,##0.0000</string>
     <string name="format_fiat">###,##0.00</string>

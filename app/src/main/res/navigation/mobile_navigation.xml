@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/navigation_wallet"
         android:name="org.ergoplatform.android.wallet.WalletFragment"
-        android:label="@string/title_wallet"
+        android:label="@string/title_wallets"
         tools:layout="@layout/fragment_wallet">
         <action
             android:id="@+id/action_to_addWalletChooserFragment"
