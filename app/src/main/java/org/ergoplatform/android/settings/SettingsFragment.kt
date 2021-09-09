@@ -9,11 +9,13 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import org.ergoplatform.android.BuildConfig
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSettingsBinding
 import org.ergoplatform.android.getPrefDisplayCurrency
 import org.ergoplatform.android.ui.enableLinks
+import org.ergoplatform.android.ui.navigateSafe
 import java.util.*
 
 class SettingsFragment : Fragment() {
@@ -59,7 +61,7 @@ class SettingsFragment : Fragment() {
         binding.darkModeNight.setOnClickListener { changeDayNightMode(AppCompatDelegate.MODE_NIGHT_YES) }
 
         binding.buttonConnectionSettings.setOnClickListener {
-            ConnectionSettingsDialogFragment().show(childFragmentManager, null)
+            findNavController().navigateSafe(SettingsFragmentDirections.actionNavigationSettingsToConnectionSettingsDialogFragment())
         }
     }
 

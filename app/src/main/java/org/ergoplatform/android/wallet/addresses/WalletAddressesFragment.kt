@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +15,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.CardWalletAddressBinding
 import org.ergoplatform.android.databinding.FragmentWalletAddressesBinding
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
+import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.wallet.WalletAddressDbEntity
 import org.ergoplatform.android.wallet.WalletDbEntity
 
@@ -115,13 +117,10 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
 
             binding.cardView.setOnClickListener {
                 if (isDerivedAddress) {
-                    val detailDialogFragment = WalletAddressDetailsDialog()
-                    val args = Bundle()
-                    args.putInt(ARG_ADDRESS_ID, dbEntity.id)
-                    detailDialogFragment.arguments = args
-                    detailDialogFragment.show(
-                        childFragmentManager,
-                        null
+                    findNavController().navigateSafe(
+                        WalletAddressesFragmentDirections.actionWalletAddressesFragmentToWalletAddressDetailsDialog(
+                            dbEntity.id
+                        )
                     )
                 }
             }

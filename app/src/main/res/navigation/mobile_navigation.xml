@@ -67,7 +67,11 @@
         android:id="@+id/navigation_settings"
         android:name="org.ergoplatform.android.settings.SettingsFragment"
         android:label="@string/title_settings"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_navigation_settings_to_connectionSettingsDialogFragment"
+            app:destination="@id/connectionSettingsDialogFragment" />
+    </fragment>
 
     <dialog
         android:id="@+id/addWalletChooserFragment"
@@ -196,9 +200,26 @@
     <fragment
         android:id="@+id/walletAddressesFragment"
         android:name="org.ergoplatform.android.wallet.addresses.WalletAddressesFragment"
-        android:label="WalletAddressesFragment">
+        android:label="WalletAddressesFragment"
+        tools:layout="@layout/fragment_wallet_addresses">
         <argument
             android:name="walletId"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_walletAddressesFragment_to_walletAddressDetailsDialog"
+            app:destination="@id/walletAddressDetailsDialog" />
     </fragment>
+    <dialog
+        android:id="@+id/connectionSettingsDialogFragment"
+        android:name="org.ergoplatform.android.settings.ConnectionSettingsDialogFragment"
+        android:label="ConnectionSettingsDialogFragment" />
+    <dialog
+        android:id="@+id/walletAddressDetailsDialog"
+        android:name="org.ergoplatform.android.wallet.addresses.WalletAddressDetailsDialog"
+        android:label="WalletAddressDetailsDialog"
+        tools:layout="@layout/fragment_wallet_address_details_dialog">
+        <argument
+            android:name="walletAddressId"
+            app:argType="integer" />
+    </dialog>
 </navigation>

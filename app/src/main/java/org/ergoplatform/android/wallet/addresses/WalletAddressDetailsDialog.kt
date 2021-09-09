@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
 import androidx.room.withTransaction
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.Dispatchers
@@ -15,14 +16,14 @@ import org.ergoplatform.android.databinding.FragmentWalletAddressDetailsDialogBi
 import org.ergoplatform.android.getAddressDerivationPath
 import org.ergoplatform.android.ui.copyAddressToClipboard
 
-const val ARG_ADDRESS_ID = "ARG_ADDRESS_ID"
-
 /**
  * Wallet address detail bottom sheet to edit an address label or delete the address
  */
 class WalletAddressDetailsDialog : BottomSheetDialogFragment() {
     private var _binding: FragmentWalletAddressDetailsDialogBinding? = null
     private val binding get() = _binding!!
+
+    private val args: WalletAddressDetailsDialogArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,25 +43,25 @@ class WalletAddressDetailsDialog : BottomSheetDialogFragment() {
             true
         }
 
-        arguments?.getInt(ARG_ADDRESS_ID)?.let { addrId ->
-            binding.buttonApply.setOnClickListener { saveLabel(addrId) }
-            binding.buttonRemove.setOnClickListener { deleteAddress(addrId) }
+        val addrId = args.walletAddressId
 
-            lifecycleScope.launch {
-                val walletAddress =
-                    AppDatabase.getInstance(requireContext()).walletDao().loadWalletAddress(addrId)
+        binding.buttonApply.setOnClickListener { saveLabel(addrId) }
+        binding.buttonRemove.setOnClickListener { deleteAddress(addrId) }
 
-                binding.publicAddress.text = walletAddress?.publicAddress
-                binding.descriptiveLabel.editText?.setText(walletAddress?.label)
-                binding.publicAddress.setOnClickListener {
-                    copyAddressToClipboard(
-                        walletAddress!!.publicAddress,
-                        requireContext(), null
-                    )
-                }
-                binding.derivationPath.text =
-                    getAddressDerivationPath(walletAddress?.derivationIndex ?: 0)
+        lifecycleScope.launch {
+            val walletAddress =
+                AppDatabase.getInstance(requireContext()).walletDao().loadWalletAddress(addrId)
+
+            binding.publicAddress.text = walletAddress?.publicAddress
+            binding.descriptiveLabel.editText?.setText(walletAddress?.label)
+            binding.publicAddress.setOnClickListener {
+                copyAddressToClipboard(
+                    walletAddress!!.publicAddress,
+                    requireContext(), null
+                )
             }
+            binding.derivationPath.text =
+                getAddressDerivationPath(walletAddress?.derivationIndex ?: 0)
         }
     }
 
