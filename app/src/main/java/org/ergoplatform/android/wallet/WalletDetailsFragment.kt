@@ -89,6 +89,15 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             )
         }
 
+        binding.buttonReceive.setOnClickListener {
+            findNavController().navigateSafe(
+                WalletDetailsFragmentDirections.actionNavigationWalletDetailsToReceiveToWalletFragment(
+                    walletDetailsViewModel.wallet!!.walletConfig.id,
+                    walletDetailsViewModel.selectedIdx ?: 0
+                )
+            )
+        }
+
         binding.layoutAddressLabels.setOnClickListener {
             ChooseAddressListDialogFragment.newInstance(
                 walletDetailsViewModel.wallet!!.walletConfig.id,

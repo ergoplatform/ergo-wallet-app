@@ -55,13 +55,30 @@
                         app:layout_constraintTop_toTopOf="parent"
                         tools:text="@string/label_wallet_default" />
 
+                    <TextView
+                        android:id="@+id/address_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:ellipsize="end"
+                        android:gravity="start"
+                        android:maxLines="1"
+                        android:textAppearance="@style/TextAppearance.App.Body1"
+                        android:textColor="?attr/colorSecondary"
+                        android:textStyle="bold"
+                        app:drawableEndCompat="@drawable/ic_drop_down_24"
+                        app:drawableTint="?android:textColor"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/wallet_name"
+                        tools:text="Address label" />
+
                     <ImageView
                         android:id="@+id/qr_code"
                         android:layout_width="match_parent"
                         android:layout_height="250dp"
-                        android:layout_marginVertical="@dimen/activity_vertical_margin"
+                        android:layout_marginVertical="@dimen/half_horizontal_margin"
                         android:contentDescription="@string/label_qr_code"
-                        app:layout_constraintTop_toBottomOf="@id/wallet_name"
+                        app:layout_constraintTop_toBottomOf="@id/address_label"
                         tools:src="@drawable/ic_qr_code_24" />
 
                     <TextView

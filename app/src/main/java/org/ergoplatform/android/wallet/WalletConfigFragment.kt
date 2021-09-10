@@ -47,7 +47,7 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
 
         lifecycleScope.launch {
             val wallet =
-                AppDatabase.getInstance(requireContext()).walletDao().loadWalletById(args.walletId)
+                AppDatabase.getInstance(requireContext()).walletDao().loadWalletConfigById(args.walletId)
 
             wallet?.let {
                 binding.publicAddress.text = wallet.firstAddress

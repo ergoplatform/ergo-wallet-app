@@ -19,7 +19,11 @@
             app:enterAnim="@anim/slide_in_from_right"
             app:exitAnim="@anim/slide_out_to_left"
             app:popEnterAnim="@anim/slide_in_from_left"
-            app:popExitAnim="@anim/slide_out_to_right" />
+            app:popExitAnim="@anim/slide_out_to_right" >
+            <argument
+                android:name="derivationIdx"
+                android:defaultValue="0" />
+        </action>
         <action
             android:id="@+id/action_navigation_wallet_to_sendFundsFragment"
             app:destination="@id/sendFundsFragment" />
@@ -57,6 +61,13 @@
         <action
             android:id="@+id/action_navigation_wallet_details_to_walletConfigFragment"
             app:destination="@id/walletConfigFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_navigation_wallet_details_to_receiveToWalletFragment"
+            app:destination="@id/receiveToWalletFragment"
             app:enterAnim="@anim/slide_in_from_right"
             app:exitAnim="@anim/slide_out_to_left"
             app:popEnterAnim="@anim/slide_in_from_left"
@@ -129,6 +140,9 @@
         tools:layout="@layout/fragment_receive_to_wallet">
         <argument
             android:name="wallet_id"
+            app:argType="integer" />
+        <argument
+            android:name="derivationIdx"
             app:argType="integer" />
     </fragment>
     <dialog

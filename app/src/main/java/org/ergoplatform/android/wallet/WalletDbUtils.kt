@@ -36,15 +36,23 @@ fun WalletDbEntity.getTokensForAddress(address: String): List<WalletTokenDbEntit
 }
 
 /**
- * @return derived address with given index
+ * @return derived address string with given index
  */
 fun WalletDbEntity.getDerivedAddress(derivationIdx: Int): String? {
     // edge case: index 0 is not (always) part of addresses table
     if (derivationIdx == 0) {
         return walletConfig.firstAddress
     } else {
-        return addresses.filter { it.derivationIndex == derivationIdx }.firstOrNull()?.publicAddress
+        return addresses.firstOrNull { it.derivationIndex == derivationIdx }?.publicAddress
     }
+}
+
+/**
+ * @return derived address entity with given derivation index
+ */
+fun WalletDbEntity.getDerivedAddressEntity(derivationIdx: Int): WalletAddressDbEntity? {
+    val allAddresses = ensureWalletAddressListHasFirstAddress(addresses, walletConfig.firstAddress!!)
+    return allAddresses.firstOrNull { it.derivationIndex == derivationIdx }
 }
 
 /**
