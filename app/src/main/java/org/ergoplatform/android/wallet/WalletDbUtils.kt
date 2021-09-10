@@ -15,8 +15,20 @@ fun WalletDbEntity.getUnconfirmedBalanceForAllAddresses(): Long {
 }
 
 fun WalletDbEntity.getTokensForAllAddresses(): List<WalletTokenDbEntity> {
-    // TODO combine tokens with same id but different list entries
-    return tokens
+    // combine tokens with same id but different list entries
+    val hashmap = HashMap<String, WalletTokenDbEntity>()
+
+    tokens.forEach {
+        hashmap.put(it.tokenId!!, hashmap.get(it.tokenId)?.let { tokenInMap ->
+            WalletTokenDbEntity(
+                0, "", it.walletFirstAddress, it.tokenId,
+                (it.amount ?: 0) + (tokenInMap.amount ?: 0), it.decimals, it.name
+            )
+        } ?: it)
+    }
+
+    val combinedTokens = hashmap.values
+    return if (combinedTokens.size < tokens.size) combinedTokens.toList() else tokens
 }
 
 fun WalletDbEntity.getTokensForAddress(address: String): List<WalletTokenDbEntity> {
