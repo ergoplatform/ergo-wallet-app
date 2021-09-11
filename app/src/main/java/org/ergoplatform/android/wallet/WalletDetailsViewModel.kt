@@ -18,7 +18,7 @@ class WalletDetailsViewModel : ViewModel() {
     var selectedIdx: Int? = null
         set(value) {
             field = value
-            _address.postValue(selectedIdx?.let { wallet?.getDerivedAddress(it) })
+            notifyObserversDerivedIdxChanged()
         }
 
     private val _address = MutableLiveData<String?>()
@@ -30,17 +30,18 @@ class WalletDetailsViewModel : ViewModel() {
                 // called every time something changes in the DB
                 wallet = it
 
-                // no address set (yet)?
-                if (selectedIdx == null) {
-                    // if there is only a single address available, fix it to this one
-                    if (it.getNumOfAddresses() == 1) {
-                        selectedIdx = 0
-                    } else {
-                        // make sure to post to observer the first time
-                        selectedIdx = null
-                    }
+                // no address set (yet) and there is only a single address available, fix it to this one
+                if (selectedIdx == null && it.getNumOfAddresses() == 1) {
+                    selectedIdx = 0
+                } else {
+                    // make sure to post to observer the first time or on DB change
+                    notifyObserversDerivedIdxChanged()
                 }
             }
         }
+    }
+
+    private fun notifyObserversDerivedIdxChanged() {
+        _address.postValue(selectedIdx?.let { wallet?.getDerivedAddress(it) })
     }
 }

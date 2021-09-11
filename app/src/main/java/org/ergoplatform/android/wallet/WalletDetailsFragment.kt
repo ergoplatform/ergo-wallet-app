@@ -64,10 +64,6 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         nodeConnector.isRefreshing.observe(viewLifecycleOwner, { isRefreshing ->
             if (!isRefreshing) {
                 binding.swipeRefreshLayout.isRefreshing = false
-                // new data could be available, refresh view
-                walletDetailsViewModel.wallet?.let {
-                    addressChanged(walletDetailsViewModel.address.value)
-                }
             }
         })
 
