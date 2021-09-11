@@ -133,7 +133,8 @@
                                 android:background="?selectableItemBackgroundBorderless"
                                 android:contentDescription="@string/title_settings"
                                 android:paddingVertical="@dimen/half_horizontal_margin"
-                                android:src="@drawable/ic_outgoing_24" />
+                                android:src="@drawable/ic_outgoing_24"
+                                app:tint="?android:textColor" />
 
                             <ImageView
                                 android:id="@+id/button_config_addresses"

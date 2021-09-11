@@ -95,7 +95,7 @@ fun sendErgoTx(
     tokensToSend: List<ErgoToken>,
     mnemonic: String,
     mnemonicPass: String,
-    derivedKeyIndex: Int,
+    derivedKeyIndices: List<Int>,
     nodeApiAddress: String,
     explorerApiAddress: String
 ): TransactionResult {
@@ -107,13 +107,15 @@ fun sendErgoTx(
             explorerApiAddress
         )
         return ergoClient.execute { ctx: BlockchainContext ->
-            val prover = ctx.newProverBuilder()
+            val proverBuilder = ctx.newProverBuilder()
                 .withMnemonic(
                     SecretString.create(mnemonic),
                     SecretString.create(mnemonicPass)
                 )
-                .withEip3Secret(derivedKeyIndex)
-                .build()
+            derivedKeyIndices.forEach {
+                proverBuilder.withEip3Secret(it)
+            }
+            val prover = proverBuilder.build()
 
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
             val signed = BoxOperations.putToContractTx(

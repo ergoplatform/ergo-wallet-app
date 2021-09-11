@@ -64,6 +64,10 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         nodeConnector.isRefreshing.observe(viewLifecycleOwner, { isRefreshing ->
             if (!isRefreshing) {
                 binding.swipeRefreshLayout.isRefreshing = false
+                // new data could be available, refresh view
+                walletDetailsViewModel.wallet?.let {
+                    addressChanged(walletDetailsViewModel.address.value)
+                }
             }
         })
 
@@ -94,6 +98,15 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                 WalletDetailsFragmentDirections.actionNavigationWalletDetailsToReceiveToWalletFragment(
                     walletDetailsViewModel.wallet!!.walletConfig.id,
                     walletDetailsViewModel.selectedIdx ?: 0
+                )
+            )
+        }
+
+        binding.buttonSend.setOnClickListener {
+            findNavController().navigateSafe(
+                WalletDetailsFragmentDirections.actionNavigationWalletDetailsToSendFundsFragment(
+                    walletDetailsViewModel.wallet!!.walletConfig.id,
+                    walletDetailsViewModel.selectedIdx ?: -1
                 )
             )
         }

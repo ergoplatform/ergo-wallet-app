@@ -31,12 +31,18 @@ import org.ergoplatform.android.doubleToLongWithDecimals
 import org.ergoplatform.android.parseContentFromQrCode
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.android.wallet.WalletTokenDbEntity
+import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
+import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
+import org.ergoplatform.android.wallet.addresses.getAddressLabel
+import org.ergoplatform.android.wallet.getNumOfAddresses
+import kotlin.math.max
 
 
 /**
  * Here's the place to send transactions
  */
-class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallback {
+class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallback,
+    AddressChooserCallback {
     private var _binding: FragmentSendFundsBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: SendFundsViewModel
@@ -57,11 +63,17 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.initWallet(requireContext(), args.walletId, args.paymentRequest)
+        viewModel.initWallet(requireContext(), args.walletId, args.derivationIdx, args.paymentRequest)
 
         // Add observers
         viewModel.walletName.observe(viewLifecycleOwner, {
             binding.walletName.text = getString(R.string.label_send_from, it)
+        })
+        viewModel.address.observe(viewLifecycleOwner, {
+            binding.addressLabel.text = it?.getAddressLabel(requireContext()) ?: getString(
+                R.string.label_all_addresses,
+                viewModel.wallet?.getNumOfAddresses()
+            )
         })
         viewModel.walletBalance.observe(viewLifecycleOwner, {
             binding.tvBalance.text = getString(
@@ -139,6 +151,13 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         })
 
         // Add click listeners
+        binding.addressLabel.setOnClickListener {
+            viewModel.wallet?.let { wallet ->
+                ChooseAddressListDialogFragment.newInstance(
+                    wallet.walletConfig.id, true
+                ).show(childFragmentManager, null)
+            }
+        }
         binding.buttonShareTx.setOnClickListener {
             val txUrl =
                 StageConstants.EXPLORER_WEB_ADDRESS + "en/transactions/" + binding.labelTxId.text.toString()
@@ -165,7 +184,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         }
         binding.amount.setEndIconOnClickListener {
             setAmountEdittext(
-                (viewModel.walletBalance.value ?: 0.0) - (viewModel.feeAmount.value ?: 0.0)
+                max(0.0, (viewModel.walletBalance.value ?: 0.0) - (viewModel.feeAmount.value ?: 0.0))
             )
         }
 
@@ -200,6 +219,10 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             { _binding?.let { it.scrollView.smoothScrollTo(0, it.amount.top) } },
             200
         )
+    }
+
+    override fun onAddressChosen(addressDerivationIdx: Int?) {
+        viewModel.derivedAddressIdx = addressDerivationIdx
     }
 
     private fun refreshTokensList() {
