@@ -83,7 +83,7 @@ fun formatDoubleWithPrettyReduction(amount: Double): String {
     val formatter = DecimalFormat("###.#", DecimalFormatSymbols(Locale.US))
     formatter.roundingMode = RoundingMode.DOWN
 
-    return if (amount < 999.9) formatter.format(amount)
+    return if (amount < 1000.0) formatter.format(amount)
     else {
         val exp = (ln(amount) / ln(1000.0)).toInt()
         formatter.format(amount / 1000.0.pow(exp.toDouble())) + suffixChars[exp - 1]
