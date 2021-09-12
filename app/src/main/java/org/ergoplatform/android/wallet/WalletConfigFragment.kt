@@ -54,7 +54,7 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
                 binding.inputWalletName.editText?.setText(wallet.displayName)
 
                 binding.buttonCopy.setOnClickListener {
-                    copyAddressToClipboard(wallet.firstAddress!!, requireContext(), requireView())
+                    copyStringToClipboard(wallet.firstAddress!!, requireContext(), requireView())
                 }
 
                 binding.buttonAddresses.setOnClickListener {

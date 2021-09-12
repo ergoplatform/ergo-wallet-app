@@ -36,7 +36,7 @@ fun WalletDbEntity.getDerivedAddress(derivationIdx: Int): String? {
 }
 
 /**
- * @return derived addresses list, making sure that 0 address is included and list ist sorted by idx
+ * @return derived addresses list, making sure that 0 address is included and list is sorted by idx
  */
 fun WalletDbEntity.getSortedDerivedAddressesList(): List<WalletAddressDbEntity> {
     val retList = ensureWalletAddressListHasFirstAddress(addresses, walletConfig.firstAddress!!)
