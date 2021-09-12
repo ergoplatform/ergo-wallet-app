@@ -2,9 +2,9 @@ package org.ergoplatform.android.wallet.addresses
 
 import android.content.Context
 import android.view.View
+import org.ergoplatform.android.ErgoAmount
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.IncludeWalletAddressInfoBinding
-import org.ergoplatform.android.nanoErgsToErgs
 import org.ergoplatform.android.wallet.*
 
 fun IncludeWalletAddressInfoBinding.fillAddressInformation(
@@ -22,7 +22,7 @@ fun IncludeWalletAddressInfoBinding.fillAddressInformation(
 
     val state = wallet.getStateForAddress(dbEntity.publicAddress)
     val tokens = wallet.getTokensForAddress(dbEntity.publicAddress)
-    addressBalance.amount = nanoErgsToErgs(state?.balance ?: 0)
+    addressBalance.amount = ErgoAmount(state?.balance ?: 0).toDouble()
     labelTokenNum.visibility =
         if (tokens.isNullOrEmpty()) View.GONE else View.VISIBLE
     labelTokenNum.text =
@@ -51,7 +51,7 @@ fun IncludeWalletAddressInfoBinding.fillWalletAddressesInformation(
         ctx.getString(R.string.label_wallet_token_balance, tokenNum.toString())
 
     addressBalance.amount =
-        nanoErgsToErgs(wallet.getBalanceForAllAddresses())
+        ErgoAmount(wallet.getBalanceForAllAddresses()).toDouble()
 }
 
 fun WalletAddressDbEntity.isDerivedAddress(): Boolean {

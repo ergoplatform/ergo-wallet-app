@@ -198,10 +198,11 @@
                             app:baseTextStyle="bold"
                             app:decimalDigitsTextSize="@dimen/body1_textsize"
                             app:decimalMargin="4dp"
+                            app:format="@string/format_erg_more_precise"
                             app:layout_constraintStart_toStartOf="@id/title_balance"
                             app:layout_constraintTop_toBottomOf="@id/title_balance"
                             app:symbolMargin="6dp"
-                            tools:amount="191256.45" />
+                            tools:amount="91256.45" />
 
                         <org.fabiomsr.moneytextview.MoneyTextView
                             android:id="@+id/wallet_fiat"

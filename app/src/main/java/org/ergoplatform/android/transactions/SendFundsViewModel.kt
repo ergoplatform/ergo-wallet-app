@@ -35,7 +35,7 @@ class SendFundsViewModel : ViewModel() {
             field = value
             calcGrossAmount()
         }
-    var amountToSend: Double = 0.0
+    var amountToSend: ErgoAmount = ErgoAmount.ZERO
         set(value) {
             field = value
             calcGrossAmount()
@@ -45,18 +45,18 @@ class SendFundsViewModel : ViewModel() {
     val lockInterface: LiveData<Boolean> = _lockInterface
     private val _walletName = MutableLiveData<String>()
     val walletName: LiveData<String> = _walletName
-    private val _walletBalance = MutableLiveData<Double>()
     private val _address = MutableLiveData<WalletAddressDbEntity?>()
     val address: LiveData<WalletAddressDbEntity?> = _address
-    val walletBalance: LiveData<Double> = _walletBalance
-    private val _feeAmount = MutableLiveData<Double>().apply {
-        value = nanoErgsToErgs(Parameters.MinFee)
+    private val _walletBalance = MutableLiveData<ErgoAmount>()
+    val walletBalance: LiveData<ErgoAmount> = _walletBalance
+    private val _feeAmount = MutableLiveData<ErgoAmount>().apply {
+        value = ErgoAmount(Parameters.MinFee)
     }
-    val feeAmount: LiveData<Double> = _feeAmount
-    private val _grossAmount = MutableLiveData<Double>().apply {
-        value = 0.0
+    val feeAmount: LiveData<ErgoAmount> = _feeAmount
+    private val _grossAmount = MutableLiveData<ErgoAmount>().apply {
+        value = ErgoAmount.ZERO
     }
-    val grossAmount: LiveData<Double> = _grossAmount
+    val grossAmount: LiveData<ErgoAmount> = _grossAmount
     private val _paymentDoneLiveData = SingleLiveEvent<TransactionResult>()
     val paymentDoneLiveData: LiveData<TransactionResult> = _paymentDoneLiveData
     private val _txId = MutableLiveData<String>()
@@ -116,7 +116,7 @@ class SendFundsViewModel : ViewModel() {
         val addressState = address?.let { wallet?.getStateForAddress(it) }
         wallet?.let { wallet ->
             _walletBalance.postValue(
-                nanoErgsToErgs(
+                ErgoAmount(
                     addressState?.balance ?: wallet.getBalanceForAllAddresses()
                 )
             )
@@ -146,7 +146,7 @@ class SendFundsViewModel : ViewModel() {
     }
 
     fun checkAmount(): Boolean {
-        return amountToSend >= nanoErgsToErgs(Parameters.MinChangeValue)
+        return amountToSend.nanoErgs >= Parameters.MinChangeValue
     }
 
     fun checkTokens(): Boolean {
@@ -216,7 +216,7 @@ class SendFundsViewModel : ViewModel() {
             val ergoTxResult: TransactionResult
             withContext(Dispatchers.IO) {
                 ergoTxResult = sendErgoTx(
-                    Address.create(receiverAddress), ergsToNanoErgs(amountToSend),
+                    Address.create(receiverAddress), amountToSend.nanoErgs,
                     tokensChosen.values.toList(),
                     mnemonic, "", derivedAddresses,
                     getPrefNodeUrl(context), getPrefExplorerApiUrl(context)

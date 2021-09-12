@@ -15,18 +15,6 @@ import kotlin.math.pow
 val MNEMONIC_WORDS_COUNT = 15
 val MNEMONIC_MIN_WORDS_COUNT = 12
 
-fun nanoErgsToErgs(nanoErgs: Long): Double {
-    val microErgs = nanoErgs / (1000L * 100L)
-    val ergs = microErgs.toDouble() / 10000.0
-    return ergs
-}
-
-fun ergsToNanoErgs(ergs: Double): Long {
-    val microErgs = (ergs * 10000.0).toLong()
-    val nanoergs = microErgs * 100L * 1000L
-    return nanoergs
-}
-
 fun longWithDecimalsToDouble(amount: Long, decimals: Int) =
     (amount.toDouble()) / (10.0.pow(decimals))
 

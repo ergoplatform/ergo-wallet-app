@@ -58,7 +58,7 @@ fun parseContentFromQrCode(qrCode: String): QrCodeContent? {
 
 fun parseContentFromQuery(query: String): QrCodeContent? {
     var address: String? = null
-    var amount = 0.0
+    var amount = ErgoAmount.ZERO
     var description = ""
     val tokenMap: HashMap<String, Double> = HashMap()
 
@@ -68,10 +68,7 @@ fun parseContentFromQuery(query: String): QrCodeContent? {
                 URLDecoder.decode(it.substring(RECIPIENT_PARAM_PREFIX.length), URI_ENCODING)
         } else if (it.startsWith(AMOUNT_PARAM_PREFIX)) {
             amount = URLDecoder.decode(it.substring(AMOUNT_PARAM_PREFIX.length), URI_ENCODING)
-                .toDoubleOrNull() ?: 0.0
-            if (amount.isNaN()) {
-                amount = 0.0
-            }
+                .toErgoAmount() ?: ErgoAmount.ZERO
         } else if (it.startsWith(DESCRIPTION_PARAM_PREFIX)) {
             description =
                 URLDecoder.decode(it.substring(DESCRIPTION_PARAM_PREFIX.length), URI_ENCODING)
@@ -98,7 +95,7 @@ fun parseContentFromQuery(query: String): QrCodeContent? {
 
 data class QrCodeContent(
     val address: String,
-    val amount: Double = 0.0,
+    val amount: ErgoAmount = ErgoAmount.ZERO,
     val description: String = "",
     val tokens: HashMap<String, Double> = HashMap(),
 )

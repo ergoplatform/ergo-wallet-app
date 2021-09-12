@@ -53,16 +53,6 @@ fun inputTextToDouble(amountStr: String?): Double {
 }
 
 /**
- * ERG is always formatted US-style (e.g. 1,000.00)
- */
-fun formatErgsToString(ergs: Double, context: Context): String {
-    return DecimalFormat(
-        context.getString(R.string.format_erg),
-        DecimalFormatSymbols(Locale.US)
-    ).format(ergs)
-}
-
-/**
  * fiat is formatted according to users locale, because it is his local currency
  */
 fun formatFiatToString(amount: Double, currency: String, context: Context): String {

@@ -6,12 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.R
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserItemBinding
-import org.ergoplatform.android.nanoErgsToErgs
-import org.ergoplatform.android.parseContentFromQuery
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.wallet.getBalanceForAllAddresses
@@ -48,9 +45,9 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
 
         val content = parseContentFromQuery(query)
         binding.receiverAddress.text = content?.address
-        val amount = content?.amount ?: 0.0
-        binding.grossAmount.amount = amount
-        binding.grossAmount.visibility = if (amount > 0.0) View.VISIBLE else View.GONE
+        val amount = content?.amount ?: ErgoAmount.ZERO
+        binding.grossAmount.amount = amount.toDouble()
+        binding.grossAmount.visibility = if (amount.nanoErgs > 0) View.VISIBLE else View.GONE
 
         AppDatabase.getInstance(requireContext()).walletDao().getWalletsWithStates()
             .observe(viewLifecycleOwner, {
@@ -68,7 +65,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
                     )
 
                     itemBinding.walletBalance.amount =
-                        nanoErgsToErgs(wallet.getBalanceForAllAddresses())
+                        ErgoAmount(wallet.getBalanceForAllAddresses()).toDouble()
                     itemBinding.walletName.text = wallet.walletConfig.displayName
 
                     itemBinding.root.setOnClickListener {

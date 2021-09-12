@@ -23,12 +23,9 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
-import org.ergoplatform.android.NodeConnector
-import org.ergoplatform.android.R
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
-import org.ergoplatform.android.doubleToLongWithDecimals
-import org.ergoplatform.android.parseContentFromQrCode
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.android.wallet.WalletTokenDbEntity
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
@@ -63,7 +60,12 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.initWallet(requireContext(), args.walletId, args.derivationIdx, args.paymentRequest)
+        viewModel.initWallet(
+            requireContext(),
+            args.walletId,
+            args.derivationIdx,
+            args.paymentRequest
+        )
 
         // Add observers
         viewModel.walletName.observe(viewLifecycleOwner, {
@@ -78,24 +80,17 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         viewModel.walletBalance.observe(viewLifecycleOwner, {
             binding.tvBalance.text = getString(
                 R.string.label_wallet_balance,
-                formatErgsToString(
-                    it,
-                    requireContext()
-                )
+                it.toStringWithScale(4)
             )
         })
         viewModel.feeAmount.observe(viewLifecycleOwner, {
             binding.tvFee.text = getString(
                 R.string.desc_fee,
-                formatErgsToString(
-                    it,
-                    requireContext()
-                )
-
+                it.toStringWithScale(4)
             )
         })
         viewModel.grossAmount.observe(viewLifecycleOwner, {
-            binding.grossAmount.amount = it
+            binding.grossAmount.amount = it.toDouble()
             val nodeConnector = NodeConnector.getInstance()
             binding.tvFiat.visibility =
                 if (nodeConnector.fiatCurrency.isNotEmpty()) View.VISIBLE else View.GONE
@@ -103,7 +98,8 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                 getString(
                     R.string.label_fiat_amount,
                     formatFiatToString(
-                        viewModel.amountToSend * (nodeConnector.fiatValue.value ?: 0f).toDouble(),
+                        viewModel.amountToSend.toDouble() * (nodeConnector.fiatValue.value
+                            ?: 0f).toDouble(),
                         nodeConnector.fiatCurrency, requireContext()
                     ),
                 )
@@ -184,13 +180,19 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         }
         binding.amount.setEndIconOnClickListener {
             setAmountEdittext(
-                max(0.0, (viewModel.walletBalance.value ?: 0.0) - (viewModel.feeAmount.value ?: 0.0))
+                ErgoAmount(
+                    max(
+                        0,
+                        (viewModel.walletBalance.value?.nanoErgs ?: 0)
+                                - (viewModel.feeAmount.value?.nanoErgs ?: 0)
+                    )
+                )
             )
         }
 
         // Init other stuff
         binding.tvReceiver.editText?.setText(viewModel.receiverAddress)
-        if (viewModel.amountToSend > 0) {
+        if (viewModel.amountToSend.nanoErgs > 0) {
             setAmountEdittext(viewModel.amountToSend)
         }
 
@@ -277,13 +279,8 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             ).replace(",", "")
         else ""
 
-    private fun setAmountEdittext(amountToSend: Double) {
-        binding.amount.editText?.setText(
-            formatErgsToString(
-                amountToSend,
-                requireContext()
-            ).replace(",", "")
-        )
+    private fun setAmountEdittext(amountToSend: ErgoAmount) {
+        binding.amount.editText?.setText(amountToSend.toString())
     }
 
     private fun startPayment() {
@@ -356,7 +353,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         viewModel.receiverAddress = binding.tvReceiver.editText?.text?.toString() ?: ""
 
         val amountStr = binding.amount.editText?.text.toString()
-        viewModel.amountToSend = inputTextToDouble(amountStr)
+        viewModel.amountToSend = amountStr.toErgoAmount() ?: ErgoAmount.ZERO
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -366,7 +363,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                 val content = parseContentFromQrCode(it)
                 content?.let {
                     binding.tvReceiver.editText?.setText(content.address)
-                    content.amount.let { amount -> if (amount > 0) setAmountEdittext(amount) }
+                    content.amount.let { amount -> if (amount.nanoErgs > 0) setAmountEdittext(amount) }
                     viewModel.addTokensFromQr(content.tokens)
                 }
             }
