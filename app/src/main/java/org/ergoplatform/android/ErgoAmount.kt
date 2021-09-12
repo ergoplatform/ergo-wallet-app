@@ -12,7 +12,7 @@ class ErgoAmount(val nanoErgs: Long) {
 
     constructor(ergString: String) : this(
         if (ergString.isBlank()) 0 else ergString.toBigDecimal()
-            .movePointRight(nanoPowerOfTen).toLong()
+            .movePointRight(nanoPowerOfTen).longValueExact()
     )
 
     override fun toString(): String {

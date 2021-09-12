@@ -20,8 +20,14 @@ class ErgoAmountTest {
         val floatPrecisionProblem = ErgoAmount("4.503")
         assertEquals(4503000000, floatPrecisionProblem.nanoErgs)
 
-        val tooMuchDecimals = ErgoAmount("1.0000000005")
-        assertEquals(Parameters.OneErg, tooMuchDecimals.nanoErgs)
+        val tooMuchDecimals = "1.0000000005".toErgoAmount()
+        assertEquals(null, tooMuchDecimals?.nanoErgs)
+
+        val maxLongAmount = (Long.MAX_VALUE / Parameters.OneErg).toString().toErgoAmount()
+        assertEquals((Long.MAX_VALUE / Parameters.OneErg) * Parameters.OneErg, maxLongAmount?.nanoErgs)
+
+        val bigNumber = "10000000000".toErgoAmount()
+        assertEquals(null, bigNumber?.nanoErgs)
     }
 
     @Test

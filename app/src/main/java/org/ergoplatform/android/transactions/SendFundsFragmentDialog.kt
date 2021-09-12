@@ -353,7 +353,12 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         viewModel.receiverAddress = binding.tvReceiver.editText?.text?.toString() ?: ""
 
         val amountStr = binding.amount.editText?.text.toString()
-        viewModel.amountToSend = amountStr.toErgoAmount() ?: ErgoAmount.ZERO
+        val ergoAmount = amountStr.toErgoAmount()
+        viewModel.amountToSend = ergoAmount ?: ErgoAmount.ZERO
+        if (ergoAmount == null) {
+            // conversion error, too many decimals or too big for long
+            binding.amount.error = getString(R.string.error_amount)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
