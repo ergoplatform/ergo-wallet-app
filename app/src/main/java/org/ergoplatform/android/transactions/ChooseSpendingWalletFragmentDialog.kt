@@ -57,7 +57,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
 
                 if (walletsWithoutReadonly.size == 1) {
                     // immediately switch to send funds screen
-                    navigateToSendFundsScreen(walletsWithoutReadonly.first().walletConfig.id, true)
+                    navigateToSendFundsScreen(walletsWithoutReadonly.first().walletConfig.id)
                 }
                 walletsWithoutReadonly.forEach { wallet ->
                     val itemBinding = FragmentSendFundsWalletChooserItemBinding.inflate(
@@ -69,16 +69,16 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
                     itemBinding.walletName.text = wallet.walletConfig.displayName
 
                     itemBinding.root.setOnClickListener {
-                        navigateToSendFundsScreen(wallet.walletConfig.id, false)
+                        navigateToSendFundsScreen(wallet.walletConfig.id)
                     }
                 }
             })
     }
 
-    private fun navigateToSendFundsScreen(walletId: Int, popThis: Boolean) {
+    private fun navigateToSendFundsScreen(walletId: Int) {
         val navBuilder = NavOptions.Builder()
         val navOptions =
-            navBuilder.setPopUpTo(R.id.chooseSpendingWalletFragmentDialog, popThis).build()
+            navBuilder.setPopUpTo(R.id.chooseSpendingWalletFragmentDialog, true).build()
 
         NavHostFragment.findNavController(requireParentFragment())
             .navigateSafe(
