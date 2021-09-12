@@ -15,12 +15,6 @@ import kotlin.math.pow
 val MNEMONIC_WORDS_COUNT = 15
 val MNEMONIC_MIN_WORDS_COUNT = 12
 
-fun longWithDecimalsToDouble(amount: Long, decimals: Int) =
-    (amount.toDouble()) / (10.0.pow(decimals))
-
-fun doubleToLongWithDecimals(amount: Double, decimals: Int) =
-    (amount * 10.0.pow(decimals)).toLong()
-
 fun serializeSecrets(mnemonic: String): String {
     val gson = Gson()
     val root = JsonObject()

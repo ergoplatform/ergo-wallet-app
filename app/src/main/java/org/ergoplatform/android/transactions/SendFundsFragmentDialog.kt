@@ -273,10 +273,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
     private fun tokenAmountToText(amount: Long, decimals: Int) =
         if (amount > 0)
-            formatTokenAmounts(
-                amount,
-                decimals
-            ).replace(",", "")
+            TokenAmount(amount, decimals).toString()
         else ""
 
     private fun setAmountEdittext(amountToSend: ErgoAmount) {
@@ -410,7 +407,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         override fun afterTextChanged(s: Editable?) {
             viewModel.setTokenAmount(
                 token.tokenId!!,
-                doubleToLongWithDecimals(inputTextToDouble(s?.toString()), token.decimals!!)
+                s?.toString()?.toTokenAmount(token.decimals!!) ?: TokenAmount(0, token.decimals!!)
             )
             binding.labelTokenAmountError.visibility = View.GONE
         }

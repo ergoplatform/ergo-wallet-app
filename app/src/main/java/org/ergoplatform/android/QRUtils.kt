@@ -60,7 +60,7 @@ fun parseContentFromQuery(query: String): QrCodeContent? {
     var address: String? = null
     var amount = ErgoAmount.ZERO
     var description = ""
-    val tokenMap: HashMap<String, Double> = HashMap()
+    val tokenMap: HashMap<String, String> = HashMap()
 
     query.split('&').forEach {
         if (it.startsWith(RECIPIENT_PARAM_PREFIX)) {
@@ -77,7 +77,7 @@ fun parseContentFromQuery(query: String): QrCodeContent? {
             val keyVal = it.split('=')
             try {
                 val tokenId = keyVal.get(0)
-                val tokenAmount = keyVal.get(1).toDouble()
+                val tokenAmount = keyVal.get(1)
                 tokenMap.put(tokenId, tokenAmount)
             } catch (t: Throwable) {
                 // in this case, we haven't found a token :)
@@ -97,5 +97,5 @@ data class QrCodeContent(
     val address: String,
     val amount: ErgoAmount = ErgoAmount.ZERO,
     val description: String = "",
-    val tokens: HashMap<String, Double> = HashMap(),
+    val tokens: HashMap<String, String> = HashMap(),
 )

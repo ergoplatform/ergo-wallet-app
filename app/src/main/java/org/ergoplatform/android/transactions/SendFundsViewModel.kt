@@ -253,13 +253,13 @@ class SendFundsViewModel : ViewModel() {
         }
     }
 
-    fun setTokenAmount(tokenId: String, amount: Long) {
+    fun setTokenAmount(tokenId: String, amount: TokenAmount) {
         tokensChosen.get(tokenId)?.let {
-            tokensChosen.put(tokenId, ErgoToken(it.id, amount))
+            tokensChosen.put(tokenId, ErgoToken(it.id, amount.rawValue))
         }
     }
 
-    fun addTokensFromQr(tokens: HashMap<String, Double>) {
+    fun addTokensFromQr(tokens: HashMap<String, String>) {
         var changed = false
         tokens.forEach {
             val tokenId = it.key
@@ -267,7 +267,7 @@ class SendFundsViewModel : ViewModel() {
 
             // we need to check for existence here, QR code might have any String, not an ID
             tokensAvail.filter { it.tokenId.equals(tokenId) }.firstOrNull()?.let {
-                val longAmount = doubleToLongWithDecimals(amount, it.decimals ?: 0)
+                val longAmount = amount.toTokenAmount(it.decimals ?: 0)?.rawValue ?: 0
                 tokensChosen.put(tokenId, ErgoToken(tokenId, longAmount))
                 changed = true
             }
