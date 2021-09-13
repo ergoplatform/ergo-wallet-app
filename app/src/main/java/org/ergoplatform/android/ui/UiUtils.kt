@@ -93,9 +93,9 @@ fun formatDoubleWithPrettyReduction(amount: Double): String {
 /**
  * Copies address to system clipboard and shows a Snackbar on given view
  */
-fun copyStringToClipboard(address: String, ctx: Context, view: View?) {
+fun copyStringToClipboard(string: String, ctx: Context, view: View?) {
     val clipboard = ContextCompat.getSystemService(ctx, ClipboardManager::class.java)
-    val clip = ClipData.newPlainText("", address)
+    val clip = ClipData.newPlainText("", string)
     clipboard?.setPrimaryClip(clip)
 
     view?.let {
