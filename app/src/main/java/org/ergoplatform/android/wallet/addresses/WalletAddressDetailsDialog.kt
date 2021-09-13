@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.databinding.FragmentWalletAddressDetailsDialogBinding
 import org.ergoplatform.android.getAddressDerivationPath
-import org.ergoplatform.android.ui.copyAddressToClipboard
+import org.ergoplatform.android.ui.copyStringToClipboard
 
 /**
  * Wallet address detail bottom sheet to edit an address label or delete the address
@@ -55,7 +55,7 @@ class WalletAddressDetailsDialog : BottomSheetDialogFragment() {
             binding.publicAddress.text = walletAddress?.publicAddress
             binding.descriptiveLabel.editText?.setText(walletAddress?.label)
             binding.publicAddress.setOnClickListener {
-                copyAddressToClipboard(
+                copyStringToClipboard(
                     walletAddress!!.publicAddress,
                     requireContext(), null
                 )

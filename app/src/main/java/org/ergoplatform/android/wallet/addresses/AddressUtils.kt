@@ -8,20 +8,20 @@ import org.ergoplatform.android.databinding.IncludeWalletAddressInfoBinding
 import org.ergoplatform.android.wallet.*
 
 fun IncludeWalletAddressInfoBinding.fillAddressInformation(
-    dbEntity: WalletAddressDbEntity,
+    walletAddress: WalletAddressDbEntity,
     wallet: WalletDbEntity
 ) {
-    val isDerivedAddress = dbEntity.isDerivedAddress()
+    val isDerivedAddress = walletAddress.isDerivedAddress()
     val ctx = root.context
 
     addressIndex.visibility =
         if (isDerivedAddress) View.VISIBLE else View.GONE
-    addressIndex.text = dbEntity.derivationIndex.toString()
-    addressLabel.text = dbEntity.getAddressLabel(ctx)
-    publicAddress.text = dbEntity.publicAddress
+    addressIndex.text = walletAddress.derivationIndex.toString()
+    addressLabel.text = walletAddress.getAddressLabel(ctx)
+    publicAddress.text = walletAddress.publicAddress
 
-    val state = wallet.getStateForAddress(dbEntity.publicAddress)
-    val tokens = wallet.getTokensForAddress(dbEntity.publicAddress)
+    val state = wallet.getStateForAddress(walletAddress.publicAddress)
+    val tokens = wallet.getTokensForAddress(walletAddress.publicAddress)
     addressBalance.amount = ErgoAmount(state?.balance ?: 0).toDouble()
     labelTokenNum.visibility =
         if (tokens.isNullOrEmpty()) View.GONE else View.VISIBLE

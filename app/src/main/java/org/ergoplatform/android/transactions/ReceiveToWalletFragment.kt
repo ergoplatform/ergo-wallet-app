@@ -11,7 +11,7 @@ import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
-import org.ergoplatform.android.ui.copyAddressToClipboard
+import org.ergoplatform.android.ui.copyStringToClipboard
 import org.ergoplatform.android.ui.formatFiatToString
 import org.ergoplatform.android.ui.inputTextToDouble
 import org.ergoplatform.android.wallet.WalletDbEntity
@@ -69,7 +69,7 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
 
         binding.buttonCopy.setOnClickListener {
             wallet?.getDerivedAddress(derivationIdx)?.let {
-                copyAddressToClipboard(it, requireContext(), requireView())
+                copyStringToClipboard(it, requireContext(), requireView())
             }
         }
         binding.addressLabel.setOnClickListener {
