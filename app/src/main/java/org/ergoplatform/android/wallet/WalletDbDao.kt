@@ -15,6 +15,9 @@ interface WalletDbDao {
     @Query("DELETE FROM wallet_states WHERE wallet_first_address = :firstAddress")
     suspend fun deleteWalletStates(firstAddress: String)
 
+    @Query("DELETE FROM wallet_states WHERE public_address = :publicAddress")
+    suspend fun deleteAddressState(publicAddress: String)
+
     @Query("DELETE FROM wallet_tokens WHERE public_address = :publicAddress")
     suspend fun deleteTokensByAddress(publicAddress: String)
 
@@ -45,10 +48,22 @@ interface WalletDbDao {
     fun walletWithStateByIdAsFlow(id: Int): Flow<WalletDbEntity>
 
     @Query("SELECT * FROM wallet_configs WHERE public_address = :firstAddress")
-    suspend fun loadWalletByAddress(firstAddress: String): WalletConfigDbEntity?
+    suspend fun loadWalletByFirstAddress(firstAddress: String): WalletConfigDbEntity?
 
     @Query("SELECT * FROM wallet_addresses WHERE wallet_first_address = :firstAddress")
     suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddressDbEntity>
+
+    @Query("SELECT * FROM wallet_addresses WHERE id = :id")
+    suspend fun loadWalletAddress(id: Int): WalletAddressDbEntity?
+
+    @Query("UPDATE wallet_addresses SET label = :label WHERE id = :id")
+    suspend fun updateWalletAddressLabel(id: Int, label: String?)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertWalletAddress(walletAddress: WalletAddressDbEntity)
+
+    @Query("DELETE FROM wallet_addresses WHERE id = :id")
+    suspend fun deleteWalletAddress(id: Int)
 
     @Query("SELECT * FROM wallet_configs")
     fun getAllWalletConfigsSyncronous(): List<WalletConfigDbEntity>

@@ -26,14 +26,43 @@ fun WalletDbEntity.getTokensForAddress(address: String): List<WalletTokenDbEntit
 /**
  * @return derived address with given index
  */
-fun WalletDbEntity.getDerivedAddress(idx: Int): String? {
+fun WalletDbEntity.getDerivedAddress(derivationIdx: Int): String? {
     // edge case: index 0 is not (always) part of addresses table
-    if (idx == 0) {
+    if (derivationIdx == 0) {
         return walletConfig.firstAddress
     } else {
-        return addresses.filter { it.derivationIndex == idx }.firstOrNull()?.publicAddress
+        return addresses.filter { it.derivationIndex == derivationIdx }.firstOrNull()?.publicAddress
     }
+}
 
+/**
+ * @return derived addresses list, making sure that 0 address is included and list is sorted by idx
+ */
+fun WalletDbEntity.getSortedDerivedAddressesList(): List<WalletAddressDbEntity> {
+    val retList = ensureWalletAddressListHasFirstAddress(addresses, walletConfig.firstAddress!!)
+    return retList.sortedBy { it.derivationIndex }
+}
+
+fun ensureWalletAddressListHasFirstAddress(
+    addresses: List<WalletAddressDbEntity>,
+    firstAddress: String
+): List<WalletAddressDbEntity> {
+    val hasFirst = addresses.filter { it.derivationIndex == 0 }.isNotEmpty()
+    val retList = addresses.toMutableList()
+
+    if (!hasFirst) {
+        retList.add(
+            0,
+            WalletAddressDbEntity(
+                0,
+                firstAddress,
+                0,
+                firstAddress,
+                null
+            )
+        )
+    }
+    return retList
 }
 
 fun WalletDbEntity.getNumOfAddresses(): Int {

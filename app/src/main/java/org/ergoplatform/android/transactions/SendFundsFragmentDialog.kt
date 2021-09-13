@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -21,12 +22,16 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
-import org.ergoplatform.android.*
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import org.ergoplatform.android.NodeConnector
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
+import org.ergoplatform.android.doubleToLongWithDecimals
+import org.ergoplatform.android.parseContentFromQrCode
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.android.wallet.WalletTokenDbEntity
-import kotlin.math.pow
+
 
 /**
  * Here's the place to send transactions
@@ -172,6 +177,29 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
         binding.amount.editText?.addTextChangedListener(MyTextWatcher(binding.amount))
         binding.tvReceiver.editText?.addTextChangedListener(MyTextWatcher(binding.tvReceiver))
+
+        // this triggers an automatic scroll so the amount field is visible when soft keyboard is
+        // opened or when amount edittext gets focus
+        binding.amount.editText?.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
+            if (hasFocus)
+                ensureAmountVisibleDelayed()
+        }
+        KeyboardVisibilityEvent.setEventListener(
+            requireActivity(),
+            viewLifecycleOwner,
+            { keyboardOpen ->
+                if (keyboardOpen && binding.amount.editText?.hasFocus() == true) {
+                    ensureAmountVisibleDelayed()
+                }
+            })
+    }
+
+    private fun ensureAmountVisibleDelayed() {
+        // delay 200 to make sure that smart keyboard is already open
+        Handler().postDelayed(
+            { _binding?.let { it.scrollView.smoothScrollTo(0, it.amount.top) } },
+            200
+        )
     }
 
     private fun refreshTokensList() {
@@ -279,7 +307,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                 try {
                     viewModel.startPaymentUserAuth(context)
                 } catch (t: Throwable) {
-                    hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
+                    hideForcedSoftKeyboard(context, binding.amount.editText!!)
                     Snackbar.make(
                         requireView(),
                         getString(R.string.error_device_security, t.message),
@@ -289,7 +317,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
+                hideForcedSoftKeyboard(context, binding.amount.editText!!)
                 Snackbar.make(
                     requireView(),
                     getString(R.string.error_device_security, errString),

@@ -49,7 +49,9 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
             binding.editPasswordConfirm.visibility = View.VISIBLE
             binding.editPasswordConfirm.editText?.setOnEditorActionListener(doneActionListener)
             binding.editPassword.editText?.imeOptions = EditorInfo.IME_ACTION_NEXT
+            binding.tvForgotPw.visibility = View.GONE
         } else {
+            binding.tvForgotPw.enableLinks()
             binding.editPassword.editText?.setOnEditorActionListener(doneActionListener)
         }
     }

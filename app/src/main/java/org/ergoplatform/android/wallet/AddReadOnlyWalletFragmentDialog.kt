@@ -65,7 +65,7 @@ class AddReadOnlyWalletFragmentDialog : FullScreenFragmentDialog() {
             GlobalScope.launch(Dispatchers.IO) {
                 // make sure not to use dialog context within this block
                 val walletDao = AppDatabase.getInstance(context).walletDao()
-                val existingWallet = walletDao.loadWalletByAddress(walletAddress)
+                val existingWallet = walletDao.loadWalletByFirstAddress(walletAddress)
                 if (existingWallet == null) {
                     walletDao.insertAll(walletConfig)
                     NodeConnector.getInstance().invalidateCache()

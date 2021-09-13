@@ -1,16 +1,16 @@
 package org.ergoplatform.android.wallet
 
+import StageConstants
 import android.animation.LayoutTransition
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -20,8 +20,12 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.nanoErgsToErgs
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
+import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
+import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
+import org.ergoplatform.android.wallet.addresses.getAddressLabel
 
-class WalletDetailsFragment : Fragment() {
+class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
     private lateinit var walletDetailsViewModel: WalletDetailsViewModel
 
@@ -29,6 +33,11 @@ class WalletDetailsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args: WalletDetailsFragmentArgs by navArgs()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -72,8 +81,45 @@ class WalletDetailsFragment : Fragment() {
             binding.root.context.startActivity(browserIntent)
         }
 
+        binding.buttonConfigAddresses.setOnClickListener {
+            findNavController().navigateSafe(
+                WalletDetailsFragmentDirections.actionNavigationWalletDetailsToWalletAddressesFragment(
+                    walletDetailsViewModel.wallet!!.walletConfig.id
+                )
+            )
+        }
+
+        binding.layoutAddressLabels.setOnClickListener {
+            ChooseAddressListDialogFragment.newInstance(
+                walletDetailsViewModel.wallet!!.walletConfig.id,
+                true
+            ).show(childFragmentManager, null)
+        }
+
         // enable layout change animations after a short wait time
         Handler(Looper.getMainLooper()).postDelayed({ enableLayoutChangeAnimations() }, 500)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_wallet_details, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_settings) {
+            findNavController().navigateSafe(
+                WalletDetailsFragmentDirections.actionNavigationWalletDetailsToWalletConfigFragment(
+                    walletDetailsViewModel.wallet!!.walletConfig.id
+                )
+            )
+
+            return true
+        } else
+            return super.onOptionsItemSelected(item)
+    }
+
+    override fun onAddressChosen(addressDerivationIdx: Int?) {
+        walletDetailsViewModel.selectedIdx = addressDerivationIdx
     }
 
     private fun addressChanged(address: String?) {
@@ -84,19 +130,26 @@ class WalletDetailsFragment : Fragment() {
 
         binding.walletName.text = wallet.walletConfig.displayName
 
-        // fill address
-        //TODO insert label here and ellipsize end for labels
-        binding.publicAddress.text =
-            address ?: getString(R.string.label_all_addresses, wallet.getNumOfAddresses())
+        // fill address or label
+        if (address != null) {
+            val addressDbEntity =
+                wallet.getSortedDerivedAddressesList().find { it.publicAddress.equals(address) }
+            binding.addressLabel.text =
+                addressDbEntity?.getAddressLabel(requireContext())
+        } else {
+            binding.addressLabel.text =
+                getString(R.string.label_all_addresses, wallet.getNumOfAddresses())
+        }
 
         // fill balances
+        val addressState = address?.let { wallet.getStateForAddress(address) }
         val ergoAmount = nanoErgsToErgs(
-            address?.let { wallet.getStateForAddress(address) }?.balance
+            addressState?.balance
                 ?: wallet.getBalanceForAllAddresses()
         )
         binding.walletBalance.amount = ergoAmount
 
-        val unconfirmed = address?.let { wallet.getStateForAddress(address) }?.unconfirmedBalance
+        val unconfirmed = addressState?.unconfirmedBalance
             ?: wallet.getUnconfirmedBalanceForAllAddresses()
         binding.walletUnconfirmed.amount = nanoErgsToErgs(unconfirmed)
         binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
@@ -114,9 +167,9 @@ class WalletDetailsFragment : Fragment() {
         }
 
         // tokens
-        binding.cardviewTokens.visibility = if (wallet.tokens.size > 0) View.VISIBLE else View.GONE
         val tokensList = address?.let { wallet.getTokensForAddress(address) }
             ?: wallet.getTokensForAllAddresses()
+        binding.cardviewTokens.visibility = if (tokensList.size > 0) View.VISIBLE else View.GONE
         binding.walletTokenNum.text = tokensList.size.toString()
 
         binding.walletTokenEntries.apply {

@@ -6,6 +6,7 @@
     android:layout_height="match_parent">
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -195,6 +196,7 @@
                         android:layout_gravity="end"
                         android:elegantTextHeight="true"
                         android:text="@string/label_add_token"
+                        android:visibility="invisible"
                         app:icon="@drawable/ic_add_24"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="@id/button_send" />

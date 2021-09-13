@@ -7,7 +7,7 @@
     android:fitsSystemWindows="true">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
+        style="@style/width_match_parent_max_500"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="@dimen/activity_horizontal_margin">

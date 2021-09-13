@@ -64,6 +64,10 @@ fun isValidErgoAddress(addressString: String): Boolean {
 
 }
 
+fun getAddressDerivationPath(index: Int): String {
+    return "m/44'/429'/0'/0/$index"
+}
+
 fun getPublicErgoAddressFromMnemonic(mnemonic: String, index: Int = 0): String {
     return Address.createEip3Address(
         index,

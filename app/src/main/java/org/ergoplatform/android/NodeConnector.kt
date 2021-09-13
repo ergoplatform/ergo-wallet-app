@@ -9,6 +9,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.wallet.WalletStateDbEntity
 import org.ergoplatform.android.wallet.WalletTokenDbEntity
+import org.ergoplatform.android.wallet.ensureWalletAddressListHasFirstAddress
 import org.ergoplatform.api.CoinGeckoApi
 import org.ergoplatform.explorer.client.DefaultApi
 import retrofit2.Retrofit
@@ -101,51 +102,8 @@ class NodeConnector {
 
                 // Refresh wallet states
                 try {
-                    val statesToSave = mutableListOf<WalletStateDbEntity>()
-                    val tokenAddressesToDelete = mutableListOf<String>()
-                    val tokensToSave = mutableListOf<WalletTokenDbEntity>()
-                    val database = AppDatabase.getInstance(context)
-                    val walletDao = database.walletDao()
-                    walletDao.getAllWalletConfigsSyncronous().forEach { walletConfig ->
-                        walletConfig.firstAddress?.let {
-                            val balanceInfo =
-                                getOrInitErgoApiService(context).getApiV1AddressesP1BalanceTotal(
-                                    walletConfig.firstAddress
-                                )
-                                    .execute()
-                                    .body()
-
-                            val newState = WalletStateDbEntity(
-                                walletConfig.firstAddress,
-                                walletConfig.firstAddress,
-                                balanceInfo?.confirmed?.nanoErgs,
-                                balanceInfo?.unconfirmed?.nanoErgs
-                            )
-
-                            statesToSave.add(newState)
-                            tokenAddressesToDelete.add(walletConfig.firstAddress)
-                            balanceInfo?.confirmed?.tokens?.forEach {
-                                tokensToSave.add(
-                                    WalletTokenDbEntity(
-                                        0,
-                                        walletConfig.firstAddress,
-                                        walletConfig.firstAddress,
-                                        it.tokenId,
-                                        it.amount,
-                                        it.decimals,
-                                        it.name
-                                    )
-                                )
-                            }
-                        }
-                    }
-
-                    database.withTransaction {
-                        walletDao.insertWalletStates(*statesToSave.toTypedArray())
-                        tokenAddressesToDelete.forEach { walletDao.deleteTokensByAddress(it) }
-                        walletDao.insertWalletTokens(*tokensToSave.toTypedArray())
-                    }
-                    didSync = statesToSave.isNotEmpty()
+                    val statesSaved = refreshWalletStates(context)
+                    didSync = statesSaved.isNotEmpty()
                 } catch (t: Throwable) {
                     Log.e("NodeConnector", "Error", t)
                     // TODO report to user
@@ -161,6 +119,74 @@ class NodeConnector {
                 isRefreshing.postValue(false)
             }
         }
+    }
+
+    fun refreshSingleAddresses(context: Context, addresses: List<String>) {
+        if (addresses.isNotEmpty()) {
+            GlobalScope.launch(Dispatchers.IO) {
+                refreshWalletStates(context, addresses)
+            }
+        }
+    }
+
+    private suspend fun refreshWalletStates(
+        context: Context,
+        addressFilter: List<String> = emptyList()
+    ): List<WalletStateDbEntity> {
+        val statesToSave = mutableListOf<WalletStateDbEntity>()
+        val tokenAddressesToDelete = mutableListOf<String>()
+        val tokensToSave = mutableListOf<WalletTokenDbEntity>()
+        val database = AppDatabase.getInstance(context)
+        val walletDao = database.walletDao()
+        walletDao.getAllWalletConfigsSyncronous().forEach { walletConfig ->
+            walletConfig.firstAddress?.let { firstAddress ->
+                val allAddresses = ensureWalletAddressListHasFirstAddress(
+                    walletDao.loadWalletAddresses(firstAddress), firstAddress
+                )
+
+                val refreshAddresses =
+                    if (addressFilter.isEmpty()) allAddresses
+                    else allAddresses.filter { addressFilter.contains(it.publicAddress) }
+
+                refreshAddresses.forEach { address ->
+                    val balanceInfo =
+                        getOrInitErgoApiService(context).getApiV1AddressesP1BalanceTotal(
+                            address.publicAddress
+                        ).execute().body()
+
+                    val newState = WalletStateDbEntity(
+                        address.publicAddress,
+                        address.walletFirstAddress,
+                        balanceInfo?.confirmed?.nanoErgs,
+                        balanceInfo?.unconfirmed?.nanoErgs
+                    )
+
+                    statesToSave.add(newState)
+                    tokenAddressesToDelete.add(address.publicAddress)
+                    balanceInfo?.confirmed?.tokens?.forEach {
+                        tokensToSave.add(
+                            WalletTokenDbEntity(
+                                0,
+                                address.publicAddress,
+                                address.walletFirstAddress,
+                                it.tokenId,
+                                it.amount,
+                                it.decimals,
+                                it.name
+                            )
+                        )
+                    }
+
+                }
+            }
+        }
+
+        database.withTransaction {
+            walletDao.insertWalletStates(*statesToSave.toTypedArray())
+            tokenAddressesToDelete.forEach { walletDao.deleteTokensByAddress(it) }
+            walletDao.insertWalletTokens(*tokensToSave.toTypedArray())
+        }
+        return statesToSave
     }
 
     fun fetchCurrencies() {

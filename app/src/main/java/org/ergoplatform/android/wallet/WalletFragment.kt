@@ -26,6 +26,9 @@ import java.util.*
 class WalletFragment : Fragment() {
 
     private var _binding: FragmentWalletBinding? = null
+    // save last shown wallet list in case view is destroyed
+    // this is to preserve user's scroll position
+    private var lastWalletList: List<WalletDbEntity> = emptyList()
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -48,7 +51,7 @@ class WalletFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val walletAdapter = WalletAdapter()
+        val walletAdapter = WalletAdapter(lastWalletList)
         binding.recyclerview.adapter = walletAdapter
         AppDatabase.getInstance(requireContext()).walletDao().getWalletsWithStates()
             .observe(viewLifecycleOwner,
@@ -58,6 +61,7 @@ class WalletFragment : Fragment() {
                             Locale.getDefault()
                         )
                     }
+                    lastWalletList = walletAdapter.walletList
 
                     binding.swipeRefreshLayout.visibility =
                         if (walletList.isEmpty()) View.GONE else View.VISIBLE
@@ -166,8 +170,8 @@ class WalletFragment : Fragment() {
     }
 }
 
-class WalletAdapter : RecyclerView.Adapter<WalletViewHolder>() {
-    var walletList: List<WalletDbEntity> = emptyList()
+class WalletAdapter(initWalletList: List<WalletDbEntity>) : RecyclerView.Adapter<WalletViewHolder>() {
+    var walletList: List<WalletDbEntity> = initWalletList
         set(value) {
             val diffCallback = WalletDiffCallback(field, value)
             field = value

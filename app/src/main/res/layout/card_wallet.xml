@@ -48,11 +48,12 @@
 
             <ImageView
                 android:id="@+id/wallet_settings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/medium_icon_size"
+                android:layout_height="@dimen/medium_icon_size"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="@string/title_settings"
-                android:src="@drawable/ic_edit_24"
+                android:scaleType="center"
+                android:src="@drawable/ic_settings_24"
                 app:layout_constraintBottom_toTopOf="@id/wallet_balance"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

@@ -16,7 +16,10 @@ class WalletDetailsViewModel : ViewModel() {
 
     // the selected index is null for "all addresses"
     var selectedIdx: Int? = null
-        private set
+        set(value) {
+            field = value
+            _address.postValue(selectedIdx?.let { wallet?.getDerivedAddress(it) })
+        }
 
     private val _address = MutableLiveData<String?>()
     val address: LiveData<String?> = _address
@@ -30,9 +33,9 @@ class WalletDetailsViewModel : ViewModel() {
                 // if there is only a single address available, fix it to this one
                 if (it.getNumOfAddresses() == 1) {
                     selectedIdx = 0
+                } else {
+                    selectedIdx = null
                 }
-
-                _address.postValue(selectedIdx?.let { wallet?.getDerivedAddress(it) })
             }
         }
     }

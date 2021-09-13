@@ -2,7 +2,6 @@ package org.ergoplatform.android.settings
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,10 +9,13 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import org.ergoplatform.android.BuildConfig
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSettingsBinding
 import org.ergoplatform.android.getPrefDisplayCurrency
+import org.ergoplatform.android.ui.enableLinks
+import org.ergoplatform.android.ui.navigateSafe
 import java.util.*
 
 class SettingsFragment : Fragment() {
@@ -44,8 +46,8 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // makes the links clickable
-        binding.labelMoreInfo.movementMethod = LinkMovementMethod.getInstance()
-        binding.labelCoingecko.movementMethod = LinkMovementMethod.getInstance()
+        binding.labelMoreInfo.enableLinks()
+        binding.labelCoingecko.enableLinks()
 
         setDisplayCurrency()
 
@@ -59,7 +61,7 @@ class SettingsFragment : Fragment() {
         binding.darkModeNight.setOnClickListener { changeDayNightMode(AppCompatDelegate.MODE_NIGHT_YES) }
 
         binding.buttonConnectionSettings.setOnClickListener {
-            ConnectionSettingsDialogFragment().show(childFragmentManager, null)
+            findNavController().navigateSafe(SettingsFragmentDirections.actionNavigationSettingsToConnectionSettingsDialogFragment())
         }
     }
 

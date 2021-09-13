@@ -1,20 +1,17 @@
 package org.ergoplatform.android.transactions
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
+import org.ergoplatform.android.ui.copyStringToClipboard
 import org.ergoplatform.android.ui.formatFiatToString
 import org.ergoplatform.android.ui.inputTextToDouble
 
@@ -61,15 +58,7 @@ class ReceiveToWalletFragment : Fragment() {
                 refreshQrCode()
 
                 binding.buttonCopy.setOnClickListener {
-                    val clipboard = getSystemService(
-                        requireContext(),
-                        ClipboardManager::class.java
-                    )
-                    val clip = ClipData.newPlainText("", wallet.firstAddress)
-                    clipboard?.setPrimaryClip(clip)
-
-                    Snackbar.make(requireView(), R.string.label_copied, Snackbar.LENGTH_LONG)
-                        .setAnchorView(R.id.nav_view).show()
+                    copyStringToClipboard(wallet.firstAddress!!, requireContext(), requireView())
                 }
             }
         }

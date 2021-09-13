@@ -1,12 +1,13 @@
 <resources>
     <string name="app_name">Ergo Wallet</string>
     <string name="title_transactions">Transactions</string>
-    <string name="title_wallet">Wallet</string>
+    <string name="title_wallets">Wallets</string>
     <string name="title_settings">Settings</string>
     <string name="format_erg">###,##0.0000</string>
     <string name="format_fiat">###,##0.00</string>
 
-    <string name="hint_password">Please enter your send funds password</string>
+    <string name="hint_password">Please enter your spending password</string>
+    <string name="label_forgot_password"><a href="https://github.com/ergoplatform/ergo-wallet-android/wiki/FAQ#i-forgot-my-spending-password">Forgot your password?</a></string>
     <string name="err_password">Passwords must be at least 8 characters long</string>
     <string name="label_password">Password</string>
     <string name="label_password_confirm">Confirm password</string>
@@ -74,8 +75,9 @@
     <string name="mnemonic_invalid">Mnemonic validation failed. If you are sure it is entered correctly, you can tap again to proceed.</string>
 
     <!-- Save wallet -->
-    <string name="intro_save_wallet">Your public wallet address is:</string>
-    <string name="intro_save_wallet2">Choose how the wallet and keys should be saved on this device.</string>
+    <string name="intro_save_wallet">Your wallet\'s main public address is:</string>
+    <string name="intro_save_wallet2">You can add additional addresses later.\n\n
+        Choose now how the wallet and keys should be saved on this device.</string>
     <string name="button_save_password_encrypted">Save password-encrypted</string>
     <string name="desc_save_password_encrypted">You have to enter a password-phrase that you need to reenter every time you want to send funds.</string>
     <string name="button_save_device_encrypted">Save device-encrypted</string>
@@ -94,12 +96,24 @@
     <string name="button_display_mnemonic">Display mnemonic</string>
 
     <!-- Wallet details -->
-    <string name="title_wallet_addresses">Addresses</string>
-    <string name="title_wallet_address">Address</string>
     <string name="title_wallet_balance">Balance</string>
-    <string name="desc_wallet_addresses">A wallet can have multiple public addresses, derived from the first address.</string>
-    <string name="label_all_addresses">All %1d address(es)</string>
+    <string name="label_all_addresses">All %1d addresses</string>
     <string name="exporer_view_transactions">Tap to view transactions in Ergo Explorer — in-app transactions list will be added soon</string>
+
+    <!-- Wallet addresses -->
+    <string name="title_wallet_addresses">Addresses</string>
+    <string name="title_wallet_address">Show content for</string>
+    <string name="label_wallet_main_address">Main address</string>
+    <string name="label_wallet_address_derived">Derived address %1s</string>
+    <string name="label_wallet_token_balance">%1s tokens</string>
+    <string name="desc_wallet_addresses">A wallet can have multiple public addresses, derived from the main address.</string>
+    <string name="button_add_address">Add address</string>
+    <string name="button_add_addresses">Add %1d addresses</string>
+    <string name="desc_wallet_addr_label">You can set a descriptive label for yourself that is shown for this address:</string>
+    <string name="hint_wallet_addr_label">Descriptive label (optional)</string>
+    <string name="desc_wallet_addr_remove">You can remove this address from this app\'s view. It is still available
+        on the Ergo Network, can receive payments and hold a balance. You can add it again at any time.</string>
+    <string name="title_choose_address">Choose an address</string>
 
     <!-- Send funds -->
     <string name="desc_choose_wallet">Please choose the wallet to send from:</string>
@@ -125,8 +139,8 @@
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, 2021</string>
-    <string name="desc_about_moreinfo">Licensed under <a href="https://github.com/MrStahlfelge/ergo-wallet-android/blob/master/LICENSE">Apache 2 License</a>\n
-        This project is <a href="https://github.com/MrStahlfelge/ergo-wallet-android">open source software</a>\n
+    <string name="desc_about_moreinfo">Licensed under <a href="https://github.com/ergoplatform/ergo-wallet-android/blob/master/LICENSE">Apache 2 License</a>\n
+        This project is <a href="https://github.com/ergoplatform/ergo-wallet-android">open source software</a>\n
     Find help on <a href="https://discord.gg/kj7s7nb">Discord</a> or <a href="https://t.me/ergosupport">Telegram</a>
         </string>
     <string name="desc_coingecko">Ergo price powered by <a href="https://www.coingecko.com">CoinGecko</a></string>

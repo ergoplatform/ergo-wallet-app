@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:background="?attr/colorSurface">
+
+    <LinearLayout
+        style="@style/width_match_parent_max_500"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_marginVertical="@dimen/activity_vertical_margin"
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
+
+        <TextView
+            android:id="@+id/public_address"
+            style="@style/TextAppearance.App.Headline2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:drawablePadding="@dimen/half_horizontal_margin"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.App.Body1"
+            app:drawableEndCompat="@drawable/ic_copy_24"
+            tools:text="Very long public address, will be 3 lines long" />
+
+        <TextView
+            android:id="@+id/derivation_path"
+            style="@style/TextAppearance.App.Body1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/half_horizontal_margin"
+            android:gravity="center"
+            android:textStyle="bold"
+            tools:text="derivation path" />
+
+        <TextView
+            style="@style/TextAppearance.App.Body1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:text="@string/desc_wallet_addr_label" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/descriptive_label"
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/half_horizontal_margin"
+            android:hint="@string/hint_wallet_addr_label"
+            app:endIconMode="clear_text">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:maxLines="1" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/button_apply"
+            style="@style/Widget.App.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:elegantTextHeight="true"
+            android:text="@string/button_apply" />
+
+        <TextView
+            style="@style/TextAppearance.App.Body1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:text="@string/desc_wallet_addr_remove" />
+
+        <Button
+            android:id="@+id/button_remove"
+            style="@style/Widget.App.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:elegantTextHeight="true"
+            android:text="@string/label_remove" />
+
+    </LinearLayout>
+</FrameLayout>

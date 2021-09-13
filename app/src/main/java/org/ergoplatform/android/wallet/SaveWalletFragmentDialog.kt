@@ -181,7 +181,7 @@ private suspend fun suspendSaveToDb(
 ) {
     // check if the wallet already exists
     val walletDao = AppDatabase.getInstance(context).walletDao()
-    val existingWallet = walletDao.loadWalletByAddress(publicAddress)
+    val existingWallet = walletDao.loadWalletByFirstAddress(publicAddress)
 
     if (existingWallet != null) {
         // update encType and secret storage

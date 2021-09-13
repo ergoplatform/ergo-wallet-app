@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/activity_horizontal_margin"
+    android:animateLayoutChanges="true"
+    tools:showIn="@layout/card_wallet_address">
+
+    <TextView
+        android:id="@+id/address_index"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="middle"
+        android:gravity="start"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.App.Headline1"
+        app:layout_constraintBottom_toBottomOf="@id/public_address"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="20" />
+
+    <TextView
+        android:id="@+id/address_label"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="@dimen/half_horizontal_margin"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="?attr/colorSecondary"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/public_address"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/address_index"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@string/label_wallet_default" />
+
+    <TextView
+        android:id="@+id/public_address"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="middle"
+        android:gravity="start"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.App.Body1"
+        app:layout_constraintEnd_toEndOf="@id/address_label"
+        app:layout_constraintStart_toStartOf="@id/address_label"
+        app:layout_constraintTop_toBottomOf="@id/address_label"
+        tools:text="Very long public address, will be 3 lines long" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginVertical="@dimen/half_horizontal_margin"
+        android:background="@color/lightgrey"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/public_address" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/half_horizontal_margin"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider">
+
+        <org.fabiomsr.moneytextview.MoneyTextView
+            android:id="@+id/address_balance"
+            style="@style/MoneyTextViewDefaultStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            app:baseTextSize="@dimen/headline2_textsize"
+            app:baseTextStyle="bold"
+            app:decimalMargin="3dp"
+            tools:amount="-123.2536" />
+
+        <TextView
+            android:id="@+id/label_token_num"
+            style="@style/TextAppearance.App.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/margin_and_half"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textStyle="bold"
+            tools:text="999 tokens" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
+    

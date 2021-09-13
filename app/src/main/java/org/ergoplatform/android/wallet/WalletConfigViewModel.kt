@@ -72,14 +72,7 @@ class WalletConfigViewModel : ViewModel() {
             wallet = walletDao.loadWalletById(walletId)
 
             wallet?.let {
-                if (it.encryptionType == ENC_TYPE_PASSWORD) {
-                    PasswordDialogFragment().show(
-                        fragment.childFragmentManager,
-                        null
-                    )
-                } else if (it.encryptionType == ENC_TYPE_DEVICE) {
-                    fragment.showBiometricPrompt()
-                }
+                fragment.startAuthFlow(it)
             }
         }
 
