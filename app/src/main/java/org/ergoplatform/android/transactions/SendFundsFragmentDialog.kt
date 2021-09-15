@@ -80,13 +80,13 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         viewModel.walletBalance.observe(viewLifecycleOwner, {
             binding.tvBalance.text = getString(
                 R.string.label_wallet_balance,
-                it.toStringWithScale(4)
+                it.toStringRoundToDecimals(4)
             )
         })
         viewModel.feeAmount.observe(viewLifecycleOwner, {
             binding.tvFee.text = getString(
                 R.string.desc_fee,
-                it.toStringWithScale(4)
+                it.toStringRoundToDecimals(4)
             )
         })
         viewModel.grossAmount.observe(viewLifecycleOwner, {
