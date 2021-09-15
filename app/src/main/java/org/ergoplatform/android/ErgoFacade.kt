@@ -1,7 +1,6 @@
 package org.ergoplatform.android
 
 import StageConstants
-import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -10,76 +9,11 @@ import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
-import java.math.RoundingMode
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
 import java.util.*
-import kotlin.math.ln
 import kotlin.math.pow
 
 val MNEMONIC_WORDS_COUNT = 15
 val MNEMONIC_MIN_WORDS_COUNT = 12
-
-fun nanoErgsToErgs(nanoErgs: Long): Float {
-    val microErgs = nanoErgs / (1000L * 100L)
-    val ergs = microErgs.toFloat() / 10000f
-    return ergs
-}
-
-fun ergsToNanoErgs(ergs: Float): Long {
-    val microErgs = (ergs * 10000f).toLong()
-    val nanoergs = microErgs * 100L * 1000L
-    return nanoergs
-}
-
-/**
- * ERG is always formatted US-style (e.g. 1,000.00)
- */
-fun formatErgsToString(ergs: Float, context: Context): String {
-    return DecimalFormat(context.getString(R.string.format_erg), DecimalFormatSymbols(Locale.US)).format(ergs)
-}
-
-/**
- * fiat is formatted according to users locale, because it is his local currency
- */
-fun formatFiatToString(amount: Float, currency: String, context: Context): String {
-    return DecimalFormat(context.getString(R.string.format_fiat)).format(amount) +
-            " " + currency.toUpperCase(Locale.getDefault())
-}
-
-/**
- * Formats token (asset) amounts, always formatted US-style
- *
- * @param formatWithPrettyReduction 1,120.00 becomes 1.1K, useful for displaying with less space
- */
-fun formatTokenAmounts(
-    amount: Long,
-    decimals: Int,
-    formatWithPrettyReduction: Boolean = false
-): String {
-    val valueToShow: Double = longWithDecimalsToDouble(amount, decimals)
-
-    return if (valueToShow < 1000 || !formatWithPrettyReduction) {
-        ("%." + (Math.min(5, decimals)).toString() + "f").format(Locale.US, valueToShow)
-    } else {
-        formatDoubleWithPrettyReduction(valueToShow)
-    }
-}
-
-fun formatDoubleWithPrettyReduction(amount: Double): String {
-    val suffixChars = "KMGTPE"
-    val formatter = DecimalFormat("###.#", DecimalFormatSymbols(Locale.US))
-    formatter.roundingMode = RoundingMode.DOWN
-
-    return if (amount < 1000.0) formatter.format(amount)
-    else {
-        val exp = (ln(amount) / ln(1000.0)).toInt()
-        formatter.format(amount / 1000.0.pow(exp.toDouble())) + suffixChars[exp - 1]
-    }
-}
-
-fun longWithDecimalsToDouble(amount: Long, decimals: Int) =
-    (amount.toDouble()) / (10.0.pow(decimals))
 
 fun serializeSecrets(mnemonic: String): String {
     val gson = Gson()
@@ -112,6 +46,10 @@ fun isValidErgoAddress(addressString: String): Boolean {
 
 }
 
+fun getAddressDerivationPath(index: Int): String {
+    return "m/44'/429'/0'/0/$index"
+}
+
 fun getPublicErgoAddressFromMnemonic(mnemonic: String, index: Int = 0): String {
     return Address.createEip3Address(
         index,
@@ -139,7 +77,7 @@ fun sendErgoTx(
     tokensToSend: List<ErgoToken>,
     mnemonic: String,
     mnemonicPass: String,
-    derivedKeyIndex: Int,
+    derivedKeyIndices: List<Int>,
     nodeApiAddress: String,
     explorerApiAddress: String
 ): TransactionResult {
@@ -151,13 +89,15 @@ fun sendErgoTx(
             explorerApiAddress
         )
         return ergoClient.execute { ctx: BlockchainContext ->
-            val prover = ctx.newProverBuilder()
+            val proverBuilder = ctx.newProverBuilder()
                 .withMnemonic(
                     SecretString.create(mnemonic),
                     SecretString.create(mnemonicPass)
                 )
-                .withEip3Secret(derivedKeyIndex)
-                .build()
+            derivedKeyIndices.forEach {
+                proverBuilder.withEip3Secret(it)
+            }
+            val prover = proverBuilder.build()
 
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
             val signed = BoxOperations.putToContractTx(

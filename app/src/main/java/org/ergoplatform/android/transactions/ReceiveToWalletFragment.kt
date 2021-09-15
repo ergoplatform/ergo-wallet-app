@@ -1,32 +1,38 @@
 package org.ergoplatform.android.transactions
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
-import org.ergoplatform.android.ui.inputTextToFloat
+import org.ergoplatform.android.ui.copyStringToClipboard
+import org.ergoplatform.android.ui.formatFiatToString
+import org.ergoplatform.android.ui.inputTextToDouble
+import org.ergoplatform.android.wallet.WalletDbEntity
+import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
+import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
+import org.ergoplatform.android.wallet.addresses.getAddressLabel
+import org.ergoplatform.android.wallet.getDerivedAddress
+import org.ergoplatform.android.wallet.getDerivedAddressEntity
 
 
 /**
  * Shows information and QR for receiving funds to a wallet
  */
-class ReceiveToWalletFragment : Fragment() {
+class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
 
     private var _binding: FragmentReceiveToWalletBinding? = null
     private val binding get() = _binding!!
 
     private val args: ReceiveToWalletFragmentArgs by navArgs()
+    private var derivationIdx: Int = 0
+    private var wallet: WalletDbEntity? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,29 +55,43 @@ class ReceiveToWalletFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        derivationIdx = args.derivationIdx
+
         lifecycleScope.launch {
-            val wallet =
-                AppDatabase.getInstance(requireContext()).walletDao().loadWalletById(args.walletId)
+            val walletDao = AppDatabase.getInstance(requireContext()).walletDao()
+            wallet = walletDao.loadWalletWithStateById(args.walletId)
 
-            wallet?.let {
-                binding.publicAddress.text = wallet.firstAddress
-                binding.walletName.text = wallet.displayName
-
-                refreshQrCode()
-
-                binding.buttonCopy.setOnClickListener {
-                    val clipboard = getSystemService(
-                        requireContext(),
-                        ClipboardManager::class.java
-                    )
-                    val clip = ClipData.newPlainText("", wallet.firstAddress)
-                    clipboard?.setPrimaryClip(clip)
-
-                    Snackbar.make(requireView(), R.string.label_copied, Snackbar.LENGTH_LONG)
-                        .setAnchorView(R.id.nav_view).show()
-                }
+            wallet?.let { wallet ->
+                binding.walletName.text = wallet.walletConfig.displayName
+                refreshAddressInformation()
             }
         }
+
+        binding.buttonCopy.setOnClickListener {
+            wallet?.getDerivedAddress(derivationIdx)?.let {
+                copyStringToClipboard(it, requireContext(), requireView())
+            }
+        }
+        binding.addressLabel.setOnClickListener {
+            wallet?.let { wallet ->
+                ChooseAddressListDialogFragment.newInstance(
+                    wallet.walletConfig.id
+                ).show(childFragmentManager, null)
+            }
+        }
+    }
+
+    override fun onAddressChosen(addressDerivationIdx: Int?) {
+        derivationIdx = addressDerivationIdx ?: 0
+        refreshAddressInformation()
+    }
+
+    private fun refreshAddressInformation() {
+        val address = wallet?.getDerivedAddressEntity(derivationIdx)
+        binding.addressLabel.text = address?.getAddressLabel(requireContext())
+        binding.publicAddress.text = address?.publicAddress
+
+        refreshQrCode()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -122,9 +142,9 @@ class ReceiveToWalletFragment : Fragment() {
         return null
     }
 
-    private fun getInputAmount(): Float {
+    private fun getInputAmount(): Double {
         val amountStr = binding.amount.editText?.text.toString()
-        val amountVal = inputTextToFloat(amountStr)
+        val amountVal = inputTextToDouble(amountStr)
         return amountVal
     }
 
@@ -146,7 +166,7 @@ class ReceiveToWalletFragment : Fragment() {
                 getString(
                     R.string.label_fiat_amount,
                     formatFiatToString(
-                        getInputAmount() * (nodeConnector.fiatValue.value ?: 0f),
+                        getInputAmount() * (nodeConnector.fiatValue.value ?: 0f).toDouble(),
                         nodeConnector.fiatCurrency, requireContext()
                     ),
                 )

@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -21,17 +22,24 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.android.wallet.WalletTokenDbEntity
-import kotlin.math.pow
+import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
+import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
+import org.ergoplatform.android.wallet.addresses.getAddressLabel
+import org.ergoplatform.android.wallet.getNumOfAddresses
+import kotlin.math.max
+
 
 /**
  * Here's the place to send transactions
  */
-class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallback {
+class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallback,
+    AddressChooserCallback {
     private var _binding: FragmentSendFundsBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: SendFundsViewModel
@@ -52,33 +60,37 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.initWallet(requireContext(), args.walletId, args.paymentRequest)
+        viewModel.initWallet(
+            requireContext(),
+            args.walletId,
+            args.derivationIdx,
+            args.paymentRequest
+        )
 
         // Add observers
         viewModel.walletName.observe(viewLifecycleOwner, {
             binding.walletName.text = getString(R.string.label_send_from, it)
         })
+        viewModel.address.observe(viewLifecycleOwner, {
+            binding.addressLabel.text = it?.getAddressLabel(requireContext()) ?: getString(
+                R.string.label_all_addresses,
+                viewModel.wallet?.getNumOfAddresses()
+            )
+        })
         viewModel.walletBalance.observe(viewLifecycleOwner, {
             binding.tvBalance.text = getString(
                 R.string.label_wallet_balance,
-                formatErgsToString(
-                    it,
-                    requireContext()
-                )
+                it.toStringWithScale(4)
             )
         })
         viewModel.feeAmount.observe(viewLifecycleOwner, {
             binding.tvFee.text = getString(
                 R.string.desc_fee,
-                formatErgsToString(
-                    it,
-                    requireContext()
-                )
-
+                it.toStringWithScale(4)
             )
         })
         viewModel.grossAmount.observe(viewLifecycleOwner, {
-            binding.grossAmount.amount = it
+            binding.grossAmount.amount = it.toDouble()
             val nodeConnector = NodeConnector.getInstance()
             binding.tvFiat.visibility =
                 if (nodeConnector.fiatCurrency.isNotEmpty()) View.VISIBLE else View.GONE
@@ -86,7 +98,8 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                 getString(
                     R.string.label_fiat_amount,
                     formatFiatToString(
-                        viewModel.amountToSend * (nodeConnector.fiatValue.value ?: 0f),
+                        viewModel.amountToSend.toDouble() * (nodeConnector.fiatValue.value
+                            ?: 0f).toDouble(),
                         nodeConnector.fiatCurrency, requireContext()
                     ),
                 )
@@ -134,6 +147,13 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         })
 
         // Add click listeners
+        binding.addressLabel.setOnClickListener {
+            viewModel.wallet?.let { wallet ->
+                ChooseAddressListDialogFragment.newInstance(
+                    wallet.walletConfig.id, true
+                ).show(childFragmentManager, null)
+            }
+        }
         binding.buttonShareTx.setOnClickListener {
             val txUrl =
                 StageConstants.EXPLORER_WEB_ADDRESS + "en/transactions/" + binding.labelTxId.text.toString()
@@ -160,18 +180,51 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         }
         binding.amount.setEndIconOnClickListener {
             setAmountEdittext(
-                (viewModel.walletBalance.value ?: 0f) - (viewModel.feeAmount.value ?: 0f)
+                ErgoAmount(
+                    max(
+                        0,
+                        (viewModel.walletBalance.value?.nanoErgs ?: 0)
+                                - (viewModel.feeAmount.value?.nanoErgs ?: 0)
+                    )
+                )
             )
         }
 
         // Init other stuff
         binding.tvReceiver.editText?.setText(viewModel.receiverAddress)
-        if (viewModel.amountToSend > 0) {
+        if (viewModel.amountToSend.nanoErgs > 0) {
             setAmountEdittext(viewModel.amountToSend)
         }
 
         binding.amount.editText?.addTextChangedListener(MyTextWatcher(binding.amount))
         binding.tvReceiver.editText?.addTextChangedListener(MyTextWatcher(binding.tvReceiver))
+
+        // this triggers an automatic scroll so the amount field is visible when soft keyboard is
+        // opened or when amount edittext gets focus
+        binding.amount.editText?.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
+            if (hasFocus)
+                ensureAmountVisibleDelayed()
+        }
+        KeyboardVisibilityEvent.setEventListener(
+            requireActivity(),
+            viewLifecycleOwner,
+            { keyboardOpen ->
+                if (keyboardOpen && binding.amount.editText?.hasFocus() == true) {
+                    ensureAmountVisibleDelayed()
+                }
+            })
+    }
+
+    private fun ensureAmountVisibleDelayed() {
+        // delay 200 to make sure that smart keyboard is already open
+        Handler().postDelayed(
+            { _binding?.let { it.scrollView.smoothScrollTo(0, it.amount.top) } },
+            200
+        )
+    }
+
+    override fun onAddressChosen(addressDerivationIdx: Int?) {
+        viewModel.derivedAddressIdx = addressDerivationIdx
     }
 
     private fun refreshTokensList() {
@@ -220,19 +273,11 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
     private fun tokenAmountToText(amount: Long, decimals: Int) =
         if (amount > 0)
-            formatTokenAmounts(
-                amount,
-                decimals
-            ).replace(",", "")
+            TokenAmount(amount, decimals).toString()
         else ""
 
-    private fun setAmountEdittext(amountToSend: Float) {
-        binding.amount.editText?.setText(
-            formatErgsToString(
-                amountToSend,
-                requireContext()
-            ).replace(",", "")
-        )
+    private fun setAmountEdittext(amountToSend: ErgoAmount) {
+        binding.amount.editText?.setText(amountToSend.toString())
     }
 
     private fun startPayment() {
@@ -279,7 +324,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                 try {
                     viewModel.startPaymentUserAuth(context)
                 } catch (t: Throwable) {
-                    hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
+                    hideForcedSoftKeyboard(context, binding.amount.editText!!)
                     Snackbar.make(
                         requireView(),
                         getString(R.string.error_device_security, t.message),
@@ -289,7 +334,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
+                hideForcedSoftKeyboard(context, binding.amount.editText!!)
                 Snackbar.make(
                     requireView(),
                     getString(R.string.error_device_security, errString),
@@ -305,7 +350,12 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         viewModel.receiverAddress = binding.tvReceiver.editText?.text?.toString() ?: ""
 
         val amountStr = binding.amount.editText?.text.toString()
-        viewModel.amountToSend = inputTextToFloat(amountStr)
+        val ergoAmount = amountStr.toErgoAmount()
+        viewModel.amountToSend = ergoAmount ?: ErgoAmount.ZERO
+        if (ergoAmount == null) {
+            // conversion error, too many decimals or too big for long
+            binding.amount.error = getString(R.string.error_amount)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -315,7 +365,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                 val content = parseContentFromQrCode(it)
                 content?.let {
                     binding.tvReceiver.editText?.setText(content.address)
-                    content.amount.let { amount -> if (amount > 0) setAmountEdittext(amount) }
+                    content.amount.let { amount -> if (amount.nanoErgs > 0) setAmountEdittext(amount) }
                     viewModel.addTokensFromQr(content.tokens)
                 }
             }
@@ -357,7 +407,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         override fun afterTextChanged(s: Editable?) {
             viewModel.setTokenAmount(
                 token.tokenId!!,
-                (inputTextToDouble(s?.toString()) * 10.0.pow(token.decimals!!)).toLong()
+                s?.toString()?.toTokenAmount(token.decimals!!) ?: TokenAmount(0, token.decimals!!)
             )
             binding.labelTokenAmountError.visibility = View.GONE
         }
