@@ -19,9 +19,12 @@ class ErgoAmount(val nanoErgs: Long) {
         return nanoErgs.toBigDecimal().movePointLeft(nanoPowerOfTen).toPlainString()
     }
 
-    fun toStringWithScale(scale: Int): String {
+    /**
+     * converts the amount to a string rounded to given number of decimals places
+     */
+    fun toStringRoundToDecimals(numDecimals: Int): String {
         return nanoErgs.toBigDecimal().movePointLeft(nanoPowerOfTen)
-            .setScale(scale, RoundingMode.HALF_UP)
+            .setScale(numDecimals, RoundingMode.HALF_UP)
             .toPlainString()
     }
 

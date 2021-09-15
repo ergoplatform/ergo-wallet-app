@@ -124,7 +124,11 @@ class NodeConnector {
     fun refreshSingleAddresses(context: Context, addresses: List<String>) {
         if (addresses.isNotEmpty()) {
             GlobalScope.launch(Dispatchers.IO) {
-                refreshWalletStates(context, addresses)
+                try {
+                    refreshWalletStates(context, addresses)
+                } catch (t: Throwable) {
+                    // ignore the error for a single address call
+                }
             }
         }
     }
@@ -149,32 +153,35 @@ class NodeConnector {
                     else allAddresses.filter { addressFilter.contains(it.publicAddress) }
 
                 refreshAddresses.forEach { address ->
-                    val balanceInfo =
+                    val balanceInfoCall =
                         getOrInitErgoApiService(context).getApiV1AddressesP1BalanceTotal(
                             address.publicAddress
-                        ).execute().body()
+                        ).execute()
 
-                    val newState = WalletStateDbEntity(
-                        address.publicAddress,
-                        address.walletFirstAddress,
-                        balanceInfo?.confirmed?.nanoErgs,
-                        balanceInfo?.unconfirmed?.nanoErgs
-                    )
+                    balanceInfoCall.body()?.let { balanceInfo ->
 
-                    statesToSave.add(newState)
-                    tokenAddressesToDelete.add(address.publicAddress)
-                    balanceInfo?.confirmed?.tokens?.forEach {
-                        tokensToSave.add(
-                            WalletTokenDbEntity(
-                                0,
-                                address.publicAddress,
-                                address.walletFirstAddress,
-                                it.tokenId,
-                                it.amount,
-                                it.decimals,
-                                it.name
-                            )
+                        val newState = WalletStateDbEntity(
+                            address.publicAddress,
+                            address.walletFirstAddress,
+                            balanceInfo.confirmed?.nanoErgs,
+                            balanceInfo.unconfirmed?.nanoErgs
                         )
+
+                        statesToSave.add(newState)
+                        tokenAddressesToDelete.add(address.publicAddress)
+                        balanceInfo.confirmed?.tokens?.forEach {
+                            tokensToSave.add(
+                                WalletTokenDbEntity(
+                                    0,
+                                    address.publicAddress,
+                                    address.walletFirstAddress,
+                                    it.tokenId,
+                                    it.amount,
+                                    it.decimals,
+                                    it.name
+                                )
+                            )
+                        }
                     }
 
                 }
