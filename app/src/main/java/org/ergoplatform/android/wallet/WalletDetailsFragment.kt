@@ -14,11 +14,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.NodeConnector
-import org.ergoplatform.android.R
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
-import org.ergoplatform.android.nanoErgsToErgs
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
@@ -89,6 +86,24 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             )
         }
 
+        binding.buttonReceive.setOnClickListener {
+            findNavController().navigateSafe(
+                WalletDetailsFragmentDirections.actionNavigationWalletDetailsToReceiveToWalletFragment(
+                    walletDetailsViewModel.wallet!!.walletConfig.id,
+                    walletDetailsViewModel.selectedIdx ?: 0
+                )
+            )
+        }
+
+        binding.buttonSend.setOnClickListener {
+            findNavController().navigateSafe(
+                WalletDetailsFragmentDirections.actionNavigationWalletDetailsToSendFundsFragment(
+                    walletDetailsViewModel.wallet!!.walletConfig.id,
+                    walletDetailsViewModel.selectedIdx ?: -1
+                )
+            )
+        }
+
         binding.layoutAddressLabels.setOnClickListener {
             ChooseAddressListDialogFragment.newInstance(
                 walletDetailsViewModel.wallet!!.walletConfig.id,
@@ -143,15 +158,15 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
         // fill balances
         val addressState = address?.let { wallet.getStateForAddress(address) }
-        val ergoAmount = nanoErgsToErgs(
+        val ergoAmount = ErgoAmount(
             addressState?.balance
                 ?: wallet.getBalanceForAllAddresses()
         )
-        binding.walletBalance.amount = ergoAmount
+        binding.walletBalance.amount = ergoAmount.toDouble()
 
         val unconfirmed = addressState?.unconfirmedBalance
             ?: wallet.getUnconfirmedBalanceForAllAddresses()
-        binding.walletUnconfirmed.amount = nanoErgsToErgs(unconfirmed)
+        binding.walletUnconfirmed.amount = ErgoAmount(unconfirmed).toDouble()
         binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
 

@@ -69,7 +69,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/activity_horizontal_margin"
-                            android:background="?android:attr/selectableItemBackground"
+                            android:background="?android:attr/selectableItemBackgroundBorderless"
                             android:orientation="vertical"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@id/image_addresses"
@@ -83,7 +83,6 @@
                                 android:ellipsize="end"
                                 android:maxLines="1"
                                 android:text="@string/title_wallet_address"
-                                android:textColor="?attr/colorSecondary"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -95,8 +94,10 @@
                                 android:maxLines="1"
                                 android:paddingBottom="@dimen/half_horizontal_margin"
                                 android:textAppearance="@style/TextAppearance.App.Body1"
+                                android:textColor="?attr/colorSecondary"
                                 android:textStyle="bold"
                                 app:drawableEndCompat="@drawable/ic_drop_down_24"
+                                app:drawableTint="?android:textColor"
                                 tools:text="Address label" />
 
 
@@ -114,16 +115,6 @@
                             app:layout_constraintTop_toBottomOf="@id/layout_address_labels">
 
                             <ImageView
-                                android:id="@+id/button_send"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:background="?selectableItemBackgroundBorderless"
-                                android:contentDescription="@string/title_settings"
-                                android:paddingVertical="@dimen/half_horizontal_margin"
-                                android:src="@drawable/ic_outgoing_24" />
-
-                            <ImageView
                                 android:id="@+id/button_receive"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -131,7 +122,19 @@
                                 android:background="?selectableItemBackgroundBorderless"
                                 android:contentDescription="@string/title_settings"
                                 android:paddingVertical="@dimen/half_horizontal_margin"
-                                android:src="@drawable/ic_received_24" />
+                                android:src="@drawable/ic_received_24"
+                                app:tint="?android:textColor" />
+
+                            <ImageView
+                                android:id="@+id/button_send"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="?selectableItemBackgroundBorderless"
+                                android:contentDescription="@string/title_settings"
+                                android:paddingVertical="@dimen/half_horizontal_margin"
+                                android:src="@drawable/ic_outgoing_24"
+                                app:tint="?android:textColor" />
 
                             <ImageView
                                 android:id="@+id/button_config_addresses"
@@ -195,10 +198,11 @@
                             app:baseTextStyle="bold"
                             app:decimalDigitsTextSize="@dimen/body1_textsize"
                             app:decimalMargin="4dp"
+                            app:format="@string/format_erg_more_precise"
                             app:layout_constraintStart_toStartOf="@id/title_balance"
                             app:layout_constraintTop_toBottomOf="@id/title_balance"
                             app:symbolMargin="6dp"
-                            tools:amount="191256.45" />
+                            tools:amount="91256.45" />
 
                         <org.fabiomsr.moneytextview.MoneyTextView
                             android:id="@+id/wallet_fiat"

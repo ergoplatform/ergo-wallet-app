@@ -199,7 +199,7 @@ class WalletAdapter(initWalletList: List<WalletDbEntity>) : RecyclerView.Adapter
 class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder(binding.root) {
     fun bind(wallet: WalletDbEntity) {
         binding.walletName.text = wallet.walletConfig.displayName
-        binding.walletBalance.amount = nanoErgsToErgs(wallet.getBalanceForAllAddresses())
+        binding.walletBalance.amount = ErgoAmount(wallet.getBalanceForAllAddresses()).toDouble()
 
         // Fill token headline
         val tokens = wallet.getTokensForAllAddresses()
@@ -217,7 +217,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
 
         // Fill unconfirmed fields
         val unconfirmed = wallet.getUnconfirmedBalanceForAllAddresses()
-        binding.walletUnconfirmed.amount = nanoErgsToErgs(unconfirmed)
+        binding.walletUnconfirmed.amount = ErgoAmount(unconfirmed).toDouble()
         binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
 

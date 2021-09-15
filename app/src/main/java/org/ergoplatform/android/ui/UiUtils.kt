@@ -18,7 +18,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
 import com.google.android.material.snackbar.Snackbar
 import org.ergoplatform.android.R
-import org.ergoplatform.android.longWithDecimalsToDouble
+import org.ergoplatform.android.TokenAmount
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -53,16 +53,6 @@ fun inputTextToDouble(amountStr: String?): Double {
 }
 
 /**
- * ERG is always formatted US-style (e.g. 1,000.00)
- */
-fun formatErgsToString(ergs: Double, context: Context): String {
-    return DecimalFormat(
-        context.getString(R.string.format_erg),
-        DecimalFormatSymbols(Locale.US)
-    ).format(ergs)
-}
-
-/**
  * fiat is formatted according to users locale, because it is his local currency
  */
 fun formatFiatToString(amount: Double, currency: String, context: Context): String {
@@ -71,21 +61,20 @@ fun formatFiatToString(amount: Double, currency: String, context: Context): Stri
 }
 
 /**
- * Formats token (asset) amounts, always formatted US-style
- *
- * @param formatWithPrettyReduction 1,120.00 becomes 1.1K, useful for displaying with less space
+ * Formats token (asset) amounts, always formatted US-style.
+ * For larger amounts, 1,120.00 becomes 1.1K, useful for displaying with less space
  */
 fun formatTokenAmounts(
     amount: Long,
     decimals: Int,
-    formatWithPrettyReduction: Boolean = false
 ): String {
-    val valueToShow: Double = longWithDecimalsToDouble(amount, decimals)
-
-    return if (valueToShow < 1000 || !formatWithPrettyReduction) {
-        ("%." + (Math.min(5, decimals)).toString() + "f").format(Locale.US, valueToShow)
+    val tokenAmount = TokenAmount(amount, decimals)
+    val doubleValue: Double = tokenAmount.toDouble()
+    val preciseString = tokenAmount.toString()
+    return if (doubleValue < 1000 && preciseString.length < 8 || doubleValue < 1) {
+        preciseString
     } else {
-        formatDoubleWithPrettyReduction(valueToShow)
+        formatDoubleWithPrettyReduction(doubleValue)
     }
 }
 
@@ -104,9 +93,9 @@ fun formatDoubleWithPrettyReduction(amount: Double): String {
 /**
  * Copies address to system clipboard and shows a Snackbar on given view
  */
-fun copyStringToClipboard(address: String, ctx: Context, view: View?) {
+fun copyStringToClipboard(string: String, ctx: Context, view: View?) {
     val clipboard = ContextCompat.getSystemService(ctx, ClipboardManager::class.java)
-    val clip = ClipData.newPlainText("", address)
+    val clip = ClipData.newPlainText("", string)
     clipboard?.setPrimaryClip(clip)
 
     view?.let {

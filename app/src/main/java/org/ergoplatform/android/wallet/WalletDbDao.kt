@@ -38,7 +38,7 @@ interface WalletDbDao {
     suspend fun updateWalletTokensUnfold(id: Int, unfoldTokens: Boolean)
 
     @Query("SELECT * FROM wallet_configs WHERE id = :id")
-    suspend fun loadWalletById(id: Int): WalletConfigDbEntity?
+    suspend fun loadWalletConfigById(id: Int): WalletConfigDbEntity?
 
     @Transaction
     @Query("SELECT * FROM wallet_configs WHERE id = :id")

@@ -54,13 +54,29 @@
                         tools:text="@string/label_send_from" />
 
                     <TextView
+                        android:id="@+id/address_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:ellipsize="end"
+                        android:gravity="start"
+                        android:maxLines="1"
+                        android:textAppearance="@style/TextAppearance.App.Body1"
+                        android:textColor="?attr/colorSecondary"
+                        app:drawableEndCompat="@drawable/ic_drop_down_24"
+                        app:drawableTint="?android:textColor"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/wallet_name"
+                        tools:text="Address label" />
+
+                    <TextView
                         android:id="@+id/tv_balance"
                         style="@style/TextAppearance.App.Body1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         app:layout_constraintEnd_toEndOf="@id/wallet_name"
                         app:layout_constraintStart_toStartOf="@id/wallet_name"
-                        app:layout_constraintTop_toBottomOf="@id/wallet_name"
+                        app:layout_constraintTop_toBottomOf="@id/address_label"
                         tools:text="@string/label_wallet_balance" />
 
                     <TextView

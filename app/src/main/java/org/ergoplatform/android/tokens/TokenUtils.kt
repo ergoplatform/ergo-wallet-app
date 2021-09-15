@@ -23,6 +23,5 @@ fun inflateAndBindTokenView(
         formatTokenAmounts(
             walletTokenDbEntity.amount ?: 0,
             walletTokenDbEntity.decimals ?: 0,
-            true
         )
 }

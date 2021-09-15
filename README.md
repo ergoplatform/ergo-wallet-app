@@ -7,7 +7,7 @@ Official Ergo Wallet for Android ([official announcement](https://ergoplatform.o
 [<img alt="Get it on Google Play" height="80" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png">](https://play.google.com/store/apps/details?id=org.ergoplatform.android)
 
 Features:
-* generating wallets, restoring wallets in a way compatible to Yoroi and Ergo node (only first address can be seen at the moment)
+* generating wallets, restoring wallets in a way compatible to Yoroi and Ergo node
 * you can add read-only wallets without entering your secrets to watch balance
 * no need to make a full sync, this is a lightweight client
 * Requesting payments by showing QR code or sharing a link

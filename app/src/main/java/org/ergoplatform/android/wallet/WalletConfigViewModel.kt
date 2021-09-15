@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.deserializeSecrets
-import org.ergoplatform.android.ui.PasswordDialogFragment
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.api.AesEncryptionManager
 
@@ -23,7 +22,7 @@ class WalletConfigViewModel : ViewModel() {
     fun saveChanges(context: Context, walletId: Int, newWalletName: String?) {
         viewModelScope.launch {
             val walletDao = AppDatabase.getInstance(context).walletDao()
-            val wallet = walletDao.loadWalletById(walletId)
+            val wallet = walletDao.loadWalletConfigById(walletId)
 
             wallet?.let {
                 val newWalletConfig = WalletConfigDbEntity(
@@ -46,7 +45,7 @@ class WalletConfigViewModel : ViewModel() {
         GlobalScope.launch {
             val database = AppDatabase.getInstance(context)
             val walletDao = database.walletDao()
-            val walletConfig = walletDao.loadWalletById(walletId)
+            val walletConfig = walletDao.loadWalletConfigById(walletId)
             walletConfig?.let {
                 database.withTransaction {
                     walletConfig.firstAddress?.let { firstAddress ->
@@ -69,7 +68,7 @@ class WalletConfigViewModel : ViewModel() {
     fun prepareDisplayMnemonic(fragment: WalletConfigFragment, walletId: Int) {
         viewModelScope.launch {
             val walletDao = AppDatabase.getInstance(fragment.requireContext()).walletDao()
-            wallet = walletDao.loadWalletById(walletId)
+            wallet = walletDao.loadWalletConfigById(walletId)
 
             wallet?.let {
                 fragment.startAuthFlow(it)

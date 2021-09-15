@@ -15,8 +15,20 @@ fun WalletDbEntity.getUnconfirmedBalanceForAllAddresses(): Long {
 }
 
 fun WalletDbEntity.getTokensForAllAddresses(): List<WalletTokenDbEntity> {
-    // TODO combine tokens with same id but different list entries
-    return tokens
+    // combine tokens with same id but different list entries
+    val hashmap = HashMap<String, WalletTokenDbEntity>()
+
+    tokens.forEach {
+        hashmap.put(it.tokenId!!, hashmap.get(it.tokenId)?.let { tokenInMap ->
+            WalletTokenDbEntity(
+                0, "", it.walletFirstAddress, it.tokenId,
+                (it.amount ?: 0) + (tokenInMap.amount ?: 0), it.decimals, it.name
+            )
+        } ?: it)
+    }
+
+    val combinedTokens = hashmap.values
+    return if (combinedTokens.size < tokens.size) combinedTokens.toList() else tokens
 }
 
 fun WalletDbEntity.getTokensForAddress(address: String): List<WalletTokenDbEntity> {
@@ -24,15 +36,23 @@ fun WalletDbEntity.getTokensForAddress(address: String): List<WalletTokenDbEntit
 }
 
 /**
- * @return derived address with given index
+ * @return derived address string with given index
  */
 fun WalletDbEntity.getDerivedAddress(derivationIdx: Int): String? {
     // edge case: index 0 is not (always) part of addresses table
     if (derivationIdx == 0) {
         return walletConfig.firstAddress
     } else {
-        return addresses.filter { it.derivationIndex == derivationIdx }.firstOrNull()?.publicAddress
+        return addresses.firstOrNull { it.derivationIndex == derivationIdx }?.publicAddress
     }
+}
+
+/**
+ * @return derived address entity with given derivation index
+ */
+fun WalletDbEntity.getDerivedAddressEntity(derivationIdx: Int): WalletAddressDbEntity? {
+    val allAddresses = ensureWalletAddressListHasFirstAddress(addresses, walletConfig.firstAddress!!)
+    return allAddresses.firstOrNull { it.derivationIndex == derivationIdx }
 }
 
 /**

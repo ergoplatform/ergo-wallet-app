@@ -15,24 +15,6 @@ import kotlin.math.pow
 val MNEMONIC_WORDS_COUNT = 15
 val MNEMONIC_MIN_WORDS_COUNT = 12
 
-fun nanoErgsToErgs(nanoErgs: Long): Double {
-    val microErgs = nanoErgs / (1000L * 100L)
-    val ergs = microErgs.toDouble() / 10000.0
-    return ergs
-}
-
-fun ergsToNanoErgs(ergs: Double): Long {
-    val microErgs = (ergs * 10000.0).toLong()
-    val nanoergs = microErgs * 100L * 1000L
-    return nanoergs
-}
-
-fun longWithDecimalsToDouble(amount: Long, decimals: Int) =
-    (amount.toDouble()) / (10.0.pow(decimals))
-
-fun doubleToLongWithDecimals(amount: Double, decimals: Int) =
-    (amount * 10.0.pow(decimals)).toLong()
-
 fun serializeSecrets(mnemonic: String): String {
     val gson = Gson()
     val root = JsonObject()
@@ -95,7 +77,7 @@ fun sendErgoTx(
     tokensToSend: List<ErgoToken>,
     mnemonic: String,
     mnemonicPass: String,
-    derivedKeyIndex: Int,
+    derivedKeyIndices: List<Int>,
     nodeApiAddress: String,
     explorerApiAddress: String
 ): TransactionResult {
@@ -107,13 +89,15 @@ fun sendErgoTx(
             explorerApiAddress
         )
         return ergoClient.execute { ctx: BlockchainContext ->
-            val prover = ctx.newProverBuilder()
+            val proverBuilder = ctx.newProverBuilder()
                 .withMnemonic(
                     SecretString.create(mnemonic),
                     SecretString.create(mnemonicPass)
                 )
-                .withEip3Secret(derivedKeyIndex)
-                .build()
+            derivedKeyIndices.forEach {
+                proverBuilder.withEip3Secret(it)
+            }
+            val prover = proverBuilder.build()
 
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
             val signed = BoxOperations.putToContractTx(
