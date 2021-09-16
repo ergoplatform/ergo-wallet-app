@@ -78,7 +78,7 @@
     <!-- Save wallet -->
     <string name="intro_save_wallet">Your wallet\'s main public address is:</string>
     <string name="intro_save_wallet2">You can add additional addresses later.\n\n
-        Choose now how the wallet and keys should be saved on this device.</string>
+        Choose how the wallet and keys should be saved on this device.</string>
     <string name="button_save_password_encrypted">Save password-encrypted</string>
     <string name="desc_save_password_encrypted">You have to enter a password-phrase that you need to reenter every time you want to send funds.</string>
     <string name="button_save_device_encrypted">Save device-encrypted</string>
@@ -99,7 +99,7 @@
     <!-- Wallet details -->
     <string name="title_wallet_balance">Balance</string>
     <string name="label_all_addresses">All %1d addresses</string>
-    <string name="exporer_view_transactions">Tap to view transactions in Ergo Explorer — in-app transactions list will be added soon</string>
+    <string name="exporer_view_transactions">Tap to view transactions in Ergo Explorer — in-app transaction list will be added soon</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Addresses</string>
@@ -107,10 +107,10 @@
     <string name="label_wallet_main_address">Main address</string>
     <string name="label_wallet_address_derived">Derived address %1s</string>
     <string name="label_wallet_token_balance">%1s tokens</string>
-    <string name="desc_wallet_addresses">A wallet can have multiple public addresses, derived from the main address.</string>
+    <string name="desc_wallet_addresses">A wallet can have multiple public addresses derived from the main address.</string>
     <string name="button_add_address">Add address</string>
     <string name="button_add_addresses">Add %1d addresses</string>
-    <string name="desc_wallet_addr_label">You can set a descriptive label for yourself that is shown for this address:</string>
+    <string name="desc_wallet_addr_label">Set a descriptive label (visible only to you) for this address:</string>
     <string name="hint_wallet_addr_label">Descriptive label (optional)</string>
     <string name="desc_wallet_addr_remove">You can remove this address from this app\'s view. It is still available
         on the Ergo Network, can receive payments and hold a balance. You can add it again at any time.</string>
