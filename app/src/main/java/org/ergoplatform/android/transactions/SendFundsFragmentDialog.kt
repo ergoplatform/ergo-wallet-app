@@ -109,8 +109,10 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             refreshTokensList()
         })
         viewModel.lockInterface.observe(viewLifecycleOwner, {
-            binding.lockProgress.visibility = if (it) View.VISIBLE else View.GONE
-            dialog?.setCancelable(!it)
+            if (it)
+                ProgressBottomSheetDialogFragment.showProgressDialog(childFragmentManager)
+            else
+                ProgressBottomSheetDialogFragment.dismissProgressDialog(childFragmentManager)
         })
         viewModel.paymentDoneLiveData.observe(viewLifecycleOwner, {
             if (!it.success) {

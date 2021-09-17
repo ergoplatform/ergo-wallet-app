@@ -303,21 +303,4 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <FrameLayout
-        android:id="@+id/lock_progress"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha=".8"
-            android:background="@color/lightgrey" />
-
-        <ProgressBar
-            android:layout_width="60dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="center" />
-    </FrameLayout>
 </FrameLayout>
