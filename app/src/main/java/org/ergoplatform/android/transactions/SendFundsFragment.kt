@@ -1,6 +1,7 @@
 package org.ergoplatform.android.transactions
 
 import StageConstants
+import android.animation.LayoutTransition
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
@@ -27,6 +28,7 @@ import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
 import org.ergoplatform.android.ui.*
+import org.ergoplatform.android.wallet.WalletConfigDbEntity
 import org.ergoplatform.android.wallet.WalletTokenDbEntity
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
@@ -69,7 +71,11 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
 
         // Add observers
         viewModel.walletName.observe(viewLifecycleOwner, {
+            // when wallet is loaded, wallet name is set. we can init everything wallet specific here
             binding.walletName.text = getString(R.string.label_send_from, it)
+            binding.hintReadonly.visibility =
+                if (viewModel.wallet!!.walletConfig.secretStorage == null) View.VISIBLE else View.GONE
+            enableLayoutChangeAnimations()
         })
         viewModel.address.observe(viewLifecycleOwner, {
             binding.addressLabel.text = it?.getAddressLabel(requireContext()) ?: getString(
@@ -191,6 +197,9 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 )
             )
         }
+        binding.hintReadonly.setOnClickListener {
+            openUrlWithBrowser(requireContext(), URL_COLD_WALLET_HELP)
+        }
 
         // Init other stuff
         binding.tvReceiver.editText?.setText(viewModel.receiverAddress)
@@ -215,6 +224,15 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                     ensureAmountVisibleDelayed()
                 }
             })
+    }
+
+    private fun enableLayoutChangeAnimations() {
+        // set layout change animations. they are not set in the xml to avoid animations for the first
+        // time the layout is displayed, and enabling them is delayed due to the same reason
+        Handler().postDelayed({
+            binding.container.layoutTransition = LayoutTransition()
+            binding.container.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        }, 200)
     }
 
     private fun ensureAmountVisibleDelayed() {
@@ -296,6 +314,14 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 ?.requestFocus()
         } else {
             startAuthFlow(viewModel.wallet!!.walletConfig)
+        }
+    }
+
+    override fun startAuthFlow(walletConfig: WalletConfigDbEntity) {
+        if (walletConfig.secretStorage == null) {
+            // we have a read only wallet here, let's go to cold wallet support mode
+        } else {
+            super.startAuthFlow(walletConfig)
         }
     }
 

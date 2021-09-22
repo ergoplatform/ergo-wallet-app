@@ -242,7 +242,6 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
                 )
         }
 
-        binding.buttonSend.isEnabled = wallet.walletConfig.secretStorage != null
         binding.buttonSend.setOnClickListener {
             NavHostFragment.findNavController(itemView.findFragment())
                 .navigateSafe(

@@ -3,6 +3,8 @@ package org.ergoplatform.android.ui
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.util.Log
@@ -42,6 +44,14 @@ fun hideForcedSoftKeyboard(context: Context, editText: EditText) {
 
 fun TextView.enableLinks() {
     movementMethod = LinkMovementMethod.getInstance()
+}
+
+fun openUrlWithBrowser(context: Context, url: String) {
+    val browserIntent = Intent(
+        Intent.ACTION_VIEW,
+        Uri.parse(url)
+    )
+    context.startActivity(browserIntent)
 }
 
 fun inputTextToDouble(amountStr: String?): Double {

@@ -12,8 +12,10 @@ import scala.collection.JavaConversions
 import java.util.*
 import kotlin.math.pow
 
-val MNEMONIC_WORDS_COUNT = 15
-val MNEMONIC_MIN_WORDS_COUNT = 12
+const val MNEMONIC_WORDS_COUNT = 15
+const val MNEMONIC_MIN_WORDS_COUNT = 12
+const val URL_COLD_WALLET_HELP =
+    "https://github.com/ergoplatform/ergo-wallet-android/wiki/Cold-wallet"
 
 fun serializeSecrets(mnemonic: String): String {
     val gson = Gson()

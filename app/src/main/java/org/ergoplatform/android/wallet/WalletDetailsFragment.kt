@@ -2,8 +2,6 @@ package org.ergoplatform.android.wallet
 
 import StageConstants
 import android.animation.LayoutTransition
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,6 +16,7 @@ import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.android.wallet.addresses.getAddressLabel
@@ -66,16 +65,13 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
         // Set button listeners
         binding.cardTransactions.setOnClickListener {
-            val browserIntent = Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    StageConstants.EXPLORER_WEB_ADDRESS + "en/addresses/" +
-                            walletDetailsViewModel.wallet!!.getDerivedAddress(
-                                walletDetailsViewModel.selectedIdx ?: 0
-                            )
-                )
+            openUrlWithBrowser(
+                binding.root.context,
+                StageConstants.EXPLORER_WEB_ADDRESS + "en/addresses/" +
+                        walletDetailsViewModel.wallet!!.getDerivedAddress(
+                            walletDetailsViewModel.selectedIdx ?: 0
+                        )
             )
-            binding.root.context.startActivity(browserIntent)
         }
 
         binding.buttonConfigAddresses.setOnClickListener {
