@@ -9,7 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.android.*
-import org.ergoplatform.android.ui.PasswordDialogFragment
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.android.wallet.*
 import org.ergoplatform.api.AesEncryptionManager
@@ -151,17 +150,6 @@ class SendFundsViewModel : ViewModel() {
 
     fun checkTokens(): Boolean {
         return tokensChosen.values.filter { it.value <= 0 }.isEmpty()
-    }
-
-    fun preparePayment(fragment: SendFundsFragment) {
-        if (wallet?.walletConfig?.encryptionType == ENC_TYPE_PASSWORD) {
-            PasswordDialogFragment().show(
-                fragment.childFragmentManager,
-                null
-            )
-        } else if (wallet?.walletConfig?.encryptionType == ENC_TYPE_DEVICE) {
-            fragment.showBiometricPrompt()
-        }
     }
 
     fun startPaymentWithPassword(password: String, context: Context): Boolean {

@@ -37,7 +37,7 @@ fun hideForcedSoftKeyboard(context: Context, editText: EditText) {
     ContextCompat.getSystemService(
         context,
         InputMethodManager::class.java
-    )?.hideSoftInputFromWindow(editText.getWindowToken(), 0)
+    )?.hideSoftInputFromWindow(editText.windowToken, 0)
 }
 
 fun TextView.enableLinks() {

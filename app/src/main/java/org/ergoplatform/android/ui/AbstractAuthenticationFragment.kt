@@ -27,7 +27,7 @@ abstract class AbstractAuthenticationFragment : Fragment(), PasswordDialogCallba
         }
     }
 
-    private fun showBiometricPrompt() {
+    open fun showBiometricPrompt() {
         // setDeviceCredentialAllowed is deprecated, but needed for older SDK level
         @Suppress("DEPRECATION") val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(getString(R.string.title_authenticate))

@@ -13,10 +13,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.view.descendants
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -40,7 +38,7 @@ import kotlin.math.max
 /**
  * Here's the place to send transactions
  */
-class SendFundsFragment : Fragment(), PasswordDialogCallback,
+class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallback,
     AddressChooserCallback {
     private var _binding: FragmentSendFundsBinding? = null
     private val binding get() = _binding!!
@@ -297,57 +295,21 @@ class SendFundsFragment : Fragment(), PasswordDialogCallback,
                 .firstOrNull()
                 ?.requestFocus()
         } else {
-            viewModel.preparePayment(this)
+            startAuthFlow(viewModel.wallet!!.walletConfig)
         }
     }
 
-    override fun onPasswordEntered(password: String?): String? {
-        password?.let {
-            val success = viewModel.startPaymentWithPassword(password, requireContext())
-            if (!success) {
-                return getString(R.string.error_password_wrong)
-            } else
-            // okay, transaction is started. ViewModel will handle waiting dialog for us
-                return null
-        }
-        return getString(R.string.error_password_empty)
+    override fun proceedAuthFlowWithPassword(password: String): Boolean {
+        return viewModel.startPaymentWithPassword(password, requireContext())
     }
 
-    fun showBiometricPrompt() {
-        // setDeviceCredentialAllowed is deprecated on API 29, but needed for older levels
-        @Suppress("DEPRECATION") val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(getString(R.string.title_authenticate))
-            .setConfirmationRequired(true) // don't send funds immediately when face is recognized
-            .setDeviceCredentialAllowed(true)
-            .build()
+    override fun showBiometricPrompt() {
+        hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
+        super.showBiometricPrompt()
+    }
 
-        val context = requireContext()
-
-        val callback = object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                try {
-                    viewModel.startPaymentUserAuth(context)
-                } catch (t: Throwable) {
-                    hideForcedSoftKeyboard(context, binding.amount.editText!!)
-                    Snackbar.make(
-                        requireView(),
-                        getString(R.string.error_device_security, t.message),
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                }
-            }
-
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                hideForcedSoftKeyboard(context, binding.amount.editText!!)
-                Snackbar.make(
-                    requireView(),
-                    getString(R.string.error_device_security, errString),
-                    Snackbar.LENGTH_LONG
-                ).show()
-            }
-        }
-
-        BiometricPrompt(this, callback).authenticate(promptInfo)
+    override fun proceedAuthFlowFromBiometrics() {
+        context?.let { viewModel.startPaymentUserAuth(it) }
     }
 
     private fun inputChangesToViewModel() {
