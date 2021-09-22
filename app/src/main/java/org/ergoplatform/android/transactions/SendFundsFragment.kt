@@ -16,7 +16,9 @@ import android.widget.EditText
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.view.descendants
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -38,12 +40,12 @@ import kotlin.math.max
 /**
  * Here's the place to send transactions
  */
-class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallback,
+class SendFundsFragment : Fragment(), PasswordDialogCallback,
     AddressChooserCallback {
     private var _binding: FragmentSendFundsBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: SendFundsViewModel
-    private val args: SendFundsFragmentDialogArgs by navArgs()
+    private val args: SendFundsFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -168,7 +170,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             val shareIntent = Intent.createChooser(sendIntent, null)
             startActivity(shareIntent)
         }
-        binding.buttonDismiss.setOnClickListener { dismiss() }
+        binding.buttonDismiss.setOnClickListener { findNavController().popBackStack() }
 
         binding.buttonSend.setOnClickListener {
             startPayment()

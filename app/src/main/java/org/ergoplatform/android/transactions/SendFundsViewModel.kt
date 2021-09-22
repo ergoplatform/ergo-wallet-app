@@ -153,7 +153,7 @@ class SendFundsViewModel : ViewModel() {
         return tokensChosen.values.filter { it.value <= 0 }.isEmpty()
     }
 
-    fun preparePayment(fragment: SendFundsFragmentDialog) {
+    fun preparePayment(fragment: SendFundsFragment) {
         if (wallet?.walletConfig?.encryptionType == ENC_TYPE_PASSWORD) {
             PasswordDialogFragment().show(
                 fragment.childFragmentManager,

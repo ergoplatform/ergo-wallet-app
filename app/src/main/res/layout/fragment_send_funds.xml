@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="?attr/colorSurface"
+        android:elevation="2dp">
+
+        <TextView
+            style="@style/TextAppearance.App.Headline1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/button_send" />
+
+    </FrameLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
@@ -31,26 +47,13 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/label_title"
-                        style="@style/TextAppearance.App.Headline2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="@string/button_send"
-                        android:textColor="?attr/colorSecondary"
-                        app:layout_constraintEnd_toStartOf="@id/button_scan"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
                         android:id="@+id/wallet_name"
                         style="@style/TextAppearance.App.Body1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        app:layout_constraintEnd_toEndOf="@id/label_title"
-                        app:layout_constraintStart_toStartOf="@id/label_title"
-                        app:layout_constraintTop_toBottomOf="@id/label_title"
+                        app:layout_constraintEnd_toStartOf="@id/button_scan"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
                         tools:text="@string/label_send_from" />
 
                     <TextView
@@ -303,4 +306,4 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-</FrameLayout>
+</LinearLayout>

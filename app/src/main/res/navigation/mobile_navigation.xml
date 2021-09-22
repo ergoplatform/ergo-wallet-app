@@ -19,14 +19,18 @@
             app:enterAnim="@anim/slide_in_from_right"
             app:exitAnim="@anim/slide_out_to_left"
             app:popEnterAnim="@anim/slide_in_from_left"
-            app:popExitAnim="@anim/slide_out_to_right" >
+            app:popExitAnim="@anim/slide_out_to_right">
             <argument
                 android:name="derivationIdx"
                 android:defaultValue="0" />
         </action>
         <action
             android:id="@+id/action_navigation_wallet_to_sendFundsFragment"
-            app:destination="@id/sendFundsFragment" >
+            app:destination="@id/sendFundsFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right">
             <argument
                 android:name="derivation_idx"
                 android:defaultValue="-1" />
@@ -78,7 +82,11 @@
             app:popExitAnim="@anim/slide_out_to_right" />
         <action
             android:id="@+id/action_navigation_wallet_details_to_sendFundsFragment"
-            app:destination="@id/sendFundsFragment" />
+            app:destination="@id/sendFundsFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
 
     <fragment
@@ -152,9 +160,9 @@
             android:name="derivationIdx"
             app:argType="integer" />
     </fragment>
-    <dialog
+    <fragment
         android:id="@+id/sendFundsFragment"
-        android:name="org.ergoplatform.android.transactions.SendFundsFragmentDialog"
+        android:name="org.ergoplatform.android.transactions.SendFundsFragment"
         android:label="@string/button_send"
         tools:layout="@layout/fragment_send_funds">
         <argument
@@ -168,7 +176,7 @@
         <argument
             android:name="derivation_idx"
             app:argType="integer" />
-    </dialog>
+    </fragment>
     <dialog
         android:id="@+id/addReadOnlyWalletFragmentDialog"
         android:name="org.ergoplatform.android.wallet.AddReadOnlyWalletFragmentDialog"
@@ -212,7 +220,11 @@
         android:label="ChooseSpendingWalletFragmentDialog">
         <action
             android:id="@+id/action_chooseSpendingWalletFragmentDialog_to_sendFundsFragment"
-            app:destination="@id/sendFundsFragment">
+            app:destination="@id/sendFundsFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right">
             <argument
                 android:name="paymentRequest"
                 app:nullable="false" />
