@@ -145,7 +145,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                             .show()
                     }
                 }
-                snackbar.show()
+                snackbar.setAnchorView(R.id.nav_view).show()
             }
         })
         viewModel.txId.observe(viewLifecycleOwner, {
