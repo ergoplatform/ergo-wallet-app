@@ -128,10 +128,13 @@
     <string name="desc_fee">Fee: %1s ERG</string>
     <string name="error_receiver_address">Please enter a valid ERG address</string>
     <string name="error_amount">Please enter a valid amount</string>
-    <string name="error_transaction">Could not send transaction</string>
+    <string name="error_send_transaction">Could not send transaction</string>
+    <string name="error_prepare_transaction">Could not prepare transaction</string>
     <string name="error_password_empty">Please enter a valid password</string>
     <string name="error_password_wrong">Wrong password</string>
     <string name="desc_transaction_send">Transaction was sent successfully and awaits confirmation. Transaction ID:</string>
+    <string name="desc_prompt_signing">Your transaction was prepared and needs to be signed with your signing device. Scan this QR code
+       to proceed.</string>
     <string name="title_authenticate">Authentication required</string>
     <string name="error_device_security">Security error: %1s</string>
     <string name="label_add_token">Token</string>

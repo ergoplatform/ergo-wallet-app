@@ -88,7 +88,7 @@ fun sendErgoTx(
     derivedKeyIndices: List<Int>,
     nodeApiAddress: String,
     explorerApiAddress: String
-): TransactionResult {
+): SendTransactionResult {
     try {
         val ergoClient = RestApiErgoClient.create(
             nodeApiAddress,
@@ -116,11 +116,11 @@ fun sendErgoTx(
 
             val txId = signed.id
 
-            return@execute TransactionResult(txId.isNotEmpty(), txId)
+            return@execute SendTransactionResult(txId.isNotEmpty(), txId)
         }
     } catch (t: Throwable) {
         Log.e("Send", "Error creating transaction", t)
-        return TransactionResult(false, errorMsg = t.message)
+        return SendTransactionResult(false, errorMsg = t.message)
     }
 }
 
@@ -134,7 +134,7 @@ fun prepareSerializedErgoTx(
     senderAddresses: List<Address>,
     nodeApiAddress: String,
     explorerApiAddress: String
-): SerializationResult {
+): PromptSigningResult {
     try {
         val ergoClient = RestApiErgoClient.create(
             nodeApiAddress,
@@ -155,11 +155,16 @@ fun prepareSerializedErgoTx(
             }
 
             val reduced = ctx.newProverBuilder().build().reduce(unsigned, ERG_BASE_COST)
-            return@execute SerializationResult(true, reduced.toBytes(), inputs)
+            return@execute PromptSigningResult(
+                true,
+                reduced.toBytes(),
+                inputs,
+                senderAddresses.first().ergoAddress.toString()
+            )
         }
     } catch (t: Throwable) {
         Log.e("Send", "Error creating transaction", t)
-        return SerializationResult(false, errorMsg = t.message)
+        return PromptSigningResult(false, errorMsg = t.message)
     }
 }
 
@@ -172,7 +177,7 @@ fun signSerializedErgoTx(
     mnemonic: String,
     mnemonicPass: String,
     derivedKeyIndices: List<Int>
-): SerializationResult {
+): SigningResult {
     try {
         val coldClient = ColdErgoClient(
             StageConstants.NETWORK_TYPE,
@@ -202,10 +207,10 @@ fun signSerializedErgoTx(
             val outputCandidates = reducedTx.tx.unsignedTx().outputCandidates()
             return@execute prover.signReduced(reducedTx, ERG_BASE_COST).toBytes()
         }
-        return SerializationResult(true, signedTxSerialized)
+        return SigningResult(true, signedTxSerialized)
     } catch (t: Throwable) {
         Log.e("Send", "Error signing transaction", t)
-        return SerializationResult(false, errorMsg = t.message)
+        return SigningResult(false, errorMsg = t.message)
     }
 }
 
@@ -216,7 +221,7 @@ fun sendSignedErgoTx(
     signedTxSerialized: ByteArray,
     nodeApiAddress: String,
     explorerApiAddress: String
-): TransactionResult {
+): SendTransactionResult {
     try {
         val ergoClient = RestApiErgoClient.create(
             nodeApiAddress,
@@ -229,11 +234,11 @@ fun sendSignedErgoTx(
             ctx.sendTransaction(signedTx)
         }
 
-        return TransactionResult(txId.isNotEmpty(), txId)
+        return SendTransactionResult(txId.isNotEmpty(), txId)
 
     } catch (t: Throwable) {
         Log.e("Send", "Error creating transaction", t)
-        return TransactionResult(false, errorMsg = t.message)
+        return SendTransactionResult(false, errorMsg = t.message)
     }
 }
 
@@ -243,15 +248,27 @@ private fun deserializeErgobox(input: ByteArray): ErgoBox? {
     return ergoBox
 }
 
-data class TransactionResult(
-    val success: Boolean,
-    val txId: String? = null,
-    val errorMsg: String? = null
-)
+interface TransactionResult {
+    val success: Boolean
+    val errorMsg: String?
+}
 
-data class SerializationResult(
-    val success: Boolean,
+data class SendTransactionResult(
+    override val success: Boolean,
+    val txId: String? = null,
+    override val errorMsg: String? = null
+) : TransactionResult
+
+data class PromptSigningResult(
+    override val success: Boolean,
     val serializedTx: ByteArray? = null,
     val serializedInputs: List<ByteArray>? = null,
-    val errorMsg: String? = null
-)
+    val address: String? = null,
+    override val errorMsg: String? = null
+) : TransactionResult
+
+data class SigningResult(
+    override val success: Boolean,
+    val serializedTx: ByteArray? = null,
+    override val errorMsg: String? = null
+) : TransactionResult

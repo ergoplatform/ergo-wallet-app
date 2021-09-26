@@ -56,10 +56,12 @@ class SendFundsViewModel : ViewModel() {
         value = ErgoAmount.ZERO
     }
     val grossAmount: LiveData<ErgoAmount> = _grossAmount
-    private val _paymentDoneLiveData = SingleLiveEvent<TransactionResult>()
-    val paymentDoneLiveData: LiveData<TransactionResult> = _paymentDoneLiveData
-    private val _txId = MutableLiveData<String>()
-    val txId: LiveData<String> = _txId
+    private val _txWorkDoneLiveData = SingleLiveEvent<TransactionResult>()
+    val txWorkDoneLiveData: LiveData<TransactionResult> = _txWorkDoneLiveData
+    private val _txId = MutableLiveData<String?>()
+    val txId: LiveData<String?> = _txId
+    private val _signingPromptData = MutableLiveData<String?>()
+    val signingPromptData: LiveData<String?> = _signingPromptData
 
     val tokensAvail: ArrayList<WalletTokenDbEntity> = ArrayList()
     val tokensChosen: HashMap<String, ErgoToken> = HashMap()
@@ -201,7 +203,7 @@ class SendFundsViewModel : ViewModel() {
                 ?: listOf(0)
 
         viewModelScope.launch {
-            val ergoTxResult: TransactionResult
+            val ergoTxResult: SendTransactionResult
             withContext(Dispatchers.IO) {
                 ergoTxResult = sendErgoTx(
                     Address.create(receiverAddress), amountToSend.nanoErgs,
@@ -215,7 +217,33 @@ class SendFundsViewModel : ViewModel() {
                 NodeConnector.getInstance().invalidateCache()
                 _txId.postValue(ergoTxResult.txId!!)
             }
-            _paymentDoneLiveData.postValue(ergoTxResult)
+            _txWorkDoneLiveData.postValue(ergoTxResult)
+        }
+    }
+
+    fun startColdWalletPayment(context: Context) {
+        wallet?.let { wallet ->
+            val derivedAddresses =
+                derivedAddressIdx?.let { listOf(wallet.getDerivedAddress(it)!!) }
+                    ?: wallet.getSortedDerivedAddressesList().map { it.publicAddress }
+
+            _lockInterface.postValue(true)
+            viewModelScope.launch {
+                val serializedTx: PromptSigningResult
+                withContext(Dispatchers.IO) {
+                    serializedTx = prepareSerializedErgoTx(
+                        Address.create(receiverAddress), amountToSend.nanoErgs,
+                        tokensChosen.values.toList(),
+                        derivedAddresses.map { Address.create(it) },
+                        getPrefNodeUrl(context), getPrefExplorerApiUrl(context)
+                    )
+                }
+                _lockInterface.postValue(false)
+                if (serializedTx.success) {
+                    _signingPromptData.postValue(buildColdSigningRequest(serializedTx))
+                }
+                _txWorkDoneLiveData.postValue(serializedTx)
+            }
         }
     }
 

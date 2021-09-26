@@ -120,11 +120,13 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             else
                 ProgressBottomSheetDialogFragment.dismissProgressDialog(childFragmentManager)
         })
-        viewModel.paymentDoneLiveData.observe(viewLifecycleOwner, {
+        viewModel.txWorkDoneLiveData.observe(viewLifecycleOwner, {
             if (!it.success) {
                 val snackbar = Snackbar.make(
                     requireView(),
-                    R.string.error_transaction,
+                    if (it is PromptSigningResult)
+                        R.string.error_prepare_transaction
+                    else R.string.error_send_transaction,
                     Snackbar.LENGTH_LONG
                 )
                 it.errorMsg?.let { errorMsg ->
@@ -146,12 +148,17 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                     }
                 }
                 snackbar.setAnchorView(R.id.nav_view).show()
+            } else if (it is PromptSigningResult) {
+                // if this is a prompt signing result, switch to prompt signing dialog
+                SigningPromptDialogFragment().show(childFragmentManager, null)
             }
         })
         viewModel.txId.observe(viewLifecycleOwner, {
-            binding.cardviewTxEdit.visibility = View.GONE
-            binding.cardviewTxDone.visibility = View.VISIBLE
-            binding.labelTxId.text = it
+            it?.let {
+                binding.cardviewTxEdit.visibility = View.GONE
+                binding.cardviewTxDone.visibility = View.VISIBLE
+                binding.labelTxId.text = it
+            }
         })
 
         // Add click listeners
@@ -320,6 +327,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
     override fun startAuthFlow(walletConfig: WalletConfigDbEntity) {
         if (walletConfig.secretStorage == null) {
             // we have a read only wallet here, let's go to cold wallet support mode
+            viewModel.startColdWalletPayment(requireContext())
         } else {
             super.startAuthFlow(walletConfig)
         }
