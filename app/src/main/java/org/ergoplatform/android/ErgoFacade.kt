@@ -5,13 +5,16 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.ergoplatform.ErgoBox
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.ErgoTreeContract
+import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.restapi.client.Parameters
+import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
+import sigmastate.serialization.`SigmaSerializer$`
 import java.util.*
-import kotlin.math.pow
 
 const val MNEMONIC_WORDS_COUNT = 15
 const val MNEMONIC_MIN_WORDS_COUNT = 12
@@ -139,19 +142,21 @@ fun prepareSerializedErgoTx(
             "",
             explorerApiAddress
         )
-        val reduced = ergoClient.execute { ctx: BlockchainContext ->
+        return ergoClient.execute { ctx: BlockchainContext ->
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
             val unsigned = BoxOperations.putToContractTxUnsigned(
                 ctx, senderAddresses,
                 contract, amountToSend, tokensToSend
             )
 
+            val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
+                val ergoBox = box.box()
+                return@map ergoBox.bytes()
+            }
+
             val reduced = ctx.newProverBuilder().build().reduce(unsigned, ERG_BASE_COST)
-
-            return@execute reduced
+            return@execute SerializationResult(true, reduced.toBytes(), inputs)
         }
-
-        return SerializationResult(true, reduced.toBytes())
     } catch (t: Throwable) {
         Log.e("Send", "Error creating transaction", t)
         return SerializationResult(false, errorMsg = t.message)
@@ -163,9 +168,10 @@ fun prepareSerializedErgoTx(
  */
 fun signSerializedErgoTx(
     serializedTx: ByteArray,
+    serializedInputs: List<ByteArray>,
     mnemonic: String,
     mnemonicPass: String,
-    derivedKeyIndex: Int
+    derivedKeyIndices: List<Int>
 ): SerializationResult {
     try {
         val coldClient = ColdErgoClient(
@@ -174,19 +180,31 @@ fun signSerializedErgoTx(
         )
 
         val signedTxSerialized = coldClient.execute { ctx ->
-            val prover = ctx.newProverBuilder()
+            val proverBuilder = ctx.newProverBuilder()
                 .withMnemonic(
                     SecretString.create(mnemonic),
                     SecretString.create(mnemonicPass)
                 )
-                .withEip3Secret(derivedKeyIndex)
-                .build()
+
+            derivedKeyIndices.forEach {
+                proverBuilder.withEip3Secret(it)
+            }
+            val prover = proverBuilder.build()
             val reducedTx = ctx.parseReducedTransaction(serializedTx)
+            val inputs = reducedTx.tx.unsignedTx().inputs()
+
+            val boxes = serializedInputs.map { input ->
+                return@map deserializeErgobox(input)
+            }
+
+            // here we can check if inputs size = boxes.size && all ids match
+
+            val outputCandidates = reducedTx.tx.unsignedTx().outputCandidates()
             return@execute prover.signReduced(reducedTx, ERG_BASE_COST).toBytes()
         }
         return SerializationResult(true, signedTxSerialized)
     } catch (t: Throwable) {
-        Log.e("Send", "Error creating transaction", t)
+        Log.e("Send", "Error signing transaction", t)
         return SerializationResult(false, errorMsg = t.message)
     }
 }
@@ -219,6 +237,12 @@ fun sendSignedErgoTx(
     }
 }
 
+private fun deserializeErgobox(input: ByteArray): ErgoBox? {
+    val r = `SigmaSerializer$`.`MODULE$`.startReader(input, 0)
+    val ergoBox = `ErgoBoxSerializer$`.`MODULE$`.parse(r)
+    return ergoBox
+}
+
 data class TransactionResult(
     val success: Boolean,
     val txId: String? = null,
@@ -228,5 +252,6 @@ data class TransactionResult(
 data class SerializationResult(
     val success: Boolean,
     val serializedTx: ByteArray? = null,
+    val serializedInputs: List<ByteArray>? = null,
     val errorMsg: String? = null
 )
