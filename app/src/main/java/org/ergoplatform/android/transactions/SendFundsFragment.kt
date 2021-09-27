@@ -363,7 +363,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let {
-                val content = parseContentFromQrCode(it)
+                val content = parseContentFromQrCode(it) { isValidErgoAddress(it) }
                 content?.let {
                     binding.tvReceiver.editText?.setText(content.address)
                     content.amount.let { amount -> if (amount.nanoErgs > 0) setAmountEdittext(amount) }

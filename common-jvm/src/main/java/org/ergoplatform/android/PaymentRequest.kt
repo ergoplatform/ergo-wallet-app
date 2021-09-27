@@ -1,8 +1,5 @@
 package org.ergoplatform.android
 
-import android.widget.ImageView
-import com.google.zxing.BarcodeFormat
-import com.journeyapps.barcodescanner.BarcodeEncoder
 import java.net.URLDecoder
 import java.net.URLEncoder
 
@@ -12,20 +9,6 @@ private val RECIPIENT_PARAM_PREFIX = "address="
 private val AMOUNT_PARAM_PREFIX = "amount="
 private val DESCRIPTION_PARAM_PREFIX = "description="
 private val URI_ENCODING = "utf-8"
-
-fun setQrCodeToImageView(imageViewQrCode: ImageView, text: String, width: Int, height: Int) {
-    try {
-        val barcodeEncoder = BarcodeEncoder()
-        val bitmap = barcodeEncoder.encodeBitmap(
-            text,
-            BarcodeFormat.QR_CODE,
-            width,
-            height
-        )
-        imageViewQrCode.setImageBitmap(bitmap)
-    } catch (e: Exception) {
-    }
-}
 
 fun getExplorerPaymentRequestAddress(
     address: String,
@@ -43,7 +26,11 @@ fun getExplorerPaymentRequestAddress(
     )
 }
 
-fun parseContentFromQrCode(qrCode: String): QrCodeContent? {
+fun parseContentFromQrCode(
+    qrCode: String,
+    isValidErgoAddress: (String) -> Boolean
+): QrCodeContent? {
+    // TODO remove higher order function argument when ErgoFacade is moved to common-jvm
     if (qrCode.startsWith(PAYMENT_URI_PREFIX, true)) {
         // we have a payment uri
         val uriWithoutPrefix = qrCode.substring(PAYMENT_URI_PREFIX.length)
@@ -78,6 +65,8 @@ fun parseContentFromQuery(query: String): QrCodeContent? {
             try {
                 val tokenId = keyVal.get(0)
                 val tokenAmount = keyVal.get(1)
+                // throws exception when it is not numeric
+                tokenAmount.toDouble()
                 tokenMap.put(tokenId, tokenAmount)
             } catch (t: Throwable) {
                 // in this case, we haven't found a token :)

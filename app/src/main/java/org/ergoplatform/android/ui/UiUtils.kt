@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.IdRes
 import androidx.core.content.ContextCompat
@@ -19,6 +20,8 @@ import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
 import com.google.android.material.snackbar.Snackbar
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
 import org.ergoplatform.android.R
 import org.ergoplatform.android.TokenAmount
 import java.math.RoundingMode
@@ -137,4 +140,18 @@ fun NavController.navigateSafe(
 
 fun NavController.navigateSafe(directions: NavDirections, navOptions: NavOptions? = null) {
     navigateSafe(directions.actionId, directions.arguments, navOptions)
+}
+
+fun setQrCodeToImageView(imageViewQrCode: ImageView, text: String, width: Int, height: Int) {
+    try {
+        val barcodeEncoder = BarcodeEncoder()
+        val bitmap = barcodeEncoder.encodeBitmap(
+            text,
+            BarcodeFormat.QR_CODE,
+            width,
+            height
+        )
+        imageViewQrCode.setImageBitmap(bitmap)
+    } catch (e: Exception) {
+    }
 }

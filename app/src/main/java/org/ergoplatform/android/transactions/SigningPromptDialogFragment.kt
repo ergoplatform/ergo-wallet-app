@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.ergoplatform.android.databinding.FragmentPromptSigningDialogBinding
-import org.ergoplatform.android.setQrCodeToImageView
+import org.ergoplatform.android.ui.setQrCodeToImageView
 
 class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentPromptSigningDialogBinding? = null

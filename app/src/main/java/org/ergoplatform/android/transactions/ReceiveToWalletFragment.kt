@@ -14,6 +14,7 @@ import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
 import org.ergoplatform.android.ui.copyStringToClipboard
 import org.ergoplatform.android.ui.formatFiatToString
 import org.ergoplatform.android.ui.inputTextToDouble
+import org.ergoplatform.android.ui.setQrCodeToImageView
 import org.ergoplatform.android.wallet.WalletDbEntity
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
