@@ -1,5 +1,6 @@
 package org.ergoplatform
 
+import org.ergoplatform.android.isValidErgoAddress
 import java.net.URLDecoder
 import java.net.URLEncoder
 
@@ -26,11 +27,7 @@ fun getExplorerPaymentRequestAddress(
     )
 }
 
-fun parseContentFromQrCode(
-    qrCode: String,
-    isValidErgoAddress: (String) -> Boolean
-): QrCodeContent? {
-    // TODO remove higher order function argument when ErgoFacade is moved to common-jvm
+fun parseContentFromQrCode(qrCode: String): QrCodeContent? {
     if (qrCode.startsWith(PAYMENT_URI_PREFIX, true)) {
         // we have a payment uri
         val uriWithoutPrefix = qrCode.substring(PAYMENT_URI_PREFIX.length)

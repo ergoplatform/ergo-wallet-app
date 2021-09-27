@@ -1,7 +1,5 @@
 package org.ergoplatform.android
 
-import StageConstants
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -25,6 +23,8 @@ const val URL_COLD_WALLET_HELP =
     "https://github.com/ergoplatform/ergo-wallet-android/wiki/Cold-wallet"
 val ERG_BASE_COST = 0
 val ERG_MAX_BLOCK_COST = 1000000
+
+var ergoNetworkType: NetworkType = NetworkType.MAINNET
 
 fun serializeSecrets(mnemonic: String): String {
     val gson = Gson()
@@ -50,7 +50,7 @@ fun isValidErgoAddress(addressString: String): Boolean {
 
     try {
         val address = Address.create(addressString)
-        return StageConstants.isValidNetworkTypeAddress(address)
+        return if (ergoNetworkType == NetworkType.MAINNET) address.isMainnet else !address.isMainnet
     } catch (t: Throwable) {
         return false
     }
@@ -64,7 +64,7 @@ fun getAddressDerivationPath(index: Int): String {
 fun getPublicErgoAddressFromMnemonic(mnemonic: String, index: Int = 0): String {
     return Address.createEip3Address(
         index,
-        StageConstants.NETWORK_TYPE,
+        ergoNetworkType,
         SecretString.create(mnemonic),
         SecretString.create("")
     ).ergoAddress.toString()
@@ -95,7 +95,7 @@ fun sendErgoTx(
     try {
         val ergoClient = RestApiErgoClient.create(
             nodeApiAddress,
-            StageConstants.NETWORK_TYPE,
+            ergoNetworkType,
             "",
             explorerApiAddress
         )
@@ -122,7 +122,6 @@ fun sendErgoTx(
             return@execute SendTransactionResult(txId.isNotEmpty(), txId)
         }
     } catch (t: Throwable) {
-        Log.e("Send", "Error creating transaction", t)
         return SendTransactionResult(false, errorMsg = t.message)
     }
 }
@@ -141,7 +140,7 @@ fun prepareSerializedErgoTx(
     try {
         val ergoClient = RestApiErgoClient.create(
             nodeApiAddress,
-            StageConstants.NETWORK_TYPE,
+            ergoNetworkType,
             "",
             explorerApiAddress
         )
@@ -166,7 +165,6 @@ fun prepareSerializedErgoTx(
             )
         }
     } catch (t: Throwable) {
-        Log.e("Send", "Error creating transaction", t)
         return PromptSigningResult(false, errorMsg = t.message)
     }
 }
@@ -183,7 +181,7 @@ fun signSerializedErgoTx(
 ): SigningResult {
     try {
         val coldClient = ColdErgoClient(
-            StageConstants.NETWORK_TYPE,
+            ergoNetworkType,
             Parameters().maxBlockCost(ERG_MAX_BLOCK_COST)
         )
 
@@ -212,7 +210,6 @@ fun signSerializedErgoTx(
         }
         return SigningResult(true, signedTxSerialized)
     } catch (t: Throwable) {
-        Log.e("Send", "Error signing transaction", t)
         return SigningResult(false, errorMsg = t.message)
     }
 }
@@ -228,7 +225,7 @@ fun sendSignedErgoTx(
     try {
         val ergoClient = RestApiErgoClient.create(
             nodeApiAddress,
-            StageConstants.NETWORK_TYPE,
+            ergoNetworkType,
             "",
             explorerApiAddress
         )
@@ -240,7 +237,6 @@ fun sendSignedErgoTx(
         return SendTransactionResult(txId.isNotEmpty(), txId)
 
     } catch (t: Throwable) {
-        Log.e("Send", "Error creating transaction", t)
         return SendTransactionResult(false, errorMsg = t.message)
     }
 }
