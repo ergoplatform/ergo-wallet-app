@@ -6,12 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import org.ergoplatform.android.*
+import org.ergoplatform.ErgoAmount
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserItemBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.wallet.getBalanceForAllAddresses
+import org.ergoplatform.parseContentFromQuery
 
 
 /**

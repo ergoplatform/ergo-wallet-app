@@ -22,8 +22,8 @@ import androidx.navigation.Navigator
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
+import org.ergoplatform.TokenAmount
 import org.ergoplatform.android.R
-import org.ergoplatform.android.TokenAmount
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols

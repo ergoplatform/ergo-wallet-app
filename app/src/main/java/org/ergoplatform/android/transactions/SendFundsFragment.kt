@@ -24,6 +24,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import org.ergoplatform.*
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
@@ -198,9 +199,9 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             setAmountEdittext(
                 ErgoAmount(
                     max(
-                        0,
-                        (viewModel.walletBalance.value?.nanoErgs ?: 0)
-                                - (viewModel.feeAmount.value?.nanoErgs ?: 0)
+                        0L,
+                        (viewModel.walletBalance.value?.nanoErgs ?: 0L)
+                                - (viewModel.feeAmount.value?.nanoErgs ?: 0L)
                     )
                 )
             )

@@ -1,4 +1,4 @@
-package org.ergoplatform.android
+package org.ergoplatform
 
 import kotlin.math.pow
 

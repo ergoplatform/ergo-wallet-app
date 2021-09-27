@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.tokens.inflateAndBindTokenView

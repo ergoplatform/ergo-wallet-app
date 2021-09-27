@@ -10,10 +10,14 @@ import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.android.*
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.NodeConnector
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentAddReadOnlyWalletDialogBinding
+import org.ergoplatform.android.isValidErgoAddress
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.parseContentFromQrCode
 
 /**
  * Add a wallet read-only by address

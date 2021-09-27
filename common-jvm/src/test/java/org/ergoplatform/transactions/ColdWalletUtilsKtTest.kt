@@ -3,6 +3,7 @@ package org.ergoplatform.transactions
 import org.ergoplatform.android.transactions.buildColdSigningRequest
 import org.ergoplatform.android.transactions.coldSigninRequestToQrChunks
 import org.ergoplatform.android.transactions.coldSigningRequestFromQrChunks
+import org.ergoplatform.android.transactions.getColdSigingRequestChunkIndex
 import org.junit.Assert
 import org.junit.Test
 
@@ -23,6 +24,7 @@ class ColdWalletUtilsKtTest {
         val manyChunks = coldSigninRequestToQrChunks(csr!!, 30)
         val oneChunk = coldSigninRequestToQrChunks(csr!!, 50000000)
         Assert.assertEquals(1, oneChunk.size)
+        Assert.assertEquals(0, getColdSigingRequestChunkIndex(oneChunk.first()))
 
         val prompt1 = coldSigningRequestFromQrChunks(manyChunks)
         val prompt2 = coldSigningRequestFromQrChunks(oneChunk)

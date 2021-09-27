@@ -1,4 +1,4 @@
-package org.ergoplatform.android
+package org.ergoplatform
 
 import org.ergoplatform.appkit.Parameters
 import org.junit.Assert

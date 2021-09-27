@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ergoplatform.*
 import org.ergoplatform.android.*
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.android.wallet.*
