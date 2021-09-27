@@ -1,0 +1,26 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
+
+dependencies {
+    api('org.ergoplatform:ergo-appkit_2.11:develop-3053fde5-SNAPSHOT') {
+        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
+        exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
+    }
+    // kiama needs an own build for JRE7 compatibility
+    api "com.github.MrStahlfelge.kiama:core_2.11:2.1.1"
+    api "com.github.MrStahlfelge.kiama:library_2.11:2.1.1"
+    api "org.bouncycastle:bcprov-jdk15to18:1.66"
+
+    // newer okhttp version than pulled from dependencies to avoid StrictMode policy violation
+    api("com.squareup.okhttp3:okhttp:3.12.13")
+    api("com.squareup.okhttp3:okhttp-urlconnection:3.12.13")
+
+    testImplementation 'junit:junit:4.13.2'
+}

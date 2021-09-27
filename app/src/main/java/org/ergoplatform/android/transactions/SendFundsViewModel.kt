@@ -15,6 +15,9 @@ import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
+import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.transactions.SendTransactionResult
+import org.ergoplatform.transactions.TransactionResult
 
 /**
  * Holding state of the send funds screen (thus to be expected to get complicated)

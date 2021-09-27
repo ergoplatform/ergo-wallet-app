@@ -34,6 +34,7 @@ import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.android.wallet.addresses.getAddressLabel
 import org.ergoplatform.android.wallet.getNumOfAddresses
+import org.ergoplatform.transactions.PromptSigningResult
 import kotlin.math.max
 
 

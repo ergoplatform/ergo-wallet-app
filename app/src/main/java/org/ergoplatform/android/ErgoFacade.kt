@@ -10,6 +10,9 @@ import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.restapi.client.Parameters
+import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.transactions.SendTransactionResult
+import org.ergoplatform.transactions.SigningResult
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
@@ -248,27 +251,3 @@ private fun deserializeErgobox(input: ByteArray): ErgoBox? {
     return ergoBox
 }
 
-interface TransactionResult {
-    val success: Boolean
-    val errorMsg: String?
-}
-
-data class SendTransactionResult(
-    override val success: Boolean,
-    val txId: String? = null,
-    override val errorMsg: String? = null
-) : TransactionResult
-
-data class PromptSigningResult(
-    override val success: Boolean,
-    val serializedTx: ByteArray? = null,
-    val serializedInputs: List<ByteArray>? = null,
-    val address: String? = null,
-    override val errorMsg: String? = null
-) : TransactionResult
-
-data class SigningResult(
-    override val success: Boolean,
-    val serializedTx: ByteArray? = null,
-    override val errorMsg: String? = null
-) : TransactionResult

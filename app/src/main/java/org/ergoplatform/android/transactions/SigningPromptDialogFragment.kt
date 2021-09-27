@@ -30,8 +30,9 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
                 .get(SendFundsViewModel::class.java)
         viewModel.signingPromptData.observe(viewLifecycleOwner, {
             it?.let {
+                val qrPages = coldSigninRequestToQrChunks(it, QR_SIZE_LIMIT)
                 // TODO handle data over 4K length
-                setQrCodeToImageView(binding.qrCode, it, 400, 400)
+                setQrCodeToImageView(binding.qrCode, qrPages.first(), 400, 400)
             }
         })
     }
