@@ -31,10 +31,10 @@ fun buildColdSigningRequest(data: PromptSigningResult): String? {
     }
 }
 
-fun parseColdSigningRequest(qrdata: String): PromptSigningResult {
+fun parseColdSigningRequest(qrData: String): PromptSigningResult {
     try {
 
-        val jsonTree = JsonParser().parse(qrdata) as JsonObject
+        val jsonTree = JsonParser().parse(qrData) as JsonObject
 
         // reducedTx is guaranteed
         val serializedTx = Base64Coder.decode(jsonTree.get(JSON_FIELD_TX).asString)
@@ -75,7 +75,7 @@ fun coldSigninRequestToQrChunks(serializedSigningRequest: String, sizeLimit: Int
     }
 }
 
-fun coldSigningRequestFromQrChunks(qrChunks: List<String>): PromptSigningResult {
+fun coldSigningRequestFromQrChunks(qrChunks: Iterable<String>): PromptSigningResult {
     try {
         // check the list
         qrChunks.forEach {
@@ -106,4 +106,11 @@ fun getColdSigingRequestChunkIndex(chunk: String): Int {
     val pages = chunkWithoutHeaderPrefix.substringBefore(QR_PREFIX_DATA_DELIMITER)
         .split(QR_PREFIX_HEADER_DELIMITER)
     return pages.firstOrNull()?.toIntOrNull() ?: 0
+}
+
+fun getColdSigingRequestChunkPagesCount(chunk: String): Int {
+    val chunkWithoutHeaderPrefix = chunk.removePrefix(QR_PREFIX_COLD_SIGNING_REQUEST)
+    val pages = chunkWithoutHeaderPrefix.substringBefore(QR_PREFIX_DATA_DELIMITER)
+        .split(QR_PREFIX_HEADER_DELIMITER)
+    return pages.lastOrNull()?.toIntOrNull() ?: 1
 }

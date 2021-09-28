@@ -364,11 +364,33 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let {
-                val content = parseContentFromQrCode(it)
-                content?.let {
-                    binding.tvReceiver.editText?.setText(content.address)
-                    content.amount.let { amount -> if (amount.nanoErgs > 0) setAmountEdittext(amount) }
-                    viewModel.addTokensFromQr(content.tokens)
+                if (viewModel.wallet?.walletConfig?.secretStorage != null
+                    && isColdSigningRequestChunk(it)
+                ) {
+                    if (getColdSigingRequestChunkPagesCount(it) > 1) {
+                        // TODO handle paged qr codes
+                        Snackbar.make(
+                            requireView(),
+                            R.string.error_qr_pages_num,
+                            Snackbar.LENGTH_LONG
+                        ).setAnchorView(R.id.nav_view).show()
+                    } else {
+                        findNavController().navigate(
+                            SendFundsFragmentDirections
+                                .actionSendFundsFragmentToColdWalletSigningFragment(it, viewModel.wallet!!.walletConfig.id)
+                        )
+                    }
+                } else {
+                    val content = parsePaymentRequestFromQrCode(it)
+                    content?.let {
+                        binding.tvReceiver.editText?.setText(content.address)
+                        content.amount.let { amount ->
+                            if (amount.nanoErgs > 0) setAmountEdittext(
+                                amount
+                            )
+                        }
+                        viewModel.addTokensFromQr(content.tokens)
+                    }
                 }
             }
         } else {

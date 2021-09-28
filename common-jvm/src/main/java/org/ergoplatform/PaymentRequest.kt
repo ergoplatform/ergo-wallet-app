@@ -27,20 +27,20 @@ fun getExplorerPaymentRequestAddress(
     )
 }
 
-fun parseContentFromQrCode(qrCode: String): QrCodeContent? {
+fun parsePaymentRequestFromQrCode(qrCode: String): PaymentRequest? {
     if (qrCode.startsWith(PAYMENT_URI_PREFIX, true)) {
         // we have a payment uri
         val uriWithoutPrefix = qrCode.substring(PAYMENT_URI_PREFIX.length)
-        return parseContentFromQuery(uriWithoutPrefix)
+        return parsePaymentRequestFromQuery(uriWithoutPrefix)
 
     } else if (isValidErgoAddress(qrCode)) {
-        return QrCodeContent(qrCode)
+        return PaymentRequest(qrCode)
     } else {
         return null
     }
 }
 
-fun parseContentFromQuery(query: String): QrCodeContent? {
+fun parsePaymentRequestFromQuery(query: String): PaymentRequest? {
     var address: String? = null
     var amount = ErgoAmount.ZERO
     var description = ""
@@ -72,14 +72,14 @@ fun parseContentFromQuery(query: String): QrCodeContent? {
     }
 
     if (address != null) {
-        return QrCodeContent(address!!, amount, description, tokenMap)
+        return PaymentRequest(address!!, amount, description, tokenMap)
     } else {
         // no recipient, no sense
         return null
     }
 }
 
-data class QrCodeContent(
+data class PaymentRequest(
     val address: String,
     val amount: ErgoAmount = ErgoAmount.ZERO,
     val description: String = "",

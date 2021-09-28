@@ -9,14 +9,14 @@ class PaymentRequestKtTest {
     @Test
     fun parseContentFromQrCode() {
         val parse1 =
-            parseContentFromQrCode("https://explorer.ergoplatform.com/payment-request?address=testaddr&amount=1.0&tokenId=notNumericAmount")
+            parsePaymentRequestFromQrCode("https://explorer.ergoplatform.com/payment-request?address=testaddr&amount=1.0&tokenId=notNumericAmount")
 
         Assert.assertEquals(Parameters.OneErg, parse1?.amount?.nanoErgs)
         Assert.assertEquals("testaddr", parse1?.address)
         Assert.assertEquals(0, parse1?.tokens?.size)
 
         val parse2 =
-            parseContentFromQrCode("https://explorer.ergoplatform.com/payment-request?address=testaddr&amount=2&12345=22.3")
+            parsePaymentRequestFromQrCode("https://explorer.ergoplatform.com/payment-request?address=testaddr&amount=2&12345=22.3")
 
         Assert.assertEquals(2 * Parameters.OneErg, parse2?.amount?.nanoErgs)
         Assert.assertEquals("testaddr", parse2?.address)

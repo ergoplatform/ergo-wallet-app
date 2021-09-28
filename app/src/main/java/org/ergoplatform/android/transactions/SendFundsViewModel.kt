@@ -79,9 +79,9 @@ class SendFundsViewModel : ViewModel() {
 
         // on first init, we read an send payment request. Don't do it again on device rotation
         // to not mess with user inputs
-        val content: QrCodeContent?
+        val content: PaymentRequest?
         if (firstInit) {
-            content = paymentRequest?.let { parseContentFromQuery(paymentRequest) }
+            content = paymentRequest?.let { parsePaymentRequestFromQuery(paymentRequest) }
             content?.let {
                 receiverAddress = content.address
                 amountToSend = content.amount

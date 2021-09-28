@@ -17,7 +17,7 @@ import org.ergoplatform.android.databinding.FragmentAddReadOnlyWalletDialogBindi
 import org.ergoplatform.android.isValidErgoAddress
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.parseContentFromQrCode
+import org.ergoplatform.parsePaymentRequestFromQrCode
 
 /**
  * Add a wallet read-only by address
@@ -84,7 +84,7 @@ class AddReadOnlyWalletFragmentDialog : FullScreenFragmentDialog() {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let {
-                val content = parseContentFromQrCode(it)
+                val content = parsePaymentRequestFromQrCode(it)
                 content?.let { binding.tvWalletAddress.editText?.setText(content.address) }
             }
         } else {

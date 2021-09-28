@@ -14,7 +14,7 @@ import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserItemBi
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.wallet.getBalanceForAllAddresses
-import org.ergoplatform.parseContentFromQuery
+import org.ergoplatform.parsePaymentRequestFromQuery
 
 
 /**
@@ -46,7 +46,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
             return
         }
 
-        val content = parseContentFromQuery(query)
+        val content = parsePaymentRequestFromQuery(query)
         binding.receiverAddress.text = content?.address
         val amount = content?.amount ?: ErgoAmount.ZERO
         binding.grossAmount.amount = amount.toDouble()

@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.ErgoBox
+import org.ergoplatform.UnsignedErgoLikeTransaction
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
@@ -169,6 +170,12 @@ fun prepareSerializedErgoTx(
     }
 }
 
+fun deserializeUnsignedTx(serializedTx: ByteArray): UnsignedErgoLikeTransaction {
+    return getColdErgoClient().execute { ctx ->
+        return@execute ctx.parseReducedTransaction(serializedTx).tx.unsignedTx()
+    }
+}
+
 /**
  * Deserializes an unsigned transaction, signs it and serializes the signed transaction
  */
@@ -180,12 +187,7 @@ fun signSerializedErgoTx(
     derivedKeyIndices: List<Int>
 ): SigningResult {
     try {
-        val coldClient = ColdErgoClient(
-            ergoNetworkType,
-            Parameters().maxBlockCost(ERG_MAX_BLOCK_COST)
-        )
-
-        val signedTxSerialized = coldClient.execute { ctx ->
+        val signedTxSerialized = getColdErgoClient().execute { ctx ->
             val proverBuilder = ctx.newProverBuilder()
                 .withMnemonic(
                     SecretString.create(mnemonic),
@@ -213,6 +215,11 @@ fun signSerializedErgoTx(
         return SigningResult(false, errorMsg = t.message)
     }
 }
+
+private fun getColdErgoClient() = ColdErgoClient(
+    ergoNetworkType,
+    Parameters().maxBlockCost(ERG_MAX_BLOCK_COST)
+)
 
 /**
  * Sends a serialized and signed transaction
