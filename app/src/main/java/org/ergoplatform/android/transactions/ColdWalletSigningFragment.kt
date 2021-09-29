@@ -13,6 +13,7 @@ import org.ergoplatform.android.databinding.EntryTransactionBoxBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
+import org.ergoplatform.transactions.reduceBoxes
 
 /**
  * Scans cold wallet signing request qr codes, signs the transaction, presents a qr code to go back
@@ -40,7 +41,7 @@ class ColdWalletSigningFragment : Fragment() {
         viewModel.setWalletId(args.walletId, requireContext())
 
         viewModel.reducedTx.observe(viewLifecycleOwner, {
-            it?.let {
+            it?.reduceBoxes()?.let {
                 binding.transactionInfo.visibility = View.VISIBLE
 
                 binding.layoutInboxes.apply {
