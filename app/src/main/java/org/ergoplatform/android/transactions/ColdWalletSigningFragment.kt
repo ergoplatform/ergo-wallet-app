@@ -64,18 +64,23 @@ class ColdWalletSigningFragment : Fragment() {
 
     private fun bindBoxView(
         container: ViewGroup,
-        value: Long,
+        value: Long?,
         address: String,
         assets: List<AssetInstanceInfo>?
     ) {
-        val outboxBinding = EntryTransactionBoxBinding.inflate(layoutInflater, container, true)
-        outboxBinding.boxErgAmount.text = getString(
+        val boxBinding = EntryTransactionBoxBinding.inflate(layoutInflater, container, true)
+        boxBinding.boxErgAmount.text = getString(
             R.string.label_erg_amount,
-            ErgoAmount(value).toStringTrimTrailingZeros()
+            ErgoAmount(value ?: 0).toStringTrimTrailingZeros()
         )
-        outboxBinding.labelOutboxAddress.text = address
+        boxBinding.boxErgAmount.visibility = if (value == null) View.GONE else View.VISIBLE
+        boxBinding.labelBoxAddress.text = address
+        boxBinding.labelBoxAddress.setOnClickListener {
+            boxBinding.labelBoxAddress.maxLines =
+                if (boxBinding.labelBoxAddress.maxLines == 1) 10 else 1
+        }
 
-        outboxBinding.boxTokenEntries.apply {
+        boxBinding.boxTokenEntries.apply {
             removeAllViews()
             visibility = View.GONE
 

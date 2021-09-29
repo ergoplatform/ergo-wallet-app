@@ -37,9 +37,15 @@ class ErgoAmountTest {
     fun convertFromAndToString() {
         val feeAmount = ErgoAmount("0.001")
         Assert.assertEquals("0.001000000", feeAmount.toString())
+        Assert.assertEquals("0.001", feeAmount.toStringTrimTrailingZeros())
+
+        val oneErg = ErgoAmount("001")
+        Assert.assertEquals("1.000000000", oneErg.toString())
+        Assert.assertEquals("1", oneErg.toStringTrimTrailingZeros())
 
         val floatPrecisionProblem = ErgoAmount("4.503")
         Assert.assertEquals("4.503000000", floatPrecisionProblem.toString())
+        Assert.assertEquals("4.503", floatPrecisionProblem.toStringTrimTrailingZeros())
     }
 
     @Test

@@ -10,12 +10,16 @@ import org.ergoplatform.android.deserializeUnsignedTx
 import org.ergoplatform.android.ergoNetworkType
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoId
+import org.ergoplatform.appkit.Iso
+import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.InputInfo
 import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.utils.Base64Coder
+import scala.Tuple2
 import scala.collection.JavaConversions
+import special.collection.Coll
 
 private const val JSON_FIELD_TX = "reducedTx"
 private const val JSON_FIELD_SENDER = "sender"
@@ -156,7 +160,9 @@ fun buildTransactionInfoFromReduced(
         inputBoxes.get(boxid)?.let {
             inputInfo.address = Address.fromErgoTree(it.ergoTree(), ergoNetworkType).toString()
             inputInfo.value = it.value()
-            // TODO token
+            getAssetInstanceInfos(it.additionalTokens()).forEach {
+                inputInfo.addAssetsItem(it)
+            }
         }
         retVal.addInputsItem(inputInfo)
     }
@@ -165,13 +171,27 @@ fun buildTransactionInfoFromReduced(
         val outputInfo = OutputInfo()
 
         outputInfo.address = Address.fromErgoTree(it.ergoTree(), ergoNetworkType).toString()
-        // TODO token
         outputInfo.value = it.value()
 
         retVal.addOutputsItem(outputInfo)
+
+        getAssetInstanceInfos(it.additionalTokens()).forEach {
+            outputInfo.addAssetsItem(it)
+        }
     }
 
     return retVal
 
+}
+
+private fun getAssetInstanceInfos(tokens: Coll<Tuple2<ByteArray, Any>>): List<AssetInstanceInfo> {
+    val tokens = Iso.isoTokensListToPairsColl().from(tokens)
+    return tokens.map {
+        val tokenInfo = AssetInstanceInfo()
+        tokenInfo.amount = it.value
+        tokenInfo.tokenId = it.id.toString()
+
+        tokenInfo
+    }
 }
 

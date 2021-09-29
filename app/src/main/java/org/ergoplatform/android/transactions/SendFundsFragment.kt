@@ -306,7 +306,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         else ""
 
     private fun setAmountEdittext(amountToSend: ErgoAmount) {
-        binding.amount.editText?.setText(amountToSend.toString())
+        binding.amount.editText?.setText(amountToSend.toStringTrimTrailingZeros())
     }
 
     private fun startPayment() {
