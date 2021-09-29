@@ -1,6 +1,5 @@
 package org.ergoplatform.android.transactions
 
-import StageConstants
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +8,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.android.databinding.EntryOutboxBinding
+import org.ergoplatform.android.R
+import org.ergoplatform.android.databinding.EntryTransactionBoxBinding
+import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
-import org.ergoplatform.appkit.Address
-import scala.collection.JavaConversions
+import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 
 /**
  * Scans cold wallet signing request qr codes, signs the transaction, presents a qr code to go back
@@ -43,24 +43,51 @@ class ColdWalletSigningFragment : Fragment() {
             it?.let {
                 binding.transactionInfo.visibility = View.VISIBLE
 
+                binding.layoutInboxes.apply {
+                    removeAllViews()
+
+                    it.inputs.forEach { input ->
+                        bindBoxView(this, input.value, input.address ?: input.boxId, input.assets)
+                    }
+                }
+
                 binding.layoutOutboxes.apply {
                     removeAllViews()
 
-                    val outputs = JavaConversions.seqAsJavaList(it.outputCandidates())!!
-                    outputs.forEach { ergoBoxCandidate ->
-                        val outboxBinding = EntryOutboxBinding.inflate(layoutInflater, this, true)
-                        outboxBinding.outboxErgAmount.amount =
-                            ErgoAmount(ergoBoxCandidate.value()).toDouble()
-                        outboxBinding.labelOutboxAddress.text =
-                            Address.fromErgoTree(
-                                ergoBoxCandidate.ergoTree(),
-                                StageConstants.NETWORK_TYPE
-                            ).toString()
-
+                    it.outputs.forEach { output ->
+                        bindBoxView(this, output.value, output.address, output.assets)
                     }
                 }
             }
         })
+    }
+
+    private fun bindBoxView(
+        container: ViewGroup,
+        value: Long,
+        address: String,
+        assets: List<AssetInstanceInfo>?
+    ) {
+        val outboxBinding = EntryTransactionBoxBinding.inflate(layoutInflater, container, true)
+        outboxBinding.boxErgAmount.text = getString(
+            R.string.label_erg_amount,
+            ErgoAmount(value).toStringTrimTrailingZeros()
+        )
+        outboxBinding.labelOutboxAddress.text = address
+
+        outboxBinding.boxTokenEntries.apply {
+            removeAllViews()
+            visibility = View.GONE
+
+            assets?.forEach {
+                visibility = View.VISIBLE
+                val tokenBinding =
+                    EntryWalletTokenBinding.inflate(layoutInflater, this, true)
+                // we use the token id here, we don't have the name in the cold wallet context
+                tokenBinding.labelTokenName.text = it.tokenId
+                tokenBinding.labelTokenVal.text = it.amount.toString()
+            }
+        }
     }
 
     override fun onDestroyView() {

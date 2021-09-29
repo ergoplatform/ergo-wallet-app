@@ -181,7 +181,6 @@ fun deserializeUnsignedTx(serializedTx: ByteArray): UnsignedErgoLikeTransaction 
  */
 fun signSerializedErgoTx(
     serializedTx: ByteArray,
-    serializedInputs: List<ByteArray>,
     mnemonic: String,
     mnemonicPass: String,
     derivedKeyIndices: List<Int>
@@ -199,15 +198,7 @@ fun signSerializedErgoTx(
             }
             val prover = proverBuilder.build()
             val reducedTx = ctx.parseReducedTransaction(serializedTx)
-            val inputs = reducedTx.tx.unsignedTx().inputs()
 
-            val boxes = serializedInputs.map { input ->
-                return@map deserializeErgobox(input)
-            }
-
-            // here we can check if inputs size = boxes.size && all ids match
-
-            val outputCandidates = reducedTx.tx.unsignedTx().outputCandidates()
             return@execute prover.signReduced(reducedTx, ERG_BASE_COST).toBytes()
         }
         return SigningResult(true, signedTxSerialized)
@@ -248,7 +239,7 @@ fun sendSignedErgoTx(
     }
 }
 
-private fun deserializeErgobox(input: ByteArray): ErgoBox? {
+fun deserializeErgobox(input: ByteArray): ErgoBox? {
     val r = `SigmaSerializer$`.`MODULE$`.startReader(input, 0)
     val ergoBox = `ErgoBoxSerializer$`.`MODULE$`.parse(r)
     return ergoBox

@@ -83,7 +83,7 @@
 
                     <TextView
                         android:id="@+id/hint_readonly"
-                        style="@style/TextAppearance.App.Body1"
+                        style="@style/TextAppearance.App.Body2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/half_horizontal_margin"
@@ -92,7 +92,6 @@
                         android:paddingHorizontal="10dp"
                         android:paddingVertical="3dp"
                         android:text="@string/hint_read_only"
-                        android:textSize="16sp"
                         android:textStyle="bold"
                         android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"

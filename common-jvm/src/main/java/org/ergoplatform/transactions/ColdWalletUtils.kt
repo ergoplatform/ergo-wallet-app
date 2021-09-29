@@ -4,8 +4,18 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.ergoplatform.ErgoBox
+import org.ergoplatform.android.deserializeErgobox
+import org.ergoplatform.android.deserializeUnsignedTx
+import org.ergoplatform.android.ergoNetworkType
+import org.ergoplatform.appkit.Address
+import org.ergoplatform.appkit.ErgoId
+import org.ergoplatform.explorer.client.model.InputInfo
+import org.ergoplatform.explorer.client.model.OutputInfo
+import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.utils.Base64Coder
+import scala.collection.JavaConversions
 
 private const val JSON_FIELD_TX = "reducedTx"
 private const val JSON_FIELD_SENDER = "sender"
@@ -114,3 +124,54 @@ fun getColdSigingRequestChunkPagesCount(chunk: String): Int {
         .split(QR_PREFIX_HEADER_DELIMITER)
     return pages.lastOrNull()?.toIntOrNull() ?: 1
 }
+
+fun buildTransactionInfoFromReduced(
+    serializedTx: ByteArray,
+    serializedInputs: List<ByteArray>? = null
+): TransactionInfo {
+    val unsignedTx = deserializeUnsignedTx(serializedTx)
+
+    val retVal = TransactionInfo()
+
+    retVal.id = unsignedTx.id()
+
+    // deserialize input boxes and store in hashmap
+    val inputBoxes = HashMap<String, ErgoBox>()
+    serializedInputs?.forEach { input ->
+        try {
+            val ergoBox = deserializeErgobox(input)
+            ergoBox?.let {
+                inputBoxes.put(ErgoId(ergoBox.id()).toString(), ergoBox)
+            }
+        } catch (t: Throwable) {
+            // ignore errors
+        }
+    }
+
+    // now add to TransactionInfo, if possible
+    JavaConversions.seqAsJavaList(unsignedTx.inputs())!!.forEach {
+        val boxid = ErgoId(it.boxId()).toString()
+        val inputInfo = InputInfo()
+        inputInfo.boxId = boxid
+        inputBoxes.get(boxid)?.let {
+            inputInfo.address = Address.fromErgoTree(it.ergoTree(), ergoNetworkType).toString()
+            inputInfo.value = it.value()
+            // TODO token
+        }
+        retVal.addInputsItem(inputInfo)
+    }
+
+    JavaConversions.seqAsJavaList(unsignedTx.outputCandidates())!!.forEach {
+        val outputInfo = OutputInfo()
+
+        outputInfo.address = Address.fromErgoTree(it.ergoTree(), ergoNetworkType).toString()
+        // TODO token
+        outputInfo.value = it.value()
+
+        retVal.addOutputsItem(outputInfo)
+    }
+
+    return retVal
+
+}
+

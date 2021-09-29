@@ -28,6 +28,10 @@ class ErgoAmount(val nanoErgs: Long) {
             .toPlainString()
     }
 
+    fun toStringTrimTrailingZeros(): String {
+        return toString().trimEnd('0').trimEnd('.')
+    }
+
     /**
      * @return double amount, only for representation purposes because double has floating point issues
      */

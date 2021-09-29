@@ -6,18 +6,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.UnsignedErgoLikeTransaction
 import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.deserializeUnsignedTx
 import org.ergoplatform.android.wallet.WalletDbEntity
+import org.ergoplatform.explorer.client.model.TransactionInfo
 
 class ColdWalletSigningViewModel : ViewModel() {
 
     var pagesQrCode = 0
     val pagesAdded get() = qrCodeChunks.size
     val qrCodeChunks = HashMap<Int, String>()
-    private val _reducedTx = MutableLiveData<UnsignedErgoLikeTransaction?>()
-    val reducedTx: LiveData<UnsignedErgoLikeTransaction?> = _reducedTx
+    private val _reducedTx = MutableLiveData<TransactionInfo?>()
+    val reducedTx: LiveData<TransactionInfo?> = _reducedTx
     var wallet: WalletDbEntity? = null
 
     fun addQrCodeChunk(qrCodeChunk: String): Boolean {
@@ -46,7 +45,7 @@ class ColdWalletSigningViewModel : ViewModel() {
         if (pagesAdded == pagesQrCode) {
             try {
                 val signingRequest = coldSigningRequestFromQrChunks(qrCodeChunks.values)
-                _reducedTx.postValue(deserializeUnsignedTx(signingRequest.serializedTx!!))
+                _reducedTx.postValue(buildTransactionInfoFromReduced(signingRequest.serializedTx!!, signingRequest.serializedInputs))
             } catch (t: Throwable) {
 
             }

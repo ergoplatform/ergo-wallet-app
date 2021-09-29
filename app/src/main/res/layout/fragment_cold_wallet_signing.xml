@@ -48,7 +48,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        style="@style/TextAppearance.AppCompat.Body1"
+                        style="@style/TextAppearance.App.Body2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -62,7 +62,7 @@
                         android:background="@color/lightgrey" />
 
                     <TextView
-                        style="@style/TextAppearance.AppCompat.Body1"
+                        style="@style/TextAppearance.App.Body1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
@@ -72,7 +72,7 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        style="@style/TextAppearance.AppCompat.Body1"
+                        style="@style/TextAppearance.App.Body2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/desc_inboxes" />
@@ -92,7 +92,7 @@
                         android:background="@color/lightgrey" />
 
                     <TextView
-                        style="@style/TextAppearance.AppCompat.Body1"
+                        style="@style/TextAppearance.App.Body1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
@@ -102,7 +102,7 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        style="@style/TextAppearance.AppCompat.Body1"
+                        style="@style/TextAppearance.App.Body2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/desc_outboxes" />
@@ -112,7 +112,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/half_horizontal_margin"
-                        android:orientation="vertical" />
+                        android:orientation="vertical">
+
+                        <include layout="@layout/entry_transaction_box" />
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
 
                     <Button

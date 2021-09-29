@@ -29,6 +29,7 @@
     <string name="label_dismiss">Dismiss</string>
     <string name="label_remove">Remove</string>
     <string name="label_confirm">Confirm</string>
+    <string name="label_erg_amount">%1s ERG</string>
 
     <!-- Wallet -->
     <string name="label_tokens">tokens</string>
