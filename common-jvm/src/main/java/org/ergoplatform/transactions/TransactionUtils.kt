@@ -19,23 +19,25 @@ fun TransactionInfo.reduceBoxes(): TransactionInfo {
     val combinedInputs = HashMap<String, InputInfo>()
 
     inputs.forEach {
-        val combined = combinedInputs.get(it.address ?: it.boxId) ?: InputInfo()
+        val addressKey = it.address ?: it.boxId
+        val combined = combinedInputs.get(addressKey) ?: InputInfo()
         combined.address = it.address
         combined.boxId = it.boxId
-        combined.value = (combined.value ?: 0) + it.value
+        combined.value = (combined.value ?: 0) + (it.value ?: 0)
         it.assets?.forEach { combined.addAssetsItem(it) }
-        combinedInputs.put(it.address ?: it.boxId, combined)
+        combinedInputs.put(addressKey, combined)
     }
 
     val combinedOutputs = HashMap<String, OutputInfo>()
 
     outputs.forEach {
-        val combined = combinedOutputs.get(it.address ?: it.boxId) ?: OutputInfo()
+        val addressKey = it.address ?: it.boxId
+        val combined = combinedOutputs.get(addressKey) ?: OutputInfo()
         combined.address = it.address
         combined.boxId = it.boxId
-        combined.value = (combined.value ?: 0) + it.value
+        combined.value = (combined.value ?: 0) + (it.value ?: 0)
         it.assets?.forEach { combined.addAssetsItem(it) }
-        combinedOutputs.put(it.address ?: it.boxId, combined)
+        combinedOutputs.put(addressKey, combined)
     }
 
     combinedInputs.values.forEach {
@@ -52,12 +54,27 @@ fun TransactionInfo.reduceBoxes(): TransactionInfo {
             output.value = output.value - ergAmount
             input.value = input.value - ergAmount
 
-            // TODO reduce token amounts
+            // reduce token amounts
+            // we can operate on the list entries safely because combineTokens() copied
+            // all entries of the original TransactionInfo
+            input.assets?.forEach { inputAssetInfo ->
+                output.assets?.filter { inputAssetInfo.tokenId.equals(it.tokenId) }?.firstOrNull()?.let {
+                    outputAssetInfo ->
+                    val tokenAmount = min(inputAssetInfo.amount, outputAssetInfo.amount)
+                    inputAssetInfo.amount = inputAssetInfo.amount - tokenAmount
+                    outputAssetInfo.amount = outputAssetInfo.amount - tokenAmount
+                }
+            }
+
+            input.assets = input.assets?.filter { it.amount != 0L }
+            output.assets = output.assets?.filter { it.amount != 0L }
         }
     }
 
     combinedInputs.values.forEach {
-        if (it.value > 0 || !it.assets.isNullOrEmpty())
+        // it.address == null needed since we need to keep boxes with null value
+        // when no input box information available
+        if (it.value > 0 || !it.assets.isNullOrEmpty() || it.address == null)
             retVal.addInputsItem(it)
     }
     combinedOutputs.values.forEach {
@@ -68,8 +85,11 @@ fun TransactionInfo.reduceBoxes(): TransactionInfo {
     return retVal
 }
 
+/**
+ * combine tokens with same id but different list entries
+ * returned items are guaranteed to be a copy
+ */
 fun combineTokens(tokens: List<AssetInstanceInfo>): List<AssetInstanceInfo> {
-    // combine tokens with same id but different list entries
     val hashmap = HashMap<String, AssetInstanceInfo>()
 
     tokens.forEach {

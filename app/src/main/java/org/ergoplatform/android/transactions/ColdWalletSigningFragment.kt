@@ -74,7 +74,7 @@ class ColdWalletSigningFragment : Fragment() {
             R.string.label_erg_amount,
             ErgoAmount(value ?: 0).toStringTrimTrailingZeros()
         )
-        boxBinding.boxErgAmount.visibility = if (value == null) View.GONE else View.VISIBLE
+        boxBinding.boxErgAmount.visibility = if (value == null || value == 0L) View.GONE else View.VISIBLE
         boxBinding.labelBoxAddress.text = address
         boxBinding.labelBoxAddress.setOnClickListener {
             boxBinding.labelBoxAddress.maxLines =

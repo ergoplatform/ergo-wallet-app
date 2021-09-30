@@ -147,11 +147,11 @@
     <!-- Cold wallet signing request screen -->
     <string name="title_signing_request">Confirm transaction</string>
     <string name="desc_signing_request">Please check the details of the transaction to issue.</string>
-    <string name="title_inboxes">Boxes to spent</string>
-    <string name="desc_inboxes">These boxes will be spent when the transaction is processed.</string>
-    <string name="title_outboxes">Outgoing boxes</string>
-    <string name="desc_outboxes">These boxes will be issued when the transaction is processed.</string>
-    <string name="error_qr_pages_num">Sorry, chunked QR codes not yet supported by this app.</string>
+    <string name="title_inboxes">Amounts to spent</string>
+    <string name="desc_inboxes">These amounts will be spent when the transaction is processed.</string>
+    <string name="title_outboxes">Outgoing amounts</string>
+    <string name="desc_outboxes">These amounts will be sent when the transaction is processed.</string>
+    <string name="error_qr_pages_num">Sorry, chunked QR codes not yet supported by this app version.</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, 2021</string>

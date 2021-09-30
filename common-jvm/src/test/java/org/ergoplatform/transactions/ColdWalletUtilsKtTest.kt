@@ -69,5 +69,26 @@ class ColdWalletUtilsKtTest {
         Assert.assertEquals(3, ti2.inputs.size)
         Assert.assertEquals(3, ti2.outputs.size)
         Assert.assertEquals(4, ti2.outputs.last().assets.size)
+
+        val tokenAmountBeforeReduce = ti2.outputs.last().assets.last().amount
+
+        val ti2b = ti2.reduceBoxes()
+        Assert.assertEquals(1, ti2b.inputs.size)
+        Assert.assertEquals(2, ti2b.outputs.size)
+
+        // Check that neither original token list nor original token object was changed by reduceBoxes()
+        Assert.assertEquals(4, ti2.outputs.last().assets.size)
+        Assert.assertEquals(tokenAmountBeforeReduce, ti2.outputs.last().assets.last().amount)
+
+        // same without input boxes
+        val csr3 =
+            parseColdSigningRequest("{\"reducedTx\":\"0QMDCp28G2Gct69t0D+IMK8h0kKEjj7f49cAtGwvUtSOPesAAGPk+W6yjBzn2jPcoFiaufhsXy52IsuIQjiCCE/q8m9DAACuLv3AeVnq+cluQls7Kz/8+YsWGTDNCl9HiVzLMP4oNgAAAARRQIOhcPxzQHHAd0j/RElAYGZUMXvVFoZRIO1wKVKrG/n/BLk/9n7C3gSwVnXkGjjA+vQJ1Jn9NExtNOXppL7dzaVi/TpNypHLwgdakRo6WxG37YEAl7GsWlS3Yqh3sGKW1lsZOJnBVNdbw6VbLTwjEfCfArnW7S2skTyxDDgwgAOA3qDLBQAIzQKDM/n3RU+NX/c9usmDN2ftb8OobPCnPflGsy6pkn2Rl7WLBQEA8zkAwIQ9EAUEAAQADjYQAgSQAQjNAnm+Zn753LusVaBilc6HCwcCm/zbLc4o2VnygVsW+BeY6gLRkqOajMenAXMAcwEQAQIEAtGWgwMBk6OMx7KlcwAAAZPCsqVzAQB0cwJzA4MBCM3urJOxpXMEtYsFAADA7/HRyQIACM0CLecmo/oGlC3SIpWWYFq5MkBM44Y0Rxm0lh3tkwZ7ITq1iwUEAQECgNDbw/QCAPCB28P0AgPQ2JatAwDNAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/NAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/NAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/QjAE\\u003d\"}")
+
+        val ti3 = buildTransactionInfoFromReduced(csr3.serializedTx!!, csr3.serializedInputs)
+        val ti3b = ti3.reduceBoxes()
+        Assert.assertEquals(3, ti3.inputs.size)
+        Assert.assertEquals(3, ti3b.inputs.size)
+        Assert.assertEquals(3, ti3.outputs.size)
+        Assert.assertEquals(3, ti3b.outputs.size)
     }
 }
