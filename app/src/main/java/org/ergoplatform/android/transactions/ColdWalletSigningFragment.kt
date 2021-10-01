@@ -1,24 +1,32 @@
 package org.ergoplatform.android.transactions
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.EntryTransactionBoxBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
+import org.ergoplatform.android.ui.AbstractAuthenticationFragment
+import org.ergoplatform.android.ui.ProgressBottomSheetDialogFragment
+import org.ergoplatform.android.ui.setQrCodeToImageView
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.transactions.reduceBoxes
 
 /**
  * Scans cold wallet signing request qr codes, signs the transaction, presents a qr code to go back
  */
-class ColdWalletSigningFragment : Fragment() {
+class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
 
     var _binding: FragmentColdWalletSigningBinding? = null
     val binding get() = _binding!!
@@ -33,14 +41,24 @@ class ColdWalletSigningFragment : Fragment() {
         return binding.root
     }
 
+    private val viewModel: ColdWalletSigningViewModel
+        get() {
+            val viewModel = ViewModelProvider(this).get(ColdWalletSigningViewModel::class.java)
+            return viewModel
+        }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val viewModel = ViewModelProvider(this).get(ColdWalletSigningViewModel::class.java)
+        val viewModel = viewModel
 
         args.qrCode?.let { viewModel.addQrCodeChunk(it) }
         viewModel.setWalletId(args.walletId, requireContext())
 
-        viewModel.reducedTx.observe(viewLifecycleOwner, {
+        viewModel.transactionInfo.observe(viewLifecycleOwner, {
+            // don't show transaction info when we already have a signing result
+            if (viewModel.signedQrCode != null)
+                return@observe
+
             it?.reduceBoxes()?.let {
                 binding.transactionInfo.visibility = View.VISIBLE
 
@@ -61,6 +79,64 @@ class ColdWalletSigningFragment : Fragment() {
                 }
             }
         })
+
+        viewModel.lockInterface.observe(viewLifecycleOwner, {
+            if (it)
+                ProgressBottomSheetDialogFragment.showProgressDialog(childFragmentManager)
+            else
+                ProgressBottomSheetDialogFragment.dismissProgressDialog(childFragmentManager)
+        })
+
+        viewModel.signingResult.observe(viewLifecycleOwner, {
+            if (it?.success == true && viewModel.signedQrCode != null) {
+                binding.transactionInfo.visibility = View.GONE
+                binding.cardSigningResult.visibility = View.VISIBLE
+
+                // TODO handle data over 4k length
+                setQrCodeToImageView(binding.qrCode, viewModel.signedQrCode!!.first(), 400, 400)
+
+            } else {
+                binding.cardSigningResult.visibility = View.GONE
+
+                it?.let {
+                    val snackbar = Snackbar.make(
+                        requireView(),
+                        R.string.error_prepare_transaction,
+                        Snackbar.LENGTH_LONG
+                    )
+                    it.errorMsg?.let { errorMsg ->
+                        snackbar.setAction(
+                            R.string.label_details
+                        ) {
+                            MaterialAlertDialogBuilder(requireContext())
+                                .setMessage(errorMsg)
+                                .setPositiveButton(R.string.button_copy) { _, _ ->
+                                    val clipboard = ContextCompat.getSystemService(
+                                        requireContext(),
+                                        ClipboardManager::class.java
+                                    )
+                                    val clip = ClipData.newPlainText("", errorMsg)
+                                    clipboard?.setPrimaryClip(clip)
+                                }
+                                .setNegativeButton(R.string.label_dismiss, null)
+                                .show()
+                        }
+                    }
+                    snackbar.setAnchorView(R.id.nav_view).show()
+                }
+            }
+        })
+
+        // Button click listeners
+        binding.buttonSignTx.setOnClickListener {
+            viewModel.wallet?.let {
+                startAuthFlow(it.walletConfig)
+            }
+        }
+
+        binding.buttonDismiss.setOnClickListener {
+            findNavController().popBackStack()
+        }
     }
 
     private fun bindBoxView(
@@ -74,7 +150,8 @@ class ColdWalletSigningFragment : Fragment() {
             R.string.label_erg_amount,
             ErgoAmount(value ?: 0).toStringTrimTrailingZeros()
         )
-        boxBinding.boxErgAmount.visibility = if (value == null || value == 0L) View.GONE else View.VISIBLE
+        boxBinding.boxErgAmount.visibility =
+            if (value == null || value == 0L) View.GONE else View.VISIBLE
         boxBinding.labelBoxAddress.text = address
         boxBinding.labelBoxAddress.setOnClickListener {
             boxBinding.labelBoxAddress.maxLines =
@@ -94,6 +171,14 @@ class ColdWalletSigningFragment : Fragment() {
                 tokenBinding.labelTokenVal.text = it.amount.toString()
             }
         }
+    }
+
+    override fun proceedAuthFlowWithPassword(password: String): Boolean {
+        return viewModel.signTxWithPassword(password, requireContext())
+    }
+
+    override fun proceedAuthFlowFromBiometrics() {
+        context?.let { viewModel.signTxUserAuth(it) }
     }
 
     override fun onDestroyView() {

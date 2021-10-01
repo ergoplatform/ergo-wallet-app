@@ -117,9 +117,8 @@
                         <include layout="@layout/entry_transaction_box" />
                     </androidx.appcompat.widget.LinearLayoutCompat>
 
-
                     <Button
-                        android:id="@+id/button_add_address"
+                        android:id="@+id/button_sign_tx"
                         style="?attr/materialButtonStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -131,6 +130,48 @@
 
             </androidx.cardview.widget.CardView>
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_signing_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/qr_code"
+                        android:layout_width="match_parent"
+                        android:layout_height="325dp"
+                        android:layout_marginVertical="@dimen/activity_vertical_margin"
+                        android:contentDescription="@string/label_qr_code"
+                        tools:src="@drawable/ic_qr_code_24" />
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                        android:gravity="center"
+                        android:text="@string/desc_show_signed" />
+
+                    <Button
+                        android:id="@+id/button_dismiss"
+                        style="?attr/materialButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:layout_marginBottom="24dp"
+                        android:minWidth="120dp"
+                        android:text="@string/label_dismiss" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
         </FrameLayout>
     </androidx.core.widget.NestedScrollView>
 

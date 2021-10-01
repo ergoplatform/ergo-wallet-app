@@ -145,13 +145,15 @@
     <string name="error_token_amount">Please enter valid amounts or remove token entries not to send</string>
 
     <!-- Cold wallet signing request screen -->
-    <string name="title_signing_request">Confirm transaction</string>
+    <string name="title_signing_request">Sign</string>
     <string name="desc_signing_request">Please check the details of the transaction to issue.</string>
     <string name="title_inboxes">Amounts to spent</string>
     <string name="desc_inboxes">These amounts will be spent when the transaction is processed.</string>
     <string name="title_outboxes">Outgoing amounts</string>
     <string name="desc_outboxes">These amounts will be sent when the transaction is processed.</string>
     <string name="error_qr_pages_num">Sorry, chunked QR codes not yet supported by this app version.</string>
+    <string name="desc_show_signed">Your transaction was signed and needs to be sent to the network. Scan this QR code
+       to proceed.</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, 2021</string>

@@ -16,12 +16,14 @@ import org.ergoplatform.explorer.client.model.InputInfo
 import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.transactions.SigningResult
 import org.ergoplatform.utils.Base64Coder
 import scala.Tuple2
 import scala.collection.JavaConversions
 import special.collection.Coll
 
-private const val JSON_FIELD_TX = "reducedTx"
+private const val JSON_FIELD_REDUCED_TX = "reducedTx"
+private const val JSON_FIELD_SIGNED_TX = "signedTx"
 private const val JSON_FIELD_SENDER = "sender"
 private const val JSON_FIELD_INPUTS = "inputs"
 
@@ -32,12 +34,24 @@ fun buildColdSigningRequest(data: PromptSigningResult): String? {
     if (data.success) {
         val gson = Gson()
         val root = JsonObject()
-        root.addProperty(JSON_FIELD_TX, String(Base64Coder.encode(data.serializedTx!!)))
+        root.addProperty(JSON_FIELD_REDUCED_TX, String(Base64Coder.encode(data.serializedTx!!)))
         root.addProperty(JSON_FIELD_SENDER, data.address)
         val inputsarray = JsonArray()
         data.serializedInputs?.map { String(Base64Coder.encode(it)) }
             ?.forEach { inputsarray.add(it) }
         root.add(JSON_FIELD_INPUTS, inputsarray)
+        return gson.toJson(root)
+
+    } else {
+        return null
+    }
+}
+
+fun buildColdSigningResponse(data: SigningResult): String? {
+    if (data.success) {
+        val gson = Gson()
+        val root = JsonObject()
+        root.addProperty(JSON_FIELD_SIGNED_TX, String(Base64Coder.encode(data.serializedTx!!)))
         return gson.toJson(root)
 
     } else {
@@ -51,7 +65,7 @@ fun parseColdSigningRequest(qrData: String): PromptSigningResult {
         val jsonTree = JsonParser().parse(qrData) as JsonObject
 
         // reducedTx is guaranteed
-        val serializedTx = Base64Coder.decode(jsonTree.get(JSON_FIELD_TX).asString)
+        val serializedTx = Base64Coder.decode(jsonTree.get(JSON_FIELD_REDUCED_TX).asString)
 
         // sender is optional
         val sender =
@@ -69,22 +83,35 @@ fun parseColdSigningRequest(qrData: String): PromptSigningResult {
     }
 }
 
-const val QR_SIZE_LIMIT = 3600
+const val QR_SIZE_LIMIT = 2900
 private const val QR_PREFIX_COLD_SIGNING_REQUEST = "CSR"
+private const val QR_PREFIX_COLD_SIGNED_TX = "CSTX"
 private const val QR_PREFIX_DATA_DELIMITER = '-'
 private const val QR_PREFIX_HEADER_DELIMITER = '/'
 
 fun coldSigninRequestToQrChunks(serializedSigningRequest: String, sizeLimit: Int): List<String> {
-    val actualSizeLimit = sizeLimit - 5 // reserve some space for our prefix
+    return buildQrChunks(QR_PREFIX_COLD_SIGNING_REQUEST, sizeLimit, serializedSigningRequest)
+}
+
+fun coldSigningResponseToQrChunks(serializedSigningRequest: String, sizeLimit: Int): List<String> {
+    return buildQrChunks(QR_PREFIX_COLD_SIGNED_TX, sizeLimit, serializedSigningRequest)
+}
+
+private fun buildQrChunks(
+    prefix: String,
+    sizeLimit: Int,
+    serializedSigningRequest: String
+): List<String> {
+    val actualSizeLimit = sizeLimit - 20 // reserve some space for our prefix
 
     if (serializedSigningRequest.length <= actualSizeLimit) {
-        return listOf(QR_PREFIX_COLD_SIGNING_REQUEST + QR_PREFIX_DATA_DELIMITER + serializedSigningRequest)
+        return listOf(prefix + QR_PREFIX_DATA_DELIMITER + serializedSigningRequest)
     } else {
         val chunks = serializedSigningRequest.chunked(sizeLimit)
         var slice = 0
         return chunks.map {
             slice++
-            QR_PREFIX_COLD_SIGNING_REQUEST + slice.toString() + QR_PREFIX_HEADER_DELIMITER + chunks.size + QR_PREFIX_DATA_DELIMITER + it
+            prefix + slice.toString() + QR_PREFIX_HEADER_DELIMITER + chunks.size + QR_PREFIX_DATA_DELIMITER + it
         }
     }
 }
@@ -129,6 +156,9 @@ fun getColdSigingRequestChunkPagesCount(chunk: String): Int {
     return pages.lastOrNull()?.toIntOrNull() ?: 1
 }
 
+/*
+ * TODO #13 use own db entity data class (null safe)
+ */
 fun buildTransactionInfoFromReduced(
     serializedTx: ByteArray,
     serializedInputs: List<ByteArray>? = null

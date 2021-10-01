@@ -176,8 +176,6 @@ class SendFundsViewModel : ViewModel() {
 
             startPaymentWithMnemonicAsync(mnemonic, context)
 
-            _lockInterface.postValue(true)
-
             return true
         }
 
@@ -194,8 +192,6 @@ class SendFundsViewModel : ViewModel() {
             mnemonic = deserializeSecrets(String(decryptData!!))
 
             startPaymentWithMnemonicAsync(mnemonic!!, context)
-
-            _lockInterface.postValue(true)
 
         }
     }
@@ -223,6 +219,8 @@ class SendFundsViewModel : ViewModel() {
             }
             _txWorkDoneLiveData.postValue(ergoTxResult)
         }
+
+        _lockInterface.postValue(true)
     }
 
     fun startColdWalletPayment(context: Context) {

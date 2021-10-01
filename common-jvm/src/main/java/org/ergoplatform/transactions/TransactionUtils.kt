@@ -9,6 +9,7 @@ import kotlin.math.min
 /**
  * combines inboxes and outboxes and reduces change amounts for user-friendly outputs
  * returns a new object with less information
+ * TODO #13 use own db entity data class (null safe)
  */
 fun TransactionInfo.reduceBoxes(): TransactionInfo {
     val retVal = TransactionInfo()
