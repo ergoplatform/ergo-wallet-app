@@ -1,26 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/width_match_parent_max_500"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    tools:background="?attr/colorSurface">
+    android:theme="@style/Theme.ErgoWallet">
 
-    <ImageView
-        android:id="@+id/qr_code"
-        android:layout_width="match_parent"
-        android:layout_height="325dp"
-        android:layout_marginVertical="@dimen/half_horizontal_margin"
-        android:contentDescription="@string/label_qr_code"
-        tools:src="@drawable/ic_qr_code_24" />
-
-    <TextView
-        style="@style/TextAppearance.App.Body1"
-        android:layout_width="match_parent"
+    <LinearLayout
+        style="@style/width_match_parent_max_500"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
-        android:layout_marginBottom="24dp"
-        android:gravity="center"
-        android:text="@string/desc_prompt_signing" />
+        android:orientation="vertical"
+        tools:background="?attr/colorSurface">
 
-</LinearLayout>
+        <ImageView
+            android:id="@+id/qr_code"
+            android:layout_width="match_parent"
+            android:layout_height="325dp"
+            android:layout_marginVertical="@dimen/half_horizontal_margin"
+            android:contentDescription="@string/label_qr_code"
+            tools:src="@drawable/ic_qr_code_24" />
+
+        <TextView
+            style="@style/TextAppearance.App.Body1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+            android:gravity="center"
+            android:text="@string/desc_prompt_signing" />
+
+        <Button
+            android:id="@+id/button_scan_signed_tx"
+            style="?attr/materialButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="24dp"
+            android:text="@string/button_scan_signed_tx" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

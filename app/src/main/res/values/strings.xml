@@ -135,8 +135,10 @@
     <string name="error_password_empty">Please enter a valid password</string>
     <string name="error_password_wrong">Wrong password</string>
     <string name="desc_transaction_send">Transaction was sent successfully and awaits confirmation. Transaction ID:</string>
-    <string name="desc_prompt_signing">Your transaction was prepared and needs to be signed with your signing device. Scan this QR code
-       to proceed.</string>
+    <string name="desc_prompt_signing">Your transaction was prepared. Scan this QR code
+       with your signing device to proceed.\n\nWhen present, scan the signed transaction QR code to
+        sent it to the network.</string>
+    <string name="button_scan_signed_tx">Scan signed tx</string>
     <string name="title_authenticate">Authentication required</string>
     <string name="error_device_security">Security error: %1s</string>
     <string name="label_add_token">Token</string>

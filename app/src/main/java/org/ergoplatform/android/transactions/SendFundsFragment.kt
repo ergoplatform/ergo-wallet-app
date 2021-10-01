@@ -367,7 +367,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 if (viewModel.wallet?.walletConfig?.secretStorage != null
                     && isColdSigningRequestChunk(it)
                 ) {
-                    if (getColdSigingRequestChunkPagesCount(it) > 1) {
+                    if (getQrChunkPagesCount(it) > 1) {
                         // TODO handle paged qr codes
                         Snackbar.make(
                             requireView(),

@@ -23,11 +23,12 @@ class ColdWalletUtilsKtTest {
         val manyChunks = coldSigninRequestToQrChunks(csr!!, 30)
         val oneChunk = coldSigninRequestToQrChunks(csr!!, 50000000)
         Assert.assertEquals(1, oneChunk.size)
-        Assert.assertEquals(0, getColdSigingRequestChunkIndex(oneChunk.first()))
-        Assert.assertEquals(1, getColdSigingRequestChunkPagesCount(oneChunk.first()))
+        Assert.assertEquals(0, getQrChunkIndex(oneChunk.first()))
+        Assert.assertEquals(1, getQrChunkIndex(manyChunks.first()))
+        Assert.assertEquals(1, getQrChunkPagesCount(oneChunk.first()))
         Assert.assertEquals(
             manyChunks.size,
-            getColdSigingRequestChunkPagesCount(manyChunks.first())
+            getQrChunkPagesCount(manyChunks.first())
         )
 
         val prompt1 = coldSigningRequestFromQrChunks(manyChunks)

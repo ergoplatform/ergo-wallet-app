@@ -83,6 +83,21 @@ fun parseColdSigningRequest(qrData: String): PromptSigningResult {
     }
 }
 
+fun parseColdSigningResponse(qrData: String): SigningResult {
+    try {
+
+        val jsonTree = JsonParser().parse(qrData) as JsonObject
+
+        // reducedTx is guaranteed
+        val serializedTx = Base64Coder.decode(jsonTree.get(JSON_FIELD_SIGNED_TX).asString)
+
+        return SigningResult(true, serializedTx)
+
+    } catch (t: Throwable) {
+        return SigningResult(false, errorMsg = t.message)
+    }
+}
+
 const val QR_SIZE_LIMIT = 2900
 private const val QR_PREFIX_COLD_SIGNING_REQUEST = "CSR"
 private const val QR_PREFIX_COLD_SIGNED_TX = "CSTX"
@@ -111,24 +126,19 @@ private fun buildQrChunks(
         var slice = 0
         return chunks.map {
             slice++
-            prefix + slice.toString() + QR_PREFIX_HEADER_DELIMITER + chunks.size + QR_PREFIX_DATA_DELIMITER + it
+            prefix + QR_PREFIX_HEADER_DELIMITER + slice.toString() + QR_PREFIX_HEADER_DELIMITER + chunks.size + QR_PREFIX_DATA_DELIMITER + it
         }
     }
 }
 
-fun coldSigningRequestFromQrChunks(qrChunks: Iterable<String>): PromptSigningResult {
+fun coldSigningRequestFromQrChunks(qrChunks: Collection<String>): PromptSigningResult {
     try {
         // check the list
         qrChunks.forEach {
             if (!isColdSigningRequestChunk(it))
                 throw IllegalArgumentException("Not a cold signing request chunk")
         }
-        val chunksSorted = qrChunks.sortedBy { getColdSigingRequestChunkIndex(it) }.map {
-            it.substringAfter(
-                QR_PREFIX_DATA_DELIMITER
-            )
-        }
-        val qrdata = chunksSorted.joinToString("") { it }
+        val qrdata = joinQrCodeChunks(qrChunks)
 
         return parseColdSigningRequest(qrdata)
 
@@ -137,21 +147,61 @@ fun coldSigningRequestFromQrChunks(qrChunks: Iterable<String>): PromptSigningRes
     }
 }
 
+fun coldSigningResponseFromQrChunks(qrChunks: Collection<String>): SigningResult {
+    try {
+        qrChunks.forEach {
+            if (!isColdSignedTxChunk(it))
+                throw IllegalArgumentException("Not a cold signing request chunk")
+        }
+        val qrdata = joinQrCodeChunks(qrChunks)
+
+        return parseColdSigningResponse(qrdata)
+
+    } catch (t: Throwable) {
+        return SigningResult(false, errorMsg = t.message)
+    }
+}
+
+private fun joinQrCodeChunks(qrChunks: Collection<String>): String {
+    val chunksSorted = qrChunks.sortedBy { getQrChunkIndex(it) }.map {
+        if (getQrChunkPagesCount(it) != qrChunks.size)
+            throw IllegalArgumentException("QR code chunk sizes differ")
+
+        it.substringAfter(
+            QR_PREFIX_DATA_DELIMITER
+        )
+    }
+    val qrdata = chunksSorted.joinToString("") { it }
+    return qrdata
+}
+
 fun isColdSigningRequestChunk(chunk: String): Boolean {
     return chunk.startsWith(QR_PREFIX_COLD_SIGNING_REQUEST) &&
             chunk.contains(QR_PREFIX_DATA_DELIMITER)
 }
 
-fun getColdSigingRequestChunkIndex(chunk: String): Int {
-    val chunkWithoutHeaderPrefix = chunk.removePrefix(QR_PREFIX_COLD_SIGNING_REQUEST)
+fun isColdSignedTxChunk(chunk: String): Boolean {
+    return chunk.startsWith(QR_PREFIX_COLD_SIGNED_TX) &&
+            chunk.contains(QR_PREFIX_DATA_DELIMITER)
+}
+
+fun getQrChunkIndex(chunk: String): Int {
+    val chunkWithoutData = chunk.substringBefore(QR_PREFIX_DATA_DELIMITER)
+    if (!chunkWithoutData.contains(QR_PREFIX_HEADER_DELIMITER))
+        return 0
+
+    val chunkWithoutHeaderPrefix = chunk.substringAfter(QR_PREFIX_HEADER_DELIMITER)
     val pages = chunkWithoutHeaderPrefix.substringBefore(QR_PREFIX_DATA_DELIMITER)
         .split(QR_PREFIX_HEADER_DELIMITER)
     return pages.firstOrNull()?.toIntOrNull() ?: 0
 }
 
-fun getColdSigingRequestChunkPagesCount(chunk: String): Int {
-    val chunkWithoutHeaderPrefix = chunk.removePrefix(QR_PREFIX_COLD_SIGNING_REQUEST)
-    val pages = chunkWithoutHeaderPrefix.substringBefore(QR_PREFIX_DATA_DELIMITER)
+fun getQrChunkPagesCount(chunk: String): Int {
+    val chunkWithoutData = chunk.substringBefore(QR_PREFIX_DATA_DELIMITER)
+    if (!chunkWithoutData.contains(QR_PREFIX_HEADER_DELIMITER))
+        return 1
+
+    val pages = chunkWithoutData.substringBefore(QR_PREFIX_DATA_DELIMITER)
         .split(QR_PREFIX_HEADER_DELIMITER)
     return pages.lastOrNull()?.toIntOrNull() ?: 1
 }

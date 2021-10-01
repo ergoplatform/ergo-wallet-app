@@ -39,8 +39,8 @@ class ColdWalletSigningViewModel : ViewModel() {
             return false
         }
 
-        val page = getColdSigingRequestChunkIndex(qrCodeChunk)
-        val count = getColdSigingRequestChunkPagesCount(qrCodeChunk)
+        val page = getQrChunkIndex(qrCodeChunk)
+        val count = getQrChunkPagesCount(qrCodeChunk)
 
         if (pagesQrCode != 0 && count != pagesQrCode) {
             return false

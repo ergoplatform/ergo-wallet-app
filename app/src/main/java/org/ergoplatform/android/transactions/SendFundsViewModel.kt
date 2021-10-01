@@ -249,6 +249,31 @@ class SendFundsViewModel : ViewModel() {
         }
     }
 
+    fun sendColdWalletSignedTx(qrCodes: List<String>, context: Context) {
+        _lockInterface.postValue(true)
+        viewModelScope.launch {
+            val ergoTxResult: SendTransactionResult
+            withContext(Dispatchers.IO) {
+                val signingResult = coldSigningResponseFromQrChunks(qrCodes)
+                if (signingResult.success) {
+                    ergoTxResult = sendSignedErgoTx(
+                        signingResult.serializedTx!!,
+                        getPrefNodeUrl(context), getPrefExplorerApiUrl(context)
+                    )
+                } else {
+                    ergoTxResult = SendTransactionResult(false, errorMsg = signingResult.errorMsg)
+                }
+            }
+            _lockInterface.postValue(false)
+            if (ergoTxResult.success) {
+                NodeConnector.getInstance().invalidateCache()
+                _txId.postValue(ergoTxResult.txId!!)
+            }
+            _txWorkDoneLiveData.postValue(ergoTxResult)
+        }
+
+    }
+
     /**
      * @return list of tokens to choose from, that means available on the wallet and not already chosen
      */
