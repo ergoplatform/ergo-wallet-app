@@ -137,6 +137,12 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     private fun addressChanged(address: String?) {
         // The selected address changed. It is null for "all addresses"
 
+        if (walletDetailsViewModel.wallet == null) {
+            // wallet was deleted from config screen
+            findNavController().popBackStack()
+            return
+        }
+
         // wallet is safely non-null here
         val wallet = walletDetailsViewModel.wallet!!
 
@@ -209,11 +215,13 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     private fun enableLayoutChangeAnimations() {
         // set layout change animations. they are not set in the xml to avoid animations for the first
         // time the layout is displayed
-        binding.layoutBalances.layoutTransition = LayoutTransition()
-        binding.layoutTokens.layoutTransition = LayoutTransition()
-        binding.layoutTokens.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        binding.layoutOuter.layoutTransition = LayoutTransition()
-        binding.layoutOuter.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        _binding?.let { binding ->
+            binding.layoutBalances.layoutTransition = LayoutTransition()
+            binding.layoutTokens.layoutTransition = LayoutTransition()
+            binding.layoutTokens.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+            binding.layoutOuter.layoutTransition = LayoutTransition()
+            binding.layoutOuter.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        }
     }
 
     override fun onDestroyView() {
