@@ -49,26 +49,27 @@ class ColdWalletSigningViewModel : ViewModel() {
         qrCodeChunks.put(page, qrCodeChunk)
         pagesQrCode = count
 
-        buildRequestWhenApplicable()
+        val ti = buildRequestWhenApplicable()
+        _transactionInfo.postValue(ti)
 
         return true
     }
 
-    private fun buildRequestWhenApplicable() {
+    private fun buildRequestWhenApplicable(): TransactionInfo? {
         if (pagesAdded == pagesQrCode) {
             try {
                 val sr = coldSigningRequestFromQrChunks(qrCodeChunks.values)
                 signingRequest = sr
-                _transactionInfo.postValue(
-                    buildTransactionInfoFromReduced(
-                        sr.serializedTx!!,
-                        sr.serializedInputs
-                    )
+                return buildTransactionInfoFromReduced(
+                    sr.serializedTx!!,
+                    sr.serializedInputs
                 )
             } catch (t: Throwable) {
 
             }
         }
+
+        return null
     }
 
     fun setWalletId(walletId: Int, ctx: Context) {
@@ -78,7 +79,7 @@ class ColdWalletSigningViewModel : ViewModel() {
         }
     }
 
-    fun signTxWithPassword(password: String, context: Context): Boolean {
+    fun signTxWithPassword(password: String): Boolean {
         wallet?.walletConfig?.secretStorage?.let {
             val mnemonic: String?
             try {
@@ -94,7 +95,7 @@ class ColdWalletSigningViewModel : ViewModel() {
                 return false
             }
 
-            signTxWithMnemonicAsync(mnemonic, context)
+            signTxWithMnemonicAsync(mnemonic)
 
             return true
         }
@@ -102,7 +103,7 @@ class ColdWalletSigningViewModel : ViewModel() {
         return false
     }
 
-    fun signTxUserAuth(context: Context) {
+    fun signTxUserAuth() {
         // we don't handle exceptions here by intention: we throw them back to the caller which
         // will show a snackbar to give the user a hint what went wrong
         wallet?.walletConfig?.secretStorage?.let {
@@ -111,12 +112,12 @@ class ColdWalletSigningViewModel : ViewModel() {
             val decryptData = AesEncryptionManager.decryptDataWithDeviceKey(it)
             mnemonic = deserializeSecrets(String(decryptData!!))
 
-            signTxWithMnemonicAsync(mnemonic!!, context)
+            signTxWithMnemonicAsync(mnemonic!!)
 
         }
     }
 
-    private fun signTxWithMnemonicAsync(mnemonic: String, context: Context) {
+    private fun signTxWithMnemonicAsync(mnemonic: String) {
         signingRequest?.let { signingRequest ->
             val derivedAddresses =
                 wallet!!.getSortedDerivedAddressesList().map { it.derivationIndex }

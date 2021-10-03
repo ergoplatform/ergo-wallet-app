@@ -239,8 +239,10 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         // set layout change animations. they are not set in the xml to avoid animations for the first
         // time the layout is displayed, and enabling them is delayed due to the same reason
         Handler().postDelayed({
-            binding.container.layoutTransition = LayoutTransition()
-            binding.container.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+            _binding?.let { binding ->
+                binding.container.layoutTransition = LayoutTransition()
+                binding.container.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+            }
         }, 200)
     }
 
@@ -367,19 +369,13 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 if (viewModel.wallet?.walletConfig?.secretStorage != null
                     && isColdSigningRequestChunk(it)
                 ) {
-                    if (getQrChunkPagesCount(it) > 1) {
-                        // TODO handle paged qr codes
-                        Snackbar.make(
-                            requireView(),
-                            R.string.error_qr_pages_num,
-                            Snackbar.LENGTH_LONG
-                        ).setAnchorView(R.id.nav_view).show()
-                    } else {
-                        findNavController().navigate(
-                            SendFundsFragmentDirections
-                                .actionSendFundsFragmentToColdWalletSigningFragment(it, viewModel.wallet!!.walletConfig.id)
-                        )
-                    }
+                    findNavController().navigate(
+                        SendFundsFragmentDirections
+                            .actionSendFundsFragmentToColdWalletSigningFragment(
+                                it,
+                                viewModel.wallet!!.walletConfig.id
+                            )
+                    )
                 } else {
                     val content = parsePaymentRequestFromQrCode(it)
                     content?.let {

@@ -172,6 +172,50 @@
                         android:text="@string/label_dismiss" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_scan_more"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginVertical="@dimen/activity_vertical_margin"
+                        android:contentDescription="@string/label_qr_code"
+                        android:src="@drawable/ic_qr_code_24" />
+
+                    <TextView
+                        android:id="@+id/label_scanned_pages"
+                        style="@style/TextAppearance.App.Headline2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                        android:gravity="center"
+                        tools:text="1 of 2" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_scan_more"
+                        style="?attr/materialButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:layout_marginBottom="24dp"
+                        android:minWidth="120dp"
+                        android:text="@string/label_scan_qr"
+                        app:icon="@drawable/ic_qr_code_24" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
         </FrameLayout>
     </androidx.core.widget.NestedScrollView>
 

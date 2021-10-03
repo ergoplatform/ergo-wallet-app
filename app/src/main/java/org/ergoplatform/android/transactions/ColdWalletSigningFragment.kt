@@ -2,6 +2,7 @@ package org.ergoplatform.android.transactions
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.EntryTransactionBoxBinding
@@ -59,8 +61,19 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             if (viewModel.signedQrCode != null)
                 return@observe
 
+            if (it == null) {
+                // refresh information on scanned codes
+                binding.labelScannedPages.text = getString(
+                    R.string.label_qr_pages_info,
+                    viewModel.pagesAdded.toString(),
+                    viewModel.pagesQrCode.toString()
+                )
+                binding.cardScanMore.visibility = View.VISIBLE
+            }
+
             it?.reduceBoxes()?.let {
                 binding.transactionInfo.visibility = View.VISIBLE
+                binding.cardScanMore.visibility = View.GONE
 
                 binding.layoutInboxes.apply {
                     removeAllViews()
@@ -91,6 +104,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             if (it?.success == true && viewModel.signedQrCode != null) {
                 binding.transactionInfo.visibility = View.GONE
                 binding.cardSigningResult.visibility = View.VISIBLE
+                binding.cardScanMore.visibility = View.GONE
 
                 // TODO handle data over 4k length
                 setQrCodeToImageView(binding.qrCode, viewModel.signedQrCode!!.first(), 400, 400)
@@ -137,6 +151,10 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
         binding.buttonDismiss.setOnClickListener {
             findNavController().popBackStack()
         }
+
+        binding.buttonScanMore.setOnClickListener {
+            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+        }
     }
 
     private fun bindBoxView(
@@ -174,11 +192,22 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
     }
 
     override fun proceedAuthFlowWithPassword(password: String): Boolean {
-        return viewModel.signTxWithPassword(password, requireContext())
+        return viewModel.signTxWithPassword(password)
     }
 
     override fun proceedAuthFlowFromBiometrics() {
-        context?.let { viewModel.signTxUserAuth(it) }
+        viewModel.signTxUserAuth()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            result.contents?.let {
+                viewModel.addQrCodeChunk(it)
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     override fun onDestroyView() {
