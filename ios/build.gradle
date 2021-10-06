@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+    id 'kotlin'
+    id 'robovm'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    implementation project(path: ':common-jvm')
+
+    implementation "com.mobidevelop.robovm:robovm-rt:${robovm_version}"
+    implementation "com.mobidevelop.robovm:robovm-cocoatouch:${robovm_version}"
+}

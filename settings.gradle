@@ -1,5 +1,5 @@
 include ':android'
 include ':ios'
-include ':desktop'
+include ':sqldelight'
 include ':common-jvm'
 rootProject.name = "Ergo Wallet"
