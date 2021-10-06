@@ -1,9 +1,11 @@
 package org.ergoplatform.android.wallet
 
 import androidx.room.*
+import org.ergoplatform.persistance.*
 
-val ENC_TYPE_PASSWORD = 1
-val ENC_TYPE_DEVICE = 2
+// Defines the Room database entities for wallets
+// Modularization is done similar to
+// https://jacquessmuts.github.io/post/modularization_room/
 
 @Entity(tableName = "wallet_configs")
 data class WalletConfigDbEntity(
@@ -13,7 +15,30 @@ data class WalletConfigDbEntity(
     @ColumnInfo(name = "enc_type") val encryptionType: Int?,
     @ColumnInfo(name = "secret_storage") val secretStorage: ByteArray?,
     @ColumnInfo(name = "unfold_tokens") val unfoldTokens: Boolean = false,
-)
+) {
+    fun toModel(): WalletConfig {
+        return WalletConfig(
+            id.toLong(),
+            displayName,
+            firstAddress,
+            encryptionType,
+            secretStorage,
+            unfoldTokens
+        )
+    }
+}
+
+fun WalletConfig.toDbEntity(): WalletConfigDbEntity {
+    return WalletConfigDbEntity(
+        id.toInt(),
+        displayName,
+        firstAddress,
+        encryptionType,
+        secretStorage,
+        unfoldTokens
+    )
+}
+
 
 @Entity(tableName = "wallet_states")
 data class WalletStateDbEntity(
@@ -21,7 +46,15 @@ data class WalletStateDbEntity(
     @ColumnInfo(name = "wallet_first_address") val walletFirstAddress: String,
     val balance: Long?,
     @ColumnInfo(name = "unconfirmed_balance") val unconfirmedBalance: Long?
-)
+) {
+    fun toModel(): WalletState {
+        return WalletState(publicAddress, walletFirstAddress, balance, unconfirmedBalance)
+    }
+}
+
+fun WalletState.toDbEntity(): WalletStateDbEntity {
+    return WalletStateDbEntity(publicAddress, walletFirstAddress, balance, unconfirmedBalance)
+}
 
 @Entity(tableName = "wallet_tokens")
 data class WalletTokenDbEntity(
@@ -32,7 +65,23 @@ data class WalletTokenDbEntity(
     val amount: Long?,
     val decimals: Int?,
     val name: String?,
-)
+) {
+    fun toModel(): WalletToken {
+        return WalletToken(id, publicAddress, walletFirstAddress, tokenId, amount, decimals, name)
+    }
+}
+
+fun WalletToken.toDbEntity(): WalletTokenDbEntity {
+    return WalletTokenDbEntity(
+        id,
+        publicAddress,
+        walletFirstAddress,
+        tokenId,
+        amount,
+        decimals,
+        name
+    )
+}
 
 @Entity(tableName = "wallet_addresses")
 data class WalletAddressDbEntity(
@@ -41,7 +90,15 @@ data class WalletAddressDbEntity(
     @ColumnInfo(name = "index") val derivationIndex: Int,
     @ColumnInfo(name = "public_address") val publicAddress: String,
     val label: String?,
-)
+) {
+    fun toModel(): WalletAddress {
+        return WalletAddress(id, walletFirstAddress, derivationIndex, publicAddress, label)
+    }
+}
+
+fun WalletAddress.toDbEntity(): WalletAddressDbEntity {
+    return WalletAddressDbEntity(id, walletFirstAddress, derivationIndex, publicAddress, label)
+}
 
 data class WalletDbEntity(
     @Embedded val walletConfig: WalletConfigDbEntity,
@@ -60,4 +117,12 @@ data class WalletDbEntity(
         entityColumn = "wallet_first_address",
     )
     val addresses: List<WalletAddressDbEntity>
-)
+) {
+    fun toModel(): Wallet {
+        return Wallet(
+            walletConfig.toModel(),
+            state.map { it.toModel() },
+            tokens.map { it.toModel() },
+            addresses.map { it.toModel() })
+    }
+}

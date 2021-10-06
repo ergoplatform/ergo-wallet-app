@@ -1,0 +1,18 @@
+import java.lang.Boolean;
+
+CREATE TABLE IF NOT EXISTS `wallet_configs` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `display_name` TEXT,
+    `public_address` TEXT,
+    `enc_type` INTEGER AS Int,
+    `secret_storage` BLOB,
+    `unfold_tokens` INTEGER AS Boolean NOT NULL
+);
+
+selectAll:
+SELECT * FROM wallet_configs;
+
+insertOrReplace:
+INSERT OR REPLACE INTO `wallet_configs` (
+    `id`,`display_name`,`public_address`,`enc_type`,`secret_storage`,`unfold_tokens`
+) VALUES ?;

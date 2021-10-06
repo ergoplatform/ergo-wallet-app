@@ -18,6 +18,8 @@ import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.persistance.ENC_TYPE_DEVICE
+import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
 
 /**
  * Dialog to save a created or restored wallet

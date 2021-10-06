@@ -4,9 +4,9 @@ import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import org.ergoplatform.android.R
-import org.ergoplatform.android.wallet.ENC_TYPE_DEVICE
-import org.ergoplatform.android.wallet.ENC_TYPE_PASSWORD
 import org.ergoplatform.android.wallet.WalletConfigDbEntity
+import org.ergoplatform.persistance.ENC_TYPE_DEVICE
+import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
 
 /**
  * Class to use when authentication with Biometrics and password to access mnemonic is needed

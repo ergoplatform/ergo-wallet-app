@@ -12,6 +12,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.deserializeSecrets
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 
 class WalletConfigViewModel : ViewModel() {
     private val _snackbarEvent = SingleLiveEvent<Int>()
