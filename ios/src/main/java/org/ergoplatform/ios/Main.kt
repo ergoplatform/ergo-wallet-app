@@ -2,6 +2,7 @@ package org.ergoplatform.ios
 
 import SQLite.JDBCDriver
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+import org.ergoplatform.ios.ui.BottomNavigationBar
 import org.ergoplatform.persistance.AppDatabase
 import org.robovm.apple.foundation.NSAutoreleasePool
 import org.robovm.apple.uikit.*
@@ -9,7 +10,6 @@ import java.io.File
 import java.sql.DriverManager
 
 class Main : UIApplicationDelegateAdapter() {
-    private var rootViewController: MyViewController? = null
     private lateinit var database: AppDatabase
 
     override fun didFinishLaunching(
@@ -19,7 +19,7 @@ class Main : UIApplicationDelegateAdapter() {
         database = setupDatabase("wallet.db")
 
         // Set up the view controller.
-        rootViewController = MyViewController()
+        val rootViewController = BottomNavigationBar()
 
         // Create a new window at screen size.
         window = UIWindow(UIScreen.getMainScreen().bounds)
