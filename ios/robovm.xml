@@ -23,6 +23,7 @@
         <pattern>sigmastate.**</pattern>
         <pattern>sigma.**</pattern>
         <pattern>scalan.**</pattern>
+        <pattern>SQLite.**</pattern>
     </forceLinkClasses>
     <!-- Remove comment to automatically skip compilation and linking in IDEA -->
     <!-- <smartSkipRebuild>true</smartSkipRebuild> -->
