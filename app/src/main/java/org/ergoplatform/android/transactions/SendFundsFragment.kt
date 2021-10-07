@@ -1,6 +1,7 @@
 package org.ergoplatform.android.transactions
 
 import StageConstants
+import android.animation.LayoutTransition
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
@@ -13,37 +14,40 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.view.descendants
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import org.ergoplatform.*
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
 import org.ergoplatform.android.ui.*
+import org.ergoplatform.android.wallet.WalletConfigDbEntity
 import org.ergoplatform.android.wallet.WalletTokenDbEntity
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.android.wallet.addresses.getAddressLabel
 import org.ergoplatform.android.wallet.getNumOfAddresses
+import org.ergoplatform.transactions.PromptSigningResult
 import kotlin.math.max
 
 
 /**
  * Here's the place to send transactions
  */
-class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallback,
+class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallback,
     AddressChooserCallback {
     private var _binding: FragmentSendFundsBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: SendFundsViewModel
-    private val args: SendFundsFragmentDialogArgs by navArgs()
+    private val args: SendFundsFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -69,7 +73,11 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
 
         // Add observers
         viewModel.walletName.observe(viewLifecycleOwner, {
+            // when wallet is loaded, wallet name is set. we can init everything wallet specific here
             binding.walletName.text = getString(R.string.label_send_from, it)
+            binding.hintReadonly.visibility =
+                if (viewModel.wallet!!.walletConfig.secretStorage == null) View.VISIBLE else View.GONE
+            enableLayoutChangeAnimations()
         })
         viewModel.address.observe(viewLifecycleOwner, {
             binding.addressLabel.text = it?.getAddressLabel(requireContext()) ?: getString(
@@ -80,13 +88,13 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         viewModel.walletBalance.observe(viewLifecycleOwner, {
             binding.tvBalance.text = getString(
                 R.string.label_wallet_balance,
-                it.toStringWithScale(4)
+                it.toStringRoundToDecimals(4)
             )
         })
         viewModel.feeAmount.observe(viewLifecycleOwner, {
             binding.tvFee.text = getString(
                 R.string.desc_fee,
-                it.toStringWithScale(4)
+                it.toStringRoundToDecimals(4)
             )
         })
         viewModel.grossAmount.observe(viewLifecycleOwner, {
@@ -109,14 +117,18 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             refreshTokensList()
         })
         viewModel.lockInterface.observe(viewLifecycleOwner, {
-            binding.lockProgress.visibility = if (it) View.VISIBLE else View.GONE
-            dialog?.setCancelable(!it)
+            if (it)
+                ProgressBottomSheetDialogFragment.showProgressDialog(childFragmentManager)
+            else
+                ProgressBottomSheetDialogFragment.dismissProgressDialog(childFragmentManager)
         })
-        viewModel.paymentDoneLiveData.observe(viewLifecycleOwner, {
+        viewModel.txWorkDoneLiveData.observe(viewLifecycleOwner, {
             if (!it.success) {
                 val snackbar = Snackbar.make(
                     requireView(),
-                    R.string.error_transaction,
+                    if (it is PromptSigningResult)
+                        R.string.error_prepare_transaction
+                    else R.string.error_send_transaction,
                     Snackbar.LENGTH_LONG
                 )
                 it.errorMsg?.let { errorMsg ->
@@ -137,13 +149,18 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                             .show()
                     }
                 }
-                snackbar.show()
+                snackbar.setAnchorView(R.id.nav_view).show()
+            } else if (it is PromptSigningResult) {
+                // if this is a prompt signing result, switch to prompt signing dialog
+                SigningPromptDialogFragment().show(childFragmentManager, null)
             }
         })
         viewModel.txId.observe(viewLifecycleOwner, {
-            binding.cardviewTxEdit.visibility = View.GONE
-            binding.cardviewTxDone.visibility = View.VISIBLE
-            binding.labelTxId.text = it
+            it?.let {
+                binding.cardviewTxEdit.visibility = View.GONE
+                binding.cardviewTxDone.visibility = View.VISIBLE
+                binding.labelTxId.text = it
+            }
         })
 
         // Add click listeners
@@ -166,7 +183,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             val shareIntent = Intent.createChooser(sendIntent, null)
             startActivity(shareIntent)
         }
-        binding.buttonDismiss.setOnClickListener { dismiss() }
+        binding.buttonDismiss.setOnClickListener { findNavController().popBackStack() }
 
         binding.buttonSend.setOnClickListener {
             startPayment()
@@ -182,12 +199,15 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
             setAmountEdittext(
                 ErgoAmount(
                     max(
-                        0,
-                        (viewModel.walletBalance.value?.nanoErgs ?: 0)
-                                - (viewModel.feeAmount.value?.nanoErgs ?: 0)
+                        0L,
+                        (viewModel.walletBalance.value?.nanoErgs ?: 0L)
+                                - (viewModel.feeAmount.value?.nanoErgs ?: 0L)
                     )
                 )
             )
+        }
+        binding.hintReadonly.setOnClickListener {
+            openUrlWithBrowser(requireContext(), URL_COLD_WALLET_HELP)
         }
 
         // Init other stuff
@@ -213,6 +233,17 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                     ensureAmountVisibleDelayed()
                 }
             })
+    }
+
+    private fun enableLayoutChangeAnimations() {
+        // set layout change animations. they are not set in the xml to avoid animations for the first
+        // time the layout is displayed, and enabling them is delayed due to the same reason
+        Handler().postDelayed({
+            _binding?.let { binding ->
+                binding.container.layoutTransition = LayoutTransition()
+                binding.container.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+            }
+        }, 200)
     }
 
     private fun ensureAmountVisibleDelayed() {
@@ -277,7 +308,7 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         else ""
 
     private fun setAmountEdittext(amountToSend: ErgoAmount) {
-        binding.amount.editText?.setText(amountToSend.toString())
+        binding.amount.editText?.setText(amountToSend.toStringTrimTrailingZeros())
     }
 
     private fun startPayment() {
@@ -293,57 +324,30 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
                 .firstOrNull()
                 ?.requestFocus()
         } else {
-            viewModel.preparePayment(this)
+            startAuthFlow(viewModel.wallet!!.walletConfig)
         }
     }
 
-    override fun onPasswordEntered(password: String?): String? {
-        password?.let {
-            val success = viewModel.startPaymentWithPassword(password, requireContext())
-            if (!success) {
-                return getString(R.string.error_password_wrong)
-            } else
-            // okay, transaction is started. ViewModel will handle waiting dialog for us
-                return null
+    override fun startAuthFlow(walletConfig: WalletConfigDbEntity) {
+        if (walletConfig.secretStorage == null) {
+            // we have a read only wallet here, let's go to cold wallet support mode
+            viewModel.startColdWalletPayment(requireContext())
+        } else {
+            super.startAuthFlow(walletConfig)
         }
-        return getString(R.string.error_password_empty)
     }
 
-    fun showBiometricPrompt() {
-        // setDeviceCredentialAllowed is deprecated on API 29, but needed for older levels
-        @Suppress("DEPRECATION") val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(getString(R.string.title_authenticate))
-            .setConfirmationRequired(true) // don't send funds immediately when face is recognized
-            .setDeviceCredentialAllowed(true)
-            .build()
+    override fun proceedAuthFlowWithPassword(password: String): Boolean {
+        return viewModel.startPaymentWithPassword(password, requireContext())
+    }
 
-        val context = requireContext()
+    override fun showBiometricPrompt() {
+        hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
+        super.showBiometricPrompt()
+    }
 
-        val callback = object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                try {
-                    viewModel.startPaymentUserAuth(context)
-                } catch (t: Throwable) {
-                    hideForcedSoftKeyboard(context, binding.amount.editText!!)
-                    Snackbar.make(
-                        requireView(),
-                        getString(R.string.error_device_security, t.message),
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                }
-            }
-
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                hideForcedSoftKeyboard(context, binding.amount.editText!!)
-                Snackbar.make(
-                    requireView(),
-                    getString(R.string.error_device_security, errString),
-                    Snackbar.LENGTH_LONG
-                ).show()
-            }
-        }
-
-        BiometricPrompt(this, callback).authenticate(promptInfo)
+    override fun proceedAuthFlowFromBiometrics() {
+        context?.let { viewModel.startPaymentUserAuth(it) }
     }
 
     private fun inputChangesToViewModel() {
@@ -362,11 +366,27 @@ class SendFundsFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallba
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let {
-                val content = parseContentFromQrCode(it)
-                content?.let {
-                    binding.tvReceiver.editText?.setText(content.address)
-                    content.amount.let { amount -> if (amount.nanoErgs > 0) setAmountEdittext(amount) }
-                    viewModel.addTokensFromQr(content.tokens)
+                if (viewModel.wallet?.walletConfig?.secretStorage != null
+                    && isColdSigningRequestChunk(it)
+                ) {
+                    findNavController().navigate(
+                        SendFundsFragmentDirections
+                            .actionSendFundsFragmentToColdWalletSigningFragment(
+                                it,
+                                viewModel.wallet!!.walletConfig.id
+                            )
+                    )
+                } else {
+                    val content = parsePaymentRequestFromQrCode(it)
+                    content?.let {
+                        binding.tvReceiver.editText?.setText(content.address)
+                        content.amount.let { amount ->
+                            if (amount.nanoErgs > 0) setAmountEdittext(
+                                amount
+                            )
+                        }
+                        viewModel.addTokensFromQr(content.tokens)
+                    }
                 }
             }
         } else {

@@ -107,6 +107,10 @@
         <item name="android:textSize">@dimen/body1_textsize</item>
     </style>
 
+    <style name="TextAppearance.App.Body2" parent="">
+        <item name="android:textSize">@dimen/body2_textsize</item>
+    </style>
+
     <style name="TextAppearance.App.Headline1" parent="">
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">@dimen/headline1_textsize</item>

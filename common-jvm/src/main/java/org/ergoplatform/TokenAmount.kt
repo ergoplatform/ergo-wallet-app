@@ -1,12 +1,12 @@
-package org.ergoplatform.android
+package org.ergoplatform
 
 import kotlin.math.pow
 
 class TokenAmount(val rawValue: Long, val decimals: Int) {
 
     constructor(tokenString: String, decimals: Int) : this(
-        if (tokenString.isBlank()) 0 else tokenString.toBigDecimal()
-            .movePointRight(decimals).longValueExact(), decimals
+        if (tokenString.isBlank()) 0
+        else tokenString.toBigDecimal().movePointRight(decimals).longValueExact(), decimals
     )
 
     override fun toString(): String {

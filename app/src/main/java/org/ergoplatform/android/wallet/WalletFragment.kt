@@ -14,7 +14,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.android.*
+import org.ergoplatform.ErgoAmount
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.NodeConnector
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
@@ -242,7 +245,6 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
                 )
         }
 
-        binding.buttonSend.isEnabled = wallet.walletConfig.secretStorage != null
         binding.buttonSend.setOnClickListener {
             NavHostFragment.findNavController(itemView.findFragment())
                 .navigateSafe(

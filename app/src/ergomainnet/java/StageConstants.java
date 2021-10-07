@@ -9,8 +9,4 @@ public class StageConstants {
     public static final String EXPLORER_API_ADDRESS = RestApiErgoClient.defaultMainnetExplorerUrl + "/";
 
     public static final String NODE_API_ADDRESS = "http://213.239.193.208:9053/";
-
-    public static boolean isValidNetworkTypeAddress(Address address) {
-        return address.isMainnet();
-    }
 }

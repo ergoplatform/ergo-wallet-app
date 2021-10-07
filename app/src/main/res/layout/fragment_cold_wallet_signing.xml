@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="?attr/colorSurface"
+        android:elevation="2dp">
+
+        <TextView
+            style="@style/TextAppearance.App.Headline1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/title_signing_request" />
+
+    </FrameLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <FrameLayout
+            style="@style/width_match_parent_max_500"
+            android:layout_height="wrap_content">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/transaction_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/activity_horizontal_margin"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/desc_signing_request"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="@dimen/half_horizontal_margin"
+                        android:background="@color/lightgrey" />
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/title_inboxes"
+                        android:textColor="?attr/colorSecondary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/desc_inboxes" />
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:id="@+id/layout_inboxes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/half_horizontal_margin"
+                        android:orientation="vertical" />
+
+                    <View
+                        android:id="@+id/divider"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="@dimen/half_horizontal_margin"
+                        android:background="@color/lightgrey" />
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/title_outboxes"
+                        android:textColor="?attr/colorSecondary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/desc_outboxes" />
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:id="@+id/layout_outboxes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/half_horizontal_margin"
+                        android:orientation="vertical">
+
+                        <include layout="@layout/entry_transaction_box" />
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <Button
+                        android:id="@+id/button_sign_tx"
+                        style="?attr/materialButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:minWidth="120dp"
+                        android:text="@string/label_confirm" />
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_signing_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/qr_code_pager"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:layout_height="325dp" />
+
+                    <TextView
+                        android:id="@+id/tv_scan_signed_desc"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                        android:gravity="center"
+                        android:text="@string/desc_show_signed" />
+
+                    <Button
+                        android:id="@+id/button_scan_next_qr"
+                        style="?attr/materialButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:layout_marginBottom="24dp"
+                        android:text="@string/button_next"
+                        android:visibility="gone" />
+
+                    <Button
+                        android:id="@+id/button_dismiss"
+                        style="?attr/materialButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:layout_marginBottom="24dp"
+                        android:minWidth="120dp"
+                        android:text="@string/label_dismiss" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_scan_more"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:visibility="gone"
+                tools:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginVertical="@dimen/activity_vertical_margin"
+                        android:contentDescription="@string/label_qr_code"
+                        android:src="@drawable/ic_qr_code_24" />
+
+                    <TextView
+                        android:id="@+id/label_scanned_pages"
+                        style="@style/TextAppearance.App.Headline2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                        android:gravity="center"
+                        tools:text="1 of 2" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_scan_more"
+                        style="?attr/materialButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:layout_marginBottom="24dp"
+                        android:minWidth="120dp"
+                        android:text="@string/label_scan_qr"
+                        app:icon="@drawable/ic_qr_code_24" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </FrameLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

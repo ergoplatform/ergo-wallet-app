@@ -64,6 +64,8 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
                         )
                     )
                 }
+
+                binding.buttonExport.isEnabled = it.secretStorage != null
             }
         }
 

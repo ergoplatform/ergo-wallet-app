@@ -2,7 +2,7 @@ package org.ergoplatform.android.wallet.addresses
 
 import android.content.Context
 import android.view.View
-import org.ergoplatform.android.ErgoAmount
+import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.IncludeWalletAddressInfoBinding
 import org.ergoplatform.android.wallet.*

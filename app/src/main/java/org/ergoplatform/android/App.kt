@@ -7,6 +7,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        ergoNetworkType = StageConstants.NETWORK_TYPE
         AppCompatDelegate.setDefaultNightMode(getDayNightMode(applicationContext))
         NodeConnector.getInstance().loadPreferenceValues(applicationContext)
     }
