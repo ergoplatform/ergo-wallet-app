@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
@@ -21,7 +22,7 @@ import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.android.ui.ProgressBottomSheetDialogFragment
-import org.ergoplatform.android.ui.setQrCodeToImageView
+import org.ergoplatform.android.ui.QrPagerAdapter
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.transactions.reduceBoxes
 
@@ -106,8 +107,8 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
                 binding.cardSigningResult.visibility = View.VISIBLE
                 binding.cardScanMore.visibility = View.GONE
 
-                // TODO handle data over 4k length
-                setQrCodeToImageView(binding.qrCode, viewModel.signedQrCode!!.first(), 400, 400)
+                binding.qrCodePager.adapter = QrPagerAdapter(viewModel.signedQrCode!!)
+                refreshButtonState()
 
             } else {
                 binding.cardSigningResult.visibility = View.GONE
@@ -148,6 +149,10 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             }
         }
 
+        binding.buttonScanNextQr.setOnClickListener {
+            binding.qrCodePager.currentItem = binding.qrCodePager.currentItem + 1
+        }
+
         binding.buttonDismiss.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -155,6 +160,25 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
         binding.buttonScanMore.setOnClickListener {
             IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
         }
+
+        binding.qrCodePager.registerOnPageChangeCallback(object :
+            ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                refreshButtonState()
+            }
+        })
+    }
+
+    private fun refreshButtonState() {
+        val lastPage =
+            binding.qrCodePager.currentItem + 1 == binding.qrCodePager.adapter!!.itemCount
+        binding.buttonDismiss.visibility = if (lastPage) View.VISIBLE else View.GONE
+        binding.buttonScanNextQr.visibility = if (!lastPage) View.VISIBLE else View.GONE
+        binding.tvScanSignedDesc.setText(
+            if (lastPage) R.string.desc_show_signed
+            else R.string.desc_show_signed_multiple
+        )
     }
 
     private fun bindBoxView(

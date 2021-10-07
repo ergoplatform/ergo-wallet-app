@@ -158,8 +158,10 @@
     <string name="label_qr_pages_info">%1s of %2s</string>
     <string name="desc_outboxes">These amounts will be sent when the transaction is processed.</string>
     <string name="error_qr_pages_num">Sorry, chunked QR codes not yet supported by this app version.</string>
-    <string name="desc_show_signed">Your transaction was signed and needs to be sent to the network. Scan this QR code
-       to proceed.</string>
+    <string name="desc_show_signed">Your transaction was signed and needs to be sent to the network.
+        Scan this QR code to proceed.</string>
+    <string name="desc_show_signed_multiple">Your transaction was signed and needs to be sent to the network.
+        Scan these QR codes to proceed.</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, 2021</string>
