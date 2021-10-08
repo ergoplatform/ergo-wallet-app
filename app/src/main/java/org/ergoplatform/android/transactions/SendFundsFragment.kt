@@ -183,7 +183,13 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             val shareIntent = Intent.createChooser(sendIntent, null)
             startActivity(shareIntent)
         }
-        binding.buttonDismiss.setOnClickListener { findNavController().popBackStack() }
+        binding.buttonDismiss.setOnClickListener {
+            val succeeded = findNavController().popBackStack()
+            // back stack might be empty when coming from a deep link
+            if (!succeeded) {
+                findNavController().navigate(R.id.navigation_wallet)
+            }
+        }
 
         binding.buttonSend.setOnClickListener {
             startPayment()
