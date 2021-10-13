@@ -60,7 +60,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
                     // immediately switch to send funds screen
                     navigateToSendFundsScreen(wallets.first().walletConfig.id)
                 }
-                wallets.forEach { wallet ->
+                wallets.sortedBy { it.walletConfig.displayName }.forEach { wallet ->
                     val itemBinding = FragmentSendFundsWalletChooserItemBinding.inflate(
                         layoutInflater, binding.listWallets, true
                     )
@@ -87,6 +87,14 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
                     requireActivity().intent.data?.encodedQuery!!, walletId
                 ), navOptions
             )
+    }
+
+    override fun onBackPressed(): Boolean {
+        // Workaround for bug in Navigation component: navigating back does not navigate
+        // to startDestination for dialogs. So we do this explicitely here
+        NavHostFragment.findNavController(requireParentFragment()).navigate(R.id.navigation_wallet)
+        dismiss()
+        return true
     }
 
     override fun onDestroyView() {
