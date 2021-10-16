@@ -6,12 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import org.ergoplatform.android.*
+import org.ergoplatform.ErgoAmount
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserItemBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.wallet.getBalanceForAllAddresses
+import org.ergoplatform.parsePaymentRequestFromQuery
 
 
 /**
@@ -43,23 +46,21 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
             return
         }
 
-        val content = parseContentFromQuery(query)
+        val content = parsePaymentRequestFromQuery(query)
         binding.receiverAddress.text = content?.address
         val amount = content?.amount ?: ErgoAmount.ZERO
         binding.grossAmount.amount = amount.toDouble()
         binding.grossAmount.visibility = if (amount.nanoErgs > 0) View.VISIBLE else View.GONE
 
         AppDatabase.getInstance(requireContext()).walletDao().getWalletsWithStates()
-            .observe(viewLifecycleOwner, {
+            .observe(viewLifecycleOwner, { wallets ->
                 binding.listWallets.removeAllViews()
 
-                val walletsWithoutReadonly = it.filter { it.walletConfig.secretStorage != null }
-
-                if (walletsWithoutReadonly.size == 1) {
+                if (wallets.size == 1) {
                     // immediately switch to send funds screen
-                    navigateToSendFundsScreen(walletsWithoutReadonly.first().walletConfig.id)
+                    navigateToSendFundsScreen(wallets.first().walletConfig.id)
                 }
-                walletsWithoutReadonly.forEach { wallet ->
+                wallets.sortedBy { it.walletConfig.displayName }.forEach { wallet ->
                     val itemBinding = FragmentSendFundsWalletChooserItemBinding.inflate(
                         layoutInflater, binding.listWallets, true
                     )
@@ -86,6 +87,14 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
                     requireActivity().intent.data?.encodedQuery!!, walletId
                 ), navOptions
             )
+    }
+
+    override fun onBackPressed(): Boolean {
+        // Workaround for bug in Navigation component: navigating back does not navigate
+        // to startDestination for dialogs. So we do this explicitely here
+        NavHostFragment.findNavController(requireParentFragment()).navigate(R.id.navigation_wallet)
+        dismiss()
+        return true
     }
 
     override fun onDestroyView() {

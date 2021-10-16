@@ -8,14 +8,17 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ergoplatform.*
 import org.ergoplatform.android.*
-import org.ergoplatform.android.ui.PasswordDialogFragment
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.android.wallet.*
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
+import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.transactions.SendTransactionResult
+import org.ergoplatform.transactions.TransactionResult
 
 /**
  * Holding state of the send funds screen (thus to be expected to get complicated)
@@ -57,10 +60,12 @@ class SendFundsViewModel : ViewModel() {
         value = ErgoAmount.ZERO
     }
     val grossAmount: LiveData<ErgoAmount> = _grossAmount
-    private val _paymentDoneLiveData = SingleLiveEvent<TransactionResult>()
-    val paymentDoneLiveData: LiveData<TransactionResult> = _paymentDoneLiveData
-    private val _txId = MutableLiveData<String>()
-    val txId: LiveData<String> = _txId
+    private val _txWorkDoneLiveData = SingleLiveEvent<TransactionResult>()
+    val txWorkDoneLiveData: LiveData<TransactionResult> = _txWorkDoneLiveData
+    private val _txId = MutableLiveData<String?>()
+    val txId: LiveData<String?> = _txId
+    private val _signingPromptData = MutableLiveData<String?>()
+    val signingPromptData: LiveData<String?> = _signingPromptData
 
     val tokensAvail: ArrayList<WalletTokenDbEntity> = ArrayList()
     val tokensChosen: HashMap<String, ErgoToken> = HashMap()
@@ -74,9 +79,9 @@ class SendFundsViewModel : ViewModel() {
 
         // on first init, we read an send payment request. Don't do it again on device rotation
         // to not mess with user inputs
-        val content: QrCodeContent?
+        val content: PaymentRequest?
         if (firstInit) {
-            content = paymentRequest?.let { parseContentFromQuery(paymentRequest) }
+            content = paymentRequest?.let { parsePaymentRequestFromQuery(paymentRequest) }
             content?.let {
                 receiverAddress = content.address
                 amountToSend = content.amount
@@ -153,17 +158,6 @@ class SendFundsViewModel : ViewModel() {
         return tokensChosen.values.filter { it.value <= 0 }.isEmpty()
     }
 
-    fun preparePayment(fragment: SendFundsFragmentDialog) {
-        if (wallet?.walletConfig?.encryptionType == ENC_TYPE_PASSWORD) {
-            PasswordDialogFragment().show(
-                fragment.childFragmentManager,
-                null
-            )
-        } else if (wallet?.walletConfig?.encryptionType == ENC_TYPE_DEVICE) {
-            fragment.showBiometricPrompt()
-        }
-    }
-
     fun startPaymentWithPassword(password: String, context: Context): Boolean {
         wallet?.walletConfig?.secretStorage?.let {
             val mnemonic: String?
@@ -182,8 +176,6 @@ class SendFundsViewModel : ViewModel() {
 
             startPaymentWithMnemonicAsync(mnemonic, context)
 
-            _lockInterface.postValue(true)
-
             return true
         }
 
@@ -201,8 +193,6 @@ class SendFundsViewModel : ViewModel() {
 
             startPaymentWithMnemonicAsync(mnemonic!!, context)
 
-            _lockInterface.postValue(true)
-
         }
     }
 
@@ -213,7 +203,7 @@ class SendFundsViewModel : ViewModel() {
                 ?: listOf(0)
 
         viewModelScope.launch {
-            val ergoTxResult: TransactionResult
+            val ergoTxResult: SendTransactionResult
             withContext(Dispatchers.IO) {
                 ergoTxResult = sendErgoTx(
                     Address.create(receiverAddress), amountToSend.nanoErgs,
@@ -227,8 +217,61 @@ class SendFundsViewModel : ViewModel() {
                 NodeConnector.getInstance().invalidateCache()
                 _txId.postValue(ergoTxResult.txId!!)
             }
-            _paymentDoneLiveData.postValue(ergoTxResult)
+            _txWorkDoneLiveData.postValue(ergoTxResult)
         }
+
+        _lockInterface.postValue(true)
+    }
+
+    fun startColdWalletPayment(context: Context) {
+        wallet?.let { wallet ->
+            val derivedAddresses =
+                derivedAddressIdx?.let { listOf(wallet.getDerivedAddress(it)!!) }
+                    ?: wallet.getSortedDerivedAddressesList().map { it.publicAddress }
+
+            _lockInterface.postValue(true)
+            viewModelScope.launch {
+                val serializedTx: PromptSigningResult
+                withContext(Dispatchers.IO) {
+                    serializedTx = prepareSerializedErgoTx(
+                        Address.create(receiverAddress), amountToSend.nanoErgs,
+                        tokensChosen.values.toList(),
+                        derivedAddresses.map { Address.create(it) },
+                        getPrefNodeUrl(context), getPrefExplorerApiUrl(context)
+                    )
+                }
+                _lockInterface.postValue(false)
+                if (serializedTx.success) {
+                    _signingPromptData.postValue(buildColdSigningRequest(serializedTx))
+                }
+                _txWorkDoneLiveData.postValue(serializedTx)
+            }
+        }
+    }
+
+    fun sendColdWalletSignedTx(qrCodes: List<String>, context: Context) {
+        _lockInterface.postValue(true)
+        viewModelScope.launch {
+            val ergoTxResult: SendTransactionResult
+            withContext(Dispatchers.IO) {
+                val signingResult = coldSigningResponseFromQrChunks(qrCodes)
+                if (signingResult.success) {
+                    ergoTxResult = sendSignedErgoTx(
+                        signingResult.serializedTx!!,
+                        getPrefNodeUrl(context), getPrefExplorerApiUrl(context)
+                    )
+                } else {
+                    ergoTxResult = SendTransactionResult(false, errorMsg = signingResult.errorMsg)
+                }
+            }
+            _lockInterface.postValue(false)
+            if (ergoTxResult.success) {
+                NodeConnector.getInstance().invalidateCache()
+                _txId.postValue(ergoTxResult.txId!!)
+            }
+            _txWorkDoneLiveData.postValue(ergoTxResult)
+        }
+
     }
 
     /**

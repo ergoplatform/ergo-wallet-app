@@ -1,8 +1,6 @@
-package org.ergoplatform.android
+package org.ergoplatform
 
-import android.widget.ImageView
-import com.google.zxing.BarcodeFormat
-import com.journeyapps.barcodescanner.BarcodeEncoder
+import org.ergoplatform.android.isValidErgoAddress
 import java.net.URLDecoder
 import java.net.URLEncoder
 
@@ -12,20 +10,6 @@ private val RECIPIENT_PARAM_PREFIX = "address="
 private val AMOUNT_PARAM_PREFIX = "amount="
 private val DESCRIPTION_PARAM_PREFIX = "description="
 private val URI_ENCODING = "utf-8"
-
-fun setQrCodeToImageView(imageViewQrCode: ImageView, text: String, width: Int, height: Int) {
-    try {
-        val barcodeEncoder = BarcodeEncoder()
-        val bitmap = barcodeEncoder.encodeBitmap(
-            text,
-            BarcodeFormat.QR_CODE,
-            width,
-            height
-        )
-        imageViewQrCode.setImageBitmap(bitmap)
-    } catch (e: Exception) {
-    }
-}
 
 fun getExplorerPaymentRequestAddress(
     address: String,
@@ -43,20 +27,20 @@ fun getExplorerPaymentRequestAddress(
     )
 }
 
-fun parseContentFromQrCode(qrCode: String): QrCodeContent? {
+fun parsePaymentRequestFromQrCode(qrCode: String): PaymentRequest? {
     if (qrCode.startsWith(PAYMENT_URI_PREFIX, true)) {
         // we have a payment uri
         val uriWithoutPrefix = qrCode.substring(PAYMENT_URI_PREFIX.length)
-        return parseContentFromQuery(uriWithoutPrefix)
+        return parsePaymentRequestFromQuery(uriWithoutPrefix)
 
     } else if (isValidErgoAddress(qrCode)) {
-        return QrCodeContent(qrCode)
+        return PaymentRequest(qrCode)
     } else {
         return null
     }
 }
 
-fun parseContentFromQuery(query: String): QrCodeContent? {
+fun parsePaymentRequestFromQuery(query: String): PaymentRequest? {
     var address: String? = null
     var amount = ErgoAmount.ZERO
     var description = ""
@@ -78,6 +62,8 @@ fun parseContentFromQuery(query: String): QrCodeContent? {
             try {
                 val tokenId = keyVal.get(0)
                 val tokenAmount = keyVal.get(1)
+                // throws exception when it is not numeric
+                tokenAmount.toDouble()
                 tokenMap.put(tokenId, tokenAmount)
             } catch (t: Throwable) {
                 // in this case, we haven't found a token :)
@@ -86,14 +72,14 @@ fun parseContentFromQuery(query: String): QrCodeContent? {
     }
 
     if (address != null) {
-        return QrCodeContent(address!!, amount, description, tokenMap)
+        return PaymentRequest(address!!, amount, description, tokenMap)
     } else {
         // no recipient, no sense
         return null
     }
 }
 
-data class QrCodeContent(
+data class PaymentRequest(
     val address: String,
     val amount: ErgoAmount = ErgoAmount.ZERO,
     val description: String = "",

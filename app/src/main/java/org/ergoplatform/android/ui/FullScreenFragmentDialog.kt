@@ -21,7 +21,7 @@ open class FullScreenFragmentDialog : DialogFragment() {
         }
     }
 
-    fun onBackPressed() : Boolean {
+    open fun onBackPressed() : Boolean {
         return false;
     }
 }

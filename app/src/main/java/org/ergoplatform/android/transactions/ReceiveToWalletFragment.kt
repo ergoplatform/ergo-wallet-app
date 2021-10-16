@@ -9,17 +9,21 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.launch
-import org.ergoplatform.android.*
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.NodeConnector
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
 import org.ergoplatform.android.ui.copyStringToClipboard
 import org.ergoplatform.android.ui.formatFiatToString
 import org.ergoplatform.android.ui.inputTextToDouble
+import org.ergoplatform.android.ui.setQrCodeToImageView
 import org.ergoplatform.android.wallet.WalletDbEntity
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.android.wallet.addresses.getAddressLabel
 import org.ergoplatform.android.wallet.getDerivedAddress
 import org.ergoplatform.android.wallet.getDerivedAddressEntity
+import org.ergoplatform.getExplorerPaymentRequestAddress
 
 
 /**

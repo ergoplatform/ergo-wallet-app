@@ -31,7 +31,7 @@ class WalletDetailsViewModel : ViewModel() {
                 wallet = it
 
                 // no address set (yet) and there is only a single address available, fix it to this one
-                if (selectedIdx == null && it.getNumOfAddresses() == 1) {
+                if (selectedIdx == null && it?.getNumOfAddresses() == 1) {
                     selectedIdx = 0
                 } else {
                     // make sure to post to observer the first time or on DB change

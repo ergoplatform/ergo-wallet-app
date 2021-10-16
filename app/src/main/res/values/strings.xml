@@ -28,6 +28,8 @@
     <string name="label_details">Details</string>
     <string name="label_dismiss">Dismiss</string>
     <string name="label_remove">Remove</string>
+    <string name="label_confirm">Confirm</string>
+    <string name="label_erg_amount">%1s ERG</string>
 
     <!-- Wallet -->
     <string name="label_tokens">tokens</string>
@@ -78,7 +80,7 @@
     <!-- Save wallet -->
     <string name="intro_save_wallet">Your wallet\'s main public address is:</string>
     <string name="intro_save_wallet2">You can add additional addresses later.\n\n
-        Choose now how the wallet and keys should be saved on this device.</string>
+        Choose how the wallet and keys should be saved on this device.</string>
     <string name="button_save_password_encrypted">Save password-encrypted</string>
     <string name="desc_save_password_encrypted">You have to enter a password-phrase that you need to reenter every time you want to send funds.</string>
     <string name="button_save_device_encrypted">Save device-encrypted</string>
@@ -99,7 +101,7 @@
     <!-- Wallet details -->
     <string name="title_wallet_balance">Balance</string>
     <string name="label_all_addresses">All %1d addresses</string>
-    <string name="exporer_view_transactions">Tap to view transactions in Ergo Explorer — in-app transactions list will be added soon</string>
+    <string name="exporer_view_transactions">Tap to view transactions in Ergo Explorer — in-app transaction list will be added soon</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Addresses</string>
@@ -107,10 +109,10 @@
     <string name="label_wallet_main_address">Main address</string>
     <string name="label_wallet_address_derived">Derived address %1s</string>
     <string name="label_wallet_token_balance">%1s tokens</string>
-    <string name="desc_wallet_addresses">A wallet can have multiple public addresses, derived from the main address.</string>
+    <string name="desc_wallet_addresses">A wallet can have multiple public addresses derived from the main address.</string>
     <string name="button_add_address">Add address</string>
     <string name="button_add_addresses">Add %1d addresses</string>
-    <string name="desc_wallet_addr_label">You can set a descriptive label for yourself that is shown for this address:</string>
+    <string name="desc_wallet_addr_label">Set a descriptive label (visible only to you) for this address:</string>
     <string name="hint_wallet_addr_label">Descriptive label (optional)</string>
     <string name="desc_wallet_addr_remove">You can remove this address from this app\'s view. It is still available
         on the Ergo Network, can receive payments and hold a balance. You can add it again at any time.</string>
@@ -119,6 +121,7 @@
     <!-- Send funds -->
     <string name="desc_choose_wallet">Please choose the wallet to send from:</string>
     <string name="label_to">to</string>
+    <string name="hint_read_only">This is a read only wallet. For sending funds, you need a device to sign your transaction. <a href="">Learn more.</a></string>
     <string name="desc_send_funds">Enter the receiver address and amount to send, or scan a QR code.</string>
     <string name="label_send_from">From: %1s</string>
     <string name="label_wallet_balance">Balance: %1s ERG</string>
@@ -127,16 +130,38 @@
     <string name="desc_fee">Fee: %1s ERG</string>
     <string name="error_receiver_address">Please enter a valid ERG address</string>
     <string name="error_amount">Please enter a valid amount</string>
-    <string name="error_transaction">Could not send transaction</string>
+    <string name="error_send_transaction">Could not send transaction</string>
+    <string name="error_prepare_transaction">Could not prepare transaction</string>
     <string name="error_password_empty">Please enter a valid password</string>
     <string name="error_password_wrong">Wrong password</string>
     <string name="desc_transaction_send">Transaction was sent successfully and awaits confirmation. Transaction ID:</string>
+    <string name="desc_prompt_signing">Your transaction was prepared. Scan this QR code
+       with your signing device to proceed.\n\nWhen present, scan the signed transaction QR code to
+        sent it to the network.</string>
+    <string name="desc_prompt_signing_multiple">Your transaction was prepared. Scan these QR codes
+       with your signing device to proceed.</string>
+    <string name="button_scan_signed_tx">Scan signed tx</string>
+    <string name="button_next">Next</string>
     <string name="title_authenticate">Authentication required</string>
     <string name="error_device_security">Security error: %1s</string>
     <string name="label_add_token">Token</string>
     <string name="label_send_all">Send all</string>
     <string name="title_add_token">Choose token to send</string>
     <string name="error_token_amount">Please enter valid amounts or remove token entries not to send</string>
+
+    <!-- Cold wallet signing request screen -->
+    <string name="title_signing_request">Sign</string>
+    <string name="desc_signing_request">Please check the details of the transaction to issue.</string>
+    <string name="title_inboxes">Amounts to spent</string>
+    <string name="desc_inboxes">These amounts will be spent when the transaction is processed.</string>
+    <string name="title_outboxes">Outgoing amounts</string>
+    <string name="label_qr_pages_info">%1s of %2s</string>
+    <string name="desc_outboxes">These amounts will be sent when the transaction is processed.</string>
+    <string name="error_qr_pages_num">Sorry, chunked QR codes not yet supported by this app version.</string>
+    <string name="desc_show_signed">Your transaction was signed and needs to be sent to the network.
+        Scan this QR code to proceed.</string>
+    <string name="desc_show_signed_multiple">Your transaction was signed and needs to be sent to the network.
+        Scan these QR codes to proceed.</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, 2021</string>

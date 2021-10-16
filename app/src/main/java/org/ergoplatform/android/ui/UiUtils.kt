@@ -3,12 +3,15 @@ package org.ergoplatform.android.ui
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.IdRes
 import androidx.core.content.ContextCompat
@@ -17,8 +20,10 @@ import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
 import com.google.android.material.snackbar.Snackbar
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
+import org.ergoplatform.TokenAmount
 import org.ergoplatform.android.R
-import org.ergoplatform.android.TokenAmount
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -37,11 +42,19 @@ fun hideForcedSoftKeyboard(context: Context, editText: EditText) {
     ContextCompat.getSystemService(
         context,
         InputMethodManager::class.java
-    )?.hideSoftInputFromWindow(editText.getWindowToken(), 0)
+    )?.hideSoftInputFromWindow(editText.windowToken, 0)
 }
 
 fun TextView.enableLinks() {
     movementMethod = LinkMovementMethod.getInstance()
+}
+
+fun openUrlWithBrowser(context: Context, url: String) {
+    val browserIntent = Intent(
+        Intent.ACTION_VIEW,
+        Uri.parse(url)
+    )
+    context.startActivity(browserIntent)
 }
 
 fun inputTextToDouble(amountStr: String?): Double {
@@ -127,4 +140,18 @@ fun NavController.navigateSafe(
 
 fun NavController.navigateSafe(directions: NavDirections, navOptions: NavOptions? = null) {
     navigateSafe(directions.actionId, directions.arguments, navOptions)
+}
+
+fun setQrCodeToImageView(imageViewQrCode: ImageView, text: String, width: Int, height: Int) {
+    try {
+        val barcodeEncoder = BarcodeEncoder()
+        val bitmap = barcodeEncoder.encodeBitmap(
+            text,
+            BarcodeFormat.QR_CODE,
+            width,
+            height
+        )
+        imageViewQrCode.setImageBitmap(bitmap)
+    } catch (e: Exception) {
+    }
 }

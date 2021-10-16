@@ -34,7 +34,9 @@ class WalletAddressesViewModel : ViewModel() {
             AppDatabase.getInstance(ctx).walletDao().walletWithStateByIdAsFlow(walletId).collect {
                 // called every time something changes in the DB
                 wallet = it
-                _addresses.postValue(it.getSortedDerivedAddressesList())
+                it?.let {
+                    _addresses.postValue(it.getSortedDerivedAddressesList())
+                }
             }
         }
     }

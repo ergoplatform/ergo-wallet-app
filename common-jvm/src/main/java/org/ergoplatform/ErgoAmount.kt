@@ -1,4 +1,4 @@
-package org.ergoplatform.android
+package org.ergoplatform
 
 import java.math.RoundingMode
 
@@ -26,6 +26,10 @@ class ErgoAmount(val nanoErgs: Long) {
         return nanoErgs.toBigDecimal().movePointLeft(nanoPowerOfTen)
             .setScale(numDecimals, RoundingMode.HALF_UP)
             .toPlainString()
+    }
+
+    fun toStringTrimTrailingZeros(): String {
+        return toString().trimEnd('0').trimEnd('.')
     }
 
     /**

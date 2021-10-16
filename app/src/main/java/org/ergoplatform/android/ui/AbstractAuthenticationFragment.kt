@@ -16,7 +16,7 @@ abstract class AbstractAuthenticationFragment : Fragment(), PasswordDialogCallba
     /**
      * Start the authentication flow, biometric prompt or password input depending on wallet
      */
-    internal fun startAuthFlow(walletConfig: WalletConfigDbEntity) {
+    internal open fun startAuthFlow(walletConfig: WalletConfigDbEntity) {
         if (walletConfig.encryptionType == ENC_TYPE_PASSWORD) {
             PasswordDialogFragment().show(
                 this.childFragmentManager,
@@ -27,7 +27,7 @@ abstract class AbstractAuthenticationFragment : Fragment(), PasswordDialogCallba
         }
     }
 
-    private fun showBiometricPrompt() {
+    internal open fun showBiometricPrompt() {
         // setDeviceCredentialAllowed is deprecated, but needed for older SDK level
         @Suppress("DEPRECATION") val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(getString(R.string.title_authenticate))
