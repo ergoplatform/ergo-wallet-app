@@ -9,6 +9,63 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+task convertStrings {
+    def source = '../android/build/intermediates/incremental/mergeErgomainnetDebugResources/merged.dir/values/values.xml'
+    def dest = 'resources/i18n/strings.properties'
+
+    doFirst {
+        def output = project.file(dest)
+        def input = project.file(source)
+
+        try {
+            if (!output.parentFile.exists())
+                output.parentFile.mkdirs()
+
+            if (!input.exists())
+                logger.error("Android merged values file not found, please build for Android first.")
+
+            def endTag = "</string>"
+
+            def lines = input.text.readLines()
+            def strings = new ArrayList<String>()
+            def isInString = false
+
+            for (line in lines) {
+                line = line.trim()
+                if (isInString) {
+                    def value
+                    if (line.indexOf(endTag) >= 0) {
+                        value = line.substring(0, line.indexOf(endTag))
+                        isInString = false
+                    } else
+                        value = line + '\\'
+
+                    strings.add(value)
+                } else if (line.startsWith("<string name=")) {
+                    def name = line.substring(14)
+                    name = name.substring(0, name.indexOf('"'))
+
+                    if (line.indexOf("/>") < 0) {
+                        def value = line.substring(line.indexOf('>') + 1)
+                        if (value.indexOf(endTag) >= 0) {
+                            value = value.substring(0, value.indexOf(endTag))
+                        } else {
+                            value = value + '\\'
+                            isInString = true
+                        }
+                        strings.add(name + "=" + value)
+                    }
+                }
+            }
+
+            output.write(strings.join('\n'))
+            logger.info("Updated strings")
+        } catch (ex) {
+            throw new GradleException('Exception writing strings file', ex)
+        }
+    }
+}
+
 dependencies {
     implementation project(path: ':common-jvm')
     implementation project(path: ':sqldelight')

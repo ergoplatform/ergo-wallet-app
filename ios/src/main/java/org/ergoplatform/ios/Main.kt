@@ -1,22 +1,28 @@
 package org.ergoplatform.ios
 
 import SQLite.JDBCDriver
+import com.badlogic.gdx.utils.I18NBundle
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import org.ergoplatform.ios.ui.BottomNavigationBar
 import org.ergoplatform.persistance.AppDatabase
 import org.robovm.apple.foundation.NSAutoreleasePool
+import org.robovm.apple.foundation.NSBundle
 import org.robovm.apple.uikit.*
 import java.io.File
 import java.sql.DriverManager
 
 class Main : UIApplicationDelegateAdapter() {
-    private lateinit var database: AppDatabase
+    lateinit var database: AppDatabase
+    lateinit var texts: I18NBundle
 
     override fun didFinishLaunching(
         application: UIApplication,
         launchOptions: UIApplicationLaunchOptions?
     ): Boolean {
+        val internalPath = NSBundle.getMainBundle().bundlePath
+
         database = setupDatabase("wallet.db")
+        texts = I18NBundle.createBundle(File(internalPath, "i18n/strings"))
 
         // Set up the view controller.
         val rootViewController = BottomNavigationBar()

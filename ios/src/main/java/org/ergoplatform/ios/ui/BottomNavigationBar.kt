@@ -1,5 +1,6 @@
 package org.ergoplatform.ios.ui
 
+import org.ergoplatform.ios.Main
 import org.ergoplatform.ios.MyViewController
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -7,17 +8,18 @@ import org.robovm.apple.uikit.*
 class BottomNavigationBar : UITabBarController() {
 
     fun setupVcs() {
-        // TODO load from i18n file
+        val appDelegate = UIApplication.getSharedApplication().delegate as Main
+
         setViewControllers(
             NSArray(
                 listOf(
                     createNavController(
                         MyViewController(),
-                        "Wallet", UIImage.systemImageNamed("house")
+                        appDelegate.texts.get("title_wallets"), UIImage.systemImageNamed("house")
                     ),
                     createNavController(
                         MyViewController(),
-                        "Settings", UIImage.systemImageNamed("person")
+                        appDelegate.texts.get("title_settings"), UIImage.systemImageNamed("person")
                     )
                 )
             )
