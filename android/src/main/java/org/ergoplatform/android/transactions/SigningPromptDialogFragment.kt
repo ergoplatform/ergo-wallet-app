@@ -7,15 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPromptSigningDialogBinding
-import org.ergoplatform.android.databinding.FragmentPromptSigningDialogQrPageBinding
-import org.ergoplatform.android.ui.setQrCodeToImageView
+import org.ergoplatform.android.ui.QrPagerAdapter
 
 class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentPromptSigningDialogBinding? = null
@@ -92,41 +90,5 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    class QrPageHolder(val binding: FragmentPromptSigningDialogQrPageBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(qrCode: String, position: Int, pagesNum: Int) {
-            setQrCodeToImageView(binding.qrCode, qrCode, 400, 400)
-
-            binding.qrPagesInfo.visibility = if (pagesNum > 1) View.VISIBLE else View.GONE
-            binding.qrPagesInfo.text = binding.root.context.getString(
-                R.string.label_qr_pages_info,
-                (position + 1).toString(),
-                pagesNum.toString()
-            )
-        }
-
-    }
-
-    inner class QrPagerAdapter(val qrCodes: List<String>) : RecyclerView.Adapter<QrPageHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QrPageHolder {
-            return QrPageHolder(
-                FragmentPromptSigningDialogQrPageBinding.inflate(
-                    layoutInflater,
-                    parent,
-                    false
-                )
-            )
-        }
-
-        override fun onBindViewHolder(holder: QrPageHolder, position: Int) {
-            holder.bind(qrCodes[position], position, qrCodes.size)
-        }
-
-        override fun getItemCount(): Int {
-            return qrCodes.size
-        }
-
     }
 }
