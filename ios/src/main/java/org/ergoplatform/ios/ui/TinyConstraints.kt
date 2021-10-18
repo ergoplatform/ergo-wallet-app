@@ -14,14 +14,105 @@ fun UIView.edgesToSuperview(
     bottomInset: Double = 0.0,
     maxWidth: Double = 0.0
 ) {
-    setTranslatesAutoresizingMaskIntoConstraints(false)
-    val layoutGuide =
-        if (useSafeArea) superview.safeAreaLayoutGuide else superview.layoutMarginsGuide
+    widthMatchesSuperview(useSafeArea, leadingInset, trailingInset, maxWidth)
+
+    val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
 
     val topConstraint = this.topAnchor.equalTo(
         layoutGuide.topAnchor,
         topInset
     )
+
+    val bottomConstraint = this.bottomAnchor.equalTo(
+        layoutGuide.bottomAnchor,
+        bottomInset * -1.0
+    )
+
+    NSLayoutConstraint.activateConstraints(
+        NSArray(
+            topConstraint,
+            bottomConstraint
+        )
+    )
+}
+
+private fun UIView.getSuperviewLayoutGuide(useSafeArea: Boolean) =
+    if (useSafeArea) superview.safeAreaLayoutGuide else superview.layoutMarginsGuide
+
+fun UIView.topToSuperview(
+    useSafeArea: Boolean = false,
+    topInset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val topConstraint = this.topAnchor.equalTo(
+        getSuperviewLayoutGuide(useSafeArea).topAnchor,
+        topInset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+
+    return this
+}
+
+fun UIView.topToBottomOf(
+    sibling: UIView,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val topConstraint = this.topAnchor.equalTo(
+        sibling.bottomAnchor,
+        inset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+
+    return this
+}
+
+fun UIView.bottomToSuperview(
+    useSafeArea: Boolean = false,
+    bottomInset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val topConstraint = this.bottomAnchor.equalTo(
+        getSuperviewLayoutGuide(useSafeArea).bottomAnchor,
+        bottomInset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+
+    return this
+}
+
+fun UIView.superViewWrapsHeight(useSafeArea: Boolean = false, multiplier: Double = 1.0, constant: Double = 0.0) {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
+
+    val topConstraint =
+        this.topAnchor.constraintEqualToSystemSpacingBelowAnchor(layoutGuide.topAnchor, multiplier)
+    topConstraint.constant = constant
+
+    val bottomConstraint =
+        layoutGuide.bottomAnchor.constraintEqualToSystemSpacingBelowAnchor(this.bottomAnchor, multiplier)
+    bottomConstraint.constant = constant
+
+    NSLayoutConstraint.activateConstraints(
+        NSArray(
+            topConstraint,
+            bottomConstraint,
+        )
+    )
+}
+
+fun UIView.widthMatchesSuperview(
+    useSafeArea: Boolean = false,
+    leadingInset: Double = 0.0,
+    trailingInset: Double = 0.0,
+    maxWidth: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+    val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
 
     val leadingConstraint = this.leadingAnchor.equalTo(
         layoutGuide.leadingAnchor,
@@ -31,10 +122,7 @@ fun UIView.edgesToSuperview(
         layoutGuide.trailingAnchor,
         trailingInset * -1.0
     )
-    val bottomConstraint = this.bottomAnchor.equalTo(
-        layoutGuide.bottomAnchor,
-        bottomInset * -1.0
-    )
+
 
     if (maxWidth > 0) {
         val widthConstraint = this.widthAnchor.lessThanOrEqualTo(maxWidth)
@@ -48,10 +136,10 @@ fun UIView.edgesToSuperview(
 
     NSLayoutConstraint.activateConstraints(
         NSArray(
-            topConstraint,
             leadingConstraint,
             trailingConstraint,
-            bottomConstraint
         )
     )
+
+    return this
 }

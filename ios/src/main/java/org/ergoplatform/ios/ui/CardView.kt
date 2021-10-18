@@ -47,7 +47,7 @@ class CardView: UIView(CGRect.Zero()) {
         this.addSubview(shadowView)
         layoutMargins = UIEdgeInsets.Zero()
         shadowView.addSubview(contentView)
-        shadowView.edgesToSuperview()
-        contentView.edgesToSuperview()
+        shadowView.widthMatchesSuperview().superViewWrapsHeight()
+        contentView.widthMatchesSuperview().superViewWrapsHeight()
     }
 }
