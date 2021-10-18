@@ -2,6 +2,7 @@ package org.ergoplatform.ios.ui
 
 import org.ergoplatform.ios.Main
 import org.ergoplatform.ios.MyViewController
+import org.ergoplatform.ios.wallet.WalletViewController
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
@@ -14,12 +15,12 @@ class BottomNavigationBar : UITabBarController() {
             NSArray(
                 listOf(
                     createNavController(
-                        MyViewController(),
-                        appDelegate.texts.get("title_wallets"), UIImage.systemImageNamed("house")
+                        WalletViewController(),
+                        appDelegate.texts.get("title_wallets"), UIImage.systemImageNamed("rectangle.on.rectangle.angled")
                     ),
                     createNavController(
                         MyViewController(),
-                        appDelegate.texts.get("title_settings"), UIImage.systemImageNamed("person")
+                        appDelegate.texts.get("title_settings"), UIImage.systemImageNamed("gearshape")
                     )
                 )
             )
