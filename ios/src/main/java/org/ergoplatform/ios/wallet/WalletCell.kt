@@ -12,9 +12,10 @@ const val WALLET_CELL = "WalletCell"
 class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     private lateinit var nameLabel: Body1Label
     private lateinit var balanceLabel: Headline1Label
-    lateinit var fiatBalance: Body1Label
-    lateinit var unconfirmedBalance: Headline2Label
-    lateinit var tokenCount: Headline2Label
+    private lateinit var fiatBalance: Body1Label
+    private lateinit var unconfirmedBalance: Headline2Label
+    private lateinit var tokenCount: Headline2Label
+    private lateinit var transactionButton: UIButton
 
     private var walletConfig: WalletConfig? = null
 
@@ -49,6 +50,8 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
 
+        transactionButton = CommonButton()
+
         val stackView =
             UIStackView(NSArray(nameLabel, balanceLabel, fiatBalance, unconfirmedBalance, spacing, tokenCount))
         stackView.alignment = UIStackViewAlignment.Leading
@@ -67,16 +70,20 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         )
         walletImage.tintColor = UIColor.secondaryLabel()
 
-        cardView.contentView.addSubviews(listOf(stackView, walletImage))
+        cardView.contentView.addSubviews(listOf(stackView, walletImage, transactionButton))
         walletImage.topToSuperview(false, DEFAULT_MARGIN * 2)
             .leftToSuperview(false, DEFAULT_MARGIN)
-        stackView.leftToRightOf(walletImage, DEFAULT_MARGIN).topToSuperview().bottomToSuperview()
+        stackView.leftToRightOf(walletImage, DEFAULT_MARGIN).topToSuperview()
             .rightToSuperview(false, DEFAULT_MARGIN)
 
         nameLabel.textColor = UIColor.secondaryLabel()
         nameLabel.numberOfLines = 1
 
         fiatBalance.textColor = UIColor.secondaryLabel()
+
+        transactionButton.setTitle(getAppDelegate().texts.get("title_transactions"), UIControlState.Normal)
+        transactionButton.widthMatchesSuperview().bottomToSuperview(false, DEFAULT_MARGIN)
+            .topToBottomOf(stackView, DEFAULT_MARGIN * 3)
     }
 
     fun bind(walletData: WalletConfig) {

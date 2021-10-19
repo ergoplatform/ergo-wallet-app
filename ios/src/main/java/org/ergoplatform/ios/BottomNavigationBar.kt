@@ -1,9 +1,8 @@
 package org.ergoplatform.ios
 
-import org.ergoplatform.ios.Main
-import org.ergoplatform.ios.MyViewController
 import org.ergoplatform.ios.ui.IMAGE_SETTINGS
 import org.ergoplatform.ios.ui.IMAGE_WALLET
+import org.ergoplatform.ios.ui.getAppDelegate
 import org.ergoplatform.ios.wallet.WalletViewController
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -11,7 +10,7 @@ import org.robovm.apple.uikit.*
 class BottomNavigationBar : UITabBarController() {
 
     fun setupVcs() {
-        val appDelegate = UIApplication.getSharedApplication().delegate as Main
+        val appDelegate = getAppDelegate()
 
         setViewControllers(
             NSArray(

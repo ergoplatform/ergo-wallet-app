@@ -32,7 +32,7 @@ abstract class ThemedLabel() : UILabel(CGRect.Zero()) {
 }
 
 open class Body1Label() : ThemedLabel() {
-    override fun getFontSize() = 18.0
+    override fun getFontSize() = FONT_SIZE_BODY1
 }
 
 class Body1BoldLabel() : Body1Label() {

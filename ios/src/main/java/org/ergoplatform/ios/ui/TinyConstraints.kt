@@ -92,7 +92,7 @@ fun UIView.bottomToSuperview(
 
     val topConstraint = this.bottomAnchor.equalTo(
         getSuperviewLayoutGuide(useSafeArea).bottomAnchor,
-        bottomInset
+        bottomInset * -1.0
     )
     NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
 
