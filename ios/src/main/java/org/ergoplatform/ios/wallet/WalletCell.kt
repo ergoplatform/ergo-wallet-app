@@ -2,6 +2,8 @@ package org.ergoplatform.ios.wallet
 
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletConfig
+import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSCoder
 import org.robovm.apple.uikit.*
 
@@ -35,7 +37,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         contentView.layoutMargins = UIEdgeInsets.Zero()
 
         // safe area is bigger than layout here due to margins
-        cardView.widthMatchesSuperview(true, 6.0, 6.0, 400.0)
+        cardView.widthMatchesSuperview(true, DEFAULT_MARGIN, DEFAULT_MARGIN, MAX_WIDTH)
             .superViewWrapsHeight(true, 0.0)
 
         // init components. This does not work in constructor, init() method is called before constructor
@@ -44,29 +46,26 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         balanceLabel = Headline1Label()
         fiatBalance = Body1Label()
         unconfirmedBalance = Headline2Label()
+        val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
 
-        cardView.contentView.addSubviews(listOf(balanceLabel, nameLabel, fiatBalance, unconfirmedBalance, tokenCount))
+        val stackView = UIStackView(NSArray(nameLabel, balanceLabel, fiatBalance, unconfirmedBalance, spacing, tokenCount))
+        stackView.alignment = UIStackViewAlignment.Leading
+        stackView.axis = UILayoutConstraintAxis.Vertical
+        stackView.setCustomSpacing(DEFAULT_MARGIN * 1.5, spacing)
+
+        cardView.contentView.addSubview(stackView)
+        stackView.widthMatchesSuperview().topToSuperview().bottomToSuperview()
 
         nameLabel.textColor = UIColor.secondaryLabel()
-        nameLabel.widthMatchesSuperview().topToSuperview(topInset = 1.0)
         nameLabel.numberOfLines = 1
 
-        balanceLabel.widthMatchesSuperview().topToBottomOf(nameLabel, 1.0)
-
-        fiatBalance.widthMatchesSuperview().topToBottomOf(balanceLabel)
         fiatBalance.textColor = UIColor.secondaryLabel()
-
-        unconfirmedBalance.widthMatchesSuperview().topToBottomOf(fiatBalance)
-
-        tokenCount.widthMatchesSuperview().topToBottomOf(unconfirmedBalance, 5.0)
-
-        tokenCount.bottomToSuperview()
     }
 
     fun bind(walletData: WalletConfig) {
         walletConfig = walletData
-        nameLabel.text = walletData.displayName
+        nameLabel.text = walletData.displayName + "kllöjklöjdjködsjkölsdjklösdjklsdkljsdjklsd"
         balanceLabel.text = "0.0000 ERG"
         fiatBalance.text = "0.00 EUR"
         unconfirmedBalance.text = "0.0000 ERG unconfirmed"
