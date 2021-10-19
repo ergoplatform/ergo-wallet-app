@@ -1,8 +1,6 @@
 package org.ergoplatform.ios
 
-import org.ergoplatform.ios.ui.IMAGE_SETTINGS
-import org.ergoplatform.ios.ui.IMAGE_WALLET
-import org.ergoplatform.ios.ui.getAppDelegate
+import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WalletViewController
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -17,11 +15,11 @@ class BottomNavigationBar : UITabBarController() {
                 listOf(
                     createNavController(
                         WalletViewController(),
-                        appDelegate.texts.get("title_wallets"), UIImage.systemImageNamed(IMAGE_WALLET)
+                        appDelegate.texts.get(TITLE_WALLETS), UIImage.systemImageNamed(IMAGE_WALLET)
                     ),
                     createNavController(
                         MyViewController(),
-                        appDelegate.texts.get("title_settings"), UIImage.systemImageNamed(IMAGE_SETTINGS)
+                        appDelegate.texts.get(TITLE_SETTINGS), UIImage.systemImageNamed(IMAGE_SETTINGS)
                     )
                 )
             )

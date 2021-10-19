@@ -12,14 +12,19 @@ java {
 task convertStrings {
     def source = '../android/build/intermediates/incremental/mergeErgomainnetDebugResources/merged.dir/values/values.xml'
     def dest = 'resources/i18n/strings.properties'
+    def dest2 = 'src/main/java/org/ergoplatform/ios/ui/StringResources.kt'
 
     doFirst {
         def output = project.file(dest)
+        def output2 = project.file(dest2)
         def input = project.file(source)
 
         try {
             if (!output.parentFile.exists())
                 output.parentFile.mkdirs()
+
+            if (!output2.parentFile.exists())
+                output2.parentFile.mkdirs()
 
             if (!input.exists())
                 logger.error("Android merged values file not found, please build for Android first.")
@@ -28,6 +33,8 @@ task convertStrings {
 
             def lines = input.text.readLines()
             def strings = new ArrayList<String>()
+            def names = new ArrayList<String>()
+            names.add("package org.ergoplatform.ios.ui")
             def isInString = false
 
             for (line in lines) {
@@ -54,11 +61,13 @@ task convertStrings {
                             isInString = true
                         }
                         strings.add(name + "=" + value)
+                        names.add("const val " + name.toUpperCase() + " = \"" + name + "\"")
                     }
                 }
             }
 
             output.write(strings.join('\n'))
+            output2.write(names.join('\n'))
             logger.info("Updated strings")
         } catch (ex) {
             throw new GradleException('Exception writing strings file', ex)

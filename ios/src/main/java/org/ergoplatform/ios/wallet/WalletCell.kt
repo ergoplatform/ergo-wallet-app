@@ -81,7 +81,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
         fiatBalance.textColor = UIColor.secondaryLabel()
 
-        transactionButton.setTitle(getAppDelegate().texts.get("title_transactions"), UIControlState.Normal)
+        transactionButton.setTitle(getAppDelegate().texts.get(TITLE_TRANSACTIONS), UIControlState.Normal)
         transactionButton.widthMatchesSuperview().bottomToSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(stackView, DEFAULT_MARGIN * 3)
     }
