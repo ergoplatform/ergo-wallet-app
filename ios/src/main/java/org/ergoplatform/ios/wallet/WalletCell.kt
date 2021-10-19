@@ -49,13 +49,29 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
 
-        val stackView = UIStackView(NSArray(nameLabel, balanceLabel, fiatBalance, unconfirmedBalance, spacing, tokenCount))
+        val stackView =
+            UIStackView(NSArray(nameLabel, balanceLabel, fiatBalance, unconfirmedBalance, spacing, tokenCount))
         stackView.alignment = UIStackViewAlignment.Leading
         stackView.axis = UILayoutConstraintAxis.Vertical
         stackView.setCustomSpacing(DEFAULT_MARGIN * 1.5, spacing)
 
-        cardView.contentView.addSubview(stackView)
-        stackView.widthMatchesSuperview().topToSuperview().bottomToSuperview()
+        val walletImage = UIImageView(
+            UIImage.getSystemImage(
+                IMAGE_WALLET,
+                UIImageSymbolConfiguration.getConfigurationWithPointSizeWeightScale(
+                    30.0,
+                    UIImageSymbolWeight.Regular,
+                    UIImageSymbolScale.Large
+                )
+            )
+        )
+        walletImage.tintColor = UIColor.secondaryLabel()
+
+        cardView.contentView.addSubviews(listOf(stackView, walletImage))
+        walletImage.topToSuperview(false, DEFAULT_MARGIN * 2)
+            .leftToSuperview(false, DEFAULT_MARGIN)
+        stackView.leftToRightOf(walletImage, DEFAULT_MARGIN).topToSuperview().bottomToSuperview()
+            .rightToSuperview(false, DEFAULT_MARGIN)
 
         nameLabel.textColor = UIColor.secondaryLabel()
         nameLabel.numberOfLines = 1

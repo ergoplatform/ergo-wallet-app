@@ -3,7 +3,6 @@ package org.ergoplatform.ios
 import SQLite.JDBCDriver
 import com.badlogic.gdx.utils.I18NBundle
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
-import org.ergoplatform.ios.ui.BottomNavigationBar
 import org.ergoplatform.persistance.AppDatabase
 import org.robovm.apple.foundation.NSAutoreleasePool
 import org.robovm.apple.foundation.NSBundle

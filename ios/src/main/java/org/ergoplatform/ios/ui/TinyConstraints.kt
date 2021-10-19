@@ -69,6 +69,21 @@ fun UIView.topToBottomOf(
     return this
 }
 
+fun UIView.leftToRightOf(
+    sibling: UIView,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val topConstraint = this.leftAnchor.equalTo(
+        sibling.rightAnchor,
+        inset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+
+    return this
+}
+
 fun UIView.bottomToSuperview(
     useSafeArea: Boolean = false,
     bottomInset: Double = 0.0
@@ -78,6 +93,36 @@ fun UIView.bottomToSuperview(
     val topConstraint = this.bottomAnchor.equalTo(
         getSuperviewLayoutGuide(useSafeArea).bottomAnchor,
         bottomInset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+
+    return this
+}
+
+fun UIView.leftToSuperview(
+    useSafeArea: Boolean = false,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val topConstraint = this.leftAnchor.equalTo(
+        getSuperviewLayoutGuide(useSafeArea).leftAnchor,
+        inset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+
+    return this
+}
+
+fun UIView.rightToSuperview(
+    useSafeArea: Boolean = false,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val topConstraint = this.rightAnchor.equalTo(
+        getSuperviewLayoutGuide(useSafeArea).rightAnchor,
+        inset * -1.0
     )
     NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
 
