@@ -22,7 +22,7 @@ abstract class ThemedLabel() : UILabel(CGRect.Zero()) {
 
     private fun setupView() {
         numberOfLines = 0
-        textColor = UIColor.black()
+        textColor = UIColor.label()
         font = UIFont.getSystemFont(getFontSize(), if (isBold()) UIFontWeight.Semibold else UIFontWeight.Regular)
     }
 
