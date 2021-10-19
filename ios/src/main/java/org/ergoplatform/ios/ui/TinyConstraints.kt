@@ -143,3 +143,7 @@ fun UIView.widthMatchesSuperview(
 
     return this
 }
+
+fun UIView.addSubviews(viewsToAdd: List<UIView>) {
+    viewsToAdd.forEach { this.addSubview(it) }
+}
