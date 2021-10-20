@@ -6,6 +6,10 @@ import org.robovm.apple.uikit.UIView
 
 // https://github.com/roberthein/TinyConstraints
 
+/**
+ * sizes the view to the superview (match_parent, match_parent)
+ * If you want to wrap the content vertically, use topToSuperView().bottomToSuperView() concatenation
+ */
 fun UIView.edgesToSuperview(
     useSafeArea: Boolean = false,
     topInset: Double = 0.0,

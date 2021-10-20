@@ -1,10 +1,12 @@
 package org.ergoplatform.ios.wallet
 
-import org.ergoplatform.ios.ui.edgesToSuperview
+import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletConfig
 import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSIndexPath
 import org.robovm.apple.uikit.*
+import org.robovm.objc.annotation.CustomClass
 
 class WalletViewController : UIViewController() {
 
@@ -26,6 +28,9 @@ class WalletViewController : UIViewController() {
         tableView.registerReusableCellClass(WalletCell::class.java, WALLET_CELL)
         tableView.rowHeight = UITableView.getAutomaticDimension()
         tableView.estimatedRowHeight = 100.0
+
+        tableView.tableHeaderView = HeaderView()
+        tableView.tableHeaderView.backgroundColor = UIColor.secondarySystemBackground()
     }
 
     override fun viewWillAppear(p0: Boolean) {
@@ -64,7 +69,22 @@ class WalletViewController : UIViewController() {
         override fun canMoveRow(p0: UITableView?, p1: NSIndexPath?): Boolean {
             return false
         }
+    }
 
+    @CustomClass
+    class HeaderView : UIView(CGRect(0.0, 0.0, 0.0, 70.0)) {
+        init {
+            val fiatLabel = Body1Label()
+            val syncLabel = Body1Label()
+
+            val stackview = UIStackView(NSArray(fiatLabel, syncLabel))
+            stackview.axis = UILayoutConstraintAxis.Vertical
+            addSubview(stackview)
+            stackview.edgesToSuperview(false, leadingInset = DEFAULT_MARGIN, trailingInset = DEFAULT_MARGIN)
+
+            fiatLabel.text = getAppDelegate().texts.get(STRING_LABEL_ERG_PRICE)
+            syncLabel.text = getAppDelegate().texts.get(STRING_LABEL_LAST_SYNC)
+        }
     }
 
 }
