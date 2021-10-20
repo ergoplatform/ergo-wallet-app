@@ -79,7 +79,7 @@ class WalletViewController : UIViewController() {
 
         init {
             val image = UIImage.getImage("ergologo")
-            ergoLogo = UIImageView(image)
+            ergoLogo = UIImageView(image.imageWithTintColor(UIColor.label()))
             ergoLogo.contentMode = UIViewContentMode.ScaleAspectFit
 
             val stackview = UIStackView(NSArray(fiatLabel, syncLabel))
