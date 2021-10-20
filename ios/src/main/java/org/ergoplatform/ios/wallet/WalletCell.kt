@@ -41,7 +41,16 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         transactionButton = CommonButton()
 
         val stackView =
-            UIStackView(NSArray(nameLabel, balanceLabel, fiatBalance, unconfirmedBalance, spacing, tokenCount))
+            UIStackView(
+                NSArray(
+                    nameLabel,
+                    balanceLabel,
+                    fiatBalance,
+                    unconfirmedBalance,
+                    spacing,
+                    tokenCount
+                )
+            )
         stackView.alignment = UIStackViewAlignment.Leading
         stackView.axis = UILayoutConstraintAxis.Vertical
         stackView.setCustomSpacing(DEFAULT_MARGIN * 1.5, spacing)
@@ -69,7 +78,10 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
         fiatBalance.textColor = UIColor.secondaryLabel()
 
-        transactionButton.setTitle(getAppDelegate().texts.get(TITLE_TRANSACTIONS), UIControlState.Normal)
+        transactionButton.setTitle(
+            getAppDelegate().texts.get(STRING_TITLE_TRANSACTIONS),
+            UIControlState.Normal
+        )
         transactionButton.widthMatchesSuperview(false, DEFAULT_MARGIN, DEFAULT_MARGIN)
             .bottomToSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(stackView, DEFAULT_MARGIN * 3)

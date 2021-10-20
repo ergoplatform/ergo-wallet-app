@@ -14,4 +14,6 @@ const val FONT_SIZE_BODY1 = 18.0
 
 fun getAppDelegate() = UIApplication.getSharedApplication().delegate as Main
 
+// See https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#system-colors
+
 val uiColorErgo get() = UIColor.systemRed()

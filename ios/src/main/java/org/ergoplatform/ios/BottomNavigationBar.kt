@@ -15,11 +15,13 @@ class BottomNavigationBar : UITabBarController() {
                 listOf(
                     createNavController(
                         WalletViewController(),
-                        appDelegate.texts.get(TITLE_WALLETS), UIImage.systemImageNamed(IMAGE_WALLET)
+                        appDelegate.texts.get(STRING_TITLE_WALLETS),
+                        UIImage.systemImageNamed(IMAGE_WALLET)
                     ),
                     createNavController(
                         MyViewController(),
-                        appDelegate.texts.get(TITLE_SETTINGS), UIImage.systemImageNamed(IMAGE_SETTINGS)
+                        appDelegate.texts.get(STRING_TITLE_WALLETS),
+                        UIImage.systemImageNamed(IMAGE_SETTINGS)
                     )
                 )
             )
