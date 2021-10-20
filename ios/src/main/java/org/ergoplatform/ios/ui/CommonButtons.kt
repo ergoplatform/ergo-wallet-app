@@ -2,7 +2,7 @@ package org.ergoplatform.ios.ui
 
 import org.robovm.apple.uikit.*
 
-class CommonButton: UIButton(UIButtonType.System) {
+open class CommonButton(caption: String): UIButton(UIButtonType.System) {
 
     init {
         titleLabel?.font = UIFont.getSystemFont(FONT_SIZE_BODY1)
@@ -11,6 +11,18 @@ class CommonButton: UIButton(UIButtonType.System) {
         layer.setMasksToBounds(false)
         setTitleColor(UIColor.label(), UIControlState.Normal)
         setTitleColor(UIColor.secondaryLabel(), UIControlState.Highlighted)
+        setTitle(
+            caption,
+            UIControlState.Normal
+        )
+
         backgroundColor = UIColor.systemGray4()
+    }
+}
+
+class PrimaryButton(caption: String): CommonButton(caption) {
+
+    init {
+        backgroundColor = uiColorErgo
     }
 }

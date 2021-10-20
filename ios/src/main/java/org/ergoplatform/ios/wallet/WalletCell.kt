@@ -11,12 +11,14 @@ const val WALLET_CELL = "WalletCell"
 
 @CustomClass
 class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
-    private lateinit var nameLabel: Body1Label
-    private lateinit var balanceLabel: Headline1Label
-    private lateinit var fiatBalance: Body1Label
-    private lateinit var unconfirmedBalance: Headline2Label
-    private lateinit var tokenCount: Headline2Label
-    private lateinit var transactionButton: UIButton
+    private val nameLabel: Body1Label
+    private val balanceLabel: Headline1Label
+    private val fiatBalance: Body1Label
+    private val unconfirmedBalance: Headline2Label
+    private val tokenCount: Headline2Label
+    private val transactionButton: UIButton
+    private val receiveButton: UIButton
+    private val sendButton: UIButton
 
     private var walletConfig: WalletConfig? = null
 
@@ -38,7 +40,10 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
 
-        transactionButton = CommonButton()
+        val textBundle = getAppDelegate().texts
+        transactionButton = CommonButton(textBundle.get(STRING_TITLE_TRANSACTIONS))
+        receiveButton = CommonButton(textBundle.get(STRING_BUTTON_RECEIVE))
+        sendButton = PrimaryButton(textBundle.get(STRING_BUTTON_SEND))
 
         val stackView =
             UIStackView(
@@ -67,7 +72,11 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         )
         walletImage.tintColor = UIColor.secondaryLabel()
 
-        cardView.contentView.addSubviews(listOf(stackView, walletImage, transactionButton))
+        val horizontalStack = UIStackView(NSArray(receiveButton, sendButton))
+        horizontalStack.spacing = DEFAULT_MARGIN
+        horizontalStack.distribution = UIStackViewDistribution.FillEqually
+
+        cardView.contentView.addSubviews(listOf(stackView, walletImage, transactionButton, horizontalStack))
         walletImage.topToSuperview(false, DEFAULT_MARGIN * 2)
             .leftToSuperview(false, DEFAULT_MARGIN)
         stackView.leftToRightOf(walletImage, DEFAULT_MARGIN).topToSuperview()
@@ -78,18 +87,18 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
         fiatBalance.textColor = UIColor.secondaryLabel()
 
-        transactionButton.setTitle(
-            getAppDelegate().texts.get(STRING_TITLE_TRANSACTIONS),
-            UIControlState.Normal
-        )
         transactionButton.widthMatchesSuperview(false, DEFAULT_MARGIN, DEFAULT_MARGIN)
-            .bottomToSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(stackView, DEFAULT_MARGIN * 3)
+
+        horizontalStack.widthMatchesSuperview(false, DEFAULT_MARGIN, DEFAULT_MARGIN)
+            .topToBottomOf(transactionButton, DEFAULT_MARGIN)
+            .bottomToSuperview(false, DEFAULT_MARGIN)
+
     }
 
     fun bind(walletData: WalletConfig) {
         walletConfig = walletData
-        nameLabel.text = walletData.displayName + "kllöjklöjdjködsjkölsdjklösdjklsdkljsdjklsd"
+        nameLabel.text = walletData.displayName
         balanceLabel.text = "0.0000 ERG"
         fiatBalance.text = "0.00 EUR"
         unconfirmedBalance.text = "0.0000 ERG unconfirmed"

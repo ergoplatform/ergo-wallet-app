@@ -12,7 +12,6 @@ class WalletViewController : UIViewController() {
     private val shownData = ArrayList<WalletConfig>()
 
     override fun viewDidLoad() {
-        view.backgroundColor = UIColor.white()
         navigationItem.rightBarButtonItem = UIBarButtonItem(UIBarButtonSystemItem.Add)
         navigationItem.rightBarButtonItem.tintColor = UIColor.label()
 

@@ -20,7 +20,7 @@ class BottomNavigationBar : UITabBarController() {
                     ),
                     createNavController(
                         MyViewController(),
-                        appDelegate.texts.get(STRING_TITLE_WALLETS),
+                        appDelegate.texts.get(STRING_TITLE_SETTINGS),
                         UIImage.systemImageNamed(IMAGE_SETTINGS)
                     )
                 )
