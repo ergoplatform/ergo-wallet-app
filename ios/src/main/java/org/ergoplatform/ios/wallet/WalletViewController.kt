@@ -73,14 +73,22 @@ class WalletViewController : UIViewController() {
 
     @CustomClass
     class HeaderView : UIView(CGRect(0.0, 0.0, 0.0, 70.0)) {
+        val ergoLogo: UIImageView
+        val fiatLabel = Body1Label()
+        val syncLabel = Body1Label()
+
         init {
-            val fiatLabel = Body1Label()
-            val syncLabel = Body1Label()
+            val image = UIImage.getImage("ergologo")
+            ergoLogo = UIImageView(image)
+            ergoLogo.contentMode = UIViewContentMode.ScaleAspectFit
 
             val stackview = UIStackView(NSArray(fiatLabel, syncLabel))
             stackview.axis = UILayoutConstraintAxis.Vertical
             addSubview(stackview)
-            stackview.edgesToSuperview(false, leadingInset = DEFAULT_MARGIN, trailingInset = DEFAULT_MARGIN)
+            addSubview(ergoLogo)
+            ergoLogo.leftToSuperview().topToSuperview().bottomToSuperview()
+            stackview.topToSuperview().bottomToSuperview().leftToRightOf(ergoLogo)
+            NSLayoutConstraint.activateConstraints(NSArray(ergoLogo.widthAnchor.equalTo(frame.height)))
 
             fiatLabel.text = getAppDelegate().texts.get(STRING_LABEL_ERG_PRICE)
             syncLabel.text = getAppDelegate().texts.get(STRING_LABEL_LAST_SYNC)
