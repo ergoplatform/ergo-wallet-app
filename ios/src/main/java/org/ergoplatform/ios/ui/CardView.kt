@@ -12,7 +12,7 @@ class CardView: UIView(CGRect.Zero()) {
 
     init {
         contentView.apply {
-            this.backgroundColor = UIColor.systemGroupedBackground()
+            this.backgroundColor = UIColor.secondarySystemBackground()
             this.layer.setMasksToBounds(true)
             this.layer.cornerRadius = 6.0
         }

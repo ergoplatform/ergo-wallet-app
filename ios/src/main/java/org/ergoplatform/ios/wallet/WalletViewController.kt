@@ -14,6 +14,7 @@ class WalletViewController : UIViewController() {
     override fun viewDidLoad() {
         view.backgroundColor = UIColor.white()
         navigationItem.rightBarButtonItem = UIBarButtonItem(UIBarButtonSystemItem.Add)
+        navigationItem.rightBarButtonItem.tintColor = UIColor.label()
 
         view.addSubview(tableView)
         tableView.edgesToSuperview(true)

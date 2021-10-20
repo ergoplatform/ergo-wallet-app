@@ -33,14 +33,19 @@ class BottomNavigationBar : UITabBarController() {
         val navController = UINavigationController(rootViewController)
         navController.tabBarItem.title = title
         navController.tabBarItem.image = image
-        //navController.navigationBar.setPrefersLargeTitles(true)
+        navController.navigationBar.setPrefersLargeTitles(true)
+        val navBarAppearance = UINavigationBarAppearance()
+        navBarAppearance.backgroundColor = uiColorErgo
+        navController.navigationBar.standardAppearance = navBarAppearance
+        navController.navigationBar.scrollEdgeAppearance = navBarAppearance
         rootViewController.navigationItem.title = title
         return navController
     }
 
     override fun viewDidLoad() {
-        tabBar.barTintColor = UIColor.systemBackground()
+        tabBar.barTintColor = uiColorErgo
         tabBar.tintColor = UIColor.label()
+        tabBar.unselectedItemTintColor = UIColor.secondaryLabel()
         setupVcs()
     }
 }
