@@ -8,7 +8,10 @@ const val MAX_WIDTH = 500.0
 const val DEFAULT_MARGIN = 6.0
 
 const val IMAGE_WALLET = "rectangle.on.rectangle.angled"
-const val IMAGE_SETTINGS = "gearshape"
+const val IMAGE_SETTINGS = "gear"
+const val IMAGE_CREATE_WALLET = "folder.badge.plus"
+const val IMAGE_RESTORE_WALLET = "arrow.clockwise"
+const val IMAGE_READONLY_WALLET = "magnifyingglass"
 
 const val FONT_SIZE_BODY1 = 18.0
 

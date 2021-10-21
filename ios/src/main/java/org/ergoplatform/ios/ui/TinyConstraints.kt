@@ -9,6 +9,7 @@ import org.robovm.apple.uikit.UIView
 /**
  * sizes the view to the superview (match_parent, match_parent)
  * If you want to wrap the content vertically, use topToSuperView().bottomToSuperView() concatenation
+ * or superviewWrapsHeight()
  */
 fun UIView.edgesToSuperview(
     useSafeArea: Boolean = false,
@@ -133,7 +134,10 @@ fun UIView.rightToSuperview(
     return this
 }
 
-fun UIView.superViewWrapsHeight(useSafeArea: Boolean = false, multiplier: Double = 1.0, constant: Double = 0.0) {
+fun UIView.superViewWrapsHeight(
+    useSafeArea: Boolean = false, multiplier: Double = 1.0, constant: Double = 0.0,
+    centerVertical: Boolean = false
+) {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
     val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
@@ -145,6 +149,10 @@ fun UIView.superViewWrapsHeight(useSafeArea: Boolean = false, multiplier: Double
     val bottomConstraint =
         layoutGuide.bottomAnchor.constraintEqualToSystemSpacingBelowAnchor(this.bottomAnchor, multiplier)
     bottomConstraint.constant = constant
+
+    if (centerVertical) {
+        this.centerYAnchor.equalTo(layoutGuide.centerYAnchor)
+    }
 
     NSLayoutConstraint.activateConstraints(
         NSArray(

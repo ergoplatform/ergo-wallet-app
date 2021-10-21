@@ -14,8 +14,12 @@ class WalletViewController : UIViewController() {
     private val shownData = ArrayList<WalletConfig>()
 
     override fun viewDidLoad() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(UIBarButtonSystemItem.Add)
-        navigationItem.rightBarButtonItem.tintColor = UIColor.label()
+        val addWalletButton = UIBarButtonItem(UIBarButtonSystemItem.Add)
+        navigationItem.rightBarButtonItem = addWalletButton
+        addWalletButton.tintColor = UIColor.label()
+        addWalletButton.setOnClickListener {
+            this.presentViewController(AddWalletChooserViewController(), true, {})
+        }
 
         view.addSubview(tableView)
         tableView.edgesToSuperview(true)
