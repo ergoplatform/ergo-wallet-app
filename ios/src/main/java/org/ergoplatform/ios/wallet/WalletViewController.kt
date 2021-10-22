@@ -7,6 +7,7 @@ import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSIndexPath
 import org.robovm.apple.uikit.*
 import org.robovm.objc.annotation.CustomClass
+import kotlin.math.max
 
 class WalletViewController : UIViewController() {
 
@@ -24,12 +25,11 @@ class WalletViewController : UIViewController() {
         view.addSubview(tableView)
         tableView.edgesToSuperview(true)
 
-        val element = WalletConfig(0, "Test", "9sxkls", 0, null, true)
-        shownData.addAll(listOf(element, element))
         tableView.dataSource = WalletDataSource()
         tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         tableView.refreshControl = UIRefreshControl()
         tableView.registerReusableCellClass(WalletCell::class.java, WALLET_CELL)
+        tableView.registerReusableCellClass(EmptyCell::class.java, EMPTY_CELL)
         tableView.rowHeight = UITableView.getAutomaticDimension()
         tableView.estimatedRowHeight = UITableView.getAutomaticDimension()
 
@@ -52,14 +52,17 @@ class WalletViewController : UIViewController() {
 
     inner class WalletDataSource() : UITableViewDataSourceAdapter() {
         override fun getNumberOfRowsInSection(p0: UITableView?, p1: Long): Long {
-            // TODO always 1 (for empty)
-            return shownData.size.toLong()
+            return max(1, shownData.size.toLong())
         }
 
         override fun getCellForRow(p0: UITableView, p1: NSIndexPath): UITableViewCell {
-            val cell = p0.dequeueReusableCell(WALLET_CELL)
-            (cell as? WalletCell)?.bind(shownData.get(p1.row))
-            return cell
+            if (shownData.isEmpty()) {
+                return p0.dequeueReusableCell(EMPTY_CELL)
+            } else {
+                val cell = p0.dequeueReusableCell(WALLET_CELL)
+                (cell as? WalletCell)?.bind(shownData.get(p1.row))
+                return cell
+            }
         }
 
         override fun getNumberOfSections(p0: UITableView?): Long {

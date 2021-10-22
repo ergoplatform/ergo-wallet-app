@@ -13,24 +13,21 @@ import org.robovm.apple.uikit.UIView
  */
 fun UIView.edgesToSuperview(
     useSafeArea: Boolean = false,
-    topInset: Double = 0.0,
-    leadingInset: Double = 0.0,
-    trailingInset: Double = 0.0,
-    bottomInset: Double = 0.0,
+    inset: Double = 0.0,
     maxWidth: Double = 0.0
 ) {
-    widthMatchesSuperview(useSafeArea, leadingInset, trailingInset, maxWidth)
+    widthMatchesSuperview(useSafeArea, inset, inset, maxWidth)
 
     val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
 
     val topConstraint = this.topAnchor.equalTo(
         layoutGuide.topAnchor,
-        topInset
+        inset
     )
 
     val bottomConstraint = this.bottomAnchor.equalTo(
         layoutGuide.bottomAnchor,
-        bottomInset * -1.0
+        inset * -1.0
     )
 
     NSLayoutConstraint.activateConstraints(

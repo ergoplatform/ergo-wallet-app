@@ -20,7 +20,7 @@ class AddWalletChooserViewController : UIViewController() {
         cancelButton.topToSuperview(priority = 1000).leftToSuperview()
         chooserView.widthMatchesSuperview().centerVertical().placeBelow(cancelButton)
 
-        cancelButton.addOnTouchUpInsideListener { _, _ -> this.dismissViewController(true, {}) }
+        cancelButton.addOnTouchUpInsideListener { _, _ -> this.dismissViewController(true) {} }
 
 
     }

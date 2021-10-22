@@ -8,6 +8,7 @@ import org.robovm.apple.foundation.NSCoder
 import org.robovm.apple.uikit.*
 
 const val WALLET_CELL = "WalletCell"
+const val EMPTY_CELL = "WalletCell"
 
 class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     private lateinit var nameLabel: Body1Label
@@ -118,4 +119,24 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         tokenCount.text = "0 tokens"
     }
 
+}
+
+class EmptyCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
+    override fun init(p0: NSCoder?): Long {
+        val init = super.init(p0)
+        setupView()
+        return init
+    }
+
+    override fun init(p0: UITableViewCellStyle?, p1: String?): Long {
+        val init = super.init(p0, p1)
+        setupView()
+        return init
+    }
+
+    private fun setupView() {
+        val walletChooserStackView = AddWalletChooserStackView(getAppDelegate().texts)
+        contentView.addSubview(walletChooserStackView)
+        walletChooserStackView.edgesToSuperview(false, DEFAULT_MARGIN)
+    }
 }
