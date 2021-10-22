@@ -46,7 +46,8 @@ private fun UIView.getSuperviewLayoutGuide(useSafeArea: Boolean) =
 
 fun UIView.topToSuperview(
     useSafeArea: Boolean = false,
-    topInset: Double = 0.0
+    topInset: Double = 0.0,
+    priority: Int? = null
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
@@ -54,6 +55,7 @@ fun UIView.topToSuperview(
         getSuperviewLayoutGuide(useSafeArea).topAnchor,
         topInset
     )
+    priority?.let { topConstraint.priority = priority.toFloat() }
     NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
 
     return this
@@ -69,6 +71,17 @@ fun UIView.topToBottomOf(
         sibling.bottomAnchor,
         inset
     )
+    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+
+    return this
+}
+
+fun UIView.placeBelow(
+    sibling: UIView,
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val topConstraint = this.topAnchor.constraintGreaterThanOrEqualToSystemSpacingBelowAnchor(sibling.bottomAnchor, 1.0)
     NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
 
     return this
@@ -151,7 +164,7 @@ fun UIView.superViewWrapsHeight(
     bottomConstraint.constant = constant
 
     if (centerVertical) {
-        this.centerYAnchor.equalTo(layoutGuide.centerYAnchor)
+        centerVertical()
     }
 
     NSLayoutConstraint.activateConstraints(
@@ -160,6 +173,14 @@ fun UIView.superViewWrapsHeight(
             bottomConstraint,
         )
     )
+}
+
+fun UIView.centerVertical(): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+    val centerConstraint = this.centerYAnchor.equalTo(superview.centerYAnchor)
+    centerConstraint.priority = 1000f
+    NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
+    return this
 }
 
 fun UIView.widthMatchesSuperview(

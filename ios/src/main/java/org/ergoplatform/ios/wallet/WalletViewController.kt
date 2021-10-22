@@ -31,7 +31,7 @@ class WalletViewController : UIViewController() {
         tableView.refreshControl = UIRefreshControl()
         tableView.registerReusableCellClass(WalletCell::class.java, WALLET_CELL)
         tableView.rowHeight = UITableView.getAutomaticDimension()
-        tableView.estimatedRowHeight = 100.0
+        tableView.estimatedRowHeight = UITableView.getAutomaticDimension()
 
         tableView.tableHeaderView = HeaderView()
         tableView.tableHeaderView.backgroundColor = UIColor.secondarySystemBackground()

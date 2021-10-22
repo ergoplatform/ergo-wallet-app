@@ -4,25 +4,37 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletConfig
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
+import org.robovm.apple.foundation.NSCoder
 import org.robovm.apple.uikit.*
-import org.robovm.objc.annotation.CustomClass
 
 const val WALLET_CELL = "WalletCell"
 
-@CustomClass
 class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
-    private val nameLabel: Body1Label
-    private val balanceLabel: Headline1Label
-    private val fiatBalance: Body1Label
-    private val unconfirmedBalance: Headline2Label
-    private val tokenCount: Headline2Label
-    private val transactionButton: UIButton
-    private val receiveButton: UIButton
-    private val sendButton: UIButton
+    private lateinit var nameLabel: Body1Label
+    private lateinit var balanceLabel: Headline1Label
+    private lateinit var fiatBalance: Body1Label
+    private lateinit var unconfirmedBalance: Headline2Label
+    private lateinit var tokenCount: Headline2Label
+    private lateinit var transactionButton: UIButton
+    private lateinit var receiveButton: UIButton
+    private lateinit var sendButton: UIButton
 
     private var walletConfig: WalletConfig? = null
 
-    init {
+    override fun init(p0: NSCoder?): Long {
+        val init = super.init(p0)
+        setupView()
+        return init
+    }
+
+    override fun init(p0: UITableViewCellStyle?, p1: String?): Long {
+        val init = super.init(p0, p1)
+        setupView()
+        return init
+    }
+
+    private fun setupView() {
+        this.selectionStyle = UITableViewCellSelectionStyle.None
         val cardView = CardView()
         contentView.addSubview(cardView)
         contentView.layoutMargins = UIEdgeInsets.Zero()
@@ -104,7 +116,6 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         unconfirmedBalance.text = "0.0000 ERG unconfirmed"
         unconfirmedBalance.isHidden = true
         tokenCount.text = "0 tokens"
-        this.selectionStyle = UITableViewCellSelectionStyle.None
     }
 
 }

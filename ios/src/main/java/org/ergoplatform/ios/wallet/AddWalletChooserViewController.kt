@@ -15,9 +15,25 @@ class AddWalletChooserViewController : UIViewController() {
         val chooserView = AddWalletChooserStackView(texts)
         view.backgroundColor = UIColor.systemBackground()
         view.addSubview(chooserView)
-        chooserView.edgesToSuperview()
-        // TODO instead, centering would be good to have since scroll view does not work anyway
+        val cancelButton = TextButton(texts.get(STRING_LABEL_CANCEL))
+        view.addSubview(cancelButton)
+        cancelButton.topToSuperview(priority = 1000).leftToSuperview()
+        chooserView.widthMatchesSuperview().centerVertical().placeBelow(cancelButton)
+
+        cancelButton.addOnTouchUpInsideListener { _, _ -> this.dismissViewController(true, {}) }
+
+
     }
+
+//    override fun viewDidLayoutSubviews() {
+    // Trying to pack the view, did not work
+//        super.viewDidLayoutSubviews()
+//        val systemLayoutSizeFittingSize = view.getSystemLayoutSizeFittingSize(UILayoutFittingSize.Compressed)
+//        if (!systemLayoutSizeFittingSize.height.isNaN()) {
+//            preferredContentSize = systemLayoutSizeFittingSize
+//            view.superview.setNeedsLayout()
+//        }
+//    }
 }
 
 @CustomClass
@@ -32,7 +48,7 @@ class AddWalletChooserStackView(val texts: I18NBundle) : UIScrollView(CGRect.Zer
 
         val stackView = UIStackView(NSArray(createWalletCell, restoreWalletCell, readOnlyWalletCell))
         stackView.axis = UILayoutConstraintAxis.Vertical
-        stackView.distribution = UIStackViewDistribution.FillEqually
+        stackView.distribution = UIStackViewDistribution.EqualCentering
         addSubview(stackView)
         stackView.edgesToSuperview()
 
