@@ -14,11 +14,22 @@ class AddWalletChooserViewController : UIViewController() {
         title = texts.get(STRING_MENU_ADD_WALLET)
         val chooserView = AddWalletChooserStackView(texts)
         view.backgroundColor = UIColor.systemBackground()
-        view.addSubview(chooserView)
+
+        val scrollView = UIScrollView(CGRect.Zero())
+        view.addSubview(scrollView)
+        scrollView.edgesToSuperview()
+
+        scrollView.addSubview(chooserView)
         val cancelButton = TextButton(texts.get(STRING_LABEL_CANCEL))
-        view.addSubview(cancelButton)
+        scrollView.addSubview(cancelButton)
         cancelButton.topToSuperview(priority = 1000).leftToSuperview()
-        chooserView.widthMatchesSuperview().centerVertical().placeBelow(cancelButton)
+        chooserView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        NSLayoutConstraint.activateConstraints(NSArray(chooserView.widthAnchor.equalTo(scrollView.widthAnchor),
+        chooserView.trailingAnchor.equalTo(scrollView.trailingAnchor),
+        chooserView.leadingAnchor.equalTo(scrollView.leadingAnchor),
+        chooserView.topAnchor.equalTo(scrollView.topAnchor),
+            chooserView.bottomAnchor.equalTo(scrollView.bottomAnchor)
+        ))
 
         cancelButton.addOnTouchUpInsideListener { _, _ -> this.dismissViewController(true) {} }
 
@@ -37,7 +48,7 @@ class AddWalletChooserViewController : UIViewController() {
 }
 
 @CustomClass
-class AddWalletChooserStackView(val texts: I18NBundle) : UIScrollView(CGRect.Zero()) {
+class AddWalletChooserStackView(val texts: I18NBundle) : UIView(CGRect.Zero()) {
     init {
         val createWalletCell =
             createCardView(STRING_LABEL_CREATE_WALLET, STRING_DESC_CREATE_WALLET, IMAGE_CREATE_WALLET)
@@ -51,8 +62,6 @@ class AddWalletChooserStackView(val texts: I18NBundle) : UIScrollView(CGRect.Zer
         stackView.distribution = UIStackViewDistribution.EqualCentering
         addSubview(stackView)
         stackView.edgesToSuperview()
-
-        // TODO Scrollview does not kick in, instead description text is shortened
     }
 
     private fun createCardView(titleLabel: String, descLabelId: String, imageName: String): CardView {
