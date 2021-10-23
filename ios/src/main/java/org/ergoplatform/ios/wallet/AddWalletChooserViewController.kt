@@ -12,20 +12,17 @@ class AddWalletChooserViewController : UIViewController() {
         val texts = getAppDelegate().texts
         modalPresentationStyle = UIModalPresentationStyle.FormSheet
         title = texts.get(STRING_MENU_ADD_WALLET)
+        val cancelButton = UIBarButtonItem(UIBarButtonSystemItem.Cancel)
+        cancelButton.tintColor = uiColorErgo
+        cancelButton.setOnClickListener { this.dismissViewController(true) {} }
+        navigationItem.leftBarButtonItem = cancelButton
+
         val chooserView = AddWalletChooserStackView(texts)
         view.backgroundColor = UIColor.systemBackground()
 
         val scrollView = chooserView.wrapInVerticalScrollView()
         view.addSubview(scrollView)
-
-        val cancelButton = TextButton(texts.get(STRING_LABEL_CANCEL))
-        view.addSubview(cancelButton)
-        cancelButton.topToSuperview(priority = 1000).leftToSuperview()
-        scrollView.widthMatchesSuperview().bottomToSuperview().topToBottomOf(cancelButton)
-
-        cancelButton.addOnTouchUpInsideListener { _, _ -> this.dismissViewController(true) {} }
-
-
+        scrollView.edgesToSuperview()
     }
 }
 

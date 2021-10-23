@@ -19,7 +19,8 @@ class WalletViewController : UIViewController() {
         navigationItem.rightBarButtonItem = addWalletButton
         addWalletButton.tintColor = UIColor.label()
         addWalletButton.setOnClickListener {
-            this.presentViewController(AddWalletChooserViewController(), true, {})
+            val navController = UINavigationController(AddWalletChooserViewController())
+            this.presentViewController(navController, true, {})
         }
 
         view.addSubview(tableView)
