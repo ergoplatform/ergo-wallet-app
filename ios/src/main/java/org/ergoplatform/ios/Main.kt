@@ -14,6 +14,9 @@ class Main : UIApplicationDelegateAdapter() {
     lateinit var database: AppDatabase
     lateinit var texts: I18NBundle
 
+    // xibless no story board approach
+    // see https://github.com/lanqy/swift-programmatically
+
     override fun didFinishLaunching(
         application: UIApplication,
         launchOptions: UIApplicationLaunchOptions?

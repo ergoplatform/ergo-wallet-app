@@ -122,6 +122,8 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 }
 
 class EmptyCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
+    lateinit var walletChooserStackView: AddWalletChooserStackView
+
     override fun init(p0: NSCoder?): Long {
         val init = super.init(p0)
         setupView()
@@ -136,8 +138,8 @@ class EmptyCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
     private fun setupView() {
         this.selectionStyle = UITableViewCellSelectionStyle.None
-        val walletChooserStackView = AddWalletChooserStackView(getAppDelegate().texts)
+        walletChooserStackView = AddWalletChooserStackView(getAppDelegate().texts)
         contentView.addSubview(walletChooserStackView)
-        walletChooserStackView.edgesToSuperview(false, DEFAULT_MARGIN)
+        walletChooserStackView.edgesToSuperview(false, DEFAULT_MARGIN, MAX_WIDTH)
     }
 }

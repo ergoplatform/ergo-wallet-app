@@ -20,6 +20,8 @@ class WalletViewController : UIViewController() {
         addWalletButton.tintColor = UIColor.label()
         addWalletButton.setOnClickListener {
             val navController = UINavigationController(AddWalletChooserViewController())
+            navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet
+            navController.isModalInPresentation = true
             this.presentViewController(navController, true, {})
         }
 
@@ -58,7 +60,14 @@ class WalletViewController : UIViewController() {
 
         override fun getCellForRow(p0: UITableView, p1: NSIndexPath): UITableViewCell {
             if (shownData.isEmpty()) {
-                return p0.dequeueReusableCell(EMPTY_CELL)
+                val cell = p0.dequeueReusableCell(EMPTY_CELL)
+                (cell as? EmptyCell)?.walletChooserStackView?.clickListener = {
+                    val navController = UINavigationController(RestoreWalletViewController())
+                    navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet
+                    navController.isModalInPresentation = true
+                    presentViewController(navController, true, {})
+                }
+                return cell
             } else {
                 val cell = p0.dequeueReusableCell(WALLET_CELL)
                 (cell as? WalletCell)?.bind(shownData.get(p1.row))

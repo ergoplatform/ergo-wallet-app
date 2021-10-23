@@ -10,24 +10,29 @@ import org.robovm.objc.annotation.CustomClass
 class AddWalletChooserViewController : UIViewController() {
     override fun viewDidLoad() {
         val texts = getAppDelegate().texts
-        modalPresentationStyle = UIModalPresentationStyle.FormSheet
         title = texts.get(STRING_MENU_ADD_WALLET)
-        val cancelButton = UIBarButtonItem(UIBarButtonSystemItem.Cancel)
-        cancelButton.tintColor = uiColorErgo
-        cancelButton.setOnClickListener { this.dismissViewController(true) {} }
-        navigationItem.leftBarButtonItem = cancelButton
-
-        val chooserView = AddWalletChooserStackView(texts)
         view.backgroundColor = UIColor.systemBackground()
 
+        val cancelButton = UIBarButtonItem(UIBarButtonSystemItem.Cancel)
+        cancelButton.setOnClickListener { this.dismissViewController(true) {} }
+        navigationItem.leftBarButtonItem = cancelButton
+        navigationController.navigationBar?.tintColor = uiColorErgo
+
+        val chooserView = AddWalletChooserStackView(texts)
         val scrollView = chooserView.wrapInVerticalScrollView()
         view.addSubview(scrollView)
         scrollView.edgesToSuperview()
+
+        chooserView.clickListener = {
+            navigationController.pushViewController(RestoreWalletViewController(), true)
+        }
     }
 }
 
 @CustomClass
 class AddWalletChooserStackView(val texts: I18NBundle) : UIView(CGRect.Zero()) {
+    var clickListener: ((String) -> Unit)? = null
+
     init {
         val createWalletCell =
             createCardView(STRING_LABEL_CREATE_WALLET, STRING_DESC_CREATE_WALLET, IMAGE_CREATE_WALLET)
@@ -35,6 +40,12 @@ class AddWalletChooserStackView(val texts: I18NBundle) : UIView(CGRect.Zero()) {
             createCardView(STRING_LABEL_RESTORE_WALLET, STRING_DESC_RESTORE_WALLET, IMAGE_RESTORE_WALLET)
         val readOnlyWalletCell =
             createCardView(STRING_LABEL_READONLY_WALLET, STRING_DESC_READONLY_WALLET, IMAGE_READONLY_WALLET)
+
+        restoreWalletCell.addGestureRecognizer(UITapGestureRecognizer {
+            clickListener?.invoke(
+                STRING_LABEL_RESTORE_WALLET
+            )
+        })
 
         val stackView = UIStackView(NSArray(createWalletCell, restoreWalletCell, readOnlyWalletCell))
         stackView.axis = UILayoutConstraintAxis.Vertical
