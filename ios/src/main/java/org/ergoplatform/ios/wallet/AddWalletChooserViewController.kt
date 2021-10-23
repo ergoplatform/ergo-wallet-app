@@ -15,36 +15,18 @@ class AddWalletChooserViewController : UIViewController() {
         val chooserView = AddWalletChooserStackView(texts)
         view.backgroundColor = UIColor.systemBackground()
 
-        val scrollView = UIScrollView(CGRect.Zero())
+        val scrollView = chooserView.wrapInVerticalScrollView()
         view.addSubview(scrollView)
-        scrollView.edgesToSuperview()
 
-        scrollView.addSubview(chooserView)
         val cancelButton = TextButton(texts.get(STRING_LABEL_CANCEL))
-        scrollView.addSubview(cancelButton)
+        view.addSubview(cancelButton)
         cancelButton.topToSuperview(priority = 1000).leftToSuperview()
-        chooserView.setTranslatesAutoresizingMaskIntoConstraints(false)
-        NSLayoutConstraint.activateConstraints(NSArray(chooserView.widthAnchor.equalTo(scrollView.widthAnchor),
-        chooserView.trailingAnchor.equalTo(scrollView.trailingAnchor),
-        chooserView.leadingAnchor.equalTo(scrollView.leadingAnchor),
-        chooserView.topAnchor.equalTo(scrollView.topAnchor),
-            chooserView.bottomAnchor.equalTo(scrollView.bottomAnchor)
-        ))
+        scrollView.widthMatchesSuperview().bottomToSuperview().topToBottomOf(cancelButton)
 
         cancelButton.addOnTouchUpInsideListener { _, _ -> this.dismissViewController(true) {} }
 
 
     }
-
-//    override fun viewDidLayoutSubviews() {
-    // Trying to pack the view, did not work
-//        super.viewDidLayoutSubviews()
-//        val systemLayoutSizeFittingSize = view.getSystemLayoutSizeFittingSize(UILayoutFittingSize.Compressed)
-//        if (!systemLayoutSizeFittingSize.height.isNaN()) {
-//            preferredContentSize = systemLayoutSizeFittingSize
-//            view.superview.setNeedsLayout()
-//        }
-//    }
 }
 
 @CustomClass

@@ -135,6 +135,7 @@ class EmptyCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     }
 
     private fun setupView() {
+        this.selectionStyle = UITableViewCellSelectionStyle.None
         val walletChooserStackView = AddWalletChooserStackView(getAppDelegate().texts)
         contentView.addSubview(walletChooserStackView)
         walletChooserStackView.edgesToSuperview(false, DEFAULT_MARGIN)

@@ -1,7 +1,9 @@
 package org.ergoplatform.ios.ui
 
+import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.NSLayoutConstraint
+import org.robovm.apple.uikit.UIScrollView
 import org.robovm.apple.uikit.UIView
 
 // https://github.com/roberthein/TinyConstraints
@@ -221,4 +223,21 @@ fun UIView.widthMatchesSuperview(
 
 fun UIView.addSubviews(viewsToAdd: List<UIView>) {
     viewsToAdd.forEach { this.addSubview(it) }
+}
+
+fun UIView.wrapInVerticalScrollView(): UIScrollView {
+    val scrollView = UIScrollView(CGRect.Zero())
+    scrollView.addSubview(this)
+    this.setTranslatesAutoresizingMaskIntoConstraints(false)
+    NSLayoutConstraint.activateConstraints(
+        NSArray(
+            this.widthAnchor.equalTo(scrollView.widthAnchor),
+            this.trailingAnchor.equalTo(scrollView.trailingAnchor),
+            this.leadingAnchor.equalTo(scrollView.leadingAnchor),
+            this.topAnchor.equalTo(scrollView.topAnchor),
+            this.bottomAnchor.equalTo(scrollView.bottomAnchor),
+        )
+    )
+
+    return scrollView
 }
