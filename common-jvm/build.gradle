@@ -25,5 +25,7 @@ dependencies {
     api "com.google.guava:guava:20.0"
     api "org.bouncycastle:bcprov-jdk15to18:1.66"
 
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$coroutines_version"
+
     testImplementation 'junit:junit:4.13.2'
 }

@@ -1,10 +1,16 @@
 package org.ergoplatform.ios.wallet
 
+import kotlinx.coroutines.*
 import org.ergoplatform.ios.ui.*
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
 class SaveWalletViewController : UIViewController() {
+    private lateinit var progressIndicator: UIActivityIndicatorView
+    private lateinit var scrollView: UIScrollView
+
+    private var viewControllerScope: CoroutineScope? = null
+
     override fun viewDidLoad() {
         super.viewDidLoad()
 
@@ -15,7 +21,7 @@ class SaveWalletViewController : UIViewController() {
         navigationController.navigationBar?.tintColor = uiColorErgo
 
         val container = UIView()
-        val scrollView = container.wrapInVerticalScrollView()
+        scrollView = container.wrapInVerticalScrollView()
         view.addSubview(scrollView)
         scrollView.edgesToSuperview()
 
@@ -57,5 +63,34 @@ class SaveWalletViewController : UIViewController() {
             .widthMatchesSuperview(inset = DEFAULT_MARGIN, maxWidth = MAX_WIDTH).bottomToSuperview()
 
         container.addSubview(addressInfoStack)
+
+        progressIndicator = UIActivityIndicatorView()
+        progressIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Large
+        view.addSubview(progressIndicator)
+        progressIndicator.centerVertical().centerHorizontal()
+    }
+
+    override fun viewWillAppear(animated: Boolean) {
+        super.viewWillAppear(animated)
+        viewControllerScope = CoroutineScope(Dispatchers.Default)
+        startDoingStuff()
+    }
+
+    override fun viewWillDisappear(animated: Boolean) {
+        super.viewWillDisappear(animated)
+        viewControllerScope?.cancel()
+    }
+
+    private fun startDoingStuff() {
+        scrollView.isHidden = true
+        progressIndicator.startAnimating()
+
+        viewControllerScope?.launch {
+            delay(2000)
+            runOnMainThread {
+                progressIndicator.isHidden = true
+                scrollView.isHidden = false
+            }
+        }
     }
 }

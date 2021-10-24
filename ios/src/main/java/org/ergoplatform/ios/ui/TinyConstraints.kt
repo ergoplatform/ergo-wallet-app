@@ -195,6 +195,14 @@ fun UIView.centerVertical(): UIView {
     return this
 }
 
+fun UIView.centerHorizontal(): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+    val centerConstraint = this.centerXAnchor.equalTo(superview.centerXAnchor)
+    centerConstraint.priority = 1000f
+    NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
+    return this
+}
+
 fun UIView.widthMatchesSuperview(
     useSafeArea: Boolean = false,
     inset: Double = 0.0,
