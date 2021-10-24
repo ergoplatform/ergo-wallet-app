@@ -3,6 +3,7 @@ package org.ergoplatform.ios
 import SQLite.JDBCDriver
 import com.badlogic.gdx.utils.I18NBundle
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.persistance.AppDatabase
 import org.robovm.apple.foundation.NSAutoreleasePool
 import org.robovm.apple.foundation.NSBundle
@@ -13,6 +14,8 @@ import java.sql.DriverManager
 class Main : UIApplicationDelegateAdapter() {
     lateinit var database: AppDatabase
     lateinit var texts: I18NBundle
+
+    private val keyboardObservers = ArrayList<ViewControllerWithKeyboardLayoutGuide>()
 
     // xibless no story board approach
     // see https://github.com/lanqy/swift-programmatically
@@ -35,7 +38,33 @@ class Main : UIApplicationDelegateAdapter() {
         window.rootViewController = rootViewController
         // Make the window visible.
         window.makeKeyAndVisible()
+
+        startKeyboardObserver()
         return true
+    }
+
+    private fun startKeyboardObserver() {
+        UIWindow.Notifications.observeKeyboardWillShow { keyboard ->
+            val duration = keyboard.animationDuration
+            keyboardObservers.forEach { it.adjustKeyboardHeight(keyboard.endFrame, duration) }
+
+        }
+        UIWindow.Notifications.observeKeyboardWillChangeFrame { keyboard ->
+            val duration = keyboard.animationDuration
+            keyboardObservers.forEach { it.adjustKeyboardHeight(keyboard.endFrame, duration) }
+
+        }
+        UIWindow.Notifications.observeKeyboardWillHide { keyboard ->
+            keyboardObservers.forEach { it.adjustKeyboardHeight(null, keyboard.animationDuration) }
+        }
+    }
+
+    fun addKeyboardObserver(vc: ViewControllerWithKeyboardLayoutGuide) {
+        keyboardObservers.add(vc)
+    }
+
+    fun removeKeyboardObserver(vc: ViewControllerWithKeyboardLayoutGuide) {
+        keyboardObservers.remove(vc)
     }
 
     private fun setupDatabase(dbname: String): AppDatabase {

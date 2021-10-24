@@ -75,6 +75,21 @@ fun UIView.topToBottomOf(
     return this
 }
 
+fun UIView.bottomToKeyboard(
+    vc: ViewControllerWithKeyboardLayoutGuide,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val bottomConstraint = this.bottomAnchor.equalTo(
+        vc.keyboardLayoutGuide.topAnchor,
+        inset * -1.0
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(bottomConstraint))
+
+    return this
+}
+
 fun UIView.placeBelow(
     sibling: UIView,
 ): UIView {

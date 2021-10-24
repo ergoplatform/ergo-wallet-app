@@ -4,7 +4,7 @@ import org.ergoplatform.ios.ui.*
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
-class RestoreWalletViewController : UIViewController() {
+class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
     override fun viewDidLoad() {
         super.viewDidLoad()
 
@@ -26,11 +26,11 @@ class RestoreWalletViewController : UIViewController() {
         textView.layer.borderWidth = 1.0
         textView.textContentType = UITextContentType.OneTimeCode
 
-        view.addSubviews(listOf(descLabel, textView))
+        container.addSubviews(listOf(descLabel, textView))
 
         descLabel.widthMatchesSuperview(false, DEFAULT_MARGIN).topToSuperview(false, DEFAULT_MARGIN)
         textView.widthMatchesSuperview(false, DEFAULT_MARGIN).topToBottomOf(descLabel, DEFAULT_MARGIN)
-            .bottomToSuperview(false, DEFAULT_MARGIN)
+            .bottomToKeyboard(this, DEFAULT_MARGIN)
 
     }
 }
