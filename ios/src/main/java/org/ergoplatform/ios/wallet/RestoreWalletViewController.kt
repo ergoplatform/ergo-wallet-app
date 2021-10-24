@@ -24,7 +24,9 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
         descLabel.text = texts.get(STRING_DESC_RESTORE_WALLET)
         val textView = UITextView(CGRect.Zero())
         textView.layer.borderWidth = 1.0
+        textView.layer.borderColor = UIColor.systemGray().cgColor
         textView.textContentType = UITextContentType.OneTimeCode
+        textView.isSecureTextEntry = true
 
         container.addSubviews(listOf(descLabel, textView))
 

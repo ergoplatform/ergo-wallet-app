@@ -24,7 +24,7 @@ open class ViewControllerWithKeyboardLayoutGuide : UIViewController() {
         NSLayoutConstraint.activateConstraints(
             NSArray(
                 keyboardHeightConstraint,
-                keyboardLayoutGuide.bottomAnchor.equalTo(container.bottomAnchor)
+                keyboardLayoutGuide.bottomAnchor.equalTo(container.layoutMarginsGuide.bottomAnchor)
             )
         )
     }
