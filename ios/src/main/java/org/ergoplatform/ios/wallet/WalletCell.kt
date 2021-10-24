@@ -41,7 +41,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         contentView.layoutMargins = UIEdgeInsets.Zero()
 
         // safe area is bigger than layout here due to margins
-        cardView.widthMatchesSuperview(true, DEFAULT_MARGIN, DEFAULT_MARGIN, MAX_WIDTH)
+        cardView.widthMatchesSuperview(true, DEFAULT_MARGIN, MAX_WIDTH)
             .superViewWrapsHeight(true, 0.0)
 
         // init components. This does not work in constructor, init() method is called before constructor
@@ -100,10 +100,10 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
         fiatBalance.textColor = UIColor.secondaryLabel()
 
-        transactionButton.widthMatchesSuperview(false, DEFAULT_MARGIN, DEFAULT_MARGIN)
+        transactionButton.widthMatchesSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(stackView, DEFAULT_MARGIN * 3)
 
-        horizontalStack.widthMatchesSuperview(false, DEFAULT_MARGIN, DEFAULT_MARGIN)
+        horizontalStack.widthMatchesSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(transactionButton, DEFAULT_MARGIN)
             .bottomToSuperview(false, DEFAULT_MARGIN)
 

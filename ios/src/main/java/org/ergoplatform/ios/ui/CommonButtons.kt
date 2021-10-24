@@ -9,6 +9,7 @@ open class CommonButton(caption: String): TextButton(caption) {
         layer.cornerRadius = 18.0
         layer.setMasksToBounds(false)
 
+        setTitleColor(UIColor.label(), UIControlState.Normal)
         backgroundColor = UIColor.systemGray4()
     }
 }
@@ -16,8 +17,9 @@ open class CommonButton(caption: String): TextButton(caption) {
 open class TextButton(caption: String): UIButton(UIButtonType.System) {
     init {
         titleLabel?.font = UIFont.getSystemFont(FONT_SIZE_BODY1)
-        setTitleColor(UIColor.label(), UIControlState.Normal)
+        setTitleColor(uiColorErgo, UIControlState.Normal)
         setTitleColor(UIColor.secondaryLabel(), UIControlState.Highlighted)
+        setTitleColor(UIColor.systemGray(), UIControlState.Disabled)
         setTitle(
             caption,
             UIControlState.Normal

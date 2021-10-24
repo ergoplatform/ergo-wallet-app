@@ -2,9 +2,7 @@ package org.ergoplatform.ios.ui
 
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
-import org.robovm.apple.uikit.NSLayoutConstraint
-import org.robovm.apple.uikit.UIScrollView
-import org.robovm.apple.uikit.UIView
+import org.robovm.apple.uikit.*
 
 // https://github.com/roberthein/TinyConstraints
 
@@ -18,7 +16,7 @@ fun UIView.edgesToSuperview(
     inset: Double = 0.0,
     maxWidth: Double = 0.0
 ) {
-    widthMatchesSuperview(useSafeArea, inset, inset, maxWidth)
+    widthMatchesSuperview(useSafeArea, inset, maxWidth)
 
     val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
 
@@ -199,8 +197,7 @@ fun UIView.centerVertical(): UIView {
 
 fun UIView.widthMatchesSuperview(
     useSafeArea: Boolean = false,
-    leadingInset: Double = 0.0,
-    trailingInset: Double = 0.0,
+    inset: Double = 0.0,
     maxWidth: Double = 0.0
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
@@ -208,11 +205,11 @@ fun UIView.widthMatchesSuperview(
 
     val leadingConstraint = this.leadingAnchor.equalTo(
         layoutGuide.leadingAnchor,
-        leadingInset
+        inset
     )
     val trailingConstraint = this.trailingAnchor.equalTo(
         layoutGuide.trailingAnchor,
-        trailingInset * -1.0
+        inset * -1.0
     )
 
 
@@ -255,4 +252,18 @@ fun UIView.wrapInVerticalScrollView(): UIScrollView {
     )
 
     return scrollView
+}
+
+fun UIView.addHorizontalSeparator(): UIView {
+    val separator = getHorizontalSeparator()
+    this.addSubview(separator)
+    separator.widthMatchesSuperview()
+    return separator
+}
+
+fun getHorizontalSeparator(): UIView {
+    val separator = UIView(CGRect.Zero())
+    separator.backgroundColor = UIColor.systemGray()
+    NSLayoutConstraint.activateConstraints(NSArray(separator.heightAnchor.equalTo(1.0)))
+    return separator
 }

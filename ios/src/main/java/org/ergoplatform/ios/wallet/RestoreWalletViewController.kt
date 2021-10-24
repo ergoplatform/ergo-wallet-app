@@ -2,6 +2,7 @@ package org.ergoplatform.ios.wallet
 
 import org.ergoplatform.ios.ui.*
 import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.foundation.NSRange
 import org.robovm.apple.uikit.*
 
 class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
@@ -20,6 +21,10 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
 
         navigationController.navigationBar?.tintColor = uiColorErgo
 
+        val nextButton = UIBarButtonItem(UIBarButtonSystemItem.Done)
+        navigationItem.rightBarButtonItem = nextButton
+        nextButton.setOnClickListener { goToNextPage() }
+
         val descLabel = Body1Label()
         descLabel.text = texts.get(STRING_DESC_RESTORE_WALLET)
         val textView = UITextView(CGRect.Zero())
@@ -27,12 +32,30 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
         textView.layer.borderColor = UIColor.systemGray().cgColor
         textView.textContentType = UITextContentType.OneTimeCode
         textView.isSecureTextEntry = true
+        textView.returnKeyType = UIReturnKeyType.Done
 
-        container.addSubviews(listOf(descLabel, textView))
+        val errorLabel = Body1Label()
+        errorLabel.textColor = UIColor.red()
+
+        textView.setDelegate(object : UITextViewDelegateAdapter() {
+            override fun shouldChangeCharacters(textView: UITextView?, range: NSRange?, text: String?): Boolean {
+                if (text == "\n") {
+                    goToNextPage()
+                }
+                return true
+            }
+        })
+
+        container.addSubviews(listOf(descLabel, textView, errorLabel))
 
         descLabel.widthMatchesSuperview(false, DEFAULT_MARGIN).topToSuperview(false, DEFAULT_MARGIN)
         textView.widthMatchesSuperview(false, DEFAULT_MARGIN).topToBottomOf(descLabel, DEFAULT_MARGIN)
-            .bottomToKeyboard(this, DEFAULT_MARGIN)
+        errorLabel.widthMatchesSuperview().topToBottomOf(textView).bottomToKeyboard(this, DEFAULT_MARGIN)
 
+    }
+
+    private fun goToNextPage() {
+        // TODO check logic
+        navigationController.pushViewController(SaveWalletViewController(), true)
     }
 }
