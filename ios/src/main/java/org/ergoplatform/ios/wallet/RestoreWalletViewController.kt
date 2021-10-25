@@ -52,6 +52,7 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
             ): Boolean {
                 if (text == "\n") {
                     uiLogic.doRestore()
+                    return false
                 }
                 return true
             }
