@@ -1,7 +1,12 @@
 package org.ergoplatform.ios
 
-import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.ui.IMAGE_SETTINGS
+import org.ergoplatform.ios.ui.IMAGE_WALLET
+import org.ergoplatform.ios.ui.getAppDelegate
+import org.ergoplatform.ios.ui.uiColorErgo
 import org.ergoplatform.ios.wallet.WalletViewController
+import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
+import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 

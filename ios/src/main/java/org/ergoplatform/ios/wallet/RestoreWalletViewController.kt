@@ -1,17 +1,24 @@
 package org.ergoplatform.ios.wallet
 
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.uilogic.STRING_DESC_RESTORE_WALLET
+import org.ergoplatform.uilogic.STRING_LABEL_RESTORE_WALLET
+import org.ergoplatform.uilogic.wallet.RestoreWalletUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSRange
 import org.robovm.apple.uikit.*
 
 class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
+    lateinit var tvMnemonic: UITextView
+    lateinit var errorLabel: Body1Label
+
     override fun viewDidLoad() {
         super.viewDidLoad()
 
         val texts = getAppDelegate().texts
         title = texts.get(STRING_LABEL_RESTORE_WALLET)
         view.backgroundColor = UIColor.systemBackground()
+        val uiLogic = IosRestoreWalletUiLogic(IosStringProvider(texts))
 
         if (navigationController.viewControllers.size == 1) {
             val cancelButton = UIBarButtonItem(UIBarButtonSystemItem.Cancel)
@@ -23,39 +30,63 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
 
         val nextButton = UIBarButtonItem(UIBarButtonSystemItem.Done)
         navigationItem.rightBarButtonItem = nextButton
-        nextButton.setOnClickListener { goToNextPage() }
+        nextButton.setOnClickListener { uiLogic.doRestore() }
 
         val descLabel = Body1Label()
         descLabel.text = texts.get(STRING_DESC_RESTORE_WALLET)
-        val textView = UITextView(CGRect.Zero())
-        textView.layer.borderWidth = 1.0
-        textView.layer.borderColor = UIColor.systemGray().cgColor
-        textView.textContentType = UITextContentType.OneTimeCode
-        textView.isSecureTextEntry = true
-        textView.returnKeyType = UIReturnKeyType.Done
+        tvMnemonic = UITextView(CGRect.Zero())
+        tvMnemonic.layer.borderWidth = 1.0
+        tvMnemonic.layer.borderColor = UIColor.systemGray().cgColor
+        tvMnemonic.textContentType = UITextContentType.OneTimeCode
+        tvMnemonic.isSecureTextEntry = true
+        tvMnemonic.returnKeyType = UIReturnKeyType.Done
 
-        val errorLabel = Body1Label()
+        errorLabel = Body1Label()
         errorLabel.textColor = UIColor.red()
 
-        textView.setDelegate(object : UITextViewDelegateAdapter() {
-            override fun shouldChangeCharacters(textView: UITextView?, range: NSRange?, text: String?): Boolean {
+        tvMnemonic.setDelegate(object : UITextViewDelegateAdapter() {
+            override fun shouldChangeCharacters(
+                textView: UITextView?,
+                range: NSRange?,
+                text: String?
+            ): Boolean {
                 if (text == "\n") {
-                    goToNextPage()
+                    uiLogic.doRestore()
                 }
                 return true
             }
+
+            override fun didChange(textView: UITextView?) {
+                uiLogic.userChangedMnemonic()
+            }
         })
 
-        container.addSubviews(listOf(descLabel, textView, errorLabel))
+        container.addSubviews(listOf(descLabel, tvMnemonic, errorLabel))
 
         descLabel.widthMatchesSuperview(false, DEFAULT_MARGIN).topToSuperview(false, DEFAULT_MARGIN)
-        textView.widthMatchesSuperview(false, DEFAULT_MARGIN).topToBottomOf(descLabel, DEFAULT_MARGIN)
-        errorLabel.widthMatchesSuperview().topToBottomOf(textView).bottomToKeyboard(this, DEFAULT_MARGIN)
+        tvMnemonic.widthMatchesSuperview(false, DEFAULT_MARGIN)
+            .topToBottomOf(descLabel, DEFAULT_MARGIN)
+        errorLabel.widthMatchesSuperview().topToBottomOf(tvMnemonic)
+            .bottomToKeyboard(this, DEFAULT_MARGIN)
 
     }
 
-    private fun goToNextPage() {
-        // TODO check logic
-        navigationController.pushViewController(SaveWalletViewController(), true)
+    inner class IosRestoreWalletUiLogic(stringProvider: IosStringProvider) :
+        RestoreWalletUiLogic(stringProvider) {
+
+        override fun getEnteredMnemonic(): CharSequence? = tvMnemonic.text
+
+        override fun setErrorLabel(error: String?) {
+            errorLabel.text = error ?: ""
+        }
+
+        override fun navigateToSaveWalletDialog(mnemonic: String) {
+            navigationController.pushViewController(SaveWalletViewController(), true)
+        }
+
+        override fun hideForcedSoftKeyboard() {
+            // not needed, iOS layout is different from Android
+        }
+
     }
 }

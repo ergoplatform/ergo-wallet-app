@@ -2,6 +2,7 @@ package org.ergoplatform.ios.wallet
 
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*

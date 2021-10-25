@@ -2,6 +2,8 @@ package org.ergoplatform.ios.wallet
 
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.uilogic.STRING_LABEL_ERG_PRICE
+import org.ergoplatform.uilogic.STRING_LABEL_LAST_SYNC
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSIndexPath

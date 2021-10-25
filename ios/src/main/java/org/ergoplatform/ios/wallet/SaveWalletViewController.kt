@@ -2,6 +2,7 @@ package org.ergoplatform.ios.wallet
 
 import kotlinx.coroutines.*
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.uilogic.*
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
