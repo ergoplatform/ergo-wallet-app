@@ -14,7 +14,7 @@ import java.util.*
  * UI Logic Restores a formerly generated wallet from mnemonic
  */
 abstract class RestoreWalletUiLogic(private val stringProvider: StringProvider) {
-    private val wordList = loadAppKitMnemonicWordList()
+    private val wordList = ArrayList(loadAppKitMnemonicWordList())
     private var isSecondButtonClick = false
 
     fun userChangedMnemonic() {
