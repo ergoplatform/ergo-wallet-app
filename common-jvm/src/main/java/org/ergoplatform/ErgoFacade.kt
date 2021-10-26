@@ -63,10 +63,14 @@ fun getAddressDerivationPath(index: Int): String {
 }
 
 fun getPublicErgoAddressFromMnemonic(mnemonic: String, index: Int = 0): String {
+    return getPublicErgoAddressFromMnemonic(SecretString.create(mnemonic), index)
+}
+
+fun getPublicErgoAddressFromMnemonic(mnemonic: SecretString, index: Int = 0): String {
     return Address.createEip3Address(
         index,
         ergoNetworkType,
-        SecretString.create(mnemonic),
+        mnemonic,
         SecretString.create("")
     ).ergoAddress.toString()
 }

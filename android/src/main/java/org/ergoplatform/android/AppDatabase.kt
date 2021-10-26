@@ -7,6 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import org.ergoplatform.android.wallet.*
+import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.persistance.WalletDbProvider
 
 @Database(
     entities = arrayOf(
@@ -64,4 +66,19 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
     }
+}
+
+class RoomWalletDbProvider(val database: AppDatabase) : WalletDbProvider {
+    override suspend fun loadWalletByFirstAddress(firstAddress: String): WalletConfig? {
+        return database.walletDao().loadWalletByFirstAddress(firstAddress)?.toModel()
+    }
+
+    override suspend fun updateWalletConfig(walletConfig: WalletConfig) {
+        database.walletDao().update(walletConfig.toDbEntity())
+    }
+
+    override suspend fun insertWalletConfig(walletConfig: WalletConfig) {
+        database.walletDao().insertAll(walletConfig.toDbEntity())
+    }
+
 }

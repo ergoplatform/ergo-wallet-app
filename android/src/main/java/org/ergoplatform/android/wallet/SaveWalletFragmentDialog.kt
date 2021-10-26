@@ -13,13 +13,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
+import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
 
 /**
  * Dialog to save a created or restored wallet
@@ -143,7 +147,14 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         GlobalScope.launch(Dispatchers.IO) {
             // make sure not to use dialog context within this block
             val publicAddress = getPublicErgoAddressFromMnemonic(mnemonic)
-            suspendSaveToDb(context, publicAddress, encType, secretStorage)
+            SaveWalletUiLogic().suspendSaveToDb(
+                RoomWalletDbProvider(AppDatabase.getInstance(context)),
+                AndroidStringProvider(context),
+                publicAddress,
+                encType,
+                secretStorage
+            )
+            NodeConnector.getInstance().invalidateCache()
         }
         NavHostFragment.findNavController(requireParentFragment())
             .navigateSafe(SaveWalletFragmentDialogDirections.actionSaveWalletFragmentDialogToNavigationWallet())
@@ -170,41 +181,3 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     }
 }
 
-/**
- * Saves the wallet data to DB. This is placed outside the dialog object, because the dialog might get
- * destroyed while the method is running. This leads occasional crashes when dialog context is
- * used here
- */
-private suspend fun suspendSaveToDb(
-    context: Context,
-    publicAddress: String,
-    encType: Int,
-    secretStorage: ByteArray
-) {
-    // check if the wallet already exists
-    val walletDao = AppDatabase.getInstance(context).walletDao()
-    val existingWallet = walletDao.loadWalletByFirstAddress(publicAddress)
-
-    if (existingWallet != null) {
-        // update encType and secret storage
-        val walletConfig = WalletConfigDbEntity(
-            existingWallet.id,
-            existingWallet.displayName,
-            existingWallet.firstAddress,
-            encType,
-            secretStorage
-        )
-        walletDao.update(walletConfig)
-    } else {
-        val walletConfig =
-            WalletConfigDbEntity(
-                0,
-                context.getString(R.string.label_wallet_default),
-                publicAddress,
-                encType,
-                secretStorage
-            )
-        walletDao.insertAll(walletConfig)
-        NodeConnector.getInstance().invalidateCache()
-    }
-}

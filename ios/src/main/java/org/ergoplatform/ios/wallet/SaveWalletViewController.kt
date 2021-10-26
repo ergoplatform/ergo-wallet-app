@@ -1,14 +1,19 @@
 package org.ergoplatform.ios.wallet
 
 import kotlinx.coroutines.*
+import org.ergoplatform.android.getPublicErgoAddressFromMnemonic
+import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.persistance.SqlDelightWalletProvider
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
-class SaveWalletViewController : UIViewController() {
+class SaveWalletViewController(private val mnemonic: SecretString) : UIViewController() {
     private lateinit var progressIndicator: UIActivityIndicatorView
     private lateinit var scrollView: UIScrollView
+    private lateinit var addressLabel: UILabel
 
     private var viewControllerScope: CoroutineScope? = null
 
@@ -21,6 +26,8 @@ class SaveWalletViewController : UIViewController() {
 
         navigationController.navigationBar?.tintColor = uiColorErgo
 
+        val uiLogic = SaveWalletUiLogic()
+
         val container = UIView()
         scrollView = container.wrapInVerticalScrollView()
         view.addSubview(scrollView)
@@ -29,18 +36,30 @@ class SaveWalletViewController : UIViewController() {
         val introLabel = Body1Label()
         introLabel.text = texts.get(STRING_INTRO_SAVE_WALLET)
 
-        val addressLabel = Headline2Label()
-        addressLabel.text = "9ewjfklhjdljkncvjklbdhndklöndhdukbhdjkbjkfbvnbvncnmnpofjdiopj"
+        addressLabel = Headline2Label()
 
         val addressInfoLabel = Body1Label()
         addressInfoLabel.text = texts.get(STRING_INTRO_SAVE_WALLET2)
 
         val buttonSavePassword = TextButton(texts.get(STRING_BUTTON_SAVE_PASSWORD_ENCRYPTED))
-        val savePwInfoLabel = Body1Label().apply { text = texts.get(STRING_DESC_SAVE_PASSWORD_ENCRYPTED) }
+        buttonSavePassword.addOnTouchUpInsideListener { _, _ ->
+            GlobalScope.launch(Dispatchers.IO) {
+                val publicErgoAddress = getPublicErgoAddressFromMnemonic(mnemonic)
+                uiLogic.suspendSaveToDb(
+                    SqlDelightWalletProvider(getAppDelegate().database), IosStringProvider(texts),
+                    publicErgoAddress, 0, null
+                )
+            }
+            navigationController.dismissViewController(true) {}
+        }
+
+        val savePwInfoLabel =
+            Body1Label().apply { text = texts.get(STRING_DESC_SAVE_PASSWORD_ENCRYPTED) }
 
         val buttonSaveDevice = TextButton(texts.get(STRING_BUTTON_SAVE_DEVICE_ENCRYPTED))
         buttonSaveDevice.isEnabled = false
-        val saveDeviceEncInfo = Body1Label().apply { text = texts.get(STRING_DESC_SAVE_DEVICE_ENCRYPTED) }
+        val saveDeviceEncInfo =
+            Body1Label().apply { text = texts.get(STRING_DESC_SAVE_DEVICE_ENCRYPTED) }
 
         val addressInfoStack = UIStackView(
             NSArray(
@@ -74,7 +93,7 @@ class SaveWalletViewController : UIViewController() {
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         viewControllerScope = CoroutineScope(Dispatchers.Default)
-        startDoingStuff()
+        calculateAndShowPkAddress()
     }
 
     override fun viewWillDisappear(animated: Boolean) {
@@ -82,13 +101,14 @@ class SaveWalletViewController : UIViewController() {
         viewControllerScope?.cancel()
     }
 
-    private fun startDoingStuff() {
+    private fun calculateAndShowPkAddress() {
         scrollView.isHidden = true
         progressIndicator.startAnimating()
 
         viewControllerScope?.launch {
-            delay(2000)
+            val publicErgoAddressFromMnemonic = getPublicErgoAddressFromMnemonic(mnemonic)
             runOnMainThread {
+                addressLabel.text = publicErgoAddressFromMnemonic
                 progressIndicator.isHidden = true
                 scrollView.isHidden = false
             }
