@@ -1,5 +1,6 @@
 package org.ergoplatform.ios.wallet
 
+import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_DESC_RESTORE_WALLET
 import org.ergoplatform.uilogic.STRING_LABEL_RESTORE_WALLET
@@ -82,7 +83,7 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
         }
 
         override fun navigateToSaveWalletDialog(mnemonic: String) {
-            navigationController.pushViewController(SaveWalletViewController(), true)
+            navigationController.pushViewController(SaveWalletViewController(SecretString.create(mnemonic)), true)
         }
 
         override fun hideForcedSoftKeyboard() {

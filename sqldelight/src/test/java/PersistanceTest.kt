@@ -17,14 +17,12 @@ class PersistanceTest {
 
         val database = AppDatabase(driver)
         database.walletConfigQueries.insertOrReplace(
-            WalletConfig(
-                1,
-                "Test",
-                "9xxx",
-                0,
-                null,
-                false
-            ).toDbEntity()
+            1,
+            "Test",
+            "9xxx",
+            0,
+            null,
+            false
         )
 
         val entities = database.walletConfigQueries.selectAll().executeAsList()
