@@ -1,13 +1,18 @@
 package org.ergoplatform.android.settings
 
 import android.os.Bundle
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.ergoplatform.android.NodeConnector
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentDisplayCurrencyDialogBinding
@@ -44,22 +49,28 @@ class DisplayCurrencyListDialogFragment : BottomSheetDialogFragment() {
         binding.list.layoutManager =
             LinearLayoutManager(context)
 
-        nodeConnector.currencies.observe(viewLifecycleOwner, {
-            if (it != null && it.isNotEmpty()) {
-                val listWithNone = arrayListOf<String>()
-                listWithNone.add("")
-                listWithNone.addAll(it.sorted())
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                nodeConnector.currencies.collect {
+                    if (it != null && it.isNotEmpty()) {
+                        val listWithNone = arrayListOf<String>()
+                        listWithNone.add("")
+                        listWithNone.addAll(it.sorted())
 
-                binding.list.adapter = DisplayCurrencyAdapter(listWithNone)
-                binding.list.visibility = View.VISIBLE
+                        binding.list.adapter = DisplayCurrencyAdapter(listWithNone)
+                        binding.list.visibility = View.VISIBLE
+                    }
+
+                    binding.progressCircular.visibility =
+                        if (it == null) View.VISIBLE else View.GONE
+                    binding.connectionError.visibility =
+                        if (it != null && it.isEmpty()) View.VISIBLE else View.GONE
+                    binding.list.visibility =
+                        if (it != null && it.isNotEmpty()) View.VISIBLE else View.GONE
+
+                }
             }
-
-            binding.progressCircular.visibility = if (it == null) View.VISIBLE else View.GONE
-            binding.connectionError.visibility =
-                if (it != null && it.isEmpty()) View.VISIBLE else View.GONE
-            binding.list.visibility = if (it != null && it.isNotEmpty()) View.VISIBLE else View.GONE
-
-        })
+        }
     }
 
     private fun onChooseCurrency(currency: String) {

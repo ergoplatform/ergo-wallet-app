@@ -170,7 +170,7 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
                 getString(
                     R.string.label_fiat_amount,
                     formatFiatToString(
-                        getInputAmount() * (nodeConnector.fiatValue.value ?: 0f).toDouble(),
+                        getInputAmount() * nodeConnector.fiatValue.value.toDouble(),
                         nodeConnector.fiatCurrency, requireContext()
                     ),
                 )

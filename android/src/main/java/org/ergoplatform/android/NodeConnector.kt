@@ -2,10 +2,10 @@ package org.ergoplatform.android
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.wallet.WalletStateDbEntity
 import org.ergoplatform.android.wallet.WalletTokenDbEntity
@@ -18,10 +18,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class NodeConnector {
 
-    val isRefreshing: MutableLiveData<Boolean> = MutableLiveData()
-    val refreshNum: MutableLiveData<Int> = MutableLiveData()
-    val fiatValue: MutableLiveData<Float> = MutableLiveData()
-    val currencies: MutableLiveData<List<String>?> = MutableLiveData()
+    val isRefreshing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val fiatValue: MutableStateFlow<Float> = MutableStateFlow(0f)
+    val currencies: MutableStateFlow<List<String>?> = MutableStateFlow(null)
     var lastRefreshMs: Long = 0
         private set
     var lastHadError: Boolean = false
@@ -74,8 +73,8 @@ class NodeConnector {
     }
 
     private fun refreshNow(context: Context) {
-        if (!(isRefreshing.value ?: false)) {
-            isRefreshing.postValue(true)
+        if (!(isRefreshing.value)) {
+            isRefreshing.value = true
             GlobalScope.launch(Dispatchers.IO) {
                 var hadError = false
                 var didSync = false
@@ -97,7 +96,7 @@ class NodeConnector {
                     fFiatValue = 0f
                 }
                 saveLastFiatValue(context, fFiatValue)
-                fiatValue.postValue(fFiatValue)
+                fiatValue.value = fFiatValue
 
 
                 // Refresh wallet states
@@ -115,8 +114,7 @@ class NodeConnector {
                     saveLastRefreshMs(context, lastRefreshMs)
                 }
                 lastHadError = hadError
-                refreshNum.postValue(refreshNum.value?.and(1) ?: 0)
-                isRefreshing.postValue(false)
+                isRefreshing.value = false
             }
         }
     }
@@ -201,12 +199,12 @@ class NodeConnector {
         if (currencies.value == null || currencies.value!!.isEmpty()) {
             GlobalScope.launch(Dispatchers.IO) {
                 try {
-                    currencies.postValue(null)
+                    currencies.value = null
                     val currencyList = coinGeckoApi.currencies.execute().body()
-                    currencies.postValue(currencyList ?: emptyList())
+                    currencies.value = currencyList ?: emptyList()
                 } catch (t: Throwable) {
                     Log.e("CoinGecko", "Error", t)
-                    currencies.postValue(emptyList())
+                    currencies.value = emptyList()
                 }
             }
         }
@@ -215,7 +213,7 @@ class NodeConnector {
     fun loadPreferenceValues(context: Context) {
         lastRefreshMs = getLastRefreshMs(context)
         fiatCurrency = getPrefDisplayCurrency(context)
-        fiatValue.postValue(getLastFiatValue(context))
+        fiatValue.value = getLastFiatValue(context)
     }
 
     companion object {

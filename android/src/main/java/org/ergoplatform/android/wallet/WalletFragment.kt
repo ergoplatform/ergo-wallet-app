@@ -7,12 +7,16 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.findFragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.AppDatabase
@@ -29,6 +33,7 @@ import java.util.*
 class WalletFragment : Fragment() {
 
     private var _binding: FragmentWalletBinding? = null
+
     // save last shown wallet list in case view is destroyed
     // this is to preserve user's scroll position
     private var lastWalletList: List<WalletDbEntity> = emptyList()
@@ -99,7 +104,7 @@ class WalletFragment : Fragment() {
             }
 
             override fun onAnimationRepeat(animation: Animation?) {
-                if (nodeConnector.isRefreshing.value == false) {
+                if (!nodeConnector.isRefreshing.value) {
                     binding.ergoLogoBack.clearAnimation()
                 }
             }
@@ -110,27 +115,40 @@ class WalletFragment : Fragment() {
                 binding.swipeRefreshLayout.isRefreshing = false
             }
         }
-        nodeConnector.isRefreshing.observe(viewLifecycleOwner, { isRefreshing ->
-            if (!isRefreshing) {
-                binding.swipeRefreshLayout.isRefreshing = false
-                binding.connectionError.visibility =
-                    if (nodeConnector.lastHadError) View.VISIBLE else View.INVISIBLE
-                refreshTimeSinceSyncLabel()
-            } else {
-                binding.ergoLogoBack.clearAnimation()
-                binding.ergoLogoBack.startAnimation(rotateAnimation)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                launch {
+                    nodeConnector.isRefreshing.collect { isRefreshing ->
+                        if (!isRefreshing) {
+                            binding.swipeRefreshLayout.isRefreshing = false
+                            binding.connectionError.visibility =
+                                if (nodeConnector.lastHadError) View.VISIBLE else View.INVISIBLE
+                            refreshTimeSinceSyncLabel()
+                        } else {
+                            binding.ergoLogoBack.clearAnimation()
+                            binding.ergoLogoBack.startAnimation(rotateAnimation)
+                        }
+                    }
+                }
+                launch {
+                    nodeConnector.fiatValue.collect { value ->
+                        if (value == 0f) {
+                            binding.ergoPrice.visibility = View.GONE
+                        } else {
+                            binding.ergoPrice.visibility = View.VISIBLE
+                            binding.ergoPrice.amount = value.toDouble()
+                            binding.ergoPrice.setSymbol(
+                                nodeConnector.fiatCurrency.toUpperCase(
+                                    Locale.getDefault()
+                                )
+                            )
+                        }
+                        binding.labelErgoPrice.visibility = binding.ergoPrice.visibility
+                    }
+                }
             }
-        })
-        nodeConnector.fiatValue.observe(viewLifecycleOwner, { value ->
-            if (value == 0f) {
-                binding.ergoPrice.visibility = View.GONE
-            } else {
-                binding.ergoPrice.visibility = View.VISIBLE
-                binding.ergoPrice.amount = value.toDouble()
-                binding.ergoPrice.setSymbol(nodeConnector.fiatCurrency.toUpperCase(Locale.getDefault()))
-            }
-            binding.labelErgoPrice.visibility = binding.ergoPrice.visibility
-        })
+        }
     }
 
     private fun refreshTimeSinceSyncLabel() {
@@ -173,7 +191,8 @@ class WalletFragment : Fragment() {
     }
 }
 
-class WalletAdapter(initWalletList: List<WalletDbEntity>) : RecyclerView.Adapter<WalletViewHolder>() {
+class WalletAdapter(initWalletList: List<WalletDbEntity>) :
+    RecyclerView.Adapter<WalletViewHolder>() {
     var walletList: List<WalletDbEntity> = initWalletList
         set(value) {
             val diffCallback = WalletDiffCallback(field, value)
@@ -278,7 +297,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
 
         // Fill fiat value
         val nodeConnector = NodeConnector.getInstance()
-        val ergoPrice = nodeConnector.fiatValue.value ?: 0f
+        val ergoPrice = nodeConnector.fiatValue.value
         if (ergoPrice == 0f) {
             binding.walletFiat.visibility = View.GONE
         } else {

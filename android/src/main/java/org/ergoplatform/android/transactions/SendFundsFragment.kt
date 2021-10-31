@@ -106,8 +106,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 getString(
                     R.string.label_fiat_amount,
                     formatFiatToString(
-                        viewModel.amountToSend.toDouble() * (nodeConnector.fiatValue.value
-                            ?: 0f).toDouble(),
+                        viewModel.amountToSend.toDouble() * nodeConnector.fiatValue.value.toDouble(),
                         nodeConnector.fiatCurrency, requireContext()
                     ),
                 )

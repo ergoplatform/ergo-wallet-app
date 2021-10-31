@@ -7,13 +7,16 @@ import android.os.Handler
 import android.os.Looper
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.android.*
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.NodeConnector
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
 import org.ergoplatform.android.ui.navigateSafe
@@ -58,11 +61,15 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                 binding.swipeRefreshLayout.isRefreshing = false
             }
         }
-        nodeConnector.isRefreshing.observe(viewLifecycleOwner, { isRefreshing ->
-            if (!isRefreshing) {
-                binding.swipeRefreshLayout.isRefreshing = false
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                nodeConnector.isRefreshing.collect { isRefreshing ->
+                    if (!isRefreshing) {
+                        binding.swipeRefreshLayout.isRefreshing = false
+                    }
+                }
             }
-        })
+        }
 
         // Set button listeners
         binding.cardTransactions.setOnClickListener {
