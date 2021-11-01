@@ -1,16 +1,16 @@
-package org.ergoplatform.android
+package org.ergoplatform
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.ergoplatform.android.wallet.ensureWalletAddressListHasFirstAddress
 import org.ergoplatform.api.CoinGeckoApi
 import org.ergoplatform.explorer.client.DefaultApi
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.persistance.WalletState
 import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.wallet.addresses.ensureWalletAddressListHasFirstAddress
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

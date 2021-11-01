@@ -1,6 +1,7 @@
 package org.ergoplatform.android.wallet
 
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.wallet.addresses.ensureWalletAddressListHasFirstAddress
 
 /**
  * sums up all balances of derived address
@@ -70,28 +71,6 @@ fun WalletDbEntity.getSortedDerivedAddressesList(): List<WalletAddress> {
         walletConfig.firstAddress!!
     )
     return retList.sortedBy { it.derivationIndex }
-}
-
-fun ensureWalletAddressListHasFirstAddress(
-    addresses: List<WalletAddress>,
-    firstAddress: String
-): List<WalletAddress> {
-    val hasFirst = addresses.filter { it.derivationIndex == 0 }.isNotEmpty()
-    val retList = addresses.toMutableList()
-
-    if (!hasFirst) {
-        retList.add(
-            0,
-            WalletAddress(
-                0,
-                firstAddress,
-                0,
-                firstAddress,
-                null
-            )
-        )
-    }
-    return retList
 }
 
 fun WalletDbEntity.getNumOfAddresses(): Int {

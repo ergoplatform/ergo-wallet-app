@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.NodeConnector
+import org.ergoplatform.NodeConnector
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentAddReadOnlyWalletDialogBinding
 import org.ergoplatform.android.isValidErgoAddress

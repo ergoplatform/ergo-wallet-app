@@ -18,6 +18,7 @@ import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.wallet.WalletDbEntity
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.wallet.addresses.isDerivedAddress
 
 
 /**

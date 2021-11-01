@@ -14,14 +14,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
+import org.ergoplatform.NodeConnector
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
+import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
-import org.ergoplatform.android.wallet.addresses.getAddressLabel
+import org.ergoplatform.wallet.addresses.getAddressLabel
 
 class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
@@ -162,7 +164,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             val addressDbEntity =
                 wallet.getSortedDerivedAddressesList().find { it.publicAddress.equals(address) }
             binding.addressLabel.text =
-                addressDbEntity?.getAddressLabel(requireContext())
+                addressDbEntity?.getAddressLabel(AndroidStringProvider(requireContext()))
         } else {
             binding.addressLabel.text =
                 getString(R.string.label_all_addresses, wallet.getNumOfAddresses())

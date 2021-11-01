@@ -9,6 +9,7 @@ import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.ergoplatform.NodeConnector
 import org.ergoplatform.android.*
 import org.ergoplatform.android.wallet.WalletAddressDbEntity
 import org.ergoplatform.android.wallet.WalletDbEntity

@@ -8,6 +8,7 @@ import org.ergoplatform.persistance.toDbEntity
 import org.junit.Assert.*
 
 import org.junit.Test
+import java.lang.RuntimeException
 
 class PersistanceTest {
 
@@ -33,5 +34,25 @@ class PersistanceTest {
 
         val entities = database.getAllWalletConfigsSynchronous()
         println(entities.toString())
+
+        runBlocking {
+            try {
+                database.withTransaction {
+                    database.insertWalletConfig(WalletConfig(0, "Test2", "x9x", 0, null, false))
+
+                    val entities = database.getAllWalletConfigsSynchronous()
+                    println(entities.toString())
+
+                    throw RuntimeException()
+                }
+            } catch (T: Throwable) {
+
+            }
+        }
+
+        val entities2 = database.getAllWalletConfigsSynchronous()
+        println(entities2.toString())
+
+        assertEquals(entities.size, entities2.size)
     }
 }

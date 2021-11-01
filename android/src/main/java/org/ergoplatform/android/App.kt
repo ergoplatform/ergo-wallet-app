@@ -2,6 +2,7 @@ package org.ergoplatform.android
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
+import org.ergoplatform.NodeConnector
 
 class App : Application() {
 

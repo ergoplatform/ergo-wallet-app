@@ -33,9 +33,9 @@ import org.ergoplatform.android.wallet.WalletConfigDbEntity
 import org.ergoplatform.android.wallet.WalletTokenDbEntity
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
-import org.ergoplatform.android.wallet.addresses.getAddressLabel
 import org.ergoplatform.android.wallet.getNumOfAddresses
 import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.wallet.addresses.getAddressLabel
 import kotlin.math.max
 
 
@@ -80,10 +80,12 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             enableLayoutChangeAnimations()
         })
         viewModel.address.observe(viewLifecycleOwner, {
-            binding.addressLabel.text = it?.getAddressLabel(requireContext()) ?: getString(
-                R.string.label_all_addresses,
-                viewModel.wallet?.getNumOfAddresses()
-            )
+            binding.addressLabel.text =
+                it?.getAddressLabel(AndroidStringProvider(requireContext()))
+                    ?: getString(
+                        R.string.label_all_addresses,
+                        viewModel.wallet?.getNumOfAddresses()
+                    )
         })
         viewModel.walletBalance.observe(viewLifecycleOwner, {
             binding.tvBalance.text = getString(

@@ -1,12 +1,14 @@
 package org.ergoplatform.android.wallet.addresses
 
-import android.content.Context
 import android.view.View
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.IncludeWalletAddressInfoBinding
+import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.wallet.*
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.wallet.addresses.getAddressLabel
+import org.ergoplatform.wallet.addresses.isDerivedAddress
 
 fun IncludeWalletAddressInfoBinding.fillAddressInformation(
     walletAddress: WalletAddress,
@@ -18,7 +20,7 @@ fun IncludeWalletAddressInfoBinding.fillAddressInformation(
     addressIndex.visibility =
         if (isDerivedAddress) View.VISIBLE else View.GONE
     addressIndex.text = walletAddress.derivationIndex.toString()
-    addressLabel.text = walletAddress.getAddressLabel(ctx)
+    addressLabel.text = walletAddress.getAddressLabel(AndroidStringProvider(ctx))
     publicAddress.text = walletAddress.publicAddress
 
     val state = wallet.getStateForAddress(walletAddress.publicAddress)
@@ -28,13 +30,6 @@ fun IncludeWalletAddressInfoBinding.fillAddressInformation(
         if (tokens.isNullOrEmpty()) View.GONE else View.VISIBLE
     labelTokenNum.text =
         ctx.getString(R.string.label_wallet_token_balance, tokens.size.toString())
-}
-
-fun WalletAddress.getAddressLabel(ctx: Context): String {
-    return (label ?: (if (isDerivedAddress()) ctx.getString(
-        R.string.label_wallet_address_derived,
-        derivationIndex.toString()
-    ) else ctx.getString(R.string.label_wallet_main_address)))
 }
 
 fun IncludeWalletAddressInfoBinding.fillWalletAddressesInformation(
@@ -53,8 +48,4 @@ fun IncludeWalletAddressInfoBinding.fillWalletAddressesInformation(
 
     addressBalance.amount =
         ErgoAmount(wallet.getBalanceForAllAddresses()).toDouble()
-}
-
-fun WalletAddress.isDerivedAddress(): Boolean {
-    return derivationIndex > 0
 }
