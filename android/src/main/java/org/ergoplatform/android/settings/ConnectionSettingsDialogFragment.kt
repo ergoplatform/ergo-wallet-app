@@ -1,5 +1,6 @@
 package org.ergoplatform.android.settings
 
+import StageConstants
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -33,8 +34,9 @@ class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.editNodeUrl.editText?.setText(getPrefNodeUrl(requireContext()))
-        binding.editExplorerApiUrl.editText?.setText(getPrefExplorerApiUrl(requireContext()))
+        val preferences = Preferences(requireContext())
+        binding.editNodeUrl.editText?.setText(preferences.prefNodeUrl)
+        binding.editExplorerApiUrl.editText?.setText(preferences.prefExplorerApiUrl)
         binding.buttonApply.setOnClickListener { buttonApply() }
         binding.editNodeUrl.editText?.setOnEditorActionListener { _, _, _ ->
             buttonApply()
@@ -50,8 +52,9 @@ class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
         val nodeUrl = binding.editNodeUrl.editText?.text?.toString() ?: ""
         val explorerApiUrl = binding.editExplorerApiUrl.editText?.text?.toString() ?: ""
 
-        saveExplorerApiUrl(requireContext(), explorerApiUrl)
-        saveNodeUrl(requireContext(), nodeUrl)
+        val preferences = Preferences(requireContext())
+        preferences.prefExplorerApiUrl = explorerApiUrl
+        preferences.prefNodeUrl = nodeUrl
 
         // reset api service of NodeConnector to load new settings
         NodeConnector.getInstance().resetApiService()

@@ -6,9 +6,10 @@ import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.IncludeWalletAddressInfoBinding
 import org.ergoplatform.android.wallet.*
+import org.ergoplatform.persistance.WalletAddress
 
 fun IncludeWalletAddressInfoBinding.fillAddressInformation(
-    walletAddress: WalletAddressDbEntity,
+    walletAddress: WalletAddress,
     wallet: WalletDbEntity
 ) {
     val isDerivedAddress = walletAddress.isDerivedAddress()
@@ -29,7 +30,7 @@ fun IncludeWalletAddressInfoBinding.fillAddressInformation(
         ctx.getString(R.string.label_wallet_token_balance, tokens.size.toString())
 }
 
-fun WalletAddressDbEntity.getAddressLabel(ctx: Context): String {
+fun WalletAddress.getAddressLabel(ctx: Context): String {
     return (label ?: (if (isDerivedAddress()) ctx.getString(
         R.string.label_wallet_address_derived,
         derivationIndex.toString()
@@ -54,6 +55,6 @@ fun IncludeWalletAddressInfoBinding.fillWalletAddressesInformation(
         ErgoAmount(wallet.getBalanceForAllAddresses()).toDouble()
 }
 
-fun WalletAddressDbEntity.isDerivedAddress(): Boolean {
+fun WalletAddress.isDerivedAddress(): Boolean {
     return derivationIndex > 0
 }

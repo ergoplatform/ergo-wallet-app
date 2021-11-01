@@ -13,9 +13,9 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.databinding.FragmentChooseAddressDialogBinding
 import org.ergoplatform.android.databinding.FragmentChooseAddressDialogItemBinding
-import org.ergoplatform.android.wallet.WalletAddressDbEntity
 import org.ergoplatform.android.wallet.WalletDbEntity
 import org.ergoplatform.android.wallet.getSortedDerivedAddressesList
+import org.ergoplatform.persistance.WalletAddress
 
 /**
  * Let the user choose a derived address
@@ -75,7 +75,7 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
     private inner class ViewHolder(val binding: FragmentChooseAddressDialogItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bindAddress(address: WalletAddressDbEntity, wallet: WalletDbEntity) {
+        fun bindAddress(address: WalletAddress, wallet: WalletDbEntity) {
             binding.addressInformation.fillAddressInformation(address, wallet)
             binding.addressInformation.addressIndex.visibility = View.GONE
             binding.root.setOnClickListener {

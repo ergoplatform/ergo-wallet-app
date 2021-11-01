@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS `wallet_addresses` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `wallet_first_address` TEXT NOT NULL,
+    `index` INTEGER AS Int NOT NULL,
+    `public_address` TEXT NOT NULL,
+    `label` TEXT
+);
+
+loadWalletAddresses:
+SELECT * FROM wallet_addresses WHERE wallet_first_address = ?;

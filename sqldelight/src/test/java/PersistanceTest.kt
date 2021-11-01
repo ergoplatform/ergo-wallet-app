@@ -1,6 +1,8 @@
 import com.squareup.sqldelight.db.SqlDriver
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+import kotlinx.coroutines.runBlocking
 import org.ergoplatform.persistance.AppDatabase
+import org.ergoplatform.persistance.SqlDelightWalletProvider
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.toDbEntity
 import org.junit.Assert.*
@@ -15,17 +17,21 @@ class PersistanceTest {
         //val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:test.db")
         AppDatabase.Schema.create(driver)
 
-        val database = AppDatabase(driver)
-        database.walletConfigQueries.insertOrReplace(
-            1,
-            "Test",
-            "9xxx",
-            0,
-            null,
-            false
-        )
+        val database = SqlDelightWalletProvider(AppDatabase(driver))
+        runBlocking {
+            database.insertWalletConfig(
+                WalletConfig(
+                    1,
+                    "Test",
+                    "9xxx",
+                    0,
+                    null,
+                    false
+                )
+            )
+        }
 
-        val entities = database.walletConfigQueries.selectAll().executeAsList()
+        val entities = database.getAllWalletConfigsSynchronous()
         println(entities.toString())
     }
 }

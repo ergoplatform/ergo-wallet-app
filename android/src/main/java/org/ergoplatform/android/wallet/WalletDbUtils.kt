@@ -1,5 +1,7 @@
 package org.ergoplatform.android.wallet
 
+import org.ergoplatform.persistance.WalletAddress
+
 /**
  * sums up all balances of derived address
  */
@@ -50,30 +52,37 @@ fun WalletDbEntity.getDerivedAddress(derivationIdx: Int): String? {
 /**
  * @return derived address entity with given derivation index
  */
-fun WalletDbEntity.getDerivedAddressEntity(derivationIdx: Int): WalletAddressDbEntity? {
-    val allAddresses = ensureWalletAddressListHasFirstAddress(addresses, walletConfig.firstAddress!!)
+fun WalletDbEntity.getDerivedAddressEntity(derivationIdx: Int): WalletAddress? {
+    val allAddresses =
+        ensureWalletAddressListHasFirstAddress(
+            addresses.map { it.toModel() },
+            walletConfig.firstAddress!!
+        )
     return allAddresses.firstOrNull { it.derivationIndex == derivationIdx }
 }
 
 /**
  * @return derived addresses list, making sure that 0 address is included and list is sorted by idx
  */
-fun WalletDbEntity.getSortedDerivedAddressesList(): List<WalletAddressDbEntity> {
-    val retList = ensureWalletAddressListHasFirstAddress(addresses, walletConfig.firstAddress!!)
+fun WalletDbEntity.getSortedDerivedAddressesList(): List<WalletAddress> {
+    val retList = ensureWalletAddressListHasFirstAddress(
+        addresses.map { it.toModel() },
+        walletConfig.firstAddress!!
+    )
     return retList.sortedBy { it.derivationIndex }
 }
 
 fun ensureWalletAddressListHasFirstAddress(
-    addresses: List<WalletAddressDbEntity>,
+    addresses: List<WalletAddress>,
     firstAddress: String
-): List<WalletAddressDbEntity> {
+): List<WalletAddress> {
     val hasFirst = addresses.filter { it.derivationIndex == 0 }.isNotEmpty()
     val retList = addresses.toMutableList()
 
     if (!hasFirst) {
         retList.add(
             0,
-            WalletAddressDbEntity(
+            WalletAddress(
                 0,
                 firstAddress,
                 0,

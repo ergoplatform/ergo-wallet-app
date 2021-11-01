@@ -16,8 +16,8 @@ import org.ergoplatform.android.databinding.CardWalletAddressBinding
 import org.ergoplatform.android.databinding.FragmentWalletAddressesBinding
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.android.wallet.WalletAddressDbEntity
 import org.ergoplatform.android.wallet.WalletDbEntity
+import org.ergoplatform.persistance.WalletAddress
 
 
 /**
@@ -74,7 +74,7 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
         var addAddrHolder: WalletAddressViewHolder? = null
 
         var wallet: WalletDbEntity? = null
-        var addressList: List<WalletAddressDbEntity> = emptyList()
+        var addressList: List<WalletAddress> = emptyList()
             set(value) {
                 val diffCallback = WalletAddressDiffCallback(field, value)
                 field = value
@@ -109,7 +109,7 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
 
     inner class WalletAddressViewHolder(val binding: CardWalletAddressBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bindAddressInfo(dbEntity: WalletAddressDbEntity, wallet: WalletDbEntity) {
+        fun bindAddressInfo(dbEntity: WalletAddress, wallet: WalletDbEntity) {
             val isDerivedAddress = dbEntity.isDerivedAddress()
 
             binding.layoutNewAddress.visibility = View.GONE
@@ -119,7 +119,7 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
                 if (isDerivedAddress) {
                     findNavController().navigateSafe(
                         WalletAddressesFragmentDirections.actionWalletAddressesFragmentToWalletAddressDetailsDialog(
-                            dbEntity.id
+                            dbEntity.id.toInt()
                         )
                     )
                 }
@@ -188,8 +188,8 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
 }
 
 class WalletAddressDiffCallback(
-    val oldList: List<WalletAddressDbEntity>,
-    val newList: List<WalletAddressDbEntity>
+    val oldList: List<WalletAddress>,
+    val newList: List<WalletAddress>
 ) : DiffUtil.Callback() {
     override fun getOldListSize(): Int {
         return oldList.size

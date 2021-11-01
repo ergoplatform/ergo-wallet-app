@@ -14,9 +14,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.NodeConnector
-import org.ergoplatform.android.R
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
 import org.ergoplatform.android.ui.navigateSafe
@@ -57,7 +55,11 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val nodeConnector = NodeConnector.getInstance()
         binding.swipeRefreshLayout.setOnRefreshListener {
-            if (!nodeConnector.refreshByUser(requireContext())) {
+            if (!nodeConnector.refreshByUser(
+                    Preferences(requireContext()),
+                    RoomWalletDbProvider(AppDatabase.getInstance(requireContext()))
+                )
+            ) {
                 binding.swipeRefreshLayout.isRefreshing = false
             }
         }

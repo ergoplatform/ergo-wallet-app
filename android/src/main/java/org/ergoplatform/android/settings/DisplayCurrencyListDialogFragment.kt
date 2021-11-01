@@ -14,10 +14,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.NodeConnector
+import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentDisplayCurrencyDialogBinding
 import org.ergoplatform.android.databinding.FragmentDisplayCurrencyDialogItemBinding
-import org.ergoplatform.android.saveDisplayCurrency
 import java.util.*
 
 /**
@@ -74,7 +74,7 @@ class DisplayCurrencyListDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun onChooseCurrency(currency: String) {
-        saveDisplayCurrency(requireContext(), currency)
+        Preferences(requireContext()).prefDisplayCurrency = currency
         NodeConnector.getInstance().invalidateCache()
         (parentFragment as? SettingsFragment)?.setDisplayCurrency()
         dismiss()

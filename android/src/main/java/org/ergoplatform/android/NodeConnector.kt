@@ -1,17 +1,16 @@
 package org.ergoplatform.android
 
-import android.content.Context
-import android.util.Log
-import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.ergoplatform.android.wallet.WalletStateDbEntity
-import org.ergoplatform.android.wallet.WalletTokenDbEntity
 import org.ergoplatform.android.wallet.ensureWalletAddressListHasFirstAddress
 import org.ergoplatform.api.CoinGeckoApi
 import org.ergoplatform.explorer.client.DefaultApi
+import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.WalletDbProvider
+import org.ergoplatform.persistance.WalletState
+import org.ergoplatform.persistance.WalletToken
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -37,11 +36,11 @@ class NodeConnector {
         coinGeckoApi = retrofitCoinGecko.create(CoinGeckoApi::class.java)
     }
 
-    private fun getOrInitErgoApiService(context: Context): DefaultApi {
+    private fun getOrInitErgoApiService(preferences: PreferencesProvider): DefaultApi {
         if (ergoApiService == null) {
 
             val retrofit = Retrofit.Builder()
-                .baseUrl(getPrefExplorerApiUrl(context))
+                .baseUrl(preferences.prefExplorerApiUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
 
@@ -58,21 +57,21 @@ class NodeConnector {
         ergoApiService = null
     }
 
-    fun refreshByUser(context: Context): Boolean {
+    fun refreshByUser(preferences: PreferencesProvider, database: WalletDbProvider): Boolean {
         if (System.currentTimeMillis() - lastRefreshMs > 1000L * 10) {
-            refreshNow(context)
+            refreshNow(preferences, database)
             return true
         } else
             return false
     }
 
-    fun refreshWhenNeeded(context: Context) {
+    fun refreshWhenNeeded(preferences: PreferencesProvider, database: WalletDbProvider) {
         if (System.currentTimeMillis() - lastRefreshMs > 1000L * 60) {
-            refreshNow(context)
+            refreshNow(preferences, database)
         }
     }
 
-    private fun refreshNow(context: Context) {
+    private fun refreshNow(preferences: PreferencesProvider, database: WalletDbProvider) {
         if (!(isRefreshing.value)) {
             isRefreshing.value = true
             GlobalScope.launch(Dispatchers.IO) {
@@ -80,7 +79,7 @@ class NodeConnector {
                 var didSync = false
 
                 // Refresh Ergo fiat value
-                fiatCurrency = getPrefDisplayCurrency(context)
+                fiatCurrency = preferences.prefDisplayCurrency
 
                 var fFiatValue = fiatValue.value ?: 0f
                 if (fiatCurrency.isNotEmpty()) {
@@ -89,29 +88,27 @@ class NodeConnector {
                             coinGeckoApi.currencyGetPrice(fiatCurrency).execute().body()
                         fFiatValue = currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f
                     } catch (t: Throwable) {
-                        Log.e("CoinGecko", "Error", t)
                         // don't set to zero here, keep last value in case of connection error
                     }
                 } else {
                     fFiatValue = 0f
                 }
-                saveLastFiatValue(context, fFiatValue)
+                preferences.lastFiatValue = fFiatValue
                 fiatValue.value = fFiatValue
 
 
                 // Refresh wallet states
                 try {
-                    val statesSaved = refreshWalletStates(context)
+                    val statesSaved = refreshWalletStates(preferences, database)
                     didSync = statesSaved.isNotEmpty()
                 } catch (t: Throwable) {
-                    Log.e("NodeConnector", "Error", t)
                     // TODO report to user
                     hadError = true
                 }
 
                 if (!hadError && didSync) {
                     lastRefreshMs = System.currentTimeMillis()
-                    saveLastRefreshMs(context, lastRefreshMs)
+                    preferences.lastRefreshMs = lastRefreshMs
                 }
                 lastHadError = hadError
                 isRefreshing.value = false
@@ -119,11 +116,15 @@ class NodeConnector {
         }
     }
 
-    fun refreshSingleAddresses(context: Context, addresses: List<String>) {
+    fun refreshSingleAddresses(
+        preferences: PreferencesProvider,
+        database: WalletDbProvider,
+        addresses: List<String>
+    ) {
         if (addresses.isNotEmpty()) {
             GlobalScope.launch(Dispatchers.IO) {
                 try {
-                    refreshWalletStates(context, addresses)
+                    refreshWalletStates(preferences, database, addresses)
                 } catch (t: Throwable) {
                     // ignore the error for a single address call
                 }
@@ -132,18 +133,17 @@ class NodeConnector {
     }
 
     private suspend fun refreshWalletStates(
-        context: Context,
+        preferences: PreferencesProvider,
+        database: WalletDbProvider,
         addressFilter: List<String> = emptyList()
-    ): List<WalletStateDbEntity> {
-        val statesToSave = mutableListOf<WalletStateDbEntity>()
+    ): List<WalletState> {
+        val statesToSave = mutableListOf<WalletState>()
         val tokenAddressesToDelete = mutableListOf<String>()
-        val tokensToSave = mutableListOf<WalletTokenDbEntity>()
-        val database = AppDatabase.getInstance(context)
-        val walletDao = database.walletDao()
-        walletDao.getAllWalletConfigsSyncronous().forEach { walletConfig ->
+        val tokensToSave = mutableListOf<WalletToken>()
+        database.getAllWalletConfigsSynchronous().forEach { walletConfig ->
             walletConfig.firstAddress?.let { firstAddress ->
                 val allAddresses = ensureWalletAddressListHasFirstAddress(
-                    walletDao.loadWalletAddresses(firstAddress), firstAddress
+                    database.loadWalletAddresses(firstAddress), firstAddress
                 )
 
                 val refreshAddresses =
@@ -152,13 +152,13 @@ class NodeConnector {
 
                 refreshAddresses.forEach { address ->
                     val balanceInfoCall =
-                        getOrInitErgoApiService(context).getApiV1AddressesP1BalanceTotal(
+                        getOrInitErgoApiService(preferences).getApiV1AddressesP1BalanceTotal(
                             address.publicAddress
                         ).execute()
 
                     balanceInfoCall.body()?.let { balanceInfo ->
 
-                        val newState = WalletStateDbEntity(
+                        val newState = WalletState(
                             address.publicAddress,
                             address.walletFirstAddress,
                             balanceInfo.confirmed?.nanoErgs,
@@ -169,7 +169,7 @@ class NodeConnector {
                         tokenAddressesToDelete.add(address.publicAddress)
                         balanceInfo.confirmed?.tokens?.forEach {
                             tokensToSave.add(
-                                WalletTokenDbEntity(
+                                WalletToken(
                                     0,
                                     address.publicAddress,
                                     address.walletFirstAddress,
@@ -187,9 +187,9 @@ class NodeConnector {
         }
 
         database.withTransaction {
-            walletDao.insertWalletStates(*statesToSave.toTypedArray())
-            tokenAddressesToDelete.forEach { walletDao.deleteTokensByAddress(it) }
-            walletDao.insertWalletTokens(*tokensToSave.toTypedArray())
+            database.insertWalletStates(statesToSave)
+            tokenAddressesToDelete.forEach { database.deleteTokensByAddress(it) }
+            database.insertWalletTokens(tokensToSave)
         }
         return statesToSave
     }
@@ -203,17 +203,16 @@ class NodeConnector {
                     val currencyList = coinGeckoApi.currencies.execute().body()
                     currencies.value = currencyList ?: emptyList()
                 } catch (t: Throwable) {
-                    Log.e("CoinGecko", "Error", t)
                     currencies.value = emptyList()
                 }
             }
         }
     }
 
-    fun loadPreferenceValues(context: Context) {
-        lastRefreshMs = getLastRefreshMs(context)
-        fiatCurrency = getPrefDisplayCurrency(context)
-        fiatValue.value = getLastFiatValue(context)
+    fun loadPreferenceValues(preferences: PreferencesProvider) {
+        lastRefreshMs = preferences.lastRefreshMs
+        fiatCurrency = preferences.prefDisplayCurrency
+        fiatValue.value = preferences.lastFiatValue
     }
 
     companion object {

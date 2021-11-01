@@ -19,9 +19,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.NodeConnector
-import org.ergoplatform.android.R
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
@@ -111,7 +109,12 @@ class WalletFragment : Fragment() {
 
         })
         binding.swipeRefreshLayout.setOnRefreshListener {
-            if (!nodeConnector.refreshByUser(requireContext())) {
+            val context = requireContext()
+            if (!nodeConnector.refreshByUser(
+                    Preferences(context),
+                    RoomWalletDbProvider(AppDatabase.getInstance(context))
+                )
+            ) {
                 binding.swipeRefreshLayout.isRefreshing = false
             }
         }
@@ -182,7 +185,11 @@ class WalletFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         refreshTimeSinceSyncLabel()
-        NodeConnector.getInstance().refreshWhenNeeded(requireContext())
+        val context = requireContext()
+        NodeConnector.getInstance().refreshWhenNeeded(
+            Preferences(context),
+            RoomWalletDbProvider(AppDatabase.getInstance(context))
+        )
     }
 
     override fun onDestroyView() {

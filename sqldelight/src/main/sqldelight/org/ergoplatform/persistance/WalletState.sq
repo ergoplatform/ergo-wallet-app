@@ -1,0 +1,14 @@
+import java.lang.Boolean;
+
+CREATE TABLE IF NOT EXISTS `wallet_states` (
+    `public_address` TEXT NOT NULL,
+    `wallet_first_address` TEXT NOT NULL,
+    `balance` INTEGER,
+    `unconfirmed_balance` INTEGER,
+    PRIMARY KEY(`public_address`)
+);
+
+insertOrReplace:
+INSERT OR REPLACE INTO `wallet_states` (
+    `public_address`,`wallet_first_address`,`balance`,`unconfirmed_balance`
+) VALUES ?;

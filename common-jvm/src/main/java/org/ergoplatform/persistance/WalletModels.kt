@@ -20,7 +20,7 @@ data class WalletState(
 )
 
 data class WalletToken(
-    val id: Int,
+    val id: Long,
     val publicAddress: String,
     val walletFirstAddress: String,
     val tokenId: String?,
@@ -30,7 +30,7 @@ data class WalletToken(
 )
 
 data class WalletAddress(
-    val id: Int,
+    val id: Long,
     val walletFirstAddress: String,
     val derivationIndex: Int,
     val publicAddress: String,

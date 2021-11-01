@@ -5,10 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
+import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import org.ergoplatform.android.wallet.*
-import org.ergoplatform.persistance.WalletConfig
-import org.ergoplatform.persistance.WalletDbProvider
+import org.ergoplatform.persistance.*
 
 @Database(
     entities = arrayOf(
@@ -69,6 +69,10 @@ abstract class AppDatabase : RoomDatabase() {
 }
 
 class RoomWalletDbProvider(val database: AppDatabase) : WalletDbProvider {
+    override suspend fun <R> withTransaction(block: suspend () -> R): R {
+        return database.withTransaction(block)
+    }
+
     override suspend fun loadWalletByFirstAddress(firstAddress: String): WalletConfig? {
         return database.walletDao().loadWalletByFirstAddress(firstAddress)?.toModel()
     }
@@ -81,4 +85,27 @@ class RoomWalletDbProvider(val database: AppDatabase) : WalletDbProvider {
         database.walletDao().insertAll(walletConfig.toDbEntity())
     }
 
+    override fun getAllWalletConfigsSynchronous(): List<WalletConfig> {
+        return database.walletDao().getAllWalletConfigsSyncronous().map { it.toModel() }
+    }
+
+
+    override suspend fun insertWalletStates(walletStates: List<WalletState>) {
+        database.walletDao()
+            .insertWalletStates(*(walletStates.map { it.toDbEntity() }.toTypedArray()))
+    }
+
+    override suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddress> {
+        return database.walletDao().loadWalletAddresses(firstAddress).map { it.toModel() }
+    }
+
+
+    override suspend fun deleteTokensByAddress(publicAddress: String) {
+        database.walletDao().deleteTokensByAddress(publicAddress)
+    }
+
+    override suspend fun insertWalletTokens(walletTokens: List<WalletToken>) {
+        database.walletDao()
+            .insertWalletTokens(*(walletTokens.map { it.toDbEntity() }.toTypedArray()))
+    }
 }

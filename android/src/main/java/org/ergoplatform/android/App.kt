@@ -8,7 +8,8 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         ergoNetworkType = StageConstants.NETWORK_TYPE
-        AppCompatDelegate.setDefaultNightMode(getDayNightMode(applicationContext))
-        NodeConnector.getInstance().loadPreferenceValues(applicationContext)
+        val preferences = Preferences(applicationContext)
+        AppCompatDelegate.setDefaultNightMode(preferences.dayNightMode)
+        NodeConnector.getInstance().loadPreferenceValues(preferences)
     }
 }

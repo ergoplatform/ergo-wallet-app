@@ -67,13 +67,21 @@ data class WalletTokenDbEntity(
     val name: String?,
 ) {
     fun toModel(): WalletToken {
-        return WalletToken(id, publicAddress, walletFirstAddress, tokenId, amount, decimals, name)
+        return WalletToken(
+            id.toLong(),
+            publicAddress,
+            walletFirstAddress,
+            tokenId,
+            amount,
+            decimals,
+            name
+        )
     }
 }
 
 fun WalletToken.toDbEntity(): WalletTokenDbEntity {
     return WalletTokenDbEntity(
-        id,
+        id.toInt(),
         publicAddress,
         walletFirstAddress,
         tokenId,
@@ -92,12 +100,18 @@ data class WalletAddressDbEntity(
     val label: String?,
 ) {
     fun toModel(): WalletAddress {
-        return WalletAddress(id, walletFirstAddress, derivationIndex, publicAddress, label)
+        return WalletAddress(id.toLong(), walletFirstAddress, derivationIndex, publicAddress, label)
     }
 }
 
 fun WalletAddress.toDbEntity(): WalletAddressDbEntity {
-    return WalletAddressDbEntity(id, walletFirstAddress, derivationIndex, publicAddress, label)
+    return WalletAddressDbEntity(
+        id.toInt(),
+        walletFirstAddress,
+        derivationIndex,
+        publicAddress,
+        label
+    )
 }
 
 data class WalletDbEntity(

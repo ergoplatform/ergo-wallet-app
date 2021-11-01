@@ -16,6 +16,7 @@ import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
+import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.TransactionResult
@@ -48,8 +49,8 @@ class SendFundsViewModel : ViewModel() {
     val lockInterface: LiveData<Boolean> = _lockInterface
     private val _walletName = MutableLiveData<String>()
     val walletName: LiveData<String> = _walletName
-    private val _address = MutableLiveData<WalletAddressDbEntity?>()
-    val address: LiveData<WalletAddressDbEntity?> = _address
+    private val _address = MutableLiveData<WalletAddress?>()
+    val address: LiveData<WalletAddress?> = _address
     private val _walletBalance = MutableLiveData<ErgoAmount>()
     val walletBalance: LiveData<ErgoAmount> = _walletBalance
     private val _feeAmount = MutableLiveData<ErgoAmount>().apply {
@@ -205,11 +206,12 @@ class SendFundsViewModel : ViewModel() {
         viewModelScope.launch {
             val ergoTxResult: SendTransactionResult
             withContext(Dispatchers.IO) {
+                val preferences = Preferences(context)
                 ergoTxResult = sendErgoTx(
                     Address.create(receiverAddress), amountToSend.nanoErgs,
                     tokensChosen.values.toList(),
                     mnemonic, "", derivedAddresses,
-                    getPrefNodeUrl(context), getPrefExplorerApiUrl(context)
+                    preferences.prefNodeUrl, preferences.prefExplorerApiUrl
                 )
             }
             _lockInterface.postValue(false)
@@ -233,11 +235,12 @@ class SendFundsViewModel : ViewModel() {
             viewModelScope.launch {
                 val serializedTx: PromptSigningResult
                 withContext(Dispatchers.IO) {
+                    val preferences = Preferences(context)
                     serializedTx = prepareSerializedErgoTx(
                         Address.create(receiverAddress), amountToSend.nanoErgs,
                         tokensChosen.values.toList(),
                         derivedAddresses.map { Address.create(it) },
-                        getPrefNodeUrl(context), getPrefExplorerApiUrl(context)
+                        preferences.prefNodeUrl, preferences.prefExplorerApiUrl
                     )
                 }
                 _lockInterface.postValue(false)
@@ -254,11 +257,12 @@ class SendFundsViewModel : ViewModel() {
         viewModelScope.launch {
             val ergoTxResult: SendTransactionResult
             withContext(Dispatchers.IO) {
+                val preferences = Preferences(context)
                 val signingResult = coldSigningResponseFromQrChunks(qrCodes)
                 if (signingResult.success) {
                     ergoTxResult = sendSignedErgoTx(
                         signingResult.serializedTx!!,
-                        getPrefNodeUrl(context), getPrefExplorerApiUrl(context)
+                        preferences.prefNodeUrl, preferences.prefExplorerApiUrl
                     )
                 } else {
                     ergoTxResult = SendTransactionResult(false, errorMsg = signingResult.errorMsg)

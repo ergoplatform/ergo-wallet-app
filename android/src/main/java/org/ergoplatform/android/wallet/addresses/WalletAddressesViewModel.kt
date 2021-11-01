@@ -9,22 +9,20 @@ import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.NodeConnector
-import org.ergoplatform.android.deserializeSecrets
-import org.ergoplatform.android.getPublicErgoAddressFromMnemonic
+import org.ergoplatform.android.*
 import org.ergoplatform.android.wallet.WalletAddressDbEntity
 import org.ergoplatform.android.wallet.WalletDbEntity
 import org.ergoplatform.android.wallet.getSortedDerivedAddressesList
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.persistance.WalletAddress
 
 class WalletAddressesViewModel : ViewModel() {
     var numAddressesToAdd: Int = 1
     var wallet: WalletDbEntity? = null
         private set
 
-    private val _addresses = MutableLiveData<List<WalletAddressDbEntity>>()
-    val addresses: LiveData<List<WalletAddressDbEntity>> = _addresses
+    private val _addresses = MutableLiveData<List<WalletAddress>>()
+    val addresses: LiveData<List<WalletAddress>> = _addresses
 
     private val _lockProgress = MutableLiveData<Boolean>()
     val lockProgress: LiveData<Boolean> = _lockProgress
@@ -79,7 +77,10 @@ class WalletAddressesViewModel : ViewModel() {
                 _lockProgress.postValue(false)
                 // make NodeConnector fetch the balances of the added addresses, in case they
                 // were used before
-                NodeConnector.getInstance().refreshSingleAddresses(ctx, addedAddresses)
+                NodeConnector.getInstance().refreshSingleAddresses(
+                    Preferences(ctx),
+                    RoomWalletDbProvider(AppDatabase.getInstance(ctx)), addedAddresses
+                )
             }
         }
     }

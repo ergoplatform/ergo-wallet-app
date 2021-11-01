@@ -1,78 +1,74 @@
 package org.ergoplatform.android
 
+import StageConstants
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
+import org.ergoplatform.persistance.PreferencesProvider
 
 const val NAME_SHAREDPREFS = "ergowallet"
 const val KEY_FIAT_CURRENCY = "fiatCurrency"
 const val KEY_NODE_URL = "nodeUrl"
 const val KEY_EXPLORER_API_URL = "explorerApiUrl"
 
-private fun getSharedPrefs(context: Context) =
-    context.getSharedPreferences(NAME_SHAREDPREFS, Context.MODE_PRIVATE)
+class Preferences(val context: Context) : PreferencesProvider {
+    private fun getSharedPrefs(context: Context) =
+        context.getSharedPreferences(NAME_SHAREDPREFS, Context.MODE_PRIVATE)
 
-fun getPrefDisplayCurrency(context: Context): String {
-    return getSharedPrefs(context).getString(KEY_FIAT_CURRENCY, "usd") ?: ""
-}
+    override var prefDisplayCurrency: String
+        get() = getSharedPrefs(context).getString(KEY_FIAT_CURRENCY, "usd") ?: ""
+        set(currency) {
+            getSharedPrefs(context).edit().putString(KEY_FIAT_CURRENCY, currency).apply()
+        }
 
-fun saveDisplayCurrency(context: Context, currency: String) {
-    getSharedPrefs(context).edit().putString(KEY_FIAT_CURRENCY, currency).apply()
-}
+    override var prefNodeUrl: String
+        get() = getSharedPrefs(context).getString(KEY_NODE_URL, StageConstants.NODE_API_ADDRESS)!!
+        set(nodeUrl) {
+            var savedNodeUrl = nodeUrl
+            if (savedNodeUrl.isEmpty()) {
+                savedNodeUrl = StageConstants.NODE_API_ADDRESS
+            } else if (!savedNodeUrl.endsWith("/")) {
+                savedNodeUrl += "/"
+            }
 
-fun getPrefNodeUrl(context: Context): String {
-    return getSharedPrefs(context).getString(KEY_NODE_URL, StageConstants.NODE_API_ADDRESS)!!
-}
+            getSharedPrefs(context).edit().putString(KEY_NODE_URL, savedNodeUrl).apply()
+        }
 
-fun saveNodeUrl(context: Context, nodeUrl: String) {
-    var savedNodeUrl = nodeUrl
-    if (savedNodeUrl.isEmpty()) {
-        savedNodeUrl = StageConstants.NODE_API_ADDRESS
-    } else if (!savedNodeUrl.endsWith("/")) {
-        savedNodeUrl += "/"
-    }
+    override var prefExplorerApiUrl: String
+        get() = getSharedPrefs(context).getString(
+            KEY_EXPLORER_API_URL,
+            StageConstants.EXPLORER_API_ADDRESS
+        )!!
+        set(value) {
+            var savedExplorerApiUrl = value
+            if (savedExplorerApiUrl.isEmpty()) {
+                savedExplorerApiUrl = StageConstants.EXPLORER_API_ADDRESS
+            } else if (!savedExplorerApiUrl.endsWith("/")) {
+                savedExplorerApiUrl += "/"
+            }
 
-    getSharedPrefs(context).edit().putString(KEY_NODE_URL, savedNodeUrl).apply()
-}
+            getSharedPrefs(context).edit().putString(KEY_EXPLORER_API_URL, savedExplorerApiUrl)
+                .apply()
+        }
 
-fun getPrefExplorerApiUrl(context: Context): String {
-    return getSharedPrefs(context).getString(KEY_EXPLORER_API_URL, StageConstants.EXPLORER_API_ADDRESS)!!
-}
+    override var dayNightMode: Int
+        get() = getSharedPrefs(context).getInt(
+            "dayNightMode",
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        )
+        set(mode) {
+            getSharedPrefs(context).edit().putInt("dayNightMode", mode).apply()
+            AppCompatDelegate.setDefaultNightMode(mode)
+        }
 
-fun saveExplorerApiUrl(context: Context, explorerApiUrl: String) {
-    var savedExplorerApiUrl = explorerApiUrl
-    if (savedExplorerApiUrl.isEmpty()) {
-        savedExplorerApiUrl = StageConstants.EXPLORER_API_ADDRESS
-    } else if (!savedExplorerApiUrl.endsWith("/")) {
-        savedExplorerApiUrl += "/"
-    }
+    override var lastRefreshMs: Long
+        get() = getSharedPrefs(context).getLong("lastRefreshMs", 0)
+        set(time) {
+            getSharedPrefs(context).edit().putLong("lastRefreshMs", time).apply()
+        }
 
-    getSharedPrefs(context).edit().putString(KEY_EXPLORER_API_URL, savedExplorerApiUrl).apply()
-}
-
-fun getDayNightMode(context: Context): Int {
-    return getSharedPrefs(context).getInt(
-        "dayNightMode",
-        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-    )
-}
-
-fun changeDayNightMode(context: Context, @AppCompatDelegate.NightMode mode: Int) {
-    getSharedPrefs(context).edit().putInt("dayNightMode", mode).apply()
-    AppCompatDelegate.setDefaultNightMode(mode)
-}
-
-fun getLastRefreshMs(context: Context): Long {
-    return getSharedPrefs(context).getLong("lastRefreshMs", 0)
-}
-
-fun saveLastRefreshMs(context: Context, time: Long) {
-    getSharedPrefs(context).edit().putLong("lastRefreshMs", time).apply()
-}
-
-fun getLastFiatValue(context: Context): Float {
-    return getSharedPrefs(context).getFloat("fiatValue", 0f)
-}
-
-fun saveLastFiatValue(context: Context, value: Float) {
-    getSharedPrefs(context).edit().putFloat("fiatValue", value).apply()
+    override var lastFiatValue: Float
+        get() = getSharedPrefs(context).getFloat("fiatValue", 0f)
+        set(value) {
+            getSharedPrefs(context).edit().putFloat("fiatValue", value).apply()
+        }
 }

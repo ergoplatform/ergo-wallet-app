@@ -11,9 +11,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import org.ergoplatform.android.BuildConfig
+import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSettingsBinding
-import org.ergoplatform.android.getPrefDisplayCurrency
 import org.ergoplatform.android.ui.enableLinks
 import org.ergoplatform.android.ui.navigateSafe
 import java.util.*
@@ -66,7 +66,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun changeDayNightMode(mode: Int) {
-        org.ergoplatform.android.changeDayNightMode(requireContext(), mode)
+        Preferences(requireContext()).dayNightMode = mode
         setDayNightModeButtonColor(mode)
     }
 
@@ -93,7 +93,7 @@ class SettingsFragment : Fragment() {
 
     fun setDisplayCurrency() {
         val displayCurrency =
-            getPrefDisplayCurrency(requireContext()).toUpperCase(Locale.getDefault())
+            Preferences(requireContext()).prefDisplayCurrency.toUpperCase(Locale.getDefault())
         binding.displayCurrency.setText(
             getString(
                 R.string.button_display_currency,
