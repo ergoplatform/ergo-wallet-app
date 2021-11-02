@@ -17,7 +17,7 @@ sqldelight {
 
 dependencies {
     implementation project(path: ':common-jvm')
-    implementation "com.squareup.sqldelight:coroutines-extensions-jvm:$sqldelight_version"
+    api "com.squareup.sqldelight:coroutines-extensions-jvm:$sqldelight_version"
 
     //implementation 'org.xerial:sqlite-jdbc:3.36.0.3'
     testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"

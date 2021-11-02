@@ -52,7 +52,7 @@ class WalletViewController : CoroutineViewController() {
             appDelegate.database.getWalletsWithStates().collect {
                 shownData.clear()
                 shownData.addAll(it.sortedBy { it.walletConfig.displayName })
-                tableView.reloadData()
+                runOnMainThread { tableView.reloadData() }
             }
         }
 

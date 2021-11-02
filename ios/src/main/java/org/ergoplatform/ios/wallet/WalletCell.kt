@@ -14,7 +14,7 @@ import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSCoder
 import org.robovm.apple.uikit.*
 
-const val WALLET_CELL = "WalletCell"
+const val WALLET_CELL = "EmptyCell"
 const val EMPTY_CELL = "WalletCell"
 
 class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
