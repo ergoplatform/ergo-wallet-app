@@ -3,6 +3,7 @@ package org.ergoplatform.ios
 import SQLite.JDBCDriver
 import com.badlogic.gdx.utils.I18NBundle
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+import org.ergoplatform.NodeConnector
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.persistance.AppDatabase
 import org.robovm.apple.foundation.NSAutoreleasePool
@@ -14,6 +15,7 @@ import java.sql.DriverManager
 class Main : UIApplicationDelegateAdapter() {
     lateinit var database: AppDatabase
     lateinit var texts: I18NBundle
+    lateinit var prefs: Preferences
 
     private val keyboardObservers = ArrayList<ViewControllerWithKeyboardLayoutGuide>()
 
@@ -28,6 +30,8 @@ class Main : UIApplicationDelegateAdapter() {
 
         database = setupDatabase("wallet.db")
         texts = I18NBundle.createBundle(File(internalPath, "i18n/strings"))
+        prefs = Preferences()
+        NodeConnector.getInstance().loadPreferenceValues(prefs)
 
         // Set up the view controller.
         val rootViewController = BottomNavigationBar()

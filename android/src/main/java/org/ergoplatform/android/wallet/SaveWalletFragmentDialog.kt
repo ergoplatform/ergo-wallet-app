@@ -17,7 +17,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.ergoplatform.NodeConnector
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
 import org.ergoplatform.android.ui.*
@@ -155,7 +154,6 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
                 encType,
                 secretStorage
             )
-            NodeConnector.getInstance().invalidateCache()
         }
         NavHostFragment.findNavController(requireParentFragment())
             .navigateSafe(SaveWalletFragmentDialogDirections.actionSaveWalletFragmentDialogToNavigationWallet())

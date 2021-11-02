@@ -1,5 +1,6 @@
 package org.ergoplatform.uilogic.wallet
 
+import org.ergoplatform.NodeConnector
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.uilogic.STRING_LABEL_WALLET_DEFAULT
@@ -39,7 +40,7 @@ class SaveWalletUiLogic {
                     secretStorage
                 )
             walletDbProvider.insertWalletConfig(walletConfig)
-            // TODO NodeConnector.getInstance().invalidateCache(), remove in Android call
+            NodeConnector.getInstance().invalidateCache()
         }
     }
 }

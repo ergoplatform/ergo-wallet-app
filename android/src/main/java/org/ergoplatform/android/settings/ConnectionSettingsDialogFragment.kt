@@ -44,8 +44,8 @@ class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
             true
         }
         binding.buttonDefaults.setOnClickListener {
-            binding.editNodeUrl.editText?.setText(StageConstants.NODE_API_ADDRESS)
-            binding.editExplorerApiUrl.editText?.setText(StageConstants.EXPLORER_API_ADDRESS)
+            binding.editNodeUrl.editText?.setText(getDefaultNodeApiUrl())
+            binding.editExplorerApiUrl.editText?.setText(getDefaultExplorerApiUrl())
         }
     }
 

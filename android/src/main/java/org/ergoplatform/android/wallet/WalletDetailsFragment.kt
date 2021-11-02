@@ -79,7 +79,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         binding.cardTransactions.setOnClickListener {
             openUrlWithBrowser(
                 binding.root.context,
-                StageConstants.EXPLORER_WEB_ADDRESS + "en/addresses/" +
+                getExplorerWebUrl() + "en/addresses/" +
                         walletDetailsViewModel.wallet!!.getDerivedAddress(
                             walletDetailsViewModel.selectedIdx ?: 0
                         )

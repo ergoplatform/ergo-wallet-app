@@ -58,6 +58,18 @@ fun isValidErgoAddress(addressString: String): Boolean {
 
 }
 
+fun getDefaultNodeApiUrl() =
+    if (ergoNetworkType == NetworkType.MAINNET) "http://213.239.193.208:9053/"
+    else "http://213.239.193.208:9052/"
+
+fun getDefaultExplorerApiUrl() =
+    if (ergoNetworkType == NetworkType.MAINNET) RestApiErgoClient.defaultMainnetExplorerUrl + "/"
+    else RestApiErgoClient.defaultTestnetExplorerUrl + "/"
+
+fun getExplorerWebUrl() =
+    if (ergoNetworkType == NetworkType.MAINNET) "https://explorer.ergoplatform.com/"
+    else "https://testnet.ergoplatform.com/"
+
 fun getAddressDerivationPath(index: Int): String {
     return "m/44'/429'/0'/0/$index"
 }
