@@ -13,9 +13,9 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.databinding.FragmentChooseAddressDialogBinding
 import org.ergoplatform.android.databinding.FragmentChooseAddressDialogItemBinding
-import org.ergoplatform.android.wallet.WalletDbEntity
-import org.ergoplatform.android.wallet.getSortedDerivedAddressesList
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 /**
  * Let the user choose a derived address
@@ -60,7 +60,7 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
             AppDatabase.getInstance(context).walletDao()
                 .loadWalletWithStateById(requireArguments().getInt(ARG_WALLET_ID))?.let {
                     binding.list.adapter = DisplayAddressesAdapter(
-                        it,
+                        it.toModel(),
                         requireArguments().getBoolean(ARG_SHOW_ALL_ADDRESSES)
                     )
                 }
@@ -75,7 +75,7 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
     private inner class ViewHolder(val binding: FragmentChooseAddressDialogItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bindAddress(address: WalletAddress, wallet: WalletDbEntity) {
+        fun bindAddress(address: WalletAddress, wallet: Wallet) {
             binding.addressInformation.fillAddressInformation(address, wallet)
             binding.addressInformation.addressIndex.visibility = View.GONE
             binding.root.setOnClickListener {
@@ -83,7 +83,7 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
             }
         }
 
-        fun bindAllAddresses(wallet: WalletDbEntity) {
+        fun bindAllAddresses(wallet: Wallet) {
             binding.addressInformation.fillWalletAddressesInformation(wallet)
             binding.root.setOnClickListener {
                 onChooseAddress(null)
@@ -93,7 +93,7 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
     }
 
     private inner class DisplayAddressesAdapter(
-        val wallet: WalletDbEntity,
+        val wallet: Wallet,
         showAllAddresses: Boolean
     ) :
         RecyclerView.Adapter<ViewHolder>() {

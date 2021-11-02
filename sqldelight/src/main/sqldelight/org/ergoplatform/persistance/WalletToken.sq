@@ -15,3 +15,6 @@ insertOrReplace:
 INSERT OR REPLACE INTO `wallet_tokens` (
     `id`,`public_address`,`wallet_first_address`,`token_id`,`amount`,`decimals`,`name`
 ) VALUES (nullif(?, 0),?,?,?,?,?,?);
+
+loadWalletTokens:
+SELECT * FROM wallet_tokens WHERE wallet_first_address = ?;

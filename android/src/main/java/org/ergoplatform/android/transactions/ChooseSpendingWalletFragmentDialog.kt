@@ -13,8 +13,8 @@ import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserBindin
 import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserItemBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.android.wallet.getBalanceForAllAddresses
 import org.ergoplatform.parsePaymentRequestFromQuery
+import org.ergoplatform.wallet.getBalanceForAllAddresses
 
 
 /**
@@ -53,7 +53,8 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
         binding.grossAmount.visibility = if (amount.nanoErgs > 0) View.VISIBLE else View.GONE
 
         AppDatabase.getInstance(requireContext()).walletDao().getWalletsWithStates()
-            .observe(viewLifecycleOwner, { wallets ->
+            .observe(viewLifecycleOwner, {
+                val wallets = it.map { it.toModel() }
                 binding.listWallets.removeAllViews()
 
                 if (wallets.size == 1) {

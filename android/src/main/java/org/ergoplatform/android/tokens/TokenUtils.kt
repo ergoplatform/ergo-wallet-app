@@ -4,10 +4,10 @@ import android.view.LayoutInflater
 import android.widget.LinearLayout
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.ui.formatTokenAmounts
-import org.ergoplatform.android.wallet.WalletTokenDbEntity
+import org.ergoplatform.persistance.WalletToken
 
 fun inflateAndBindTokenView(
-    walletTokenDbEntity: WalletTokenDbEntity,
+    walletToken: WalletToken,
     linearLayout: LinearLayout,
     layoutInflater: LayoutInflater
 ) {
@@ -18,10 +18,10 @@ fun inflateAndBindTokenView(
             true
         )
 
-    itemBinding.labelTokenName.text = walletTokenDbEntity.name
+    itemBinding.labelTokenName.text = walletToken.name
     itemBinding.labelTokenVal.text =
         formatTokenAmounts(
-            walletTokenDbEntity.amount ?: 0,
-            walletTokenDbEntity.decimals ?: 0,
+            walletToken.amount ?: 0,
+            walletToken.decimals ?: 0,
         )
 }

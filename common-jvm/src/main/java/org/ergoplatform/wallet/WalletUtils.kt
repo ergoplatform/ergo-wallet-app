@@ -1,29 +1,32 @@
-package org.ergoplatform.android.wallet
+package org.ergoplatform.wallet
 
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.persistance.WalletState
+import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.wallet.addresses.ensureWalletAddressListHasFirstAddress
 
 /**
  * sums up all balances of derived address
  */
-fun WalletDbEntity.getBalanceForAllAddresses(): Long {
+fun Wallet.getBalanceForAllAddresses(): Long {
     return state.map { it.balance ?: 0 }.sum()
 }
 
 /**
  * sums up all unconfirmed balances of derived address
  */
-fun WalletDbEntity.getUnconfirmedBalanceForAllAddresses(): Long {
+fun Wallet.getUnconfirmedBalanceForAllAddresses(): Long {
     return state.map { it.unconfirmedBalance ?: 0 }.sum()
 }
 
-fun WalletDbEntity.getTokensForAllAddresses(): List<WalletTokenDbEntity> {
+fun Wallet.getTokensForAllAddresses(): List<WalletToken> {
     // combine tokens with same id but different list entries
-    val hashmap = HashMap<String, WalletTokenDbEntity>()
+    val hashmap = HashMap<String, WalletToken>()
 
     tokens.forEach {
         hashmap.put(it.tokenId!!, hashmap.get(it.tokenId)?.let { tokenInMap ->
-            WalletTokenDbEntity(
+            WalletToken(
                 0, "", it.walletFirstAddress, it.tokenId,
                 (it.amount ?: 0) + (tokenInMap.amount ?: 0), it.decimals, it.name
             )
@@ -34,14 +37,14 @@ fun WalletDbEntity.getTokensForAllAddresses(): List<WalletTokenDbEntity> {
     return if (combinedTokens.size < tokens.size) combinedTokens.toList() else tokens
 }
 
-fun WalletDbEntity.getTokensForAddress(address: String): List<WalletTokenDbEntity> {
+fun Wallet.getTokensForAddress(address: String): List<WalletToken> {
     return tokens.filter { it.publicAddress.equals(address) }
 }
 
 /**
  * @return derived address string with given index
  */
-fun WalletDbEntity.getDerivedAddress(derivationIdx: Int): String? {
+fun Wallet.getDerivedAddress(derivationIdx: Int): String? {
     // edge case: index 0 is not (always) part of addresses table
     if (derivationIdx == 0) {
         return walletConfig.firstAddress
@@ -53,10 +56,10 @@ fun WalletDbEntity.getDerivedAddress(derivationIdx: Int): String? {
 /**
  * @return derived address entity with given derivation index
  */
-fun WalletDbEntity.getDerivedAddressEntity(derivationIdx: Int): WalletAddress? {
+fun Wallet.getDerivedAddressEntity(derivationIdx: Int): WalletAddress? {
     val allAddresses =
         ensureWalletAddressListHasFirstAddress(
-            addresses.map { it.toModel() },
+            addresses,
             walletConfig.firstAddress!!
         )
     return allAddresses.firstOrNull { it.derivationIndex == derivationIdx }
@@ -65,19 +68,19 @@ fun WalletDbEntity.getDerivedAddressEntity(derivationIdx: Int): WalletAddress? {
 /**
  * @return derived addresses list, making sure that 0 address is included and list is sorted by idx
  */
-fun WalletDbEntity.getSortedDerivedAddressesList(): List<WalletAddress> {
+fun Wallet.getSortedDerivedAddressesList(): List<WalletAddress> {
     val retList = ensureWalletAddressListHasFirstAddress(
-        addresses.map { it.toModel() },
+        addresses,
         walletConfig.firstAddress!!
     )
     return retList.sortedBy { it.derivationIndex }
 }
 
-fun WalletDbEntity.getNumOfAddresses(): Int {
+fun Wallet.getNumOfAddresses(): Int {
     // edge case: index 0 is not (always) part of addresses table
     return addresses.filter { it.derivationIndex != 0 }.size + 1
 }
 
-fun WalletDbEntity.getStateForAddress(address: String): WalletStateDbEntity? {
+fun Wallet.getStateForAddress(address: String): WalletState? {
     return state.filter { it.publicAddress.equals(address) }.firstOrNull()
 }

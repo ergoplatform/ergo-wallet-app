@@ -12,3 +12,6 @@ insertOrReplace:
 INSERT OR REPLACE INTO `wallet_states` (
     `public_address`,`wallet_first_address`,`balance`,`unconfirmed_balance`
 ) VALUES ?;
+
+loadWalletStates:
+SELECT * FROM wallet_states WHERE wallet_first_address = ?;

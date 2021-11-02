@@ -5,14 +5,15 @@ import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.IncludeWalletAddressInfoBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
-import org.ergoplatform.android.wallet.*
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.wallet.*
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.addresses.isDerivedAddress
 
 fun IncludeWalletAddressInfoBinding.fillAddressInformation(
     walletAddress: WalletAddress,
-    wallet: WalletDbEntity
+    wallet: Wallet
 ) {
     val isDerivedAddress = walletAddress.isDerivedAddress()
     val ctx = root.context
@@ -33,7 +34,7 @@ fun IncludeWalletAddressInfoBinding.fillAddressInformation(
 }
 
 fun IncludeWalletAddressInfoBinding.fillWalletAddressesInformation(
-    wallet: WalletDbEntity
+    wallet: Wallet
 ) {
     val ctx = root.context
 

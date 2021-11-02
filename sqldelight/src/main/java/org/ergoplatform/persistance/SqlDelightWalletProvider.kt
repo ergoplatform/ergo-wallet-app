@@ -1,6 +1,10 @@
 package org.ergoplatform.persistance
 
+import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
@@ -25,7 +29,7 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
     override suspend fun updateWalletConfig(walletConfig: WalletConfig) {
         withContext(Dispatchers.IO) {
             appDb.walletConfigQueries.insertOrReplace(
-                walletConfig.id,
+                walletConfig.id.toLong(),
                 walletConfig.displayName,
                 walletConfig.firstAddress,
                 walletConfig.encryptionType,
@@ -49,6 +53,26 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         withContext(Dispatchers.IO) {
             walletStates.forEach {
                 appDb.walletStateQueries.insertOrReplace(it.toDbEntity())
+            }
+        }
+    }
+
+    fun getWalletsWithStates(): Flow<List<Wallet>> {
+        return flow {
+            appDb.walletConfigQueries.observeWithState().asFlow().collect {
+                // we detected a change in any of the database tables - do all querys and return
+                emit(appDb.walletConfigQueries.selectAll().executeAsList().map {
+                    val model = it.toModel()
+                    val state = appDb.walletStateQueries.loadWalletStates(model.firstAddress!!)
+                        .executeAsList().map { it.toModel() }
+                    val tokens = appDb.walletTokenQueries.loadWalletTokens(model.firstAddress!!)
+                        .executeAsList().map { it.toModel() }
+                    val addresses =
+                        appDb.walletAddressQueries.loadWalletAddresses(model.firstAddress!!)
+                            .executeAsList().map { it.toModel() }
+
+                    Wallet(model, state, tokens, addresses)
+                })
             }
         }
     }

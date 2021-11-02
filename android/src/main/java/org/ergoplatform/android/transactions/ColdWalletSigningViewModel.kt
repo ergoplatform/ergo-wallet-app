@@ -8,13 +8,15 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.ergoplatform.android.*
-import org.ergoplatform.android.wallet.WalletDbEntity
-import org.ergoplatform.android.wallet.getSortedDerivedAddressesList
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.deserializeSecrets
+import org.ergoplatform.android.signSerializedErgoTx
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.explorer.client.model.TransactionInfo
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SigningResult
+import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 class ColdWalletSigningViewModel : ViewModel() {
 
@@ -30,7 +32,7 @@ class ColdWalletSigningViewModel : ViewModel() {
     val lockInterface: LiveData<Boolean> = _lockInterface
     private val _signingResult = MutableLiveData<SigningResult?>()
     val signingResult: LiveData<SigningResult?> = _signingResult
-    var wallet: WalletDbEntity? = null
+    var wallet: Wallet? = null
 
     fun addQrCodeChunk(qrCodeChunk: String): Boolean {
 
@@ -75,7 +77,7 @@ class ColdWalletSigningViewModel : ViewModel() {
     fun setWalletId(walletId: Int, ctx: Context) {
         viewModelScope.launch {
             wallet =
-                AppDatabase.getInstance(ctx).walletDao().loadWalletWithStateById(walletId)
+                AppDatabase.getInstance(ctx).walletDao().loadWalletWithStateById(walletId)?.toModel()
         }
     }
 

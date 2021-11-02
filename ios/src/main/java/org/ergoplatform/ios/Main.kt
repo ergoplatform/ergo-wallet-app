@@ -6,6 +6,7 @@ import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.persistance.AppDatabase
+import org.ergoplatform.persistance.SqlDelightWalletProvider
 import org.robovm.apple.foundation.NSAutoreleasePool
 import org.robovm.apple.foundation.NSBundle
 import org.robovm.apple.uikit.*
@@ -13,7 +14,7 @@ import java.io.File
 import java.sql.DriverManager
 
 class Main : UIApplicationDelegateAdapter() {
-    lateinit var database: AppDatabase
+    lateinit var database: SqlDelightWalletProvider
     lateinit var texts: I18NBundle
     lateinit var prefs: Preferences
 
@@ -28,7 +29,7 @@ class Main : UIApplicationDelegateAdapter() {
     ): Boolean {
         val internalPath = NSBundle.getMainBundle().bundlePath
 
-        database = setupDatabase("wallet.db")
+        database = SqlDelightWalletProvider(setupDatabase("wallet.db"))
         texts = I18NBundle.createBundle(File(internalPath, "i18n/strings"))
         prefs = Preferences()
         NodeConnector.getInstance().loadPreferenceValues(prefs)

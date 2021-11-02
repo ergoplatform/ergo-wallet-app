@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.ergoplatform.android.databinding.FragmentChooseTokenDialogBinding
 import org.ergoplatform.android.databinding.FragmentChooseTokenDialogItemBinding
-import org.ergoplatform.android.wallet.WalletTokenDbEntity
+import org.ergoplatform.persistance.WalletToken
 
 /**
  * Let the user choose one or more token(s) from the available tokens
@@ -57,7 +57,7 @@ class ChooseTokenListDialogFragment : BottomSheetDialogFragment() {
         internal val name: TextView = binding.labelTokenName
     }
 
-    private inner class DisplayTokenAdapter internal constructor(private val items: List<WalletTokenDbEntity>) :
+    private inner class DisplayTokenAdapter internal constructor(private val items: List<WalletToken>) :
         RecyclerView.Adapter<ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

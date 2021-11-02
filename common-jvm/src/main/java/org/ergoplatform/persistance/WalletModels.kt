@@ -4,7 +4,7 @@ val ENC_TYPE_PASSWORD = 1
 val ENC_TYPE_DEVICE = 2
 
 data class WalletConfig(
-    val id: Long,
+    val id: Int,
     val displayName: String?,
     val firstAddress: String?,
     val encryptionType: Int?,
@@ -25,7 +25,7 @@ data class WalletToken(
     val walletFirstAddress: String,
     val tokenId: String?,
     val amount: Long?,
-    val decimals: Int?,
+    val decimals: Int,
     val name: String?,
 )
 

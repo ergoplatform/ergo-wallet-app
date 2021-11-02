@@ -16,7 +16,7 @@ import org.ergoplatform.android.databinding.CardWalletAddressBinding
 import org.ergoplatform.android.databinding.FragmentWalletAddressesBinding
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.android.wallet.WalletDbEntity
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.wallet.addresses.isDerivedAddress
 
@@ -74,7 +74,7 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
         // holder that holds the add address button, for showing the progress bar
         var addAddrHolder: WalletAddressViewHolder? = null
 
-        var wallet: WalletDbEntity? = null
+        var wallet: Wallet? = null
         var addressList: List<WalletAddress> = emptyList()
             set(value) {
                 val diffCallback = WalletAddressDiffCallback(field, value)
@@ -110,7 +110,7 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
 
     inner class WalletAddressViewHolder(val binding: CardWalletAddressBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bindAddressInfo(dbEntity: WalletAddress, wallet: WalletDbEntity) {
+        fun bindAddressInfo(dbEntity: WalletAddress, wallet: Wallet) {
             val isDerivedAddress = dbEntity.isDerivedAddress()
 
             binding.layoutNewAddress.visibility = View.GONE

@@ -1,7 +1,10 @@
 package org.ergoplatform.ios.wallet
 
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import org.ergoplatform.NodeConnector
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.STRING_LABEL_ERG_PRICE
 import org.ergoplatform.uilogic.STRING_LABEL_LAST_SYNC
 import org.robovm.apple.coregraphics.CGRect
@@ -11,10 +14,10 @@ import org.robovm.apple.uikit.*
 import org.robovm.objc.annotation.CustomClass
 import kotlin.math.max
 
-class WalletViewController : UIViewController() {
+class WalletViewController : CoroutineViewController() {
 
     private val tableView = UITableView(CGRect.Zero())
-    private val shownData = ArrayList<WalletConfig>()
+    private val shownData = ArrayList<Wallet>()
 
     override fun viewDidLoad() {
         val addWalletButton = UIBarButtonItem(UIBarButtonSystemItem.Add)
@@ -44,18 +47,27 @@ class WalletViewController : UIViewController() {
 
     override fun viewWillAppear(p0: Boolean) {
         super.viewWillAppear(p0)
-        // TODO register observers
-        tableView.reloadData()
-        // TODO tableview.refreshControl.beginRefreshing()
+        val appDelegate = getAppDelegate()
+        viewControllerScope.launch {
+            appDelegate.database.getWalletsWithStates().collect {
+                shownData.clear()
+                shownData.addAll(it.sortedBy { it.walletConfig.displayName })
+                tableView.reloadData()
+            }
+        }
+
+        NodeConnector.getInstance().refreshWhenNeeded(
+            appDelegate.prefs,
+            appDelegate.database
+        )
     }
 
     override fun viewWillDisappear(p0: Boolean) {
         super.viewWillDisappear(p0)
-        // TODO unregister observers
         tableView.refreshControl.endRefreshing()
     }
 
-    inner class WalletDataSource() : UITableViewDataSourceAdapter() {
+    inner class WalletDataSource : UITableViewDataSourceAdapter() {
         override fun getNumberOfRowsInSection(p0: UITableView?, p1: Long): Long {
             return max(1, shownData.size.toLong())
         }

@@ -1,6 +1,5 @@
 package org.ergoplatform.android.wallet
 
-import StageConstants
 import android.animation.LayoutTransition
 import android.os.Bundle
 import android.os.Handler
@@ -23,6 +22,7 @@ import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
+import org.ergoplatform.wallet.*
 import org.ergoplatform.wallet.addresses.getAddressLabel
 
 class WalletDetailsFragment : Fragment(), AddressChooserCallback {

@@ -9,18 +9,18 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.launch
-import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
 import org.ergoplatform.android.ui.*
-import org.ergoplatform.android.wallet.WalletDbEntity
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
-import org.ergoplatform.android.wallet.getDerivedAddress
-import org.ergoplatform.android.wallet.getDerivedAddressEntity
 import org.ergoplatform.getExplorerPaymentRequestAddress
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.wallet.addresses.getAddressLabel
+import org.ergoplatform.wallet.getDerivedAddress
+import org.ergoplatform.wallet.getDerivedAddressEntity
 
 
 /**
@@ -33,7 +33,7 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
 
     private val args: ReceiveToWalletFragmentArgs by navArgs()
     private var derivationIdx: Int = 0
-    private var wallet: WalletDbEntity? = null
+    private var wallet: Wallet? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +60,7 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
 
         lifecycleScope.launch {
             val walletDao = AppDatabase.getInstance(requireContext()).walletDao()
-            wallet = walletDao.loadWalletWithStateById(args.walletId)
+            wallet = walletDao.loadWalletWithStateById(args.walletId)?.toModel()
 
             wallet?.let { wallet ->
                 binding.walletName.text = wallet.walletConfig.displayName
@@ -89,7 +89,8 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
 
     private fun refreshAddressInformation() {
         val address = wallet?.getDerivedAddressEntity(derivationIdx)
-        binding.addressLabel.text = address?.getAddressLabel(AndroidStringProvider(requireContext()))
+        binding.addressLabel.text =
+            address?.getAddressLabel(AndroidStringProvider(requireContext()))
         binding.publicAddress.text = address?.publicAddress
 
         refreshQrCode()

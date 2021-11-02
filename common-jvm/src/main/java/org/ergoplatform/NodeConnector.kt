@@ -81,7 +81,7 @@ class NodeConnector {
                 // Refresh Ergo fiat value
                 fiatCurrency = preferences.prefDisplayCurrency
 
-                var fFiatValue = fiatValue.value ?: 0f
+                var fFiatValue = fiatValue.value
                 if (fiatCurrency.isNotEmpty()) {
                     try {
                         val currencyGetPrice =

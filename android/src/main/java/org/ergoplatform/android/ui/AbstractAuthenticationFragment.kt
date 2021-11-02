@@ -4,9 +4,9 @@ import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import org.ergoplatform.android.R
-import org.ergoplatform.android.wallet.WalletConfigDbEntity
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
+import org.ergoplatform.persistance.WalletConfig
 
 /**
  * Class to use when authentication with Biometrics and password to access mnemonic is needed
@@ -16,7 +16,7 @@ abstract class AbstractAuthenticationFragment : Fragment(), PasswordDialogCallba
     /**
      * Start the authentication flow, biometric prompt or password input depending on wallet
      */
-    internal open fun startAuthFlow(walletConfig: WalletConfigDbEntity) {
+    internal open fun startAuthFlow(walletConfig: WalletConfig) {
         if (walletConfig.encryptionType == ENC_TYPE_PASSWORD) {
             PasswordDialogFragment().show(
                 this.childFragmentManager,

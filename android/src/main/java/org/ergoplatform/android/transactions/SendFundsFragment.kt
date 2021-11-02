@@ -1,6 +1,5 @@
 package org.ergoplatform.android.transactions
 
-import StageConstants
 import android.animation.LayoutTransition
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -25,17 +24,19 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.*
-import org.ergoplatform.android.*
+import org.ergoplatform.android.R
+import org.ergoplatform.android.URL_COLD_WALLET_HELP
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
+import org.ergoplatform.android.getExplorerWebUrl
 import org.ergoplatform.android.ui.*
-import org.ergoplatform.android.wallet.WalletConfigDbEntity
-import org.ergoplatform.android.wallet.WalletTokenDbEntity
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
-import org.ergoplatform.android.wallet.getNumOfAddresses
+import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.wallet.addresses.getAddressLabel
+import org.ergoplatform.wallet.getNumOfAddresses
 import kotlin.math.max
 
 
@@ -335,7 +336,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         }
     }
 
-    override fun startAuthFlow(walletConfig: WalletConfigDbEntity) {
+    override fun startAuthFlow(walletConfig: WalletConfig) {
         if (walletConfig.secretStorage == null) {
             // we have a read only wallet here, let's go to cold wallet support mode
             viewModel.startColdWalletPayment(requireContext())
@@ -422,7 +423,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
 
     }
 
-    inner class TokenAmountWatcher(private val token: WalletTokenDbEntity) : TextWatcher {
+    inner class TokenAmountWatcher(private val token: WalletToken) : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
         }

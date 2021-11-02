@@ -26,6 +26,10 @@ import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.wallet.getBalanceForAllAddresses
+import org.ergoplatform.wallet.getTokensForAllAddresses
+import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
 import java.util.*
 
 
@@ -35,7 +39,7 @@ class WalletFragment : Fragment() {
 
     // save last shown wallet list in case view is destroyed
     // this is to preserve user's scroll position
-    private var lastWalletList: List<WalletDbEntity> = emptyList()
+    private var lastWalletList: List<Wallet> = emptyList()
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -62,9 +66,10 @@ class WalletFragment : Fragment() {
         binding.recyclerview.adapter = walletAdapter
         AppDatabase.getInstance(requireContext()).walletDao().getWalletsWithStates()
             .observe(viewLifecycleOwner,
-                { walletList ->
+                {
+                    val walletList = it.map { it.toModel() }
                     walletAdapter.walletList = walletList.sortedBy {
-                        it.walletConfig.displayName?.toLowerCase(
+                        it.walletConfig.displayName?.lowercase(
                             Locale.getDefault()
                         )
                     }
@@ -199,9 +204,9 @@ class WalletFragment : Fragment() {
     }
 }
 
-class WalletAdapter(initWalletList: List<WalletDbEntity>) :
+class WalletAdapter(initWalletList: List<Wallet>) :
     RecyclerView.Adapter<WalletViewHolder>() {
-    var walletList: List<WalletDbEntity> = initWalletList
+    var walletList: List<Wallet> = initWalletList
         set(value) {
             val diffCallback = WalletDiffCallback(field, value)
             field = value
@@ -227,7 +232,7 @@ class WalletAdapter(initWalletList: List<WalletDbEntity>) :
 }
 
 class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(wallet: WalletDbEntity) {
+    fun bind(wallet: Wallet) {
         binding.walletName.text = wallet.walletConfig.displayName
         binding.walletBalance.amount = ErgoAmount(wallet.getBalanceForAllAddresses()).toDouble()
 
@@ -350,7 +355,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
 
 }
 
-class WalletDiffCallback(val oldList: List<WalletDbEntity>, val newList: List<WalletDbEntity>) :
+class WalletDiffCallback(val oldList: List<Wallet>, val newList: List<Wallet>) :
     DiffUtil.Callback() {
     override fun getOldListSize(): Int {
         return oldList.size

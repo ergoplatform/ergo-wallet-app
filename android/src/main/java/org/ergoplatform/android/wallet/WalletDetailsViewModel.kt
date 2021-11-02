@@ -8,10 +8,13 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.wallet.getDerivedAddress
+import org.ergoplatform.wallet.getNumOfAddresses
 
 class WalletDetailsViewModel : ViewModel() {
 
-    var wallet: WalletDbEntity? = null
+    var wallet: Wallet? = null
         private set
 
     // the selected index is null for "all addresses"
@@ -28,10 +31,10 @@ class WalletDetailsViewModel : ViewModel() {
         viewModelScope.launch {
             AppDatabase.getInstance(ctx).walletDao().walletWithStateByIdAsFlow(walletId).collect {
                 // called every time something changes in the DB
-                wallet = it
+                wallet = it?.toModel()
 
                 // no address set (yet) and there is only a single address available, fix it to this one
-                if (selectedIdx == null && it?.getNumOfAddresses() == 1) {
+                if (selectedIdx == null && wallet?.getNumOfAddresses() == 1) {
                     selectedIdx = 0
                 } else {
                     // make sure to post to observer the first time or on DB change

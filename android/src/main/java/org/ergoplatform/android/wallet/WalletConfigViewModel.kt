@@ -13,12 +13,13 @@ import org.ergoplatform.android.deserializeSecrets
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
+import org.ergoplatform.persistance.WalletConfig
 
 class WalletConfigViewModel : ViewModel() {
     private val _snackbarEvent = SingleLiveEvent<Int>()
     val snackbarEvent: LiveData<Int> = _snackbarEvent
 
-    private var wallet: WalletConfigDbEntity? = null
+    private var wallet: WalletConfig? = null
 
     fun saveChanges(context: Context, walletId: Int, newWalletName: String?) {
         viewModelScope.launch {
@@ -69,7 +70,7 @@ class WalletConfigViewModel : ViewModel() {
     fun prepareDisplayMnemonic(fragment: WalletConfigFragment, walletId: Int) {
         viewModelScope.launch {
             val walletDao = AppDatabase.getInstance(fragment.requireContext()).walletDao()
-            wallet = walletDao.loadWalletConfigById(walletId)
+            wallet = walletDao.loadWalletConfigById(walletId)?.toModel()
 
             wallet?.let {
                 fragment.startAuthFlow(it)

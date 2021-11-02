@@ -1,10 +1,14 @@
 package org.ergoplatform.ios.wallet
 
+import org.ergoplatform.ErgoAmount
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 import org.ergoplatform.uilogic.STRING_TITLE_TRANSACTIONS
+import org.ergoplatform.wallet.getBalanceForAllAddresses
+import org.ergoplatform.wallet.getTokensForAllAddresses
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSCoder
@@ -92,7 +96,14 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         horizontalStack.spacing = DEFAULT_MARGIN
         horizontalStack.distribution = UIStackViewDistribution.FillEqually
 
-        cardView.contentView.addSubviews(listOf(stackView, walletImage, transactionButton, horizontalStack))
+        cardView.contentView.addSubviews(
+            listOf(
+                stackView,
+                walletImage,
+                transactionButton,
+                horizontalStack
+            )
+        )
         walletImage.topToSuperview(false, DEFAULT_MARGIN * 2)
             .leftToSuperview(false, DEFAULT_MARGIN)
         stackView.leftToRightOf(walletImage, DEFAULT_MARGIN).topToSuperview()
@@ -112,14 +123,15 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
     }
 
-    fun bind(walletData: WalletConfig) {
-        walletConfig = walletData
-        nameLabel.text = walletData.displayName
-        balanceLabel.text = "0.0000 ERG"
+    fun bind(wallet: Wallet) {
+        walletConfig = wallet.walletConfig
+        nameLabel.text = wallet.walletConfig.displayName
+        balanceLabel.text = ErgoAmount(wallet.getBalanceForAllAddresses()).toString() + " ERG"
         fiatBalance.text = "0.00 EUR"
         unconfirmedBalance.text = "0.0000 ERG unconfirmed"
         unconfirmedBalance.isHidden = true
-        tokenCount.text = "0 tokens"
+        val tokens = wallet.getTokensForAllAddresses()
+        tokenCount.text = tokens.size.toString() + " tokens"
     }
 
 }

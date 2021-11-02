@@ -16,16 +16,19 @@ import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.TransactionResult
+import org.ergoplatform.wallet.*
 
 /**
  * Holding state of the send funds screen (thus to be expected to get complicated)
  */
 class SendFundsViewModel : ViewModel() {
-    var wallet: WalletDbEntity? = null
+    var wallet: Wallet? = null
         private set
 
     var derivedAddressIdx: Int? = null
@@ -68,7 +71,7 @@ class SendFundsViewModel : ViewModel() {
     private val _signingPromptData = MutableLiveData<String?>()
     val signingPromptData: LiveData<String?> = _signingPromptData
 
-    val tokensAvail: ArrayList<WalletTokenDbEntity> = ArrayList()
+    val tokensAvail: ArrayList<WalletToken> = ArrayList()
     val tokensChosen: HashMap<String, ErgoToken> = HashMap()
 
     // the live data gets data posted on adding or removing tokens, not on every amount change
@@ -91,7 +94,7 @@ class SendFundsViewModel : ViewModel() {
 
         viewModelScope.launch {
             wallet =
-                AppDatabase.getInstance(ctx).walletDao().loadWalletWithStateById(walletId)
+                AppDatabase.getInstance(ctx).walletDao().loadWalletWithStateById(walletId)?.toModel()
 
             wallet?.walletConfig?.displayName?.let {
                 _walletName.postValue(it)
@@ -281,7 +284,7 @@ class SendFundsViewModel : ViewModel() {
     /**
      * @return list of tokens to choose from, that means available on the wallet and not already chosen
      */
-    fun getTokensToChooseFrom(): List<WalletTokenDbEntity> {
+    fun getTokensToChooseFrom(): List<WalletToken> {
         return tokensAvail.filter {
             !tokensChosen.containsKey(it.tokenId)
         }

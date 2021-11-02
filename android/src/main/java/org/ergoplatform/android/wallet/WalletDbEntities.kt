@@ -18,7 +18,7 @@ data class WalletConfigDbEntity(
 ) {
     fun toModel(): WalletConfig {
         return WalletConfig(
-            id.toLong(),
+            id,
             displayName,
             firstAddress,
             encryptionType,
@@ -30,7 +30,7 @@ data class WalletConfigDbEntity(
 
 fun WalletConfig.toDbEntity(): WalletConfigDbEntity {
     return WalletConfigDbEntity(
-        id.toInt(),
+        id,
         displayName,
         firstAddress,
         encryptionType,
@@ -73,7 +73,7 @@ data class WalletTokenDbEntity(
             walletFirstAddress,
             tokenId,
             amount,
-            decimals,
+            decimals ?: 0,
             name
         )
     }

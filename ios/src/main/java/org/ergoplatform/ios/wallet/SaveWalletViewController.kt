@@ -10,12 +10,10 @@ import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
-class SaveWalletViewController(private val mnemonic: SecretString) : UIViewController() {
+class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineViewController() {
     private lateinit var progressIndicator: UIActivityIndicatorView
     private lateinit var scrollView: UIScrollView
     private lateinit var addressLabel: UILabel
-
-    private var viewControllerScope: CoroutineScope? = null
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -46,7 +44,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) : UIViewContr
             GlobalScope.launch(Dispatchers.IO) {
                 val publicErgoAddress = getPublicErgoAddressFromMnemonic(mnemonic)
                 uiLogic.suspendSaveToDb(
-                    SqlDelightWalletProvider(getAppDelegate().database), IosStringProvider(texts),
+                    getAppDelegate().database, IosStringProvider(texts),
                     publicErgoAddress, 0, null
                 )
             }
@@ -92,20 +90,14 @@ class SaveWalletViewController(private val mnemonic: SecretString) : UIViewContr
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        viewControllerScope = CoroutineScope(Dispatchers.Default)
         calculateAndShowPkAddress()
-    }
-
-    override fun viewWillDisappear(animated: Boolean) {
-        super.viewWillDisappear(animated)
-        viewControllerScope?.cancel()
     }
 
     private fun calculateAndShowPkAddress() {
         scrollView.isHidden = true
         progressIndicator.startAnimating()
 
-        viewControllerScope?.launch {
+        viewControllerScope.launch {
             val publicErgoAddressFromMnemonic = getPublicErgoAddressFromMnemonic(mnemonic)
             runOnMainThread {
                 addressLabel.text = publicErgoAddressFromMnemonic

@@ -12,14 +12,14 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.android.*
 import org.ergoplatform.android.wallet.WalletAddressDbEntity
-import org.ergoplatform.android.wallet.WalletDbEntity
-import org.ergoplatform.android.wallet.getSortedDerivedAddressesList
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 class WalletAddressesViewModel : ViewModel() {
     var numAddressesToAdd: Int = 1
-    var wallet: WalletDbEntity? = null
+    var wallet: Wallet? = null
         private set
 
     private val _addresses = MutableLiveData<List<WalletAddress>>()
@@ -32,8 +32,8 @@ class WalletAddressesViewModel : ViewModel() {
         viewModelScope.launch {
             AppDatabase.getInstance(ctx).walletDao().walletWithStateByIdAsFlow(walletId).collect {
                 // called every time something changes in the DB
-                wallet = it
-                it?.let {
+                wallet = it?.toModel()
+                wallet?.let {
                     _addresses.postValue(it.getSortedDerivedAddressesList())
                 }
             }
