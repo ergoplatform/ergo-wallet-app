@@ -1,8 +1,7 @@
 package org.ergoplatform.transactions
 
-import org.ergoplatform.android.ergoNetworkType
+import org.ergoplatform.android.isErgoMainNet
 import org.ergoplatform.android.transactions.*
-import org.ergoplatform.appkit.NetworkType
 import org.junit.Assert
 import org.junit.Test
 
@@ -50,7 +49,7 @@ class ColdWalletUtilsKtTest {
 
     @Test
     fun buildTransactionInfoTest() {
-        ergoNetworkType = NetworkType.TESTNET
+        isErgoMainNet = false
         val csr =
             parseColdSigningRequest("{\"reducedTx\":\"9AEBJmPrKJW357sXF3WsClhAxbyYRt1quzw3ch4Vy5sclX4AAAAAA4CU69wDAAjNAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6o4oFAADAhD0QBQQABAAONhACBJABCM0Ceb5mfvncu6xVoGKVzocLBwKb/NstzijZWfKBWxb4F5jqAtGSo5qMx6cBcwBzARABAgQC0ZaDAwGTo4zHsqVzAAABk8KypXMBAHRzAnMDgwEIze6sk7GlcwSjigUAAOaW4NLqAQAIzQKDM/n3RU+NX/c9usmDN2ftb8OobPCnPflGsy6pkn2Rl6OKBQAAzQKDM/n3RU+NX/c9usmDN2ftb8OobPCnPflGsy6pkn2Rl51PjGA\\u003d\",\"sender\":\"3WwbzW6u8hKWBcL1W7kNVMr25s2UHfSBnYtwSHvrRQt7DdPuoXrt\",\"inputs\":[\"pq+IsO4BAAjNAoMz+fdFT41f9z26yYM3Z+1vw6hs8Kc9+UazLqmSfZGXneUEAABT3vrcze/5EGY0QKBNfYn0USYWLqxfTf32VmfH2yml/wA\\u003d\"]}")
 
