@@ -85,8 +85,7 @@ class AddWalletChooserStackView(val texts: I18NBundle) : UIView(CGRect.Zero()) {
         stackView.axis = UILayoutConstraintAxis.Vertical
 
         cardView.contentView.addSubviews(listOf(stackView, imageView))
-        imageView.topToSuperview().leftToSuperview().bottomToSuperview()
-        NSLayoutConstraint.activateConstraints(NSArray(imageView.widthAnchor.equalTo(75.0)))
+        imageView.topToSuperview().leftToSuperview().bottomToSuperview().fixedWidth(75.0)
         stackView.rightToSuperview(inset = DEFAULT_MARGIN).leftToRightOf(imageView)
             .superViewWrapsHeight(constant = DEFAULT_MARGIN)
 

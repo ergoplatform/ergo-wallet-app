@@ -1,14 +1,18 @@
 package org.ergoplatform.ios.wallet
 
+import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ErgoAmount
+import org.ergoplatform.NodeConnector
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
+import org.ergoplatform.uilogic.STRING_LABEL_UNCONFIRMED
 import org.ergoplatform.uilogic.STRING_TITLE_TRANSACTIONS
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
+import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSCoder
@@ -26,6 +30,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     private lateinit var transactionButton: UIButton
     private lateinit var receiveButton: UIButton
     private lateinit var sendButton: UIButton
+    private lateinit var textBundle: I18NBundle
 
     private var walletConfig: WalletConfig? = null
 
@@ -60,7 +65,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
 
-        val textBundle = getAppDelegate().texts
+        textBundle = getAppDelegate().texts
         transactionButton = CommonButton(textBundle.get(STRING_TITLE_TRANSACTIONS))
         receiveButton = CommonButton(textBundle.get(STRING_BUTTON_RECEIVE))
         sendButton = PrimaryButton(textBundle.get(STRING_BUTTON_SEND))
@@ -126,10 +131,17 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     fun bind(wallet: Wallet) {
         walletConfig = wallet.walletConfig
         nameLabel.text = wallet.walletConfig.displayName
-        balanceLabel.text = ErgoAmount(wallet.getBalanceForAllAddresses()).toString() + " ERG"
-        fiatBalance.text = "0.00 EUR"
-        unconfirmedBalance.text = "0.0000 ERG unconfirmed"
-        unconfirmedBalance.isHidden = true
+        val ergoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
+        balanceLabel.text = ergoAmount.toString() + " ERG"
+        val nodeConnector = NodeConnector.getInstance()
+        val ergoPrice = nodeConnector.fiatValue.value
+        fiatBalance.isHidden = ergoPrice == 0f
+        fiatBalance.text = String.format("%.2f", ergoPrice.toDouble() * ergoAmount.toDouble()) + " " +
+                nodeConnector.fiatCurrency.uppercase()
+        val unconfirmedErgs = wallet.getUnconfirmedBalanceForAllAddresses()
+        unconfirmedBalance.text = ErgoAmount(unconfirmedErgs).toString() + " ERG " +
+                textBundle.get(STRING_LABEL_UNCONFIRMED)
+        unconfirmedBalance.isHidden = unconfirmedErgs == 0L
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
     }

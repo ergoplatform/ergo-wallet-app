@@ -7,6 +7,7 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.STRING_LABEL_ERG_PRICE
 import org.ergoplatform.uilogic.STRING_LABEL_LAST_SYNC
+import org.ergoplatform.utils.getTimeSpanString
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSIndexPath
@@ -18,6 +19,7 @@ class WalletViewController : CoroutineViewController() {
 
     private val tableView = UITableView(CGRect.Zero())
     private val shownData = ArrayList<Wallet>()
+    private lateinit var header: HeaderView
 
     override fun viewDidLoad() {
         val addWalletButton = UIBarButtonItem(UIBarButtonSystemItem.Add)
@@ -27,7 +29,7 @@ class WalletViewController : CoroutineViewController() {
             val navController = UINavigationController(AddWalletChooserViewController())
             navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet
             navController.isModalInPresentation = true
-            this.presentViewController(navController, true, {})
+            this.presentViewController(navController, true, { onResume() })
         }
 
         view.addSubview(tableView)
@@ -35,19 +37,29 @@ class WalletViewController : CoroutineViewController() {
 
         tableView.dataSource = WalletDataSource()
         tableView.separatorStyle = UITableViewCellSeparatorStyle.None
-        tableView.refreshControl = UIRefreshControl()
+        val uiRefreshControl = UIRefreshControl()
+        tableView.refreshControl = uiRefreshControl
+        uiRefreshControl.addOnValueChangedListener {
+            if (uiRefreshControl.isRefreshing) {
+                uiRefreshControl.endRefreshing()
+                val appDelegate = getAppDelegate()
+                NodeConnector.getInstance().refreshByUser(appDelegate.prefs, appDelegate.database)
+            }
+        }
         tableView.registerReusableCellClass(WalletCell::class.java, WALLET_CELL)
         tableView.registerReusableCellClass(EmptyCell::class.java, EMPTY_CELL)
         tableView.rowHeight = UITableView.getAutomaticDimension()
         tableView.estimatedRowHeight = UITableView.getAutomaticDimension()
 
-        tableView.tableHeaderView = HeaderView()
+        header = HeaderView()
+        tableView.tableHeaderView = header
         tableView.tableHeaderView.backgroundColor = UIColor.secondarySystemBackground()
     }
 
     override fun viewWillAppear(p0: Boolean) {
         super.viewWillAppear(p0)
         val appDelegate = getAppDelegate()
+        val nodeConnector = NodeConnector.getInstance()
         viewControllerScope.launch {
             appDelegate.database.getWalletsWithStates().collect {
                 shownData.clear()
@@ -55,7 +67,35 @@ class WalletViewController : CoroutineViewController() {
                 runOnMainThread { tableView.reloadData() }
             }
         }
+        viewControllerScope.launch {
+            nodeConnector.isRefreshing.collect {
+                println("refreshing: $it")
+                runOnMainThread {
+                    if (it)
+                        header.refreshView.startAnimating()
+                    else {
+                        // TODO show error state
+                        header.refreshView.stopAnimating()
+                        header.updateLastRefreshLabel()
+                    }
+                }
+            }
+        }
+        viewControllerScope.launch {
+            nodeConnector.fiatValue.collect {
+                println("New fiat value")
+                runOnMainThread {
+                    header.refreshFiatValue()
+                }
+            }
+        }
 
+        onResume()
+    }
+
+    override fun onResume() {
+        header.updateLastRefreshLabel()
+        val appDelegate = getAppDelegate()
         NodeConnector.getInstance().refreshWhenNeeded(
             appDelegate.prefs,
             appDelegate.database
@@ -79,7 +119,7 @@ class WalletViewController : CoroutineViewController() {
                     val navController = UINavigationController(RestoreWalletViewController())
                     navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet
                     navController.isModalInPresentation = true
-                    presentViewController(navController, true, {})
+                    presentViewController(navController, true, { onResume() })
                 }
                 return cell
             } else {
@@ -104,9 +144,11 @@ class WalletViewController : CoroutineViewController() {
 
     @CustomClass
     class HeaderView : UIView(CGRect(0.0, 0.0, 0.0, 70.0)) {
-        val ergoLogo: UIImageView
-        val fiatLabel = Body1Label()
-        val syncLabel = Body1Label()
+        private val ergoLogo: UIImageView
+        private val fiatLabel = Body1Label()
+        private val syncLabel = Body1Label()
+        val refreshView = UIActivityIndicatorView()
+        private val stringProvider = IosStringProvider(getAppDelegate().texts)
 
         init {
             val image = UIImage.getImage("ergologo")
@@ -117,12 +159,26 @@ class WalletViewController : CoroutineViewController() {
             stackview.axis = UILayoutConstraintAxis.Vertical
             addSubview(stackview)
             addSubview(ergoLogo)
-            ergoLogo.leftToSuperview().topToSuperview().bottomToSuperview()
-            stackview.topToSuperview().bottomToSuperview().leftToRightOf(ergoLogo)
-            NSLayoutConstraint.activateConstraints(NSArray(ergoLogo.widthAnchor.equalTo(frame.height)))
+            addSubview(refreshView)
+            ergoLogo.leftToSuperview().topToSuperview().bottomToSuperview().fixedWidth(frame.height)
+            refreshView.rightToSuperview().topToSuperview().bottomToSuperview().fixedWidth(frame.height)
+            stackview.topToSuperview().bottomToSuperview().leftToRightOf(ergoLogo).rightToLeftOf(refreshView)
+        }
 
-            fiatLabel.text = getAppDelegate().texts.get(STRING_LABEL_ERG_PRICE)
-            syncLabel.text = getAppDelegate().texts.get(STRING_LABEL_LAST_SYNC)
+        fun updateLastRefreshLabel() {
+            val lastRefreshMs = NodeConnector.getInstance().lastRefreshMs
+            syncLabel.isHidden = lastRefreshMs == 0L
+            val lastRefreshTimeSpan = (System.currentTimeMillis() - lastRefreshMs) / 1000L
+            val timeSpanString: String = getTimeSpanString(lastRefreshTimeSpan, stringProvider)
+            syncLabel.text = stringProvider.getString(STRING_LABEL_LAST_SYNC, timeSpanString)
+        }
+
+        fun refreshFiatValue() {
+            val nodeConnector = NodeConnector.getInstance()
+            val ergoPrice = nodeConnector.fiatValue.value
+            fiatLabel.isHidden = ergoPrice == 0f
+            fiatLabel.text = stringProvider.getString(STRING_LABEL_ERG_PRICE) +
+                    " " + ergoPrice.toString() + " " + nodeConnector.fiatCurrency.uppercase()
         }
     }
 

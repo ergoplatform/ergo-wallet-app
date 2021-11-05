@@ -4,6 +4,8 @@ import SQLite.JDBCDriver
 import com.badlogic.gdx.utils.I18NBundle
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.android.isErgoMainNet
+import org.ergoplatform.ios.ui.CoroutineViewController
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.persistance.AppDatabase
 import org.ergoplatform.persistance.SqlDelightWalletProvider
@@ -19,6 +21,7 @@ class Main : UIApplicationDelegateAdapter() {
     lateinit var prefs: Preferences
 
     private val keyboardObservers = ArrayList<ViewControllerWithKeyboardLayoutGuide>()
+    private val appActiveObservers = ArrayList<CoroutineViewController>()
 
     // xibless no story board approach
     // see https://github.com/lanqy/swift-programmatically
@@ -28,6 +31,8 @@ class Main : UIApplicationDelegateAdapter() {
         launchOptions: UIApplicationLaunchOptions?
     ): Boolean {
         val internalPath = NSBundle.getMainBundle().bundlePath
+
+        isErgoMainNet = false
 
         database = SqlDelightWalletProvider(setupDatabase("wallet.db"))
         texts = I18NBundle.createBundle(File(internalPath, "i18n/strings"))
@@ -46,6 +51,11 @@ class Main : UIApplicationDelegateAdapter() {
 
         startKeyboardObserver()
         return true
+    }
+
+    override fun didBecomeActive(application: UIApplication?) {
+        super.didBecomeActive(application)
+        appActiveObservers.forEach { it.onResume() }
     }
 
     private fun startKeyboardObserver() {
@@ -70,6 +80,14 @@ class Main : UIApplicationDelegateAdapter() {
 
     fun removeKeyboardObserver(vc: ViewControllerWithKeyboardLayoutGuide) {
         keyboardObservers.remove(vc)
+    }
+
+    fun addAppActiveObserver(vc: CoroutineViewController) {
+        appActiveObservers.add(vc)
+    }
+
+    fun removeAppActiveObserver(vc: CoroutineViewController) {
+        appActiveObservers.remove(vc)
     }
 
     private fun setupDatabase(dbname: String): AppDatabase {

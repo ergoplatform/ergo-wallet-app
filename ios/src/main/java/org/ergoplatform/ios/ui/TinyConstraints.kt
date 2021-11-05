@@ -114,6 +114,21 @@ fun UIView.leftToRightOf(
     return this
 }
 
+fun UIView.rightToLeftOf(
+    sibling: UIView,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val topConstraint = this.rightAnchor.equalTo(
+        sibling.leftAnchor,
+        inset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+
+    return this
+}
+
 fun UIView.bottomToSuperview(
     useSafeArea: Boolean = false,
     bottomInset: Double = 0.0
@@ -201,6 +216,11 @@ fun UIView.centerHorizontal(): UIView {
     centerConstraint.priority = 1000f
     NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
     return this
+}
+
+fun UIView.fixedWidth(c: Double) {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+    NSLayoutConstraint.activateConstraints(NSArray(this.widthAnchor.equalTo(c)))
 }
 
 fun UIView.widthMatchesSuperview(

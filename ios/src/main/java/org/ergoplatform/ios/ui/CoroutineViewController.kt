@@ -15,8 +15,23 @@ abstract class CoroutineViewController : UIViewController() {
             return _viewControllerScope!!
         }
 
+    override fun viewDidAppear(animated: Boolean) {
+        super.viewDidAppear(animated)
+        getAppDelegate().addAppActiveObserver(this)
+    }
+
+    override fun viewWillDisappear(animated: Boolean) {
+        super.viewWillDisappear(animated)
+        getAppDelegate().removeAppActiveObserver(this)
+    }
+
     override fun viewDidDisappear(animated: Boolean) {
         super.viewDidDisappear(animated)
         _viewControllerScope?.cancel()
+        _viewControllerScope = null
+    }
+
+    open fun onResume() {
+        // called when app gets active again, override in subclasses
     }
 }
