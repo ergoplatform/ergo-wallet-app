@@ -2,9 +2,15 @@ import com.squareup.sqldelight.db.SqlDriver
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import org.ergoplatform.NodeConnector
+import org.ergoplatform.android.getDefaultExplorerApiUrl
+import org.ergoplatform.android.isErgoMainNet
 import org.ergoplatform.persistance.*
+import org.ergoplatform.utils.LogUtils
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 class PersistanceTest {
 
@@ -15,7 +21,7 @@ class PersistanceTest {
         runBlocking {
             database.insertWalletConfig(
                 WalletConfig(
-                    1,
+                    0,
                     "Test",
                     "9xxx",
                     0,
@@ -93,8 +99,20 @@ class PersistanceTest {
                         )
                     )
                 )
+                delay(200)
+                database.insertWalletStates(
+                    listOf(
+                        WalletState(
+                            firstAddress,
+                            "secondaddress",
+                            2L,
+                            0L
+                        )
+                    )
+                )
+
             }
-            delay(200)
+            delay(2000)
 
             // two changes: insertWalletConfig and transaction
             assertEquals(2, changes)
@@ -106,7 +124,30 @@ class PersistanceTest {
         }
     }
 
+    fun testNodeConnector() {
+        val db = setupDb()
+        val coroutineScope = CoroutineScope(Dispatchers.IO)
+        isErgoMainNet = false
+        coroutineScope.launch {
+            db.getWalletsWithStates().collect {
+                println(it)
+            }
+        }
+
+        val prefs = mock<PreferencesProvider> {
+        }
+        whenever(prefs.prefDisplayCurrency).thenReturn("")
+        whenever(prefs.prefExplorerApiUrl).thenReturn(getDefaultExplorerApiUrl())
+
+        runBlocking {
+            db.insertWalletConfig(WalletConfig(0, "Test2", "3Wwxnaem5ojTfp91qfLw3Y4Sr7ZWVcLPvYSzTsZ4LKGcoxujbxd3", 0, null, false))
+            NodeConnector.getInstance().refreshByUser(prefs, db)
+            delay(10000)
+        }
+    }
+
     private fun setupDb(): SqlDelightWalletProvider {
+        LogUtils.logDebug = true
         val driver: SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         //val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:test.db")
         AppDatabase.Schema.create(driver)
