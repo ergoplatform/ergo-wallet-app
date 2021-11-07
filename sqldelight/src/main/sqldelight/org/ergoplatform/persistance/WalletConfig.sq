@@ -18,7 +18,7 @@ SELECT * FROM wallet_configs WHERE public_address = ?;
 insertOrReplace:
 INSERT OR REPLACE INTO `wallet_configs` (
     `id`,`display_name`,`public_address`,`enc_type`,`secret_storage`,`unfold_tokens`
-) VALUES (nullif(?, 0),?,?,?,?,?);
+) VALUES (?,?,?,?,?,?);
 
 observeWithState:
 SELECT DISTINCT wallet_configs.*

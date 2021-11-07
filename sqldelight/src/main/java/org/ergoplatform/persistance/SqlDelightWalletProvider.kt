@@ -29,7 +29,7 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
     override suspend fun updateWalletConfig(walletConfig: WalletConfig) {
         withContext(Dispatchers.IO) {
             appDb.walletConfigQueries.insertOrReplace(
-                walletConfig.id.toLong(),
+                if (walletConfig.id > 0) walletConfig.id.toLong() else null,
                 walletConfig.displayName,
                 walletConfig.firstAddress,
                 walletConfig.encryptionType,
@@ -95,7 +95,7 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         withContext(Dispatchers.IO) {
             walletTokens.forEach {
                 appDb.walletTokenQueries.insertOrReplace(
-                    it.id,
+                    if (it.id > 0) it.id else null,
                     it.publicAddress,
                     it.walletFirstAddress,
                     it.tokenId,
