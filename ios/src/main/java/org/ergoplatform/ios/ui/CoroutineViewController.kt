@@ -3,6 +3,7 @@ package org.ergoplatform.ios.ui
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.uikit.UIViewController
 
 abstract class CoroutineViewController : UIViewController() {
@@ -10,6 +11,7 @@ abstract class CoroutineViewController : UIViewController() {
     val viewControllerScope: CoroutineScope
         get() {
             if (_viewControllerScope == null) {
+                LogUtils.logDebug(this.javaClass.simpleName, "viewControllerScope started")
                 _viewControllerScope = CoroutineScope(Dispatchers.Default)
             }
             return _viewControllerScope!!
@@ -27,6 +29,7 @@ abstract class CoroutineViewController : UIViewController() {
 
     override fun viewDidDisappear(animated: Boolean) {
         super.viewDidDisappear(animated)
+        LogUtils.logDebug(this.javaClass.simpleName, "viewControllerScope cancelled")
         _viewControllerScope?.cancel()
         _viewControllerScope = null
     }

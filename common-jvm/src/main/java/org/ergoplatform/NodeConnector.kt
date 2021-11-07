@@ -10,6 +10,7 @@ import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.persistance.WalletState
 import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.addresses.ensureWalletAddressListHasFirstAddress
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -88,6 +89,7 @@ class NodeConnector {
                             coinGeckoApi.currencyGetPrice(fiatCurrency).execute().body()
                         fFiatValue = currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f
                     } catch (t: Throwable) {
+                        LogUtils.logDebug("NodeConnector", "Error: " + t.message, t)
                         // don't set to zero here, keep last value in case of connection error
                     }
                 } else {
@@ -102,6 +104,8 @@ class NodeConnector {
                     val statesSaved = refreshWalletStates(preferences, database)
                     didSync = statesSaved.isNotEmpty()
                 } catch (t: Throwable) {
+                    LogUtils.logDebug("NodeConnector", "Error: " + t.message, t)
+                    t.printStackTrace()
                     // TODO report to user
                     hadError = true
                 }
@@ -110,6 +114,7 @@ class NodeConnector {
                     lastRefreshMs = System.currentTimeMillis()
                     preferences.lastRefreshMs = lastRefreshMs
                 }
+                LogUtils.logDebug("NodeConnector","Refresh done, errors: $hadError")
                 lastHadError = hadError
                 isRefreshing.value = false
             }
@@ -187,8 +192,11 @@ class NodeConnector {
         }
 
         database.withTransaction {
+            LogUtils.logDebug("NodeConnector", "Persisting wallet states to db")
             database.insertWalletStates(statesToSave)
+            LogUtils.logDebug("NodeConnector", "Deleting wallet tokens")
             tokenAddressesToDelete.forEach { database.deleteTokensByAddress(it) }
+            LogUtils.logDebug("NodeConnector", "Persisting wallet tokens to db")
             database.insertWalletTokens(tokensToSave)
         }
         return statesToSave
@@ -213,6 +221,7 @@ class NodeConnector {
         lastRefreshMs = preferences.lastRefreshMs
         fiatCurrency = preferences.prefDisplayCurrency
         fiatValue.value = preferences.lastFiatValue
+        LogUtils.logDebug("NodeConnector", "Initialized preferences.")
     }
 
     companion object {

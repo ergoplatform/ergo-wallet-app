@@ -9,6 +9,7 @@ import org.ergoplatform.ios.ui.CoroutineViewController
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.persistance.AppDatabase
 import org.ergoplatform.persistance.SqlDelightWalletProvider
+import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.foundation.NSAutoreleasePool
 import org.robovm.apple.foundation.NSBundle
 import org.robovm.apple.uikit.*
@@ -33,6 +34,7 @@ class Main : UIApplicationDelegateAdapter() {
         val internalPath = NSBundle.getMainBundle().bundlePath
 
         isErgoMainNet = false
+        LogUtils.logDebug = !isErgoMainNet
 
         database = SqlDelightWalletProvider(setupDatabase("wallet.db"))
         texts = I18NBundle.createBundle(File(internalPath, "i18n/strings"))
