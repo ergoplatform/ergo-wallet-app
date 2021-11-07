@@ -57,24 +57,26 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         }
     }
 
-    fun getWalletsWithStates(): Flow<List<Wallet>> {
+    fun getWalletsWithStatesFlow(): Flow<List<Wallet>> {
         return flow {
             appDb.walletConfigQueries.observeWithState().asFlow().collect {
                 // we detected a change in any of the database tables - do all queries and return
-                emit(appDb.walletConfigQueries.selectAll().executeAsList().map {
-                    val model = it.toModel()
-                    val state = appDb.walletStateQueries.loadWalletStates(model.firstAddress!!)
-                        .executeAsList().map { it.toModel() }
-                    val tokens = appDb.walletTokenQueries.loadWalletTokens(model.firstAddress!!)
-                        .executeAsList().map { it.toModel() }
-                    val addresses =
-                        appDb.walletAddressQueries.loadWalletAddresses(model.firstAddress!!)
-                            .executeAsList().map { it.toModel() }
-
-                    Wallet(model, state, tokens, addresses)
-                })
+                emit(getWalletsWithStates())
             }
         }
+    }
+
+    fun getWalletsWithStates() = appDb.walletConfigQueries.selectAll().executeAsList().map {
+        val model = it.toModel()
+        val state = appDb.walletStateQueries.loadWalletStates(model.firstAddress!!)
+            .executeAsList().map { it.toModel() }
+        val tokens = appDb.walletTokenQueries.loadWalletTokens(model.firstAddress!!)
+            .executeAsList().map { it.toModel() }
+        val addresses =
+            appDb.walletAddressQueries.loadWalletAddresses(model.firstAddress!!)
+                .executeAsList().map { it.toModel() }
+
+        Wallet(model, state, tokens, addresses)
     }
 
 

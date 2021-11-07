@@ -61,7 +61,7 @@ class PersistanceTest {
         var changes = 0
         val coroutineScope = CoroutineScope(Dispatchers.IO)
         coroutineScope.launch {
-            database.getWalletsWithStates().collect {
+            database.getWalletsWithStatesFlow().collect {
                 println(it)
                 changes++
             }

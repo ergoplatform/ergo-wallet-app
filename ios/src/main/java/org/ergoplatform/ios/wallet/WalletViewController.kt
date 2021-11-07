@@ -7,6 +7,7 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.STRING_LABEL_ERG_PRICE
 import org.ergoplatform.uilogic.STRING_LABEL_LAST_SYNC
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getTimeSpanString
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
@@ -61,23 +62,28 @@ class WalletViewController : CoroutineViewController() {
         val appDelegate = getAppDelegate()
         val nodeConnector = NodeConnector.getInstance()
         viewControllerScope.launch {
-            appDelegate.database.getWalletsWithStates().collect {
-                shownData.clear()
-                shownData.addAll(it.sortedBy { it.walletConfig.displayName })
-                runOnMainThread { tableView.reloadData() }
+            appDelegate.database.getWalletsWithStatesFlow().collect {
+                LogUtils.logDebug("WalletViewController", "Refresh shown wallet data from flow change")
+                runOnMainThread {
+                    refreshListShownData(it)
+                }
             }
         }
         viewControllerScope.launch {
-            nodeConnector.isRefreshing.collect {
-                println("refreshing: $it")
+            nodeConnector.isRefreshing.collect { refreshing ->
                 runOnMainThread {
-                    if (it)
+                    if (refreshing)
                         header.refreshView.startAnimating()
                     else {
                         // TODO show error state
                         header.refreshView.stopAnimating()
                         header.updateLastRefreshLabel()
                     }
+                }
+                if (!refreshing) {
+                    LogUtils.logDebug("ViewController", "Refresh done, reload data")
+                    val newData = appDelegate.database.getWalletsWithStates()
+                    runOnMainThread { refreshListShownData(newData) }
                 }
             }
         }
@@ -91,6 +97,12 @@ class WalletViewController : CoroutineViewController() {
         }
 
         onResume()
+    }
+
+    private fun refreshListShownData(newData: List<Wallet>) {
+        shownData.clear()
+        shownData.addAll(newData.sortedBy { it.walletConfig.displayName })
+        tableView.reloadData()
     }
 
     override fun onResume() {
