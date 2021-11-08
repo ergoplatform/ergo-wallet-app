@@ -36,7 +36,7 @@
     <string name="label_last_sync">已同步 %1s</string>
     <string name="label_erg_price">1 ERG ≈</string>
     <string name="label_fiat_amount">≈ %1s</string>
-    <string name="label_last_sync_just_now">立即</string>
+    <string name="label_time_span_just_now">立即</string>
     <string name="label_wallet_default">我的钱包</string>
 
     <!-- add wallet -->

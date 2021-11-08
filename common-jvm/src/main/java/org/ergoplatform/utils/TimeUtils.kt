@@ -1,7 +1,6 @@
 package org.ergoplatform.utils
 
-import org.ergoplatform.uilogic.STRING_LABEL_LAST_SYNC_JUST_NOW
-import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.*
 
 fun getTimeSpanString(
     seconds: Long,
@@ -9,19 +8,21 @@ fun getTimeSpanString(
 ): String {
     val timeSpanString: String
     if (seconds < 60) {
-        timeSpanString = stringProvider.getString(STRING_LABEL_LAST_SYNC_JUST_NOW)
+        timeSpanString = stringProvider.getString(STRING_LABEL_TIME_SPAN_JUST_NOW)
     } else {
-        // TODO use StringProvider here, too
         val minuteTimeSpan = seconds / 60
         if (minuteTimeSpan < 60) {
-            timeSpanString = "$minuteTimeSpan minutes ago"
+            timeSpanString =
+                stringProvider.getString(STRING_LABEL_TIME_SPAN_MINUTES_AGO, minuteTimeSpan)
         } else {
             val hourTimeSpan = minuteTimeSpan / 24
             if (hourTimeSpan < 24)
-                timeSpanString = "$hourTimeSpan hours ago"
+                timeSpanString =
+                    stringProvider.getString(STRING_LABEL_TIME_SPAN_HOURS_AGO, hourTimeSpan)
             else {
                 val dayTimeSpan = hourTimeSpan / 24
-                timeSpanString = "$dayTimeSpan days ago"
+                timeSpanString =
+                    stringProvider.getString(STRING_LABEL_TIME_SPAN_DAYS_AGO, dayTimeSpan)
             }
         }
     }

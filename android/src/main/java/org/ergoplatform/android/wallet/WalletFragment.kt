@@ -1,7 +1,6 @@
 package org.ergoplatform.android.wallet
 
 import android.os.Bundle
-import android.text.format.DateUtils
 import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -20,13 +19,18 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
-import org.ergoplatform.android.*
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.Preferences
+import org.ergoplatform.android.R
+import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
+import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.utils.getTimeSpanString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
 import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
@@ -165,8 +169,10 @@ class WalletFragment : Fragment() {
         val lastRefresMs = nodeConnector.lastRefreshMs
         binding.synctime.text = if (lastRefresMs > 0) getString(
             R.string.label_last_sync,
-            if (System.currentTimeMillis() - lastRefresMs < 60000L) getString(R.string.label_last_sync_just_now) else
-                DateUtils.getRelativeTimeSpanString(lastRefresMs)
+            getTimeSpanString(
+                (System.currentTimeMillis() - lastRefresMs) / 1000L,
+                AndroidStringProvider(requireContext())
+            )
         )
         else null
     }

@@ -30,6 +30,10 @@
     <string name="label_remove">Remove</string>
     <string name="label_confirm">Confirm</string>
     <string name="label_erg_amount">%1s ERG</string>
+    <string name="label_time_span_just_now">just now</string>
+    <string name="label_time_span_minutes_ago">%1s minutes ago</string>
+    <string name="label_time_span_hours_ago">%1s hours ago</string>
+    <string name="label_time_span_days_ago">%1s days ago</string>
 
     <!-- Wallet -->
     <string name="label_tokens">tokens</string>
@@ -41,7 +45,6 @@
     <string name="label_last_sync">synced %1s</string>
     <string name="label_erg_price">1 ERG ≈</string>
     <string name="label_fiat_amount">≈ %1s</string>
-    <string name="label_last_sync_just_now">just now</string>
     <string name="label_wallet_default">My wallet</string>
 
     <!-- add wallet -->

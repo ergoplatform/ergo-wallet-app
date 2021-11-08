@@ -129,7 +129,7 @@ class PersistanceTest {
         val coroutineScope = CoroutineScope(Dispatchers.IO)
         isErgoMainNet = false
         coroutineScope.launch {
-            db.getWalletsWithStates().collect {
+            db.getWalletsWithStatesFlow().collect {
                 println(it)
             }
         }
