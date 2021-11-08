@@ -21,8 +21,10 @@ import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
+import org.ergoplatform.serializeSecrets
 import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
 
 /**

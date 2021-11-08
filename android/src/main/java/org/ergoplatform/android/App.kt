@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.appkit.NetworkType
+import org.ergoplatform.isErgoMainNet
 
 class App : Application() {
 

@@ -9,7 +9,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
-import org.ergoplatform.android.deserializeSecrets
+import org.ergoplatform.deserializeSecrets
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE

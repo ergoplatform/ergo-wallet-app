@@ -1,10 +1,11 @@
 package org.ergoplatform.ios.wallet
 
-import kotlinx.coroutines.*
-import org.ergoplatform.android.getPublicErgoAddressFromMnemonic
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.persistance.SqlDelightWalletProvider
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
 import org.robovm.apple.foundation.NSArray

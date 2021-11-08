@@ -13,7 +13,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.databinding.FragmentWalletAddressDetailsDialogBinding
-import org.ergoplatform.android.getAddressDerivationPath
+import org.ergoplatform.getAddressDerivationPath
 import org.ergoplatform.android.ui.copyStringToClipboard
 
 /**

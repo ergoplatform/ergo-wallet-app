@@ -1,7 +1,7 @@
 package org.ergoplatform.uilogic.wallet
 
-import org.ergoplatform.android.MNEMONIC_MIN_WORDS_COUNT
-import org.ergoplatform.android.loadAppKitMnemonicWordList
+import org.ergoplatform.MNEMONIC_MIN_WORDS_COUNT
+import org.ergoplatform.loadAppKitMnemonicWordList
 import org.ergoplatform.appkit.Mnemonic
 import org.ergoplatform.appkit.MnemonicValidationException
 import org.ergoplatform.uilogic.STRING_MNEMONIC_INVALID

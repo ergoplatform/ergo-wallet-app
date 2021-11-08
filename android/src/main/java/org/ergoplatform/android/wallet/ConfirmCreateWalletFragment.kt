@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
-import org.ergoplatform.android.MNEMONIC_WORDS_COUNT
+import org.ergoplatform.MNEMONIC_WORDS_COUNT
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentConfirmCreateWalletBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog

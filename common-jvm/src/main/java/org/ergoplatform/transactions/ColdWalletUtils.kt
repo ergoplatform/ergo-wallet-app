@@ -5,9 +5,9 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.ErgoBox
-import org.ergoplatform.android.deserializeErgobox
-import org.ergoplatform.android.deserializeUnsignedTx
-import org.ergoplatform.android.getErgoNetworkType
+import org.ergoplatform.deserializeErgobox
+import org.ergoplatform.deserializeUnsignedTx
+import org.ergoplatform.getErgoNetworkType
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoId
 import org.ergoplatform.appkit.Iso

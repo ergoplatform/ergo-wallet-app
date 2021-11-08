@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.NodeConnector
-import org.ergoplatform.android.isValidErgoAddress
+import org.ergoplatform.isValidErgoAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.uilogic.STRING_ERROR_RECEIVER_ADDRESS

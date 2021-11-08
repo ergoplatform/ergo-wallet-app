@@ -9,6 +9,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentConnectionSettingsBinding
+import org.ergoplatform.getDefaultExplorerApiUrl
+import org.ergoplatform.getDefaultNodeApiUrl
 
 /**
  *

@@ -4,7 +4,7 @@ import SQLite.JDBCDriver
 import com.badlogic.gdx.utils.I18NBundle
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import org.ergoplatform.NodeConnector
-import org.ergoplatform.android.isErgoMainNet
+import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.ios.ui.CoroutineViewController
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.persistance.AppDatabase

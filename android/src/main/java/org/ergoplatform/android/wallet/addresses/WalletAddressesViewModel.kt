@@ -13,6 +13,8 @@ import org.ergoplatform.NodeConnector
 import org.ergoplatform.android.*
 import org.ergoplatform.android.wallet.WalletAddressDbEntity
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.deserializeSecrets
+import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.wallet.getSortedDerivedAddressesList

@@ -1,7 +1,7 @@
 package org.ergoplatform.persistance
 
-import org.ergoplatform.android.getDefaultExplorerApiUrl
-import org.ergoplatform.android.getDefaultNodeApiUrl
+import org.ergoplatform.getDefaultExplorerApiUrl
+import org.ergoplatform.getDefaultNodeApiUrl
 
 const val NAME_SHAREDPREFS = "ergowallet"
 const val KEY_FIAT_CURRENCY = "fiatCurrency"

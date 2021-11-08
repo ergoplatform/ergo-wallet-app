@@ -3,6 +3,7 @@ package org.ergoplatform.ios.wallet
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletConfig
@@ -11,11 +12,13 @@ import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 import org.ergoplatform.uilogic.STRING_LABEL_UNCONFIRMED
 import org.ergoplatform.uilogic.STRING_TITLE_TRANSACTIONS
 import org.ergoplatform.wallet.getBalanceForAllAddresses
+import org.ergoplatform.wallet.getDerivedAddress
 import org.ergoplatform.wallet.getTokensForAllAddresses
 import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSCoder
+import org.robovm.apple.foundation.NSURL
 import org.robovm.apple.uikit.*
 
 const val WALLET_CELL = "EmptyCell"
@@ -144,6 +147,15 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         unconfirmedBalance.isHidden = unconfirmedErgs == 0L
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
+
+        transactionButton.addOnTouchUpInsideListener { _, _ ->
+            UIApplication.getSharedApplication().openURL(
+                NSURL(
+                    getExplorerWebUrl() + "en/addresses/" +
+                            wallet.getDerivedAddress(0)
+                )
+            )
+        }
     }
 
 }

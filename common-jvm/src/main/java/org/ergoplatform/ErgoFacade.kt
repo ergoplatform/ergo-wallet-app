@@ -1,4 +1,4 @@
-package org.ergoplatform.android
+package org.ergoplatform
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject

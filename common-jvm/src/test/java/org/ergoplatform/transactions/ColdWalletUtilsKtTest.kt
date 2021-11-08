@@ -1,6 +1,6 @@
 package org.ergoplatform.transactions
 
-import org.ergoplatform.android.isErgoMainNet
+import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.android.transactions.*
 import org.junit.Assert
 import org.junit.Test

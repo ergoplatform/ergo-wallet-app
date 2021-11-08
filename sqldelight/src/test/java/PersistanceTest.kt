@@ -3,8 +3,8 @@ import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.ergoplatform.NodeConnector
-import org.ergoplatform.android.getDefaultExplorerApiUrl
-import org.ergoplatform.android.isErgoMainNet
+import org.ergoplatform.getDefaultExplorerApiUrl
+import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.persistance.*
 import org.ergoplatform.utils.LogUtils
 import org.junit.Assert.assertEquals

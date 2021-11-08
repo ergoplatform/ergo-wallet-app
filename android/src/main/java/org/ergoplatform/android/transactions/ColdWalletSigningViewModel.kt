@@ -9,8 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.deserializeSecrets
-import org.ergoplatform.android.signSerializedErgoTx
+import org.ergoplatform.deserializeSecrets
+import org.ergoplatform.signSerializedErgoTx
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.persistance.Wallet
