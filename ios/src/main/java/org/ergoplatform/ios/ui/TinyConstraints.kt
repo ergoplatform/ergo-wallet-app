@@ -218,9 +218,16 @@ fun UIView.centerHorizontal(): UIView {
     return this
 }
 
-fun UIView.fixedWidth(c: Double) {
+fun UIView.fixedWidth(c: Double): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
     NSLayoutConstraint.activateConstraints(NSArray(this.widthAnchor.equalTo(c)))
+    return this
+}
+
+fun UIView.fixedHeight(c: Double): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+    NSLayoutConstraint.activateConstraints(NSArray(this.heightAnchor.equalTo(c)))
+    return this
 }
 
 fun UIView.widthMatchesSuperview(

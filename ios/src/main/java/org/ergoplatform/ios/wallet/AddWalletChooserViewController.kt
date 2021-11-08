@@ -24,15 +24,15 @@ class AddWalletChooserViewController : UIViewController() {
         view.addSubview(scrollView)
         scrollView.edgesToSuperview()
 
-        chooserView.clickListener = {
-            navigationController.pushViewController(RestoreWalletViewController(), true)
+        chooserView.clickListener = { vc ->
+            navigationController.pushViewController(vc, true)
         }
     }
 }
 
 @CustomClass
 class AddWalletChooserStackView(val texts: I18NBundle) : UIView(CGRect.Zero()) {
-    var clickListener: ((String) -> Unit)? = null
+    var clickListener: ((UIViewController) -> Unit)? = null
 
     init {
         val createWalletCell =
@@ -43,9 +43,10 @@ class AddWalletChooserStackView(val texts: I18NBundle) : UIView(CGRect.Zero()) {
             createCardView(STRING_LABEL_READONLY_WALLET, STRING_DESC_READONLY_WALLET, IMAGE_READONLY_WALLET)
 
         restoreWalletCell.addGestureRecognizer(UITapGestureRecognizer {
-            clickListener?.invoke(
-                STRING_LABEL_RESTORE_WALLET
-            )
+            clickListener?.invoke(RestoreWalletViewController())
+        })
+        readOnlyWalletCell.addGestureRecognizer(UITapGestureRecognizer {
+            clickListener?.invoke(AddReadOnlyWalletViewController())
         })
 
         val stackView = UIStackView(NSArray(createWalletCell, restoreWalletCell, readOnlyWalletCell))

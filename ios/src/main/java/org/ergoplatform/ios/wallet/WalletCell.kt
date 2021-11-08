@@ -132,14 +132,14 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         walletConfig = wallet.walletConfig
         nameLabel.text = wallet.walletConfig.displayName
         val ergoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
-        balanceLabel.text = ergoAmount.toString() + " ERG"
+        balanceLabel.text = ergoAmount.toStringRoundToDecimals(5) + " ERG"
         val nodeConnector = NodeConnector.getInstance()
         val ergoPrice = nodeConnector.fiatValue.value
         fiatBalance.isHidden = ergoPrice == 0f
         fiatBalance.text = String.format("%.2f", ergoPrice.toDouble() * ergoAmount.toDouble()) + " " +
                 nodeConnector.fiatCurrency.uppercase()
         val unconfirmedErgs = wallet.getUnconfirmedBalanceForAllAddresses()
-        unconfirmedBalance.text = ErgoAmount(unconfirmedErgs).toString() + " ERG " +
+        unconfirmedBalance.text = ErgoAmount(unconfirmedErgs).toStringRoundToDecimals(5) + " ERG " +
                 textBundle.get(STRING_LABEL_UNCONFIRMED)
         unconfirmedBalance.isHidden = unconfirmedErgs == 0L
         val tokens = wallet.getTokensForAllAddresses()

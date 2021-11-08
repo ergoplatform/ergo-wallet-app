@@ -64,8 +64,13 @@ class WalletViewController : CoroutineViewController() {
         viewControllerScope.launch {
             appDelegate.database.getWalletsWithStatesFlow().collect {
                 LogUtils.logDebug("WalletViewController", "Refresh shown wallet data from flow change")
+                // do we have a new wallet or wallet address and need to trigger NodeConnector?
+                val needStateRefresh = (NodeConnector.getInstance().lastRefreshMs == 0L)
                 runOnMainThread {
                     refreshListShownData(it)
+                    if (needStateRefresh) {
+                        onResume()
+                    }
                 }
             }
         }
@@ -81,7 +86,7 @@ class WalletViewController : CoroutineViewController() {
                     }
                 }
                 if (!refreshing) {
-                    LogUtils.logDebug("ViewController", "Refresh done, reload data")
+                    LogUtils.logDebug("WalletViewController", "Refresh done, reload shown data")
                     val newData = appDelegate.database.getWalletsWithStates()
                     runOnMainThread { refreshListShownData(newData) }
                 }
@@ -127,8 +132,8 @@ class WalletViewController : CoroutineViewController() {
         override fun getCellForRow(p0: UITableView, p1: NSIndexPath): UITableViewCell {
             if (shownData.isEmpty()) {
                 val cell = p0.dequeueReusableCell(EMPTY_CELL)
-                (cell as? EmptyCell)?.walletChooserStackView?.clickListener = {
-                    val navController = UINavigationController(RestoreWalletViewController())
+                (cell as? EmptyCell)?.walletChooserStackView?.clickListener = { vc ->
+                    val navController = UINavigationController(vc)
                     navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet
                     navController.isModalInPresentation = true
                     presentViewController(navController, true, { onResume() })

@@ -2,7 +2,7 @@ package org.ergoplatform.ios.wallet
 
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.uilogic.STRING_DESC_RESTORE_WALLET
+import org.ergoplatform.uilogic.STRING_INTRO_RESTORE_WALLET
 import org.ergoplatform.uilogic.STRING_LABEL_RESTORE_WALLET
 import org.ergoplatform.uilogic.wallet.RestoreWalletUiLogic
 import org.robovm.apple.coregraphics.CGRect
@@ -34,12 +34,13 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
         nextButton.setOnClickListener { uiLogic.doRestore() }
 
         val descLabel = Body1Label()
-        descLabel.text = texts.get(STRING_DESC_RESTORE_WALLET)
+        descLabel.text = texts.get(STRING_INTRO_RESTORE_WALLET)
         tvMnemonic = UITextView(CGRect.Zero())
         tvMnemonic.layer.borderWidth = 1.0
         tvMnemonic.layer.borderColor = UIColor.systemGray().cgColor
         tvMnemonic.textContentType = UITextContentType.OneTimeCode
         tvMnemonic.isSecureTextEntry = true
+        tvMnemonic.font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
         tvMnemonic.returnKeyType = UIReturnKeyType.Done
 
         errorLabel = Body1Label()

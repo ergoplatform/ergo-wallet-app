@@ -84,6 +84,7 @@ class NodeConnector {
 
                 var fFiatValue = fiatValue.value
                 if (fiatCurrency.isNotEmpty()) {
+                    LogUtils.logDebug("NodeConnector", "Refresh fiat value")
                     try {
                         val currencyGetPrice =
                             coinGeckoApi.currencyGetPrice(fiatCurrency).execute().body()
@@ -114,7 +115,7 @@ class NodeConnector {
                     lastRefreshMs = System.currentTimeMillis()
                     preferences.lastRefreshMs = lastRefreshMs
                 }
-                LogUtils.logDebug("NodeConnector","Refresh done, errors: $hadError")
+                LogUtils.logDebug("NodeConnector", "Refresh done, errors: $hadError")
                 lastHadError = hadError
                 isRefreshing.value = false
             }
@@ -192,11 +193,9 @@ class NodeConnector {
         }
 
         database.withTransaction {
-            LogUtils.logDebug("NodeConnector", "Persisting wallet states to db")
+            LogUtils.logDebug("NodeConnector", "Persisting ${statesToSave.size} wallet states to db")
             database.insertWalletStates(statesToSave)
-            LogUtils.logDebug("NodeConnector", "Deleting wallet tokens")
             tokenAddressesToDelete.forEach { database.deleteTokensByAddress(it) }
-            LogUtils.logDebug("NodeConnector", "Persisting wallet tokens to db")
             database.insertWalletTokens(tokensToSave)
         }
         return statesToSave
