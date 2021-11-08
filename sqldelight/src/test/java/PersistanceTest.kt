@@ -82,34 +82,27 @@ class PersistanceTest {
             delay(200)
 
             database.withTransaction {
-                database.deleteTokensByAddress(firstAddress)
-                delay(200)
-                database.insertWalletStates(listOf(WalletState(firstAddress, firstAddress, 1L, 0L)))
-                delay(200)
-                database.insertWalletTokens(
-                    listOf(
-                        WalletToken(
-                            0,
-                            firstAddress,
-                            firstAddress,
-                            "tokenid",
-                            1L,
-                            0,
-                            "tokenname"
-                        )
+                database.insertWalletConfig(
+                    WalletConfig(
+                        0,
+                        "Observertest",
+                        firstAddress + "2",
+                        0,
+                        null,
+                        false
                     )
                 )
-                delay(200)
-                database.insertWalletStates(
-                    listOf(
-                        WalletState(
-                            firstAddress,
-                            "secondaddress",
-                            2L,
-                            0L
-                        )
+                database.insertWalletConfig(
+                    WalletConfig(
+                        0,
+                        "Observertest",
+                        firstAddress + "3",
+                        0,
+                        null,
+                        false
                     )
                 )
+
 
             }
             delay(2000)
@@ -118,7 +111,17 @@ class PersistanceTest {
             assertEquals(2, changes)
             val changeBeforeCancel = changes
             coroutineScope.cancel()
-            database.deleteTokensByAddress(firstAddress)
+            database.insertWalletConfig(
+                WalletConfig(
+                    0,
+                    "Observertest",
+                    firstAddress + "4",
+                    0,
+                    null,
+                    false
+                )
+            )
+
             delay(1000)
             assertEquals(changeBeforeCancel, changes)
         }
