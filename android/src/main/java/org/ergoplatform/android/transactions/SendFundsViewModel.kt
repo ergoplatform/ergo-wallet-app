@@ -11,8 +11,8 @@ import kotlinx.coroutines.withContext
 import org.ergoplatform.*
 import org.ergoplatform.android.*
 import org.ergoplatform.android.ui.SingleLiveEvent
-import org.ergoplatform.android.wallet.*
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.api.AndroidEncryptionManager
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
@@ -94,7 +94,8 @@ class SendFundsViewModel : ViewModel() {
 
         viewModelScope.launch {
             wallet =
-                AppDatabase.getInstance(ctx).walletDao().loadWalletWithStateById(walletId)?.toModel()
+                AppDatabase.getInstance(ctx).walletDao().loadWalletWithStateById(walletId)
+                    ?.toModel()
 
             wallet?.walletConfig?.displayName?.let {
                 _walletName.postValue(it)
@@ -192,7 +193,7 @@ class SendFundsViewModel : ViewModel() {
         wallet?.walletConfig?.secretStorage?.let {
             val mnemonic: String?
 
-            val decryptData = AesEncryptionManager.decryptDataWithDeviceKey(it)
+            val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
             mnemonic = deserializeSecrets(String(decryptData!!))
 
             startPaymentWithMnemonicAsync(mnemonic!!, context)

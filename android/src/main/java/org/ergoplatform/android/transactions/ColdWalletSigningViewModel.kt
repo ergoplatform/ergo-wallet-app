@@ -12,6 +12,7 @@ import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.deserializeSecrets
 import org.ergoplatform.signSerializedErgoTx
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.api.AndroidEncryptionManager
 import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.PromptSigningResult
@@ -111,7 +112,7 @@ class ColdWalletSigningViewModel : ViewModel() {
         wallet?.walletConfig?.secretStorage?.let {
             val mnemonic: String?
 
-            val decryptData = AesEncryptionManager.decryptDataWithDeviceKey(it)
+            val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
             mnemonic = deserializeSecrets(String(decryptData!!))
 
             signTxWithMnemonicAsync(mnemonic!!)

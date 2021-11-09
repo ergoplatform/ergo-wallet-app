@@ -21,6 +21,7 @@ import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.api.AndroidEncryptionManager
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
@@ -104,7 +105,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         val callback = object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 try {
-                    val secretStorage = AesEncryptionManager.encryptDataOnDevice(
+                    val secretStorage = AndroidEncryptionManager.encryptDataOnDevice(
                         serializeSecrets(args.mnemonic).toByteArray()
                     )
                     saveToDbAndNavigateToWallet(

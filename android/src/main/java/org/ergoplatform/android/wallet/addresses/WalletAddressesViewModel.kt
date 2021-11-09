@@ -13,6 +13,7 @@ import org.ergoplatform.NodeConnector
 import org.ergoplatform.android.*
 import org.ergoplatform.android.wallet.WalletAddressDbEntity
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.api.AndroidEncryptionManager
 import org.ergoplatform.deserializeSecrets
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.persistance.Wallet
@@ -90,7 +91,7 @@ class WalletAddressesViewModel : ViewModel() {
 
     fun addAddressWithBiometricAuth(ctx: Context) {
         wallet?.walletConfig?.secretStorage?.let {
-            val decryptData = AesEncryptionManager.decryptDataWithDeviceKey(it)
+            val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
             deserializeSecrets(String(decryptData!!))?.let { mnemonic ->
                 addNextAddresses(ctx, numAddressesToAdd, mnemonic)
             }

@@ -1,8 +1,5 @@
 package org.ergoplatform.api;
 
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
-
 import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.*;
@@ -10,17 +7,11 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
@@ -29,9 +20,6 @@ import java.security.spec.KeySpec;
  * example for nullbeans.com
  */
 public class AesEncryptionManager {
-
-    public static final String MY_KEY_ALIAS = "ergowalletkey";
-    public static final String ANDROID_KEY_STORE = "AndroidKeyStore";
 
     /**
      * This method will encrypt the given data using the given password.
@@ -65,44 +53,6 @@ public class AesEncryptionManager {
         return encryptWithCipher(data, iv, cipher);
     }
 
-    public static byte[] encryptDataOnDevice(byte[] data) throws NoSuchPaddingException,
-            NoSuchAlgorithmException,
-            InvalidAlgorithmParameterException,
-            InvalidKeyException,
-            BadPaddingException,
-            IllegalBlockSizeException, NoSuchProviderException, CertificateException, UnrecoverableEntryException, KeyStoreException, IOException {
-
-        SecretKey secretKey = loadSecretDeviceKey();
-        if (secretKey == null) {
-            // first use, we need to generate the key
-            secretKey = generateDeviceSecretKey();
-        }
-
-        final Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        byte[] iv = cipher.getIV();
-
-        return encryptWithCipher(data, iv, cipher);
-    }
-
-    private static SecretKey generateDeviceSecretKey() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
-        SecretKey secretKey;
-        final KeyGenerator keyGenerator = KeyGenerator
-                .getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEY_STORE);
-
-        final KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec.Builder(MY_KEY_ALIAS,
-                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .setUserAuthenticationRequired(true)
-                .setUserAuthenticationValidityDurationSeconds(10)
-                .build();
-
-        keyGenerator.init(keyGenParameterSpec);
-        secretKey = keyGenerator.generateKey();
-        return secretKey;
-    }
-
     /**
      * Encrypts the given data using the given {@link Cipher} and the salt.
      *
@@ -112,7 +62,7 @@ public class AesEncryptionManager {
      * @return encrypted data packed with the salt.
      */
     @NotNull
-    private static byte[] encryptWithCipher(byte[] data, byte[] iv, Cipher cipher) throws BadPaddingException, IllegalBlockSizeException {
+    static byte[] encryptWithCipher(byte[] data, byte[] iv, Cipher cipher) throws BadPaddingException, IllegalBlockSizeException {
         //Encrypt the data
         byte[] encryptedData = cipher.doFinal(data);
 
@@ -142,7 +92,7 @@ public class AesEncryptionManager {
         return decryptWithSecretKey(data, secretKey);
     }
 
-    private static byte[] decryptWithSecretKey(DecryptionData data, SecretKey secretKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    static byte[] decryptWithSecretKey(DecryptionData data, SecretKey secretKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         GCMParameterSpec parameterSpec = new GCMParameterSpec(128, data.iv);
 
@@ -151,23 +101,6 @@ public class AesEncryptionManager {
 
         //decrypt the data
         return cipher.doFinal(data.cipherBytes);
-    }
-
-    public static byte[] decryptDataWithDeviceKey(byte[] encryptedData)
-            throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, UnrecoverableEntryException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, InvalidAlgorithmParameterException, NoSuchPaddingException {
-        DecryptionData data = new DecryptionData(encryptedData);
-
-        final SecretKey secretKey = loadSecretDeviceKey();
-        return decryptWithSecretKey(data, secretKey);
-    }
-
-    private static SecretKey loadSecretDeviceKey() throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException, UnrecoverableEntryException {
-        KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
-        keyStore.load(null);
-        final KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) keyStore
-                .getEntry(MY_KEY_ALIAS, null);
-
-        return secretKeyEntry != null ? secretKeyEntry.getSecretKey() : null;
     }
 
     /**
@@ -179,24 +112,14 @@ public class AesEncryptionManager {
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
      */
-    public static SecretKey generateSecretKey(String password, byte[] iv) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private static SecretKey generateSecretKey(String password, byte[] iv) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeySpec spec = new PBEKeySpec(password.toCharArray(), iv, 65536, 128); // AES-128
         SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         byte[] key = secretKeyFactory.generateSecret(spec).getEncoded();
         return new SecretKeySpec(key, "AES");
     }
 
-    public static void emptyKeystore() {
-        try {
-            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
-            keyStore.load(null);
-            keyStore.deleteEntry(MY_KEY_ALIAS);
-        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static class DecryptionData {
+    static class DecryptionData {
         final byte[] iv;
         final byte[] cipherBytes;
 

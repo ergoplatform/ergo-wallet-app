@@ -12,6 +12,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.deserializeSecrets
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.api.AndroidEncryptionManager
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.WalletConfig
 
@@ -61,7 +62,7 @@ class WalletConfigViewModel : ViewModel() {
                 // After we deleted a wallet, we can prune the keystore if it is not needed
                 if (walletDao.getAllWalletConfigsSyncronous().filter { it.encryptionType == ENC_TYPE_DEVICE }
                         .isEmpty()) {
-                    AesEncryptionManager.emptyKeystore()
+                    AndroidEncryptionManager.emptyKeystore()
                 }
             }
         }
@@ -95,7 +96,7 @@ class WalletConfigViewModel : ViewModel() {
 
     fun decryptMnemonicWithUserAuth(): String? {
         wallet?.secretStorage?.let {
-            val decryptData = AesEncryptionManager.decryptDataWithDeviceKey(it)
+            val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
             return deserializeSecrets(String(decryptData!!))
         }
         return null
