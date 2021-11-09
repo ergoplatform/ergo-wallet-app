@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -12,6 +13,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
@@ -20,6 +22,10 @@ import java.security.spec.KeySpec;
  * example for nullbeans.com
  */
 public class AesEncryptionManager {
+
+    // On Android API below 19, we need to use another Parameter Spec as the current one is not available.
+    // It is compatible with the newer one, so when RoboVM switched to API 26 we can remove this code.
+    public static boolean isOnLegacyApi = false;
 
     /**
      * This method will encrypt the given data using the given password.
@@ -45,12 +51,20 @@ public class AesEncryptionManager {
         SecretKey secretKey = generateSecretKey(password, iv);
 
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        GCMParameterSpec parameterSpec = new GCMParameterSpec(128, iv);
+        AlgorithmParameterSpec parameterSpec = getParameterSpec(iv);
 
         //Initialize the cipher for encryption mode!
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, parameterSpec);
 
         return encryptWithCipher(data, iv, cipher);
+    }
+
+    @NotNull
+    private static AlgorithmParameterSpec getParameterSpec(byte[] iv) {
+        if (isOnLegacyApi)
+            return new IvParameterSpec(iv);
+        else
+            return new GCMParameterSpec(128, iv);
     }
 
     /**
@@ -94,7 +108,7 @@ public class AesEncryptionManager {
 
     static byte[] decryptWithSecretKey(DecryptionData data, SecretKey secretKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        GCMParameterSpec parameterSpec = new GCMParameterSpec(128, data.iv);
+        AlgorithmParameterSpec parameterSpec = getParameterSpec(data.iv);
 
         //Encryption mode on!
         cipher.init(Cipher.DECRYPT_MODE, secretKey, parameterSpec);

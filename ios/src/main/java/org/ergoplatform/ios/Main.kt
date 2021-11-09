@@ -4,6 +4,7 @@ import SQLite.JDBCDriver
 import com.badlogic.gdx.utils.I18NBundle
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.ios.ui.CoroutineViewController
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
@@ -35,6 +36,7 @@ class Main : UIApplicationDelegateAdapter() {
 
         isErgoMainNet = false
         LogUtils.logDebug = !isErgoMainNet
+        AesEncryptionManager.isOnLegacyApi = true
 
         database = SqlDelightWalletProvider(setupDatabase("wallet.db"))
         texts = I18NBundle.createBundle(File(internalPath, "i18n/strings"))
