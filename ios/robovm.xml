@@ -11,12 +11,7 @@
     </resources>
     <forceLinkClasses>
         <pattern>com.android.org.conscrypt.**</pattern>
-        <pattern>com.android.org.bouncycastle.jce.provider.BouncyCastleProvider</pattern>
-        <pattern>com.android.org.bouncycastle.jcajce.provider.keystore.BC$Mappings</pattern>
-        <pattern>com.android.org.bouncycastle.jcajce.provider.keystore.bc.BcKeyStoreSpi</pattern>
-        <pattern>com.android.org.bouncycastle.jcajce.provider.keystore.bc.BcKeyStoreSpi$Std</pattern>
-        <pattern>com.android.org.bouncycastle.jce.provider.PKIXCertPathValidatorSpi</pattern>
-        <pattern>com.android.org.bouncycastle.crypto.digests.AndroidDigestFactoryOpenSSL</pattern>
+        <pattern>com.android.org.bouncycastle.**</pattern>
         <pattern>org.apache.harmony.security.provider.cert.DRLCertFactory</pattern>
         <pattern>org.apache.harmony.security.provider.crypto.CryptoProvider</pattern>
         <pattern>org.apache.harmony.security.provider.crypto.CryptoProvider</pattern>

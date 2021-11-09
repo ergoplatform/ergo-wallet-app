@@ -163,7 +163,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     }
 
     override fun onPasswordEntered(password: String?): String? {
-        if (password == null || password.length < 8) {
+        if (SaveWalletUiLogic().isPasswordWeak(password)) {
             return getString(R.string.err_password)
         } else {
             saveToDbAndNavigateToWallet(

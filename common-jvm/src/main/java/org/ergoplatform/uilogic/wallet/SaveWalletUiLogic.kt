@@ -43,4 +43,8 @@ class SaveWalletUiLogic {
             NodeConnector.getInstance().invalidateCache()
         }
     }
+
+    fun isPasswordWeak(password: String?): Boolean {
+        return password == null || password.length < 8
+    }
 }

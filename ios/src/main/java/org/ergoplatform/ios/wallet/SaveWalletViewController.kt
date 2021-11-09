@@ -3,9 +3,12 @@ package org.ergoplatform.ios.wallet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
+import org.ergoplatform.serializeSecrets
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
 import org.robovm.apple.foundation.NSArray
@@ -15,6 +18,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
     private lateinit var progressIndicator: UIActivityIndicatorView
     private lateinit var scrollView: UIScrollView
     private lateinit var addressLabel: UILabel
+    val uiLogic = SaveWalletUiLogic()
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -24,8 +28,6 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
         view.backgroundColor = UIColor.systemBackground()
 
         navigationController.navigationBar?.tintColor = uiColorErgo
-
-        val uiLogic = SaveWalletUiLogic()
 
         val container = UIView()
         scrollView = container.wrapInVerticalScrollView()
@@ -42,14 +44,22 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
 
         val buttonSavePassword = TextButton(texts.get(STRING_BUTTON_SAVE_PASSWORD_ENCRYPTED))
         buttonSavePassword.addOnTouchUpInsideListener { _, _ ->
-            GlobalScope.launch(Dispatchers.IO) {
-                val publicErgoAddress = getPublicErgoAddressFromMnemonic(mnemonic)
-                uiLogic.suspendSaveToDb(
-                    getAppDelegate().database, IosStringProvider(texts),
-                    publicErgoAddress, 0, null
-                )
-            }
-            navigationController.dismissViewController(true) {}
+            PasswordViewController.showDialog(
+                this@SaveWalletViewController,
+                { password ->
+                    if (uiLogic.isPasswordWeak(password)) {
+                        return@showDialog texts.get(STRING_ERR_PASSWORD)
+                    }
+
+                    val encrypted = AesEncryptionManager.encryptData(
+                        password,
+                        serializeSecrets(mnemonic.toStringUnsecure()).toByteArray()
+                    )
+
+                    saveToDbAndDismissController(ENC_TYPE_PASSWORD, encrypted)
+                    return@showDialog null
+                }, true
+            )
         }
 
         val savePwInfoLabel =
@@ -87,6 +97,18 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
         progressIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Large
         view.addSubview(progressIndicator)
         progressIndicator.centerVertical().centerHorizontal()
+    }
+
+    private fun saveToDbAndDismissController(encType: Int, secretStorage: ByteArray) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val publicErgoAddress = getPublicErgoAddressFromMnemonic(mnemonic)
+            val appDelegate = getAppDelegate()
+            uiLogic.suspendSaveToDb(
+                appDelegate.database, IosStringProvider(appDelegate.texts),
+                publicErgoAddress, encType, secretStorage
+            )
+        }
+        navigationController.dismissViewController(true) {}
     }
 
     override fun viewWillAppear(animated: Boolean) {
