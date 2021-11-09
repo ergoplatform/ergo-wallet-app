@@ -30,7 +30,7 @@ class WalletViewController : CoroutineViewController() {
             val navController = UINavigationController(AddWalletChooserViewController())
             navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet
             navController.isModalInPresentation = true
-            this.presentViewController(navController, true, { onResume() })
+            this.presentViewController(navController, true) { }
         }
 
         view.addSubview(tableView)
@@ -136,7 +136,7 @@ class WalletViewController : CoroutineViewController() {
                     val navController = UINavigationController(vc)
                     navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet
                     navController.isModalInPresentation = true
-                    presentViewController(navController, true, { onResume() })
+                    presentViewController(navController, true) { }
                 }
                 return cell
             } else {
