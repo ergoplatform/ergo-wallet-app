@@ -89,6 +89,9 @@ class RoomWalletDbProvider(val database: AppDatabase) : WalletDbProvider {
         return database.walletDao().getAllWalletConfigsSyncronous().map { it.toModel() }
     }
 
+    override suspend fun loadWalletWithStateById(id: Int): Wallet? {
+        return database.walletDao().loadWalletWithStateById(id)?.toModel()
+    }
 
     override suspend fun insertWalletStates(walletStates: List<WalletState>) {
         database.walletDao()

@@ -9,18 +9,18 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
+import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
-import org.ergoplatform.android.ui.*
+import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.copyStringToClipboard
+import org.ergoplatform.android.ui.setQrCodeToImageView
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
-import org.ergoplatform.getExplorerPaymentRequestAddress
-import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.uilogic.wallet.ReceiveToWalletUiLogic
+import org.ergoplatform.utils.inputTextToDouble
 import org.ergoplatform.wallet.addresses.getAddressLabel
-import org.ergoplatform.wallet.getDerivedAddress
-import org.ergoplatform.wallet.getDerivedAddressEntity
 
 
 /**
@@ -32,8 +32,7 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
     private val binding get() = _binding!!
 
     private val args: ReceiveToWalletFragmentArgs by navArgs()
-    private var derivationIdx: Int = 0
-    private var wallet: Wallet? = null
+    val uiLogic = ReceiveToWalletUiLogic()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,25 +55,25 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        derivationIdx = args.derivationIdx
-
+        uiLogic.derivationIdx = args.derivationIdx
         lifecycleScope.launch {
-            val walletDao = AppDatabase.getInstance(requireContext()).walletDao()
-            wallet = walletDao.loadWalletWithStateById(args.walletId)?.toModel()
-
-            wallet?.let { wallet ->
+            uiLogic.loadWallet(
+                args.walletId,
+                RoomWalletDbProvider(AppDatabase.getInstance(requireContext()))
+            )
+            uiLogic.wallet?.let { wallet ->
                 binding.walletName.text = wallet.walletConfig.displayName
                 refreshAddressInformation()
             }
         }
 
         binding.buttonCopy.setOnClickListener {
-            wallet?.getDerivedAddress(derivationIdx)?.let {
+            uiLogic.address?.publicAddress?.let {
                 copyStringToClipboard(it, requireContext(), requireView())
             }
         }
         binding.addressLabel.setOnClickListener {
-            wallet?.let { wallet ->
+            uiLogic.wallet?.let { wallet ->
                 ChooseAddressListDialogFragment.newInstance(
                     wallet.walletConfig.id
                 ).show(childFragmentManager, null)
@@ -83,12 +82,12 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
-        derivationIdx = addressDerivationIdx ?: 0
+        uiLogic.derivationIdx = addressDerivationIdx ?: 0
         refreshAddressInformation()
     }
 
     private fun refreshAddressInformation() {
-        val address = wallet?.getDerivedAddressEntity(derivationIdx)
+        val address = uiLogic.address
         binding.addressLabel.text =
             address?.getAddressLabel(AndroidStringProvider(requireContext()))
         binding.publicAddress.text = address?.publicAddress
@@ -131,18 +130,8 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
         }
     }
 
-    private fun getTextToShare(): String? {
-        binding.publicAddress.text?.let {
-            val amountVal = getInputAmount()
-
-            return getExplorerPaymentRequestAddress(
-                it.toString(),
-                amountVal,
-                binding.purpose.editText?.text.toString()
-            )
-        }
-        return null
-    }
+    private fun getTextToShare() =
+        uiLogic.getTextToShare(getInputAmount(), binding.purpose.editText?.text.toString())
 
     private fun getInputAmount(): Double {
         val amountStr = binding.amount.editText?.text.toString()
@@ -161,18 +150,12 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
 
         override fun afterTextChanged(s: Editable?) {
             refreshQrCode()
-            val nodeConnector = NodeConnector.getInstance()
-            binding.tvFiat.visibility =
-                if (nodeConnector.fiatCurrency.isNotEmpty()) View.VISIBLE else View.GONE
-            binding.tvFiat.setText(
-                getString(
-                    R.string.label_fiat_amount,
-                    formatFiatToString(
-                        getInputAmount() * nodeConnector.fiatValue.value.toDouble(),
-                        nodeConnector.fiatCurrency, requireContext()
-                    ),
-                )
+            val fiatString = uiLogic.getFiatAmount(
+                getInputAmount(), AndroidStringProvider(requireContext())
             )
+
+            binding.tvFiat.visibility = if (!fiatString.isNullOrEmpty()) View.VISIBLE else View.GONE
+            binding.tvFiat.text = fiatString
         }
 
     }

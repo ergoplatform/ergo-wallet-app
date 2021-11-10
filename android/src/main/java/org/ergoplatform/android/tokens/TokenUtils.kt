@@ -3,8 +3,8 @@ package org.ergoplatform.android.tokens
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
-import org.ergoplatform.android.ui.formatTokenAmounts
 import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.utils.formatTokenAmounts
 
 fun inflateAndBindTokenView(
     walletToken: WalletToken,

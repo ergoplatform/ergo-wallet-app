@@ -68,6 +68,10 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
 
     fun getWalletsWithStates() = appDb.walletConfigQueries.selectAll().executeAsList().map {
         val model = it.toModel()
+        fetchStateInformation(model)
+    }
+
+    private fun fetchStateInformation(model: WalletConfig): Wallet {
         val state = appDb.walletStateQueries.loadWalletStates(model.firstAddress!!)
             .executeAsList().map { it.toModel() }
         val tokens = appDb.walletTokenQueries.loadWalletTokens(model.firstAddress!!)
@@ -76,9 +80,17 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
             appDb.walletAddressQueries.loadWalletAddresses(model.firstAddress!!)
                 .executeAsList().map { it.toModel() }
 
-        Wallet(model, state, tokens, addresses)
+        return Wallet(model, state, tokens, addresses)
     }
 
+    override suspend fun loadWalletWithStateById(id: Int): Wallet? {
+        return withContext(Dispatchers.IO) {
+            val walletConfig =
+                appDb.walletConfigQueries.loadWalletById(id.toLong()).executeAsOneOrNull()
+                    ?.toModel()
+            walletConfig?.let { fetchStateInformation(it) }
+        }
+    }
 
     override suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddress> {
         return withContext(Dispatchers.IO) {

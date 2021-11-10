@@ -15,6 +15,9 @@ SELECT * FROM wallet_configs;
 loadWalletByFirstAddress:
 SELECT * FROM wallet_configs WHERE public_address = ?;
 
+loadWalletById:
+SELECT * FROM wallet_configs WHERE id = ?;
+
 insertOrReplace:
 INSERT OR REPLACE INTO `wallet_configs` (
     `id`,`display_name`,`public_address`,`enc_type`,`secret_storage`,`unfold_tokens`

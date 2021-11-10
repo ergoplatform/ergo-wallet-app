@@ -5,11 +5,14 @@ interface WalletDbProvider {
 
     // Address functions
     suspend fun loadWalletByFirstAddress(firstAddress: String): WalletConfig?
+
+    // Config functions
     suspend fun updateWalletConfig(walletConfig: WalletConfig)
     suspend fun insertWalletConfig(walletConfig: WalletConfig)
     fun getAllWalletConfigsSynchronous(): List<WalletConfig>
 
     // State functions
+    suspend fun loadWalletWithStateById(id: Int): Wallet?
     suspend fun insertWalletStates(walletStates: List<WalletState>)
 
     // Address functions

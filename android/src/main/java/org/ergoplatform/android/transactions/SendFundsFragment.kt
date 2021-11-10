@@ -25,16 +25,15 @@ import com.google.zxing.integration.android.IntentIntegrator
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.*
 import org.ergoplatform.android.R
-import org.ergoplatform.URL_COLD_WALLET_HELP
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
-import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
 import kotlin.math.max
@@ -110,7 +109,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                     R.string.label_fiat_amount,
                     formatFiatToString(
                         viewModel.amountToSend.toDouble() * nodeConnector.fiatValue.value.toDouble(),
-                        nodeConnector.fiatCurrency, requireContext()
+                        nodeConnector.fiatCurrency, AndroidStringProvider(requireContext())
                     ),
                 )
             )

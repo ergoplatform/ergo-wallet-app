@@ -11,6 +11,7 @@ import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 import org.ergoplatform.uilogic.STRING_LABEL_UNCONFIRMED
 import org.ergoplatform.uilogic.STRING_TITLE_TRANSACTIONS
+import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getDerivedAddress
 import org.ergoplatform.wallet.getTokensForAllAddresses
@@ -139,9 +140,10 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         val nodeConnector = NodeConnector.getInstance()
         val ergoPrice = nodeConnector.fiatValue.value
         fiatBalance.isHidden = ergoPrice == 0f
-        fiatBalance.text =
-            String.format("%.2f", ergoPrice.toDouble() * ergoAmount.toDouble()) + " " +
-                    nodeConnector.fiatCurrency.uppercase()
+        fiatBalance.text = formatFiatToString(
+            ergoPrice.toDouble() * ergoAmount.toDouble(),
+            nodeConnector.fiatCurrency, IosStringProvider(textBundle)
+        )
         val unconfirmedErgs = wallet.getUnconfirmedBalanceForAllAddresses()
         unconfirmedBalance.text = ErgoAmount(unconfirmedErgs).toStringRoundToDecimals(5) + " ERG " +
                 textBundle.get(STRING_LABEL_UNCONFIRMED)
