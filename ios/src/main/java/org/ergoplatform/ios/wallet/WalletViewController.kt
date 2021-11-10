@@ -141,7 +141,11 @@ class WalletViewController : CoroutineViewController() {
                 return cell
             } else {
                 val cell = p0.dequeueReusableCell(WALLET_CELL)
-                (cell as? WalletCell)?.bind(shownData.get(p1.row))
+                (cell as? WalletCell)?.let {
+                    it.bind(shownData.get(p1.row))
+                    it.clickListener =
+                        { vc -> this@WalletViewController.navigationController.pushViewController(vc, true) }
+                }
                 return cell
             }
         }

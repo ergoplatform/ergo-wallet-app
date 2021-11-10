@@ -11,6 +11,7 @@ import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 import org.ergoplatform.uilogic.STRING_LABEL_UNCONFIRMED
 import org.ergoplatform.uilogic.STRING_TITLE_TRANSACTIONS
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getDerivedAddress
@@ -19,13 +20,14 @@ import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSCoder
-import org.robovm.apple.foundation.NSURL
 import org.robovm.apple.uikit.*
 
 const val WALLET_CELL = "EmptyCell"
 const val EMPTY_CELL = "WalletCell"
 
 class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
+    var clickListener: ((vc: UIViewController) -> Unit)? = null
+
     private lateinit var nameLabel: Body1Label
     private lateinit var balanceLabel: Headline1Label
     private lateinit var fiatBalance: Body1Label
@@ -36,7 +38,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     private lateinit var sendButton: UIButton
     private lateinit var textBundle: I18NBundle
 
-    private var walletConfig: WalletConfig? = null
+    private var wallet: Wallet? = null
 
     override fun init(p0: NSCoder?): Long {
         val init = super.init(p0)
@@ -130,10 +132,17 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             .topToBottomOf(transactionButton, DEFAULT_MARGIN)
             .bottomToSuperview(false, DEFAULT_MARGIN)
 
+        transactionButton.addOnTouchUpInsideListener { _, _ ->
+            transactionButtonClicked()
+        }
+
+        receiveButton.addOnTouchUpInsideListener { _, _ ->
+            receiveButtonClicked()
+        }
     }
 
     fun bind(wallet: Wallet) {
-        walletConfig = wallet.walletConfig
+        this.wallet = wallet
         nameLabel.text = wallet.walletConfig.displayName
         val ergoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
         balanceLabel.text = ergoAmount.toStringRoundToDecimals(5) + " ERG"
@@ -150,13 +159,18 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         unconfirmedBalance.isHidden = unconfirmedErgs == 0L
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
+    }
 
-        transactionButton.addOnTouchUpInsideListener { _, _ ->
-            openBrowser(
-                getExplorerWebUrl() + "en/addresses/" +
-                        wallet.getDerivedAddress(0)
-            )
-        }
+    private fun transactionButtonClicked() {
+        openUrlInBrowser(
+            getExplorerWebUrl() + "en/addresses/" +
+                    wallet!!.getDerivedAddress(0)
+        )
+    }
+
+    private fun receiveButtonClicked() {
+        LogUtils.logDebug("WalletCell", "Clicked receive")
+        clickListener?.invoke(ReceiveToWalletViewController(wallet!!.walletConfig.id))
     }
 
 }

@@ -5,9 +5,8 @@ import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.NSLayoutConstraint
 import org.robovm.apple.uikit.UILayoutGuide
 import org.robovm.apple.uikit.UIView
-import org.robovm.apple.uikit.UIViewController
 
-open class ViewControllerWithKeyboardLayoutGuide : UIViewController() {
+open class ViewControllerWithKeyboardLayoutGuide : CoroutineViewController() {
     lateinit var keyboardLayoutGuide: UILayoutGuide
     lateinit var container: UIView
     private lateinit var keyboardHeightConstraint: NSLayoutConstraint

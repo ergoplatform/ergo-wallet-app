@@ -54,7 +54,7 @@ object PasswordViewController {
                 UIAlertAction(
                     textProvider.get(STRING_LABEL_FORGOT_PASSWORD), UIAlertActionStyle.Default
                 ) {
-                    openBrowser(URL_FORGOT_PASSWORD_HELP)
+                    openUrlInBrowser(URL_FORGOT_PASSWORD_HELP)
                 })
         alertController.addAction(
             UIAlertAction(textProvider.get(STRING_ZXING_BUTTON_OK), UIAlertActionStyle.Default) {
