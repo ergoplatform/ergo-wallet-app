@@ -1,5 +1,6 @@
 package org.ergoplatform.ios.ui
 
+import org.ergoplatform.URL_FORGOT_PASSWORD_HELP
 import org.ergoplatform.uilogic.*
 import org.robovm.apple.foundation.NSAttributedString
 import org.robovm.apple.uikit.*
@@ -50,11 +51,10 @@ object PasswordViewController {
         )
         if (!showConfirmation && errorMessage != null)
             alertController.addAction(
-                // TODO place in strings
                 UIAlertAction(
-                    "Forgot your password?", UIAlertActionStyle.Default
+                    textProvider.get(STRING_LABEL_FORGOT_PASSWORD), UIAlertActionStyle.Default
                 ) {
-                    // TODO open web site and reopen dialog
+                    openBrowser(URL_FORGOT_PASSWORD_HELP)
                 })
         alertController.addAction(
             UIAlertAction(textProvider.get(STRING_ZXING_BUTTON_OK), UIAlertActionStyle.Default) {

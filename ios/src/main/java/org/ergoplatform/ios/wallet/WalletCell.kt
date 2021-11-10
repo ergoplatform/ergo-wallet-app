@@ -139,8 +139,9 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         val nodeConnector = NodeConnector.getInstance()
         val ergoPrice = nodeConnector.fiatValue.value
         fiatBalance.isHidden = ergoPrice == 0f
-        fiatBalance.text = String.format("%.2f", ergoPrice.toDouble() * ergoAmount.toDouble()) + " " +
-                nodeConnector.fiatCurrency.uppercase()
+        fiatBalance.text =
+            String.format("%.2f", ergoPrice.toDouble() * ergoAmount.toDouble()) + " " +
+                    nodeConnector.fiatCurrency.uppercase()
         val unconfirmedErgs = wallet.getUnconfirmedBalanceForAllAddresses()
         unconfirmedBalance.text = ErgoAmount(unconfirmedErgs).toStringRoundToDecimals(5) + " ERG " +
                 textBundle.get(STRING_LABEL_UNCONFIRMED)
@@ -149,11 +150,9 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         tokenCount.text = tokens.size.toString() + " tokens"
 
         transactionButton.addOnTouchUpInsideListener { _, _ ->
-            UIApplication.getSharedApplication().openURL(
-                NSURL(
-                    getExplorerWebUrl() + "en/addresses/" +
-                            wallet.getDerivedAddress(0)
-                )
+            openBrowser(
+                getExplorerWebUrl() + "en/addresses/" +
+                        wallet.getDerivedAddress(0)
             )
         }
     }

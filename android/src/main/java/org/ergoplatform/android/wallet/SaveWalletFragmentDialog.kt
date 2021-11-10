@@ -17,12 +17,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.ergoplatform.android.*
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.R
+import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.api.AndroidEncryptionManager
-import org.ergoplatform.getPublicErgoAddressFromMnemonic
+import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
 import org.ergoplatform.serializeSecrets
@@ -36,6 +38,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     private val binding get() = _binding!!
 
     private val args: SaveWalletFragmentDialogArgs by navArgs()
+    private lateinit var uiLogic: SaveWalletUiLogic
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,10 +53,22 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // TODO avoid using mnemonic here, store and use publicAddress directly
+        // Reason why this is not done: mnemonic is stored in arguments to allow Android to
+        // destroy and recreate this dialog without the loss of the mnemonic. Possible
+        // workarounds not implemented because of their drawbacks:
+        // - Storing it as a SecretString in a shared ViewModel for the wallet creation dialogs
+        //   Drawback: The ViewModel is reset when the destruction of the dialog is done due to low
+        //             memory, hence we could lose the mnemonic on low end devices
+        // - Use a static variable to store the mnemonic in a SecretString
+        //   Drawback: It is completely out of control when static variables get reset and the
+        //             variable might leak into a process reusing the JVM
+        uiLogic = SaveWalletUiLogic(SecretString.create(args.mnemonic))
+
         // firing up appkit for the first time needs some time on medium end devices, so do this on
         // background thread while showing infinite progress bar
         lifecycleScope.launch(Dispatchers.IO) {
-            val publicErgoAddressFromMnemonic = getPublicErgoAddressFromMnemonic(args.mnemonic)
+            val publicErgoAddressFromMnemonic = uiLogic.publicAddress
             withContext(Dispatchers.Main) {
                 binding.publicAddress.text = publicErgoAddressFromMnemonic
                 binding.cardViewContainer.visibility = View.VISIBLE
@@ -134,26 +149,13 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     }
 
     private fun saveToDbAndNavigateToWallet(encType: Int, secretStorage: ByteArray) {
-        // TODO avoid using mnemonic here, store and use publicAddress directly
-        // Reason why this is not done: mnemonic is stored in arguments to allow Android to
-        // destroy and recreate this dialog without the loss of the mnemonic. Possible
-        // workarounds not implemented because of their drawbacks:
-        // - Storing it as a SecretString in a shared ViewModel for the wallet creation dialogs
-        //   Drawback: The ViewModel is reset when the destruction of the dialog is done due to low
-        //             memory, hence we could lose the mnemonic on low end devices
-        // - Use a static variable to store the mnemonic in a SecretString
-        //   Drawback: It is completely out of control when static variables get reset and the
-        //             variable might leak into a process reusing the JVM
 
         val context = requireContext()
-        val mnemonic = args.mnemonic
         GlobalScope.launch(Dispatchers.IO) {
             // make sure not to use dialog context within this block
-            val publicAddress = getPublicErgoAddressFromMnemonic(mnemonic)
-            SaveWalletUiLogic().suspendSaveToDb(
+            uiLogic.suspendSaveToDb(
                 RoomWalletDbProvider(AppDatabase.getInstance(context)),
                 AndroidStringProvider(context),
-                publicAddress,
                 encType,
                 secretStorage
             )
@@ -163,7 +165,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     }
 
     override fun onPasswordEntered(password: String?): String? {
-        if (SaveWalletUiLogic().isPasswordWeak(password)) {
+        if (uiLogic.isPasswordWeak(password)) {
             return getString(R.string.err_password)
         } else {
             saveToDbAndNavigateToWallet(

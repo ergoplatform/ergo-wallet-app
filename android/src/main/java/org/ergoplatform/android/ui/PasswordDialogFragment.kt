@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import org.ergoplatform.URL_FORGOT_PASSWORD_HELP
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPasswordDialogBinding
 
@@ -51,6 +53,10 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
             binding.editPassword.editText?.imeOptions = EditorInfo.IME_ACTION_NEXT
             binding.tvForgotPw.visibility = View.GONE
         } else {
+            binding.tvForgotPw.text = HtmlCompat.fromHtml(
+                "<a href=\"$URL_FORGOT_PASSWORD_HELP\">" + getString(R.string.label_forgot_password) + "</a>",
+                HtmlCompat.FROM_HTML_MODE_COMPACT
+            )
             binding.tvForgotPw.enableLinks()
             binding.editPassword.editText?.setOnEditorActionListener(doneActionListener)
         }

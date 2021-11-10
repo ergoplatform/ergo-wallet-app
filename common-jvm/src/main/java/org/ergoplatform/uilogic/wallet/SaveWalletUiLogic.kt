@@ -1,22 +1,28 @@
 package org.ergoplatform.uilogic.wallet
 
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.uilogic.STRING_LABEL_WALLET_DEFAULT
 import org.ergoplatform.uilogic.StringProvider
 
-class SaveWalletUiLogic {
+class SaveWalletUiLogic(val mnemonic: SecretString) {
+
+    val publicAddress get() = getPublicErgoAddressFromMnemonic(mnemonic)
+
     /**
      * Saves the wallet data to DB
      */
     suspend fun suspendSaveToDb(
         walletDbProvider: WalletDbProvider,
         strings: StringProvider,
-        publicAddress: String,
         encType: Int,
         secretStorage: ByteArray?
     ) {
+        val publicAddress = this.publicAddress
+
         // check if the wallet already exists
         val existingWallet = walletDbProvider.loadWalletByFirstAddress(publicAddress)
 

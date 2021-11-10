@@ -5,7 +5,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.SecretString
-import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
 import org.ergoplatform.serializeSecrets
@@ -18,7 +17,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
     private lateinit var progressIndicator: UIActivityIndicatorView
     private lateinit var scrollView: UIScrollView
     private lateinit var addressLabel: UILabel
-    val uiLogic = SaveWalletUiLogic()
+    private val uiLogic = SaveWalletUiLogic(mnemonic)
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -101,11 +100,10 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
 
     private fun saveToDbAndDismissController(encType: Int, secretStorage: ByteArray) {
         GlobalScope.launch(Dispatchers.IO) {
-            val publicErgoAddress = getPublicErgoAddressFromMnemonic(mnemonic)
             val appDelegate = getAppDelegate()
             uiLogic.suspendSaveToDb(
                 appDelegate.database, IosStringProvider(appDelegate.texts),
-                publicErgoAddress, encType, secretStorage
+                encType, secretStorage
             )
         }
         navigationController.dismissViewController(true) {}
@@ -121,7 +119,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
         progressIndicator.startAnimating()
 
         viewControllerScope.launch {
-            val publicErgoAddressFromMnemonic = getPublicErgoAddressFromMnemonic(mnemonic)
+            val publicErgoAddressFromMnemonic = uiLogic.publicAddress
             runOnMainThread {
                 addressLabel.text = publicErgoAddressFromMnemonic
                 progressIndicator.isHidden = true

@@ -2,6 +2,7 @@ package org.ergoplatform.ios.ui
 
 import org.ergoplatform.ios.Main
 import org.robovm.apple.foundation.NSOperationQueue
+import org.robovm.apple.foundation.NSURL
 import org.robovm.apple.uikit.UIApplication
 import org.robovm.apple.uikit.UIColor
 
@@ -16,10 +17,10 @@ const val IMAGE_READONLY_WALLET = "magnifyingglass"
 
 const val FONT_SIZE_BODY1 = 18.0
 
-fun getAppDelegate() = UIApplication.getSharedApplication().delegate as Main
-fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(r)
-
 // See https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#system-colors
-
 val uiColorErgo get() = UIColor.systemRed()
 
+
+fun getAppDelegate() = UIApplication.getSharedApplication().delegate as Main
+fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(r)
+fun openBrowser(url: String) = UIApplication.getSharedApplication().openURL(NSURL(url))
