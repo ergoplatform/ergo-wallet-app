@@ -1,14 +1,10 @@
 package org.ergoplatform.ios.ui
 
 import org.ergoplatform.ios.Main
-import org.robovm.apple.foundation.NSArray
-import org.robovm.apple.foundation.NSOperationQueue
-import org.robovm.apple.foundation.NSString
-import org.robovm.apple.foundation.NSURL
-import org.robovm.apple.uikit.UIActivityViewController
-import org.robovm.apple.uikit.UIApplication
-import org.robovm.apple.uikit.UIColor
-import org.robovm.apple.uikit.UIViewController
+import org.robovm.apple.coregraphics.CGAffineTransform
+import org.robovm.apple.coreimage.CIFilter
+import org.robovm.apple.foundation.*
+import org.robovm.apple.uikit.*
 
 
 const val MAX_WIDTH = 500.0
@@ -30,9 +26,29 @@ fun getAppDelegate() = UIApplication.getSharedApplication().delegate as Main
 fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(r)
 fun openUrlInBrowser(url: String) = UIApplication.getSharedApplication().openURL(NSURL(url))
 
-fun UIViewController.shareText(text: String) {
+fun UIViewController.shareText(text: String, sourceView: UIView) {
     val textShare = NSString(text)
     val texttoshare = NSArray(textShare)
     val share = UIActivityViewController(texttoshare, null)
+    share.popoverPresentationController?.sourceView = sourceView
     presentViewController(share, true, null)
+}
+
+fun UIImageView.setQrCode(data: String, size: Int) {
+    val nsString = NSString(data).toData(NSStringEncoding.ASCII)
+    val filter = CIFilter("CIQRCodeGenerator")
+    filter?.let {
+        it.keyValueCoder.setValue("inputMessage", nsString)
+        val transform = CGAffineTransform.Identity()
+        transform.scale(3.0, 3.0)
+
+        val output = it.outputImage?.newImageByApplyingTransform(transform)
+        output?.let {
+            val image = UIImage(output)
+            setImage(image)
+            contentMode = UIViewContentMode.ScaleAspectFit
+            backgroundColor = UIColor.systemRed()
+
+        }
+    }
 }

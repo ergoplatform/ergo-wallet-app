@@ -25,7 +25,7 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
         val texts = getAppDelegate().texts
         title = texts.get(STRING_BUTTON_RECEIVE)
         view.backgroundColor = UIColor.systemBackground()
-        // TODO tinting ui bar items
+        navigationController.navigationBar?.tintColor = UIColor.label()
 
         walletTitle = Headline2Label()
         walletTitle.numberOfLines = 1
@@ -37,9 +37,12 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
         val uiBarButtonItem = UIBarButtonItem(UIBarButtonSystemItem.Action)
         uiBarButtonItem.title = texts.get(STRING_LABEL_SHARE)
         uiBarButtonItem.setOnClickListener {
-            // TODO add correct values
-            // TODO does not work on ipad
-            uiLogic.getTextToShare(0.0, "")?.let { this@ReceiveToWalletViewController.shareText(it) }
+            uiLogic.getTextToShare(getInputAmount(), getInputPurpose())?.let {
+                this@ReceiveToWalletViewController.shareText(
+                    it,
+                    uiBarButtonItem.keyValueCoder.getValue("view") as UIView
+                )
+            }
         }
         navigationController.topViewController.navigationItem.rightBarButtonItem = uiBarButtonItem
 
@@ -87,6 +90,12 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
     }
 
     private fun refreshQrCode() {
-        // TODO
+        uiLogic.getTextToShare(getInputAmount(), getInputPurpose())?.let {
+            qrCode.setQrCode(it, 300)
+        }
     }
+
+    // TODO
+    private fun getInputPurpose() = ""
+    private fun getInputAmount() = 0.0
 }
