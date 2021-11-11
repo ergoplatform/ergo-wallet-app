@@ -46,10 +46,12 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
         }
         navigationController.topViewController.navigationItem.rightBarButtonItem = uiBarButtonItem
 
-        // TODO copy button
-
         qrCode = UIImageView(CGRect.Zero())
         addressLabel = Headline2Label()
+        addressLabel.isUserInteractionEnabled = true
+        addressLabel.addGestureRecognizer(UITapGestureRecognizer {
+            shareText(addressLabel.text, addressLabel)
+        })
 
         val container = UIView()
         val stackView = UIStackView(NSArray(walletTitle, addressNameLabel, qrCode, addressLabel))
