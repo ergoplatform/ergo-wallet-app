@@ -1,5 +1,6 @@
 package org.ergoplatform.ios
 
+import org.ergoplatform.ios.settings.SettingsViewController
 import org.ergoplatform.ios.ui.IMAGE_SETTINGS
 import org.ergoplatform.ios.ui.IMAGE_WALLET
 import org.ergoplatform.ios.ui.getAppDelegate
@@ -25,7 +26,7 @@ class BottomNavigationBar : UITabBarController() {
                         false
                     ),
                     createNavController(
-                        MyViewController(),
+                        SettingsViewController(),
                         appDelegate.texts.get(STRING_TITLE_SETTINGS),
                         UIImage.systemImageNamed(IMAGE_SETTINGS)
                     )
@@ -53,7 +54,7 @@ class BottomNavigationBar : UITabBarController() {
     override fun viewDidLoad() {
         tabBar.barTintColor = uiColorErgo
         tabBar.tintColor = UIColor.label()
-        tabBar.unselectedItemTintColor = UIColor.secondaryLabel()
+        tabBar.unselectedItemTintColor = UIColor.label()
         setupVcs()
     }
 }

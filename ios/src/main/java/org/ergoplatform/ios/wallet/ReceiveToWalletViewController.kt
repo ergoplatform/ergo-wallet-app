@@ -47,6 +47,8 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
         navigationController.topViewController.navigationItem.rightBarButtonItem = uiBarButtonItem
 
         qrCode = UIImageView(CGRect.Zero())
+        val qrCodeContainer = UIView()
+        qrCodeContainer.addSubview(qrCode)
         addressLabel = Headline2Label()
         addressLabel.isUserInteractionEnabled = true
         addressLabel.addGestureRecognizer(UITapGestureRecognizer {
@@ -54,12 +56,12 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
         })
 
         val container = UIView()
-        val stackView = UIStackView(NSArray(walletTitle, addressNameLabel, qrCode, addressLabel))
+        val stackView = UIStackView(NSArray(walletTitle, addressNameLabel, qrCodeContainer, addressLabel))
         stackView.axis = UILayoutConstraintAxis.Vertical
         stackView.setCustomSpacing(DEFAULT_MARGIN * 2, addressNameLabel)
-        stackView.setCustomSpacing(DEFAULT_MARGIN * 2, qrCode)
+        stackView.setCustomSpacing(DEFAULT_MARGIN * 2, qrCodeContainer)
         val scrollView = container.wrapInVerticalScrollView()
-        qrCode.fixedWidth(300.0).fixedHeight(300.0)
+        qrCode.fixedWidth(300.0).fixedHeight(300.0).centerHorizontal().topToSuperview().bottomToSuperview()
         container.addSubview(stackView)
         stackView.topToSuperview(topInset = DEFAULT_MARGIN)
             .widthMatchesSuperview(inset = DEFAULT_MARGIN, maxWidth = MAX_WIDTH)

@@ -11,7 +11,7 @@ const val MAX_WIDTH = 500.0
 const val DEFAULT_MARGIN = 6.0
 
 const val IMAGE_WALLET = "rectangle.on.rectangle.angled"
-const val IMAGE_SETTINGS = "gear"
+val IMAGE_SETTINGS = if (Foundation.getMajorSystemVersion() >= 14) "gearshape" else "gear"
 const val IMAGE_CREATE_WALLET = "folder.badge.plus"
 const val IMAGE_RESTORE_WALLET = "arrow.clockwise"
 const val IMAGE_READONLY_WALLET = "magnifyingglass"
@@ -20,7 +20,7 @@ const val FONT_SIZE_BODY1 = 18.0
 
 // See https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#system-colors
 val uiColorErgo get() = UIColor.systemRed()
-
+val ergoLogoImage get() = UIImage.getImage("ergologo")
 
 fun getAppDelegate() = UIApplication.getSharedApplication().delegate as Main
 fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(r)
@@ -51,4 +51,19 @@ fun UIImageView.setQrCode(data: String, size: Int) {
 
         }
     }
+}
+
+fun UITextView.setHtmlText(html: String) {
+    val attributedString = NSAttributedString(
+        NSString(html.replace("\n", "<br>"))
+            .toData(NSStringEncoding.Unicode),
+        NSAttributedStringDocumentAttributes().apply {
+            documentType = NSDocumentType.HTML
+        })
+
+    attributedText = attributedString
+    dataDetectorTypes = UIDataDetectorTypes.Link
+    //isSelectable = true
+    isScrollEnabled = false
+    isEditable = false
 }

@@ -172,8 +172,7 @@ class WalletViewController : CoroutineViewController() {
         private val stringProvider = IosStringProvider(getAppDelegate().texts)
 
         init {
-            val image = UIImage.getImage("ergologo")
-            ergoLogo = UIImageView(image.imageWithTintColor(UIColor.label()))
+            ergoLogo = UIImageView(ergoLogoImage.imageWithTintColor(UIColor.label()))
             ergoLogo.contentMode = UIViewContentMode.ScaleAspectFit
 
             val stackview = UIStackView(NSArray(fiatLabel, syncLabel))
