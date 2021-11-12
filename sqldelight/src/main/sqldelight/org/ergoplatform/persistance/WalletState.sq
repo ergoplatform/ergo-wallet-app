@@ -15,3 +15,6 @@ INSERT OR REPLACE INTO `wallet_states` (
 
 loadWalletStates:
 SELECT * FROM wallet_states WHERE wallet_first_address = ?;
+
+deleteByFirstAddress:
+DELETE FROM wallet_states WHERE wallet_first_address = ?;

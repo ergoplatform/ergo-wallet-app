@@ -8,3 +8,6 @@ CREATE TABLE IF NOT EXISTS `wallet_addresses` (
 
 loadWalletAddresses:
 SELECT * FROM wallet_addresses WHERE wallet_first_address = ?;
+
+deleteWalletAddressByFirstAddress:
+DELETE FROM wallet_addresses WHERE wallet_first_address = ?;

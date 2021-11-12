@@ -45,9 +45,24 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         }
     }
 
+    fun updateWalletDisplayName(displayName: String, walletId: Int) {
+        appDb.walletConfigQueries.updateWalletDisplayNameById(displayName, walletId.toLong())
+    }
+
     override suspend fun insertWalletConfig(walletConfig: WalletConfig) {
         // same code here
         updateWalletConfig(walletConfig)
+    }
+
+    suspend fun deleteAllWalletData(walletConfig: WalletConfig) {
+        withTransaction {
+            walletConfig.firstAddress?.let { firstAddress ->
+                appDb.walletStateQueries.deleteByFirstAddress(firstAddress)
+                appDb.walletTokenQueries.deleteTokensByFirstAddress(firstAddress)
+                appDb.walletAddressQueries.deleteWalletAddressByFirstAddress(firstAddress)
+            }
+            appDb.walletConfigQueries.deleteWalletById(walletConfig.id.toLong())
+        }
     }
 
     override fun getAllWalletConfigsSynchronous(): List<WalletConfig> {

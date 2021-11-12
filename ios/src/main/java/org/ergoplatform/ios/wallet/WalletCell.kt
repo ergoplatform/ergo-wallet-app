@@ -139,6 +139,11 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         receiveButton.addOnTouchUpInsideListener { _, _ ->
             receiveButtonClicked()
         }
+
+        cardView.isUserInteractionEnabled = true
+        cardView.addGestureRecognizer(UITapGestureRecognizer {
+            walletCardClicked()
+        })
     }
 
     fun bind(wallet: Wallet) {
@@ -173,6 +178,9 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         clickListener?.invoke(ReceiveToWalletViewController(wallet!!.walletConfig.id))
     }
 
+    private fun walletCardClicked() {
+        clickListener?.invoke(WalletConfigViewController(wallet!!.walletConfig.id))
+    }
 }
 
 class EmptyCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
