@@ -35,7 +35,6 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
         addressNameLabel.textColor = uiColorErgo
 
         val uiBarButtonItem = UIBarButtonItem(UIBarButtonSystemItem.Action)
-        uiBarButtonItem.title = texts.get(STRING_LABEL_SHARE)
         uiBarButtonItem.setOnClickListener {
             uiLogic.getTextToShare(getInputAmount(), getInputPurpose())?.let {
                 this@ReceiveToWalletViewController.shareText(

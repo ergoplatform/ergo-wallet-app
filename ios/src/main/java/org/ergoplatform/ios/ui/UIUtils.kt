@@ -2,6 +2,7 @@ package org.ergoplatform.ios.ui
 
 import org.ergoplatform.ios.Main
 import org.robovm.apple.coregraphics.CGAffineTransform
+import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.coreimage.CIFilter
 import org.robovm.apple.foundation.*
 import org.robovm.apple.uikit.*
@@ -66,4 +67,12 @@ fun UITextView.setHtmlText(html: String) {
     //isSelectable = true
     isScrollEnabled = false
     isEditable = false
+}
+
+fun createTextview(): UITextView {
+    val textView = UITextView(CGRect.Zero())
+    textView.font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+    textView.layer.borderWidth = 1.0
+    textView.layer.borderColor = UIColor.systemGray().cgColor
+    return textView
 }

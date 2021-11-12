@@ -1,5 +1,8 @@
+import org.robovm.apple.foundation.NSBundle
 import org.robovm.apple.foundation.NSDictionary
 import org.robovm.apple.foundation.NSException
+import org.robovm.apple.foundation.NSObject
+import org.robovm.apple.uikit.UIDevice
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -17,8 +20,16 @@ object CrashHandler {
 
                 val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
                 val nowAsString: String = df.format(Date())
+                val osVersion = UIDevice.getCurrentDevice().systemVersion
+                val device = UIDevice.getCurrentDevice().name
 
-                file.writeText("$nowAsString\n\n$exceptionAsString")
+                file.writeText(
+                    "$nowAsString\n" +
+                            "App: ${getAppVersion()}\n" +
+                            "OS: $osVersion\n" +
+                            "Device: $device\n\n" +
+                            "$exceptionAsString"
+                )
 
             } catch (throwable: Throwable) {
                 // do nothing
@@ -26,7 +37,7 @@ object CrashHandler {
                 // crash the app in iOS
                 val exception = NSException(
                     e.javaClass.name,
-                    exceptionAsString ?: "(no stacktrace)", NSDictionary<Any?, Any?>()
+                    exceptionAsString ?: "(no stacktrace)", NSDictionary<NSObject, NSObject>()
                 )
                 exception.raise()
             }
@@ -38,7 +49,15 @@ object CrashHandler {
         return File(libraryPath, LAST_CRASH_FILE_NAME)
     }
 
-    fun getLastCrashInformation(): String {
-        return getCrashFile().readText()
+    fun getAppVersion(): String? {
+        return NSBundle.getMainBundle().infoDictionary?.getString("CFBundleShortVersionString")
+    }
+
+    fun getLastCrashInformation(): String? {
+        val crashFile = getCrashFile()
+        if (crashFile.exists()) {
+            return crashFile.readText()
+        } else
+            return null
     }
 }

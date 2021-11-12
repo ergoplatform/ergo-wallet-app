@@ -35,12 +35,9 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
 
         val descLabel = Body1Label()
         descLabel.text = texts.get(STRING_INTRO_RESTORE_WALLET)
-        tvMnemonic = UITextView(CGRect.Zero())
-        tvMnemonic.layer.borderWidth = 1.0
-        tvMnemonic.layer.borderColor = UIColor.systemGray().cgColor
+        tvMnemonic = createTextview()
         tvMnemonic.textContentType = UITextContentType.OneTimeCode
         tvMnemonic.isSecureTextEntry = true
-        tvMnemonic.font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
         tvMnemonic.returnKeyType = UIReturnKeyType.Done
 
         errorLabel = Body1Label()
