@@ -58,7 +58,7 @@ class SettingsViewController : CoroutineViewController() {
         // Containers, Stackview, Scrollview
 
         val container = UIView()
-        val stackView = UIStackView(NSArray(ergoLogo, title, version, moreInfo, getHorizontalSeparator(), button))
+        val stackView = UIStackView(NSArray(ergoLogo, title, version, moreInfo, createHorizontalSeparator(), button))
         stackView.axis = UILayoutConstraintAxis.Vertical
         stackView.spacing = DEFAULT_MARGIN
         val scrollView = container.wrapInVerticalScrollView()

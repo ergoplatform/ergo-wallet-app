@@ -77,6 +77,10 @@ class RoomWalletDbProvider(val database: AppDatabase) : WalletDbProvider {
         return database.walletDao().loadWalletByFirstAddress(firstAddress)?.toModel()
     }
 
+    override suspend fun loadWalletConfigById(id: Int): WalletConfig? {
+        return database.walletDao().loadWalletConfigById(id)?.toModel()
+    }
+
     override suspend fun updateWalletConfig(walletConfig: WalletConfig) {
         database.walletDao().update(walletConfig.toDbEntity())
     }

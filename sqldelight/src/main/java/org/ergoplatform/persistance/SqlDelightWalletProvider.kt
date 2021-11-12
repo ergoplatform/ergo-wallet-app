@@ -26,6 +26,12 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         }
     }
 
+    override suspend fun loadWalletConfigById(id: Int): WalletConfig? {
+        return withContext(Dispatchers.IO) {
+            appDb.walletConfigQueries.loadWalletById(id.toLong()).executeAsOneOrNull()?.toModel()
+        }
+    }
+
     override suspend fun updateWalletConfig(walletConfig: WalletConfig) {
         withContext(Dispatchers.IO) {
             appDb.walletConfigQueries.insertOrReplace(

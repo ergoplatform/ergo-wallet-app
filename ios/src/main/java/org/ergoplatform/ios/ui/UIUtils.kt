@@ -10,6 +10,7 @@ import org.robovm.apple.uikit.*
 
 const val MAX_WIDTH = 500.0
 const val DEFAULT_MARGIN = 6.0
+const val DEFAULT_TEXT_FIELD_HEIGHT = 40.0
 
 const val IMAGE_WALLET = "rectangle.on.rectangle.angled"
 val IMAGE_SETTINGS = if (Foundation.getMajorSystemVersion() >= 14) "gearshape" else "gear"
@@ -73,6 +74,19 @@ fun createTextview(): UITextView {
     val textView = UITextView(CGRect.Zero())
     textView.font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
     textView.layer.borderWidth = 1.0
+    textView.layer.cornerRadius = 4.0
     textView.layer.borderColor = UIColor.systemGray().cgColor
     return textView
+}
+
+fun createTextField(): UITextField {
+    val textField = UITextField(CGRect.Zero())
+    textField.font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+    textField.layer.borderWidth = 1.0
+    textField.layer.cornerRadius = 4.0
+    textField.layer.borderColor = UIColor.systemGray().cgColor
+    val padding = UIView(CGRect(0.0, 0.0, 5.0, 10.0))
+    textField.leftView = padding
+    textField.leftViewMode = UITextFieldViewMode.Always
+    return textField
 }

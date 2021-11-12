@@ -34,11 +34,8 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
 
         val descLabel = Body1Label()
         descLabel.text = texts.get(STRING_INTRO_ADD_READONLY)
-        tvAddress = UITextField(CGRect.Zero())
-        tvAddress.layer.borderWidth = 1.0
-        tvAddress.layer.borderColor = UIColor.systemGray().cgColor
+        tvAddress = createTextField()
         tvAddress.returnKeyType = UIReturnKeyType.Done
-        tvAddress.font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
         tvAddress.delegate = object : UITextFieldDelegateAdapter() {
             override fun shouldReturn(textField: UITextField?): Boolean {
                 userPressedDone(uiLogic)
@@ -58,7 +55,7 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
             .bottomToKeyboard(this)
 
         descLabel.widthMatchesSuperview()
-        tvAddress.widthMatchesSuperview().fixedHeight(40.0)
+        tvAddress.widthMatchesSuperview().fixedHeight(DEFAULT_TEXT_FIELD_HEIGHT)
             .topToBottomOf(descLabel, DEFAULT_MARGIN * 2).centerVertical()
         errorLabel.widthMatchesSuperview().topToBottomOf(tvAddress, DEFAULT_MARGIN)
 

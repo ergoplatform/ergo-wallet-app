@@ -74,10 +74,10 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
                 introLabel,
                 addressLabel,
                 addressInfoLabel,
-                getHorizontalSeparator(),
+                createHorizontalSeparator(),
                 buttonSavePassword,
                 savePwInfoLabel,
-                getHorizontalSeparator(),
+                createHorizontalSeparator(),
                 buttonSaveDevice,
                 saveDeviceEncInfo
             )

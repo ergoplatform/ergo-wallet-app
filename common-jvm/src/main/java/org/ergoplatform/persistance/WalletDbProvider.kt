@@ -7,6 +7,7 @@ interface WalletDbProvider {
     suspend fun loadWalletByFirstAddress(firstAddress: String): WalletConfig?
 
     // Config functions
+    suspend fun loadWalletConfigById(id: Int): WalletConfig?
     suspend fun updateWalletConfig(walletConfig: WalletConfig)
     suspend fun insertWalletConfig(walletConfig: WalletConfig)
     fun getAllWalletConfigsSynchronous(): List<WalletConfig>

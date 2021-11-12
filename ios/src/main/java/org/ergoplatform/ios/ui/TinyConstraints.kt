@@ -290,13 +290,13 @@ fun UIView.wrapInVerticalScrollView(): UIScrollView {
 }
 
 fun UIView.addHorizontalSeparator(): UIView {
-    val separator = getHorizontalSeparator()
+    val separator = createHorizontalSeparator()
     this.addSubview(separator)
     separator.widthMatchesSuperview()
     return separator
 }
 
-fun getHorizontalSeparator(): UIView {
+fun createHorizontalSeparator(): UIView {
     val separator = UIView(CGRect.Zero())
     separator.backgroundColor = UIColor.systemGray()
     NSLayoutConstraint.activateConstraints(NSArray(separator.heightAnchor.equalTo(1.0)))
