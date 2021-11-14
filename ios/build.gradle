@@ -21,6 +21,13 @@ task convertStrings {
                 .replace("%4d", "{3}").replace("%4s", "{3}")
     }
 
+    ext.addEndLineChar = { line ->
+        if (!line.endsWith("\\n"))
+            return line + " \\"
+        else
+            return line + "\\"
+    }
+
     doFirst {
         def output = project.file(dest)
         def output2 = project.file(dest2)
@@ -53,7 +60,7 @@ task convertStrings {
                         value = line.substring(0, line.indexOf(endTag))
                         isInString = false
                     } else
-                        value = line + '\\'
+                        value = addEndLineChar(line)
 
                     strings.add(changePlaceHolders(value))
                 } else if (line.startsWith("<string name=")) {
@@ -65,7 +72,7 @@ task convertStrings {
                         if (value.indexOf(endTag) >= 0) {
                             value = value.substring(0, value.indexOf(endTag))
                         } else {
-                            value = value + '\\'
+                            value = addEndLineChar(value)
                             isInString = true
                         }
                         strings.add(name + "=" + changePlaceHolders(value))
