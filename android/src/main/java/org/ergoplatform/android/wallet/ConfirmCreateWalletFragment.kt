@@ -6,12 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
-import org.ergoplatform.MNEMONIC_WORDS_COUNT
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentConfirmCreateWalletBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
-import kotlin.random.Random
+import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.uilogic.wallet.ConfirmCreateWalletUiLogic
 
 /**
  * Create new wallet, step 2:
@@ -23,9 +23,7 @@ class ConfirmCreateWalletFragment : FullScreenFragmentDialog() {
     private val binding get() = _binding!!
 
     private val args: ConfirmCreateWalletFragmentArgs by navArgs()
-    private var firstWord: Int = 0
-    private var secondWord: Int = 0
-
+    private val uiLogic = ConfirmCreateWalletUiLogic()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,37 +37,26 @@ class ConfirmCreateWalletFragment : FullScreenFragmentDialog() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        firstWord = Random.nextInt(1, MNEMONIC_WORDS_COUNT)
-        while (secondWord == 0 || secondWord == firstWord)
-            secondWord = Random.nextInt(1, MNEMONIC_WORDS_COUNT)
-
+        uiLogic.mnemonic = SecretString.create(args.mnemonic)
         binding.inputWord1.hint =
-            getString(R.string.label_word_confirm_create_wallet, firstWord.toString())
+            getString(R.string.label_word_confirm_create_wallet, uiLogic.firstWord.toString())
         binding.inputWord2.hint =
-            getString(R.string.label_word_confirm_create_wallet, secondWord.toString())
+            getString(R.string.label_word_confirm_create_wallet, uiLogic.secondWord.toString())
 
         binding.buttonNextStep.setOnClickListener { checkConfirmations() }
     }
 
     private fun checkConfirmations() {
-        val split = args.mnemonic.split(" ")
 
-        var hadErrors = false
-        binding.inputWord1.error = null
-        binding.inputWord2.error = null
+        val hadErrors = uiLogic.checkConfirmations(
+            binding.inputWord1.editText?.text.toString(),
+            binding.inputWord2.editText?.text.toString(), binding.checkConfirmCreateWallet.isChecked
+        )
 
-        if (!binding.inputWord1.editText?.text.toString().equals(split.get(firstWord - 1), false)) {
-            binding.inputWord1.error = getString(R.string.error_word_confirm_create_wallet)
-            hadErrors = true
-        }
-        if (!binding.inputWord2.editText?.text.toString().equals(split.get(secondWord - 1), false)) {
-            binding.inputWord2.error = getString(R.string.error_word_confirm_create_wallet)
-            hadErrors = true
-        }
-
-        if (!binding.checkConfirmCreateWallet.isChecked) {
-            hadErrors = true
-        }
+        binding.inputWord1.error =
+            if (uiLogic.firstWordCorrect) null else getString(R.string.error_word_confirm_create_wallet)
+        binding.inputWord2.error =
+            if (uiLogic.secondWordCorrect) null else getString(R.string.error_word_confirm_create_wallet)
 
         if (!hadErrors) {
             NavHostFragment.findNavController(requireParentFragment())
