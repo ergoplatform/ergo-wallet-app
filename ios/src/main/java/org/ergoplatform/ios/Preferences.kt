@@ -1,5 +1,6 @@
 package org.ergoplatform.ios
 
+import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.persistance.PreferencesProvider
 import org.robovm.apple.foundation.NSMutableDictionary
 import org.robovm.apple.foundation.NSObject
@@ -10,7 +11,7 @@ class Preferences : PreferencesProvider() {
     private val iosPreferences: IOSPreferences
 
     init {
-        val name = "ergowallet"
+        val name = if (isErgoMainNet) "wallet_prefs" else "wallet_test"
 
         val libraryPath = File(System.getenv("HOME"), "Library")
         val finalPath = File(libraryPath, "$name.plist")

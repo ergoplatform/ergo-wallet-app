@@ -39,7 +39,7 @@ class Main : UIApplicationDelegateAdapter() {
         AesEncryptionManager.isOnLegacyApi = true
 
         CrashHandler.registerUncaughtExceptionHandler()
-        database = SqlDelightWalletProvider(setupDatabase("wallet.db"))
+        database = SqlDelightWalletProvider(setupDatabase())
         texts = I18NBundle.createBundle(File(internalPath, "i18n/strings"))
         prefs = Preferences()
         NodeConnector.getInstance().loadPreferenceValues(prefs)
@@ -95,15 +95,17 @@ class Main : UIApplicationDelegateAdapter() {
         appActiveObservers.remove(vc)
     }
 
-    private fun setupDatabase(dbname: String): AppDatabase {
+    private fun setupDatabase(): AppDatabase {
         // retrieve directory
         val dbPath = File(System.getenv("HOME"), "Library/").absolutePath
 
         // register RoboVMs Sqlite driver
         DriverManager.registerDriver(JDBCDriver())
 
-        val driver = JdbcSqliteDriver("sqlite:/" + dbPath + dbname)
+        val dbname = if (isErgoMainNet) "wallet" else "wallet_test"
+        val driver = JdbcSqliteDriver("sqlite:/$dbPath$dbname.db")
 
+        // TODO https://github.com/cashapp/sqldelight/issues/1605
         AppDatabase.Schema.create(driver)
 
         return AppDatabase(driver)
