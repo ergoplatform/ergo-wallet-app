@@ -4,9 +4,9 @@ import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.getExplorerWebUrl
+import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
-import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 import org.ergoplatform.uilogic.STRING_LABEL_UNCONFIRMED
@@ -140,6 +140,8 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             receiveButtonClicked()
         }
 
+        sendButton.addOnTouchUpInsideListener { _, _ -> sendButtonClicked() }
+
         cardView.isUserInteractionEnabled = true
         cardView.addGestureRecognizer(UITapGestureRecognizer {
             walletCardClicked()
@@ -176,6 +178,10 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     private fun receiveButtonClicked() {
         LogUtils.logDebug("WalletCell", "Clicked receive")
         clickListener?.invoke(ReceiveToWalletViewController(wallet!!.walletConfig.id))
+    }
+
+    private fun sendButtonClicked() {
+        clickListener?.invoke(SendFundsViewController(wallet!!.walletConfig.id))
     }
 
     private fun walletCardClicked() {

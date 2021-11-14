@@ -66,7 +66,9 @@ class ConfirmCreateWalletViewController(val mnemonic: SecretString) : ViewContro
         val confirmationContainer = UIView()
         confirmationContainer.addSubview(confirmationCheck)
         confirmationContainer.addSubview(confirmationText)
+        // Fixed width needed on UISwitch, does not support auto layout out of the box...
         confirmationCheck.leftToSuperview().centerVertical().rightToLeftOf(confirmationText, DEFAULT_MARGIN * 2)
+            .fixedWidth(50.0)
         confirmationText.topToSuperview().bottomToSuperview().rightToSuperview()
 
         val verticalStack = UIStackView(
