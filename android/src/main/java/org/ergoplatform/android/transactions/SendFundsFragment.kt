@@ -24,6 +24,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.*
+import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
@@ -76,7 +77,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             // when wallet is loaded, wallet name is set. we can init everything wallet specific here
             binding.walletName.text = getString(R.string.label_send_from, it)
             binding.hintReadonly.visibility =
-                if (viewModel.wallet!!.walletConfig.secretStorage == null) View.VISIBLE else View.GONE
+                if (viewModel.uiLogic.wallet!!.walletConfig.secretStorage == null) View.VISIBLE else View.GONE
             enableLayoutChangeAnimations()
         })
         viewModel.address.observe(viewLifecycleOwner, {
@@ -84,7 +85,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 it?.getAddressLabel(AndroidStringProvider(requireContext()))
                     ?: getString(
                         R.string.label_all_addresses,
-                        viewModel.wallet?.getNumOfAddresses()
+                        viewModel.uiLogic.wallet?.getNumOfAddresses()
                     )
         })
         viewModel.walletBalance.observe(viewLifecycleOwner, {
@@ -93,13 +94,11 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 it.toStringRoundToDecimals(4)
             )
         })
-        viewModel.feeAmount.observe(viewLifecycleOwner, {
+        viewModel.grossAmount.observe(viewLifecycleOwner, {
             binding.tvFee.text = getString(
                 R.string.desc_fee,
-                it.toStringRoundToDecimals(4)
+                viewModel.uiLogic.feeAmount.toStringRoundToDecimals(4)
             )
-        })
-        viewModel.grossAmount.observe(viewLifecycleOwner, {
             binding.grossAmount.amount = it.toDouble()
             val nodeConnector = NodeConnector.getInstance()
             binding.tvFiat.visibility =
@@ -108,7 +107,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 getString(
                     R.string.label_fiat_amount,
                     formatFiatToString(
-                        viewModel.amountToSend.toDouble() * nodeConnector.fiatValue.value.toDouble(),
+                        viewModel.uiLogic.amountToSend.toDouble() * nodeConnector.fiatValue.value.toDouble(),
                         nodeConnector.fiatCurrency, AndroidStringProvider(requireContext())
                     ),
                 )
@@ -166,7 +165,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
 
         // Add click listeners
         binding.addressLabel.setOnClickListener {
-            viewModel.wallet?.let { wallet ->
+            viewModel.uiLogic.wallet?.let { wallet ->
                 ChooseAddressListDialogFragment.newInstance(
                     wallet.walletConfig.id, true
                 ).show(childFragmentManager, null)
@@ -208,7 +207,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                     max(
                         0L,
                         (viewModel.walletBalance.value?.nanoErgs ?: 0L)
-                                - (viewModel.feeAmount.value?.nanoErgs ?: 0L)
+                                - (viewModel.uiLogic.feeAmount.nanoErgs)
                     )
                 )
             )
@@ -218,9 +217,9 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         }
 
         // Init other stuff
-        binding.tvReceiver.editText?.setText(viewModel.receiverAddress)
-        if (viewModel.amountToSend.nanoErgs > 0) {
-            setAmountEdittext(viewModel.amountToSend)
+        binding.tvReceiver.editText?.setText(viewModel.uiLogic.receiverAddress)
+        if (viewModel.uiLogic.amountToSend.nanoErgs > 0) {
+            setAmountEdittext(viewModel.uiLogic.amountToSend)
         }
 
         binding.amount.editText?.addTextChangedListener(MyTextWatcher(binding.amount))
@@ -262,12 +261,12 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
-        viewModel.derivedAddressIdx = addressDerivationIdx
+        viewModel.uiLogic.derivedAddressIdx = addressDerivationIdx
     }
 
     private fun refreshTokensList() {
-        val tokensAvail = viewModel.tokensAvail
-        val tokensChosen = viewModel.tokensChosen
+        val tokensAvail = viewModel.uiLogic.tokensAvail
+        val tokensChosen = viewModel.uiLogic.tokensChosen
 
         binding.buttonAddToken.visibility =
             if (tokensAvail.size > tokensChosen.size) View.VISIBLE else View.INVISIBLE
@@ -284,7 +283,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                             FragmentSendFundsTokenItemBinding.inflate(layoutInflater, this, true)
                         itemBinding.tvTokenName.text = tokenDbEntity.name
                         itemBinding.inputTokenAmount.inputType =
-                            if (tokenDbEntity.decimals!! > 0) InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+                            if (tokenDbEntity.decimals > 0) InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
                             else InputType.TYPE_CLASS_NUMBER
                         itemBinding.inputTokenAmount.addTextChangedListener(
                             TokenAmountWatcher(tokenDbEntity)
@@ -294,7 +293,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                         )
                         itemBinding.buttonTokenRemove.setOnClickListener {
                             if (itemBinding.inputTokenAmount.text.isEmpty()) {
-                                viewModel.removeToken(ergoId)
+                                viewModel.uiLogic.removeToken(ergoId)
                             } else {
                                 itemBinding.inputTokenAmount.text = null
                             }
@@ -319,26 +318,32 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
     }
 
     private fun startPayment() {
-        if (!viewModel.checkReceiverAddress()) {
+        val checkResponse = viewModel.uiLogic.checkCanMakePayment()
+
+        if (checkResponse.receiverError) {
             binding.tvReceiver.error = getString(R.string.error_receiver_address)
             binding.tvReceiver.editText?.requestFocus()
-        } else if (!viewModel.checkAmount()) {
+        }
+        if (checkResponse.amountError) {
             binding.amount.error = getString(R.string.error_amount)
-            binding.amount.editText?.requestFocus()
-        } else if (!viewModel.checkTokens()) {
+            if (!checkResponse.receiverError) binding.amount.editText?.requestFocus()
+        }
+        if (checkResponse.tokenError) {
             binding.labelTokenAmountError.visibility = View.VISIBLE
             binding.tokensList.descendants.filter { it is EditText && it.text.isEmpty() }
                 .firstOrNull()
                 ?.requestFocus()
-        } else {
-            startAuthFlow(viewModel.wallet!!.walletConfig)
+        }
+
+        if (checkResponse.canPay) {
+            startAuthFlow(viewModel.uiLogic.wallet!!.walletConfig)
         }
     }
 
     override fun startAuthFlow(walletConfig: WalletConfig) {
         if (walletConfig.secretStorage == null) {
             // we have a read only wallet here, let's go to cold wallet support mode
-            viewModel.startColdWalletPayment(requireContext())
+            viewModel.uiLogic.startColdWalletPayment(Preferences(requireContext()))
         } else {
             super.startAuthFlow(walletConfig)
         }
@@ -358,11 +363,11 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
     }
 
     private fun inputChangesToViewModel() {
-        viewModel.receiverAddress = binding.tvReceiver.editText?.text?.toString() ?: ""
+        viewModel.uiLogic.receiverAddress = binding.tvReceiver.editText?.text?.toString() ?: ""
 
         val amountStr = binding.amount.editText?.text.toString()
         val ergoAmount = amountStr.toErgoAmount()
-        viewModel.amountToSend = ergoAmount ?: ErgoAmount.ZERO
+        viewModel.uiLogic.amountToSend = ergoAmount ?: ErgoAmount.ZERO
         if (ergoAmount == null) {
             // conversion error, too many decimals or too big for long
             binding.amount.error = getString(R.string.error_amount)
@@ -373,14 +378,14 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let {
-                if (viewModel.wallet?.walletConfig?.secretStorage != null
+                if (viewModel.uiLogic.wallet?.walletConfig?.secretStorage != null
                     && isColdSigningRequestChunk(it)
                 ) {
                     findNavController().navigate(
                         SendFundsFragmentDirections
                             .actionSendFundsFragmentToColdWalletSigningFragment(
                                 it,
-                                viewModel.wallet!!.walletConfig.id
+                                viewModel.uiLogic.wallet!!.walletConfig.id
                             )
                     )
                 } else {
@@ -392,7 +397,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                                 amount
                             )
                         }
-                        viewModel.addTokensFromQr(content.tokens)
+                        viewModel.uiLogic.addTokensFromQr(content.tokens)
                     }
                 }
             }
@@ -432,9 +437,9 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         }
 
         override fun afterTextChanged(s: Editable?) {
-            viewModel.setTokenAmount(
+            viewModel.uiLogic.setTokenAmount(
                 token.tokenId!!,
-                s?.toString()?.toTokenAmount(token.decimals!!) ?: TokenAmount(0, token.decimals!!)
+                s?.toString()?.toTokenAmount(token.decimals) ?: TokenAmount(0, token.decimals)
             )
             binding.labelTokenAmountError.visibility = View.GONE
         }

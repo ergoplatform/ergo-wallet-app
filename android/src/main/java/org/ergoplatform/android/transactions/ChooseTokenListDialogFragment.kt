@@ -41,13 +41,13 @@ class ChooseTokenListDialogFragment : BottomSheetDialogFragment() {
         val viewModel =
             ViewModelProvider(parentFragment as ViewModelStoreOwner)
                 .get(SendFundsViewModel::class.java)
-        val tokensToChooseFrom = viewModel.getTokensToChooseFrom()
+        val tokensToChooseFrom = viewModel.uiLogic.getTokensToChooseFrom()
         binding.list.adapter = DisplayTokenAdapter(tokensToChooseFrom)
     }
 
     private fun onChooseToken(tokenId: String) {
         ViewModelProvider(parentFragment as ViewModelStoreOwner).get(SendFundsViewModel::class.java)
-            .newTokenChoosen(tokenId)
+            .uiLogic.newTokenChoosen(tokenId)
         dismiss()
     }
 

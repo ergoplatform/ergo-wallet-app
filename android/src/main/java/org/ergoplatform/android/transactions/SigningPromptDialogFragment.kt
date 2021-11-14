@@ -11,6 +11,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
+import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPromptSigningDialogBinding
 import org.ergoplatform.android.ui.QrPagerAdapter
@@ -55,7 +56,8 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun refreshButtonState() {
-        val lastPage = binding.qrCodePager.currentItem + 1 == binding.qrCodePager.adapter!!.itemCount
+        val lastPage =
+            binding.qrCodePager.currentItem + 1 == binding.qrCodePager.adapter!!.itemCount
         binding.buttonScanSignedTx.visibility = if (lastPage) View.VISIBLE else View.GONE
         binding.buttonScanNextQr.visibility = if (!lastPage) View.VISIBLE else View.GONE
         binding.tvDesc.setText(if (lastPage) R.string.desc_prompt_signing else R.string.desc_prompt_signing_multiple)
@@ -77,7 +79,10 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
                             Snackbar.LENGTH_LONG
                         ).setAnchorView(R.id.nav_view).show()
                     } else {
-                        getViewModel().sendColdWalletSignedTx(listOf(it), requireContext())
+                        getViewModel().uiLogic.sendColdWalletSignedTx(
+                            listOf(it),
+                            Preferences(requireContext())
+                        )
                         dismiss()
                     }
                 }

@@ -5,48 +5,23 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.ergoplatform.*
-import org.ergoplatform.android.*
+import org.ergoplatform.ErgoAmount
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.Preferences
+import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.api.AndroidEncryptionManager
-import org.ergoplatform.appkit.Address
-import org.ergoplatform.appkit.ErgoToken
-import org.ergoplatform.appkit.Parameters
-import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.deserializeSecrets
 import org.ergoplatform.persistance.WalletAddress
-import org.ergoplatform.persistance.WalletToken
-import org.ergoplatform.transactions.PromptSigningResult
-import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.TransactionResult
-import org.ergoplatform.wallet.*
+import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 
 /**
  * Holding state of the send funds screen (thus to be expected to get complicated)
  */
 class SendFundsViewModel : ViewModel() {
-    var wallet: Wallet? = null
-        private set
-
-    var derivedAddressIdx: Int? = null
-        set(value) {
-            field = value
-            derivedAddressChanged()
-        }
-
-    var receiverAddress: String = ""
-        set(value) {
-            field = value
-            calcGrossAmount()
-        }
-    var amountToSend: ErgoAmount = ErgoAmount.ZERO
-        set(value) {
-            field = value
-            calcGrossAmount()
-        }
+    val uiLogic = AndroidSendFundsUiLogic()
 
     private val _lockInterface = MutableLiveData<Boolean>()
     val lockInterface: LiveData<Boolean> = _lockInterface
@@ -56,10 +31,6 @@ class SendFundsViewModel : ViewModel() {
     val address: LiveData<WalletAddress?> = _address
     private val _walletBalance = MutableLiveData<ErgoAmount>()
     val walletBalance: LiveData<ErgoAmount> = _walletBalance
-    private val _feeAmount = MutableLiveData<ErgoAmount>().apply {
-        value = ErgoAmount(Parameters.MinFee)
-    }
-    val feeAmount: LiveData<ErgoAmount> = _feeAmount
     private val _grossAmount = MutableLiveData<ErgoAmount>().apply {
         value = ErgoAmount.ZERO
     }
@@ -71,100 +42,21 @@ class SendFundsViewModel : ViewModel() {
     private val _signingPromptData = MutableLiveData<String?>()
     val signingPromptData: LiveData<String?> = _signingPromptData
 
-    val tokensAvail: ArrayList<WalletToken> = ArrayList()
-    val tokensChosen: HashMap<String, ErgoToken> = HashMap()
-
     // the live data gets data posted on adding or removing tokens, not on every amount change
     private val _tokensChosenLiveData = MutableLiveData<List<String>>()
     val tokensChosenLiveData: LiveData<List<String>> = _tokensChosenLiveData
 
     fun initWallet(ctx: Context, walletId: Int, derivationIdx: Int, paymentRequest: String?) {
-        val firstInit = wallet == null
-
-        // on first init, we read an send payment request. Don't do it again on device rotation
-        // to not mess with user inputs
-        val content: PaymentRequest?
-        if (firstInit) {
-            content = paymentRequest?.let { parsePaymentRequestFromQuery(paymentRequest) }
-            content?.let {
-                receiverAddress = content.address
-                amountToSend = content.amount
-            }
-        } else content = null
-
-        viewModelScope.launch {
-            wallet =
-                AppDatabase.getInstance(ctx).walletDao().loadWalletWithStateById(walletId)
-                    ?.toModel()
-
-            wallet?.walletConfig?.displayName?.let {
-                _walletName.postValue(it)
-            }
-
-            // no address set (yet)?
-            if (derivedAddressIdx == null && firstInit) {
-                // if there is only a single address available, fix it to this one
-                if (wallet?.getNumOfAddresses() == 1) {
-                    derivedAddressIdx = 0
-                } else {
-                    // make sure to post to observer the first time
-                    derivedAddressIdx = if (derivationIdx >= 0) derivationIdx else null
-                }
-            }
-
-            content?.let {
-                addTokensFromQr(content.tokens)
-                notifyTokensChosenChanged()
-            }
-        }
-        calcGrossAmount()
-    }
-
-    private fun derivedAddressChanged() {
-        val addressDbEntity = derivedAddressIdx?.let { wallet?.getDerivedAddressEntity(it) }
-        val address = addressDbEntity?.publicAddress
-        val addressState = address?.let { wallet?.getStateForAddress(it) }
-        wallet?.let { wallet ->
-            _walletBalance.postValue(
-                ErgoAmount(
-                    addressState?.balance ?: wallet.getBalanceForAllAddresses()
-                )
-            )
-        }
-        tokensAvail.clear()
-        val tokensList = address?.let { wallet?.getTokensForAddress(address) }
-            ?: wallet?.getTokensForAllAddresses()
-        tokensList?.let { tokensAvail.addAll(it) }
-        // remove from chosen what's not available
-        // toMutableList copies the list, so we don't get a ConcurrentModificationException when
-        // removing elements from the HashMap
-        tokensChosen.keys.toMutableList().forEach { tokenId ->
-            if (tokensAvail.find { it.tokenId.equals(tokenId) } == null)
-                tokensChosen.remove(tokenId)
-        }
-
-        _address.postValue(addressDbEntity)
-        notifyTokensChosenChanged()
-    }
-
-    private fun calcGrossAmount() {
-        _grossAmount.postValue(feeAmount.value!! + amountToSend)
-    }
-
-    fun checkReceiverAddress(): Boolean {
-        return isValidErgoAddress(receiverAddress)
-    }
-
-    fun checkAmount(): Boolean {
-        return amountToSend.nanoErgs >= Parameters.MinChangeValue
-    }
-
-    fun checkTokens(): Boolean {
-        return tokensChosen.values.filter { it.value <= 0 }.isEmpty()
+        uiLogic.initWallet(
+            RoomWalletDbProvider(AppDatabase.getInstance(ctx)),
+            walletId,
+            derivationIdx,
+            paymentRequest
+        )
     }
 
     fun startPaymentWithPassword(password: String, context: Context): Boolean {
-        wallet?.walletConfig?.secretStorage?.let {
+        uiLogic.wallet?.walletConfig?.secretStorage?.let {
             val mnemonic: String?
             try {
                 val decryptData = AesEncryptionManager.decryptData(password, it)
@@ -179,7 +71,7 @@ class SendFundsViewModel : ViewModel() {
                 return false
             }
 
-            startPaymentWithMnemonicAsync(mnemonic, context)
+            uiLogic.startPaymentWithMnemonicAsync(mnemonic, Preferences(context))
 
             return true
         }
@@ -190,145 +82,54 @@ class SendFundsViewModel : ViewModel() {
     fun startPaymentUserAuth(context: Context) {
         // we don't handle exceptions here by intention: we throw them back to the fragment which
         // will show a snackbar to give the user a hint what went wrong
-        wallet?.walletConfig?.secretStorage?.let {
+        uiLogic.wallet?.walletConfig?.secretStorage?.let {
             val mnemonic: String?
 
             val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
             mnemonic = deserializeSecrets(String(decryptData!!))
 
-            startPaymentWithMnemonicAsync(mnemonic!!, context)
+            uiLogic.startPaymentWithMnemonicAsync(mnemonic!!, Preferences(context))
 
         }
     }
 
-    private fun startPaymentWithMnemonicAsync(mnemonic: String, context: Context) {
-        val derivedAddresses =
-            derivedAddressIdx?.let { listOf(it) }
-                ?: wallet?.getSortedDerivedAddressesList()?.map { it.derivationIndex }
-                ?: listOf(0)
-
-        viewModelScope.launch {
-            val ergoTxResult: SendTransactionResult
-            withContext(Dispatchers.IO) {
-                val preferences = Preferences(context)
-                ergoTxResult = sendErgoTx(
-                    Address.create(receiverAddress), amountToSend.nanoErgs,
-                    tokensChosen.values.toList(),
-                    mnemonic, "", derivedAddresses,
-                    preferences.prefNodeUrl, preferences.prefExplorerApiUrl
-                )
-            }
-            _lockInterface.postValue(false)
-            if (ergoTxResult.success) {
-                NodeConnector.getInstance().invalidateCache()
-                _txId.postValue(ergoTxResult.txId!!)
-            }
-            _txWorkDoneLiveData.postValue(ergoTxResult)
-        }
-
-        _lockInterface.postValue(true)
-    }
-
-    fun startColdWalletPayment(context: Context) {
-        wallet?.let { wallet ->
-            val derivedAddresses =
-                derivedAddressIdx?.let { listOf(wallet.getDerivedAddress(it)!!) }
-                    ?: wallet.getSortedDerivedAddressesList().map { it.publicAddress }
-
-            _lockInterface.postValue(true)
-            viewModelScope.launch {
-                val serializedTx: PromptSigningResult
-                withContext(Dispatchers.IO) {
-                    val preferences = Preferences(context)
-                    serializedTx = prepareSerializedErgoTx(
-                        Address.create(receiverAddress), amountToSend.nanoErgs,
-                        tokensChosen.values.toList(),
-                        derivedAddresses.map { Address.create(it) },
-                        preferences.prefNodeUrl, preferences.prefExplorerApiUrl
-                    )
-                }
-                _lockInterface.postValue(false)
-                if (serializedTx.success) {
-                    _signingPromptData.postValue(buildColdSigningRequest(serializedTx))
-                }
-                _txWorkDoneLiveData.postValue(serializedTx)
+    inner class AndroidSendFundsUiLogic : SendFundsUiLogic(viewModelScope) {
+        override fun notifyWalletStateLoaded() {
+            wallet?.walletConfig?.displayName?.let {
+                _walletName.postValue(it)
             }
         }
-    }
 
-    fun sendColdWalletSignedTx(qrCodes: List<String>, context: Context) {
-        _lockInterface.postValue(true)
-        viewModelScope.launch {
-            val ergoTxResult: SendTransactionResult
-            withContext(Dispatchers.IO) {
-                val preferences = Preferences(context)
-                val signingResult = coldSigningResponseFromQrChunks(qrCodes)
-                if (signingResult.success) {
-                    ergoTxResult = sendSignedErgoTx(
-                        signingResult.serializedTx!!,
-                        preferences.prefNodeUrl, preferences.prefExplorerApiUrl
-                    )
-                } else {
-                    ergoTxResult = SendTransactionResult(false, errorMsg = signingResult.errorMsg)
-                }
-            }
-            _lockInterface.postValue(false)
-            if (ergoTxResult.success) {
-                NodeConnector.getInstance().invalidateCache()
-                _txId.postValue(ergoTxResult.txId!!)
-            }
-            _txWorkDoneLiveData.postValue(ergoTxResult)
+        override fun notifyDerivedAddressChanged() {
+            _address.postValue(derivedAddress)
         }
 
-    }
-
-    /**
-     * @return list of tokens to choose from, that means available on the wallet and not already chosen
-     */
-    fun getTokensToChooseFrom(): List<WalletToken> {
-        return tokensAvail.filter {
-            !tokensChosen.containsKey(it.tokenId)
+        override fun notifyBalanceChanged() {
+            _walletBalance.postValue(balance)
         }
-    }
 
-    fun newTokenChoosen(tokenId: String) {
-        tokensChosen.put(tokenId, ErgoToken(tokenId, 0))
-        notifyTokensChosenChanged()
-    }
-
-    fun removeToken(tokenId: String) {
-        val size = tokensChosen.size
-        tokensChosen.remove(tokenId)
-        if (tokensChosen.size != size) {
-            notifyTokensChosenChanged()
+        override fun notifyAmountsChanged() {
+            _grossAmount.postValue(grossAmount)
         }
-    }
 
-    fun setTokenAmount(tokenId: String, amount: TokenAmount) {
-        tokensChosen.get(tokenId)?.let {
-            tokensChosen.put(tokenId, ErgoToken(it.id, amount.rawValue))
+        override fun notifyTokensChosenChanged() {
+            _tokensChosenLiveData.postValue(tokensChosen.keys.toList())
         }
-    }
 
-    fun addTokensFromQr(tokens: HashMap<String, String>) {
-        var changed = false
-        tokens.forEach {
-            val tokenId = it.key
-            val amount = it.value
-
-            // we need to check for existence here, QR code might have any String, not an ID
-            tokensAvail.filter { it.tokenId.equals(tokenId) }.firstOrNull()?.let {
-                val longAmount = amount.toTokenAmount(it.decimals ?: 0)?.rawValue ?: 0
-                tokensChosen.put(tokenId, ErgoToken(tokenId, longAmount))
-                changed = true
-            }
+        override fun notifyUiLocked(locked: Boolean) {
+            _lockInterface.postValue(locked)
         }
-        if (changed) {
-            notifyTokensChosenChanged()
-        }
-    }
 
-    private fun notifyTokensChosenChanged() {
-        _tokensChosenLiveData.postValue(tokensChosen.keys.toList())
+        override fun notifyHasTxId(txId: String) {
+            _txId.postValue(txId)
+        }
+
+        override fun notifyHasErgoTxResult(txResult: TransactionResult) {
+            _txWorkDoneLiveData.postValue(txResult)
+        }
+
+        override fun notifyHasSigningPromptData(signingPrompt: String?) {
+            _signingPromptData.postValue(signingPrompt)
+        }
     }
 }
