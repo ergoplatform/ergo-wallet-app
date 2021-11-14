@@ -5,7 +5,7 @@
     <string name="title_settings">设置</string>
 
     <string name="hint_password">请输入您的支出密码</string>
-    <string name="label_forgot_password"><a href="https://github.com/ergoplatform/ergo-wallet-android/wiki/FAQ#i-forgot-my-spending-password">忘记密码？</a></string>
+    <string name="label_forgot_password">忘记密码？</string>
     <string name="err_password">密码长度必须至少为 8 个字符</string>
     <string name="label_password">密码</string>
     <string name="label_password_confirm">确认密码</string>

@@ -183,4 +183,5 @@
     <string name="button_reset_defaults">Defaults</string>
     <string name="label_explorer_api_url">Explorer API URL</string>
     <string name="label_node_url">Node URL</string>
+    <string name="button_show_debug_info">Show debug information</string>
 </resources>

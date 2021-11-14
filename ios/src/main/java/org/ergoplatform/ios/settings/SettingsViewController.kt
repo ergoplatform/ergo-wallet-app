@@ -2,6 +2,7 @@ package org.ergoplatform.ios.settings
 
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_APP_NAME
+import org.ergoplatform.uilogic.STRING_BUTTON_SHOW_DEBUG_INFO
 import org.ergoplatform.uilogic.STRING_DESC_ABOUT
 import org.ergoplatform.uilogic.STRING_DESC_ABOUT_MOREINFO
 import org.robovm.apple.coregraphics.CGPoint
@@ -46,8 +47,7 @@ class SettingsViewController : CoroutineViewController() {
 
         // Debug information
 
-        // TODO i18N
-        val button = TextButton("Show debug information")
+        val button = TextButton(texts.get(STRING_BUTTON_SHOW_DEBUG_INFO))
         button.addOnTouchUpInsideListener { _, _ ->
             val navController = UINavigationController(DebugInfoViewController())
             navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet
@@ -76,7 +76,7 @@ class SettingsViewController : CoroutineViewController() {
 
         override fun viewDidLoad() {
             super.viewDidLoad()
-            title = "Debug Information"
+            title = getAppDelegate().texts.get(STRING_BUTTON_SHOW_DEBUG_INFO)
             val lastCrashInformation = CrashHandler.getLastCrashInformation()
 
             lastCrashInformation?.let {
