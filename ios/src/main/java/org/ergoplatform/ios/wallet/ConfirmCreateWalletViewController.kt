@@ -40,11 +40,25 @@ class ConfirmCreateWalletViewController(val mnemonic: SecretString) : ViewContro
         introLabel.text = texts.get(STRING_INTRO_CONFIRM_CREATE_WALLET)
 
         val textField1 = createTextField()
+        val textField2 = createTextField()
         textField1.placeholder = texts.format(STRING_LABEL_WORD_CONFIRM_CREATE_WALLET, uiLogic.firstWord.toString())
         textField1.autocapitalizationType = UITextAutocapitalizationType.None
-        val textField2 = createTextField()
+        textField1.returnKeyType = UIReturnKeyType.Next
+        textField1.delegate = object : UITextFieldDelegateAdapter() {
+            override fun shouldReturn(textField: UITextField?): Boolean {
+                textField2.becomeFirstResponder()
+                return super.shouldReturn(textField)
+            }
+        }
         textField2.placeholder = texts.format(STRING_LABEL_WORD_CONFIRM_CREATE_WALLET, uiLogic.secondWord.toString())
         textField2.autocapitalizationType = UITextAutocapitalizationType.None
+        textField2.returnKeyType = UIReturnKeyType.Next
+        textField2.delegate = object : UITextFieldDelegateAdapter() {
+            override fun shouldReturn(textField: UITextField?): Boolean {
+                textField2.resignFirstResponder()
+                return super.shouldReturn(textField)
+            }
+        }
 
         val confirmationCheck = UISwitch(CGRect.Zero())
         val confirmationText = Body1Label()

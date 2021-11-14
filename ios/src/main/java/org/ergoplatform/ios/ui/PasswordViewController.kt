@@ -28,10 +28,19 @@ object PasswordViewController {
         )
         alertController.accessibilityAttributedValue = NSAttributedString()
 
+        var textField1: UITextField? = null
+        var textField2: UITextField? = null
+        var defaultColor: UIColor? = null
+
         alertController.addTextField {
             it.isSecureTextEntry = true
             it.placeholder = textProvider.get(STRING_LABEL_PASSWORD)
             password?.let { pw -> it.text = pw }
+            defaultColor = it.textColor
+            if (errorMessage != null && !showConfirmation) {
+                it.textColor = UIColor.systemRed()
+            }
+            textField1 = it
         }
 
         if (showConfirmation) {
@@ -39,8 +48,21 @@ object PasswordViewController {
                 it.isSecureTextEntry = true
                 it.placeholder = textProvider.get(STRING_LABEL_PASSWORD_CONFIRM)
                 confirm?.let { pw -> it.text = pw }
+                if (errorMessage != null) {
+                    it.textColor = UIColor.systemRed()
+                }
+                textField2 = it
             }
         }
+
+        val changeListener: ((UIControl) -> Unit) = {
+            (it as? UITextField)?.textColor = defaultColor ?: UIColor.label()
+            alertController.actions.last().isEnabled =
+                (textField1?.text?.isNotEmpty() ?: true) && (textField2?.text?.isNotEmpty() ?: true)
+        }
+
+        textField1?.addOnEditingChangedListener(changeListener)
+        textField2?.addOnEditingChangedListener(changeListener)
 
         alertController.addAction(
             UIAlertAction(
@@ -74,6 +96,7 @@ object PasswordViewController {
                 }
             }
         )
+        alertController.actions.last().isEnabled = false
         parentViewController.presentViewController(alertController, errorMessage == null) {}
     }
 }

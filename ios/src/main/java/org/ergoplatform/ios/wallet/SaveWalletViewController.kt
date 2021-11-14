@@ -67,7 +67,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
         val buttonSaveDevice = TextButton(texts.get(STRING_BUTTON_SAVE_DEVICE_ENCRYPTED))
         buttonSaveDevice.isEnabled = false
         val saveDeviceEncInfo =
-            Body1Label().apply { text = texts.get(STRING_DESC_SAVE_DEVICE_ENCRYPTED) }
+            Body1Label().apply { text = texts.format(STRING_DESC_SAVE_DEVICE_ENCRYPTED, "n/a") }
 
         val addressInfoStack = UIStackView(
             NSArray(
