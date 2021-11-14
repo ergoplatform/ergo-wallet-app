@@ -122,7 +122,7 @@ fun UIView.rightToLeftOf(
 
     val topConstraint = this.rightAnchor.equalTo(
         sibling.leftAnchor,
-        inset
+        -inset
     )
     NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
 

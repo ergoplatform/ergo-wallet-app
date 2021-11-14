@@ -1,6 +1,7 @@
 package org.ergoplatform.ios.ui
 
 import org.ergoplatform.ios.Main
+import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.coregraphics.CGAffineTransform
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.coreimage.CIFilter
@@ -17,6 +18,7 @@ val IMAGE_SETTINGS = if (Foundation.getMajorSystemVersion() >= 14) "gearshape" e
 const val IMAGE_CREATE_WALLET = "folder.badge.plus"
 const val IMAGE_RESTORE_WALLET = "arrow.clockwise"
 const val IMAGE_READONLY_WALLET = "magnifyingglass"
+const val IMAGE_EXCLAMATION_MARK = "exclamationmark.circle.fill"
 
 const val FONT_SIZE_BODY1 = 18.0
 
@@ -79,6 +81,10 @@ fun createTextview(): UITextView {
     return textView
 }
 
+fun UITextView.setHasError(hasError: Boolean) {
+    layer.borderColor = (if (hasError) UIColor.systemRed() else UIColor.systemGray()).cgColor
+}
+
 fun createTextField(): UITextField {
     val textField = UITextField(CGRect.Zero())
     textField.font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
@@ -88,5 +94,31 @@ fun createTextField(): UITextField {
     val padding = UIView(CGRect(0.0, 0.0, 5.0, 10.0))
     textField.leftView = padding
     textField.leftViewMode = UITextFieldViewMode.Always
+    textField.fixedHeight(DEFAULT_TEXT_FIELD_HEIGHT)
     return textField
+}
+
+fun UITextField.setHasError(hasError: Boolean) {
+    layer.borderColor = (if (hasError) UIColor.systemRed() else UIColor.systemGray()).cgColor
+    LogUtils.logDebug("Textheight", layer.visibleRect.height.toString())
+    if (hasError) {
+        val errorIcon = UIImageView(
+            UIImage.getSystemImage(
+                IMAGE_EXCLAMATION_MARK,
+                UIImageSymbolConfiguration.getConfigurationWithPointSizeWeightScale(
+                    30.0,
+                    UIImageSymbolWeight.Regular,
+                    UIImageSymbolScale.Small
+                )
+            )
+        )
+        errorIcon.tintColor = UIColor.systemRed()
+        errorIcon.contentMode = UIViewContentMode.Center
+        val errorView = UIView(CGRect(0.0, 0.0, 35.0, 30.0))
+        errorView.addSubview(errorIcon)
+        rightView = errorView
+        rightViewMode = UITextFieldViewMode.Always
+    } else {
+        rightView = null
+    }
 }

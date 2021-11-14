@@ -38,7 +38,6 @@ class WalletConfigViewController(val walletId: Int) : ViewControllerWithKeyboard
         nameInputLabel.text = texts.get(STRING_LABEL_WALLET_NAME)
 
         nameInputField = createTextField()
-        nameInputField.fixedHeight(DEFAULT_TEXT_FIELD_HEIGHT)
         nameInputField.returnKeyType = UIReturnKeyType.Done
         nameInputField.clearButtonMode = UITextFieldViewMode.Always
         nameInputField.delegate = object : UITextFieldDelegateAdapter() {

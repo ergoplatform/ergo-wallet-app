@@ -41,7 +41,7 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
         tvMnemonic.returnKeyType = UIReturnKeyType.Done
 
         errorLabel = Body1Label()
-        errorLabel.textColor = UIColor.red()
+        errorLabel.textColor = UIColor.systemRed()
 
         tvMnemonic.setDelegate(object : UITextViewDelegateAdapter() {
             override fun shouldChangeCharacters(
@@ -78,6 +78,7 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
 
         override fun setErrorLabel(error: String?) {
             errorLabel.text = error ?: ""
+            tvMnemonic.setHasError(!error.isNullOrEmpty())
         }
 
         override fun navigateToSaveWalletDialog(mnemonic: String) {

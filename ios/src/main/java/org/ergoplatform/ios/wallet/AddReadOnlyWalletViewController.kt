@@ -44,7 +44,7 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
         }
 
         errorLabel = Body1Label()
-        errorLabel.textColor = UIColor.red()
+        errorLabel.textColor = UIColor.systemRed()
 
         val centerView = UIView(CGRect.Zero())
         centerView.addSubviews(listOf(descLabel, tvAddress, errorLabel))
@@ -55,7 +55,7 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
             .bottomToKeyboard(this)
 
         descLabel.widthMatchesSuperview()
-        tvAddress.widthMatchesSuperview().fixedHeight(DEFAULT_TEXT_FIELD_HEIGHT)
+        tvAddress.widthMatchesSuperview()
             .topToBottomOf(descLabel, DEFAULT_MARGIN * 2).centerVertical()
         errorLabel.widthMatchesSuperview().topToBottomOf(tvAddress, DEFAULT_MARGIN)
 
@@ -73,6 +73,7 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
 
         override fun setErrorMessage(message: String) {
             errorLabel.text = message
+            tvAddress.setHasError(message.isNotEmpty())
         }
     }
 }

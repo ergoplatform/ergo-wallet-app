@@ -48,6 +48,9 @@ class AddWalletChooserStackView(val texts: I18NBundle) : UIView(CGRect.Zero()) {
         readOnlyWalletCell.addGestureRecognizer(UITapGestureRecognizer {
             clickListener?.invoke(AddReadOnlyWalletViewController())
         })
+        createWalletCell.addGestureRecognizer(UITapGestureRecognizer {
+            clickListener?.invoke(CreateWalletViewController())
+        })
 
         val stackView = UIStackView(NSArray(createWalletCell, restoreWalletCell, readOnlyWalletCell))
         stackView.axis = UILayoutConstraintAxis.Vertical
