@@ -2,9 +2,11 @@ package org.ergoplatform.ios.transactions
 
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
+import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.URL_COLD_WALLET_HELP
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.toErgoAmount
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
@@ -83,6 +85,11 @@ class SendFundsViewController(
                     return true
                 }
             }
+
+            addOnEditingChangedListener {
+                setHasError(false)
+                uiLogic.receiverAddress = text
+            }
         }
         inputErgoAmount = createTextField().apply {
             placeholder = texts.get(STRING_LABEL_AMOUNT)
@@ -97,13 +104,15 @@ class SendFundsViewController(
                     // TODO does not work as intended (allows multiple dots)
                     return string?.matches(Regex("^\\d*\\.?(\\d)*$")) ?: true
                 }
+
                 override fun shouldReturn(textField: UITextField?): Boolean {
                     inputErgoAmount.resignFirstResponder()
                     return true
                 }
             }
             addOnEditingChangedListener {
-                // TODO
+                setHasError(false)
+                uiLogic.amountToSend = text.toErgoAmount() ?: ErgoAmount.ZERO
             }
         }
 
@@ -262,9 +271,14 @@ class SendFundsViewController(
 
         override fun notifyHasErgoTxResult(txResult: TransactionResult) {
             if (!txResult.success) {
-                val message = texts.get(STRING_ERROR_SEND_TRANSACTION) + (txResult.errorMsg?.let { "\n\n$it" } ?: "")
-                val alertVc = UIAlertController(texts.get(STRING_BUTTON_SEND), message, UIAlertControllerStyle.Alert)
-                alertVc.addAction(UIAlertAction(texts.get(STRING_ZXING_BUTTON_OK), UIAlertActionStyle.Default) {})
+                runOnMainThread {
+                    val message =
+                        texts.get(STRING_ERROR_SEND_TRANSACTION) + (txResult.errorMsg?.let { "\n\n$it" } ?: "")
+                    val alertVc =
+                        UIAlertController(texts.get(STRING_BUTTON_SEND), message, UIAlertControllerStyle.Alert)
+                    alertVc.addAction(UIAlertAction(texts.get(STRING_ZXING_BUTTON_OK), UIAlertActionStyle.Default) {})
+                    presentViewController(alertVc, true) {}
+                }
             }
         }
 

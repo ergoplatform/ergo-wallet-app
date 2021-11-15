@@ -12,6 +12,7 @@ import org.ergoplatform.restapi.client.Parameters
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
@@ -141,6 +142,7 @@ fun sendErgoTx(
             return@execute SendTransactionResult(txId.isNotEmpty(), txId)
         }
     } catch (t: Throwable) {
+        LogUtils.logDebug("sendErgoTx", "Error caught", t)
         return SendTransactionResult(false, errorMsg = t.message)
     }
 }

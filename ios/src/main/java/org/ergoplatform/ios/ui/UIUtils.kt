@@ -59,14 +59,14 @@ fun UIImageView.setQrCode(data: String, size: Int) {
 }
 
 fun UITextView.setHtmlText(html: String) {
-    val attributedString = NSAttributedString(
-        NSString(html.replace("\n", "<br>"))
-            .toData(NSStringEncoding.Unicode),
-        NSAttributedStringDocumentAttributes().apply {
-            documentType = NSDocumentType.HTML
-        })
-
-    attributedText = attributedString
+//    val attributedString = NSAttributedString(
+//        NSString(html.replace("\n", "<br>"))
+//            .toData(NSStringEncoding.Unicode),
+//        NSAttributedStringDocumentAttributes().apply {
+//            documentType = NSDocumentType.HTML
+//        })
+//
+//    attributedText = attributedString
     dataDetectorTypes = UIDataDetectorTypes.Link
     isScrollEnabled = false
     isEditable = false
