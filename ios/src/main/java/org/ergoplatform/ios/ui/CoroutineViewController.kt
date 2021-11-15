@@ -29,8 +29,10 @@ abstract class CoroutineViewController : UIViewController() {
 
     override fun viewDidDisappear(animated: Boolean) {
         super.viewDidDisappear(animated)
-        LogUtils.logDebug(this.javaClass.simpleName, "viewControllerScope cancelled")
-        _viewControllerScope?.cancel()
+        _viewControllerScope?.let {
+            LogUtils.logDebug(this.javaClass.simpleName, "viewControllerScope cancelled")
+            it.cancel()
+        }
         _viewControllerScope = null
     }
 

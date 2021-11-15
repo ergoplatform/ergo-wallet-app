@@ -22,7 +22,7 @@ class ErgoAmount(val nanoErgs: Long) {
     /**
      * converts the amount to a string rounded to given number of decimals places
      */
-    fun toStringRoundToDecimals(numDecimals: Int): String {
+    fun toStringRoundToDecimals(numDecimals: Int = 4): String {
         return nanoErgs.toBigDecimal().movePointLeft(nanoPowerOfTen)
             .setScale(numDecimals, RoundingMode.HALF_UP)
             .toPlainString()

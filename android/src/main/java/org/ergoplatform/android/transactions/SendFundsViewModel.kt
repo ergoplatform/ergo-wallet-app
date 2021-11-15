@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
@@ -93,7 +94,10 @@ class SendFundsViewModel : ViewModel() {
         }
     }
 
-    inner class AndroidSendFundsUiLogic : SendFundsUiLogic(viewModelScope) {
+    inner class AndroidSendFundsUiLogic : SendFundsUiLogic() {
+        override val coroutineScope: CoroutineScope
+            get() = viewModelScope
+
         override fun notifyWalletStateLoaded() {
             wallet?.walletConfig?.displayName?.let {
                 _walletName.postValue(it)

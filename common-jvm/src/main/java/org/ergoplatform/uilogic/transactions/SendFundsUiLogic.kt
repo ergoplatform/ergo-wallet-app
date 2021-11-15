@@ -16,7 +16,9 @@ import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.wallet.*
 
-abstract class SendFundsUiLogic(val coroutineScope: CoroutineScope) {
+abstract class SendFundsUiLogic() {
+    abstract val coroutineScope: CoroutineScope
+
     var wallet: Wallet? = null
         private set
 

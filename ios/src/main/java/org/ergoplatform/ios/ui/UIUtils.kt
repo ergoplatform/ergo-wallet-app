@@ -19,6 +19,7 @@ const val IMAGE_CREATE_WALLET = "folder.badge.plus"
 const val IMAGE_RESTORE_WALLET = "arrow.clockwise"
 const val IMAGE_READONLY_WALLET = "magnifyingglass"
 const val IMAGE_EXCLAMATION_MARK = "exclamationmark.circle.fill"
+const val IMAGE_SEND = "paperplane"
 
 const val FONT_SIZE_BODY1 = 18.0
 
@@ -67,7 +68,6 @@ fun UITextView.setHtmlText(html: String) {
 
     attributedText = attributedString
     dataDetectorTypes = UIDataDetectorTypes.Link
-    //isSelectable = true
     isScrollEnabled = false
     isEditable = false
 }
@@ -100,7 +100,6 @@ fun createTextField(): UITextField {
 
 fun UITextField.setHasError(hasError: Boolean) {
     layer.borderColor = (if (hasError) UIColor.systemRed() else UIColor.systemGray()).cgColor
-    LogUtils.logDebug("Textheight", layer.visibleRect.height.toString())
     if (hasError) {
         val errorIcon = UIImageView(
             UIImage.getSystemImage(

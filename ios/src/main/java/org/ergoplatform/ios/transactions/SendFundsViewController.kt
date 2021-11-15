@@ -1,22 +1,26 @@
 package org.ergoplatform.ios.transactions
 
 import com.badlogic.gdx.utils.I18NBundle
+import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.URL_COLD_WALLET_HELP
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
+import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSRange
 import org.robovm.apple.uikit.*
 
 class SendFundsViewController(
-    val walletId: Int,
-    val derivationIdx: Int = -1,
-    val paymentRequest: String? = null
+    private val walletId: Int,
+    private val derivationIdx: Int = -1,
+    private val paymentRequest: String? = null
 ) : ViewControllerWithKeyboardLayoutGuide() {
     private lateinit var texts: I18NBundle
     private val uiLogic = IosSendFundsUiLogic()
@@ -25,6 +29,10 @@ class SendFundsViewController(
     private lateinit var addressNameLabel: UILabel
     private lateinit var balanceLabel: UILabel
     private lateinit var fiatLabel: UILabel
+    private lateinit var readOnlyHint: UITextView
+    private lateinit var feeLabel: UILabel
+    private lateinit var grossAmountLabel: UILabel
+    private lateinit var sendButton: UIButton
 
     private lateinit var inputReceiver: UITextField
     private lateinit var inputErgoAmount: UITextField
@@ -54,7 +62,17 @@ class SendFundsViewController(
         val introLabel = Body1Label()
         introLabel.text = texts.get(STRING_DESC_SEND_FUNDS)
 
-        // TODO add cold wallet hint box here
+        readOnlyHint = UITextView(CGRect.Zero()).apply {
+            setHtmlText(texts.get(STRING_HINT_READ_ONLY).replace("href=\"\"", "href=\"$URL_COLD_WALLET_HELP\""))
+            textColor = UIColor.label()
+            tintColor = uiColorErgo
+            textAlignment = NSTextAlignment.Center
+            layer.borderWidth = 1.0
+            layer.cornerRadius = 4.0
+            layer.borderColor = UIColor.systemGray().cgColor
+            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+
+        }
 
         inputReceiver = createTextField().apply {
             placeholder = texts.get(STRING_LABEL_RECEIVER_ADDRESS)
@@ -93,16 +111,42 @@ class SendFundsViewController(
         fiatLabel.textAlignment = NSTextAlignment.Right
         fiatLabel.isHidden = true
 
+        feeLabel = Body1Label()
+        grossAmountLabel = Headline1Label()
+        grossAmountLabel.textAlignment = NSTextAlignment.Center
+
+        sendButton = PrimaryButton(texts.get(STRING_BUTTON_SEND))
+        sendButton.setImage(
+            UIImage.getSystemImage(
+                IMAGE_SEND,
+                UIImageSymbolConfiguration.getConfigurationWithPointSizeWeightScale(
+                    30.0,
+                    UIImageSymbolWeight.Regular,
+                    UIImageSymbolScale.Small
+                )
+            ), UIControlState.Normal
+        )
+        sendButton.tintColor = UIColor.label()
+        sendButton.addOnTouchUpInsideListener { _, _ -> startPayment() }
+
+        val buttonContainer = UIView()
+        buttonContainer.addSubview(sendButton)
+        sendButton.topToSuperview().bottomToSuperview().rightToSuperview().fixedWidth(120.0)
+
         val container = UIView()
         val stackView = UIStackView(
             NSArray(
                 walletTitle,
                 addressNameLabel,
                 balanceLabel,
+                readOnlyHint,
                 introLabel,
                 inputReceiver,
                 inputErgoAmount,
-                fiatLabel
+                fiatLabel,
+                feeLabel,
+                grossAmountLabel,
+                buttonContainer
             )
         )
         stackView.axis = UILayoutConstraintAxis.Vertical
@@ -121,16 +165,43 @@ class SendFundsViewController(
         scrollView.isHidden = true
     }
 
-    override fun viewDidAppear(animated: Boolean) {
-        super.viewDidAppear(animated)
+    override fun viewWillAppear(animated: Boolean) {
+        super.viewWillAppear(animated)
         uiLogic.initWallet(getAppDelegate().database, walletId, derivationIdx, paymentRequest)
     }
 
-    inner class IosSendFundsUiLogic : SendFundsUiLogic(viewControllerScope) {
+    private fun startPayment() {
+        val checkResponse = uiLogic.checkCanMakePayment()
+
+        inputReceiver.setHasError(checkResponse.receiverError)
+        inputErgoAmount.setHasError(checkResponse.amountError)
+        if (checkResponse.receiverError) {
+            inputReceiver.becomeFirstResponder()
+        } else if (checkResponse.amountError) {
+            inputErgoAmount.becomeFirstResponder()
+        }
+        if (checkResponse.tokenError) {
+            // TODO
+        }
+
+        if (checkResponse.canPay) {
+            startAuthFlow(uiLogic.wallet!!.walletConfig) { mnemonic ->
+                uiLogic.startPaymentWithMnemonicAsync(mnemonic, getAppDelegate().prefs)
+            }
+        }
+    }
+
+    inner class IosSendFundsUiLogic : SendFundsUiLogic() {
+        var progressViewController: ProgressViewController? = null
+
+        override val coroutineScope: CoroutineScope
+            get() = viewControllerScope
+
         override fun notifyWalletStateLoaded() {
             runOnMainThread {
                 walletTitle.text = texts.format(STRING_LABEL_SEND_FROM, wallet!!.walletConfig.displayName)
-                // TODO hintReadonly.isHidden = if (uiLogic.wallet!!.walletConfig.secretStorage != null)
+                readOnlyHint.isHidden = uiLogic.wallet!!.walletConfig.secretStorage != null
+                sendButton.isEnabled = readOnlyHint.isHidden // TODO cold wallet
                 scrollView.isHidden = false
             }
         }
@@ -148,8 +219,8 @@ class SendFundsViewController(
 
         override fun notifyAmountsChanged() {
             runOnMainThread {
-                // TODO tvFee.text = texts.format(STRING_DESC_FEE, feeAmount.toStringRoundToDecimals(4))
-                // TODO grossAmount.texts = feeAmount.toStringRoundToDecimals(4)
+                feeLabel.text = texts.format(STRING_DESC_FEE, feeAmount.toStringRoundToDecimals())
+                grossAmountLabel.text = grossAmount.toStringRoundToDecimals() + " ERG"
                 val nodeConnector = NodeConnector.getInstance()
                 fiatLabel.isHidden = (nodeConnector.fiatCurrency.isEmpty())
                 fiatLabel.text = texts.format(
@@ -164,24 +235,57 @@ class SendFundsViewController(
 
         override fun notifyBalanceChanged() {
             runOnMainThread {
-                balanceLabel.text = texts.format(STRING_LABEL_WALLET_BALANCE, balance.toStringRoundToDecimals(4))
+                balanceLabel.text = texts.format(STRING_LABEL_WALLET_BALANCE, balance.toStringRoundToDecimals())
             }
         }
 
         override fun notifyUiLocked(locked: Boolean) {
-            TODO("Not yet implemented")
+            runOnMainThread {
+                if (locked) {
+                    if (progressViewController == null) {
+                        progressViewController = ProgressViewController()
+                        progressViewController?.modalPresentationStyle = UIModalPresentationStyle.FormSheet
+                        progressViewController?.isModalInPresentation = true
+                        presentViewController(progressViewController!!, true) {}
+                    }
+                } else {
+                    progressViewController?.dismissViewController(true) {}
+                    progressViewController = null
+                }
+            }
         }
 
         override fun notifyHasTxId(txId: String) {
-            TODO("Not yet implemented")
+            LogUtils.logDebug("SendFunds", "Success, tx id $txId")
+            // TODO show it
         }
 
         override fun notifyHasErgoTxResult(txResult: TransactionResult) {
-            TODO("Not yet implemented")
+            if (!txResult.success) {
+                val message = texts.get(STRING_ERROR_SEND_TRANSACTION) + (txResult.errorMsg?.let { "\n\n$it" } ?: "")
+                val alertVc = UIAlertController(texts.get(STRING_BUTTON_SEND), message, UIAlertControllerStyle.Alert)
+                alertVc.addAction(UIAlertAction(texts.get(STRING_ZXING_BUTTON_OK), UIAlertActionStyle.Default) {})
+            }
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String?) {
             TODO("Not yet implemented")
+        }
+    }
+
+    inner class ProgressViewController : UIViewController() {
+        private lateinit var progressIndicator: UIActivityIndicatorView
+        override fun viewDidLoad() {
+            super.viewDidLoad()
+            progressIndicator = UIActivityIndicatorView()
+            progressIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Large
+            view.addSubview(progressIndicator)
+            progressIndicator.centerVertical().centerHorizontal()
+        }
+
+        override fun viewWillAppear(animated: Boolean) {
+            super.viewWillAppear(animated)
+            progressIndicator.startAnimating()
         }
     }
 }

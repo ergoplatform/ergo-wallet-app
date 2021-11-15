@@ -91,13 +91,13 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         viewModel.walletBalance.observe(viewLifecycleOwner, {
             binding.tvBalance.text = getString(
                 R.string.label_wallet_balance,
-                it.toStringRoundToDecimals(4)
+                it.toStringRoundToDecimals()
             )
         })
         viewModel.grossAmount.observe(viewLifecycleOwner, {
             binding.tvFee.text = getString(
                 R.string.desc_fee,
-                viewModel.uiLogic.feeAmount.toStringRoundToDecimals(4)
+                viewModel.uiLogic.feeAmount.toStringRoundToDecimals()
             )
             binding.grossAmount.amount = it.toDouble()
             val nodeConnector = NodeConnector.getInstance()
