@@ -17,13 +17,13 @@ object DbInitializer {
             setVersion(driver, latestVersion)
             LogUtils.logDebug("Database", "migrated from $currentVer to $latestVersion")
         } else {
-            LogUtils.logDebug("Database", "initialized, already on latest schemea $latestVersion")
+            LogUtils.logDebug("Database", "initialized, already on latest schema $latestVersion")
         }
     }
 
     private fun getVersion(driver: SqlDriver): Int {
         val sqlCursor = driver.executeQuery(null, "PRAGMA user_version;", 0, null);
-        return sqlCursor.use { sqlCursor.getLong(0)!!.toInt() }
+        return sqlCursor.use { if (it.next()) it.getLong(0)!!.toInt() else 0 }
     }
 
     private fun setVersion(driver: SqlDriver, version: Int) {

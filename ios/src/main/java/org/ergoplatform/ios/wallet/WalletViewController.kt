@@ -94,7 +94,6 @@ class WalletViewController : CoroutineViewController() {
         }
         viewControllerScope.launch {
             nodeConnector.fiatValue.collect {
-                println("New fiat value")
                 runOnMainThread {
                     header.refreshFiatValue()
                 }
