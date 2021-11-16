@@ -136,6 +136,7 @@ class SendFundsViewController(
             ), UIControlState.Normal
         )
         sendButton.tintColor = UIColor.label()
+        sendButton.imageEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 15.0)
         sendButton.addOnTouchUpInsideListener { _, _ -> startPayment() }
 
         val buttonContainer = UIView()
@@ -253,12 +254,10 @@ class SendFundsViewController(
                 if (locked) {
                     if (progressViewController == null) {
                         progressViewController = ProgressViewController()
-                        progressViewController?.modalPresentationStyle = UIModalPresentationStyle.FormSheet
-                        progressViewController?.isModalInPresentation = true
-                        presentViewController(progressViewController!!, true) {}
+                        progressViewController?.presentModalAbove(this@SendFundsViewController)
                     }
                 } else {
-                    progressViewController?.dismissViewController(true) {}
+                    progressViewController?.dismissViewController(false) {}
                     progressViewController = null
                 }
             }
@@ -284,22 +283,6 @@ class SendFundsViewController(
 
         override fun notifyHasSigningPromptData(signingPrompt: String?) {
             TODO("Not yet implemented")
-        }
-    }
-
-    inner class ProgressViewController : UIViewController() {
-        private lateinit var progressIndicator: UIActivityIndicatorView
-        override fun viewDidLoad() {
-            super.viewDidLoad()
-            progressIndicator = UIActivityIndicatorView()
-            progressIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Large
-            view.addSubview(progressIndicator)
-            progressIndicator.centerVertical().centerHorizontal()
-        }
-
-        override fun viewWillAppear(animated: Boolean) {
-            super.viewWillAppear(animated)
-            progressIndicator.startAnimating()
         }
     }
 }

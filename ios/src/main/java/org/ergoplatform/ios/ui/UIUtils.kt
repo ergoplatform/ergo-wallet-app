@@ -59,6 +59,8 @@ fun UIImageView.setQrCode(data: String, size: Int) {
 }
 
 fun UITextView.setHtmlText(html: String) {
+    // TODO deactivated due to crashes on GC, see https://github.com/MobiVM/robovm/issues/608
+    text = html
 //    val attributedString = NSAttributedString(
 //        NSString(html.replace("\n", "<br>"))
 //            .toData(NSStringEncoding.Unicode),

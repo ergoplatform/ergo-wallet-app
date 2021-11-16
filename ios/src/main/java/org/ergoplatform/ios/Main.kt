@@ -40,6 +40,7 @@ class Main : UIApplicationDelegateAdapter() {
         AesEncryptionManager.isOnLegacyApi = true
 
         CrashHandler.registerUncaughtExceptionHandler()
+        LogUtils.stackTraceLogger = { CrashHandler.writeToDebugFile(it) }
         database = SqlDelightWalletProvider(setupDatabase())
         texts = I18NBundle.createBundle(File(internalPath, "i18n/strings"))
         prefs = Preferences()

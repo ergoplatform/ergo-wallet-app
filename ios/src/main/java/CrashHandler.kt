@@ -16,20 +16,7 @@ object CrashHandler {
             var exceptionAsString: String? = null
             try {
                 exceptionAsString = e.stackTraceToString()
-                val file = getCrashFile()
-
-                val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
-                val nowAsString: String = df.format(Date())
-                val osVersion = UIDevice.getCurrentDevice().systemVersion
-                val device = UIDevice.getCurrentDevice().name
-
-                file.writeText(
-                    "$nowAsString\n" +
-                            "App: ${getAppVersion()}\n" +
-                            "OS: $osVersion\n" +
-                            "Device: $device\n\n" +
-                            "$exceptionAsString"
-                )
+                writeToDebugFile(exceptionAsString)
 
             } catch (throwable: Throwable) {
                 // do nothing
@@ -42,6 +29,23 @@ object CrashHandler {
                 exception.raise()
             }
         }
+    }
+
+    fun writeToDebugFile(exceptionAsString: String) {
+        val file = getCrashFile()
+
+        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
+        val nowAsString: String = df.format(Date())
+        val osVersion = UIDevice.getCurrentDevice().systemVersion
+        val device = UIDevice.getCurrentDevice().name
+
+        file.writeText(
+            "$nowAsString\n" +
+                    "App: ${getAppVersion()}\n" +
+                    "OS: $osVersion\n" +
+                    "Device: $device\n\n" +
+                    exceptionAsString
+        )
     }
 
     private fun getCrashFile(): File {
