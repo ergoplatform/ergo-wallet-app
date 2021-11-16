@@ -2,7 +2,6 @@ package org.ergoplatform.ios.ui
 
 import org.ergoplatform.URL_FORGOT_PASSWORD_HELP
 import org.ergoplatform.uilogic.*
-import org.robovm.apple.foundation.NSAttributedString
 import org.robovm.apple.uikit.*
 
 object PasswordViewController {
@@ -20,13 +19,12 @@ object PasswordViewController {
         password: String?, confirm: String?
     ) {
         val textProvider = getAppDelegate().texts
-        val message = if (errorMessage == null) textProvider.get(STRING_HINT_PASSWORD) else errorMessage
+        val message = errorMessage ?: textProvider.get(STRING_HINT_PASSWORD)
         val alertController = UIAlertController(
             textProvider.get(STRING_LABEL_PASSWORD),
             message,
             UIAlertControllerStyle.Alert
         )
-        alertController.accessibilityAttributedValue = NSAttributedString()
 
         var textField1: UITextField? = null
         var textField2: UITextField? = null
