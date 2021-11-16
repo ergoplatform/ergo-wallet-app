@@ -8,6 +8,7 @@ import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.STRING_LABEL_ERG_PRICE
 import org.ergoplatform.uilogic.STRING_LABEL_LAST_SYNC
 import org.ergoplatform.utils.LogUtils
+import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.utils.getTimeSpanString
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
@@ -215,7 +216,7 @@ class WalletViewController : CoroutineViewController() {
             val ergoPrice = nodeConnector.fiatValue.value
             fiatLabel.isHidden = ergoPrice == 0f
             fiatLabel.text = stringProvider.getString(STRING_LABEL_ERG_PRICE) +
-                    " " + ergoPrice.toString() + " " + nodeConnector.fiatCurrency.uppercase()
+                    " " + formatFiatToString(ergoPrice.toDouble(), nodeConnector.fiatCurrency, stringProvider)
         }
     }
 
