@@ -9,6 +9,7 @@ import org.ergoplatform.ios.ui.CoroutineViewController
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.persistance.AppDatabase
+import org.ergoplatform.persistance.DbInitializer
 import org.ergoplatform.persistance.SqlDelightWalletProvider
 import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.foundation.NSAutoreleasePool
@@ -105,8 +106,7 @@ class Main : UIApplicationDelegateAdapter() {
         val dbname = if (isErgoMainNet) "wallet" else "wallet_test"
         val driver = JdbcSqliteDriver("sqlite:/$dbPath$dbname.db")
 
-        // TODO https://github.com/cashapp/sqldelight/issues/1605
-        AppDatabase.Schema.create(driver)
+        DbInitializer.initDbSchema(driver)
 
         return AppDatabase(driver)
     }

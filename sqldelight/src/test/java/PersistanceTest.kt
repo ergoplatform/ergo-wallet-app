@@ -153,7 +153,8 @@ class PersistanceTest {
         LogUtils.logDebug = true
         val driver: SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         //val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:test.db")
-        AppDatabase.Schema.create(driver)
+        DbInitializer.initDbSchema(driver)
+        DbInitializer.initDbSchema(driver)
 
         val database = SqlDelightWalletProvider(AppDatabase(driver))
         return database
