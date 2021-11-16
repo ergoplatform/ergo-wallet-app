@@ -172,8 +172,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             }
         }
         binding.buttonShareTx.setOnClickListener {
-            val txUrl =
-                getExplorerWebUrl() + "en/transactions/" + binding.labelTxId.text.toString()
+            val txUrl = getExplorerTxUrl(binding.labelTxId.text.toString())
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_TEXT, txUrl)

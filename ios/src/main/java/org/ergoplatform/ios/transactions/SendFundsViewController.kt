@@ -2,11 +2,8 @@ package org.ergoplatform.ios.transactions
 
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
-import org.ergoplatform.ErgoAmount
-import org.ergoplatform.NodeConnector
-import org.ergoplatform.URL_COLD_WALLET_HELP
+import org.ergoplatform.*
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.toErgoAmount
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
@@ -38,6 +35,8 @@ class SendFundsViewController(
 
     private lateinit var inputReceiver: UITextField
     private lateinit var inputErgoAmount: UITextField
+
+    private var txDoneView: UIView? = null
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -184,7 +183,7 @@ class SendFundsViewController(
             inputErgoAmount.becomeFirstResponder()
         }
         if (checkResponse.tokenError) {
-            // TODO
+            // TODO tokens
         }
 
         if (checkResponse.canPay) {
@@ -202,10 +201,13 @@ class SendFundsViewController(
 
         override fun notifyWalletStateLoaded() {
             runOnMainThread {
-                walletTitle.text = texts.format(STRING_LABEL_SEND_FROM, wallet!!.walletConfig.displayName)
-                readOnlyHint.isHidden = uiLogic.wallet!!.walletConfig.secretStorage != null
-                sendButton.isEnabled = readOnlyHint.isHidden // TODO cold wallet
-                scrollView.isHidden = false
+                // if we already have a successful tx, there is no need to refresh the ui
+                if (txDoneView == null) {
+                    walletTitle.text = texts.format(STRING_LABEL_SEND_FROM, wallet!!.walletConfig.displayName)
+                    readOnlyHint.isHidden = uiLogic.wallet!!.walletConfig.secretStorage != null
+                    sendButton.isEnabled = readOnlyHint.isHidden // TODO cold wallet
+                    scrollView.isHidden = false
+                }
             }
         }
 
@@ -217,7 +219,7 @@ class SendFundsViewController(
         }
 
         override fun notifyTokensChosenChanged() {
-            // TODO
+            // TODO tokens
         }
 
         override fun notifyAmountsChanged() {
@@ -258,7 +260,45 @@ class SendFundsViewController(
 
         override fun notifyHasTxId(txId: String) {
             LogUtils.logDebug("SendFunds", "Success, tx id $txId")
-            // TODO show it
+
+            runOnMainThread {
+                scrollView.isHidden = true
+                val txDoneCardView = CardView()
+                view.addSubview(txDoneCardView)
+                val texts = getAppDelegate().texts
+
+                val image = UIImageView(getIosSystemImage(IMAGE_TX_DONE, UIImageSymbolScale.Large))
+                image.contentMode = UIViewContentMode.ScaleAspectFit
+                image.tintColor = uiColorErgo
+                image.fixedHeight(100.0)
+
+                val descLabel = Body1Label()
+                descLabel.text = texts.get(STRING_DESC_TRANSACTION_SEND)
+                descLabel.textAlignment = NSTextAlignment.Center
+                val txLabel = Body1BoldLabel()
+                txLabel.text = txId
+                txLabel.textAlignment = NSTextAlignment.Center
+                txLabel.isUserInteractionEnabled = true
+                txLabel.addGestureRecognizer(UITapGestureRecognizer {
+                    shareText(getExplorerTxUrl(txId), txLabel)
+                })
+
+                val doneButton = PrimaryButton(texts.get(STRING_BUTTON_DONE))
+                doneButton.addOnTouchUpInsideListener { _, _ -> navigationController.popViewController(true) }
+                val doneButtonContainer = UIView()
+                doneButtonContainer.addSubview(doneButton)
+                doneButton.centerHorizontal().topToSuperview().bottomToSuperview().fixedWidth(150.0)
+
+                val txDoneStack = UIStackView(NSArray(image, descLabel, txLabel, doneButtonContainer))
+                txDoneStack.axis = UILayoutConstraintAxis.Vertical
+                txDoneStack.spacing = DEFAULT_MARGIN * 3
+
+                txDoneCardView.contentView.addSubview(txDoneStack)
+                txDoneStack.edgesToSuperview(inset = DEFAULT_MARGIN * 2)
+
+                txDoneCardView.centerVertical().widthMatchesSuperview(inset = DEFAULT_MARGIN * 2, maxWidth = MAX_WIDTH)
+                txDoneView = txDoneCardView
+            }
         }
 
         override fun notifyHasErgoTxResult(txResult: TransactionResult) {
@@ -275,7 +315,7 @@ class SendFundsViewController(
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String?) {
-            TODO("Not yet implemented")
+            TODO("Cold wallet not yet implemented")
         }
     }
 }

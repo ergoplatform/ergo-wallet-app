@@ -73,6 +73,8 @@ fun getExplorerWebUrl() =
     if (isErgoMainNet) "https://explorer.ergoplatform.com/"
     else "https://testnet.ergoplatform.com/"
 
+fun getExplorerTxUrl(txId: String) = getExplorerWebUrl() + "en/transactions/" + txId
+
 fun getAddressDerivationPath(index: Int): String {
     return "m/44'/429'/0'/0/$index"
 }

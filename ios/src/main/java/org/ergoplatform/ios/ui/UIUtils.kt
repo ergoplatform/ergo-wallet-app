@@ -15,6 +15,7 @@ const val DEFAULT_TEXT_FIELD_HEIGHT = 40.0
 
 const val IMAGE_WALLET = "rectangle.on.rectangle.angled"
 val IMAGE_SETTINGS = if (Foundation.getMajorSystemVersion() >= 14) "gearshape" else "gear"
+val IMAGE_TX_DONE = if (Foundation.getMajorSystemVersion() >= 15) "clock.badge.checkmark" else "checkmark.seal"
 const val IMAGE_CREATE_WALLET = "folder.badge.plus"
 const val IMAGE_RESTORE_WALLET = "arrow.clockwise"
 const val IMAGE_READONLY_WALLET = "magnifyingglass"

@@ -98,7 +98,7 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
         }
     }
 
-    // TODO
+    // TODO for first release
     private fun getInputPurpose() = ""
     private fun getInputAmount() = 0.0
 }

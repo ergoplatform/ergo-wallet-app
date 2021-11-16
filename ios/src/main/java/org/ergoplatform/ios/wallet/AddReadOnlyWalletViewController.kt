@@ -42,6 +42,7 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
                 return super.shouldReturn(textField)
             }
         }
+        // TODO qr code scan
 
         errorLabel = Body1Label()
         errorLabel.textColor = UIColor.systemRed()
