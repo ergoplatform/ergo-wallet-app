@@ -91,16 +91,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         stackView.axis = UILayoutConstraintAxis.Vertical
         stackView.setCustomSpacing(DEFAULT_MARGIN * 1.5, spacing)
 
-        val walletImage = UIImageView(
-            UIImage.getSystemImage(
-                IMAGE_WALLET,
-                UIImageSymbolConfiguration.getConfigurationWithPointSizeWeightScale(
-                    30.0,
-                    UIImageSymbolWeight.Regular,
-                    UIImageSymbolScale.Large
-                )
-            )
-        )
+        val walletImage = UIImageView(getIosSystemImage(IMAGE_WALLET, UIImageSymbolScale.Large))
         walletImage.tintColor = UIColor.secondaryLabel()
 
         val horizontalStack = UIStackView(NSArray(receiveButton, sendButton))

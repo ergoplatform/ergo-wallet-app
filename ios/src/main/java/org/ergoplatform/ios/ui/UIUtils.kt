@@ -19,6 +19,7 @@ const val IMAGE_CREATE_WALLET = "folder.badge.plus"
 const val IMAGE_RESTORE_WALLET = "arrow.clockwise"
 const val IMAGE_READONLY_WALLET = "magnifyingglass"
 const val IMAGE_EXCLAMATION_MARK = "exclamationmark.circle.fill"
+const val IMAGE_NO_CONNECTION = "icloud.slash"
 const val IMAGE_SEND = "paperplane"
 
 const val FONT_SIZE_BODY1 = 18.0
@@ -103,16 +104,7 @@ fun createTextField(): UITextField {
 fun UITextField.setHasError(hasError: Boolean) {
     layer.borderColor = (if (hasError) UIColor.systemRed() else UIColor.systemGray()).cgColor
     if (hasError) {
-        val errorIcon = UIImageView(
-            UIImage.getSystemImage(
-                IMAGE_EXCLAMATION_MARK,
-                UIImageSymbolConfiguration.getConfigurationWithPointSizeWeightScale(
-                    30.0,
-                    UIImageSymbolWeight.Regular,
-                    UIImageSymbolScale.Small
-                )
-            )
-        )
+        val errorIcon = UIImageView(getIosSystemImage(IMAGE_EXCLAMATION_MARK, UIImageSymbolScale.Small))
         errorIcon.tintColor = UIColor.systemRed()
         errorIcon.contentMode = UIViewContentMode.Center
         val errorView = UIView(CGRect(0.0, 0.0, 35.0, 30.0))
@@ -122,4 +114,15 @@ fun UITextField.setHasError(hasError: Boolean) {
     } else {
         rightView = null
     }
+}
+
+fun getIosSystemImage(name: String, scale: UIImageSymbolScale): UIImage? {
+    return UIImage.getSystemImage(
+        name,
+        UIImageSymbolConfiguration.getConfigurationWithPointSizeWeightScale(
+            30.0,
+            UIImageSymbolWeight.Regular,
+            scale
+        )
+    )
 }

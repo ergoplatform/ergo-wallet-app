@@ -62,16 +62,7 @@ class AddWalletChooserStackView(val texts: I18NBundle) : UIView(CGRect.Zero()) {
     private fun createCardView(titleLabel: String, descLabelId: String, imageName: String): CardView {
         val cardView = CardView()
 
-        val imageView = UIImageView(
-            UIImage.getSystemImage(
-                imageName,
-                UIImageSymbolConfiguration.getConfigurationWithPointSizeWeightScale(
-                    30.0,
-                    UIImageSymbolWeight.Regular,
-                    UIImageSymbolScale.Large
-                )
-            )
-        )
+        val imageView = UIImageView(getIosSystemImage(imageName, UIImageSymbolScale.Large))
         imageView.tintColor = UIColor.secondaryLabel()
         imageView.contentMode = UIViewContentMode.Center
 

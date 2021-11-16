@@ -77,13 +77,7 @@ class WalletViewController : CoroutineViewController() {
         viewControllerScope.launch {
             nodeConnector.isRefreshing.collect { refreshing ->
                 runOnMainThread {
-                    if (refreshing)
-                        header.refreshView.startAnimating()
-                    else {
-                        // TODO show error state
-                        header.refreshView.stopAnimating()
-                        header.updateLastRefreshLabel()
-                    }
+                    header.isRefreshing = refreshing
                 }
                 if (!refreshing) {
                     LogUtils.logDebug("WalletViewController", "Refresh done, reload shown data")
@@ -165,31 +159,55 @@ class WalletViewController : CoroutineViewController() {
     @CustomClass
     class HeaderView : UIView(CGRect(0.0, 0.0, 0.0, 70.0)) {
         private val ergoLogo: UIImageView
+        private val noConnection: UIImageView
         private val fiatLabel = Body1Label()
         private val syncLabel = Body1Label()
-        val refreshView = UIActivityIndicatorView()
+        private val refreshView = UIActivityIndicatorView()
         private val stringProvider = IosStringProvider(getAppDelegate().texts)
+
+        var isRefreshing: Boolean = false
+            set(refreshing) {
+                field = refreshing
+                if (refreshing) {
+                    refreshView.startAnimating()
+                    noConnection.isHidden = true
+                } else {
+                    refreshView.stopAnimating()
+                    updateLastRefreshLabel()
+                }
+            }
 
         init {
             ergoLogo = UIImageView(ergoLogoImage.imageWithTintColor(UIColor.label()))
             ergoLogo.contentMode = UIViewContentMode.ScaleAspectFit
+
+            noConnection = UIImageView(
+                getIosSystemImage(IMAGE_NO_CONNECTION, UIImageSymbolScale.Small)
+            )
+            noConnection.contentMode = UIViewContentMode.Center
+            noConnection.tintColor = UIColor.systemRed()
+            noConnection.isHidden = true
 
             val stackview = UIStackView(NSArray(fiatLabel, syncLabel))
             stackview.axis = UILayoutConstraintAxis.Vertical
             addSubview(stackview)
             addSubview(ergoLogo)
             addSubview(refreshView)
+            addSubview(noConnection)
             ergoLogo.leftToSuperview().topToSuperview().bottomToSuperview().fixedWidth(frame.height)
+            noConnection.rightToSuperview().topToSuperview().bottomToSuperview().fixedWidth(frame.height)
             refreshView.rightToSuperview().topToSuperview().bottomToSuperview().fixedWidth(frame.height)
             stackview.topToSuperview().bottomToSuperview().leftToRightOf(ergoLogo).rightToLeftOf(refreshView)
         }
 
         fun updateLastRefreshLabel() {
-            val lastRefreshMs = NodeConnector.getInstance().lastRefreshMs
+            val nodeConnector = NodeConnector.getInstance()
+            val lastRefreshMs = nodeConnector.lastRefreshMs
             syncLabel.isHidden = lastRefreshMs == 0L
             val lastRefreshTimeSpan = (System.currentTimeMillis() - lastRefreshMs) / 1000L
             val timeSpanString: String = getTimeSpanString(lastRefreshTimeSpan, stringProvider)
             syncLabel.text = stringProvider.getString(STRING_LABEL_LAST_SYNC, timeSpanString)
+            noConnection.isHidden = !nodeConnector.lastHadError
         }
 
         fun refreshFiatValue() {

@@ -126,14 +126,7 @@ class SendFundsViewController(
 
         sendButton = PrimaryButton(texts.get(STRING_BUTTON_SEND))
         sendButton.setImage(
-            UIImage.getSystemImage(
-                IMAGE_SEND,
-                UIImageSymbolConfiguration.getConfigurationWithPointSizeWeightScale(
-                    30.0,
-                    UIImageSymbolWeight.Regular,
-                    UIImageSymbolScale.Small
-                )
-            ), UIControlState.Normal
+            getIosSystemImage(IMAGE_SEND, UIImageSymbolScale.Small), UIControlState.Normal
         )
         sendButton.tintColor = UIColor.label()
         sendButton.imageEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 15.0)
