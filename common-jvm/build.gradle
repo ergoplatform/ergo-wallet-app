@@ -12,15 +12,20 @@ dependencies {
     api('org.ergoplatform:ergo-appkit_2.11:develop-1b7347ca-SNAPSHOT') {
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
         exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
+        exclude group: 'com.google.guava', module: 'guava'
     }
     // kiama needs an own build for JRE7 compatibility
-    api "com.github.MrStahlfelge.kiama:core_2.11:2.1.1"
-    api "com.github.MrStahlfelge.kiama:library_2.11:2.1.1"
+    api ('com.github.MrStahlfelge.kiama:core_2.11:2.1.1') {
+        exclude group: 'com.google.guava', module: 'guava'
+    }
+    api ('com.github.MrStahlfelge.kiama:library_2.11:2.1.1') {
+        exclude group: 'com.google.guava', module: 'guava'
+    }
+    // stick to 20 for JRE7 compatibility
+    api "com.google.guava:guava:20.0"
     api "org.bouncycastle:bcprov-jdk15to18:1.66"
 
-    // newer okhttp version than pulled from dependencies to avoid StrictMode policy violation
-    api("com.squareup.okhttp3:okhttp:3.12.13")
-    api("com.squareup.okhttp3:okhttp-urlconnection:3.12.13")
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$coroutines_version"
 
     testImplementation 'junit:junit:4.13.2'
 }

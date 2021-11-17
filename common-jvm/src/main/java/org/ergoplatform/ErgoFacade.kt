@@ -1,4 +1,4 @@
-package org.ergoplatform.android
+package org.ergoplatform
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -12,20 +12,23 @@ import org.ergoplatform.restapi.client.Parameters
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
 import sigmastate.serialization.`SigmaSerializer$`
-import java.util.*
 
 const val MNEMONIC_WORDS_COUNT = 15
 const val MNEMONIC_MIN_WORDS_COUNT = 12
 const val URL_COLD_WALLET_HELP =
     "https://github.com/ergoplatform/ergo-wallet-android/wiki/Cold-wallet"
+const val URL_FORGOT_PASSWORD_HELP =
+    "https://github.com/ergoplatform/ergo-wallet-android/wiki/FAQ#i-forgot-my-spending-password"
+
 val ERG_BASE_COST = 0
 val ERG_MAX_BLOCK_COST = 1000000
 
-var ergoNetworkType: NetworkType = NetworkType.MAINNET
+var isErgoMainNet: Boolean = true
 
 fun serializeSecrets(mnemonic: String): String {
     val gson = Gson()
@@ -51,22 +54,40 @@ fun isValidErgoAddress(addressString: String): Boolean {
 
     try {
         val address = Address.create(addressString)
-        return if (ergoNetworkType == NetworkType.MAINNET) address.isMainnet else !address.isMainnet
+        return if (isErgoMainNet) address.isMainnet else !address.isMainnet
     } catch (t: Throwable) {
         return false
     }
 
 }
 
+fun getDefaultNodeApiUrl() =
+    if (isErgoMainNet) "http://213.239.193.208:9053/"
+    else "http://213.239.193.208:9052/"
+
+fun getDefaultExplorerApiUrl() =
+    if (isErgoMainNet) RestApiErgoClient.defaultMainnetExplorerUrl + "/"
+    else RestApiErgoClient.defaultTestnetExplorerUrl + "/"
+
+fun getExplorerWebUrl() =
+    if (isErgoMainNet) "https://explorer.ergoplatform.com/"
+    else "https://testnet.ergoplatform.com/"
+
+fun getExplorerTxUrl(txId: String) = getExplorerWebUrl() + "en/transactions/" + txId
+
 fun getAddressDerivationPath(index: Int): String {
     return "m/44'/429'/0'/0/$index"
 }
 
 fun getPublicErgoAddressFromMnemonic(mnemonic: String, index: Int = 0): String {
+    return getPublicErgoAddressFromMnemonic(SecretString.create(mnemonic), index)
+}
+
+fun getPublicErgoAddressFromMnemonic(mnemonic: SecretString, index: Int = 0): String {
     return Address.createEip3Address(
         index,
-        ergoNetworkType,
-        SecretString.create(mnemonic),
+        getErgoNetworkType(),
+        mnemonic,
         SecretString.create("")
     ).ergoAddress.toString()
 }
@@ -96,7 +117,7 @@ fun sendErgoTx(
     try {
         val ergoClient = RestApiErgoClient.create(
             nodeApiAddress,
-            ergoNetworkType,
+            getErgoNetworkType(),
             "",
             explorerApiAddress
         )
@@ -123,6 +144,7 @@ fun sendErgoTx(
             return@execute SendTransactionResult(txId.isNotEmpty(), txId)
         }
     } catch (t: Throwable) {
+        LogUtils.logDebug("sendErgoTx", "Error caught", t)
         return SendTransactionResult(false, errorMsg = t.message)
     }
 }
@@ -141,7 +163,7 @@ fun prepareSerializedErgoTx(
     try {
         val ergoClient = RestApiErgoClient.create(
             nodeApiAddress,
-            ergoNetworkType,
+            getErgoNetworkType(),
             "",
             explorerApiAddress
         )
@@ -208,7 +230,7 @@ fun signSerializedErgoTx(
 }
 
 private fun getColdErgoClient() = ColdErgoClient(
-    ergoNetworkType,
+    getErgoNetworkType(),
     Parameters().maxBlockCost(ERG_MAX_BLOCK_COST)
 )
 
@@ -223,7 +245,7 @@ fun sendSignedErgoTx(
     try {
         val ergoClient = RestApiErgoClient.create(
             nodeApiAddress,
-            ergoNetworkType,
+            getErgoNetworkType(),
             "",
             explorerApiAddress
         )
@@ -238,6 +260,8 @@ fun sendSignedErgoTx(
         return SendTransactionResult(false, errorMsg = t.message)
     }
 }
+
+fun getErgoNetworkType() = if (isErgoMainNet) NetworkType.MAINNET else NetworkType.TESTNET
 
 fun deserializeErgobox(input: ByteArray): ErgoBox? {
     val r = `SigmaSerializer$`.`MODULE$`.startReader(input, 0)
