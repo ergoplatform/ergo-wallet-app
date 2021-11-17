@@ -98,14 +98,17 @@ class Main : UIApplicationDelegateAdapter() {
     }
 
     private fun setupDatabase(): AppDatabase {
+        val dbname = if (isErgoMainNet) "wallet" else "wallet_test"
+
         // retrieve directory
-        val dbPath = File(System.getenv("HOME"), "Library/").absolutePath
+        val libraryPath = File(System.getenv("HOME"), "Library")
+        val dbFileName = File(libraryPath, "$dbname.db").absolutePath
+        LogUtils.logDebug("Database", "Open db at $dbFileName")
 
         // register RoboVMs Sqlite driver
         DriverManager.registerDriver(JDBCDriver())
 
-        val dbname = if (isErgoMainNet) "wallet" else "wallet_test"
-        val driver = JdbcSqliteDriver("sqlite:/$dbPath$dbname.db")
+        val driver = JdbcSqliteDriver("sqlite:/$dbFileName")
 
         DbInitializer.initDbSchema(driver)
 
