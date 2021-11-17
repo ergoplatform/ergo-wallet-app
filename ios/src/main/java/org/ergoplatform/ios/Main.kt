@@ -35,7 +35,7 @@ class Main : UIApplicationDelegateAdapter() {
     ): Boolean {
         val internalPath = NSBundle.getMainBundle().bundlePath
 
-        isErgoMainNet = false
+        // activate for testnet: isErgoMainNet = false
         LogUtils.logDebug = !isErgoMainNet
         AesEncryptionManager.isOnLegacyApi = true
 
