@@ -64,16 +64,15 @@ fun UIImageView.setQrCode(data: String, size: Int) {
 }
 
 fun UITextView.setHtmlText(html: String) {
-    // TODO deactivated due to crashes on GC, see https://github.com/MobiVM/robovm/issues/608
-    text = html
-//    val attributedString = NSAttributedString(
-//        NSString(html.replace("\n", "<br>"))
-//            .toData(NSStringEncoding.Unicode),
-//        NSAttributedStringDocumentAttributes().apply {
-//            documentType = NSDocumentType.HTML
-//        })
-//
-//    attributedText = attributedString
+    val attributedString = NSAttributedString(
+        NSString(html.replace("\n", "<br>"))
+            .toData(NSStringEncoding.Unicode),
+        NSAttributedStringDocumentAttributes().apply {
+            documentType = NSDocumentType.HTML
+        })
+    // TODO retain needed due to crashes on GC, see https://github.com/MobiVM/robovm/issues/608
+    attributedString.retain()
+    attributedText = attributedString
     dataDetectorTypes = UIDataDetectorTypes.Link
     isScrollEnabled = false
     isEditable = false
