@@ -20,8 +20,17 @@ import kotlin.math.max
 class WalletViewController : CoroutineViewController() {
 
     private val tableView = UITableView(CGRect.Zero())
+
+    // the data currently to be shown, only change on main thread
     private val shownData = ArrayList<Wallet>()
-    private var didLoadData = false
+    private var loadedDataChanged = false
+
+    // the data that should get shown on next table refresh
+    private val loadedData = ArrayList<Wallet>()
+
+    // did we actually already fetch dada from the db at least once?
+    private var hasDataToShow = false
+
     private lateinit var header: HeaderView
 
     override fun viewDidLoad() {
@@ -65,11 +74,12 @@ class WalletViewController : CoroutineViewController() {
         val nodeConnector = NodeConnector.getInstance()
         viewControllerScope.launch {
             appDelegate.database.getWalletsWithStatesFlow().collect {
-                LogUtils.logDebug("WalletViewController", "Refresh shown wallet data from flow change")
+                LogUtils.logDebug("WalletViewController", "New wallet data from flow change")
+                newDataLoaded(it)
                 // do we have a new wallet or wallet address and need to trigger NodeConnector?
                 val needStateRefresh = (NodeConnector.getInstance().lastRefreshMs == 0L)
                 runOnMainThread {
-                    refreshListShownData(it)
+                    refreshListShownData()
                     if (needStateRefresh) {
                         onResume()
                     }
@@ -82,9 +92,12 @@ class WalletViewController : CoroutineViewController() {
                     header.isRefreshing = refreshing
                 }
                 if (!refreshing) {
-                    LogUtils.logDebug("WalletViewController", "Refresh done, reload shown data")
-                    val newData = appDelegate.database.getWalletsWithStates()
-                    runOnMainThread { refreshListShownData(newData) }
+                    LogUtils.logDebug(
+                        "WalletViewController",
+                        "Node connector refresh done, reload shown data"
+                    )
+                    newDataLoaded(appDelegate.database.getWalletsWithStates())
+                    runOnMainThread { refreshListShownData() }
                 }
             }
         }
@@ -99,11 +112,28 @@ class WalletViewController : CoroutineViewController() {
         onResume()
     }
 
-    private fun refreshListShownData(newData: List<Wallet>) {
-        shownData.clear()
-        shownData.addAll(newData.sortedBy { it.walletConfig.displayName })
-        didLoadData = true
-        tableView.reloadData()
+    private fun newDataLoaded(walletData: List<Wallet>) {
+        synchronized(loadedData) {
+            loadedData.clear()
+            loadedData.addAll(walletData)
+            loadedDataChanged = true
+        }
+    }
+
+    private fun refreshListShownData() {
+        LogUtils.logDebug(
+            "WalletViewController",
+            "Refresh changed wallet data in UI: $loadedDataChanged"
+        )
+        if (loadedDataChanged) {
+            synchronized(loadedData) {
+                loadedDataChanged = false
+                shownData.clear()
+                shownData.addAll(loadedData.sortedBy { it.walletConfig.displayName })
+            }
+            hasDataToShow = true
+            tableView.reloadData()
+        }
     }
 
     override fun onResume() {
@@ -115,15 +145,15 @@ class WalletViewController : CoroutineViewController() {
         )
     }
 
-    override fun viewWillDisappear(p0: Boolean) {
-        super.viewWillDisappear(p0)
+    override fun viewWillDisappear(animated: Boolean) {
+        super.viewWillDisappear(animated)
         tableView.refreshControl.endRefreshing()
     }
 
     inner class WalletDataSource : UITableViewDataSourceAdapter() {
         override fun getNumberOfRowsInSection(p0: UITableView?, p1: Long): Long {
-            // When data is already loaded, show the empty cell if no wallets configured
-            return max( if (didLoadData) 1 else 0, shownData.size.toLong())
+            // When we already have data to show, show the empty cell if no wallets configured
+            return max(if (hasDataToShow) 1 else 0, shownData.size.toLong())
         }
 
         override fun getCellForRow(p0: UITableView, p1: NSIndexPath): UITableViewCell {
