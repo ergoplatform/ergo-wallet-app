@@ -21,6 +21,7 @@ class WalletViewController : CoroutineViewController() {
 
     private val tableView = UITableView(CGRect.Zero())
     private val shownData = ArrayList<Wallet>()
+    private var didLoadData = false
     private lateinit var header: HeaderView
 
     override fun viewDidLoad() {
@@ -101,6 +102,7 @@ class WalletViewController : CoroutineViewController() {
     private fun refreshListShownData(newData: List<Wallet>) {
         shownData.clear()
         shownData.addAll(newData.sortedBy { it.walletConfig.displayName })
+        didLoadData = true
         tableView.reloadData()
     }
 
@@ -120,7 +122,8 @@ class WalletViewController : CoroutineViewController() {
 
     inner class WalletDataSource : UITableViewDataSourceAdapter() {
         override fun getNumberOfRowsInSection(p0: UITableView?, p1: Long): Long {
-            return max(1, shownData.size.toLong())
+            // When data is already loaded, show the empty cell if no wallets configured
+            return max( if (didLoadData) 1 else 0, shownData.size.toLong())
         }
 
         override fun getCellForRow(p0: UITableView, p1: NSIndexPath): UITableViewCell {

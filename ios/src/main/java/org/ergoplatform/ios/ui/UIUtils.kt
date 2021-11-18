@@ -46,16 +46,18 @@ fun UIImageView.setQrCode(data: String, size: Int) {
     val filter = CIFilter("CIQRCodeGenerator")
     filter?.let {
         it.keyValueCoder.setValue("inputMessage", nsString)
-        val transform = CGAffineTransform.Identity()
-        transform.scale(3.0, 3.0)
+        val unscaledOutput = it.outputImage
 
-        val output = it.outputImage?.newImageByApplyingTransform(transform)
-        output?.let {
+        unscaledOutput?.let {
+            val scaleX = size / it.extent.size.width
+            val scaleY = size / it.extent.size.height
+            val transform = CGAffineTransform.createScale(scaleX, scaleY)
+
+            val output = unscaledOutput.newImageByApplyingTransform(transform)
             val image = UIImage(output)
             setImage(image)
             contentMode = UIViewContentMode.ScaleAspectFit
             backgroundColor = UIColor.systemRed()
-
         }
     }
 }
