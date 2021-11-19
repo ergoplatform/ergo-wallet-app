@@ -254,6 +254,7 @@ class SendFundsViewController(
             runOnMainThread {
                 if (locked) {
                     if (progressViewController == null) {
+                        forceDismissKeyboard()
                         progressViewController = ProgressViewController()
                         progressViewController?.presentModalAbove(this@SendFundsViewController)
                     }

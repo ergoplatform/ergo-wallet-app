@@ -7,6 +7,7 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.coreimage.CIFilter
 import org.robovm.apple.foundation.*
 import org.robovm.apple.uikit.*
+import org.robovm.objc.Selector
 
 
 const val MAX_WIDTH = 500.0
@@ -128,4 +129,9 @@ fun getIosSystemImage(name: String, scale: UIImageSymbolScale): UIImage? {
             scale
         )
     )
+}
+
+fun forceDismissKeyboard() {
+    UIApplication.getSharedApplication()
+        .sendAction(Selector.register("resignFirstResponder"), null, null, null)
 }
