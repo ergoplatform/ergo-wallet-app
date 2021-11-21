@@ -61,10 +61,6 @@ fun isValidErgoAddress(addressString: String): Boolean {
 
 }
 
-fun getDefaultNodeApiUrl() =
-    if (isErgoMainNet) "http://213.239.193.208:9053/"
-    else "http://213.239.193.208:9052/"
-
 fun getDefaultExplorerApiUrl() =
     if (isErgoMainNet) RestApiErgoClient.defaultMainnetExplorerUrl + "/"
     else RestApiErgoClient.defaultTestnetExplorerUrl + "/"

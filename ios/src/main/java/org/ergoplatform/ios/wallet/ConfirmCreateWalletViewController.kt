@@ -88,7 +88,7 @@ class ConfirmCreateWalletViewController(val mnemonic: SecretString) : ViewContro
         container.addSubview(verticalStack)
 
         nextButton.setOnClickListener {
-            val hasErrors = uiLogic.checkConfirmations(textField1.text, textField2.text, confirmationCheck.isOn)
+            val hasErrors = uiLogic.checkUserEnteredCorrectWordsAndConfirmedObligations(textField1.text, textField2.text, confirmationCheck.isOn)
 
             textField1.setHasError(!uiLogic.firstWordCorrect)
             textField2.setHasError(!uiLogic.secondWordCorrect)

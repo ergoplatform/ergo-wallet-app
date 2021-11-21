@@ -1,16 +1,14 @@
 package org.ergoplatform.android.settings
 
-import StageConstants
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.ergoplatform.NodeConnector
-import org.ergoplatform.android.*
+import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.databinding.FragmentConnectionSettingsBinding
 import org.ergoplatform.getDefaultExplorerApiUrl
-import org.ergoplatform.getDefaultNodeApiUrl
 
 /**
  *
@@ -46,7 +44,7 @@ class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
             true
         }
         binding.buttonDefaults.setOnClickListener {
-            binding.editNodeUrl.editText?.setText(getDefaultNodeApiUrl())
+            binding.editNodeUrl.editText?.setText(preferences.getDefaultNodeApiUrl())
             binding.editExplorerApiUrl.editText?.setText(getDefaultExplorerApiUrl())
         }
     }
