@@ -237,10 +237,11 @@ class WalletViewController : CoroutineViewController() {
         fun updateLastRefreshLabel() {
             val nodeConnector = NodeConnector.getInstance()
             val lastRefreshMs = nodeConnector.lastRefreshMs
-            syncLabel.isHidden = lastRefreshMs == 0L
             val lastRefreshTimeSpan = (System.currentTimeMillis() - lastRefreshMs) / 1000L
             val timeSpanString: String = getTimeSpanString(lastRefreshTimeSpan, stringProvider)
-            syncLabel.text = stringProvider.getString(STRING_LABEL_LAST_SYNC, timeSpanString)
+            syncLabel.text =
+                if (lastRefreshMs == 0L) " " // needs to be a blank, iOS handles empty like hidden
+                else stringProvider.getString(STRING_LABEL_LAST_SYNC, timeSpanString)
             noConnection.isHidden = !nodeConnector.lastHadError
         }
 

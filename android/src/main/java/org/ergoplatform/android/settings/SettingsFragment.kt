@@ -8,24 +8,25 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import org.ergoplatform.android.BuildConfig
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSettingsBinding
+import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.enableLinks
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.settings.SettingsUiLogic
 import java.util.*
 
 class SettingsFragment : Fragment() {
-
-    private lateinit var settingsViewModel: SettingsViewModel
 
     private var _binding: FragmentSettingsBinding? = null
 
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
+
+    private val uiLogic = SettingsUiLogic()
 
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
@@ -33,8 +34,6 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        settingsViewModel =
-            ViewModelProvider(this).get(SettingsViewModel::class.java)
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
         binding.labelVersion.text = BuildConfig.VERSION_NAME
@@ -49,7 +48,7 @@ class SettingsFragment : Fragment() {
         binding.labelMoreInfo.enableLinks()
         binding.labelCoingecko.enableLinks()
 
-        setDisplayCurrency()
+        showDisplayCurrency()
 
         binding.displayCurrency.setOnClickListener {
             DisplayCurrencyListDialogFragment().show(childFragmentManager, null)
@@ -91,14 +90,9 @@ class SettingsFragment : Fragment() {
             )
     }
 
-    fun setDisplayCurrency() {
-        val displayCurrency =
-            Preferences(requireContext()).prefDisplayCurrency.toUpperCase(Locale.getDefault())
-        binding.displayCurrency.setText(
-            getString(
-                R.string.button_display_currency,
-                if (displayCurrency.isNotEmpty()) displayCurrency else getString(R.string.label_none)
-            )
+    fun showDisplayCurrency() {
+        binding.displayCurrency.text = uiLogic.getFiatCurrencyButtonText(
+            Preferences(requireContext()), AndroidStringProvider(requireContext())
         )
     }
 

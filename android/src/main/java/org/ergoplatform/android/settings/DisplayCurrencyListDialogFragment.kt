@@ -76,7 +76,7 @@ class DisplayCurrencyListDialogFragment : BottomSheetDialogFragment() {
     private fun onChooseCurrency(currency: String) {
         Preferences(requireContext()).prefDisplayCurrency = currency
         NodeConnector.getInstance().invalidateCache()
-        (parentFragment as? SettingsFragment)?.setDisplayCurrency()
+        (parentFragment as? SettingsFragment)?.showDisplayCurrency()
         dismiss()
     }
 
