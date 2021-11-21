@@ -22,10 +22,10 @@ class ConfirmCreateWalletUiLogic() {
             secondWord = Random.nextInt(1, MNEMONIC_WORDS_COUNT)
     }
 
-    fun checkConfirmations(
+    fun checkUserEnteredCorrectWordsAndConfirmedObligations(
         inputWord1: String,
         inputWord2: String,
-        confirmationChecked: Boolean
+        obligationsConfirmed: Boolean
     ): Boolean {
 
         val words = mnemonic!!.toStringUnsecure().split(" ")
@@ -33,6 +33,6 @@ class ConfirmCreateWalletUiLogic() {
         firstWordCorrect = inputWord1.equals(words[firstWord - 1], false)
         secondWordCorrect = inputWord2.equals(words[secondWord - 1], false)
 
-        return !firstWordCorrect || !secondWordCorrect || !confirmationChecked
+        return !firstWordCorrect || !secondWordCorrect || !obligationsConfirmed
     }
 }

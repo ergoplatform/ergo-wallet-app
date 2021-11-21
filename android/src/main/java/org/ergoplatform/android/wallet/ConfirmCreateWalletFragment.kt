@@ -48,7 +48,7 @@ class ConfirmCreateWalletFragment : FullScreenFragmentDialog() {
 
     private fun checkConfirmations() {
 
-        val hadErrors = uiLogic.checkConfirmations(
+        val hadErrors = uiLogic.checkUserEnteredCorrectWordsAndConfirmedObligations(
             binding.inputWord1.editText?.text.toString(),
             binding.inputWord2.editText?.text.toString(), binding.checkConfirmCreateWallet.isChecked
         )

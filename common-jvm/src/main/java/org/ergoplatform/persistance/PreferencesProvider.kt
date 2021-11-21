@@ -1,7 +1,7 @@
 package org.ergoplatform.persistance
 
 import org.ergoplatform.getDefaultExplorerApiUrl
-import org.ergoplatform.getDefaultNodeApiUrl
+import org.ergoplatform.isErgoMainNet
 
 const val NAME_SHAREDPREFS = "ergowallet"
 const val KEY_FIAT_CURRENCY = "fiatCurrency"
@@ -40,6 +40,10 @@ abstract class PreferencesProvider {
 
             saveString(KEY_NODE_URL, savedNodeUrl)
         }
+
+    fun getDefaultNodeApiUrl() =
+        if (isErgoMainNet) "http://213.239.193.208:9053/"
+        else "http://213.239.193.208:9052/"
 
     var prefExplorerApiUrl: String
         get() = getString(KEY_EXPLORER_API_URL, getDefaultExplorerApiUrl())
