@@ -157,6 +157,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         unconfirmedBalance.isHidden = unconfirmedErgs == 0L
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
+        tokenCount.isHidden = tokens.isEmpty()
     }
 
     private fun transactionButtonClicked() {

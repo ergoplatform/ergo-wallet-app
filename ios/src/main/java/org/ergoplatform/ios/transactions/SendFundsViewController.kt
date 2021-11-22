@@ -13,7 +13,6 @@ import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
-import org.robovm.apple.foundation.NSRange
 import org.robovm.apple.uikit.*
 
 class SendFundsViewController(
@@ -46,11 +45,22 @@ class SendFundsViewController(
         view.backgroundColor = UIColor.systemBackground()
         navigationController.navigationBar?.tintColor = UIColor.label()
 
-        // TODO qr code scan
-        //val uiBarButtonItem = UIBarButtonItem(UIBarButtonSystemItem.Action)
-        //uiBarButtonItem.setOnClickListener {
-        //}
-        //navigationController.topViewController.navigationItem.rightBarButtonItem = uiBarButtonItem
+        val uiBarButtonItem = UIBarButtonItem(getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small), UIBarButtonItemStyle.Plain)
+        uiBarButtonItem.setOnClickListener {
+            presentViewController(QrScannerViewController {
+                // TODO check cold wallet QR
+                val content = parsePaymentRequestFromQrCode(it)
+                content?.let {
+                    inputReceiver.text = content.address
+                    inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
+                    content.amount.let { amount ->
+                        if (amount.nanoErgs > 0) setInputAmount(amount)
+                    }
+                    // TODO token uiLogic.addTokensFromQr(content.tokens)
+                }
+            }, true) {}
+        }
+        navigationController.topViewController.navigationItem.rightBarButtonItem = uiBarButtonItem
 
         walletTitle = Body1Label()
         walletTitle.numberOfLines = 1
@@ -94,16 +104,7 @@ class SendFundsViewController(
             placeholder = texts.get(STRING_LABEL_AMOUNT)
             keyboardType = UIKeyboardType.NumbersAndPunctuation
             returnKeyType = UIReturnKeyType.Next
-            delegate = object : UITextFieldDelegateAdapter() {
-                override fun shouldChangeCharacters(
-                    textField: UITextField?,
-                    range: NSRange?,
-                    string: String?
-                ): Boolean {
-                    // TODO does not work as intended (allows multiple dots)
-                    return string?.matches(Regex("^\\d*\\.?(\\d)*$")) ?: true
-                }
-
+            delegate = object : OnlyNumericInputTextFieldDelegate() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
                     inputErgoAmount.resignFirstResponder()
                     return true
@@ -165,6 +166,11 @@ class SendFundsViewController(
         view.addSubview(scrollView)
         scrollView.topToSuperview().widthMatchesSuperview().bottomToKeyboard(this)
         scrollView.isHidden = true
+    }
+
+    private fun setInputAmount(amountToSend: ErgoAmount) {
+        inputErgoAmount.text = amountToSend.toStringTrimTrailingZeros()
+        inputErgoAmount.sendControlEventsActions(UIControlEvents.EditingChanged)
     }
 
     override fun viewWillAppear(animated: Boolean) {
@@ -248,6 +254,7 @@ class SendFundsViewController(
             runOnMainThread {
                 if (locked) {
                     if (progressViewController == null) {
+                        forceDismissKeyboard()
                         progressViewController = ProgressViewController()
                         progressViewController?.presentModalAbove(this@SendFundsViewController)
                     }

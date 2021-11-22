@@ -3,19 +3,23 @@ package org.ergoplatform
 import java.net.URLDecoder
 import java.net.URLEncoder
 
-private val PAYMENT_URI_PREFIX = "https://explorer.ergoplatform.com/payment-request?"
 private val PARAM_DELIMITER = "&"
 private val RECIPIENT_PARAM_PREFIX = "address="
 private val AMOUNT_PARAM_PREFIX = "amount="
 private val DESCRIPTION_PARAM_PREFIX = "description="
 private val URI_ENCODING = "utf-8"
 
+private val paymentUriPrefix
+    get() =
+        if (isErgoMainNet) "https://explorer.ergoplatform.com/payment-request?"
+        else "https://testnet.ergoplatform.com/payment-request?"
+
 fun getExplorerPaymentRequestAddress(
     address: String,
     amount: Double = 0.0,
     description: String = ""
 ): String {
-    return PAYMENT_URI_PREFIX + RECIPIENT_PARAM_PREFIX + URLEncoder.encode(address, URI_ENCODING) +
+    return paymentUriPrefix + RECIPIENT_PARAM_PREFIX + URLEncoder.encode(address, URI_ENCODING) +
             PARAM_DELIMITER + AMOUNT_PARAM_PREFIX + URLEncoder.encode(
         amount.toString(),
         URI_ENCODING
@@ -27,9 +31,9 @@ fun getExplorerPaymentRequestAddress(
 }
 
 fun parsePaymentRequestFromQrCode(qrCode: String): PaymentRequest? {
-    if (qrCode.startsWith(PAYMENT_URI_PREFIX, true)) {
+    if (qrCode.startsWith(paymentUriPrefix, true)) {
         // we have a payment uri
-        val uriWithoutPrefix = qrCode.substring(PAYMENT_URI_PREFIX.length)
+        val uriWithoutPrefix = qrCode.substring(paymentUriPrefix.length)
         return parsePaymentRequestFromQuery(uriWithoutPrefix)
 
     } else if (isValidErgoAddress(qrCode)) {

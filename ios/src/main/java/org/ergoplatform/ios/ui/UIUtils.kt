@@ -7,6 +7,7 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.coreimage.CIFilter
 import org.robovm.apple.foundation.*
 import org.robovm.apple.uikit.*
+import org.robovm.objc.Selector
 
 
 const val MAX_WIDTH = 500.0
@@ -22,8 +23,11 @@ const val IMAGE_READONLY_WALLET = "magnifyingglass"
 const val IMAGE_EXCLAMATION_MARK = "exclamationmark.circle.fill"
 const val IMAGE_NO_CONNECTION = "icloud.slash"
 const val IMAGE_SEND = "paperplane"
+const val IMAGE_QR_SCAN = "qrcode.viewfinder"
 
 const val FONT_SIZE_BODY1 = 18.0
+const val FONT_SIZE_HEADLINE2 = 24.0
+const val FONT_SIZE_TEXTBUTTON = 20.0
 
 // See https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#system-colors
 val uiColorErgo get() = UIColor.systemRed()
@@ -46,31 +50,32 @@ fun UIImageView.setQrCode(data: String, size: Int) {
     val filter = CIFilter("CIQRCodeGenerator")
     filter?.let {
         it.keyValueCoder.setValue("inputMessage", nsString)
-        val transform = CGAffineTransform.Identity()
-        transform.scale(3.0, 3.0)
+        val unscaledOutput = it.outputImage
 
-        val output = it.outputImage?.newImageByApplyingTransform(transform)
-        output?.let {
+        unscaledOutput?.let {
+            val scaleX = size / it.extent.size.width
+            val scaleY = size / it.extent.size.height
+            val transform = CGAffineTransform.createScale(scaleX, scaleY)
+
+            val output = unscaledOutput.newImageByApplyingTransform(transform)
             val image = UIImage(output)
             setImage(image)
             contentMode = UIViewContentMode.ScaleAspectFit
             backgroundColor = UIColor.systemRed()
-
         }
     }
 }
 
 fun UITextView.setHtmlText(html: String) {
-    // TODO deactivated due to crashes on GC, see https://github.com/MobiVM/robovm/issues/608
-    text = html
-//    val attributedString = NSAttributedString(
-//        NSString(html.replace("\n", "<br>"))
-//            .toData(NSStringEncoding.Unicode),
-//        NSAttributedStringDocumentAttributes().apply {
-//            documentType = NSDocumentType.HTML
-//        })
-//
-//    attributedText = attributedString
+    val attributedString = NSAttributedString(
+        NSString(html.replace("\n", "<br>"))
+            .toData(NSStringEncoding.Unicode),
+        NSAttributedStringDocumentAttributes().apply {
+            documentType = NSDocumentType.HTML
+        })
+    // TODO retain needed due to crashes on GC, see https://github.com/MobiVM/robovm/issues/608
+    attributedString.retain()
+    attributedText = attributedString
     dataDetectorTypes = UIDataDetectorTypes.Link
     isScrollEnabled = false
     isEditable = false
@@ -126,4 +131,9 @@ fun getIosSystemImage(name: String, scale: UIImageSymbolScale): UIImage? {
             scale
         )
     )
+}
+
+fun forceDismissKeyboard() {
+    UIApplication.getSharedApplication()
+        .sendAction(Selector.register("resignFirstResponder"), null, null, null)
 }
