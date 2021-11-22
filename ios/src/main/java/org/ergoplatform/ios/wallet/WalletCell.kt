@@ -36,6 +36,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     private lateinit var unconfirmedBalance: ErgoAmountView
     private lateinit var unconfirmedContainer: UIView
     private lateinit var tokenCount: Headline2Label
+    private lateinit var unfoldTokensButton: UIImageView
     private lateinit var transactionButton: UIButton
     private lateinit var receiveButton: UIButton
     private lateinit var sendButton: UIButton
@@ -130,12 +131,16 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         transactionButtonStack.spacing = DEFAULT_MARGIN
         transactionButtonStack.distribution = UIStackViewDistribution.FillEqually
 
+        unfoldTokensButton = UIImageView()
+        unfoldTokensButton.tintColor = UIColor.label()
+
         cardView.contentView.addSubviews(
             listOf(
                 stackView,
                 walletImage,
                 transactionButton,
                 transactionButtonStack,
+                unfoldTokensButton,
                 configButton
             )
         )
@@ -158,6 +163,9 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
         configButton.topToSuperview().rightToSuperview()
 
+        unfoldTokensButton.centerVerticallyTo(tokenCount)
+        unfoldTokensButton.rightToLeftOf(tokenCount, DEFAULT_MARGIN)
+
         transactionButton.addOnTouchUpInsideListener { _, _ ->
             transactionButtonClicked()
         }
@@ -172,6 +180,17 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         configButton.addGestureRecognizer(UITapGestureRecognizer {
             walletCardClicked()
         })
+
+        unfoldTokensButton.isUserInteractionEnabled = true
+        unfoldTokensButton.addGestureRecognizer(UITapGestureRecognizer { toggleTokenUnfold() })
+        tokenCount.isUserInteractionEnabled = true
+        tokenCount.addGestureRecognizer(UITapGestureRecognizer { toggleTokenUnfold() })
+    }
+
+    private fun toggleTokenUnfold() {
+        wallet?.walletConfig?.let { config ->
+            getAppDelegate().database.updateWalletDisplayTokens(!config.unfoldTokens, config.id)
+        }
     }
 
     fun bind(wallet: Wallet) {
@@ -192,13 +211,20 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
         tokenCount.isHidden = tokens.isEmpty()
+        unfoldTokensButton.isHidden = tokens.isEmpty()
+        unfoldTokensButton.image = getIosSystemImage(
+            if (!wallet.walletConfig.unfoldTokens) IMAGE_PLUS_CIRCLE else IMAGE_MINUS_CIRCLE,
+            UIImageSymbolScale.Small
+        )
 
         tokenStack.clearArrangedSubviews()
-        fillTokenOverview(tokens, {
-            tokenStack.addArrangedSubview(TokenEntryView().bindWalletToken(it))
-        }, {
-            tokenStack.addArrangedSubview(TokenEntryView().bindHasMoreTokenHint(it))
-        })
+        if (wallet.walletConfig.unfoldTokens) {
+            fillTokenOverview(tokens, {
+                tokenStack.addArrangedSubview(TokenEntryView().bindWalletToken(it))
+            }, {
+                tokenStack.addArrangedSubview(TokenEntryView().bindHasMoreTokenHint(it))
+            })
+        }
     }
 
     private fun transactionButtonClicked() {
