@@ -33,7 +33,8 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     private lateinit var nameLabel: Body1Label
     private lateinit var balanceLabel: ErgoAmountView
     private lateinit var fiatBalance: Body1Label
-    private lateinit var unconfirmedBalance: Headline2Label
+    private lateinit var unconfirmedBalance: ErgoAmountView
+    private lateinit var unconfirmedContainer: UIView
     private lateinit var tokenCount: Headline2Label
     private lateinit var transactionButton: UIButton
     private lateinit var receiveButton: UIButton
@@ -66,12 +67,29 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         cardView.widthMatchesSuperview(true, DEFAULT_MARGIN, MAX_WIDTH)
             .superViewWrapsHeight(true, 0.0)
 
+        textBundle = getAppDelegate().texts
+
         // init components. This does not work in constructor, init() method is called before constructor
         // (yes - magic of RoboVM)
         nameLabel = Body1BoldLabel()
         balanceLabel = ErgoAmountView(true, FONT_SIZE_HEADLINE1)
         fiatBalance = Body1Label()
-        unconfirmedBalance = Headline2Label()
+
+        unconfirmedBalance = ErgoAmountView(true)
+        val unconfirmedLabel = Body1Label().apply {
+            text = textBundle.get(STRING_LABEL_UNCONFIRMED)
+            setContentCompressionResistancePriority(500f, UILayoutConstraintAxis.Horizontal)
+            numberOfLines = 1
+        }
+        unconfirmedContainer = UIStackView(NSArray(unconfirmedBalance, unconfirmedLabel)).apply {
+            axis = UILayoutConstraintAxis.Horizontal
+            spacing = DEFAULT_MARGIN
+            layoutMargins = UIEdgeInsets(DEFAULT_MARGIN / 2, 0.0, 0.0, 0.0)
+            isLayoutMarginsRelativeArrangement = true
+        }
+        unconfirmedBalance.setContentCompressionResistancePriority(1000f, UILayoutConstraintAxis.Horizontal)
+        unconfirmedBalance.setContentHuggingPriority(700f, UILayoutConstraintAxis.Horizontal)
+
         val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
         tokenStack = UIStackView(CGRect.Zero()).apply {
@@ -84,7 +102,6 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             tintColor = UIColor.label()
         }
 
-        textBundle = getAppDelegate().texts
         transactionButton = CommonButton(textBundle.get(STRING_TITLE_TRANSACTIONS))
         receiveButton = CommonButton(textBundle.get(STRING_BUTTON_RECEIVE))
         sendButton = PrimaryButton(textBundle.get(STRING_BUTTON_SEND))
@@ -95,7 +112,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
                     nameLabel,
                     balanceLabel,
                     fiatBalance,
-                    unconfirmedBalance,
+                    unconfirmedContainer,
                     spacing,
                     tokenCount,
                     tokenStack
@@ -170,16 +187,14 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             nodeConnector.fiatCurrency, IosStringProvider(textBundle)
         )
         val unconfirmedErgs = wallet.getUnconfirmedBalanceForAllAddresses()
-        unconfirmedBalance.text = ErgoAmount(unconfirmedErgs).toStringRoundToDecimals() + " ERG " +
-                textBundle.get(STRING_LABEL_UNCONFIRMED)
-        unconfirmedBalance.isHidden = unconfirmedErgs == 0L
+        unconfirmedBalance.setErgoAmount(ErgoAmount(unconfirmedErgs))
+        unconfirmedContainer.isHidden = unconfirmedErgs == 0L
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
         tokenCount.isHidden = tokens.isEmpty()
 
         tokenStack.clearArrangedSubviews()
         fillTokenOverview(tokens, {
-            LogUtils.logDebug("Token", it.name!!)
             tokenStack.addArrangedSubview(TokenEntryView().bindWalletToken(it))
         }, {
             tokenStack.addArrangedSubview(TokenEntryView().bindHasMoreTokenHint(it))
