@@ -1,0 +1,38 @@
+import java.lang.Boolean;
+
+CREATE TABLE IF NOT EXISTS `wallet_configs` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `display_name` TEXT,
+    `public_address` TEXT,
+    `enc_type` INTEGER AS Int,
+    `secret_storage` BLOB,
+    `unfold_tokens` INTEGER AS Boolean NOT NULL
+);
+
+selectAll:
+SELECT * FROM wallet_configs;
+
+loadWalletByFirstAddress:
+SELECT * FROM wallet_configs WHERE public_address = ?;
+
+loadWalletById:
+SELECT * FROM wallet_configs WHERE id = ?;
+
+updateWalletDisplayNameById:
+UPDATE wallet_configs SET display_name = ? WHERE id = ?;
+
+insertOrReplace:
+INSERT OR REPLACE INTO `wallet_configs` (
+    `id`,`display_name`,`public_address`,`enc_type`,`secret_storage`,`unfold_tokens`
+) VALUES (?,?,?,?,?,?);
+
+deleteWalletById:
+DELETE FROM wallet_configs WHERE id = ?;
+
+-- wallet_tokens and state is not observed because changed only on NodeConnector and observing
+-- did not work reliably on iOS.
+observeWithState:
+SELECT DISTINCT wallet_configs.*
+FROM wallet_configs
+JOIN wallet_addresses ON wallet_addresses.wallet_first_address = wallet_configs.public_address
+LIMIT 1;

@@ -27,4 +27,6 @@ jobs:
     - name: Setup Android build environment
       uses: android-actions/setup-android@v2.0.2
     - name: Build Android
-      run: ./gradlew app:buildErgomainnetDebug --stacktrace
+      run: ./gradlew android:buildErgomainnetDebug --stacktrace
+    - name: Build classes iOS module
+      run: ./gradlew ios:buildNeeded --stacktrace

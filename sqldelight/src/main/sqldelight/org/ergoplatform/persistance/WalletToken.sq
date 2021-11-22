@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS `wallet_tokens` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `public_address` TEXT NOT NULL,
+    `wallet_first_address` TEXT NOT NULL,
+    `token_id` TEXT,
+    `amount` INTEGER,
+    `decimals` INTEGER AS Int,
+    `name` TEXT
+);
+
+deleteTokensByAddress:
+DELETE FROM wallet_tokens WHERE public_address = ?;
+
+deleteTokensByFirstAddress:
+DELETE FROM wallet_tokens WHERE wallet_first_address = ?;
+
+insertOrReplace:
+INSERT OR REPLACE INTO `wallet_tokens` (
+    `id`,`public_address`,`wallet_first_address`,`token_id`,`amount`,`decimals`,`name`
+) VALUES (?,?,?,?,?,?,?);
+
+loadWalletTokens:
+SELECT * FROM wallet_tokens WHERE wallet_first_address = ?;

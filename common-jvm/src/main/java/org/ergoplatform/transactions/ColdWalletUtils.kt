@@ -5,9 +5,9 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.ErgoBox
-import org.ergoplatform.android.deserializeErgobox
-import org.ergoplatform.android.deserializeUnsignedTx
-import org.ergoplatform.android.ergoNetworkType
+import org.ergoplatform.deserializeErgobox
+import org.ergoplatform.deserializeUnsignedTx
+import org.ergoplatform.getErgoNetworkType
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoId
 import org.ergoplatform.appkit.Iso
@@ -238,7 +238,7 @@ fun buildTransactionInfoFromReduced(
         val inputInfo = InputInfo()
         inputInfo.boxId = boxid
         inputBoxes.get(boxid)?.let {
-            inputInfo.address = Address.fromErgoTree(it.ergoTree(), ergoNetworkType).toString()
+            inputInfo.address = Address.fromErgoTree(it.ergoTree(), getErgoNetworkType()).toString()
             inputInfo.value = it.value()
             getAssetInstanceInfos(it.additionalTokens()).forEach {
                 inputInfo.addAssetsItem(it)
@@ -250,7 +250,7 @@ fun buildTransactionInfoFromReduced(
     JavaConversions.seqAsJavaList(unsignedTx.outputCandidates())!!.forEach {
         val outputInfo = OutputInfo()
 
-        outputInfo.address = Address.fromErgoTree(it.ergoTree(), ergoNetworkType).toString()
+        outputInfo.address = Address.fromErgoTree(it.ergoTree(), getErgoNetworkType()).toString()
         outputInfo.value = it.value()
 
         retVal.addOutputsItem(outputInfo)

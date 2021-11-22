@@ -1,6 +1,5 @@
 package org.ergoplatform
 
-import org.ergoplatform.android.isValidErgoAddress
 import java.net.URLDecoder
 import java.net.URLEncoder
 

@@ -8,7 +8,7 @@ Official Ergo Wallet for Android ([official announcement](https://ergoplatform.o
 
 Features:
 * generating wallets, restoring wallets in a way compatible to Yoroi and Ergo node
-* you can add read-only wallets without entering your secrets to watch balance
+* you can add read-only wallets without entering your secrets to watch balance or to prepare transactions for [cold wallet devices](https://github.com/ergoplatform/ergo-wallet-android/wiki/Cold-wallet)
 * no need to make a full sync, this is a lightweight client
 * Requesting payments by showing QR code or sharing a link
 * Sending payments, manually or by scanning a QR code
@@ -39,17 +39,8 @@ The APK file can be installed on your Android device. If you sideload for the fi
 
 ### Build yourself
 
-#### Deploy to your phone with Android Studio
-* Download Android Studio
-* Clone this repo with "New project from version control"
-* Let Android Studio download all necessary stuff
-* Enable developer mode on your phone, connect it and hit the play button in Android Studio
-
-#### Create the APK
-* Clone this repo
-* Download and install Android SDK (not necessary when you installed Android Studio)
-* Set up OpenJDK8 (not necessary when you installed Android Studio)
-* Run `./gradlew assembleDebug`
+* [Android](android/BUILD.md)
+* [iOS](ios/BUILD.md)
 
 ### Tip the developer
 
@@ -58,6 +49,5 @@ If you want to tip the developer for making this app, thanks in advance! Send yo
 
 ### Testing on Testnet
 You can test the testnet debug build on testnet. Generate a new wallet and send
-yourself some test Ergos by visiting https://faucet.ergopool.io/payment/address/TESTNET_WALLET_ADDRESS
-(replace TESTNET_WALLET_ADDRESS with your actual P2PK address)
+yourself some test Ergos by visiting https://testnet.ergofaucet.org/
 
