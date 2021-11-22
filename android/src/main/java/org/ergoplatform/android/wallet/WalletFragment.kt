@@ -30,6 +30,7 @@ import org.ergoplatform.android.tokens.inflateAndBindTokenView
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.tokens.fillTokenOverview
 import org.ergoplatform.utils.getTimeSpanString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
@@ -330,20 +331,10 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
             removeAllViews()
 
             if (wallet.walletConfig.unfoldTokens) {
-                val maxTokensToShow = 5
-                val dontShowAll = tokens.size > maxTokensToShow
-                val tokensToShow =
-                    (if (dontShowAll) tokens.subList(
-                        0,
-                        maxTokensToShow - 1
-                    ) else tokens)
                 val layoutInflater = LayoutInflater.from(context)
-                tokensToShow.forEach {
+                fillTokenOverview(tokens, {
                     inflateAndBindTokenView(it, this, layoutInflater)
-                }
-
-                // in case we don't show all items, add a hint that not all items were shown
-                if (dontShowAll) {
+                }, { moreToShowNum ->
                     val itemBinding =
                         EntryWalletTokenBinding.inflate(
                             LayoutInflater.from(itemView.context),
@@ -353,8 +344,8 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
 
                     itemBinding.labelTokenName.setText(R.string.label_more_tokens)
                     itemBinding.labelTokenVal.text =
-                        "+" + (tokens.size - maxTokensToShow + 1).toString()
-                }
+                        "+" + moreToShowNum.toString()
+                })
             }
         }
     }

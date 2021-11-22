@@ -137,3 +137,10 @@ fun forceDismissKeyboard() {
     UIApplication.getSharedApplication()
         .sendAction(Selector.register("resignFirstResponder"), null, null, null)
 }
+
+fun UIStackView.clearArrangedSubviews() {
+    arrangedSubviews.toMutableList().forEach {
+        removeArrangedSubview(it)
+        it.removeFromSuperview()
+    }
+}

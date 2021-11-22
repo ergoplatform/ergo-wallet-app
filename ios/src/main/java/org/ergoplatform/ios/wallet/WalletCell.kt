@@ -4,9 +4,11 @@ import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.getExplorerWebUrl
+import org.ergoplatform.ios.tokens.TokenEntryView
 import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.tokens.fillTokenOverview
 import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 import org.ergoplatform.uilogic.STRING_LABEL_UNCONFIRMED
@@ -37,6 +39,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     private lateinit var receiveButton: UIButton
     private lateinit var sendButton: UIButton
     private lateinit var textBundle: I18NBundle
+    private lateinit var tokenStack: UIStackView
 
     private var wallet: Wallet? = null
 
@@ -70,6 +73,12 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         unconfirmedBalance = Headline2Label()
         val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
+        tokenStack = UIStackView(CGRect.Zero()).apply {
+            axis = UILayoutConstraintAxis.Vertical
+            setSpacing(DEFAULT_MARGIN / 3)
+            layoutMargins = UIEdgeInsets(DEFAULT_MARGIN * .5, DEFAULT_MARGIN * 2, 0.0, 0.0)
+            isLayoutMarginsRelativeArrangement = true
+        }
 
         textBundle = getAppDelegate().texts
         transactionButton = CommonButton(textBundle.get(STRING_TITLE_TRANSACTIONS))
@@ -84,7 +93,8 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
                     fiatBalance,
                     unconfirmedBalance,
                     spacing,
-                    tokenCount
+                    tokenCount,
+                    tokenStack
                 )
             )
         stackView.alignment = UIStackViewAlignment.Leading
@@ -93,17 +103,18 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
         val walletImage = UIImageView(getIosSystemImage(IMAGE_WALLET, UIImageSymbolScale.Large))
         walletImage.tintColor = UIColor.secondaryLabel()
+        walletImage.setContentCompressionResistancePriority(1000f, UILayoutConstraintAxis.Horizontal)
 
-        val horizontalStack = UIStackView(NSArray(receiveButton, sendButton))
-        horizontalStack.spacing = DEFAULT_MARGIN
-        horizontalStack.distribution = UIStackViewDistribution.FillEqually
+        val transactionButtonStack = UIStackView(NSArray(receiveButton, sendButton))
+        transactionButtonStack.spacing = DEFAULT_MARGIN
+        transactionButtonStack.distribution = UIStackViewDistribution.FillEqually
 
         cardView.contentView.addSubviews(
             listOf(
                 stackView,
                 walletImage,
                 transactionButton,
-                horizontalStack
+                transactionButtonStack
             )
         )
         walletImage.topToSuperview(false, DEFAULT_MARGIN * 2)
@@ -119,7 +130,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         transactionButton.widthMatchesSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(stackView, DEFAULT_MARGIN * 3)
 
-        horizontalStack.widthMatchesSuperview(false, DEFAULT_MARGIN)
+        transactionButtonStack.widthMatchesSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(transactionButton, DEFAULT_MARGIN)
             .bottomToSuperview(false, DEFAULT_MARGIN)
 
@@ -158,6 +169,14 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
         tokenCount.isHidden = tokens.isEmpty()
+
+        tokenStack.clearArrangedSubviews()
+        fillTokenOverview(tokens, {
+            LogUtils.logDebug("Token", it.name!!)
+            tokenStack.addArrangedSubview(TokenEntryView().bindWalletToken(it))
+        }, {
+            tokenStack.addArrangedSubview(TokenEntryView().bindHasMoreTokenHint(it))
+        })
     }
 
     private fun transactionButtonClicked() {
