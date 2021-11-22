@@ -87,6 +87,8 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             spacing = DEFAULT_MARGIN
             layoutMargins = UIEdgeInsets(DEFAULT_MARGIN / 2, 0.0, 0.0, 0.0)
             isLayoutMarginsRelativeArrangement = true
+            // for some reason UI animations mess up the layout when this is initially not hidden...
+            isHidden = true
         }
         unconfirmedBalance.setContentCompressionResistancePriority(1000f, UILayoutConstraintAxis.Horizontal)
         unconfirmedBalance.setContentHuggingPriority(700f, UILayoutConstraintAxis.Horizontal)
@@ -194,6 +196,17 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     }
 
     fun bind(wallet: Wallet) {
+        if (!wallet.walletConfig.firstAddress.equals(this.wallet?.walletConfig?.firstAddress)) {
+            bindImmediately(wallet)
+        } else {
+            contentView.layer.removeAllAnimations()
+            UIView.transition(contentView, 0.3, UIViewAnimationOptions.TransitionCrossDissolve, {
+                bindImmediately(wallet)
+            }) {}
+        }
+    }
+
+    private fun bindImmediately(wallet: Wallet) {
         this.wallet = wallet
         nameLabel.text = wallet.walletConfig.displayName
         val ergoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
