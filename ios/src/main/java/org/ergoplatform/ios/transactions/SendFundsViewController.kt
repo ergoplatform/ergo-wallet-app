@@ -29,7 +29,7 @@ class SendFundsViewController(
     private lateinit var fiatLabel: UILabel
     private lateinit var readOnlyHint: UITextView
     private lateinit var feeLabel: UILabel
-    private lateinit var grossAmountLabel: UILabel
+    private lateinit var grossAmountLabel: ErgoAmountView
     private lateinit var sendButton: UIButton
 
     private lateinit var inputReceiver: UITextField
@@ -121,8 +121,11 @@ class SendFundsViewController(
         fiatLabel.isHidden = true
 
         feeLabel = Body1Label()
-        grossAmountLabel = Headline1Label()
-        grossAmountLabel.textAlignment = NSTextAlignment.Center
+        grossAmountLabel = ErgoAmountView(true, FONT_SIZE_HEADLINE1)
+        val grossAmountContainer = UIView()
+        grossAmountContainer.layoutMargins = UIEdgeInsets.Zero()
+        grossAmountContainer.addSubview(grossAmountLabel)
+        grossAmountLabel.topToSuperview().bottomToSuperview().centerHorizontal()
 
         sendButton = PrimaryButton(texts.get(STRING_BUTTON_SEND))
         sendButton.setImage(
@@ -148,7 +151,7 @@ class SendFundsViewController(
                 inputErgoAmount,
                 fiatLabel,
                 feeLabel,
-                grossAmountLabel,
+                grossAmountContainer,
                 buttonContainer
             )
         )
@@ -231,7 +234,7 @@ class SendFundsViewController(
         override fun notifyAmountsChanged() {
             runOnMainThread {
                 feeLabel.text = texts.format(STRING_DESC_FEE, feeAmount.toStringRoundToDecimals())
-                grossAmountLabel.text = grossAmount.toStringRoundToDecimals() + " ERG"
+                grossAmountLabel.setErgoAmount(grossAmount)
                 val nodeConnector = NodeConnector.getInstance()
                 fiatLabel.isHidden = (nodeConnector.fiatCurrency.isEmpty())
                 fiatLabel.text = texts.format(

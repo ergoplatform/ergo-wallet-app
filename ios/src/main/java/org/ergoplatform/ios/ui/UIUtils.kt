@@ -26,6 +26,7 @@ const val IMAGE_SEND = "paperplane"
 const val IMAGE_QR_SCAN = "qrcode.viewfinder"
 
 const val FONT_SIZE_BODY1 = 18.0
+const val FONT_SIZE_HEADLINE1 = 30.0
 const val FONT_SIZE_HEADLINE2 = 24.0
 const val FONT_SIZE_TEXTBUTTON = 20.0
 

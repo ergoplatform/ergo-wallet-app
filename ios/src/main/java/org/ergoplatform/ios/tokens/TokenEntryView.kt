@@ -28,7 +28,7 @@ class TokenEntryView : UIStackView(CGRect.Zero()) {
 
         // do not truncate the number, truncate the name instead (default resistance is 750)
         labelTokenVal.setContentCompressionResistancePriority(1000f, UILayoutConstraintAxis.Horizontal)
-        // make the name grow, not the number
+        // make the name grow, not the number (default 250)
         labelTokenVal.setContentHuggingPriority(700f, UILayoutConstraintAxis.Horizontal)
     }
 

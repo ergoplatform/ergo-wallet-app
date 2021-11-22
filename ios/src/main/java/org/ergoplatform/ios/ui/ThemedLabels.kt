@@ -46,7 +46,7 @@ class Body2Label() : ThemedLabel() {
 }
 
 class Headline1Label() : ThemedLabel() {
-    override fun getFontSize() = 30.0
+    override fun getFontSize() = FONT_SIZE_HEADLINE1
 
     override fun isBold(): Boolean {
         return true

@@ -31,7 +31,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     var clickListener: ((vc: UIViewController) -> Unit)? = null
 
     private lateinit var nameLabel: Body1Label
-    private lateinit var balanceLabel: Headline1Label
+    private lateinit var balanceLabel: ErgoAmountView
     private lateinit var fiatBalance: Body1Label
     private lateinit var unconfirmedBalance: Headline2Label
     private lateinit var tokenCount: Headline2Label
@@ -40,6 +40,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     private lateinit var sendButton: UIButton
     private lateinit var textBundle: I18NBundle
     private lateinit var tokenStack: UIStackView
+    private lateinit var configButton: UIView
 
     private var wallet: Wallet? = null
 
@@ -68,7 +69,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         // init components. This does not work in constructor, init() method is called before constructor
         // (yes - magic of RoboVM)
         nameLabel = Body1BoldLabel()
-        balanceLabel = Headline1Label()
+        balanceLabel = ErgoAmountView(true, FONT_SIZE_HEADLINE1)
         fiatBalance = Body1Label()
         unconfirmedBalance = Headline2Label()
         val spacing = UIView(CGRect.Zero())
@@ -78,6 +79,9 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             setSpacing(DEFAULT_MARGIN / 3)
             layoutMargins = UIEdgeInsets(DEFAULT_MARGIN * .5, DEFAULT_MARGIN * 2, 0.0, 0.0)
             isLayoutMarginsRelativeArrangement = true
+        }
+        configButton = UIImageView(getIosSystemImage(IMAGE_SETTINGS, UIImageSymbolScale.Small)).apply {
+            tintColor = UIColor.label()
         }
 
         textBundle = getAppDelegate().texts
@@ -114,7 +118,8 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
                 stackView,
                 walletImage,
                 transactionButton,
-                transactionButtonStack
+                transactionButtonStack,
+                configButton
             )
         )
         walletImage.topToSuperview(false, DEFAULT_MARGIN * 2)
@@ -134,6 +139,8 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             .topToBottomOf(transactionButton, DEFAULT_MARGIN)
             .bottomToSuperview(false, DEFAULT_MARGIN)
 
+        configButton.topToSuperview().rightToSuperview()
+
         transactionButton.addOnTouchUpInsideListener { _, _ ->
             transactionButtonClicked()
         }
@@ -144,8 +151,8 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
         sendButton.addOnTouchUpInsideListener { _, _ -> sendButtonClicked() }
 
-        cardView.isUserInteractionEnabled = true
-        cardView.addGestureRecognizer(UITapGestureRecognizer {
+        configButton.isUserInteractionEnabled = true
+        configButton.addGestureRecognizer(UITapGestureRecognizer {
             walletCardClicked()
         })
     }
@@ -154,7 +161,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         this.wallet = wallet
         nameLabel.text = wallet.walletConfig.displayName
         val ergoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
-        balanceLabel.text = ergoAmount.toStringRoundToDecimals() + " ERG"
+        balanceLabel.setErgoAmount(ergoAmount)
         val nodeConnector = NodeConnector.getInstance()
         val ergoPrice = nodeConnector.fiatValue.value
         fiatBalance.isHidden = ergoPrice == 0f
