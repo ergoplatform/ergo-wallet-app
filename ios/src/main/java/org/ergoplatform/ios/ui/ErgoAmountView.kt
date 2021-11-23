@@ -7,7 +7,7 @@ import org.robovm.apple.uikit.*
 class ErgoAmountView(bold: Boolean, baseSize: Double = FONT_SIZE_HEADLINE2, private val numDecimals: Int = 4) :
     UIStackView(CGRect.Zero()) {
 
-    val integerValueLabel = object : ThemedLabel() {
+    private val integerValueLabel = object : ThemedLabel() {
         override fun getFontSize(): Double {
             return baseSize
         }
@@ -17,7 +17,7 @@ class ErgoAmountView(bold: Boolean, baseSize: Double = FONT_SIZE_HEADLINE2, priv
         }
     }
 
-    val decimalValueLabel = object : ThemedLabel() {
+    private val decimalValueLabel = object : ThemedLabel() {
         override fun getFontSize(): Double {
             return baseSize * .6
         }
@@ -26,7 +26,7 @@ class ErgoAmountView(bold: Boolean, baseSize: Double = FONT_SIZE_HEADLINE2, priv
             return bold
         }
     }
-    val currencyLabel = object : ThemedLabel() {
+    private val currencyLabel = object : ThemedLabel() {
         override fun getFontSize(): Double {
             return baseSize
         }
@@ -56,8 +56,8 @@ class ErgoAmountView(bold: Boolean, baseSize: Double = FONT_SIZE_HEADLINE2, priv
         decimalValueLabel.numberOfLines = 1
         currencyLabel.numberOfLines = 1
 
-        integerValueLabel.setContentCompressionResistancePriority(1000f, UILayoutConstraintAxis.Horizontal)
-        integerValueLabel.setContentHuggingPriority(700f, UILayoutConstraintAxis.Horizontal)
+        integerValueLabel.enforceKeepIntrinsicWidth()
+        // this compression resistance should be slightly lower, so don't use enforceKeepIntrinsicWidth
         decimalValueLabel.setContentCompressionResistancePriority(900f, UILayoutConstraintAxis.Horizontal)
         decimalValueLabel.setContentHuggingPriority(700f, UILayoutConstraintAxis.Horizontal)
 

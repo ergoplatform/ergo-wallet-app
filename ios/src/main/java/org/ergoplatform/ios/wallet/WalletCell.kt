@@ -79,6 +79,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         unconfirmedBalance = ErgoAmountView(true)
         val unconfirmedLabel = Body1Label().apply {
             text = textBundle.get(STRING_LABEL_UNCONFIRMED)
+            // this label should grow in case more space is provided
             setContentCompressionResistancePriority(500f, UILayoutConstraintAxis.Horizontal)
             numberOfLines = 1
         }
@@ -90,8 +91,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             // for some reason UI animations mess up the layout when this is initially not hidden...
             isHidden = true
         }
-        unconfirmedBalance.setContentCompressionResistancePriority(1000f, UILayoutConstraintAxis.Horizontal)
-        unconfirmedBalance.setContentHuggingPriority(700f, UILayoutConstraintAxis.Horizontal)
+        unconfirmedBalance.enforceKeepIntrinsicWidth()
 
         val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
@@ -127,7 +127,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
         val walletImage = UIImageView(getIosSystemImage(IMAGE_WALLET, UIImageSymbolScale.Large))
         walletImage.tintColor = UIColor.secondaryLabel()
-        walletImage.setContentCompressionResistancePriority(1000f, UILayoutConstraintAxis.Horizontal)
+        walletImage.enforceKeepIntrinsicWidth()
 
         val transactionButtonStack = UIStackView(NSArray(receiveButton, sendButton))
         transactionButtonStack.spacing = DEFAULT_MARGIN

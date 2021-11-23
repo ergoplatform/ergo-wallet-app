@@ -162,3 +162,13 @@ fun UIStackView.clearArrangedSubviews() {
         it.removeFromSuperview()
     }
 }
+
+/**
+ * Enforce to keep the intrinsic width by not growing or shrinking this view.
+ */
+fun UIView.enforceKeepIntrinsicWidth() {
+    // default resistance is 750 - setting it higher means this view resists more than others
+    setContentCompressionResistancePriority(1000f, UILayoutConstraintAxis.Horizontal)
+    // default 250 - setting it higher means this view hugs more than others
+    setContentHuggingPriority(700f, UILayoutConstraintAxis.Horizontal)
+}

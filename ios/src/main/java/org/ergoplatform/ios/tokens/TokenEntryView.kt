@@ -1,9 +1,6 @@
 package org.ergoplatform.ios.tokens
 
-import org.ergoplatform.ios.ui.Body1BoldLabel
-import org.ergoplatform.ios.ui.Body1Label
-import org.ergoplatform.ios.ui.DEFAULT_MARGIN
-import org.ergoplatform.ios.ui.getAppDelegate
+import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.uilogic.STRING_LABEL_MORE_TOKENS
 import org.ergoplatform.utils.formatTokenAmounts
@@ -26,10 +23,8 @@ class TokenEntryView : UIStackView(CGRect.Zero()) {
         labelTokenVal.numberOfLines = 1
         labelTokenName.numberOfLines = 1
 
-        // do not truncate the number, truncate the name instead (default resistance is 750)
-        labelTokenVal.setContentCompressionResistancePriority(1000f, UILayoutConstraintAxis.Horizontal)
-        // make the name grow, not the number (default 250)
-        labelTokenVal.setContentHuggingPriority(700f, UILayoutConstraintAxis.Horizontal)
+        // never shrink or grow the value, but the name
+        labelTokenVal.enforceKeepIntrinsicWidth()
     }
 
     fun bindWalletToken(walletToken: WalletToken): TokenEntryView {
