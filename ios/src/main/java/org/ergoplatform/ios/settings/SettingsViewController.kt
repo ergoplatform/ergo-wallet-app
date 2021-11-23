@@ -61,6 +61,10 @@ class SettingsViewController : CoroutineViewController() {
         }
 
 
+        // Expert settings
+        val expertSettingsContainer = buildExpertSettings(texts)
+
+
         // Containers, Stackview, Scrollview
 
         val container = UIView()
@@ -73,6 +77,8 @@ class SettingsViewController : CoroutineViewController() {
                     moreInfo,
                     createHorizontalSeparator(),
                     fiatCurrencyContainer,
+                    createHorizontalSeparator(),
+                    expertSettingsContainer,
                     createHorizontalSeparator(),
                     showDebugInfoButton
                 )
@@ -117,10 +123,33 @@ class SettingsViewController : CoroutineViewController() {
         }
         fiatCurrencyContainer.addSubview(coingeckoLabel)
         fiatCurrencyContainer.addSubview(changeFiatCurrencyButton)
-        changeFiatCurrencyButton.widthMatchesSuperview(inset = DEFAULT_MARGIN * 2).topToSuperview()
-        coingeckoLabel.topToBottomOf(changeFiatCurrencyButton).bottomToSuperview()
-            .widthMatchesSuperview()
+        changeFiatCurrencyButton.widthMatchesSuperview(inset = DEFAULT_MARGIN * 2).bottomToSuperview()
+            .topToBottomOf(coingeckoLabel)
+        coingeckoLabel.topToSuperview().widthMatchesSuperview()
         return fiatCurrencyContainer
+    }
+
+    private fun buildExpertSettings(texts: I18NBundle): UIView {
+        val expertSettingsContainer = UIView(CGRect.Zero())
+
+        val title = Body1Label().apply {
+            text = texts.get(STRING_DESC_EXPERT_SETTINGS)
+            numberOfLines = 1
+            textAlignment = NSTextAlignment.Center
+        }
+
+        val button = TextButton(texts.get(STRING_BUTTON_CONNECTION_SETTINGS))
+        button.addOnTouchUpInsideListener { _, _ ->
+            presentViewController(UINavigationController(ConnectionSettingsViewController()), true) {}
+        }
+
+        expertSettingsContainer.addSubviews(listOf(title, button))
+        title.topToSuperview(topInset = DEFAULT_MARGIN).widthMatchesSuperview()
+        button.bottomToSuperview().topToBottomOf(title, inset = DEFAULT_MARGIN).widthMatchesSuperview(
+
+        )
+
+        return expertSettingsContainer
     }
 
     class DebugInfoViewController : UIViewController() {

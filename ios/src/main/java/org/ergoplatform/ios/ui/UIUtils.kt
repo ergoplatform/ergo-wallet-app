@@ -172,3 +172,18 @@ fun UIView.enforceKeepIntrinsicWidth() {
     // default 250 - setting it higher means this view hugs more than others
     setContentHuggingPriority(700f, UILayoutConstraintAxis.Horizontal)
 }
+
+/**
+ * adds a close button to the top left corner of this UIViewController. If no action is given,
+ * it will dismiss the view controller.
+ */
+fun UIViewController.addCloseButton(action: Runnable? = null): UIButton {
+    val closeButton = UIButton(UIButtonType.Close)
+    view.addSubview(closeButton)
+    closeButton.addOnTouchUpInsideListener { _, _ ->
+        if (action != null) action.run() else dismissViewController(true) {}
+    }
+    closeButton.topToSuperview(topInset = DEFAULT_MARGIN).leftToSuperview()
+
+    return closeButton
+}
