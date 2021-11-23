@@ -1,7 +1,6 @@
 package org.ergoplatform.ios.ui
 
 import org.ergoplatform.ios.Main
-import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.coregraphics.CGAffineTransform
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.coreimage.CIFilter
@@ -51,21 +50,19 @@ fun UIViewController.shareText(text: String, sourceView: UIView) {
 fun UIImageView.setQrCode(data: String, size: Int) {
     val nsString = NSString(data).toData(NSStringEncoding.ASCII)
     val filter = CIFilter("CIQRCodeGenerator")
-    filter?.let {
-        it.keyValueCoder.setValue("inputMessage", nsString)
-        val unscaledOutput = it.outputImage
+    filter.keyValueCoder.setValue("inputMessage", nsString)
+    val unscaledOutput = filter.outputImage
 
-        unscaledOutput?.let {
-            val scaleX = size / it.extent.size.width
-            val scaleY = size / it.extent.size.height
-            val transform = CGAffineTransform.createScale(scaleX, scaleY)
+    unscaledOutput?.let {
+        val scaleX = size / it.extent.size.width
+        val scaleY = size / it.extent.size.height
+        val transform = CGAffineTransform.createScale(scaleX, scaleY)
 
-            val output = unscaledOutput.newImageByApplyingTransform(transform)
-            val image = UIImage(output)
-            setImage(image)
-            contentMode = UIViewContentMode.ScaleAspectFit
-            backgroundColor = UIColor.systemRed()
-        }
+        val output = unscaledOutput.newImageByApplyingTransform(transform)
+        val image = UIImage(output)
+        setImage(image)
+        contentMode = UIViewContentMode.ScaleAspectFit
+        backgroundColor = UIColor.systemRed()
     }
 }
 
@@ -113,16 +110,34 @@ fun createTextField(): UITextField {
 fun UITextField.setHasError(hasError: Boolean) {
     layer.borderColor = (if (hasError) UIColor.systemRed() else UIColor.systemGray()).cgColor
     if (hasError) {
-        val errorIcon = UIImageView(getIosSystemImage(IMAGE_EXCLAMATION_MARK, UIImageSymbolScale.Small))
-        errorIcon.tintColor = UIColor.systemRed()
-        errorIcon.contentMode = UIViewContentMode.Center
-        val errorView = UIView(CGRect(0.0, 0.0, 35.0, 30.0))
-        errorView.addSubview(errorIcon)
+        val errorView = prepareTextFieldImageContainer(
+            getIosSystemImage(IMAGE_EXCLAMATION_MARK, UIImageSymbolScale.Small)!!,
+            UIColor.systemRed()
+        )
         rightView = errorView
         rightViewMode = UITextFieldViewMode.Always
     } else {
         rightView = null
     }
+}
+
+private fun prepareTextFieldImageContainer(image: UIImage, tintColor: UIColor = UIColor.label()): UIView {
+    val customIcon = UIImageView(image)
+    customIcon.tintColor = tintColor
+    customIcon.contentMode = UIViewContentMode.Center
+    val iconContainer = UIView(CGRect(0.0, 0.0, 35.0, 30.0))
+    iconContainer.addSubview(customIcon)
+    return iconContainer
+}
+
+fun UITextField.setCustomActionField(image: UIImage, action: Runnable) {
+    val iconContainer = prepareTextFieldImageContainer(image)
+    rightView = iconContainer
+    rightViewMode = UITextFieldViewMode.Always
+    iconContainer.isUserInteractionEnabled = true
+    iconContainer.addGestureRecognizer(UITapGestureRecognizer {
+        action.run()
+    })
 }
 
 fun getIosSystemImage(name: String, scale: UIImageSymbolScale): UIImage? {
