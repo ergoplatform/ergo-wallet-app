@@ -31,9 +31,11 @@
     <string name="label_confirm">Confirm</string>
     <string name="label_erg_amount">%1s ERG</string>
     <string name="label_time_span_just_now">just now</string>
+    <string name="label_time_span_moments_ago">some moments ago</string>
     <string name="label_time_span_minutes_ago">%1s minutes ago</string>
     <string name="label_time_span_hours_ago">%1s hours ago</string>
     <string name="label_time_span_days_ago">%1s days ago</string>
+    <string name="error_camera">Error initializing camera. Please check your privacy settings.</string>
 
     <!-- Wallet -->
     <string name="label_tokens">tokens</string>

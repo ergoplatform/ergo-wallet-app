@@ -1,16 +1,18 @@
 package org.ergoplatform.ios.settings
 
+import com.badlogic.gdx.utils.I18NBundle
+import org.ergoplatform.NodeConnector
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.uilogic.STRING_APP_NAME
-import org.ergoplatform.uilogic.STRING_BUTTON_SHOW_DEBUG_INFO
-import org.ergoplatform.uilogic.STRING_DESC_ABOUT
-import org.ergoplatform.uilogic.STRING_DESC_ABOUT_MOREINFO
+import org.ergoplatform.settings.SettingsUiLogic
+import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.*
 import org.robovm.apple.uikit.*
 
 class SettingsViewController : CoroutineViewController() {
+
+    private val uiLogic = SettingsUiLogic()
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -19,7 +21,6 @@ class SettingsViewController : CoroutineViewController() {
         navigationController.navigationBar?.tintColor = UIColor.label()
 
         val texts = getAppDelegate().texts
-
 
         // Header
 
@@ -37,18 +38,23 @@ class SettingsViewController : CoroutineViewController() {
         compiledBy.text = texts.get(STRING_DESC_ABOUT)
         compiledBy.textAlignment = NSTextAlignment.Center
 
-        val moreInfo = UITextView(CGRect.Zero())
-        moreInfo.setHtmlText(texts.get(STRING_DESC_ABOUT_MOREINFO))
-        moreInfo.textColor = UIColor.label()
-        moreInfo.tintColor = uiColorErgo
-        moreInfo.textAlignment = NSTextAlignment.Center
-        moreInfo.font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+        val moreInfo = UITextView(CGRect.Zero()).apply {
+            setHtmlText(texts.get(STRING_DESC_ABOUT_MOREINFO))
+            textColor = UIColor.label()
+            tintColor = uiColorErgo
+            textAlignment = NSTextAlignment.Center
+            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+        }
+
+
+        // Fiat currency setting
+        val fiatCurrencyContainer = buildFiatCurrencySettings(texts)
 
 
         // Debug information
 
-        val button = TextButton(texts.get(STRING_BUTTON_SHOW_DEBUG_INFO))
-        button.addOnTouchUpInsideListener { _, _ ->
+        val showDebugInfoButton = TextButton(texts.get(STRING_BUTTON_SHOW_DEBUG_INFO))
+        showDebugInfoButton.addOnTouchUpInsideListener { _, _ ->
             val navController = UINavigationController(DebugInfoViewController())
             navController.modalPresentationStyle = UIModalPresentationStyle.FormSheet
             this.presentViewController(navController, true) { }
@@ -58,7 +64,19 @@ class SettingsViewController : CoroutineViewController() {
         // Containers, Stackview, Scrollview
 
         val container = UIView()
-        val stackView = UIStackView(NSArray(ergoLogo, title, version, moreInfo, createHorizontalSeparator(), button))
+        val stackView =
+            UIStackView(
+                NSArray(
+                    ergoLogo,
+                    title,
+                    version,
+                    moreInfo,
+                    createHorizontalSeparator(),
+                    fiatCurrencyContainer,
+                    createHorizontalSeparator(),
+                    showDebugInfoButton
+                )
+            )
         stackView.axis = UILayoutConstraintAxis.Vertical
         stackView.spacing = DEFAULT_MARGIN
         val scrollView = container.wrapInVerticalScrollView()
@@ -69,6 +87,40 @@ class SettingsViewController : CoroutineViewController() {
 
         view.addSubview(scrollView)
         scrollView.edgesToSuperview()
+        scrollView.setDelaysContentTouches(false)
+    }
+
+    private fun buildFiatCurrencySettings(texts: I18NBundle): UIView {
+        val fiatCurrencyContainer = UIView()
+        val preferences = getAppDelegate().prefs
+        val changeFiatCurrencyButton =
+            TextButton(uiLogic.getFiatCurrencyButtonText(preferences, IosStringProvider(texts)))
+        changeFiatCurrencyButton.addOnTouchUpInsideListener { _, _ ->
+            presentViewController(DisplayCurrencyListViewController { currency ->
+                preferences.prefDisplayCurrency = currency
+                NodeConnector.getInstance().invalidateCache()
+                changeFiatCurrencyButton.setTitle(
+                    uiLogic.getFiatCurrencyButtonText(
+                        preferences,
+                        IosStringProvider(texts)
+                    ),
+                    UIControlState.Normal
+                )
+            }, true) { }
+        }
+        val coingeckoLabel = UITextView(CGRect.Zero()).apply {
+            setHtmlText(texts.get(STRING_DESC_COINGECKO))
+            textColor = UIColor.label()
+            tintColor = uiColorErgo
+            textAlignment = NSTextAlignment.Center
+            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+        }
+        fiatCurrencyContainer.addSubview(coingeckoLabel)
+        fiatCurrencyContainer.addSubview(changeFiatCurrencyButton)
+        changeFiatCurrencyButton.widthMatchesSuperview(inset = DEFAULT_MARGIN * 2).topToSuperview()
+        coingeckoLabel.topToBottomOf(changeFiatCurrencyButton).bottomToSuperview()
+            .widthMatchesSuperview()
+        return fiatCurrencyContainer
     }
 
     class DebugInfoViewController : UIViewController() {

@@ -1,6 +1,7 @@
 package org.ergoplatform.ios.wallet
 
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.parsePaymentRequestFromQrCode
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.AddReadOnlyWalletUiLogic
 import org.robovm.apple.coregraphics.CGRect
@@ -34,15 +35,31 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
 
         val descLabel = Body1Label()
         descLabel.text = texts.get(STRING_INTRO_ADD_READONLY)
-        tvAddress = createTextField()
-        tvAddress.returnKeyType = UIReturnKeyType.Done
-        tvAddress.delegate = object : UITextFieldDelegateAdapter() {
-            override fun shouldReturn(textField: UITextField?): Boolean {
-                userPressedDone(uiLogic)
-                return super.shouldReturn(textField)
+        tvAddress = createTextField().apply {
+            returnKeyType = UIReturnKeyType.Done
+            delegate = object : UITextFieldDelegateAdapter() {
+                override fun shouldReturn(textField: UITextField?): Boolean {
+                    userPressedDone(uiLogic)
+                    return super.shouldReturn(textField)
+                }
             }
+
+            val scanIcon = UIImageView(getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small))
+            scanIcon.tintColor = UIColor.label()
+            scanIcon.contentMode = UIViewContentMode.Center
+            val scanView = UIView(CGRect(0.0, 0.0, 35.0, 30.0))
+            scanView.addSubview(scanIcon)
+            rightView = scanView
+            rightViewMode = UITextFieldViewMode.Always
+            scanView.isUserInteractionEnabled = true
+            scanView.addGestureRecognizer(UITapGestureRecognizer {
+                presentViewController(QrScannerViewController {
+                    val content = parsePaymentRequestFromQrCode(it)
+                    content?.let { text = content.address }
+                }, true) {}
+            })
         }
-        // TODO qr code scan
+
 
         errorLabel = Body1Label()
         errorLabel.textColor = UIColor.systemRed()

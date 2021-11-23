@@ -2,7 +2,7 @@ package org.ergoplatform.ios.ui
 
 import org.robovm.apple.uikit.*
 
-open class CommonButton(caption: String) : TextButton(caption, false) {
+open class CommonButton(caption: String) : TextButton(caption, false, FONT_SIZE_BODY1) {
 
     init {
         contentEdgeInsets = UIEdgeInsets(8.0, 8.0, 8.0, 8.0)
@@ -14,10 +14,11 @@ open class CommonButton(caption: String) : TextButton(caption, false) {
     }
 }
 
-open class TextButton(caption: String, bold: Boolean = true) : UIButton(UIButtonType.System) {
+open class TextButton(caption: String, bold: Boolean = true, fontSize: Double = FONT_SIZE_TEXTBUTTON) :
+    UIButton(UIButtonType.System) {
     init {
         titleLabel?.font =
-            UIFont.getSystemFont(FONT_SIZE_BODY1, if (bold) UIFontWeight.Semibold else UIFontWeight.Regular)
+            UIFont.getSystemFont(fontSize, if (bold) UIFontWeight.Semibold else UIFontWeight.Regular)
         setTitleColor(uiColorErgo, UIControlState.Normal)
         setTitleColor(UIColor.secondaryLabel(), UIControlState.Highlighted)
         setTitleColor(UIColor.systemGray(), UIControlState.Disabled)

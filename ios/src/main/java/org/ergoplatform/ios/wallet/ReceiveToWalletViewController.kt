@@ -3,8 +3,9 @@ package org.ergoplatform.ios.wallet
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
-import org.ergoplatform.uilogic.STRING_LABEL_SHARE
+import org.ergoplatform.uilogic.STRING_LABEL_AMOUNT
 import org.ergoplatform.uilogic.wallet.ReceiveToWalletUiLogic
+import org.ergoplatform.utils.inputTextToDouble
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
@@ -18,6 +19,7 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
     private lateinit var addressLabel: UILabel
     private lateinit var qrCode: UIImageView
     private lateinit var addressNameLabel: UILabel
+    private lateinit var inputErgoAmount: UITextField
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -54,11 +56,35 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
             shareText(addressLabel.text, addressLabel)
         })
 
+        inputErgoAmount = createTextField().apply {
+            placeholder = texts.get(STRING_LABEL_AMOUNT)
+            keyboardType = UIKeyboardType.NumbersAndPunctuation
+            returnKeyType = UIReturnKeyType.Next
+            delegate = object : OnlyNumericInputTextFieldDelegate() {
+                override fun shouldReturn(textField: UITextField?): Boolean {
+                    resignFirstResponder()
+                    return true
+                }
+            }
+            addOnEditingChangedListener {
+                refreshQrCode()
+            }
+        }
+
         val container = UIView()
-        val stackView = UIStackView(NSArray(walletTitle, addressNameLabel, qrCodeContainer, addressLabel))
+        val stackView = UIStackView(
+            NSArray(
+                walletTitle,
+                addressNameLabel,
+                qrCodeContainer,
+                addressLabel,
+                inputErgoAmount
+            )
+        )
         stackView.axis = UILayoutConstraintAxis.Vertical
         stackView.setCustomSpacing(DEFAULT_MARGIN * 2, addressNameLabel)
         stackView.setCustomSpacing(DEFAULT_MARGIN * 2, qrCodeContainer)
+        stackView.setCustomSpacing(DEFAULT_MARGIN * 2, addressLabel)
         val scrollView = container.wrapInVerticalScrollView()
         qrCode.fixedWidth(300.0).fixedHeight(300.0).centerHorizontal().topToSuperview().bottomToSuperview()
         container.addSubview(stackView)
@@ -98,7 +124,6 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
         }
     }
 
-    // TODO for first release
     private fun getInputPurpose() = ""
-    private fun getInputAmount() = 0.0
+    private fun getInputAmount() = inputTextToDouble(inputErgoAmount.text)
 }
