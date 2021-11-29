@@ -80,8 +80,8 @@ class SendFundsViewController(
             textAlignment = NSTextAlignment.Center
             layer.borderWidth = 1.0
             layer.cornerRadius = 4.0
-            layer.borderColor = UIColor.systemGray().cgColor
-            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+            layer.borderColor = uiColorErgo.cgColor
+            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Semibold)
 
         }
 
@@ -127,12 +127,10 @@ class SendFundsViewController(
         grossAmountContainer.addSubview(grossAmountLabel)
         grossAmountLabel.topToSuperview().bottomToSuperview().centerHorizontal()
 
-        sendButton = PrimaryButton(texts.get(STRING_BUTTON_SEND))
-        sendButton.setImage(
-            getIosSystemImage(IMAGE_SEND, UIImageSymbolScale.Small), UIControlState.Normal
+        sendButton = PrimaryButton(
+            texts.get(STRING_BUTTON_SEND),
+            getIosSystemImage(IMAGE_SEND, UIImageSymbolScale.Small)
         )
-        sendButton.tintColor = UIColor.label()
-        sendButton.imageEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 15.0)
         sendButton.addOnTouchUpInsideListener { _, _ -> startPayment() }
 
         val buttonContainer = UIView()

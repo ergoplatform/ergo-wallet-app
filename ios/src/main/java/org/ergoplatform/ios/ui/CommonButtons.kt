@@ -2,7 +2,8 @@ package org.ergoplatform.ios.ui
 
 import org.robovm.apple.uikit.*
 
-open class CommonButton(caption: String) : TextButton(caption, false, FONT_SIZE_BODY1) {
+open class CommonButton(caption: String, image: UIImage? = null) :
+    TextButton(caption, false, FONT_SIZE_BODY1) {
 
     init {
         contentEdgeInsets = UIEdgeInsets(8.0, 8.0, 8.0, 8.0)
@@ -11,6 +12,12 @@ open class CommonButton(caption: String) : TextButton(caption, false, FONT_SIZE_
 
         setTitleColor(UIColor.label(), UIControlState.Normal)
         backgroundColor = UIColor.systemGray4()
+
+        image?.let {
+            setImage(image, UIControlState.Normal)
+            tintColor = UIColor.label()
+            imageEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 15.0)
+        }
     }
 }
 
@@ -29,7 +36,7 @@ open class TextButton(caption: String, bold: Boolean = true, fontSize: Double = 
     }
 }
 
-class PrimaryButton(caption: String) : CommonButton(caption) {
+class PrimaryButton(caption: String, image: UIImage? = null) : CommonButton(caption, image) {
 
     init {
         backgroundColor = uiColorErgo
