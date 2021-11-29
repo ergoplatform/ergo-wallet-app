@@ -64,7 +64,9 @@ class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorF
     private fun removeTokenClicked() {
         token?.let {
             if (inputTokenVal.text.isBlank()) {
-                uiLogic.removeToken(it.tokenId!!)
+                superview.animateLayoutChanges {
+                    uiLogic.removeToken(it.tokenId!!)
+                }
             } else {
                 inputTokenVal.text = ""
                 amountChanged()

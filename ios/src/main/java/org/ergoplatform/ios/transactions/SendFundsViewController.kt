@@ -163,7 +163,11 @@ class SendFundsViewController(
             presentViewController(
                 ChooseTokenListViewController(
                     uiLogic.getTokensToChooseFrom().sortedBy { it.name?.lowercase() }
-                ) { tokenToAdd -> uiLogic.newTokenChoosen(tokenToAdd) }, true
+                ) { tokenToAdd ->
+                    tokensUiList.superview.animateLayoutChanges {
+                        uiLogic.newTokenChoosen(tokenToAdd)
+                    }
+                }, true
             ) {}
         }
 
