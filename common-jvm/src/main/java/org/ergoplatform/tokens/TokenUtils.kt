@@ -12,7 +12,7 @@ fun fillTokenOverview(tokens: List<WalletToken>, addToken: (WalletToken) -> Unit
         (if (dontShowAll) tokens.subList(
             0,
             maxTokensToShow - 1
-        ) else tokens)
+        ) else tokens).sortedBy { it.name?.lowercase() }
     tokensToShow.forEach {
         addToken.invoke(it)
     }

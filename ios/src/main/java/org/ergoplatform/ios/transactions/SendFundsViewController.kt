@@ -3,6 +3,7 @@ package org.ergoplatform.ios.transactions
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.*
+import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.*
@@ -30,7 +31,10 @@ class SendFundsViewController(
     private lateinit var readOnlyHint: UITextView
     private lateinit var feeLabel: UILabel
     private lateinit var grossAmountLabel: ErgoAmountView
+    private lateinit var tokensUiList: UIStackView
+    private lateinit var tokensError: UILabel
     private lateinit var sendButton: UIButton
+    private lateinit var addTokenButton: UIButton
 
     private lateinit var inputReceiver: UITextField
     private lateinit var inputErgoAmount: UITextField
@@ -45,7 +49,10 @@ class SendFundsViewController(
         view.backgroundColor = UIColor.systemBackground()
         navigationController.navigationBar?.tintColor = UIColor.label()
 
-        val uiBarButtonItem = UIBarButtonItem(getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small), UIBarButtonItemStyle.Plain)
+        val uiBarButtonItem = UIBarButtonItem(
+            getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small),
+            UIBarButtonItemStyle.Plain
+        )
         uiBarButtonItem.setOnClickListener {
             presentViewController(QrScannerViewController {
                 // TODO check cold wallet QR
@@ -56,7 +63,7 @@ class SendFundsViewController(
                     content.amount.let { amount ->
                         if (amount.nanoErgs > 0) setInputAmount(amount)
                     }
-                    // TODO token uiLogic.addTokensFromQr(content.tokens)
+                    uiLogic.addTokensFromQr(content.tokens)
                 }
             }, true) {}
         }
@@ -114,6 +121,7 @@ class SendFundsViewController(
                 setHasError(false)
                 uiLogic.amountToSend = text.toErgoAmount() ?: ErgoAmount.ZERO
             }
+            // TODO full amount button
         }
 
         fiatLabel = Body1Label()
@@ -127,15 +135,43 @@ class SendFundsViewController(
         grossAmountContainer.addSubview(grossAmountLabel)
         grossAmountLabel.topToSuperview().bottomToSuperview().centerHorizontal()
 
+        tokensUiList = UIStackView(CGRect.Zero()).apply {
+            axis = UILayoutConstraintAxis.Vertical
+            isHidden = true
+            layoutMargins = UIEdgeInsets(0.0, DEFAULT_MARGIN * 3, 0.0, DEFAULT_MARGIN * 3)
+            isLayoutMarginsRelativeArrangement = true
+        }
+        tokensError = Body1Label().apply {
+            text = texts.get(STRING_ERROR_TOKEN_AMOUNT)
+            isHidden = true
+            textAlignment = NSTextAlignment.Center
+        }
+
         sendButton = PrimaryButton(
             texts.get(STRING_BUTTON_SEND),
             getIosSystemImage(IMAGE_SEND, UIImageSymbolScale.Small)
         )
         sendButton.addOnTouchUpInsideListener { _, _ -> startPayment() }
 
+        addTokenButton = CommonButton(
+            texts.get(STRING_LABEL_ADD_TOKEN), getIosSystemImage(
+                IMAGE_PLUS, UIImageSymbolScale.Small
+            )
+        )
+        addTokenButton.isHidden = true
+        addTokenButton.addOnTouchUpInsideListener { _, _ ->
+            presentViewController(
+                ChooseTokenListViewController(
+                    uiLogic.getTokensToChooseFrom().sortedBy { it.name?.lowercase() }
+                ) { tokenToAdd -> uiLogic.newTokenChoosen(tokenToAdd) }, true
+            ) {}
+        }
+
         val buttonContainer = UIView()
         buttonContainer.addSubview(sendButton)
+        buttonContainer.addSubview(addTokenButton)
         sendButton.topToSuperview().bottomToSuperview().rightToSuperview().fixedWidth(120.0)
+        addTokenButton.centerVerticallyTo(sendButton).leftToSuperview().fixedWidth(120.0)
 
         val container = UIView()
         val stackView = UIStackView(
@@ -150,6 +186,8 @@ class SendFundsViewController(
                 fiatLabel,
                 feeLabel,
                 grossAmountContainer,
+                tokensUiList,
+                tokensError,
                 buttonContainer
             )
         )
@@ -190,7 +228,7 @@ class SendFundsViewController(
             inputErgoAmount.becomeFirstResponder()
         }
         if (checkResponse.tokenError) {
-            // TODO tokens
+            tokensError.isHidden = false
         }
 
         if (checkResponse.canPay) {
@@ -226,7 +264,18 @@ class SendFundsViewController(
         }
 
         override fun notifyTokensChosenChanged() {
-            // TODO tokens
+            addTokenButton.isHidden = (uiLogic.tokensChosen.size >= uiLogic.tokensAvail.size)
+            tokensUiList.clearArrangedSubviews()
+            uiLogic.tokensChosen.forEach {
+                val ergoId = it.key
+                tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
+                        val tokenEntry = SendTokenEntryView(uiLogic, tokensError).apply {
+                            bindWalletToken(tokenEntity, it.value)
+                        }
+                        tokensUiList.addArrangedSubview(tokenEntry)
+                    }
+            }
+            tokensUiList.isHidden = uiLogic.tokensChosen.isEmpty()
         }
 
         override fun notifyAmountsChanged() {
@@ -315,8 +364,16 @@ class SendFundsViewController(
                     val message =
                         texts.get(STRING_ERROR_SEND_TRANSACTION) + (txResult.errorMsg?.let { "\n\n$it" } ?: "")
                     val alertVc =
-                        UIAlertController(texts.get(STRING_BUTTON_SEND), message, UIAlertControllerStyle.Alert)
-                    alertVc.addAction(UIAlertAction(texts.get(STRING_ZXING_BUTTON_OK), UIAlertActionStyle.Default) {})
+                        UIAlertController(
+                            texts.get(STRING_BUTTON_SEND),
+                            message,
+                            UIAlertControllerStyle.Alert
+                        )
+                    alertVc.addAction(
+                        UIAlertAction(
+                            texts.get(STRING_ZXING_BUTTON_OK),
+                            UIAlertActionStyle.Default
+                        ) {})
                     presentViewController(alertVc, true) {}
                 }
             }

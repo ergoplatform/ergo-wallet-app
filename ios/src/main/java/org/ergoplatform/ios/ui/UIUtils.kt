@@ -24,7 +24,9 @@ const val IMAGE_NO_CONNECTION = "icloud.slash"
 const val IMAGE_SEND = "paperplane"
 const val IMAGE_QR_SCAN = "qrcode.viewfinder"
 const val IMAGE_PLUS_CIRCLE = "plus.circle.fill"
+const val IMAGE_PLUS = "plus"
 const val IMAGE_MINUS_CIRCLE = "minus.circle.fill"
+const val IMAGE_CROSS_CIRCLE = "xmark.circle"
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
@@ -186,4 +188,8 @@ fun UIViewController.addCloseButton(action: Runnable? = null): UIButton {
     closeButton.topToSuperview(topInset = DEFAULT_MARGIN).leftToSuperview()
 
     return closeButton
+}
+
+fun UIView.animateLayoutChanges(block: Runnable) {
+    UIView.transition(this, 0.3, UIViewAnimationOptions.TransitionCrossDissolve, block) {}
 }

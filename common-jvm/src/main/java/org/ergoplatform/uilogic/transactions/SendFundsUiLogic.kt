@@ -247,6 +247,11 @@ abstract class SendFundsUiLogic() {
         }
     }
 
+    fun tokenAmountToText(amount: Long, decimals: Int) =
+        if (amount > 0)
+            TokenAmount(amount, decimals).toString()
+        else ""
+
     fun addTokensFromQr(tokens: HashMap<String, String>) {
         var changed = false
         tokens.forEach {

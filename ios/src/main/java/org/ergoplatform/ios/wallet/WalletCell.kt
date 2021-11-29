@@ -5,6 +5,7 @@ import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.ios.tokens.TokenEntryView
+import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
 import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
@@ -200,9 +201,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             bindImmediately(wallet)
         } else {
             contentView.layer.removeAllAnimations()
-            UIView.transition(contentView, 0.3, UIViewAnimationOptions.TransitionCrossDissolve, {
-                bindImmediately(wallet)
-            }) {}
+            contentView.animateLayoutChanges { bindImmediately(wallet) }
         }
     }
 

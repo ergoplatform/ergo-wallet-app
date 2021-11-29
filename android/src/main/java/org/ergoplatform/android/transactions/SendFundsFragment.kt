@@ -288,7 +288,10 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                             TokenAmountWatcher(tokenDbEntity)
                         )
                         itemBinding.inputTokenAmount.setText(
-                            tokenAmountToText(it.value.value, tokenDbEntity.decimals)
+                            viewModel.uiLogic.tokenAmountToText(
+                                it.value.value,
+                                tokenDbEntity.decimals
+                            )
                         )
                         itemBinding.buttonTokenRemove.setOnClickListener {
                             if (itemBinding.inputTokenAmount.text.isEmpty()) {
@@ -299,18 +302,16 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                         }
                         itemBinding.buttonTokenAll.setOnClickListener {
                             itemBinding.inputTokenAmount.setText(
-                                tokenAmountToText(tokenDbEntity.amount!!, tokenDbEntity.decimals)
+                                viewModel.uiLogic.tokenAmountToText(
+                                    tokenDbEntity.amount!!,
+                                    tokenDbEntity.decimals
+                                )
                             )
                         }
                     }
             }
         }
     }
-
-    private fun tokenAmountToText(amount: Long, decimals: Int) =
-        if (amount > 0)
-            TokenAmount(amount, decimals).toString()
-        else ""
 
     private fun setAmountEdittext(amountToSend: ErgoAmount) {
         binding.amount.editText?.setText(amountToSend.toStringTrimTrailingZeros())
