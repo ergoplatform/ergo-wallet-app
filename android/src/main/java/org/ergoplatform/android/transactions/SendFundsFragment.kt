@@ -37,7 +37,6 @@ import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
-import kotlin.math.max
 
 
 /**
@@ -201,15 +200,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             ChooseTokenListDialogFragment().show(childFragmentManager, null)
         }
         binding.amount.setEndIconOnClickListener {
-            setAmountEdittext(
-                ErgoAmount(
-                    max(
-                        0L,
-                        (viewModel.walletBalance.value?.nanoErgs ?: 0L)
-                                - (viewModel.uiLogic.feeAmount.nanoErgs)
-                    )
-                )
-            )
+            setAmountEdittext(viewModel.uiLogic.getMaxPossibleAmountToSend())
         }
         binding.hintReadonly.setOnClickListener {
             openUrlWithBrowser(requireContext(), URL_COLD_WALLET_HELP)
@@ -288,7 +279,10 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                             TokenAmountWatcher(tokenDbEntity)
                         )
                         itemBinding.inputTokenAmount.setText(
-                            tokenAmountToText(it.value.value, tokenDbEntity.decimals)
+                            viewModel.uiLogic.tokenAmountToText(
+                                it.value.value,
+                                tokenDbEntity.decimals
+                            )
                         )
                         itemBinding.buttonTokenRemove.setOnClickListener {
                             if (itemBinding.inputTokenAmount.text.isEmpty()) {
@@ -299,18 +293,16 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                         }
                         itemBinding.buttonTokenAll.setOnClickListener {
                             itemBinding.inputTokenAmount.setText(
-                                tokenAmountToText(tokenDbEntity.amount!!, tokenDbEntity.decimals)
+                                viewModel.uiLogic.tokenAmountToText(
+                                    tokenDbEntity.amount!!,
+                                    tokenDbEntity.decimals
+                                )
                             )
                         }
                     }
             }
         }
     }
-
-    private fun tokenAmountToText(amount: Long, decimals: Int) =
-        if (amount > 0)
-            TokenAmount(amount, decimals).toString()
-        else ""
 
     private fun setAmountEdittext(amountToSend: ErgoAmount) {
         binding.amount.editText?.setText(amountToSend.toStringTrimTrailingZeros())

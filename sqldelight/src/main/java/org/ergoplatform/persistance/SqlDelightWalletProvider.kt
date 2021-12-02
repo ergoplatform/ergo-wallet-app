@@ -49,6 +49,10 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         appDb.walletConfigQueries.updateWalletDisplayNameById(displayName, walletId.toLong())
     }
 
+    fun updateWalletDisplayTokens(displayTokens: Boolean, walletId: Int) {
+        appDb.walletConfigQueries.updateWalletTokensUnfold(displayTokens, walletId.toLong())
+    }
+
     override suspend fun insertWalletConfig(walletConfig: WalletConfig) {
         // same code here
         updateWalletConfig(walletConfig)

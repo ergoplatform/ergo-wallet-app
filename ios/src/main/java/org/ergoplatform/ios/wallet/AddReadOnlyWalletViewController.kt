@@ -44,20 +44,12 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
                 }
             }
 
-            val scanIcon = UIImageView(getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small))
-            scanIcon.tintColor = UIColor.label()
-            scanIcon.contentMode = UIViewContentMode.Center
-            val scanView = UIView(CGRect(0.0, 0.0, 35.0, 30.0))
-            scanView.addSubview(scanIcon)
-            rightView = scanView
-            rightViewMode = UITextFieldViewMode.Always
-            scanView.isUserInteractionEnabled = true
-            scanView.addGestureRecognizer(UITapGestureRecognizer {
+            setCustomActionField(getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small)!!) {
                 presentViewController(QrScannerViewController {
                     val content = parsePaymentRequestFromQrCode(it)
                     content?.let { text = content.address }
                 }, true) {}
-            })
+            }
         }
 
 

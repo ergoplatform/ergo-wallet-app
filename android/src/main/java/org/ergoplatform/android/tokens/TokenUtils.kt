@@ -22,6 +22,6 @@ fun inflateAndBindTokenView(
     itemBinding.labelTokenVal.text =
         formatTokenAmounts(
             walletToken.amount ?: 0,
-            walletToken.decimals ?: 0,
+            walletToken.decimals,
         )
 }

@@ -11,7 +11,7 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
-class WalletConfigViewController(val walletId: Int) : ViewControllerWithKeyboardLayoutGuide() {
+class WalletConfigViewController(private val walletId: Int) : ViewControllerWithKeyboardLayoutGuide() {
 
     private lateinit var addressLabel: UILabel
     private lateinit var nameInputField: UITextField
@@ -160,7 +160,10 @@ class WalletConfigViewController(val walletId: Int) : ViewControllerWithKeyboard
             if (it.isNotBlank()) {
                 viewControllerScope.launch(Dispatchers.IO) {
                     getAppDelegate().database.updateWalletDisplayName(it, walletId)
-                    runOnMainThread { nameChangeApplyButton.isEnabled = false }
+                    runOnMainThread {
+                        nameChangeApplyButton.isEnabled = false
+                        nameInputField.resignFirstResponder()
+                    }
                 }
             }
         }

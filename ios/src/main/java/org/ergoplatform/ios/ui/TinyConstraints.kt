@@ -73,6 +73,36 @@ fun UIView.topToBottomOf(
     return this
 }
 
+fun UIView.topToTopOf(
+    sibling: UIView,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val topConstraint = this.topAnchor.equalTo(
+        sibling.topAnchor,
+        inset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+
+    return this
+}
+
+fun UIView.centerVerticallyTo(
+    sibling: UIView,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val topConstraint = this.centerYAnchor.equalTo(
+        sibling.centerYAnchor,
+        inset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+
+    return this
+}
+
 fun UIView.bottomToKeyboard(
     vc: ViewControllerWithKeyboardLayoutGuide,
     inset: Double = 0.0

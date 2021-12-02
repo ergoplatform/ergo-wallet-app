@@ -4,9 +4,12 @@ import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.getExplorerWebUrl
+import org.ergoplatform.ios.tokens.TokenEntryView
+import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
 import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.tokens.fillTokenOverview
 import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 import org.ergoplatform.uilogic.STRING_LABEL_UNCONFIRMED
@@ -29,14 +32,18 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     var clickListener: ((vc: UIViewController) -> Unit)? = null
 
     private lateinit var nameLabel: Body1Label
-    private lateinit var balanceLabel: Headline1Label
+    private lateinit var balanceLabel: ErgoAmountView
     private lateinit var fiatBalance: Body1Label
-    private lateinit var unconfirmedBalance: Headline2Label
+    private lateinit var unconfirmedBalance: ErgoAmountView
+    private lateinit var unconfirmedContainer: UIView
     private lateinit var tokenCount: Headline2Label
+    private lateinit var unfoldTokensButton: UIImageView
     private lateinit var transactionButton: UIButton
     private lateinit var receiveButton: UIButton
     private lateinit var sendButton: UIButton
     private lateinit var textBundle: I18NBundle
+    private lateinit var tokenStack: UIStackView
+    private lateinit var configButton: UIView
 
     private var wallet: Wallet? = null
 
@@ -62,16 +69,43 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         cardView.widthMatchesSuperview(true, DEFAULT_MARGIN, MAX_WIDTH)
             .superViewWrapsHeight(true, 0.0)
 
+        textBundle = getAppDelegate().texts
+
         // init components. This does not work in constructor, init() method is called before constructor
         // (yes - magic of RoboVM)
         nameLabel = Body1BoldLabel()
-        balanceLabel = Headline1Label()
+        balanceLabel = ErgoAmountView(true, FONT_SIZE_HEADLINE1)
         fiatBalance = Body1Label()
-        unconfirmedBalance = Headline2Label()
+
+        unconfirmedBalance = ErgoAmountView(true)
+        val unconfirmedLabel = Body1Label().apply {
+            text = textBundle.get(STRING_LABEL_UNCONFIRMED)
+            // this label should grow in case more space is provided
+            setContentCompressionResistancePriority(500f, UILayoutConstraintAxis.Horizontal)
+            numberOfLines = 1
+        }
+        unconfirmedContainer = UIStackView(NSArray(unconfirmedBalance, unconfirmedLabel)).apply {
+            axis = UILayoutConstraintAxis.Horizontal
+            spacing = DEFAULT_MARGIN
+            layoutMargins = UIEdgeInsets(DEFAULT_MARGIN / 2, 0.0, 0.0, 0.0)
+            isLayoutMarginsRelativeArrangement = true
+            // for some reason UI animations mess up the layout when this is initially not hidden...
+            isHidden = true
+        }
+        unconfirmedBalance.enforceKeepIntrinsicWidth()
+
         val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
+        tokenStack = UIStackView(CGRect.Zero()).apply {
+            axis = UILayoutConstraintAxis.Vertical
+            setSpacing(DEFAULT_MARGIN / 3)
+            layoutMargins = UIEdgeInsets(DEFAULT_MARGIN * .5, DEFAULT_MARGIN * 2, 0.0, 0.0)
+            isLayoutMarginsRelativeArrangement = true
+        }
+        configButton = UIImageView(getIosSystemImage(IMAGE_SETTINGS, UIImageSymbolScale.Small)).apply {
+            tintColor = UIColor.label()
+        }
 
-        textBundle = getAppDelegate().texts
         transactionButton = CommonButton(textBundle.get(STRING_TITLE_TRANSACTIONS))
         receiveButton = CommonButton(textBundle.get(STRING_BUTTON_RECEIVE))
         sendButton = PrimaryButton(textBundle.get(STRING_BUTTON_SEND))
@@ -82,9 +116,10 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
                     nameLabel,
                     balanceLabel,
                     fiatBalance,
-                    unconfirmedBalance,
+                    unconfirmedContainer,
                     spacing,
-                    tokenCount
+                    tokenCount,
+                    tokenStack
                 )
             )
         stackView.alignment = UIStackViewAlignment.Leading
@@ -93,17 +128,23 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
         val walletImage = UIImageView(getIosSystemImage(IMAGE_WALLET, UIImageSymbolScale.Large))
         walletImage.tintColor = UIColor.secondaryLabel()
+        walletImage.enforceKeepIntrinsicWidth()
 
-        val horizontalStack = UIStackView(NSArray(receiveButton, sendButton))
-        horizontalStack.spacing = DEFAULT_MARGIN
-        horizontalStack.distribution = UIStackViewDistribution.FillEqually
+        val transactionButtonStack = UIStackView(NSArray(receiveButton, sendButton))
+        transactionButtonStack.spacing = DEFAULT_MARGIN
+        transactionButtonStack.distribution = UIStackViewDistribution.FillEqually
+
+        unfoldTokensButton = UIImageView()
+        unfoldTokensButton.tintColor = UIColor.label()
 
         cardView.contentView.addSubviews(
             listOf(
                 stackView,
                 walletImage,
                 transactionButton,
-                horizontalStack
+                transactionButtonStack,
+                unfoldTokensButton,
+                configButton
             )
         )
         walletImage.topToSuperview(false, DEFAULT_MARGIN * 2)
@@ -119,9 +160,14 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         transactionButton.widthMatchesSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(stackView, DEFAULT_MARGIN * 3)
 
-        horizontalStack.widthMatchesSuperview(false, DEFAULT_MARGIN)
+        transactionButtonStack.widthMatchesSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(transactionButton, DEFAULT_MARGIN)
             .bottomToSuperview(false, DEFAULT_MARGIN)
+
+        configButton.topToSuperview().rightToSuperview()
+
+        unfoldTokensButton.centerVerticallyTo(tokenCount)
+        unfoldTokensButton.rightToLeftOf(tokenCount, DEFAULT_MARGIN)
 
         transactionButton.addOnTouchUpInsideListener { _, _ ->
             transactionButtonClicked()
@@ -133,17 +179,37 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
         sendButton.addOnTouchUpInsideListener { _, _ -> sendButtonClicked() }
 
-        cardView.isUserInteractionEnabled = true
-        cardView.addGestureRecognizer(UITapGestureRecognizer {
+        configButton.isUserInteractionEnabled = true
+        configButton.addGestureRecognizer(UITapGestureRecognizer {
             walletCardClicked()
         })
+
+        unfoldTokensButton.isUserInteractionEnabled = true
+        unfoldTokensButton.addGestureRecognizer(UITapGestureRecognizer { toggleTokenUnfold() })
+        tokenCount.isUserInteractionEnabled = true
+        tokenCount.addGestureRecognizer(UITapGestureRecognizer { toggleTokenUnfold() })
+    }
+
+    private fun toggleTokenUnfold() {
+        wallet?.walletConfig?.let { config ->
+            getAppDelegate().database.updateWalletDisplayTokens(!config.unfoldTokens, config.id)
+        }
     }
 
     fun bind(wallet: Wallet) {
+        if (!wallet.walletConfig.firstAddress.equals(this.wallet?.walletConfig?.firstAddress)) {
+            bindImmediately(wallet)
+        } else {
+            contentView.layer.removeAllAnimations()
+            contentView.animateLayoutChanges { bindImmediately(wallet) }
+        }
+    }
+
+    private fun bindImmediately(wallet: Wallet) {
         this.wallet = wallet
         nameLabel.text = wallet.walletConfig.displayName
         val ergoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
-        balanceLabel.text = ergoAmount.toStringRoundToDecimals() + " ERG"
+        balanceLabel.setErgoAmount(ergoAmount)
         val nodeConnector = NodeConnector.getInstance()
         val ergoPrice = nodeConnector.fiatValue.value
         fiatBalance.isHidden = ergoPrice == 0f
@@ -152,12 +218,25 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             nodeConnector.fiatCurrency, IosStringProvider(textBundle)
         )
         val unconfirmedErgs = wallet.getUnconfirmedBalanceForAllAddresses()
-        unconfirmedBalance.text = ErgoAmount(unconfirmedErgs).toStringRoundToDecimals() + " ERG " +
-                textBundle.get(STRING_LABEL_UNCONFIRMED)
-        unconfirmedBalance.isHidden = unconfirmedErgs == 0L
+        unconfirmedBalance.setErgoAmount(ErgoAmount(unconfirmedErgs))
+        unconfirmedContainer.isHidden = unconfirmedErgs == 0L
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
         tokenCount.isHidden = tokens.isEmpty()
+        unfoldTokensButton.isHidden = tokens.isEmpty()
+        unfoldTokensButton.image = getIosSystemImage(
+            if (!wallet.walletConfig.unfoldTokens) IMAGE_PLUS_CIRCLE else IMAGE_MINUS_CIRCLE,
+            UIImageSymbolScale.Small
+        )
+
+        tokenStack.clearArrangedSubviews()
+        if (wallet.walletConfig.unfoldTokens) {
+            fillTokenOverview(tokens, {
+                tokenStack.addArrangedSubview(TokenEntryView().bindWalletToken(it))
+            }, {
+                tokenStack.addArrangedSubview(TokenEntryView().bindHasMoreTokenHint(it))
+            })
+        }
     }
 
     private fun transactionButtonClicked() {
