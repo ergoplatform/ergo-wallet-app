@@ -8,11 +8,12 @@ import org.ergoplatform.persistance.WalletToken
 fun fillTokenOverview(tokens: List<WalletToken>, addToken: (WalletToken) -> Unit, addMoreTokenHint: (Int) -> Unit) {
     val maxTokensToShow = 5
     val dontShowAll = tokens.size > maxTokensToShow
+    val tokensSorted = tokens.sortedBy { it.name?.lowercase() }
     val tokensToShow =
-        (if (dontShowAll) tokens.subList(
+        (if (dontShowAll) tokensSorted.subList(
             0,
             maxTokensToShow - 1
-        ) else tokens).sortedBy { it.name?.lowercase() }
+        ) else tokensSorted)
     tokensToShow.forEach {
         addToken.invoke(it)
     }

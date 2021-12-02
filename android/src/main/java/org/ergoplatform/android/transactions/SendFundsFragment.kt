@@ -37,7 +37,6 @@ import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
-import kotlin.math.max
 
 
 /**
@@ -201,15 +200,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             ChooseTokenListDialogFragment().show(childFragmentManager, null)
         }
         binding.amount.setEndIconOnClickListener {
-            setAmountEdittext(
-                ErgoAmount(
-                    max(
-                        0L,
-                        (viewModel.walletBalance.value?.nanoErgs ?: 0L)
-                                - (viewModel.uiLogic.feeAmount.nanoErgs)
-                    )
-                )
-            )
+            setAmountEdittext(viewModel.uiLogic.getMaxPossibleAmountToSend())
         }
         binding.hintReadonly.setOnClickListener {
             openUrlWithBrowser(requireContext(), URL_COLD_WALLET_HELP)

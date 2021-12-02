@@ -118,11 +118,11 @@ class SendFundsViewController(
                 }
             }
             addOnEditingChangedListener {
-                setHasError(false)
+                hasAmountError = false
                 uiLogic.amountToSend = text.toErgoAmount() ?: ErgoAmount.ZERO
             }
-            // TODO full amount button
         }
+        addMaxAmountActionToTextField()
 
         fiatLabel = Body1Label()
         fiatLabel.textAlignment = NSTextAlignment.Right
@@ -138,13 +138,14 @@ class SendFundsViewController(
         tokensUiList = UIStackView(CGRect.Zero()).apply {
             axis = UILayoutConstraintAxis.Vertical
             isHidden = true
-            layoutMargins = UIEdgeInsets(0.0, DEFAULT_MARGIN * 3, 0.0, DEFAULT_MARGIN * 3)
+            layoutMargins = UIEdgeInsets(0.0, DEFAULT_MARGIN, 0.0, DEFAULT_MARGIN)
             isLayoutMarginsRelativeArrangement = true
         }
         tokensError = Body1Label().apply {
             text = texts.get(STRING_ERROR_TOKEN_AMOUNT)
             isHidden = true
             textAlignment = NSTextAlignment.Center
+            textColor = uiColorErgo
         }
 
         sendButton = PrimaryButton(
@@ -162,7 +163,7 @@ class SendFundsViewController(
         addTokenButton.addOnTouchUpInsideListener { _, _ ->
             presentViewController(
                 ChooseTokenListViewController(
-                    uiLogic.getTokensToChooseFrom().sortedBy { it.name?.lowercase() }
+                    uiLogic.getTokensToChooseFrom()
                 ) { tokenToAdd ->
                     tokensUiList.superview.animateLayoutChanges {
                         uiLogic.newTokenChoosen(tokenToAdd)
@@ -211,6 +212,28 @@ class SendFundsViewController(
         scrollView.isHidden = true
     }
 
+    private var hasAmountError = false
+        set(hasError) {
+            if (field != hasError) {
+                field = hasError
+                inputErgoAmount.setHasError(hasError)
+
+                // restore the max amount action button when error state is reset
+                if (!hasError) {
+                    addMaxAmountActionToTextField()
+                }
+            }
+        }
+
+    private fun addMaxAmountActionToTextField() {
+        inputErgoAmount.setCustomActionField(
+            getIosSystemImage(
+                IMAGE_FULL_AMOUNT,
+                UIImageSymbolScale.Small
+            )!!
+        ) { setInputAmount(uiLogic.getMaxPossibleAmountToSend()) }
+    }
+
     private fun setInputAmount(amountToSend: ErgoAmount) {
         inputErgoAmount.text = amountToSend.toStringTrimTrailingZeros()
         inputErgoAmount.sendControlEventsActions(UIControlEvents.EditingChanged)
@@ -225,14 +248,16 @@ class SendFundsViewController(
         val checkResponse = uiLogic.checkCanMakePayment()
 
         inputReceiver.setHasError(checkResponse.receiverError)
-        inputErgoAmount.setHasError(checkResponse.amountError)
+        hasAmountError = checkResponse.amountError
         if (checkResponse.receiverError) {
             inputReceiver.becomeFirstResponder()
         } else if (checkResponse.amountError) {
             inputErgoAmount.becomeFirstResponder()
         }
         if (checkResponse.tokenError) {
-            tokensError.isHidden = false
+            tokensError.setHiddenAnimated(false)
+            (tokensUiList.arrangedSubviews.firstOrNull { (it as? SendTokenEntryView)?.hasAmount() == false }
+                    as? SendTokenEntryView)?.setFocus()
         }
 
         if (checkResponse.canPay) {

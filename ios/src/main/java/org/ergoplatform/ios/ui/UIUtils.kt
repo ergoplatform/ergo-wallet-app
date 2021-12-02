@@ -27,6 +27,7 @@ const val IMAGE_PLUS_CIRCLE = "plus.circle.fill"
 const val IMAGE_PLUS = "plus"
 const val IMAGE_MINUS_CIRCLE = "minus.circle.fill"
 const val IMAGE_CROSS_CIRCLE = "xmark.circle"
+const val IMAGE_FULL_AMOUNT = "arrow.down.circle"
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
@@ -192,4 +193,10 @@ fun UIViewController.addCloseButton(action: Runnable? = null): UIButton {
 
 fun UIView.animateLayoutChanges(block: Runnable) {
     UIView.transition(this, 0.3, UIViewAnimationOptions.TransitionCrossDissolve, block) {}
+}
+
+fun UIView.setHiddenAnimated(hidden: Boolean) {
+    if (hidden != isHidden) {
+        superview.animateLayoutChanges { isHidden = hidden }
+    }
 }

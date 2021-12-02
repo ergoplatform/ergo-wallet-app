@@ -40,11 +40,29 @@ class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorF
                 contentMode = UIViewContentMode.Center
             }
 
+        val maxAmountImageView = UIImageView(getIosSystemImage(IMAGE_FULL_AMOUNT, UIImageSymbolScale.Small)).apply {
+            tintColor = UIColor.label()
+            contentMode = UIViewContentMode.Center
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UITapGestureRecognizer {
+                token?.let { token ->
+                    inputTokenVal.text = uiLogic.tokenAmountToText(
+                        token.amount!!,
+                        token.decimals
+                    )
+                    amountChanged()
+                }
+            })
+        }
+
+        addArrangedSubview(maxAmountImageView)
         addArrangedSubview(inputTokenVal)
         addArrangedSubview(labelTokenName)
         addArrangedSubview(removeImageView)
 
-        inputTokenVal.fixedWidth(85.0)
+        maxAmountImageView.enforceKeepIntrinsicWidth()
+
+        inputTokenVal.fixedWidth(80.0)
         inputTokenVal.enforceKeepIntrinsicWidth()
 
         removeImageView.enforceKeepIntrinsicWidth()
@@ -52,8 +70,6 @@ class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorF
         removeImageView.addGestureRecognizer(UITapGestureRecognizer {
             removeTokenClicked()
         })
-
-        // TODO full amount button
 
         labelTokenName.numberOfLines = 1
 
@@ -76,16 +92,25 @@ class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorF
 
     private fun amountChanged() {
         token?.let { token ->
-            val amountString = inputTokenVal.text
-            uiLogic.setTokenAmount(
-                token.tokenId!!,
-                amountString.toTokenAmount(token.decimals) ?: TokenAmount(
-                    0,
-                    token.decimals
-                )
-            )
-            amountErrorField.isHidden = true
+            val amount = getInputAmount()
+            uiLogic.setTokenAmount(token.tokenId!!, amount)
+            amountErrorField.setHiddenAnimated(true)
         }
+    }
+
+    private fun getInputAmount(): TokenAmount {
+        val amountString = inputTokenVal.text
+        val amount =
+            amountString.toTokenAmount(token!!.decimals) ?: TokenAmount(0, token!!.decimals)
+        return amount
+    }
+
+    fun hasAmount(): Boolean {
+        return token?.let { getInputAmount().rawValue > 0 } ?: false
+    }
+
+    fun setFocus() {
+        inputTokenVal.becomeFirstResponder()
     }
 
     fun bindWalletToken(walletToken: WalletToken, ergoToken: ErgoToken): SendTokenEntryView {
