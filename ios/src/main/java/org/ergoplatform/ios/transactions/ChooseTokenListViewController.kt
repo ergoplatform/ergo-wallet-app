@@ -10,6 +10,9 @@ import org.robovm.apple.uikit.*
 
 const val TOKEN_CELL = "TOKEN_CELL"
 
+/**
+ * Let the user choose one or more token(s) from a list of tokens
+ */
 class ChooseTokenListViewController(
     val tokensToChooseFrom: List<WalletToken>,
     val onChoose: (String) -> Unit

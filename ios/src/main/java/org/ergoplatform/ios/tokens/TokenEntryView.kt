@@ -8,6 +8,9 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.UILayoutConstraintAxis
 import org.robovm.apple.uikit.UIStackView
 
+/**
+ * View template for displaying token information on wallet overview and wallet details screen
+ */
 class TokenEntryView : UIStackView(CGRect.Zero()) {
 
     private val labelTokenVal = Body1BoldLabel()

@@ -9,6 +9,9 @@ import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
+/**
+ * View template for sending token entry on send funds screen
+ */
 class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorField: UIView) :
     UIStackView(CGRect.Zero()) {
 
