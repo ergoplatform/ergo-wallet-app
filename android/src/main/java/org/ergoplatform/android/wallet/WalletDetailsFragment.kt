@@ -6,7 +6,10 @@ import android.os.Handler
 import android.os.Looper
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.GlobalScope
@@ -187,18 +190,18 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
         // Fill fiat value
         val nodeConnector = NodeConnector.getInstance()
-        val ergoPrice = nodeConnector.fiatValue.value ?: 0f
+        val ergoPrice = nodeConnector.fiatValue.value
         if (ergoPrice == 0f) {
             binding.walletFiat.visibility = View.GONE
         } else {
             binding.walletFiat.visibility = View.VISIBLE
             binding.walletFiat.amount = ergoPrice * binding.walletBalance.amount
-            binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.toUpperCase())
+            binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.uppercase())
         }
 
         // tokens
-        val tokensList = address?.let { wallet.getTokensForAddress(address) }
-            ?: wallet.getTokensForAllAddresses()
+        val tokensList = (address?.let { wallet.getTokensForAddress(address) }
+            ?: wallet.getTokensForAllAddresses()).sortedBy { it.name?.lowercase() }
         binding.cardviewTokens.visibility = if (tokensList.size > 0) View.VISIBLE else View.GONE
         binding.walletTokenNum.text = tokensList.size.toString()
 

@@ -25,12 +25,7 @@ class DisplayCurrencyListViewController(private val clickListener: (String) -> U
         view.addSubview(activityView)
         activityView.centerVertical().centerHorizontal()
 
-        closeButton = UIButton(UIButtonType.Close)
-        view.addSubview(closeButton)
-        closeButton.addOnTouchUpInsideListener { _, _ ->
-            dismissViewController(true) {}
-        }
-        closeButton.topToSuperview(topInset = DEFAULT_MARGIN).leftToSuperview()
+        closeButton = addCloseButton()
 
         errorLabel = Body1BoldLabel()
         errorLabel.textAlignment = NSTextAlignment.Center

@@ -15,6 +15,7 @@ import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.wallet.*
+import kotlin.math.max
 
 abstract class SendFundsUiLogic() {
     abstract val coroutineScope: CoroutineScope
@@ -128,6 +129,15 @@ abstract class SendFundsUiLogic() {
         notifyAmountsChanged()
     }
 
+    fun getMaxPossibleAmountToSend(): ErgoAmount {
+        return ErgoAmount(
+            max(
+                0L,
+                (balance.nanoErgs) - (feeAmount.nanoErgs)
+            )
+        )
+    }
+
     fun checkCanMakePayment(): CheckCanPayResponse {
         val receiverOk = isValidErgoAddress(receiverAddress)
         val amountOk = amountToSend.nanoErgs >= Parameters.MinChangeValue
@@ -225,7 +235,7 @@ abstract class SendFundsUiLogic() {
     fun getTokensToChooseFrom(): List<WalletToken> {
         return tokensAvail.filter {
             !tokensChosen.containsKey(it.tokenId)
-        }
+        }.sortedBy { it.name?.lowercase() }
     }
 
     fun newTokenChoosen(tokenId: String) {
@@ -247,6 +257,11 @@ abstract class SendFundsUiLogic() {
         }
     }
 
+    fun tokenAmountToText(amount: Long, decimals: Int) =
+        if (amount > 0)
+            TokenAmount(amount, decimals).toStringTrimTrailingZeros()
+        else ""
+
     fun addTokensFromQr(tokens: HashMap<String, String>) {
         var changed = false
         tokens.forEach {
@@ -255,7 +270,7 @@ abstract class SendFundsUiLogic() {
 
             // we need to check for existence here, QR code might have any String, not an ID
             tokensAvail.filter { it.tokenId.equals(tokenId) }.firstOrNull()?.let {
-                val longAmount = amount.toTokenAmount(it.decimals ?: 0)?.rawValue ?: 0
+                val longAmount = amount.toTokenAmount(it.decimals)?.rawValue ?: 0
                 tokensChosen.put(tokenId, ErgoToken(tokenId, longAmount))
                 changed = true
             }

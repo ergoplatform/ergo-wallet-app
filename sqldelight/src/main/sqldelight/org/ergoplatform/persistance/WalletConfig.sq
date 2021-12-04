@@ -21,6 +21,9 @@ SELECT * FROM wallet_configs WHERE id = ?;
 updateWalletDisplayNameById:
 UPDATE wallet_configs SET display_name = ? WHERE id = ?;
 
+updateWalletTokensUnfold:
+UPDATE wallet_configs SET unfold_tokens = ? WHERE id = ?;
+
 insertOrReplace:
 INSERT OR REPLACE INTO `wallet_configs` (
     `id`,`display_name`,`public_address`,`enc_type`,`secret_storage`,`unfold_tokens`

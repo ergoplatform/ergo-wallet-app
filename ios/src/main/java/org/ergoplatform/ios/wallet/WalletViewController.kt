@@ -248,9 +248,10 @@ class WalletViewController : CoroutineViewController() {
         fun refreshFiatValue() {
             val nodeConnector = NodeConnector.getInstance()
             val ergoPrice = nodeConnector.fiatValue.value
-            fiatLabel.isHidden = ergoPrice == 0f
-            fiatLabel.text = stringProvider.getString(STRING_LABEL_ERG_PRICE) +
-                    " " + formatFiatToString(ergoPrice.toDouble(), nodeConnector.fiatCurrency, stringProvider)
+            fiatLabel.text =
+                if (ergoPrice == 0f) " " // needs to be a blank, iOS handles empty like hidden
+                else stringProvider.getString(STRING_LABEL_ERG_PRICE) + " " +
+                        formatFiatToString(ergoPrice.toDouble(), nodeConnector.fiatCurrency, stringProvider)
         }
     }
 

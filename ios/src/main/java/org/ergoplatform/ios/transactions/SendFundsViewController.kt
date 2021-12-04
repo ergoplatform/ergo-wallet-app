@@ -3,6 +3,7 @@ package org.ergoplatform.ios.transactions
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.*
+import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.*
@@ -29,8 +30,11 @@ class SendFundsViewController(
     private lateinit var fiatLabel: UILabel
     private lateinit var readOnlyHint: UITextView
     private lateinit var feeLabel: UILabel
-    private lateinit var grossAmountLabel: UILabel
+    private lateinit var grossAmountLabel: ErgoAmountView
+    private lateinit var tokensUiList: UIStackView
+    private lateinit var tokensError: UILabel
     private lateinit var sendButton: UIButton
+    private lateinit var addTokenButton: UIButton
 
     private lateinit var inputReceiver: UITextField
     private lateinit var inputErgoAmount: UITextField
@@ -45,7 +49,10 @@ class SendFundsViewController(
         view.backgroundColor = UIColor.systemBackground()
         navigationController.navigationBar?.tintColor = UIColor.label()
 
-        val uiBarButtonItem = UIBarButtonItem(getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small), UIBarButtonItemStyle.Plain)
+        val uiBarButtonItem = UIBarButtonItem(
+            getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small),
+            UIBarButtonItemStyle.Plain
+        )
         uiBarButtonItem.setOnClickListener {
             presentViewController(QrScannerViewController {
                 // TODO check cold wallet QR
@@ -56,7 +63,7 @@ class SendFundsViewController(
                     content.amount.let { amount ->
                         if (amount.nanoErgs > 0) setInputAmount(amount)
                     }
-                    // TODO token uiLogic.addTokensFromQr(content.tokens)
+                    uiLogic.addTokensFromQr(content.tokens)
                 }
             }, true) {}
         }
@@ -80,8 +87,8 @@ class SendFundsViewController(
             textAlignment = NSTextAlignment.Center
             layer.borderWidth = 1.0
             layer.cornerRadius = 4.0
-            layer.borderColor = UIColor.systemGray().cgColor
-            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+            layer.borderColor = uiColorErgo.cgColor
+            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Semibold)
 
         }
 
@@ -111,30 +118,65 @@ class SendFundsViewController(
                 }
             }
             addOnEditingChangedListener {
-                setHasError(false)
+                hasAmountError = false
                 uiLogic.amountToSend = text.toErgoAmount() ?: ErgoAmount.ZERO
             }
         }
+        addMaxAmountActionToTextField()
 
         fiatLabel = Body1Label()
         fiatLabel.textAlignment = NSTextAlignment.Right
         fiatLabel.isHidden = true
 
         feeLabel = Body1Label()
-        grossAmountLabel = Headline1Label()
-        grossAmountLabel.textAlignment = NSTextAlignment.Center
+        grossAmountLabel = ErgoAmountView(true, FONT_SIZE_HEADLINE1)
+        val grossAmountContainer = UIView()
+        grossAmountContainer.layoutMargins = UIEdgeInsets.Zero()
+        grossAmountContainer.addSubview(grossAmountLabel)
+        grossAmountLabel.topToSuperview().bottomToSuperview().centerHorizontal()
 
-        sendButton = PrimaryButton(texts.get(STRING_BUTTON_SEND))
-        sendButton.setImage(
-            getIosSystemImage(IMAGE_SEND, UIImageSymbolScale.Small), UIControlState.Normal
+        tokensUiList = UIStackView(CGRect.Zero()).apply {
+            axis = UILayoutConstraintAxis.Vertical
+            isHidden = true
+            layoutMargins = UIEdgeInsets(0.0, DEFAULT_MARGIN, 0.0, DEFAULT_MARGIN)
+            isLayoutMarginsRelativeArrangement = true
+        }
+        tokensError = Body1Label().apply {
+            text = texts.get(STRING_ERROR_TOKEN_AMOUNT)
+            isHidden = true
+            textAlignment = NSTextAlignment.Center
+            textColor = uiColorErgo
+        }
+
+        sendButton = PrimaryButton(
+            texts.get(STRING_BUTTON_SEND),
+            getIosSystemImage(IMAGE_SEND, UIImageSymbolScale.Small)
         )
-        sendButton.tintColor = UIColor.label()
-        sendButton.imageEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 15.0)
         sendButton.addOnTouchUpInsideListener { _, _ -> startPayment() }
+
+        addTokenButton = CommonButton(
+            texts.get(STRING_LABEL_ADD_TOKEN), getIosSystemImage(
+                IMAGE_PLUS, UIImageSymbolScale.Small
+            )
+        )
+        addTokenButton.isHidden = true
+        addTokenButton.addOnTouchUpInsideListener { _, _ ->
+            presentViewController(
+                ChooseTokenListViewController(
+                    uiLogic.getTokensToChooseFrom()
+                ) { tokenToAdd ->
+                    tokensUiList.superview.animateLayoutChanges {
+                        uiLogic.newTokenChoosen(tokenToAdd)
+                    }
+                }, true
+            ) {}
+        }
 
         val buttonContainer = UIView()
         buttonContainer.addSubview(sendButton)
+        buttonContainer.addSubview(addTokenButton)
         sendButton.topToSuperview().bottomToSuperview().rightToSuperview().fixedWidth(120.0)
+        addTokenButton.centerVerticallyTo(sendButton).leftToSuperview().fixedWidth(120.0)
 
         val container = UIView()
         val stackView = UIStackView(
@@ -148,7 +190,9 @@ class SendFundsViewController(
                 inputErgoAmount,
                 fiatLabel,
                 feeLabel,
-                grossAmountLabel,
+                grossAmountContainer,
+                tokensUiList,
+                tokensError,
                 buttonContainer
             )
         )
@@ -168,6 +212,28 @@ class SendFundsViewController(
         scrollView.isHidden = true
     }
 
+    private var hasAmountError = false
+        set(hasError) {
+            if (field != hasError) {
+                field = hasError
+                inputErgoAmount.setHasError(hasError)
+
+                // restore the max amount action button when error state is reset
+                if (!hasError) {
+                    addMaxAmountActionToTextField()
+                }
+            }
+        }
+
+    private fun addMaxAmountActionToTextField() {
+        inputErgoAmount.setCustomActionField(
+            getIosSystemImage(
+                IMAGE_FULL_AMOUNT,
+                UIImageSymbolScale.Small
+            )!!
+        ) { setInputAmount(uiLogic.getMaxPossibleAmountToSend()) }
+    }
+
     private fun setInputAmount(amountToSend: ErgoAmount) {
         inputErgoAmount.text = amountToSend.toStringTrimTrailingZeros()
         inputErgoAmount.sendControlEventsActions(UIControlEvents.EditingChanged)
@@ -182,14 +248,16 @@ class SendFundsViewController(
         val checkResponse = uiLogic.checkCanMakePayment()
 
         inputReceiver.setHasError(checkResponse.receiverError)
-        inputErgoAmount.setHasError(checkResponse.amountError)
+        hasAmountError = checkResponse.amountError
         if (checkResponse.receiverError) {
             inputReceiver.becomeFirstResponder()
         } else if (checkResponse.amountError) {
             inputErgoAmount.becomeFirstResponder()
         }
         if (checkResponse.tokenError) {
-            // TODO tokens
+            tokensError.setHiddenAnimated(false)
+            (tokensUiList.arrangedSubviews.firstOrNull { (it as? SendTokenEntryView)?.hasAmount() == false }
+                    as? SendTokenEntryView)?.setFocus()
         }
 
         if (checkResponse.canPay) {
@@ -225,13 +293,24 @@ class SendFundsViewController(
         }
 
         override fun notifyTokensChosenChanged() {
-            // TODO tokens
+            addTokenButton.isHidden = (uiLogic.tokensChosen.size >= uiLogic.tokensAvail.size)
+            tokensUiList.clearArrangedSubviews()
+            uiLogic.tokensChosen.forEach {
+                val ergoId = it.key
+                tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
+                        val tokenEntry = SendTokenEntryView(uiLogic, tokensError).apply {
+                            bindWalletToken(tokenEntity, it.value)
+                        }
+                        tokensUiList.addArrangedSubview(tokenEntry)
+                    }
+            }
+            tokensUiList.isHidden = uiLogic.tokensChosen.isEmpty()
         }
 
         override fun notifyAmountsChanged() {
             runOnMainThread {
                 feeLabel.text = texts.format(STRING_DESC_FEE, feeAmount.toStringRoundToDecimals())
-                grossAmountLabel.text = grossAmount.toStringRoundToDecimals() + " ERG"
+                grossAmountLabel.setErgoAmount(grossAmount)
                 val nodeConnector = NodeConnector.getInstance()
                 fiatLabel.isHidden = (nodeConnector.fiatCurrency.isEmpty())
                 fiatLabel.text = texts.format(
@@ -314,8 +393,16 @@ class SendFundsViewController(
                     val message =
                         texts.get(STRING_ERROR_SEND_TRANSACTION) + (txResult.errorMsg?.let { "\n\n$it" } ?: "")
                     val alertVc =
-                        UIAlertController(texts.get(STRING_BUTTON_SEND), message, UIAlertControllerStyle.Alert)
-                    alertVc.addAction(UIAlertAction(texts.get(STRING_ZXING_BUTTON_OK), UIAlertActionStyle.Default) {})
+                        UIAlertController(
+                            texts.get(STRING_BUTTON_SEND),
+                            message,
+                            UIAlertControllerStyle.Alert
+                        )
+                    alertVc.addAction(
+                        UIAlertAction(
+                            texts.get(STRING_ZXING_BUTTON_OK),
+                            UIAlertActionStyle.Default
+                        ) {})
                     presentViewController(alertVc, true) {}
                 }
             }

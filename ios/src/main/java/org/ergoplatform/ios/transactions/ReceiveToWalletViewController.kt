@@ -1,4 +1,4 @@
-package org.ergoplatform.ios.wallet
+package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.ui.*
