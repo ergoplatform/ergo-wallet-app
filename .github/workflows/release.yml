@@ -20,14 +20,14 @@ jobs:
       - name: Setup Android build environment
         uses: android-actions/setup-android@v2.0.2
       - name: Build Android debug apks
-        run: ./gradlew clean app:assembleDebug
+        run: ./gradlew clean android:assembleDebug
       - name: Release mainnet artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: app/build/outputs/apk/ergomainnet/debug/app-ergomainnet-debug.apk
+          asset_path: android/build/outputs/apk/ergomainnet/debug/android-ergomainnet-debug.apk
           asset_name: ergowallet-mainnet-debug.apk
           asset_content_type: application/zip
       - name: Release testnet artifact
@@ -36,6 +36,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: app/build/outputs/apk/ergotestnet/debug/app-ergotestnet-debug.apk
+          asset_path: android/build/outputs/apk/ergotestnet/debug/android-ergotestnet-debug.apk
           asset_name: ergowallet-testnet-debug.apk
           asset_content_type: application/zip
