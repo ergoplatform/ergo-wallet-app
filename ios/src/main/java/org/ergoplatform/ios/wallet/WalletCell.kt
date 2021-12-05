@@ -47,8 +47,6 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
     private var wallet: Wallet? = null
 
-    private var lastBindCall = 0L
-
     override fun init(p0: NSCoder?): Long {
         val init = super.init(p0)
         setupView()
@@ -82,19 +80,20 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         unconfirmedBalance = ErgoAmountView(true)
         val unconfirmedLabel = Body1Label().apply {
             text = textBundle.get(STRING_LABEL_UNCONFIRMED)
-            // this label should grow in case more space is provided
+            // this label should get compressed if not enough space is provided
             setContentCompressionResistancePriority(500f, UILayoutConstraintAxis.Horizontal)
             numberOfLines = 1
         }
-        unconfirmedContainer = UIStackView(NSArray(unconfirmedBalance, unconfirmedLabel)).apply {
-            axis = UILayoutConstraintAxis.Horizontal
-            spacing = DEFAULT_MARGIN
+        unconfirmedContainer = UIView(CGRect.Zero()).apply {
             layoutMargins = UIEdgeInsets(DEFAULT_MARGIN / 2, 0.0, 0.0, 0.0)
-            isLayoutMarginsRelativeArrangement = true
-            // for some reason UI animations mess up the layout when this is initially not hidden...
+            addSubview(unconfirmedBalance)
+            addSubview(unconfirmedLabel)
             isHidden = true
         }
         unconfirmedBalance.enforceKeepIntrinsicWidth()
+        unconfirmedBalance.leftToSuperview().topToSuperview().bottomToSuperview()
+        unconfirmedLabel.centerVerticallyTo(unconfirmedBalance)
+        unconfirmedLabel.leftToRightOf(unconfirmedBalance, DEFAULT_MARGIN).rightToSuperview()
 
         val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
@@ -199,14 +198,12 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     }
 
     fun bind(wallet: Wallet) {
-        val noAnimations = lastBindCall == 0L || (System.currentTimeMillis() - lastBindCall) < 700L
-        contentView.layer.removeAllAnimations()
-        if (noAnimations || !wallet.walletConfig.firstAddress.equals(this.wallet?.walletConfig?.firstAddress)) {
+        if (!wallet.walletConfig.firstAddress.equals(this.wallet?.walletConfig?.firstAddress)) {
             bindImmediately(wallet)
         } else {
+            contentView.layer.removeAllAnimations()
             contentView.animateLayoutChanges { bindImmediately(wallet) }
         }
-        lastBindCall = System.currentTimeMillis()
     }
 
     private fun bindImmediately(wallet: Wallet) {
