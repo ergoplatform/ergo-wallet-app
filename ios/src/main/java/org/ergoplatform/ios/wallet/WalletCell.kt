@@ -47,6 +47,8 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
     private var wallet: Wallet? = null
 
+    private var lastBindCall = 0L
+
     override fun init(p0: NSCoder?): Long {
         val init = super.init(p0)
         setupView()
@@ -197,12 +199,14 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     }
 
     fun bind(wallet: Wallet) {
-        if (!wallet.walletConfig.firstAddress.equals(this.wallet?.walletConfig?.firstAddress)) {
+        val noAnimations = lastBindCall == 0L || (System.currentTimeMillis() - lastBindCall) < 700L
+        contentView.layer.removeAllAnimations()
+        if (noAnimations || !wallet.walletConfig.firstAddress.equals(this.wallet?.walletConfig?.firstAddress)) {
             bindImmediately(wallet)
         } else {
-            contentView.layer.removeAllAnimations()
             contentView.animateLayoutChanges { bindImmediately(wallet) }
         }
+        lastBindCall = System.currentTimeMillis()
     }
 
     private fun bindImmediately(wallet: Wallet) {
