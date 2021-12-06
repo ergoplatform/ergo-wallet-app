@@ -1,8 +1,6 @@
 package org.ergoplatform.android.transactions
 
 import android.animation.LayoutTransition
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -13,12 +11,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.core.content.ContextCompat
 import androidx.core.view.descendants
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
@@ -134,18 +130,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                     snackbar.setAction(
                         R.string.label_details
                     ) {
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setMessage(errorMsg)
-                            .setPositiveButton(R.string.button_copy) { _, _ ->
-                                val clipboard = ContextCompat.getSystemService(
-                                    requireContext(),
-                                    ClipboardManager::class.java
-                                )
-                                val clip = ClipData.newPlainText("", errorMsg)
-                                clipboard?.setPrimaryClip(clip)
-                            }
-                            .setNegativeButton(R.string.label_dismiss, null)
-                            .show()
+                        showDialogWithCopyOption(requireContext(), errorMsg)
                     }
                 }
                 snackbar.setAnchorView(R.id.nav_view).show()
