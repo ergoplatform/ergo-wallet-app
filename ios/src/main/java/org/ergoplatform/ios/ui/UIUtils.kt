@@ -82,6 +82,8 @@ fun UITextView.setHtmlText(html: String) {
     dataDetectorTypes = UIDataDetectorTypes.Link
     isScrollEnabled = false
     isEditable = false
+    textColor = UIColor.label()
+    tintColor = uiColorErgo
 }
 
 fun createTextview(): UITextView {

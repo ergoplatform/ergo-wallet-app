@@ -40,8 +40,6 @@ class SettingsViewController : CoroutineViewController() {
 
         val moreInfo = UITextView(CGRect.Zero()).apply {
             setHtmlText(texts.get(STRING_DESC_ABOUT_MOREINFO))
-            textColor = UIColor.label()
-            tintColor = uiColorErgo
             textAlignment = NSTextAlignment.Center
             font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
         }
@@ -116,8 +114,6 @@ class SettingsViewController : CoroutineViewController() {
         }
         val coingeckoLabel = UITextView(CGRect.Zero()).apply {
             setHtmlText(texts.get(STRING_DESC_COINGECKO))
-            textColor = UIColor.label()
-            tintColor = uiColorErgo
             textAlignment = NSTextAlignment.Center
             font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
         }

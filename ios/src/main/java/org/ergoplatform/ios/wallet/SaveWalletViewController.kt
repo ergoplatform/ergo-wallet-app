@@ -64,10 +64,10 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
         val savePwInfoLabel =
             Body1Label().apply { text = texts.get(STRING_DESC_SAVE_PASSWORD_ENCRYPTED) }
 
-        val buttonSaveDevice = TextButton(texts.get(STRING_BUTTON_SAVE_DEVICE_ENCRYPTED))
-        buttonSaveDevice.isEnabled = false
-        val saveDeviceEncInfo =
-            Body1Label().apply { text = texts.format(STRING_DESC_SAVE_DEVICE_ENCRYPTED, "n/a") }
+        val buttonSaveKeychain = TextButton(texts.get(STRING_BUTTON_SAVE_KEYCHAIN))
+        buttonSaveKeychain.isEnabled = false
+        val saveKeychainInfo =
+            Body1Label().apply { text = texts.get(STRING_DESC_SAVE_KEYCHAIN) }
 
         val addressInfoStack = UIStackView(
             NSArray(
@@ -78,8 +78,8 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
                 buttonSavePassword,
                 savePwInfoLabel,
                 createHorizontalSeparator(),
-                buttonSaveDevice,
-                saveDeviceEncInfo
+                buttonSaveKeychain,
+                saveKeychainInfo
             )
         )
         addressInfoStack.axis = UILayoutConstraintAxis.Vertical

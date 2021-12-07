@@ -19,6 +19,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
@@ -101,4 +102,19 @@ fun setQrCodeToImageView(imageViewQrCode: ImageView, text: String, width: Int, h
         imageViewQrCode.setImageBitmap(bitmap)
     } catch (e: Exception) {
     }
+}
+
+fun showDialogWithCopyOption(context: Context, message: String) {
+    MaterialAlertDialogBuilder(context)
+        .setMessage(message)
+        .setPositiveButton(R.string.button_copy) { _, _ ->
+            val clipboard = ContextCompat.getSystemService(
+                context,
+                ClipboardManager::class.java
+            )
+            val clip = ClipData.newPlainText("", message)
+            clipboard?.setPrimaryClip(clip)
+        }
+        .setNegativeButton(R.string.label_dismiss, null)
+        .show()
 }
