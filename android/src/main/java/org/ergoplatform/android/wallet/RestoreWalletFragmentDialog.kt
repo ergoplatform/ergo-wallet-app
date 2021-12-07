@@ -47,6 +47,8 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
 
         binding.buttonRestore.setOnClickListener { uiLogic.doRestore() }
 
+        binding.labelWordListHint.enableLinks()
+
         return binding.root
     }
 

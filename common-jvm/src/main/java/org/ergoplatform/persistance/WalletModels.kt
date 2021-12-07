@@ -1,7 +1,11 @@
 package org.ergoplatform.persistance
 
-val ENC_TYPE_PASSWORD = 1
-val ENC_TYPE_DEVICE = 2
+const val ENC_TYPE_PASSWORD = 1
+
+/**
+ * Indicates some kind of device-bound encryption: Device encryption on Android, Keychain on iOS
+ */
+const val ENC_TYPE_DEVICE = 2
 
 data class WalletConfig(
     val id: Int,

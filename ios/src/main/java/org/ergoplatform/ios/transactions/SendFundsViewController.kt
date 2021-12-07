@@ -82,8 +82,6 @@ class SendFundsViewController(
 
         readOnlyHint = UITextView(CGRect.Zero()).apply {
             setHtmlText(texts.get(STRING_HINT_READ_ONLY).replace("href=\"\"", "href=\"$URL_COLD_WALLET_HELP\""))
-            textColor = UIColor.label()
-            tintColor = uiColorErgo
             textAlignment = NSTextAlignment.Center
             layer.borderWidth = 1.0
             layer.cornerRadius = 4.0

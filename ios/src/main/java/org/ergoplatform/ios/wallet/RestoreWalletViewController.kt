@@ -4,6 +4,7 @@ import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_INTRO_RESTORE_WALLET
 import org.ergoplatform.uilogic.STRING_LABEL_RESTORE_WALLET
+import org.ergoplatform.uilogic.STRING_LABEL_RESTORE_WALLET_WORD_LIST
 import org.ergoplatform.uilogic.wallet.RestoreWalletUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSRange
@@ -40,6 +41,11 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
         tvMnemonic.isSecureTextEntry = true
         tvMnemonic.returnKeyType = UIReturnKeyType.Done
 
+        val wordListHint = UITextView(CGRect.Zero()).apply {
+            setHtmlText(texts.get(STRING_LABEL_RESTORE_WALLET_WORD_LIST))
+            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+        }
+
         errorLabel = Body1Label()
         errorLabel.textColor = UIColor.systemRed()
 
@@ -61,11 +67,13 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
             }
         })
 
-        container.addSubviews(listOf(descLabel, tvMnemonic, errorLabel))
+        container.addSubviews(listOf(descLabel, wordListHint, tvMnemonic, errorLabel))
 
         descLabel.widthMatchesSuperview(false, DEFAULT_MARGIN).topToSuperview(false, DEFAULT_MARGIN)
-        tvMnemonic.widthMatchesSuperview(false, DEFAULT_MARGIN)
+        wordListHint.widthMatchesSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(descLabel, DEFAULT_MARGIN)
+        tvMnemonic.widthMatchesSuperview(false, DEFAULT_MARGIN)
+            .topToBottomOf(wordListHint, DEFAULT_MARGIN * 2)
         errorLabel.widthMatchesSuperview().topToBottomOf(tvMnemonic)
             .bottomToKeyboard(this, DEFAULT_MARGIN)
 

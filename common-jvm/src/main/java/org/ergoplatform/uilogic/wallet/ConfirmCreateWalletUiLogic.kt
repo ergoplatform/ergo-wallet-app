@@ -30,8 +30,8 @@ class ConfirmCreateWalletUiLogic() {
 
         val words = mnemonic!!.toStringUnsecure().split(" ")
 
-        firstWordCorrect = inputWord1.equals(words[firstWord - 1], false)
-        secondWordCorrect = inputWord2.equals(words[secondWord - 1], false)
+        firstWordCorrect = inputWord1.trim().equals(words[firstWord - 1], false)
+        secondWordCorrect = inputWord2.trim().equals(words[secondWord - 1], false)
 
         return !firstWordCorrect || !secondWordCorrect || !obligationsConfirmed
     }
