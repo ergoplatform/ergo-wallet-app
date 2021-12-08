@@ -13,6 +13,7 @@ import org.robovm.apple.uikit.*
 class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
     lateinit var tvMnemonic: UITextView
     lateinit var errorLabel: Body1Label
+    lateinit var wordListHint: UITextView
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -41,10 +42,7 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
         tvMnemonic.isSecureTextEntry = true
         tvMnemonic.returnKeyType = UIReturnKeyType.Done
 
-        val wordListHint = UITextView(CGRect.Zero()).apply {
-            setHtmlText(texts.get(STRING_LABEL_RESTORE_WALLET_WORD_LIST))
-            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
-        }
+        wordListHint = UITextView(CGRect.Zero())
 
         errorLabel = Body1Label()
         errorLabel.textColor = UIColor.systemRed()
@@ -77,6 +75,16 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
         errorLabel.widthMatchesSuperview().topToBottomOf(tvMnemonic)
             .bottomToKeyboard(this, DEFAULT_MARGIN)
 
+    }
+
+    override fun viewWillAppear(animated: Boolean) {
+        super.viewWillAppear(animated)
+        // for some reason, setting setHtmlText in viewDidLoad does not work when this VC is
+        // invoked from empty cell. Moving it to here works.
+        wordListHint.apply {
+            setHtmlText(getAppDelegate().texts.get(STRING_LABEL_RESTORE_WALLET_WORD_LIST))
+            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+        }
     }
 
     inner class IosRestoreWalletUiLogic(stringProvider: IosStringProvider) :
