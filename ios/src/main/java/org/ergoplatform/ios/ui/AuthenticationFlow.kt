@@ -32,7 +32,7 @@ fun UIViewController.startAuthFlow(wallet: WalletConfig, callback: (mnemonic: St
                 override fun onAuthenticationSucceeded(context: LAContext) {
                     try {
                         val decrypted = IosEncryptionManager.decryptDataWithKeychain(
-                            wallet.secretStorage!!
+                            wallet.secretStorage!!, context
                         )
 
                         val mnemonic = deserializeSecrets(String(decrypted))!!
@@ -41,21 +41,27 @@ fun UIViewController.startAuthFlow(wallet: WalletConfig, callback: (mnemonic: St
                     } catch (t: Throwable) {
                         LogUtils.logDebug("KeychainEnc", "Error accessing secrets", t)
                         runOnMainThread {
-                            val uac = UIAlertController(
+                            val uac = buildSimpleAlertController(
                                 texts.format(STRING_ERROR_DEVICE_SECURITY, ""),
-                                t.message, UIAlertControllerStyle.Alert
+                                t.message ?: "", texts
                             )
-                            uac.addAction(
-                                UIAlertAction(
-                                    texts.get(STRING_ZXING_BUTTON_OK),
-                                    UIAlertActionStyle.Default
-                                ) {})
                             presentViewController(uac, true) {}
                         }
                     }
                 }
 
                 override fun onAuthenticationError(error: String) {
+                    runOnMainThread {
+                        presentViewController(
+                            buildSimpleAlertController(
+                                texts.format(STRING_ERROR_DEVICE_SECURITY, ""),
+                                error, texts
+                            ), true
+                        ) {}
+                    }
+                }
+
+                override fun onAuthenticationCancelled() {
                     // do nothing
                 }
 

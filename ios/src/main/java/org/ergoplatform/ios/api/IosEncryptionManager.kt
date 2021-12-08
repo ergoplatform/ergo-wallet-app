@@ -2,6 +2,7 @@ package org.ergoplatform.ios.api
 
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.utils.LogUtils
+import org.robovm.apple.localauthentication.LAContext
 import kotlin.random.Random
 
 object IosEncryptionManager {
@@ -9,13 +10,13 @@ object IosEncryptionManager {
     private const val KEYCHAIN_ACCOUNT = "ergoWalletKey"
     private const val KEY_LENGTH = 28
 
-    fun encryptDataWithKeychain(data: ByteArray): ByteArray {
-        val key = loadOrGenerateKey()
+    fun encryptDataWithKeychain(data: ByteArray, context: LAContext): ByteArray {
+        val key = loadOrGenerateKey(context)
         return AesEncryptionManager.encryptData(key, data)
     }
 
-    fun decryptDataWithKeychain(encryptedData: ByteArray): ByteArray {
-        val key = loadOrGenerateKey()
+    fun decryptDataWithKeychain(encryptedData: ByteArray, context: LAContext): ByteArray {
+        val key = loadOrGenerateKey(context)
         return AesEncryptionManager.decryptData(key, encryptedData)
     }
 
@@ -25,16 +26,18 @@ object IosEncryptionManager {
         return List(KEY_LENGTH) { chars.random(rnd) }.joinToString("")
     }
 
-    private fun loadOrGenerateKey(): String {
-        val existingKey = IosKeychainAccess.queryPassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT)
+    private fun loadOrGenerateKey(context: LAContext): String {
+        val existingKey = IosKeychainAccess.queryPassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT, context)
 
         return if (existingKey == null) {
             LogUtils.logDebug("IosEncryptionManager", "Generating new key")
             val newKey = getRandomKey()
             IosKeychainAccess.savePassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT, newKey)
             newKey
-        } else
+        } else {
+            LogUtils.logDebug("IosEncryptionManager", "Key read from keychain")
             existingKey
+        }
     }
 
     fun emptyKeychain() {

@@ -78,7 +78,8 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
                     override fun onAuthenticationSucceeded(context: LAContext) {
                         try {
                             val encrypted = IosEncryptionManager.encryptDataWithKeychain(
-                                serializeSecrets(mnemonic.toStringUnsecure()).toByteArray()
+                                serializeSecrets(mnemonic.toStringUnsecure()).toByteArray(),
+                                context
                             )
 
                             runOnMainThread { saveToDbAndDismissController(ENC_TYPE_DEVICE, encrypted) }
@@ -100,6 +101,17 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
                     }
 
                     override fun onAuthenticationError(error: String) {
+                        runOnMainThread {
+                            presentViewController(
+                                buildSimpleAlertController(
+                                    texts.format(STRING_ERROR_DEVICE_SECURITY, ""),
+                                    error, texts
+                                ), true
+                            ) {}
+                        }
+                    }
+
+                    override fun onAuthenticationCancelled() {
                         // do nothing
                     }
 
