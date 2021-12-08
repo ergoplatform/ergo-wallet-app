@@ -26,7 +26,6 @@ fun UIViewController.startAuthFlow(wallet: WalletConfig, callback: (mnemonic: St
             return texts.get(STRING_ERROR_PASSWORD_EMPTY)
         })
     } else if (wallet.encryptionType == ENC_TYPE_DEVICE) {
-        // TODO Biometrics test on device when auth is disabled after saving the wallet
         IosAuthentication.authenticate(texts.get(STRING_TITLE_AUTHENTICATE),
             object : IosAuthentication.IosAuthCallback {
                 override fun onAuthenticationSucceeded(context: LAContext) {
