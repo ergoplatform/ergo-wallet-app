@@ -1,10 +1,11 @@
-# Ergo Wallet Android
+# Ergo Wallet App
 
 <img src="https://user-images.githubusercontent.com/26038055/131368542-0e401c2c-35e4-449c-8423-ea259b39614b.png" align="right"  width="250">
 
-Official Ergo Wallet for Android ([official announcement](https://ergoplatform.org/en/blog/2021-07-29-ergo-for-android-released/))
+Official Ergo Wallet App ([official announcement](https://ergoplatform.org/en/blog/2021-07-29-ergo-for-android-released/))
 
-[<img alt="Get it on Google Play" height="80" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png">](https://play.google.com/store/apps/details?id=org.ergoplatform.android)
+<a href="https://play.google.com/store/apps/details?id=org.ergoplatform.android"><img alt="Get it on Google Play" src="https://user-images.githubusercontent.com/11427267/75923897-483f3b00-5e66-11ea-8ec7-e86887afea51.png"></a>
+<a href="https://testflight.apple.com/join/MRyG2qfm"><img alt="Download App Store" src="https://user-images.githubusercontent.com/11427267/75923896-47a6a480-5e66-11ea-87c1-3ec73ebcf7a5.png"></a>
 
 Features:
 * generating wallets, restoring wallets in a way compatible to Yoroi and Ergo node
@@ -16,7 +17,7 @@ Features:
 * Your secrets are stored password-encrypted or authentication-protected
 * Show wallet balance, configurable comparison fiat currency
 
-You need at least Android 7 to run Ergo Wallet.
+You need at least Android 7 or iOS 13 to run Ergo Wallet.
 
 Visit the [Ergo Discord](https://discord.gg/kj7s7nb) to give feedback.
 
@@ -48,6 +49,6 @@ If you want to tip the developer for making this app, thanks in advance! Send yo
 [9ewA9T53dy5qvAkcR5jVCtbaDW2XgWzbLPs5H4uCJJavmA4fzDx](https://explorer.ergoplatform.com/payment-request?address=9ewA9T53dy5qvAkcR5jVCtbaDW2XgWzbLPs5H4uCJJavmA4fzDx&amount=0&description=)
 
 ### Testing on Testnet
-You can test the testnet debug build on testnet. Generate a new wallet and send
+You can test the testnet Android debug build on testnet or build the iOS version yourself for testnet. Generate a new wallet and send
 yourself some test Ergos by visiting https://testnet.ergofaucet.org/
 
