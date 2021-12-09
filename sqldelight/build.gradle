@@ -19,8 +19,7 @@ dependencies {
     implementation project(path: ':common-jvm')
     api "com.squareup.sqldelight:coroutines-extensions-jvm:$sqldelight_version"
 
-    //implementation 'org.xerial:sqlite-jdbc:3.36.0.3'
     testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_version"
+    testImplementation "junit:junit:$junit_version"
 }

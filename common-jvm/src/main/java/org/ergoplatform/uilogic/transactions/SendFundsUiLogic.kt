@@ -17,7 +17,7 @@ import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.wallet.*
 import kotlin.math.max
 
-abstract class SendFundsUiLogic() {
+abstract class SendFundsUiLogic {
     abstract val coroutineScope: CoroutineScope
 
     var wallet: Wallet? = null
@@ -36,6 +36,10 @@ abstract class SendFundsUiLogic() {
             field = value
             calcGrossAmount()
         }
+
+    /**
+     * amount to send, entered by user
+     */
     var amountToSend: ErgoAmount = ErgoAmount.ZERO
         set(value) {
             field = value
@@ -138,9 +142,21 @@ abstract class SendFundsUiLogic() {
         )
     }
 
+    /**
+     * actual amount to send is user entered amount or
+     * min possible amount in case no amount was entered and token should be sent
+     */
+    private fun getActualAmountToSendNanoErgs(): Long {
+        val userEnteredNanoErgs = amountToSend.nanoErgs
+        return if (tokensChosen.isNotEmpty() && userEnteredNanoErgs == 0L)
+            Parameters.MinChangeValue
+        else
+            userEnteredNanoErgs
+    }
+
     fun checkCanMakePayment(): CheckCanPayResponse {
         val receiverOk = isValidErgoAddress(receiverAddress)
-        val amountOk = amountToSend.nanoErgs >= Parameters.MinChangeValue
+        val amountOk = getActualAmountToSendNanoErgs() >= Parameters.MinChangeValue
         val tokensOk = tokensChosen.values.none { it.value <= 0 }
 
         return CheckCanPayResponse(
@@ -161,7 +177,7 @@ abstract class SendFundsUiLogic() {
             val ergoTxResult: SendTransactionResult
             withContext(Dispatchers.IO) {
                 ergoTxResult = sendErgoTx(
-                    Address.create(receiverAddress), amountToSend.nanoErgs,
+                    Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
                     tokensChosen.values.toList(),
                     mnemonic, "", derivedAddresses,
                     preferences.prefNodeUrl, preferences.prefExplorerApiUrl
@@ -189,7 +205,7 @@ abstract class SendFundsUiLogic() {
                 val serializedTx: PromptSigningResult
                 withContext(Dispatchers.IO) {
                     serializedTx = prepareSerializedErgoTx(
-                        Address.create(receiverAddress), amountToSend.nanoErgs,
+                        Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
                         tokensChosen.values.toList(),
                         derivedAddresses.map { Address.create(it) },
                         preferences.prefNodeUrl, preferences.prefExplorerApiUrl
