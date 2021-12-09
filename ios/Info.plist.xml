@@ -53,6 +53,6 @@
         <key>NSCameraUsageDescription</key>
         <string>Scan QR codes</string>
         <key>NSFaceIDUsageDescription</key>
-        <string>Authentication required to access secrets</string>
+        <string>The wallet can use Face ID to securely store and access your secret phrase on this device</string>
     </dict>
 </plist>
