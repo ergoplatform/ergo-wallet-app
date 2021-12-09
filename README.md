@@ -9,7 +9,7 @@ Official Ergo Wallet App ([official announcement](https://ergoplatform.org/en/bl
 
 Features:
 * generating wallets, restoring wallets in a way compatible to Yoroi and Ergo node
-* you can add read-only wallets without entering your secrets to watch balance or to prepare transactions for [cold wallet devices](https://github.com/ergoplatform/ergo-wallet-android/wiki/Cold-wallet)
+* you can add read-only wallets without entering your secrets to watch balance or to prepare transactions for [cold wallet devices](https://github.com/ergoplatform/ergo-wallet-app/wiki/Cold-wallet)
 * no need to make a full sync, this is a lightweight client
 * Requesting payments by showing QR code or sharing a link
 * Sending payments, manually or by scanning a QR code
@@ -23,7 +23,7 @@ Visit the [Ergo Discord](https://discord.gg/kj7s7nb) to give feedback.
 
 ### Download and install the APK manually
 
-Apart from Google Play, you can download the app APKs from the [releases section](https://github.com/ergoplatform/ergo-wallet-android/releases) to sideload.
+Apart from Google Play, you can download the app APKs from the [releases section](https://github.com/ergoplatform/ergo-wallet-app/releases) to sideload.
 There are APKs available for Testnet and Mainnet, and as a debug build and release build.
 
 **Debug builds** are built on GitHub.
