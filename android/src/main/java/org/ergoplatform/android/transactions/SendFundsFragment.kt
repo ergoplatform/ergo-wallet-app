@@ -29,6 +29,7 @@ import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
@@ -257,32 +258,42 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                         val itemBinding =
                             FragmentSendFundsTokenItemBinding.inflate(layoutInflater, this, true)
                         itemBinding.tvTokenName.text = tokenDbEntity.name
-                        itemBinding.inputTokenAmount.inputType =
-                            if (tokenDbEntity.decimals > 0) InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-                            else InputType.TYPE_CLASS_NUMBER
-                        itemBinding.inputTokenAmount.addTextChangedListener(
-                            TokenAmountWatcher(tokenDbEntity)
-                        )
-                        itemBinding.inputTokenAmount.setText(
-                            viewModel.uiLogic.tokenAmountToText(
-                                it.value.value,
-                                tokenDbEntity.decimals
+
+                        val amountChosen = it.value.value
+                        val isSingular = tokenDbEntity.isSingularToken() && amountChosen == 1L
+
+                        if (isSingular) {
+                            itemBinding.inputTokenAmount.visibility = View.GONE
+                            itemBinding.buttonTokenAll.visibility = View.INVISIBLE
+                        } else {
+                            itemBinding.inputTokenAmount.inputType =
+                                if (tokenDbEntity.decimals > 0) InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+                                else InputType.TYPE_CLASS_NUMBER
+                            itemBinding.inputTokenAmount.addTextChangedListener(
+                                TokenAmountWatcher(tokenDbEntity)
                             )
-                        )
+                            itemBinding.inputTokenAmount.setText(
+                                viewModel.uiLogic.tokenAmountToText(
+                                    amountChosen,
+                                    tokenDbEntity.decimals
+                                )
+                            )
+                            itemBinding.buttonTokenAll.setOnClickListener {
+                                itemBinding.inputTokenAmount.setText(
+                                    viewModel.uiLogic.tokenAmountToText(
+                                        tokenDbEntity.amount!!,
+                                        tokenDbEntity.decimals
+                                    )
+                                )
+                            }
+                        }
+
                         itemBinding.buttonTokenRemove.setOnClickListener {
-                            if (itemBinding.inputTokenAmount.text.isEmpty()) {
+                            if (isSingular || itemBinding.inputTokenAmount.text.isEmpty()) {
                                 viewModel.uiLogic.removeToken(ergoId)
                             } else {
                                 itemBinding.inputTokenAmount.text = null
                             }
-                        }
-                        itemBinding.buttonTokenAll.setOnClickListener {
-                            itemBinding.inputTokenAmount.setText(
-                                viewModel.uiLogic.tokenAmountToText(
-                                    tokenDbEntity.amount!!,
-                                    tokenDbEntity.decimals
-                                )
-                            )
                         }
                     }
             }

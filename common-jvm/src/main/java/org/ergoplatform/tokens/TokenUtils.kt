@@ -23,3 +23,10 @@ fun fillTokenOverview(tokens: List<WalletToken>, addToken: (WalletToken) -> Unit
         addMoreTokenHint.invoke((tokens.size - maxTokensToShow + 1))
     }
 }
+
+/**
+ * @return if this is a singular token, or so-called NFT
+ */
+fun WalletToken.isSingularToken(): Boolean {
+    return amount == 1L && decimals == 0
+}

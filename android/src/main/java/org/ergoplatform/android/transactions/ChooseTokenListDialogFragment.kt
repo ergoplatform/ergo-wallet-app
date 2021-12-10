@@ -47,7 +47,7 @@ class ChooseTokenListDialogFragment : BottomSheetDialogFragment() {
 
     private fun onChooseToken(tokenId: String) {
         ViewModelProvider(parentFragment as ViewModelStoreOwner).get(SendFundsViewModel::class.java)
-            .uiLogic.newTokenChoosen(tokenId)
+            .uiLogic.newTokenChosen(tokenId)
         dismiss()
     }
 

@@ -5,6 +5,7 @@ import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.toTokenAmount
+import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
@@ -16,8 +17,10 @@ class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorF
     UIStackView(CGRect.Zero()) {
 
     private val inputTokenVal: UITextField
+    private val maxAmountImageView: UIImageView
     private val labelTokenName = Body1Label()
     private var token: WalletToken? = null
+    private var isSingular = false
     private val amountDelegate = object : OnlyNumericInputTextFieldDelegate() {
         override fun shouldReturn(textField: UITextField?): Boolean {
             resignFirstResponder()
@@ -43,7 +46,7 @@ class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorF
                 contentMode = UIViewContentMode.Center
             }
 
-        val maxAmountImageView = UIImageView(getIosSystemImage(IMAGE_FULL_AMOUNT, UIImageSymbolScale.Small)).apply {
+        maxAmountImageView = UIImageView(getIosSystemImage(IMAGE_FULL_AMOUNT, UIImageSymbolScale.Small)).apply {
             tintColor = UIColor.label()
             contentMode = UIViewContentMode.Center
             isUserInteractionEnabled = true
@@ -82,7 +85,7 @@ class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorF
 
     private fun removeTokenClicked() {
         token?.let {
-            if (inputTokenVal.text.isBlank()) {
+            if (isSingular || inputTokenVal.text.isBlank()) {
                 superview.animateLayoutChanges {
                     uiLogic.removeToken(it.tokenId!!)
                 }
@@ -118,11 +121,15 @@ class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorF
 
     fun bindWalletToken(walletToken: WalletToken, ergoToken: ErgoToken): SendTokenEntryView {
         token = walletToken
+        val amountChosen = ergoToken.value
+        isSingular = walletToken.isSingularToken() && amountChosen == 1L
         amountDelegate.decimals = walletToken.decimals > 0
         labelTokenName.text = walletToken.name
         inputTokenVal.keyboardType =
             if (walletToken.decimals > 0) UIKeyboardType.NumbersAndPunctuation else UIKeyboardType.NumberPad
-        inputTokenVal.text = uiLogic.tokenAmountToText(ergoToken.value, walletToken.decimals)
+        inputTokenVal.text = uiLogic.tokenAmountToText(amountChosen, walletToken.decimals)
+        inputTokenVal.isHidden = isSingular
+        maxAmountImageView.isHighlighted = isSingular
         return this
     }
 }

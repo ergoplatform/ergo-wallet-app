@@ -164,7 +164,7 @@ class SendFundsViewController(
                     uiLogic.getTokensToChooseFrom()
                 ) { tokenToAdd ->
                     tokensUiList.superview.animateLayoutChanges {
-                        uiLogic.newTokenChoosen(tokenToAdd)
+                        uiLogic.newTokenChosen(tokenToAdd)
                     }
                 }, true
             ) {}
