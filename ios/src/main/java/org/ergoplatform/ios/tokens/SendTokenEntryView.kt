@@ -13,14 +13,16 @@ import org.robovm.apple.uikit.*
 /**
  * View template for sending token entry on send funds screen
  */
-class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorField: UIView) :
+class SendTokenEntryView(
+    val uiLogic: SendFundsUiLogic, private val amountErrorField: UIView,
+    val token: WalletToken, ergoToken: ErgoToken
+) :
     UIStackView(CGRect.Zero()) {
 
     private val inputTokenVal: UITextField
     private val maxAmountImageView: UIImageView
     private val labelTokenName = Body1Label()
-    private var token: WalletToken? = null
-    private var isSingular = false
+    private val isSingular: Boolean
     private val amountDelegate = object : OnlyNumericInputTextFieldDelegate() {
         override fun shouldReturn(textField: UITextField?): Boolean {
             resignFirstResponder()
@@ -32,11 +34,16 @@ class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorF
         axis = UILayoutConstraintAxis.Horizontal
         spacing = DEFAULT_MARGIN
 
+        val amountChosen = ergoToken.value
+        isSingular = token.isSingularToken() && amountChosen == 1L
+
         inputTokenVal = createTextField().apply {
             delegate = amountDelegate
 
-            addOnEditingChangedListener {
-                amountChanged()
+            if (!isSingular) {
+                addOnEditingChangedListener {
+                    amountChanged()
+                }
             }
         }
 
@@ -49,20 +56,25 @@ class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorF
         maxAmountImageView = UIImageView(getIosSystemImage(IMAGE_FULL_AMOUNT, UIImageSymbolScale.Small)).apply {
             tintColor = UIColor.label()
             contentMode = UIViewContentMode.Center
-            isUserInteractionEnabled = true
-            addGestureRecognizer(UITapGestureRecognizer {
-                token?.let { token ->
-                    inputTokenVal.text = uiLogic.tokenAmountToText(
-                        token.amount!!,
-                        token.decimals
-                    )
-                    amountChanged()
-                }
-            })
+
+            if (!isSingular) {
+                isUserInteractionEnabled = true
+                addGestureRecognizer(UITapGestureRecognizer {
+                    token.let { token ->
+                        inputTokenVal.text = uiLogic.tokenAmountToText(
+                            token.amount!!,
+                            token.decimals
+                        )
+                        amountChanged()
+                    }
+                })
+            }
         }
 
         addArrangedSubview(maxAmountImageView)
-        addArrangedSubview(inputTokenVal)
+        if (!isSingular) {
+            addArrangedSubview(inputTokenVal)
+        }
         addArrangedSubview(labelTokenName)
         addArrangedSubview(removeImageView)
 
@@ -81,55 +93,47 @@ class SendTokenEntryView(val uiLogic: SendFundsUiLogic, private val amountErrorF
 
         // never shrink or grow the value, but the name
         inputTokenVal.enforceKeepIntrinsicWidth()
+
+        amountDelegate.decimals = token.decimals > 0
+        labelTokenName.text = token.name
+        inputTokenVal.keyboardType =
+            if (token.decimals > 0) UIKeyboardType.NumbersAndPunctuation else UIKeyboardType.NumberPad
+        inputTokenVal.text = uiLogic.tokenAmountToText(amountChosen, token.decimals)
+        maxAmountImageView.alpha = if (isSingular) 0.0 else 1.0
     }
 
     private fun removeTokenClicked() {
-        token?.let {
-            if (isSingular || inputTokenVal.text.isBlank()) {
-                superview.animateLayoutChanges {
-                    uiLogic.removeToken(it.tokenId!!)
-                }
-            } else {
-                inputTokenVal.text = ""
-                amountChanged()
+        if (isSingular || inputTokenVal.text.isBlank()) {
+            superview.animateLayoutChanges {
+                uiLogic.removeToken(token.tokenId!!)
             }
+        } else {
+            inputTokenVal.text = ""
+            amountChanged()
         }
     }
 
     private fun amountChanged() {
-        token?.let { token ->
-            val amount = getInputAmount()
-            uiLogic.setTokenAmount(token.tokenId!!, amount)
-            amountErrorField.setHiddenAnimated(true)
-        }
+        val amount = getInputAmount()
+        uiLogic.setTokenAmount(token.tokenId!!, amount)
+        amountErrorField.setHiddenAnimated(true)
     }
 
     private fun getInputAmount(): TokenAmount {
         val amountString = inputTokenVal.text
         val amount =
-            amountString.toTokenAmount(token!!.decimals) ?: TokenAmount(0, token!!.decimals)
+            amountString.toTokenAmount(token.decimals) ?: TokenAmount(0, token.decimals)
         return amount
     }
 
     fun hasAmount(): Boolean {
-        return token?.let { getInputAmount().rawValue > 0 } ?: false
+        return isSingular || getInputAmount().rawValue > 0
     }
 
     fun setFocus() {
-        inputTokenVal.becomeFirstResponder()
+        if (!isSingular) {
+            inputTokenVal.becomeFirstResponder()
+        }
     }
 
-    fun bindWalletToken(walletToken: WalletToken, ergoToken: ErgoToken): SendTokenEntryView {
-        token = walletToken
-        val amountChosen = ergoToken.value
-        isSingular = walletToken.isSingularToken() && amountChosen == 1L
-        amountDelegate.decimals = walletToken.decimals > 0
-        labelTokenName.text = walletToken.name
-        inputTokenVal.keyboardType =
-            if (walletToken.decimals > 0) UIKeyboardType.NumbersAndPunctuation else UIKeyboardType.NumberPad
-        inputTokenVal.text = uiLogic.tokenAmountToText(amountChosen, walletToken.decimals)
-        inputTokenVal.isHidden = isSingular
-        maxAmountImageView.isHighlighted = isSingular
-        return this
-    }
 }

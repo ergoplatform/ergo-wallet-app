@@ -293,12 +293,11 @@ class SendFundsViewController(
         override fun notifyTokensChosenChanged() {
             addTokenButton.isHidden = (uiLogic.tokensChosen.size >= uiLogic.tokensAvail.size)
             tokensUiList.clearArrangedSubviews()
+            tokensError.isHidden = true
             uiLogic.tokensChosen.forEach {
                 val ergoId = it.key
                 tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
-                        val tokenEntry = SendTokenEntryView(uiLogic, tokensError).apply {
-                            bindWalletToken(tokenEntity, it.value)
-                        }
+                        val tokenEntry = SendTokenEntryView(uiLogic, tokensError, tokenEntity, it.value)
                         tokensUiList.addArrangedSubview(tokenEntry)
                     }
             }
