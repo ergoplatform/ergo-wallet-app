@@ -2,9 +2,7 @@ package org.ergoplatform.ios.ui
 
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
-import org.robovm.apple.uikit.NSLayoutConstraint
-import org.robovm.apple.uikit.UILayoutGuide
-import org.robovm.apple.uikit.UIView
+import org.robovm.apple.uikit.*
 
 open class ViewControllerWithKeyboardLayoutGuide : CoroutineViewController() {
     lateinit var keyboardLayoutGuide: UILayoutGuide
@@ -26,6 +24,11 @@ open class ViewControllerWithKeyboardLayoutGuide : CoroutineViewController() {
                 keyboardLayoutGuide.bottomAnchor.equalTo(container.layoutMarginsGuide.bottomAnchor)
             )
         )
+
+        // this will make the smart keyboard disappear when tapping on the screen background
+        val endEditingOnBgListener = UITapGestureRecognizer { view.endEditing(true) }
+        endEditingOnBgListener.setCancelsTouchesInView(false)
+        view.addGestureRecognizer(endEditingOnBgListener)
     }
 
     fun adjustKeyboardHeight(keyboard: CGRect?, duration: Double) {
