@@ -20,7 +20,7 @@ class ColdWalletUtilsKtTest {
         Assert.assertNotNull(csr)
 
         val manyChunks = coldSigninRequestToQrChunks(csr!!, 30)
-        val oneChunk = coldSigninRequestToQrChunks(csr!!, 50000000)
+        val oneChunk = coldSigninRequestToQrChunks(csr, 50000000)
         Assert.assertEquals(1, oneChunk.size)
         Assert.assertEquals(0, getQrChunkIndex(oneChunk.first()))
         Assert.assertEquals(1, getQrChunkIndex(manyChunks.first()))
