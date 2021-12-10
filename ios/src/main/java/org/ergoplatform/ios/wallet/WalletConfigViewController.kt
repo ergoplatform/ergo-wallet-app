@@ -4,7 +4,9 @@ import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.ergoplatform.ios.api.IosEncryptionManager
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGRect
@@ -149,7 +151,16 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
         // we use GlobalScope here to not cancel the transaction when we leave this view
         wallet?.let {
             GlobalScope.launch {
-                getAppDelegate().database.deleteAllWalletData(it)
+                val database = getAppDelegate().database
+                database.deleteAllWalletData(it)
+
+                // After we deleted a keychain encrypted wallet, we can prune the keychain data if it is not needed
+                if (it.encryptionType == ENC_TYPE_DEVICE &&
+                    database.getAllWalletConfigsSynchronous().none { it.encryptionType == ENC_TYPE_DEVICE }
+                ) {
+                    IosEncryptionManager.emptyKeychain()
+                }
+
             }
         }
         navigationController.popViewController(true)

@@ -1,3 +1,5 @@
+package org.ergoplatform.ios
+
 import org.robovm.apple.foundation.NSBundle
 import org.robovm.apple.foundation.NSDictionary
 import org.robovm.apple.foundation.NSException

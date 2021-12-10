@@ -20,8 +20,11 @@ import java.sql.DriverManager
 
 class Main : UIApplicationDelegateAdapter() {
     lateinit var database: SqlDelightWalletProvider
+        private set
     lateinit var texts: I18NBundle
+        private set
     lateinit var prefs: Preferences
+        private set
 
     private val keyboardObservers = ArrayList<ViewControllerWithKeyboardLayoutGuide>()
     private val appActiveObservers = ArrayList<CoroutineViewController>()

@@ -2,6 +2,7 @@ package org.ergoplatform.ios.settings
 
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.ios.CrashHandler
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.settings.SettingsUiLogic
 import org.ergoplatform.uilogic.*

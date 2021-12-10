@@ -22,8 +22,7 @@ class BottomNavigationBar : UITabBarController() {
                     createNavController(
                         WalletViewController(),
                         appDelegate.texts.get(STRING_TITLE_WALLETS),
-                        UIImage.systemImageNamed(IMAGE_WALLET),
-                        false
+                        UIImage.systemImageNamed(IMAGE_WALLET)
                     ),
                     createNavController(
                         SettingsViewController(),
@@ -37,12 +36,12 @@ class BottomNavigationBar : UITabBarController() {
 
     private fun createNavController(
         rootViewController: UIViewController,
-        title: String, image: UIImage, preferLargeTitle: Boolean = true
+        title: String, image: UIImage
     ): UINavigationController {
         val navController = UINavigationController(rootViewController)
         navController.tabBarItem.title = title
         navController.tabBarItem.image = image
-        navController.navigationBar.setPrefersLargeTitles(preferLargeTitle)
+        navController.navigationBar.setPrefersLargeTitles(false)
         val navBarAppearance = UINavigationBarAppearance()
         navBarAppearance.backgroundColor = uiColorErgo
         navController.navigationBar.standardAppearance = navBarAppearance
