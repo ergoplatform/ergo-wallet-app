@@ -91,7 +91,10 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             isHidden = true
         }
         unconfirmedBalance.enforceKeepIntrinsicWidth()
-        unconfirmedBalance.leftToSuperview().topToSuperview().bottomToSuperview()
+        val fixedHeight = 30.0
+        unconfirmedBalance.fixedHeight(fixedHeight)
+        unconfirmedBalance.leftToSuperview().centerVertical()
+        unconfirmedContainer.fixedHeight(fixedHeight + (DEFAULT_MARGIN / 2))
         unconfirmedLabel.centerVerticallyTo(unconfirmedBalance)
         unconfirmedLabel.leftToRightOf(unconfirmedBalance, DEFAULT_MARGIN).rightToSuperview()
 
