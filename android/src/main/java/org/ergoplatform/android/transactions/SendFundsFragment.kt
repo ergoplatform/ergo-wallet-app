@@ -253,8 +253,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             this.removeAllViews()
             tokensChosen.forEach {
                 val ergoId = it.key
-                tokensAvail.filter { it.tokenId.equals(ergoId) }
-                    .firstOrNull()?.let { tokenDbEntity ->
+                tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenDbEntity ->
                         val itemBinding =
                             FragmentSendFundsTokenItemBinding.inflate(layoutInflater, this, true)
                         itemBinding.tvTokenName.text = tokenDbEntity.name
@@ -270,7 +269,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                                 if (tokenDbEntity.decimals > 0) InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
                                 else InputType.TYPE_CLASS_NUMBER
                             itemBinding.inputTokenAmount.addTextChangedListener(
-                                TokenAmountWatcher(tokenDbEntity)
+                                TokenAmountWatcher(tokenDbEntity, itemBinding)
                             )
                             itemBinding.inputTokenAmount.setText(
                                 viewModel.uiLogic.tokenAmountToText(
@@ -285,6 +284,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                                         tokenDbEntity.decimals
                                     )
                                 )
+                                itemBinding.buttonTokenAll.visibility = View.INVISIBLE
                             }
                         }
 
@@ -293,11 +293,20 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                                 viewModel.uiLogic.removeToken(ergoId)
                             } else {
                                 itemBinding.inputTokenAmount.text = null
+                                itemBinding.inputTokenAmount.requestFocus()
                             }
                         }
                     }
             }
+
+            setFocusToEmptyTokenAmountInput()
         }
+    }
+
+    private fun setFocusToEmptyTokenAmountInput() {
+        binding.tokensList.descendants.firstOrNull {
+            it is EditText && it.text.isEmpty() && it.isEnabled && it.visibility == View.VISIBLE
+        }?.requestFocus()
     }
 
     private fun setAmountEdittext(amountToSend: ErgoAmount) {
@@ -317,9 +326,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         }
         if (checkResponse.tokenError) {
             binding.labelTokenAmountError.visibility = View.VISIBLE
-            binding.tokensList.descendants.filter { it is EditText && it.text.isEmpty() }
-                .firstOrNull()
-                ?.requestFocus()
+            setFocusToEmptyTokenAmountInput()
         }
 
         if (checkResponse.canPay) {
@@ -414,7 +421,10 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
 
     }
 
-    inner class TokenAmountWatcher(private val token: WalletToken) : TextWatcher {
+    inner class TokenAmountWatcher(
+        private val token: WalletToken,
+        private val itemBinding: FragmentSendFundsTokenItemBinding
+    ) : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
         }
@@ -429,6 +439,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 s?.toString()?.toTokenAmount(token.decimals) ?: TokenAmount(0, token.decimals)
             )
             binding.labelTokenAmountError.visibility = View.GONE
+            itemBinding.buttonTokenAll.visibility = View.VISIBLE
         }
 
     }

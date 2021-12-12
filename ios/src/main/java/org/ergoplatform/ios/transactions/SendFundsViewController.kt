@@ -254,8 +254,7 @@ class SendFundsViewController(
         }
         if (checkResponse.tokenError) {
             tokensError.setHiddenAnimated(false)
-            (tokensUiList.arrangedSubviews.firstOrNull { (it as? SendTokenEntryView)?.hasAmount() == false }
-                    as? SendTokenEntryView)?.setFocus()
+            setFocusToEmptyTokenAmountInput()
         }
 
         if (checkResponse.canPay) {
@@ -263,6 +262,11 @@ class SendFundsViewController(
                 uiLogic.startPaymentWithMnemonicAsync(mnemonic, getAppDelegate().prefs)
             }
         }
+    }
+
+    private fun setFocusToEmptyTokenAmountInput() {
+        (tokensUiList.arrangedSubviews.firstOrNull { (it as? SendTokenEntryView)?.hasAmount() == false }
+                as? SendTokenEntryView)?.setFocus()
     }
 
     inner class IosSendFundsUiLogic : SendFundsUiLogic() {
@@ -302,6 +306,7 @@ class SendFundsViewController(
                     }
             }
             tokensUiList.isHidden = uiLogic.tokensChosen.isEmpty()
+            setFocusToEmptyTokenAmountInput()
         }
 
         override fun notifyAmountsChanged() {

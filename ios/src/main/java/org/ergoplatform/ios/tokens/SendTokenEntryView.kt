@@ -15,7 +15,7 @@ import org.robovm.apple.uikit.*
  */
 class SendTokenEntryView(
     val uiLogic: SendFundsUiLogic, private val amountErrorField: UIView,
-    val token: WalletToken, ergoToken: ErgoToken
+    private val token: WalletToken, ergoToken: ErgoToken
 ) :
     UIStackView(CGRect.Zero()) {
 
@@ -60,13 +60,11 @@ class SendTokenEntryView(
             if (!isSingular) {
                 isUserInteractionEnabled = true
                 addGestureRecognizer(UITapGestureRecognizer {
-                    token.let { token ->
-                        inputTokenVal.text = uiLogic.tokenAmountToText(
-                            token.amount!!,
-                            token.decimals
-                        )
-                        amountChanged()
-                    }
+                    inputTokenVal.text = uiLogic.tokenAmountToText(
+                        token.amount!!,
+                        token.decimals
+                    )
+                    amountChanged()
                 })
             }
         }
@@ -99,7 +97,11 @@ class SendTokenEntryView(
         inputTokenVal.keyboardType =
             if (token.decimals > 0) UIKeyboardType.NumbersAndPunctuation else UIKeyboardType.NumberPad
         inputTokenVal.text = uiLogic.tokenAmountToText(amountChosen, token.decimals)
-        maxAmountImageView.alpha = if (isSingular) 0.0 else 1.0
+        setMaxAmountImageViewVisibility(ergoToken.value)
+    }
+
+    private fun setMaxAmountImageViewVisibility(currentRawAmount: Long) {
+        maxAmountImageView.alpha = if (isSingular || currentRawAmount == token.amount) 0.0 else 1.0
     }
 
     private fun removeTokenClicked() {
@@ -110,6 +112,7 @@ class SendTokenEntryView(
         } else {
             inputTokenVal.text = ""
             amountChanged()
+            inputTokenVal.becomeFirstResponder()
         }
     }
 
@@ -117,13 +120,12 @@ class SendTokenEntryView(
         val amount = getInputAmount()
         uiLogic.setTokenAmount(token.tokenId!!, amount)
         amountErrorField.setHiddenAnimated(true)
+        setMaxAmountImageViewVisibility(amount.rawValue)
     }
 
     private fun getInputAmount(): TokenAmount {
         val amountString = inputTokenVal.text
-        val amount =
-            amountString.toTokenAmount(token.decimals) ?: TokenAmount(0, token.decimals)
-        return amount
+        return amountString.toTokenAmount(token.decimals) ?: TokenAmount(0, token.decimals)
     }
 
     fun hasAmount(): Boolean {

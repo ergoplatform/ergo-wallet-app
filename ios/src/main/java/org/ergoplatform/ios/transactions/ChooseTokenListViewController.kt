@@ -109,6 +109,7 @@ class ChooseTokenListViewController(
                 numberOfLines = 1
                 textAlignment = NSTextAlignment.Center
                 lineBreakMode = NSLineBreakMode.TruncatingMiddle
+                textColor = UIColor.secondaryLabel()
             }
             contentView.addSubview(nameLabel)
             contentView.addSubview(tokenIdLabel)
