@@ -164,7 +164,7 @@ class SendFundsViewController(
                     uiLogic.getTokensToChooseFrom()
                 ) { tokenToAdd ->
                     tokensUiList.superview.animateLayoutChanges {
-                        uiLogic.newTokenChoosen(tokenToAdd)
+                        uiLogic.newTokenChosen(tokenToAdd)
                     }
                 }, true
             ) {}
@@ -254,8 +254,7 @@ class SendFundsViewController(
         }
         if (checkResponse.tokenError) {
             tokensError.setHiddenAnimated(false)
-            (tokensUiList.arrangedSubviews.firstOrNull { (it as? SendTokenEntryView)?.hasAmount() == false }
-                    as? SendTokenEntryView)?.setFocus()
+            setFocusToEmptyTokenAmountInput()
         }
 
         if (checkResponse.canPay) {
@@ -263,6 +262,11 @@ class SendFundsViewController(
                 uiLogic.startPaymentWithMnemonicAsync(mnemonic, getAppDelegate().prefs)
             }
         }
+    }
+
+    private fun setFocusToEmptyTokenAmountInput() {
+        (tokensUiList.arrangedSubviews.firstOrNull { (it as? SendTokenEntryView)?.hasAmount() == false }
+                as? SendTokenEntryView)?.setFocus()
     }
 
     inner class IosSendFundsUiLogic : SendFundsUiLogic() {
@@ -293,16 +297,16 @@ class SendFundsViewController(
         override fun notifyTokensChosenChanged() {
             addTokenButton.isHidden = (uiLogic.tokensChosen.size >= uiLogic.tokensAvail.size)
             tokensUiList.clearArrangedSubviews()
+            tokensError.isHidden = true
             uiLogic.tokensChosen.forEach {
                 val ergoId = it.key
                 tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
-                        val tokenEntry = SendTokenEntryView(uiLogic, tokensError).apply {
-                            bindWalletToken(tokenEntity, it.value)
-                        }
+                        val tokenEntry = SendTokenEntryView(uiLogic, tokensError, tokenEntity, it.value)
                         tokensUiList.addArrangedSubview(tokenEntry)
                     }
             }
             tokensUiList.isHidden = uiLogic.tokensChosen.isEmpty()
+            setFocusToEmptyTokenAmountInput()
         }
 
         override fun notifyAmountsChanged() {

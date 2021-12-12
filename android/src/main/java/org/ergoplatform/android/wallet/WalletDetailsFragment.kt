@@ -17,9 +17,12 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
-import org.ergoplatform.android.*
+import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.Preferences
+import org.ergoplatform.android.R
+import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
-import org.ergoplatform.android.tokens.inflateAndBindTokenView
+import org.ergoplatform.android.tokens.inflateAndBindDetailedTokenEntryView
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.openUrlWithBrowser
@@ -208,7 +211,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         binding.walletTokenEntries.apply {
             removeAllViews()
             if (wallet.walletConfig.unfoldTokens) {
-                tokensList.forEach { inflateAndBindTokenView(it, this, layoutInflater) }
+                tokensList.forEach { inflateAndBindDetailedTokenEntryView(it, this, layoutInflater) }
             }
         }
 

@@ -309,13 +309,13 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginHorizontal="@dimen/half_horizontal_margin"
-                            android:layout_marginTop="@dimen/half_horizontal_margin"
+                            android:layout_marginTop="3dp"
                             android:orientation="vertical"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/tokens_logo">
 
-                            <include layout="@layout/entry_wallet_token" />
+                            <include layout="@layout/entry_wallet_token_details" />
                         </LinearLayout>
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
