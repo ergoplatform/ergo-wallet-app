@@ -88,13 +88,10 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
             layoutMargins = UIEdgeInsets(DEFAULT_MARGIN / 2, 0.0, 0.0, 0.0)
             addSubview(unconfirmedBalance)
             addSubview(unconfirmedLabel)
-            isHidden = true
+            alpha = 0.0
         }
         unconfirmedBalance.enforceKeepIntrinsicWidth()
-        val fixedHeight = 30.0
-        unconfirmedBalance.fixedHeight(fixedHeight)
-        unconfirmedBalance.leftToSuperview().centerVertical()
-        unconfirmedContainer.fixedHeight(fixedHeight + (DEFAULT_MARGIN / 2))
+        unconfirmedBalance.leftToSuperview().topToSuperview().bottomToSuperview()
         unconfirmedLabel.centerVerticallyTo(unconfirmedBalance)
         unconfirmedLabel.leftToRightOf(unconfirmedBalance, DEFAULT_MARGIN).rightToSuperview()
 
@@ -223,7 +220,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         )
         val unconfirmedErgs = wallet.getUnconfirmedBalanceForAllAddresses()
         unconfirmedBalance.setErgoAmount(ErgoAmount(unconfirmedErgs))
-        unconfirmedContainer.isHidden = unconfirmedErgs == 0L
+        unconfirmedContainer.alpha = if (unconfirmedErgs == 0L) 0.0 else 1.0
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
         tokenCount.isHidden = tokens.isEmpty()
