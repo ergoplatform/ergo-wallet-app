@@ -141,7 +141,7 @@
         本项目是一个<a href="https://github.com/ergoplatform/ergo-wallet-app">开源软件</a>\n
     请到<a href="https://discord.gg/kj7s7nb">Discord</a> 或 <a href="https://t.me/ergosupport">Telegram</a>寻求帮助
         </string>
-    <string name="desc_coingecko">Ergo价格提供方是<a href="https://www.coingecko.com">CoinGecko</a></string>
+    <string name="desc_coingecko">Ergo价格提供方是<a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a></string>
     <string name="label_cg_conn_error">连接 CoinGecko 时出错，请稍后重试。</string>
     <string name="desc_dark_mode">暗黑模式还是明亮模式？</string>
     <string name="button_dark_mode_system">系统默认</string>
