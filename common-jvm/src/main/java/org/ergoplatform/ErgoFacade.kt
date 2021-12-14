@@ -21,9 +21,9 @@ import sigmastate.serialization.`SigmaSerializer$`
 const val MNEMONIC_WORDS_COUNT = 15
 const val MNEMONIC_MIN_WORDS_COUNT = 12
 const val URL_COLD_WALLET_HELP =
-    "https://github.com/ergoplatform/ergo-wallet-android/wiki/Cold-wallet"
+    "https://github.com/ergoplatform/ergo-wallet-app/wiki/Cold-wallet"
 const val URL_FORGOT_PASSWORD_HELP =
-    "https://github.com/ergoplatform/ergo-wallet-android/wiki/FAQ#i-forgot-my-spending-password"
+    "https://github.com/ergoplatform/ergo-wallet-app/wiki/FAQ#i-forgot-my-spending-password"
 
 val ERG_BASE_COST = 0
 val ERG_MAX_BLOCK_COST = 1000000

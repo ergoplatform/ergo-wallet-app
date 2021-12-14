@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import org.ergoplatform.android.App
 import org.ergoplatform.android.BuildConfig
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -16,8 +17,8 @@ import org.ergoplatform.android.databinding.FragmentSettingsBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.enableLinks
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.android.ui.showDialogWithCopyOption
 import org.ergoplatform.settings.SettingsUiLogic
-import java.util.*
 
 class SettingsFragment : Fragment() {
 
@@ -61,6 +62,15 @@ class SettingsFragment : Fragment() {
 
         binding.buttonConnectionSettings.setOnClickListener {
             findNavController().navigateSafe(SettingsFragmentDirections.actionNavigationSettingsToConnectionSettingsDialogFragment())
+        }
+
+        binding.containerDebugInformation.visibility =
+            if (App.lastStackTrace.isNullOrBlank()) View.GONE else View.VISIBLE
+
+        binding.buttonDebugInformation.setOnClickListener {
+            App.lastStackTrace?.let {
+                showDialogWithCopyOption(requireContext(), it)
+            }
         }
     }
 

@@ -11,13 +11,14 @@ import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
 import org.ergoplatform.persistance.*
+import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.wallet.*
 import kotlin.math.max
 
-abstract class SendFundsUiLogic() {
+abstract class SendFundsUiLogic {
     abstract val coroutineScope: CoroutineScope
 
     var wallet: Wallet? = null
@@ -36,6 +37,10 @@ abstract class SendFundsUiLogic() {
             field = value
             calcGrossAmount()
         }
+
+    /**
+     * amount to send, entered by user
+     */
     var amountToSend: ErgoAmount = ErgoAmount.ZERO
         set(value) {
             field = value
@@ -138,9 +143,21 @@ abstract class SendFundsUiLogic() {
         )
     }
 
+    /**
+     * actual amount to send is user entered amount or
+     * min possible amount in case no amount was entered and token should be sent
+     */
+    private fun getActualAmountToSendNanoErgs(): Long {
+        val userEnteredNanoErgs = amountToSend.nanoErgs
+        return if (tokensChosen.isNotEmpty() && userEnteredNanoErgs == 0L)
+            Parameters.MinChangeValue
+        else
+            userEnteredNanoErgs
+    }
+
     fun checkCanMakePayment(): CheckCanPayResponse {
         val receiverOk = isValidErgoAddress(receiverAddress)
-        val amountOk = amountToSend.nanoErgs >= Parameters.MinChangeValue
+        val amountOk = getActualAmountToSendNanoErgs() >= Parameters.MinChangeValue
         val tokensOk = tokensChosen.values.none { it.value <= 0 }
 
         return CheckCanPayResponse(
@@ -161,7 +178,7 @@ abstract class SendFundsUiLogic() {
             val ergoTxResult: SendTransactionResult
             withContext(Dispatchers.IO) {
                 ergoTxResult = sendErgoTx(
-                    Address.create(receiverAddress), amountToSend.nanoErgs,
+                    Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
                     tokensChosen.values.toList(),
                     mnemonic, "", derivedAddresses,
                     preferences.prefNodeUrl, preferences.prefExplorerApiUrl
@@ -189,7 +206,7 @@ abstract class SendFundsUiLogic() {
                 val serializedTx: PromptSigningResult
                 withContext(Dispatchers.IO) {
                     serializedTx = prepareSerializedErgoTx(
-                        Address.create(receiverAddress), amountToSend.nanoErgs,
+                        Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
                         tokensChosen.values.toList(),
                         derivedAddresses.map { Address.create(it) },
                         preferences.prefNodeUrl, preferences.prefExplorerApiUrl
@@ -238,11 +255,19 @@ abstract class SendFundsUiLogic() {
         }.sortedBy { it.name?.lowercase() }
     }
 
-    fun newTokenChoosen(tokenId: String) {
-        tokensChosen.put(tokenId, ErgoToken(tokenId, 0))
-        notifyTokensChosenChanged()
+    /**
+     * called by UI when user wants to add a token
+     */
+    fun newTokenChosen(tokenId: String) {
+        tokensAvail.firstOrNull { it.tokenId.equals(tokenId) }?.let {
+            tokensChosen.put(tokenId, ErgoToken(tokenId, if (it.isSingularToken()) 1 else 0))
+            notifyTokensChosenChanged()
+        }
     }
 
+    /**
+     * called by UI when user wants to remove a token
+     */
     fun removeToken(tokenId: String) {
         val size = tokensChosen.size
         tokensChosen.remove(tokenId)
@@ -251,6 +276,9 @@ abstract class SendFundsUiLogic() {
         }
     }
 
+    /**
+     * called by UI when user changes token amount
+     */
     fun setTokenAmount(tokenId: String, amount: TokenAmount) {
         tokensChosen.get(tokenId)?.let {
             tokensChosen.put(tokenId, ErgoToken(it.id, amount.rawValue))
@@ -269,9 +297,11 @@ abstract class SendFundsUiLogic() {
             val amount = it.value
 
             // we need to check for existence here, QR code might have any String, not an ID
-            tokensAvail.filter { it.tokenId.equals(tokenId) }.firstOrNull()?.let {
-                val longAmount = amount.toTokenAmount(it.decimals)?.rawValue ?: 0
-                tokensChosen.put(tokenId, ErgoToken(tokenId, longAmount))
+            tokensAvail.firstOrNull { it.tokenId.equals(tokenId) }?.let {
+                val amountFromRequest = amount.toTokenAmount(it.decimals)?.rawValue ?: 0
+                val amountToUse =
+                    if (amountFromRequest == 0L && it.isSingularToken()) 1 else amountFromRequest
+                tokensChosen.put(tokenId, ErgoToken(tokenId, amountToUse))
                 changed = true
             }
         }

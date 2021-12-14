@@ -85,6 +85,7 @@ class ChooseTokenListViewController(
     class TokenCell : UITableViewCell(UITableViewCellStyle.Default, TOKEN_CELL) {
         var clickListener: ((tokenId: String) -> Unit)? = null
         private lateinit var nameLabel: Headline2Label
+        private lateinit var tokenIdLabel: Body2Label
         private var token: WalletToken? = null
 
         override fun init(p0: NSCoder?): Long {
@@ -104,8 +105,16 @@ class ChooseTokenListViewController(
                 numberOfLines = 1
                 textAlignment = NSTextAlignment.Center
             }
+            tokenIdLabel = Body2Label().apply {
+                numberOfLines = 1
+                textAlignment = NSTextAlignment.Center
+                lineBreakMode = NSLineBreakMode.TruncatingMiddle
+                textColor = UIColor.secondaryLabel()
+            }
             contentView.addSubview(nameLabel)
-            nameLabel.edgesToSuperview()
+            contentView.addSubview(tokenIdLabel)
+            nameLabel.topToSuperview().widthMatchesSuperview()
+            tokenIdLabel.topToBottomOf(nameLabel).widthMatchesSuperview().bottomToSuperview()
             contentView.addGestureRecognizer(UITapGestureRecognizer {
                 token?.tokenId?.let { tokenId -> clickListener?.invoke(tokenId) }
             })
@@ -114,6 +123,7 @@ class ChooseTokenListViewController(
         fun bind(walletToken: WalletToken) {
             token = walletToken
             nameLabel.text = walletToken.name
+            tokenIdLabel.text = walletToken.tokenId
         }
     }
 }

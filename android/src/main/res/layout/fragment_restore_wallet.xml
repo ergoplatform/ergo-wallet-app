@@ -33,19 +33,27 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/desc_restore_wallet"
                 style="@style/TextAppearance.App.Body1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/activity_vertical_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginBottom="@dimen/half_horizontal_margin"
                 android:text="@string/intro_restore_wallet" />
+
+            <TextView
+                android:id="@+id/label_word_list_hint"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:text="@string/label_restore_wallet_word_list" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tv_mnemonic"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 app:errorEnabled="true"
-                app:errorIconDrawable="@null"
-                android:layout_height="wrap_content">
+                app:errorIconDrawable="@null">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"

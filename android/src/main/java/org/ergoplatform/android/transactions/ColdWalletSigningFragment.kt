@@ -1,18 +1,14 @@
 package org.ergoplatform.android.transactions
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.ErgoAmount
@@ -23,6 +19,7 @@ import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.android.ui.ProgressBottomSheetDialogFragment
 import org.ergoplatform.android.ui.QrPagerAdapter
+import org.ergoplatform.android.ui.showDialogWithCopyOption
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.transactions.reduceBoxes
 
@@ -123,18 +120,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
                         snackbar.setAction(
                             R.string.label_details
                         ) {
-                            MaterialAlertDialogBuilder(requireContext())
-                                .setMessage(errorMsg)
-                                .setPositiveButton(R.string.button_copy) { _, _ ->
-                                    val clipboard = ContextCompat.getSystemService(
-                                        requireContext(),
-                                        ClipboardManager::class.java
-                                    )
-                                    val clip = ClipData.newPlainText("", errorMsg)
-                                    clipboard?.setPrimaryClip(clip)
-                                }
-                                .setNegativeButton(R.string.label_dismiss, null)
-                                .show()
+                            showDialogWithCopyOption(requireContext(), errorMsg)
                         }
                     }
                     snackbar.setAnchorView(R.id.nav_view).show()

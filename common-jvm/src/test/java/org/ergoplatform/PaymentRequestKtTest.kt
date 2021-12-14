@@ -8,6 +8,8 @@ class PaymentRequestKtTest {
 
     @Test
     fun parseContentFromQrCode() {
+        isErgoMainNet = true
+
         val parse1 =
             parsePaymentRequestFromQrCode("https://explorer.ergoplatform.com/payment-request?address=testaddr&amount=1.0&tokenId=notNumericAmount")
 

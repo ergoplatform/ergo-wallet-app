@@ -5,12 +5,17 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.ios.api.IosAuthentication
+import org.ergoplatform.ios.api.IosEncryptionManager
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
 import org.ergoplatform.serializeSecrets
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
+import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.foundation.NSArray
+import org.robovm.apple.localauthentication.LAContext
 import org.robovm.apple.uikit.*
 
 class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineViewController() {
@@ -64,10 +69,57 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
         val savePwInfoLabel =
             Body1Label().apply { text = texts.get(STRING_DESC_SAVE_PASSWORD_ENCRYPTED) }
 
-        val buttonSaveDevice = TextButton(texts.get(STRING_BUTTON_SAVE_DEVICE_ENCRYPTED))
-        buttonSaveDevice.isEnabled = false
-        val saveDeviceEncInfo =
-            Body1Label().apply { text = texts.format(STRING_DESC_SAVE_DEVICE_ENCRYPTED, "n/a") }
+        val buttonSaveKeychain = TextButton(texts.get(STRING_BUTTON_SAVE_KEYCHAIN))
+        buttonSaveKeychain.isEnabled = IosAuthentication.canAuthenticate()
+        buttonSaveKeychain.addOnTouchUpInsideListener { _, _ ->
+            IosAuthentication.authenticate(
+                texts.get(STRING_TITLE_AUTHENTICATE),
+                object : IosAuthentication.IosAuthCallback {
+                    override fun onAuthenticationSucceeded(context: LAContext) {
+                        try {
+                            val encrypted = IosEncryptionManager.encryptDataWithKeychain(
+                                serializeSecrets(mnemonic.toStringUnsecure()).toByteArray(),
+                                context
+                            )
+
+                            runOnMainThread { saveToDbAndDismissController(ENC_TYPE_DEVICE, encrypted) }
+                        } catch (t: Throwable) {
+                            LogUtils.logDebug("KeychainEnc", "Error encrypting mnemonic", t)
+                            runOnMainThread {
+                                val uac = UIAlertController(
+                                    texts.format(STRING_ERROR_DEVICE_SECURITY, ""),
+                                    t.message, UIAlertControllerStyle.Alert
+                                )
+                                uac.addAction(
+                                    UIAlertAction(
+                                        texts.get(STRING_ZXING_BUTTON_OK),
+                                        UIAlertActionStyle.Default
+                                    ) {})
+                                presentViewController(uac, true) {}
+                            }
+                        }
+                    }
+
+                    override fun onAuthenticationError(error: String) {
+                        runOnMainThread {
+                            presentViewController(
+                                buildSimpleAlertController(
+                                    texts.format(STRING_ERROR_DEVICE_SECURITY, ""),
+                                    error, texts
+                                ), true
+                            ) {}
+                        }
+                    }
+
+                    override fun onAuthenticationCancelled() {
+                        // do nothing
+                    }
+
+                })
+        }
+
+        val saveKeychainInfo =
+            Body1Label().apply { text = texts.get(STRING_DESC_SAVE_KEYCHAIN) }
 
         val addressInfoStack = UIStackView(
             NSArray(
@@ -78,8 +130,8 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
                 buttonSavePassword,
                 savePwInfoLabel,
                 createHorizontalSeparator(),
-                buttonSaveDevice,
-                saveDeviceEncInfo
+                buttonSaveKeychain,
+                saveKeychainInfo
             )
         )
         addressInfoStack.axis = UILayoutConstraintAxis.Vertical

@@ -4,6 +4,7 @@ import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_INTRO_RESTORE_WALLET
 import org.ergoplatform.uilogic.STRING_LABEL_RESTORE_WALLET
+import org.ergoplatform.uilogic.STRING_LABEL_RESTORE_WALLET_WORD_LIST
 import org.ergoplatform.uilogic.wallet.RestoreWalletUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSRange
@@ -12,6 +13,7 @@ import org.robovm.apple.uikit.*
 class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
     lateinit var tvMnemonic: UITextView
     lateinit var errorLabel: Body1Label
+    lateinit var wordListHint: UITextView
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -40,6 +42,8 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
         tvMnemonic.isSecureTextEntry = true
         tvMnemonic.returnKeyType = UIReturnKeyType.Done
 
+        wordListHint = UITextView(CGRect.Zero())
+
         errorLabel = Body1Label()
         errorLabel.textColor = UIColor.systemRed()
 
@@ -61,14 +65,26 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
             }
         })
 
-        container.addSubviews(listOf(descLabel, tvMnemonic, errorLabel))
+        container.addSubviews(listOf(descLabel, wordListHint, tvMnemonic, errorLabel))
 
         descLabel.widthMatchesSuperview(false, DEFAULT_MARGIN).topToSuperview(false, DEFAULT_MARGIN)
-        tvMnemonic.widthMatchesSuperview(false, DEFAULT_MARGIN)
+        wordListHint.widthMatchesSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(descLabel, DEFAULT_MARGIN)
+        tvMnemonic.widthMatchesSuperview(false, DEFAULT_MARGIN)
+            .topToBottomOf(wordListHint, DEFAULT_MARGIN * 2)
         errorLabel.widthMatchesSuperview().topToBottomOf(tvMnemonic)
             .bottomToKeyboard(this, DEFAULT_MARGIN)
 
+    }
+
+    override fun viewWillAppear(animated: Boolean) {
+        super.viewWillAppear(animated)
+        // for some reason, setting setHtmlText in viewDidLoad does not work when this VC is
+        // invoked from empty cell. Moving it to here works.
+        wordListHint.apply {
+            setHtmlText(getAppDelegate().texts.get(STRING_LABEL_RESTORE_WALLET_WORD_LIST))
+            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+        }
     }
 
     inner class IosRestoreWalletUiLogic(stringProvider: IosStringProvider) :

@@ -1,6 +1,8 @@
 package org.ergoplatform.ios.ui
 
+import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.Main
+import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
 import org.robovm.apple.coregraphics.CGAffineTransform
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.coreimage.CIFilter
@@ -82,6 +84,8 @@ fun UITextView.setHtmlText(html: String) {
     dataDetectorTypes = UIDataDetectorTypes.Link
     isScrollEnabled = false
     isEditable = false
+    textColor = UIColor.label()
+    tintColor = uiColorErgo
 }
 
 fun createTextview(): UITextView {
@@ -199,4 +203,17 @@ fun UIView.setHiddenAnimated(hidden: Boolean) {
     if (hidden != isHidden) {
         superview.animateLayoutChanges { isHidden = hidden }
     }
+}
+
+/**
+ * builds a simple alert controller (or message box) with a title, message and OK button
+ */
+fun buildSimpleAlertController(title: String, message: String, texts: I18NBundle): UIAlertController {
+    val uac = UIAlertController(title, message, UIAlertControllerStyle.Alert)
+    uac.addAction(
+        UIAlertAction(
+            texts.get(STRING_ZXING_BUTTON_OK),
+            UIAlertActionStyle.Default
+        ) {})
+    return uac
 }

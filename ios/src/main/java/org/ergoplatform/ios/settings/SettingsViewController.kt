@@ -2,6 +2,7 @@ package org.ergoplatform.ios.settings
 
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.ios.CrashHandler
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.settings.SettingsUiLogic
 import org.ergoplatform.uilogic.*
@@ -40,8 +41,6 @@ class SettingsViewController : CoroutineViewController() {
 
         val moreInfo = UITextView(CGRect.Zero()).apply {
             setHtmlText(texts.get(STRING_DESC_ABOUT_MOREINFO))
-            textColor = UIColor.label()
-            tintColor = uiColorErgo
             textAlignment = NSTextAlignment.Center
             font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
         }
@@ -116,8 +115,6 @@ class SettingsViewController : CoroutineViewController() {
         }
         val coingeckoLabel = UITextView(CGRect.Zero()).apply {
             setHtmlText(texts.get(STRING_DESC_COINGECKO))
-            textColor = UIColor.label()
-            tintColor = uiColorErgo
             textAlignment = NSTextAlignment.Center
             font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
         }

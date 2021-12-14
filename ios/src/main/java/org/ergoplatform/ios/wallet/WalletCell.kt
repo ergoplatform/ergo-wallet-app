@@ -80,19 +80,20 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         unconfirmedBalance = ErgoAmountView(true)
         val unconfirmedLabel = Body1Label().apply {
             text = textBundle.get(STRING_LABEL_UNCONFIRMED)
-            // this label should grow in case more space is provided
+            // this label should get compressed if not enough space is provided
             setContentCompressionResistancePriority(500f, UILayoutConstraintAxis.Horizontal)
             numberOfLines = 1
         }
-        unconfirmedContainer = UIStackView(NSArray(unconfirmedBalance, unconfirmedLabel)).apply {
-            axis = UILayoutConstraintAxis.Horizontal
-            spacing = DEFAULT_MARGIN
+        unconfirmedContainer = UIView(CGRect.Zero()).apply {
             layoutMargins = UIEdgeInsets(DEFAULT_MARGIN / 2, 0.0, 0.0, 0.0)
-            isLayoutMarginsRelativeArrangement = true
-            // for some reason UI animations mess up the layout when this is initially not hidden...
-            isHidden = true
+            addSubview(unconfirmedBalance)
+            addSubview(unconfirmedLabel)
+            alpha = 0.0
         }
         unconfirmedBalance.enforceKeepIntrinsicWidth()
+        unconfirmedBalance.leftToSuperview().topToSuperview().bottomToSuperview()
+        unconfirmedLabel.centerVerticallyTo(unconfirmedBalance)
+        unconfirmedLabel.leftToRightOf(unconfirmedBalance, DEFAULT_MARGIN).rightToSuperview()
 
         val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
@@ -219,7 +220,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
         )
         val unconfirmedErgs = wallet.getUnconfirmedBalanceForAllAddresses()
         unconfirmedBalance.setErgoAmount(ErgoAmount(unconfirmedErgs))
-        unconfirmedContainer.isHidden = unconfirmedErgs == 0L
+        unconfirmedContainer.alpha = if (unconfirmedErgs == 0L) 0.0 else 1.0
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
         tokenCount.isHidden = tokens.isEmpty()

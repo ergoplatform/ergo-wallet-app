@@ -47,17 +47,18 @@ class ChooseTokenListDialogFragment : BottomSheetDialogFragment() {
 
     private fun onChooseToken(tokenId: String) {
         ViewModelProvider(parentFragment as ViewModelStoreOwner).get(SendFundsViewModel::class.java)
-            .uiLogic.newTokenChoosen(tokenId)
+            .uiLogic.newTokenChosen(tokenId)
         dismiss()
     }
 
-    private inner class ViewHolder internal constructor(binding: FragmentChooseTokenDialogItemBinding) :
+    private inner class ViewHolder(binding: FragmentChooseTokenDialogItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        internal val name: TextView = binding.labelTokenName
+        val tokenName: TextView = binding.labelTokenName
+        val tokenId: TextView = binding.labelTokenId
     }
 
-    private inner class DisplayTokenAdapter internal constructor(private val items: List<WalletToken>) :
+    private inner class DisplayTokenAdapter(private val items: List<WalletToken>) :
         RecyclerView.Adapter<ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -74,8 +75,9 @@ class ChooseTokenListDialogFragment : BottomSheetDialogFragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val token = items.get(position)
-            holder.name.text = token.name
-            holder.name.setOnClickListener { onChooseToken(token.tokenId!!) }
+            holder.tokenName.text = token.name
+            holder.tokenId.text = token.tokenId
+            holder.itemView.setOnClickListener { onChooseToken(token.tokenId!!) }
         }
 
         override fun getItemCount(): Int {
