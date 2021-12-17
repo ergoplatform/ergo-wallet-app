@@ -10,8 +10,8 @@ java {
 }
 
 task convertStrings {
-    def source = '../android/build/intermediates/incremental/mergeErgomainnetDebugResources/merged.dir/values/values.xml'
-    def dest = 'resources/i18n/strings.properties'
+    def source = '../android/build/intermediates/incremental/mergeErgomainnetDebugResources/merged.dir/values{l}/values{l}.xml'
+    def dest = 'resources/i18n/strings{l}.properties'
     def dest2 = '../common-jvm/src/main/java/org/ergoplatform/uilogic/StringResources.kt'
 
     ext.changePlaceHolders = { stringText ->
@@ -28,10 +28,12 @@ task convertStrings {
             return line + "\\"
     }
 
-    doFirst {
-        def output = project.file(dest)
+    ext.convertFile = { language ->
+        def primaryLanguage = language == ""
+
+        def output = project.file(dest.replace("{l}", primaryLanguage ? "" : "_" + language))
         def output2 = project.file(dest2)
-        def input = project.file(source)
+        def input = project.file(source.replace("{l}", primaryLanguage ? "" : "-" + language))
 
         try {
             if (!output.parentFile.exists())
@@ -82,11 +84,16 @@ task convertStrings {
             }
 
             output.write(strings.join('\n'))
-            output2.write(names.join('\n'))
+            if (primaryLanguage) output2.write(names.join('\n'))
             logger.info("Updated strings")
         } catch (ex) {
             throw new GradleException('Exception writing strings file', ex)
         }
+    }
+
+    doFirst {
+        convertFile("")
+        convertFile("zh")
     }
 }
 

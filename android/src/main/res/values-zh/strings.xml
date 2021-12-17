@@ -25,6 +25,14 @@
     <string name="label_details">详情</string>
     <string name="label_dismiss">摒弃</string>
     <string name="label_remove">移除</string>
+    <string name="label_confirm">确认</string>
+    <string name="label_erg_amount">%1s ERG</string>
+    <string name="label_time_span_just_now">刚刚</string>
+    <string name="label_time_span_moments_ago">几分钟前</string>
+    <string name="label_time_span_minutes_ago">%1s 分钟前</string>
+    <string name="label_time_span_hours_ago">%1s 小时前</string>
+    <string name="label_time_span_days_ago">%1s 天前</string>
+    <string name="error_camera">初始化相机时出错。请检查您的隐私设置。</string>
 
     <!-- Wallet -->
     <string name="label_tokens">代币</string>
@@ -36,13 +44,12 @@
     <string name="label_last_sync">已同步 %1s</string>
     <string name="label_erg_price">1 ERG ≈</string>
     <string name="label_fiat_amount">≈ %1s</string>
-    <string name="label_time_span_just_now">立即</string>
     <string name="label_wallet_default">我的钱包</string>
 
     <!-- add wallet -->
     <string name="menu_add_wallet">添加钱包</string>
     <string name="label_create_wallet">新钱包</string>
-    <string name="desc_create_wallet">利用随机生成的助记符创建钱包（密钥和地址）。</string>
+    <string name="desc_create_wallet">利用随机生成的助记词创建钱包（密钥和地址）。</string>
     <string name="label_restore_wallet">恢复钱包</string>
     <string name="desc_restore_wallet">利用助记词恢复钱包的密钥和地址。</string>
     <string name="label_import_wallet">导入钱包</string>
@@ -56,17 +63,19 @@
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">这是您的15个单词的Ergo钱包助记词。这些单词也称为种子词或纸质密钥。
-
-        使用这15个单词，如果您无法访问这台设备，您可以在其他设备上恢复您的钱包。\n您必须
-    认真完整地抄写这15个单词（用笔和纸）并将它们存放在安全的地方。</string>
+       如果您无法访问这台设备，使用这15个单词，您可以在其他设备上恢复您的钱包。\n您必须
+   认真完整地抄写下这15个单词（用笔和纸）并将它们存放在安全的地方。</string>
     <string name="intro_confirm_create_wallet">为了确认您抄写的助记词正确无误，请立即输入这些助记词中的两个单词：</string>
     <string name="check_confirm_create_wallet">我明白我有责任将我的助记词存放在安全的地方。
-    如果存储在此设备上的密钥丢失或无法访问，助记词是访问我的钱包的唯一方式。</string>
+   如果存储在此设备上的密钥丢失或无法访问，则助记词是访问我的钱包的唯一方式。</string>
     <string name="label_word_confirm_create_wallet">单词 %1s</string>
     <string name="error_word_confirm_create_wallet">单词错误</string>
 
     <!-- Restore wallet -->
     <string name="intro_restore_wallet">输入您的 Ergo 钱包助记词以重新生成钱包。</string>
+    <string name="label_restore_wallet_word_list">阅读您的注释时有问题？
+        <a href="https://github.com/ergoplatform/ergo/blob/master/ergo-wallet/src/main/resources/wordlist/english.txt">查看单词列表</a>
+            并进行比较。</string>
     <string name="button_restore">恢复钱包</string>
     <string name="mnemonic_length_not_enough">单词数不够，请至少再添加 %1s</string>
     <string name="mnemonic_unknown_words">助记词包含未知单词，请检查拼写错误</string>
@@ -79,7 +88,9 @@
     <string name="button_save_password_encrypted">保存已加密密码</string>
     <string name="desc_save_password_encrypted">您须输入每次您打算发送资金时都需要重新输入的密码短语。</string>
     <string name="button_save_device_encrypted">保存已加密设备</string>
-    <string name="desc_save_device_encrypted">您需要在您的设备上进行认证以保存钱包并发送资金。\n当前认证方法：%1s</string>
+    <string name="desc_save_device_encrypted">您需要在您的设备上进行验证以保存钱包并发送资金。\n当前验证方法：%1s</string>
+    <string name="button_save_keychain">保存在密钥串中</string>
+    <string name="desc_save_keychain">您需要在您的设备上进行验证才能发送资金。</string>
     <string name="device_enc_security_none">无</string>
     <string name="device_enc_security_pass">密码、PIN 或图案</string>
     <string name="device_enc_security_biometric_strong">安全性强的生物认证</string>
@@ -96,7 +107,7 @@
     <!-- Wallet details -->
     <string name="title_wallet_balance">余额</string>
     <string name="label_all_addresses">所有 %1d 地址</string>
-    <string name="exporer_view_transactions">点击即可在 Ergo浏览器中查看交易 — 即将添加应用内交易列表</string>
+    <string name="exporer_view_transactions">点击即可在 Ergo 浏览器中查看交易 — 即将添加应用内交易列表</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">地址</string>
@@ -107,41 +118,63 @@
     <string name="desc_wallet_addresses">一个钱包可以有多个从主地址派生的公共地址。</string>
     <string name="button_add_address">添加地址</string>
     <string name="button_add_addresses">添加 %1d 地址</string>
-    <string name="desc_wallet_addr_label">您可以为自己设置一个为此地址显示的描述性标签：</string>
-    <string name="hint_wallet_addr_label">描述性标签（可选）</string>
-    <string name="desc_wallet_addr_remove">您可以从此应用的查看中删除此地址。 它仍然可以
+    <string name="desc_wallet_addr_label">为此地址设置一个描述性标签（只有您可见）：</string>
+    <string name="hint_wallet_addr_label">描述标签（可选）</string>
+    <string name="desc_wallet_addr_remove">您可以从此应用的查看中删除此地址。它仍然可以
         在 Ergo 网络上获得，可以接收付款并保留余额。您可以随时再次添加此地址。</string>
     <string name="title_choose_address">选择地址</string>
 
     <!-- Send funds -->
-    <string name="desc_choose_wallet">请选择要发送资金出去钱包：</string>
-    <string name="label_to">去</string>
+    <string name="desc_choose_wallet">请选择钱包，以便从：</string>
+    <string name="label_to">发送至</string>
+    <string name="hint_read_only">>这是一个只读钱包。如要发送资金，您需要一台设备来签署您的交易。 <a href="">了解详情。</a></string>
     <string name="desc_send_funds">输入接收方地址和发送金额，或扫描二维码。</string>
-    <string name="label_send_from">来源 %1s</string>
+    <string name="label_send_from">从：%1s</string>
     <string name="label_wallet_balance">余额：%1s ERG</string>
     <string name="label_receiver_address">接收方地址</string>
     <string name="label_scan_qr">扫描二维码</string>
     <string name="desc_fee">手续费：%1s ERG</string>
-    <string name="error_receiver_address">请输入有效ERG地址</string>
+    <string name="error_receiver_address">请输入有效 ERG 地址</string>
     <string name="error_amount">请输入有效金额</string>
     <string name="error_send_transaction">无法发送交易</string>
+    <string name="error_prepare_transaction">无法准备交易</string>
     <string name="error_password_empty">请输入有效密码</string>
     <string name="error_password_wrong">密码错误</string>
     <string name="desc_transaction_send">交易已成功发送并等待确认。 交易ID：</string>
-    <string name="title_authenticate">需要认证</string>
-    <string name="error_device_security">安全错误： %1s</string>
+    <string name="desc_prompt_signing">您的交易已准备就绪。扫描此二维码
+       以便您的签名设备继续。\n\n如果存在，请扫描已签名交易的二维码以
+        将它发送到网络。</string>
+    <string name="desc_prompt_signing_multiple">您的交易已准备就绪。扫描这些二维码
+       以便您的签名设备继续。</string>
+    <string name="button_scan_signed_tx">扫描已签名交易</string>
+    <string name="button_next">下一步</string>
+    <string name="title_authenticate">需要验证</string>
+    <string name="error_device_security">安全错误：%1s</string>
     <string name="label_add_token">代币</string>
     <string name="label_send_all">全部发送</string>
     <string name="title_add_token">选择要发送的代币</string>
     <string name="error_token_amount">请输入有效金额或移除不发送的代币条目</string>
 
+    <!-- Cold wallet signing request screen -->
+    <string name="title_signing_request">签名</string>
+    <string name="desc_signing_request">请核实待签发交易的详情。</string>
+    <string name="title_inboxes">支出金额</string>
+    <string name="desc_inboxes">在处理交易时将支出这些金额。</string>
+    <string name="title_outboxes">支出金额</string>
+    <string name="label_qr_pages_info"> %2s中的 %1s </string>
+    <string name="desc_outboxes">这些金额将在处理交易时发送。</string>
+    <string name="error_qr_pages_num">抱歉，此应用版本尚不支持分块二维码。</string>
+    <string name="desc_show_signed">您的交易已签名，需要发送到网络。
+         扫描此二维码以继续。</string>
+    <string name="desc_show_signed_multiple">您的交易已签名，需要发送到网络。
+        扫描这些二维码以继续。</string>
+
     <!-- Settings -->
-    <string name="desc_about">Benjamin Schulte于 2021 年为您带来</string>
-    <string name="desc_about_moreinfo">许可依据 <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Apache 2 License</a>\n
+    <string name="desc_about"> Benjamin Schulte于 2021 年为您带来 </string>
+    <string name="desc_about_moreinfo">许可依据<a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Apache 2 License</a>\n
         本项目是一个<a href="https://github.com/ergoplatform/ergo-wallet-app">开源软件</a>\n
-    请到<a href="https://discord.gg/kj7s7nb">Discord</a> 或 <a href="https://t.me/ergosupport">Telegram</a>寻求帮助
-        </string>
-    <string name="desc_coingecko">Ergo价格提供方是<a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a></string>
+    请到<a href="https://discord.gg/kj7s7nb">Discord</a> 或 <a href="https://t.me/ergosupport">电报</a></string>寻求帮助
+    <string name="desc_coingecko">Ergo价格提供方是 <a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a></string>
     <string name="label_cg_conn_error">连接 CoinGecko 时出错，请稍后重试。</string>
     <string name="desc_dark_mode">暗黑模式还是明亮模式？</string>
     <string name="button_dark_mode_system">系统默认</string>
@@ -152,4 +185,5 @@
     <string name="button_reset_defaults">默认值</string>
     <string name="label_explorer_api_url">浏览器 API URL</string>
     <string name="label_node_url">节点 URL</string>
+    <string name="button_show_debug_info">显示调试信息</string>
 </resources>

@@ -8,6 +8,11 @@
         <string>${app.name}</string>
         <key>CFBundleExecutable</key>
         <string>${app.executable}</string>
+        <key>CFBundleLocalizations</key>
+        <array>
+            <string>en</string>
+            <string>zh</string>
+        </array>
         <key>CFBundleIdentifier</key>
         <string>${app.id}</string>
         <key>CFBundleInfoDictionaryVersion</key>
