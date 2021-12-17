@@ -31,7 +31,7 @@
     <string name="label_confirm">Confirm</string>
     <string name="label_erg_amount">%1s ERG</string>
     <string name="label_time_span_just_now">just now</string>
-    <string name="label_time_span_moments_ago">some moments ago</string>
+    <string name="label_time_span_moments_ago">a few moments ago</string>
     <string name="label_time_span_minutes_ago">%1s minutes ago</string>
     <string name="label_time_span_hours_ago">%1s hours ago</string>
     <string name="label_time_span_days_ago">%1s days ago</string>
@@ -81,20 +81,20 @@
         <a href="https://github.com/ergoplatform/ergo/blob/master/ergo-wallet/src/main/resources/wordlist/english.txt">Check out the word list</a>
             and compare.</string>
     <string name="button_restore">Restore wallet</string>
-    <string name="mnemonic_length_not_enough">Not enough words, add at least %1s more</string>
-    <string name="mnemonic_unknown_words">Mnemonic contains unknown words, check for typos</string>
-    <string name="mnemonic_invalid">Mnemonic validation failed. If you are sure it is entered correctly, you can tap again to proceed.</string>
+    <string name="mnemonic_length_not_enough">Some words are missing from your mnemonic. Add at least %1s more.</string>
+    <string name="mnemonic_unknown_words">Mnemonic contains invalid words. Check for typos.</string>
+    <string name="mnemonic_invalid">Mnemonic validation failed. If you are sure you have entered it correctly, you can tap again to proceed.</string>
 
     <!-- Save wallet -->
     <string name="intro_save_wallet">Your wallet\'s main public address is:</string>
     <string name="intro_save_wallet2">You can add additional addresses later.\n\n
         Choose how the wallet and keys should be saved on this device.</string>
     <string name="button_save_password_encrypted">Save password-encrypted</string>
-    <string name="desc_save_password_encrypted">You have to enter a password-phrase that you need to reenter every time you want to send funds.</string>
+    <string name="desc_save_password_encrypted">Enter a password-phrase that you will need to reenter every time you want to send funds.</string>
     <string name="button_save_device_encrypted">Save device-encrypted</string>
-    <string name="desc_save_device_encrypted">You need to authenticate on your device to save the wallet and send funds.\nCurrent authentication method: %1s</string>
+    <string name="desc_save_device_encrypted">Authenticate on your device to save the wallet and send funds.\nCurrent authentication method: %1s</string>
     <string name="button_save_keychain">Save in keychain</string>
-    <string name="desc_save_keychain">You need to authenticate on your device to send funds.</string>
+    <string name="desc_save_keychain">Authenticate on your device to send funds.</string>
     <string name="device_enc_security_none">None</string>
     <string name="device_enc_security_pass">Password, PIN or pattern</string>
     <string name="device_enc_security_biometric_strong">Biometric with strong security</string>
@@ -157,7 +157,7 @@
     <string name="label_add_token">Token</string>
     <string name="label_send_all">Send all</string>
     <string name="title_add_token">Choose token to send</string>
-    <string name="error_token_amount">Please enter valid amounts or remove token entries not to send</string>
+    <string name="error_token_amount">Please enter valid token amounts or remove the invalid token entries</string>
 
     <!-- Cold wallet signing request screen -->
     <string name="title_signing_request">Sign</string>
@@ -167,7 +167,7 @@
     <string name="title_outboxes">Outgoing amounts</string>
     <string name="label_qr_pages_info">%1s of %2s</string>
     <string name="desc_outboxes">These amounts will be sent when the transaction is processed.</string>
-    <string name="error_qr_pages_num">Sorry, chunked QR codes not yet supported by this app version.</string>
+    <string name="error_qr_pages_num">Sorry, chunked QR codes are not yet supported by this app version.</string>
     <string name="desc_show_signed">Your transaction was signed and needs to be sent to the network.
         Scan this QR code to proceed.</string>
     <string name="desc_show_signed_multiple">Your transaction was signed and needs to be sent to the network.
