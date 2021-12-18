@@ -15,6 +15,7 @@ import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.TransactionResult
+import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.wallet.*
 import kotlin.math.max
 
@@ -168,7 +169,11 @@ abstract class SendFundsUiLogic {
         )
     }
 
-    fun startPaymentWithMnemonicAsync(mnemonic: String, preferences: PreferencesProvider) {
+    fun startPaymentWithMnemonicAsync(
+        mnemonic: String,
+        preferences: PreferencesProvider,
+        texts: StringProvider
+    ) {
         val derivedAddresses =
             derivedAddressIdx?.let { listOf(it) }
                 ?: wallet?.getSortedDerivedAddressesList()?.map { it.derivationIndex }
@@ -181,7 +186,7 @@ abstract class SendFundsUiLogic {
                     Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
                     tokensChosen.values.toList(),
                     mnemonic, "", derivedAddresses,
-                    preferences.prefNodeUrl, preferences.prefExplorerApiUrl
+                    preferences, texts
                 )
             }
             notifyUiLocked(false)
@@ -195,7 +200,7 @@ abstract class SendFundsUiLogic {
         notifyUiLocked(true)
     }
 
-    fun startColdWalletPayment(preferences: PreferencesProvider) {
+    fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
         wallet?.let { wallet ->
             val derivedAddresses =
                 derivedAddressIdx?.let { listOf(wallet.getDerivedAddress(it)!!) }
@@ -209,7 +214,7 @@ abstract class SendFundsUiLogic {
                         Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
                         tokensChosen.values.toList(),
                         derivedAddresses.map { Address.create(it) },
-                        preferences.prefNodeUrl, preferences.prefExplorerApiUrl
+                        preferences, texts
                     )
                 }
                 notifyUiLocked(false)
@@ -221,7 +226,11 @@ abstract class SendFundsUiLogic {
         }
     }
 
-    fun sendColdWalletSignedTx(qrCodes: List<String>, preferences: PreferencesProvider) {
+    fun sendColdWalletSignedTx(
+        qrCodes: List<String>,
+        preferences: PreferencesProvider,
+        texts: StringProvider
+    ) {
         notifyUiLocked(true)
         coroutineScope.launch {
             val ergoTxResult: SendTransactionResult
@@ -230,7 +239,7 @@ abstract class SendFundsUiLogic {
                 if (signingResult.success) {
                     ergoTxResult = sendSignedErgoTx(
                         signingResult.serializedTx!!,
-                        preferences.prefNodeUrl, preferences.prefExplorerApiUrl
+                        preferences, texts
                     )
                 } else {
                     ergoTxResult = SendTransactionResult(false, errorMsg = signingResult.errorMsg)

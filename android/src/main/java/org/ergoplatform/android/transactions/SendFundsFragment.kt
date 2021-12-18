@@ -337,7 +337,11 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
     override fun startAuthFlow(walletConfig: WalletConfig) {
         if (walletConfig.secretStorage == null) {
             // we have a read only wallet here, let's go to cold wallet support mode
-            viewModel.uiLogic.startColdWalletPayment(Preferences(requireContext()))
+            val context = requireContext()
+            viewModel.uiLogic.startColdWalletPayment(
+                Preferences(context),
+                AndroidStringProvider(context)
+            )
         } else {
             super.startAuthFlow(walletConfig)
         }

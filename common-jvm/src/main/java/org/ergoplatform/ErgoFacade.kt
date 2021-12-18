@@ -3,15 +3,16 @@ package org.ergoplatform
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.ergoplatform.ErgoBox
-import org.ergoplatform.UnsignedErgoLikeTransaction
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
+import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.restapi.client.Parameters
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
+import org.ergoplatform.uilogic.STRING_ERROR_BALANCE_ERG
+import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
@@ -107,15 +108,15 @@ fun sendErgoTx(
     mnemonic: String,
     mnemonicPass: String,
     derivedKeyIndices: List<Int>,
-    nodeApiAddress: String,
-    explorerApiAddress: String
+    prefs: PreferencesProvider,
+    texts: StringProvider
 ): SendTransactionResult {
     try {
         val ergoClient = RestApiErgoClient.create(
-            nodeApiAddress,
+            prefs.prefNodeUrl,
             getErgoNetworkType(),
             "",
-            explorerApiAddress
+            prefs.prefExplorerApiUrl
         )
         return ergoClient.execute { ctx: BlockchainContext ->
             val proverBuilder = ctx.newProverBuilder()
@@ -141,7 +142,7 @@ fun sendErgoTx(
         }
     } catch (t: Throwable) {
         LogUtils.logDebug("sendErgoTx", "Error caught", t)
-        return SendTransactionResult(false, errorMsg = t.message)
+        return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
     }
 }
 
@@ -153,15 +154,15 @@ fun prepareSerializedErgoTx(
     amountToSend: Long,
     tokensToSend: List<ErgoToken>,
     senderAddresses: List<Address>,
-    nodeApiAddress: String,
-    explorerApiAddress: String
+    prefs: PreferencesProvider,
+    texts: StringProvider
 ): PromptSigningResult {
     try {
         val ergoClient = RestApiErgoClient.create(
-            nodeApiAddress,
+            prefs.prefNodeUrl,
             getErgoNetworkType(),
             "",
-            explorerApiAddress
+            prefs.prefExplorerApiUrl
         )
         return ergoClient.execute { ctx: BlockchainContext ->
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
@@ -184,7 +185,7 @@ fun prepareSerializedErgoTx(
             )
         }
     } catch (t: Throwable) {
-        return PromptSigningResult(false, errorMsg = t.message)
+        return PromptSigningResult(false, errorMsg = getErrorMessage(t, texts))
     }
 }
 
@@ -201,7 +202,8 @@ fun signSerializedErgoTx(
     serializedTx: ByteArray,
     mnemonic: String,
     mnemonicPass: String,
-    derivedKeyIndices: List<Int>
+    derivedKeyIndices: List<Int>,
+    texts: StringProvider
 ): SigningResult {
     try {
         val signedTxSerialized = getColdErgoClient().execute { ctx ->
@@ -221,7 +223,7 @@ fun signSerializedErgoTx(
         }
         return SigningResult(true, signedTxSerialized)
     } catch (t: Throwable) {
-        return SigningResult(false, errorMsg = t.message)
+        return SigningResult(false, errorMsg = getErrorMessage(t, texts))
     }
 }
 
@@ -235,15 +237,15 @@ private fun getColdErgoClient() = ColdErgoClient(
  */
 fun sendSignedErgoTx(
     signedTxSerialized: ByteArray,
-    nodeApiAddress: String,
-    explorerApiAddress: String
+    prefs: PreferencesProvider,
+    texts: StringProvider
 ): SendTransactionResult {
     try {
         val ergoClient = RestApiErgoClient.create(
-            nodeApiAddress,
+            prefs.prefNodeUrl,
             getErgoNetworkType(),
             "",
-            explorerApiAddress
+            prefs.prefExplorerApiUrl
         )
         val txId = ergoClient.execute { ctx ->
             val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
@@ -253,7 +255,18 @@ fun sendSignedErgoTx(
         return SendTransactionResult(txId.isNotEmpty(), txId)
 
     } catch (t: Throwable) {
-        return SendTransactionResult(false, errorMsg = t.message)
+        return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
+    }
+}
+
+fun getErrorMessage(t: Throwable, texts: StringProvider): String? {
+    return if (t is InputBoxesSelectionException.NotEnoughErgsException) {
+        texts.getString(
+            STRING_ERROR_BALANCE_ERG,
+            ErgoAmount(t.balanceFound).toStringTrimTrailingZeros()
+        )
+    } else {
+        t.message
     }
 }
 

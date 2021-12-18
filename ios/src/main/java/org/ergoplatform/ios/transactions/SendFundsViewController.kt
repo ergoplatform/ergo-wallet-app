@@ -259,7 +259,12 @@ class SendFundsViewController(
 
         if (checkResponse.canPay) {
             startAuthFlow(uiLogic.wallet!!.walletConfig) { mnemonic ->
-                uiLogic.startPaymentWithMnemonicAsync(mnemonic, getAppDelegate().prefs)
+                val appDelegate = getAppDelegate()
+                uiLogic.startPaymentWithMnemonicAsync(
+                    mnemonic, appDelegate.prefs, IosStringProvider(
+                        appDelegate.texts
+                    )
+                )
             }
         }
     }
