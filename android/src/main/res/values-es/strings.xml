@@ -1,11 +1,7 @@
 <resources>
-    <string name="app_name">Billetera de Ergo</string>
     <string name="title_transactions">Transacciones</string>
     <string name="title_wallets">Billeteras</string>
     <string name="title_settings">Opcines</string>
-    <string name="format_erg">###,##0.0000</string>
-    <string name="format_erg_more_precise">###,##0.000000</string>
-    <string name="format_fiat">###,##0.00</string>
 
     <string name="hint_password">Por favor introduce tu contraseña de gastos</string>
     <string name="label_forgot_password">¿Olvidaste tu contraseña?</string>
