@@ -1,0 +1,193 @@
+<resources>
+    <string name="app_name">Billetera de Ergo</string>
+    <string name="title_transactions">Transacciones</string>
+    <string name="title_wallets">Billeteras</string>
+    <string name="title_settings">Opcines</string>
+    <string name="format_erg">###,##0.0000</string>
+    <string name="format_erg_more_precise">###,##0.000000</string>
+    <string name="format_fiat">###,##0.00</string>
+
+    <string name="hint_password">Por favor introduce tu contraseña de gastos</string>
+    <string name="label_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="err_password">Las contraseñas deben tener al menos 8 caracteres de largo.</string>
+    <string name="label_password">Contraseña</string>
+    <string name="label_password_confirm">Confirmar contraseña</string>
+    <string name="err_password_confirm">Las contraseñas no coinciden</string>
+    <string name="button_done">Hecho</string>
+    <string name="button_apply">Guardar</string>
+    <string name="button_copy">Copiar</string>
+    <string name="label_copied">Copiado!</string>
+    <string name="label_qr_code">Código QR</string>
+    <string name="label_amount">Cantidad</string>
+    <string name="label_purpose">Propósito</string>
+    <string name="label_share">Compartir</string>
+    <string name="button_delete">Eliminar</string>
+    <string name="button_yes">Si</string>
+    <string name="label_cancel">Cancelar</string>
+    <string name="label_none">Ninguna</string>
+    <string name="label_details">Detalles</string>
+    <string name="label_dismiss">Descartar</string>
+    <string name="label_remove">Eliminar</string>
+    <string name="label_confirm">Confirmar</string>
+    <string name="label_erg_amount">%1s ERG</string>
+    <string name="label_time_span_just_now">Ahora mismo</string>
+    <string name="label_time_span_moments_ago">hace unos momentos</string>
+    <string name="label_time_span_minutes_ago">hace %1s minutos</string>
+    <string name="label_time_span_hours_ago">hace %1s horas</string>
+    <string name="label_time_span_days_ago">hace %1s días</string>
+    <string name="error_camera">Error al inicializar la cámara. Comprueba tu configuración de privacidad.</string>
+
+    <!-- Wallet -->
+    <string name="label_tokens">tokens</string>
+    <string name="label_more_tokens">más tokens</string>
+    <string name="label_unconfirmed">no confirmado</string>
+    <string name="button_receive">Recibir</string>
+    <string name="button_send">Enviar</string>
+    <string name="button_display_currency">Mostrar dinero en: %1s</string>
+    <string name="label_last_sync">Sincronizado %1s</string>
+    <string name="label_erg_price">1 ERG ≈</string>
+    <string name="label_fiat_amount">≈ %1s</string>
+    <string name="label_wallet_default">Mi billetera</string>
+
+    <!-- add wallet -->
+    <string name="menu_add_wallet">Añadir billetera</string>
+    <string name="label_create_wallet">Nueva billetera</string>
+    <string name="desc_create_wallet">Crea una billetera (claves y una dirección) a partir de una frase semilla generada aleatoriamente.</string>
+    <string name="label_restore_wallet">Restaurar billetera</string>
+    <string name="desc_restore_wallet">Restaura una billetera a partir de su frase semilla.</string>
+    <string name="label_import_wallet">Importar billetera</string>
+    <string name="desc_import_wallet">Use un archivo de billetera exportado o guardado para importar una billetera existente.</string>
+    <string name="label_readonly_wallet">Billetera de solo lectura</string>
+    <string name="desc_readonly_wallet">Agrega una dirección de billetera en modo de solo lectura. Esto no guardará ninguna clave en este dispositivo.</string>
+
+    <!-- add readonly wallet -->
+    <string name="intro_add_readonly">Ingrese la dirección de su billetera pública para agregar la billetera en modo de solo lectura.</string>
+    <string name="label_wallet_address">Dirección de billetera</string>
+
+    <!-- Create wallet -->
+    <string name="intro_create_wallet">Esta es su frase semilla de 15 palabras. Estas palabras también se conocen como llave de papel.
+        Con estas 15 palabras, puede restaurar su billetera en otros dispositivos si pierde el acceso a este.\nEs crucial
+    que escribas cuidadosamente las 15 palabras (con lápiz y papel) y guárdelas en un lugar seguro.</string>
+    <string name="intro_confirm_create_wallet">Para confirmar que su frase semilla escrita a mano es correcto, ingrese dos palabras de la frase ahora:</string>
+    <string name="check_confirm_create_wallet">Entiendo que soy responsable de guardar mi frase semilla en un lugar seguro.
+    Es la única forma de acceder a mi billetera si las claves almacenadas en este dispositivo se pierden o son inaccesibles.</string>
+    <string name="label_word_confirm_create_wallet">Palabra %1s</string>
+    <string name="error_word_confirm_create_wallet">Palabra incorrecta</string>
+
+    <!-- Restore wallet -->
+    <string name="intro_restore_wallet">Ingrese su frase semilla de la billetera Ergo para regenerar la billetera.</string>
+    <string name="label_restore_wallet_word_list">¿Problemas para leer tus palabras escritas?
+        <a href="https://github.com/ergoplatform/ergo/blob/master/ergo-wallet/src/main/resources/wordlist/english.txt">Mira la lista de palabras</a>
+            y compara.</string>
+    <string name="button_restore">Restaurar billetera</string>
+    <string name="mnemonic_length_not_enough">Faltan algunas palabras en su frase. Agregue al menos %1s más.</string>
+    <string name="mnemonic_unknown_words">La frase contiene palabras no válidas. Compruebe si hay errores de escritura.</string>
+    <string name="mnemonic_invalid">La validación de la frase falló. Si está seguro de haberlo ingresado correctamente, inténtelo nuevamente.</string>
+
+    <!-- Save wallet -->
+    <string name="intro_save_wallet">La dirección pública de su billetera principal es:</string>
+    <string name="intro_save_wallet2">Puede agregar direcciones adicionales más tarde.\n\n
+        Elija cómo se deben guardar la billetera y las claves en este dispositivo.</string>
+    <string name="button_save_password_encrypted">Guardar contraseña encriptada</string>
+    <string name="desc_save_password_encrypted">Ingrese una frase de contraseña que deberá volver a ingresar cada vez que desee enviar fondos.</string>
+    <string name="button_save_device_encrypted">Guardar dispositivo encriptado</string>
+    <string name="desc_save_device_encrypted">Autentíquese en su dispositivo para guardar la billetera y enviar fondos.\nEl método de autenticación actual: %1s</string>
+    <string name="button_save_keychain">Guardar en llavero</string>
+    <string name="desc_save_keychain">Autentíquese en su dispositivo para enviar fondos.</string>
+    <string name="device_enc_security_none">ninguno</string>
+    <string name="device_enc_security_pass">Contraseña, PIN o patrón</string>
+    <string name="device_enc_security_biometric_strong">Biométrico con fuerte seguridad</string>
+    <string name="device_enc_security_biometric_weak">Biométrico, Clase 2</string>
+
+    <!-- Wallet config -->
+    <string name="title_wallet_details">Configuración de billetera</string>
+    <string name="label_wallet_name">Nombre descriptivo de la billetera</string>
+    <string name="label_changes_saved">Cambios guardados</string>
+    <string name="label_confirm_delete">¿Estás seguro de que deseas borrar la billetera de este dispositivo?\nEsta acción no se puede deshacer.</string>
+    <string name="desc_display_mnemonic">Puede mostrar su frase semilla en caso de que haya perdido su copia de seguridad o para confirmar que su copia de seguridad es correcta.</string>
+    <string name="button_display_mnemonic">Mostrar frase semilla</string>
+
+    <!-- Wallet details -->
+    <string name="title_wallet_balance">Saldo</string>
+    <string name="label_all_addresses">Todas las %1d billeteras</string>
+    <string name="exporer_view_transactions">Toque para ver las transacciones en Ergo Explorer; la lista de transacciones en la aplicación se agregará pronto</string>
+
+    <!-- Wallet addresses -->
+    <string name="title_wallet_addresses">Direcciones</string>
+    <string name="title_wallet_address">Mostrar contenido para</string>
+    <string name="label_wallet_main_address">Direccion principal</string>
+    <string name="label_wallet_address_derived">Dirección derivada %1s</string>
+    <string name="label_wallet_token_balance">%1s tokens</string>
+    <string name="desc_wallet_addresses">Una billetera puede tener varias direcciones públicas derivadas de la dirección principal.</string>
+    <string name="button_add_address">Añadir dirección</string>
+    <string name="button_add_addresses">Añadir %1d direcciones</string>
+    <string name="desc_wallet_addr_label">Establecer una etiqueta descriptiva (visible solo para usted) para esta dirección:</string>
+    <string name="hint_wallet_addr_label">Etiqueta descriptiva (opcional)</string>
+    <string name="desc_wallet_addr_remove">Puede eliminar esta dirección de la vista de esta aplicación. Todavía estará disponible
+        en la red de Ergo, puede recibir pagos y mantener un saldo. Puede agregarlo nuevamente en cualquier momento.</string>
+    <string name="title_choose_address">Elige una dirección</string>
+
+    <!-- Send funds -->
+    <string name="desc_choose_wallet">Elija la billetera desde donde enviar:</string>
+    <string name="label_to">hacia</string>
+    <string name="hint_read_only">Esta es una billetera de solo lectura. Para enviar fondos, necesita un dispositivo para firmar su transacción. <a href="">Learn more.</a></string>
+    <string name="desc_send_funds">Ingrese la dirección del destinatario y la cantidad a enviar, o escanee un código QR.</string>
+    <string name="label_send_from">De: %1s</string>
+    <string name="label_wallet_balance">Saldo: %1s ERG</string>
+    <string name="label_receiver_address">Dirección del destinatario</string>
+    <string name="label_scan_qr">Scan QR code</string>
+    <string name="desc_fee">Comisión: %1s ERG</string>
+    <string name="error_receiver_address">Ingrese una dirección de ERG válida</string>
+    <string name="error_amount">Ingrese una cantidad válida</string>
+    <string name="error_send_transaction">No se pudo enviar la transacción</string>
+    <string name="error_prepare_transaction">No se pudo preparar la transacción</string>
+    <string name="error_password_empty">Por favor introduce una contraseña válida</string>
+    <string name="error_password_wrong">Wrong password</string>
+    <string name="desc_transaction_send">La transacción se envió correctamente y está pendiente de confirmación. ID de transacción:</string>
+    <string name="desc_prompt_signing">Tu transacción fue preparada. Escanea este código QR
+       con su dispositivo de firma para continuar.\n\nCuando esté presente, escanee el código QR de la transacción firmada para
+        enviarla a la red</string>
+    <string name="desc_prompt_signing_multiple">Tu transacción fue preparada. Escanea estos códigos QR
+       con su dispositivo de firma para continuar.</string>
+    <string name="button_scan_signed_tx">Escanear el tx firmado</string>
+    <string name="button_next">Siguiente</string>
+    <string name="title_authenticate">Autenticacion requerida</string>
+    <string name="error_device_security">Error de seguridad: %1s</string>
+    <string name="label_add_token">Token</string>
+    <string name="label_send_all">Enviar todos</string>
+    <string name="title_add_token">Elija el token para enviar</string>
+    <string name="error_token_amount">Ingrese cantidades de tokens válidas o elimine las entradas de tokens no válidas</string>
+    <string name="error_balance_erg">No hay saldo suficiente para enviar la cantidad especificada: solo hay %1s ERG disponibles.</string>
+
+    <!-- Cold wallet signing request screen -->
+    <string name="title_signing_request">Firma</string>
+    <string name="desc_signing_request">Verifique los detalles de la transacción a emitir.</string>
+    <string name="title_inboxes">Cantidades a gastar</string>
+    <string name="desc_inboxes">Estas cantidades se gastarán cuando se procese la transacción.</string>
+    <string name="title_outboxes">Cantidades salientes</string>
+    <string name="label_qr_pages_info">%1s de %2s</string>
+    <string name="desc_outboxes">Estas cantidades se enviarán cuando se procese la transacción.</string>
+    <string name="error_qr_pages_num">Lo sentimos, los códigos QR fragmentados aún no son compatibles con esta versión de la aplicación.</string>
+    <string name="desc_show_signed">Su transacción fue firmada y debe enviarse a la red.
+        Escanee este código QR para continuar.</string>
+    <string name="desc_show_signed_multiple">Su transacción fue firmada y debe enviarse a la red.
+        Escanee estos códigos QR para continuar.</string>
+
+    <!-- Settings -->
+    <string name="desc_about">Creado por Benjamin Schulte, 2021</string>
+    <string name="desc_about_moreinfo">Licenciado bajo <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Licencia de Apache 2</a>\n
+        Este proyecto es <a href="https://github.com/ergoplatform/ergo-wallet-app">software de código abierto</a>\n
+    Encuentra ayuda en <a href="https://discord.gg/kj7s7nb">Discord</a> o <a href="https://t.me/ergosupport">Telegram</a></string>
+    <string name="desc_coingecko">Precio de Ergo mostrado por <a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a></string>
+    <string name="label_cg_conn_error">Error al conectarse a CoinGecko, inténtelo de nuevo más tarde.</string>
+    <string name="desc_dark_mode">¿Modo oscuro o claro?</string>
+    <string name="button_dark_mode_system">Por defecto</string>
+    <string name="button_dark_mode_day">Claro</string>
+    <string name="button_dark_mode_night">Oscuro</string>
+    <string name="desc_expert_settings">Configuración avanzada</string>
+    <string name="button_connection_settings">Conexiones de nodo y API</string>
+    <string name="button_reset_defaults">Por defecto</string>
+    <string name="label_explorer_api_url">URL de la API del explorador</string>
+    <string name="label_node_url">URL del nodo</string>
+    <string name="button_show_debug_info">Mostrar información de depuración</string>
+</resources>

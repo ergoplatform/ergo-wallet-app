@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MoneyTextViewDefaultStyle">
+        <item name="format">@string/format_erg</item>
+        <item name="symbol">ERG</item>
+        <item name="baseTextSize">@dimen/body1_textsize</item>
+        <item name="baseTextColor">@color/secondary</item>
+        <item name="includeDecimalSeparator">false</item>
+        <item name="decimalUnderline">false</item>
+        <item name="decimalDigitsTextSize">12dp</item>
+        <item name="symbolMargin">6dp</item>
+        <item name="decimalMargin">2dp</item>
+        <item name="symbolGravity">end|bottom</item>
+        <item name="decimalGravity">top</item>
+    </style>
+
+    <style name="MoneyTextViewFiatStyle" parent="MoneyTextViewDefaultStyle">
+        <item name="format">@string/format_fiat</item>
+    </style>
+
+    <style name="width_match_parent_max_500">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+</resources>
