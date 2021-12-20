@@ -23,6 +23,15 @@ class PaymentRequestKtTest {
         Assert.assertEquals(2 * Parameters.OneErg, parse2?.amount?.nanoErgs)
         Assert.assertEquals("testaddr", parse2?.address)
         Assert.assertEquals(1, parse2?.tokens?.size)
+        Assert.assertEquals("12345", parse2?.tokens?.keys?.first())
         Assert.assertEquals("22.3", parse2?.tokens?.get("12345"))
+
+        parsePaymentRequestFromQrCode("ergoplatform:testaddr&amount=1&token-2345=22.3").apply {
+            Assert.assertEquals(Parameters.OneErg, this?.amount?.nanoErgs)
+            Assert.assertEquals("testaddr", this?.address)
+            Assert.assertEquals(1, this?.tokens?.size)
+            Assert.assertEquals("2345", this?.tokens?.keys?.first())
+            Assert.assertEquals("22.3", this?.tokens?.get("2345"))
+        }
     }
 }

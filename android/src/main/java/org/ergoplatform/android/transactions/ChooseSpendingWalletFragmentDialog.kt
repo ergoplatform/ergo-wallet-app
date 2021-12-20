@@ -13,7 +13,7 @@ import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserBindin
 import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserItemBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.parsePaymentRequestFromQuery
+import org.ergoplatform.parsePaymentRequestFromQrCode
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 
 
@@ -39,14 +39,14 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val query = requireActivity().intent.data?.encodedQuery
+        val query = requireActivity().intent.dataString
 
         if (query == null) {
             dismiss()
             return
         }
 
-        val content = parsePaymentRequestFromQuery(query)
+        val content = parsePaymentRequestFromQrCode(query)
         binding.receiverAddress.text = content?.address
         val amount = content?.amount ?: ErgoAmount.ZERO
         binding.grossAmount.amount = amount.toDouble()
@@ -85,7 +85,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
         NavHostFragment.findNavController(requireParentFragment())
             .navigateSafe(
                 ChooseSpendingWalletFragmentDialogDirections.actionChooseSpendingWalletFragmentDialogToSendFundsFragment(
-                    requireActivity().intent.data?.encodedQuery!!, walletId
+                    requireActivity().intent.dataString!!, walletId
                 ), navOptions
             )
     }

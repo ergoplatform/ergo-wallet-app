@@ -6,20 +6,26 @@ import java.net.URLEncoder
 private val PARAM_DELIMITER = "&"
 private val RECIPIENT_PARAM_PREFIX = "address="
 private val AMOUNT_PARAM_PREFIX = "amount="
+private val TOKEN_PARAM_PREFIX = "token-"
 private val DESCRIPTION_PARAM_PREFIX = "description="
 private val URI_ENCODING = "utf-8"
 
-private val paymentUriPrefix
+private val explorerPaymentUrlPrefix
     get() =
         if (isErgoMainNet) "https://explorer.ergoplatform.com/payment-request?"
         else "https://testnet.ergoplatform.com/payment-request?"
+
+private val PAYMENT_URI_SCHEME = "ergoplatform:"
 
 fun getExplorerPaymentRequestAddress(
     address: String,
     amount: Double = 0.0,
     description: String = ""
 ): String {
-    return paymentUriPrefix + RECIPIENT_PARAM_PREFIX + URLEncoder.encode(address, URI_ENCODING) +
+    return explorerPaymentUrlPrefix + RECIPIENT_PARAM_PREFIX + URLEncoder.encode(
+        address,
+        URI_ENCODING
+    ) +
             PARAM_DELIMITER + AMOUNT_PARAM_PREFIX + URLEncoder.encode(
         amount.toString(),
         URI_ENCODING
@@ -30,12 +36,27 @@ fun getExplorerPaymentRequestAddress(
     )
 }
 
-fun parsePaymentRequestFromQrCode(qrCode: String): PaymentRequest? {
-    if (qrCode.startsWith(paymentUriPrefix, true)) {
-        // we have a payment uri
-        val uriWithoutPrefix = qrCode.substring(paymentUriPrefix.length)
-        return parsePaymentRequestFromQuery(uriWithoutPrefix)
+fun isPaymentRequestUrl(url: String): Boolean {
+    return url.startsWith(explorerPaymentUrlPrefix, true) || url.startsWith(
+        PAYMENT_URI_SCHEME,
+        true
+    )
+}
 
+fun parsePaymentRequestFromQrCode(qrCode: String): PaymentRequest? {
+    if (qrCode.startsWith(explorerPaymentUrlPrefix, true)) {
+        // we have an explorer payment url
+        val uriWithoutPrefix = qrCode.substring(explorerPaymentUrlPrefix.length)
+        return parsePaymentRequestFromQuery(uriWithoutPrefix)
+    } else if (qrCode.startsWith(PAYMENT_URI_SCHEME, true)) {
+        // we have an uri scheme payment request: ergoplatform:address?moreParams
+        val uriWithoutPrefix = qrCode.substring(PAYMENT_URI_SCHEME.length).trimStart('/')
+        return parsePaymentRequestFromQuery(
+            RECIPIENT_PARAM_PREFIX + uriWithoutPrefix.replaceFirst(
+                '?',
+                '&'
+            )
+        )
     } else if (isValidErgoAddress(qrCode)) {
         return PaymentRequest(qrCode)
     } else {
@@ -43,7 +64,7 @@ fun parsePaymentRequestFromQrCode(qrCode: String): PaymentRequest? {
     }
 }
 
-fun parsePaymentRequestFromQuery(query: String): PaymentRequest? {
+private fun parsePaymentRequestFromQuery(query: String): PaymentRequest? {
     var address: String? = null
     var amount = ErgoAmount.ZERO
     var description = ""
@@ -63,7 +84,10 @@ fun parsePaymentRequestFromQuery(query: String): PaymentRequest? {
             // this could be a token
             val keyVal = it.split('=')
             try {
+                // we accept token params without token-prefix to not break compatibility with
+                // auction house for now. Can be removed later
                 val tokenId = keyVal.get(0)
+                    .let { if (it.startsWith(TOKEN_PARAM_PREFIX)) it.substring(TOKEN_PARAM_PREFIX.length) else it }
                 val tokenAmount = keyVal.get(1)
                 // throws exception when it is not numeric
                 tokenAmount.toDouble()
