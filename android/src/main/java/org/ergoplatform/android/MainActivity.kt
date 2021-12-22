@@ -36,7 +36,9 @@ class MainActivity : AppCompatActivity() {
             navView.visibility = if (isOpen) View.GONE else View.VISIBLE
         })
 
-        handleIntent(navController)
+        if (savedInstanceState == null) {
+            handleIntent(navController)
+        }
     }
 
     private fun handleIntent(navController: NavController) {
