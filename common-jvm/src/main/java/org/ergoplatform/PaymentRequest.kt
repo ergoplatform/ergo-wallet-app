@@ -113,3 +113,7 @@ data class PaymentRequest(
     val description: String = "",
     val tokens: HashMap<String, String> = HashMap(),
 )
+
+data class PaymentRequestWarning(
+    val errorCode: String, val arguments: String? = null
+)

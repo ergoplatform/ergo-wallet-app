@@ -63,7 +63,7 @@ class SendFundsViewController(
                     content.amount.let { amount ->
                         if (amount.nanoErgs > 0) setInputAmount(amount)
                     }
-                    uiLogic.addTokensFromQr(content.tokens)
+                    uiLogic.addTokensFromPaymentRequest(content.tokens)
                 }
             }, true) {}
         }
@@ -317,6 +317,12 @@ class SendFundsViewController(
                 }
                 tokensUiList.isHidden = uiLogic.tokensChosen.isEmpty()
                 setFocusToEmptyTokenAmountInput()
+
+                uiLogic.getPaymentRequestWarnings(IosStringProvider(texts))?.let {
+                    val uac = buildSimpleAlertController("", it, texts)
+                    presentViewController(uac, true) {}
+
+                }
             }
         }
 
