@@ -1,12 +1,12 @@
 package org.ergoplatform.ios
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.ergoplatform.ios.settings.SettingsViewController
 import org.ergoplatform.ios.transactions.ChooseSpendingWalletViewController
 import org.ergoplatform.ios.transactions.SendFundsViewController
-import org.ergoplatform.ios.ui.IMAGE_SETTINGS
-import org.ergoplatform.ios.ui.IMAGE_WALLET
-import org.ergoplatform.ios.ui.getAppDelegate
-import org.ergoplatform.ios.ui.uiColorErgo
+import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WalletViewController
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
@@ -64,22 +64,37 @@ class BottomNavigationBar : UITabBarController() {
         val pr = parsePaymentRequest(paymentRequest)
 
         pr?.let {
-            presentViewController(
-                ChooseSpendingWalletViewController(pr) { walletId ->
-                    navigateToSendFundsScreen(walletId, paymentRequest)
-                }, true
-            ) {}
+            CoroutineScope(Dispatchers.Default).launch {
+                val wallets = getAppDelegate().database.getAllWalletConfigsSynchronous()
+
+                runOnMainThread {
+                    if (wallets.size == 1) {
+                        navigateToSendFundsScreen(wallets.first().id, paymentRequest, false)
+                    } else {
+                        presentViewController(
+                            ChooseSpendingWalletViewController(pr) { walletId ->
+                                navigateToSendFundsScreen(walletId, paymentRequest, true)
+                            }, true
+                        ) {}
+                    }
+                }
+            }
         }
     }
 
-    private fun navigateToSendFundsScreen(walletId: Int, paymentRequest: String) {
-        // set view to first controller, go back to its root and switch to the wallet's send funds screen
+    private fun navigateToSendFundsScreen(
+        walletId: Int,
+        paymentRequest: String,
+        fromChooseScreen: Boolean
+    ) {
+        // set view to first controller (wallet list), go back to its root and switch to the
+        // wallet's send funds screen
         selectedViewController = viewControllers.first()
         (selectedViewController as? UINavigationController)?.apply {
             popToRootViewController(false)
             pushViewController(
                 SendFundsViewController(walletId, paymentRequest = paymentRequest),
-                false
+                !fromChooseScreen
             )
         }
 

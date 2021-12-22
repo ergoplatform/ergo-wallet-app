@@ -87,13 +87,9 @@ class ChooseSpendingWalletViewController(
             val wallets = getAppDelegate().database.getWalletsWithStates()
 
             runOnMainThread {
-                if (wallets.size == 1) {
-                    navigateToSendFundsScreen(wallets.first().walletConfig.id)
-                } else {
-                    walletsStackView.clearArrangedSubviews()
-                    wallets.sortedBy { it.walletConfig.displayName }.forEach { wallet ->
-                        walletsStackView.addArrangedSubview(WalletItem(wallet))
-                    }
+                walletsStackView.clearArrangedSubviews()
+                wallets.sortedBy { it.walletConfig.displayName }.forEach { wallet ->
+                    walletsStackView.addArrangedSubview(WalletItem(wallet))
                 }
             }
         }
