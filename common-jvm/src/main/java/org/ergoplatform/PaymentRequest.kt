@@ -43,7 +43,7 @@ fun isPaymentRequestUrl(url: String): Boolean {
     )
 }
 
-fun parsePaymentRequestFromQrCode(qrCode: String): PaymentRequest? {
+fun parsePaymentRequest(qrCode: String): PaymentRequest? {
     if (qrCode.startsWith(explorerPaymentUrlPrefix, true)) {
         // we have an explorer payment url
         val uriWithoutPrefix = qrCode.substring(explorerPaymentUrlPrefix.length)
@@ -82,10 +82,11 @@ private fun parsePaymentRequestFromQuery(query: String): PaymentRequest? {
                 URLDecoder.decode(it.substring(DESCRIPTION_PARAM_PREFIX.length), URI_ENCODING)
         } else if (it.contains('=')) {
             // this could be a token
+            // we accept token params without token-prefix to not break compatibility with
+            // auction house for now.
+            // TODO Q2/2022 remove backwards compatiblity
             val keyVal = it.split('=')
             try {
-                // we accept token params without token-prefix to not break compatibility with
-                // auction house for now. Can be removed later
                 val tokenId = keyVal.get(0)
                     .let { if (it.startsWith(TOKEN_PARAM_PREFIX)) it.substring(TOKEN_PARAM_PREFIX.length) else it }
                 val tokenAmount = keyVal.get(1)

@@ -14,7 +14,7 @@ import org.ergoplatform.android.databinding.FragmentAddReadOnlyWalletDialogBindi
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.parsePaymentRequestFromQrCode
+import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.uilogic.wallet.AddReadOnlyWalletUiLogic
 
 /**
@@ -63,7 +63,7 @@ class AddReadOnlyWalletFragmentDialog : FullScreenFragmentDialog() {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let {
-                val content = parsePaymentRequestFromQrCode(it)
+                val content = parsePaymentRequest(it)
                 content?.let { binding.tvWalletAddress.editText?.setText(content.address) }
             }
         } else {

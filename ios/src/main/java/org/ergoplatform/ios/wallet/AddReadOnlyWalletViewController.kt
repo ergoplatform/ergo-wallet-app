@@ -1,7 +1,7 @@
 package org.ergoplatform.ios.wallet
 
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.parsePaymentRequestFromQrCode
+import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.AddReadOnlyWalletUiLogic
 import org.robovm.apple.coregraphics.CGRect
@@ -46,7 +46,7 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
 
             setCustomActionField(getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small)!!) {
                 presentViewController(QrScannerViewController {
-                    val content = parsePaymentRequestFromQrCode(it)
+                    val content = parsePaymentRequest(it)
                     content?.let { text = content.address }
                 }, true) {}
             }

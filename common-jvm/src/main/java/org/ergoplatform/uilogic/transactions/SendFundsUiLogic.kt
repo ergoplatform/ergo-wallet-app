@@ -70,7 +70,7 @@ abstract class SendFundsUiLogic {
         // to not mess with user inputs
         val content: PaymentRequest?
         if (firstInit) {
-            content = paymentRequest?.let { parsePaymentRequestFromQrCode(paymentRequest) }
+            content = paymentRequest?.let { parsePaymentRequest(paymentRequest) }
             content?.let {
                 receiverAddress = content.address
                 amountToSend = content.amount

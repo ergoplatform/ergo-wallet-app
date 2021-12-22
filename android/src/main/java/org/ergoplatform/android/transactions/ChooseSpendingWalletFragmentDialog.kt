@@ -13,7 +13,7 @@ import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserBindin
 import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserItemBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.parsePaymentRequestFromQrCode
+import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 
 
@@ -46,7 +46,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
             return
         }
 
-        val content = parsePaymentRequestFromQrCode(query)
+        val content = parsePaymentRequest(query)
         binding.receiverAddress.text = content?.address
         val amount = content?.amount ?: ErgoAmount.ZERO
         binding.grossAmount.amount = amount.toDouble()
@@ -59,7 +59,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
 
                 if (wallets.size == 1) {
                     // immediately switch to send funds screen
-                    navigateToSendFundsScreen(wallets.first().walletConfig.id)
+                    navigateToSendFundsScreen(wallets.first().walletConfig.id, query)
                 }
                 wallets.sortedBy { it.walletConfig.displayName }.forEach { wallet ->
                     val itemBinding = FragmentSendFundsWalletChooserItemBinding.inflate(
@@ -71,13 +71,13 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
                     itemBinding.walletName.text = wallet.walletConfig.displayName
 
                     itemBinding.root.setOnClickListener {
-                        navigateToSendFundsScreen(wallet.walletConfig.id)
+                        navigateToSendFundsScreen(wallet.walletConfig.id, query)
                     }
                 }
             })
     }
 
-    private fun navigateToSendFundsScreen(walletId: Int) {
+    private fun navigateToSendFundsScreen(walletId: Int, paymentRequest: String) {
         val navBuilder = NavOptions.Builder()
         val navOptions =
             navBuilder.setPopUpTo(R.id.chooseSpendingWalletFragmentDialog, true).build()
@@ -85,7 +85,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
         NavHostFragment.findNavController(requireParentFragment())
             .navigateSafe(
                 ChooseSpendingWalletFragmentDialogDirections.actionChooseSpendingWalletFragmentDialogToSendFundsFragment(
-                    requireActivity().intent.dataString!!, walletId
+                    paymentRequest, walletId
                 ), navOptions
             )
     }

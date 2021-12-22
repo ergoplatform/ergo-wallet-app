@@ -387,7 +387,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                             )
                     )
                 } else {
-                    val content = parsePaymentRequestFromQrCode(it)
+                    val content = parsePaymentRequest(it)
                     content?.let {
                         binding.tvReceiver.editText?.setText(content.address)
                         content.amount.let { amount ->

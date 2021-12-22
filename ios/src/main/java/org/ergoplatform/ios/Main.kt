@@ -8,12 +8,14 @@ import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.ios.ui.CoroutineViewController
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.isErgoMainNet
+import org.ergoplatform.isPaymentRequestUrl
 import org.ergoplatform.persistance.AppDatabase
 import org.ergoplatform.persistance.DbInitializer
 import org.ergoplatform.persistance.SqlDelightWalletProvider
 import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.foundation.NSAutoreleasePool
 import org.robovm.apple.foundation.NSBundle
+import org.robovm.apple.foundation.NSURL
 import org.robovm.apple.uikit.*
 import java.io.File
 import java.sql.DriverManager
@@ -61,6 +63,22 @@ class Main : UIApplicationDelegateAdapter() {
 
         startKeyboardObserver()
         return true
+    }
+
+    override fun openURL(
+        app: UIApplication?,
+        url: NSURL?,
+        options: UIApplicationOpenURLOptions?
+    ): Boolean {
+        url?.absoluteString?.let {
+            LogUtils.logDebug("openURL", it)
+            if (isPaymentRequestUrl(it)) {
+                (window.rootViewController as? BottomNavigationBar)?.handlePaymentRequest(it)
+                return true
+            }
+        }
+
+        return super.openURL(app, url, options)
     }
 
     override fun didBecomeActive(application: UIApplication?) {
