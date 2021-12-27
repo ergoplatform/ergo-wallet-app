@@ -1,5 +1,7 @@
 package org.ergoplatform.persistance
 
+import kotlinx.coroutines.flow.Flow
+
 interface WalletDbProvider {
     suspend fun <R> withTransaction(block: suspend () -> R): R
 
@@ -14,10 +16,12 @@ interface WalletDbProvider {
 
     // State functions
     suspend fun loadWalletWithStateById(id: Int): Wallet?
+    suspend fun walletWithStateByIdAsFlow(id: Int): Flow<Wallet?>
     suspend fun insertWalletStates(walletStates: List<WalletState>)
 
     // Address functions
     suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddress>
+    suspend fun insertWalletAddress(walletAddress: WalletAddress)
 
     // Token functions
     suspend fun deleteTokensByAddress(publicAddress: String)

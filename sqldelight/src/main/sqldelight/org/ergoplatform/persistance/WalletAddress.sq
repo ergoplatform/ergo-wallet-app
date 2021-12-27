@@ -11,3 +11,8 @@ SELECT * FROM wallet_addresses WHERE wallet_first_address = ?;
 
 deleteWalletAddressByFirstAddress:
 DELETE FROM wallet_addresses WHERE wallet_first_address = ?;
+
+insertOrReplace:
+INSERT OR REPLACE INTO `wallet_addresses` (
+    `id`,`wallet_first_address`,`index`,`public_address`,`label`
+) VALUES (?,?,?,?,?);

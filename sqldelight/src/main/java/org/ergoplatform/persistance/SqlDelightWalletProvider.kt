@@ -117,10 +117,31 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         }
     }
 
+    override suspend fun walletWithStateByIdAsFlow(id: Int): Flow<Wallet?> {
+        return flow {
+            appDb.walletConfigQueries.observeWithState().asFlow().collect {
+                // we detected a change in any of the database tables - do all queries and return
+                emit(loadWalletWithStateById(id))
+            }
+        }
+    }
+
     override suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddress> {
         return withContext(Dispatchers.IO) {
             appDb.walletAddressQueries.loadWalletAddresses(firstAddress).executeAsList()
                 .map { it.toModel() }
+        }
+    }
+
+    override suspend fun insertWalletAddress(walletAddress: WalletAddress) {
+        withContext(Dispatchers.IO) {
+            appDb.walletAddressQueries.insertOrReplace(
+                if (walletAddress.id > 0) walletAddress.id else null,
+                walletAddress.walletFirstAddress,
+                walletAddress.derivationIndex,
+                walletAddress.publicAddress,
+                walletAddress.label
+            )
         }
     }
 

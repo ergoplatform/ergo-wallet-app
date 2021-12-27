@@ -7,6 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.ergoplatform.android.wallet.*
 import org.ergoplatform.persistance.*
 
@@ -97,6 +99,10 @@ class RoomWalletDbProvider(val database: AppDatabase) : WalletDbProvider {
         return database.walletDao().loadWalletWithStateById(id)?.toModel()
     }
 
+    override suspend fun walletWithStateByIdAsFlow(id: Int): Flow<Wallet?> {
+        return database.walletDao().walletWithStateByIdAsFlow(id).map { it?.toModel() }
+    }
+
     override suspend fun insertWalletStates(walletStates: List<WalletState>) {
         database.walletDao()
             .insertWalletStates(*(walletStates.map { it.toDbEntity() }.toTypedArray()))
@@ -106,6 +112,9 @@ class RoomWalletDbProvider(val database: AppDatabase) : WalletDbProvider {
         return database.walletDao().loadWalletAddresses(firstAddress).map { it.toModel() }
     }
 
+    override suspend fun insertWalletAddress(walletAddress: WalletAddress) {
+        database.walletDao().insertWalletAddress(walletAddress.toDbEntity())
+    }
 
     override suspend fun deleteTokensByAddress(publicAddress: String) {
         database.walletDao().deleteTokensByAddress(publicAddress)

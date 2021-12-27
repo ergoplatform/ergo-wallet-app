@@ -1,4 +1,4 @@
-package org.ergoplatform.settings
+package org.ergoplatform.uilogic.settings
 
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.uilogic.STRING_BUTTON_DISPLAY_CURRENCY
