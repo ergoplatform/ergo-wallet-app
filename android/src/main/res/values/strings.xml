@@ -159,6 +159,9 @@
     <string name="title_add_token">Choose token to send</string>
     <string name="error_token_amount">Please enter valid token amounts or remove the invalid token entries</string>
     <string name="error_balance_erg">There is not enough balance to send the specified amount: only %1s ERG available.</string>
+    <string name="error_request_token_not_found">Could not add token \'%1s\'</string>
+    <string name="error_request_token_amount">Could not set requested amount for token \'%1s\'</string>
+    <string name="error_request_token_but_no_erg">Tokens requested, but no ERG amount. A default amount will be sent.</string>
 
     <!-- Cold wallet signing request screen -->
     <string name="title_signing_request">Sign</string>

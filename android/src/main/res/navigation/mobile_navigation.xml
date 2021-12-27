@@ -239,9 +239,6 @@
                 android:name="derivation_idx"
                 android:defaultValue="-1" />
         </action>
-        <deepLink
-            android:id="@+id/deepLink"
-            app:uri="explorer.ergoplatform.com/payment-request" />
     </dialog>
     <fragment
         android:id="@+id/walletAddressesFragment"

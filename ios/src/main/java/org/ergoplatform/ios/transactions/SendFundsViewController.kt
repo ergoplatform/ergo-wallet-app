@@ -56,14 +56,14 @@ class SendFundsViewController(
         uiBarButtonItem.setOnClickListener {
             presentViewController(QrScannerViewController {
                 // TODO check cold wallet QR
-                val content = parsePaymentRequestFromQrCode(it)
+                val content = parsePaymentRequest(it)
                 content?.let {
                     inputReceiver.text = content.address
                     inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
                     content.amount.let { amount ->
                         if (amount.nanoErgs > 0) setInputAmount(amount)
                     }
-                    uiLogic.addTokensFromQr(content.tokens)
+                    uiLogic.addTokensFromPaymentRequest(content.tokens)
                 }
             }, true) {}
         }
@@ -240,6 +240,9 @@ class SendFundsViewController(
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         uiLogic.initWallet(getAppDelegate().database, walletId, derivationIdx, paymentRequest)
+
+        inputReceiver.text = uiLogic.receiverAddress
+        if (uiLogic.amountToSend.nanoErgs > 0) setInputAmount(uiLogic.amountToSend)
     }
 
     private fun startPayment() {
@@ -300,18 +303,27 @@ class SendFundsViewController(
         }
 
         override fun notifyTokensChosenChanged() {
-            addTokenButton.isHidden = (uiLogic.tokensChosen.size >= uiLogic.tokensAvail.size)
-            tokensUiList.clearArrangedSubviews()
-            tokensError.isHidden = true
-            uiLogic.tokensChosen.forEach {
-                val ergoId = it.key
-                tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
-                        val tokenEntry = SendTokenEntryView(uiLogic, tokensError, tokenEntity, it.value)
+            runOnMainThread {
+                addTokenButton.isHidden = (uiLogic.tokensChosen.size >= uiLogic.tokensAvail.size)
+                tokensUiList.clearArrangedSubviews()
+                tokensError.isHidden = true
+                uiLogic.tokensChosen.forEach {
+                    val ergoId = it.key
+                    tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
+                        val tokenEntry =
+                            SendTokenEntryView(uiLogic, tokensError, tokenEntity, it.value)
                         tokensUiList.addArrangedSubview(tokenEntry)
                     }
+                }
+                tokensUiList.isHidden = uiLogic.tokensChosen.isEmpty()
+                setFocusToEmptyTokenAmountInput()
+
+                uiLogic.getPaymentRequestWarnings(IosStringProvider(texts))?.let {
+                    val uac = buildSimpleAlertController("", it, texts)
+                    presentViewController(uac, true) {}
+
+                }
             }
-            tokensUiList.isHidden = uiLogic.tokensChosen.isEmpty()
-            setFocusToEmptyTokenAmountInput()
         }
 
         override fun notifyAmountsChanged() {

@@ -26,6 +26,17 @@
         <string>${app.version}</string>
         <key>CFBundleSignature</key>
         <string>????</string>
+        <key>CFBundleURLTypes</key>
+        <array>
+            <dict>
+                <key>CFBundleTypeRole</key>
+                <string>Editor</string>
+                <key>CFBundleURLSchemes</key>
+                <array>
+                    <string>ergoplatform</string>
+                </array>
+            </dict>
+        </array>
         <key>CFBundleVersion</key>
         <string>${app.build}</string>
         <key>LSRequiresIPhoneOS</key>
