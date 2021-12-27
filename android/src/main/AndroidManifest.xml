@@ -32,6 +32,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- URI schemes not supported by nav component at the moment (2.3.5) -->
+                <!-- PaymentRequest.PAYMENT_URI_SCHEME -->
                 <data android:scheme="ergoplatform" />
             </intent-filter>
             <intent-filter>
@@ -40,6 +41,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <!-- PaymentRequest.explorerPaymentUrlPrefix -->
                 <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:path="/payment-request" />

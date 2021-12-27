@@ -306,11 +306,12 @@ abstract class SendFundsUiLogic {
 
     fun addTokensFromPaymentRequest(tokens: HashMap<String, String>) {
         // at the moment, tokens are the only thing provided by a payment request apart from
-        // amount and receiver. If this changes in the future, everything new should be handled
-        // here as well and we might need a new callback onPaymentRequestProcessed() to display
-        // the warnings in the UI. At the moment, this works because we only have warnings set here
-        // and therefore the calls to notifyTokensChosenChanged() going on before reaching this here
-        // have no impact on the warnings message.
+        // amount and receiver. New features added in the future should be handled
+        // here as well. addPaymentRequestWarning is only called from this method.
+        // If this changes, we might need a new callback onPaymentRequestProcessed() to display
+        // the warnings in the UI. For the time being, it is sufficient without a dedicated
+        // callback because calls to notifyTokensChosenChanged() going on before reaching this here
+        // have no impact on showing warnings messages.
 
         var changed = false
         tokens.forEach {
