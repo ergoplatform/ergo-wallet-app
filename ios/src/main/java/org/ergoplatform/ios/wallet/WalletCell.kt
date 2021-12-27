@@ -28,7 +28,7 @@ import org.robovm.apple.uikit.*
 const val WALLET_CELL = "EmptyCell"
 const val EMPTY_CELL = "WalletCell"
 
-class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
+class WalletCell : AbstractTableViewCell(WALLET_CELL) {
     var clickListener: ((vc: UIViewController) -> Unit)? = null
 
     private lateinit var nameLabel: Body1Label
@@ -47,19 +47,7 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
 
     private var wallet: Wallet? = null
 
-    override fun init(p0: NSCoder?): Long {
-        val init = super.init(p0)
-        setupView()
-        return init
-    }
-
-    override fun init(p0: UITableViewCellStyle?, p1: String?): Long {
-        val init = super.init(p0, p1)
-        setupView()
-        return init
-    }
-
-    private fun setupView() {
+   override fun setupView() {
         this.selectionStyle = UITableViewCellSelectionStyle.None
         val cardView = CardView()
         contentView.addSubview(cardView)
@@ -261,22 +249,10 @@ class WalletCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
     }
 }
 
-class EmptyCell : UITableViewCell(UITableViewCellStyle.Default, WALLET_CELL) {
+class EmptyCell : AbstractTableViewCell(EMPTY_CELL) {
     lateinit var walletChooserStackView: AddWalletChooserStackView
 
-    override fun init(p0: NSCoder?): Long {
-        val init = super.init(p0)
-        setupView()
-        return init
-    }
-
-    override fun init(p0: UITableViewCellStyle?, p1: String?): Long {
-        val init = super.init(p0, p1)
-        setupView()
-        return init
-    }
-
-    private fun setupView() {
+    override fun setupView() {
         this.selectionStyle = UITableViewCellSelectionStyle.None
         walletChooserStackView = AddWalletChooserStackView(getAppDelegate().texts)
         contentView.addSubview(walletChooserStackView)

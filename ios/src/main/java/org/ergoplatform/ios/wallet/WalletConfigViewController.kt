@@ -1,11 +1,13 @@
 package org.ergoplatform.ios.wallet
 
 import com.badlogic.gdx.utils.I18NBundle
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.api.IosEncryptionManager
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.wallet.addresses.WalletAddressesViewController
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
@@ -18,6 +20,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
     private lateinit var addressLabel: UILabel
     private lateinit var nameInputField: UITextField
     private lateinit var nameChangeApplyButton: UIButton
+    private lateinit var addressesButton: UIButton
     private lateinit var displaySecretsButton: UIButton
     private var wallet: WalletConfig? = null
 
@@ -62,6 +65,14 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
         }
         navigationController.topViewController.navigationItem.rightBarButtonItem = deleteButton
 
+        val descAddresses = Body1Label().apply {
+            text = texts.get(STRING_DESC_WALLET_ADDRESSES)
+        }
+        addressesButton = TextButton(texts.get(STRING_TITLE_WALLET_ADDRESSES))
+        addressesButton.addOnTouchUpInsideListener { _, _ ->
+            navigationController.pushViewController(WalletAddressesViewController(walletId), true)
+        }
+
         val descShowSecrets = Body1Label()
         descShowSecrets.text = texts.get(STRING_DESC_DISPLAY_MNEMONIC)
         displaySecretsButton = TextButton(texts.get(STRING_BUTTON_DISPLAY_MNEMONIC))
@@ -76,6 +87,9 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
                 nameInputField,
                 nameChangeApplyButtonContainer,
                 createHorizontalSeparator(),
+                descAddresses,
+                addressesButton,
+                createHorizontalSeparator(),
                 descShowSecrets,
                 displaySecretsButton
             )
@@ -84,7 +98,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
         stackView.spacing = DEFAULT_MARGIN * 3
         stackView.setCustomSpacing(DEFAULT_MARGIN, nameInputLabel)
         stackView.setCustomSpacing(0.0, nameInputField)
-        stackView.setCustomSpacing(DEFAULT_MARGIN, nameChangeApplyButton)
+        stackView.setCustomSpacing(DEFAULT_MARGIN, descAddresses)
         stackView.setCustomSpacing(DEFAULT_MARGIN, descShowSecrets)
         val scrollView = container.wrapInVerticalScrollView()
         container.addSubview(stackView)
@@ -107,6 +121,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
                     addressLabel.text = walletConfig.firstAddress
                     nameChangeApplyButton.isEnabled = false
                     displaySecretsButton.isEnabled = walletConfig.secretStorage != null
+                    addressesButton.isEnabled = walletConfig.secretStorage != null
                 }
             }
         }
@@ -147,6 +162,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun doDeleteWallet() {
         // we use GlobalScope here to not cancel the transaction when we leave this view
         wallet?.let {

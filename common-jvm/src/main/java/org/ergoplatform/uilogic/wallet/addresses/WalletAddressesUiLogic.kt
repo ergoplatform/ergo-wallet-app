@@ -10,6 +10,7 @@ import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletDbProvider
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 abstract class WalletAddressesUiLogic {
@@ -26,6 +27,7 @@ abstract class WalletAddressesUiLogic {
                 wallet = it
                 wallet?.let {
                     addresses = it.getSortedDerivedAddressesList()
+                    LogUtils.logDebug("WalletAddresses", "New data loaded")
                     notifyNewAddresses()
                 }
             }

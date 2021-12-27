@@ -82,25 +82,13 @@ class ChooseTokenListViewController(
         }
     }
 
-    class TokenCell : UITableViewCell(UITableViewCellStyle.Default, TOKEN_CELL) {
+    class TokenCell : AbstractTableViewCell(TOKEN_CELL) {
         var clickListener: ((tokenId: String) -> Unit)? = null
         private lateinit var nameLabel: Headline2Label
         private lateinit var tokenIdLabel: Body2Label
         private var token: WalletToken? = null
 
-        override fun init(p0: NSCoder?): Long {
-            val init = super.init(p0)
-            setupView()
-            return init
-        }
-
-        override fun init(p0: UITableViewCellStyle?, p1: String?): Long {
-            val init = super.init(p0, p1)
-            setupView()
-            return init
-        }
-
-        private fun setupView() {
+        override fun setupView() {
             nameLabel = Headline2Label().apply {
                 numberOfLines = 1
                 textAlignment = NSTextAlignment.Center
