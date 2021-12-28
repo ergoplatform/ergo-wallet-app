@@ -10,10 +10,10 @@ import org.ergoplatform.wallet.addresses.isDerivedAddress
 import org.ergoplatform.wallet.getStateForAddress
 import org.ergoplatform.wallet.getTokensForAddress
 import org.robovm.apple.coregraphics.CGRect
-import org.robovm.apple.uikit.NSLineBreakMode
-import org.robovm.apple.uikit.UILayoutConstraintAxis
-import org.robovm.apple.uikit.UIStackView
-import org.robovm.apple.uikit.UIView
+import org.robovm.apple.foundation.NSArray
+import org.robovm.apple.uikit.*
+
+const val ADDRESS_CELL = "address_cell"
 
 class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
     var clickListener: ((String) -> Unit)? = null
@@ -35,9 +35,7 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
 
         val ownContentView = UIView(CGRect.Zero())
         contentView.addSubview(ownContentView)
-        ownContentView.topToSuperview(topInset = DEFAULT_MARGIN)
-            .bottomToSuperview(bottomInset = DEFAULT_MARGIN)
-            .widthMatchesSuperview(inset = DEFAULT_MARGIN, maxWidth = MAX_WIDTH)
+        ownContentView.edgesToSuperview(inset = DEFAULT_MARGIN, maxWidth = MAX_WIDTH)
 
         ownContentView.apply {
             addSubview(addrIndexLabel)
@@ -46,20 +44,27 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
             addSubview(separator)
         }
 
-        addrIndexLabel.leftToSuperview(true).topToSuperview(true)
+        addrIndexLabel.leftToSuperview(true)
         addrIndexLabel.apply {
+            val centerConstraint = centerYAnchor.equalTo(
+                publicAddressLabel.topAnchor,
+                0.0
+            )
+            NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
+
             enforceKeepIntrinsicWidth()
             numberOfLines = 1
         }
 
-        nameLabel.topToSuperview(true).leftToRightOf(addrIndexLabel).rightToSuperview(true)
+        nameLabel.topToSuperview(true).leftToRightOf(addrIndexLabel, DEFAULT_MARGIN)
+            .rightToSuperview(true, DEFAULT_MARGIN)
         nameLabel.apply {
             textColor = uiColorErgo
             numberOfLines = 1
         }
 
-        publicAddressLabel.topToBottomOf(nameLabel).leftToRightOf(addrIndexLabel)
-            .rightToSuperview(true)
+        publicAddressLabel.topToBottomOf(nameLabel).leftToRightOf(addrIndexLabel, DEFAULT_MARGIN)
+            .rightToSuperview(true, DEFAULT_MARGIN)
         publicAddressLabel.apply {
             numberOfLines = 1
             lineBreakMode = NSLineBreakMode.TruncatingMiddle
@@ -74,7 +79,8 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
             addArrangedSubview(tokenCount)
         }
         contentView.addSubview(horizontalStack)
-        horizontalStack.topToBottomOf(separator, DEFAULT_MARGIN).bottomToSuperview(true)
+        horizontalStack.topToBottomOf(separator, DEFAULT_MARGIN)
+            .bottomToSuperview(true, DEFAULT_MARGIN)
             .centerHorizontal()
     }
 
@@ -83,7 +89,7 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
         val texts = getAppDelegate().texts
 
         addrIndexLabel.text =
-            if (isDerivedAddress) walletAddress.derivationIndex.toString() else ""
+            if (isDerivedAddress) walletAddress.derivationIndex.toString() + " " else ""
         nameLabel.text = walletAddress.getAddressLabel(IosStringProvider(texts))
         publicAddressLabel.text = walletAddress.publicAddress
 

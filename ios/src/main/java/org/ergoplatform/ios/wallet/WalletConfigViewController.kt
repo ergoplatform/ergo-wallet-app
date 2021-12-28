@@ -121,7 +121,6 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
                     addressLabel.text = walletConfig.firstAddress
                     nameChangeApplyButton.isEnabled = false
                     displaySecretsButton.isEnabled = walletConfig.secretStorage != null
-                    addressesButton.isEnabled = walletConfig.secretStorage != null
                 }
             }
         }

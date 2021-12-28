@@ -94,11 +94,11 @@ fun UIView.centerVerticallyTo(
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
-    val topConstraint = this.centerYAnchor.equalTo(
+    val centerConstraint = this.centerYAnchor.equalTo(
         sibling.centerYAnchor,
         inset
     )
-    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+    NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
 
     return this
 }

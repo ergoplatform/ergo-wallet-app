@@ -23,7 +23,7 @@ abstract class WalletAddressesUiLogic {
     fun init(database: WalletDbProvider, walletId: Int) {
         coroutineScope.launch {
             database.walletWithStateByIdAsFlow(walletId).collect {
-                // called every time something changes in the DB
+                // called every time something (Room) / config (SqlDelight) changes in the DB
                 wallet = it
                 wallet?.let {
                     addresses = it.getSortedDerivedAddressesList()
