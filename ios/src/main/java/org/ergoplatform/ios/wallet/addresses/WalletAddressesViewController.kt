@@ -138,6 +138,7 @@ class WalletAddressesViewController(val walletId: Int) : CoroutineViewController
         private var addrCount = 1
 
         override fun setupView() {
+            selectionStyle = UITableViewCellSelectionStyle.None
             val texts = getAppDelegate().texts
 
             val description = Body1Label().apply {

@@ -26,6 +26,7 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
     private lateinit var tokenCount: Body1BoldLabel
 
     override fun setupView() {
+        selectionStyle = UITableViewCellSelectionStyle.None
         addrIndexLabel = Headline1Label()
         nameLabel = Body1BoldLabel()
         publicAddressLabel = Body1Label()
@@ -72,13 +73,13 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
 
         separator.widthMatchesSuperview(true).topToBottomOf(publicAddressLabel, DEFAULT_MARGIN)
 
-        val horizontalStack = UIStackView(CGRect.Zero()).apply {
-            axis = UILayoutConstraintAxis.Horizontal
-            spacing = 4 * DEFAULT_MARGIN
-            addArrangedSubview(ergAmount)
-            addArrangedSubview(tokenCount)
+        val horizontalStack = UIView(CGRect.Zero()).apply {
+            addSubview(ergAmount)
+            addSubview(tokenCount)
         }
         contentView.addSubview(horizontalStack)
+        ergAmount.leftToSuperview().topToSuperview().bottomToSuperview()
+        tokenCount.leftToRightOf(ergAmount).centerVerticallyTo(ergAmount).rightToSuperview()
         horizontalStack.topToBottomOf(separator, DEFAULT_MARGIN)
             .bottomToSuperview(true, DEFAULT_MARGIN)
             .centerHorizontal()
@@ -96,8 +97,9 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
         val state = wallet.getStateForAddress(walletAddress.publicAddress)
         val tokens = wallet.getTokensForAddress(walletAddress.publicAddress)
         ergAmount.setErgoAmount(ErgoAmount(state?.balance ?: 0))
-        tokenCount.isHidden = tokens.isNullOrEmpty()
-        tokenCount.text = texts.format(STRING_LABEL_WALLET_TOKEN_BALANCE, tokens.size.toString())
+        tokenCount.isHidden = tokens.isEmpty()
+        tokenCount.text = if (tokens.isEmpty()) "" else "   " + // some margin blanks
+                texts.format(STRING_LABEL_WALLET_TOKEN_BALANCE, tokens.size.toString())
     }
 
 }
