@@ -19,6 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class NodeConnector {
 
     val isRefreshing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val singleAddressRefresh: MutableStateFlow<Long> = MutableStateFlow(0)
     val fiatValue: MutableStateFlow<Float> = MutableStateFlow(0f)
     val currencies: MutableStateFlow<List<String>?> = MutableStateFlow(null)
     var lastRefreshMs: Long = 0
@@ -130,7 +131,10 @@ class NodeConnector {
         if (addresses.isNotEmpty()) {
             GlobalScope.launch(Dispatchers.IO) {
                 try {
-                    refreshWalletStates(preferences, database, addresses)
+                    val statesSaved = refreshWalletStates(preferences, database, addresses)
+                    if (statesSaved.isNotEmpty()) {
+                        singleAddressRefresh.value = System.currentTimeMillis()
+                    }
                 } catch (t: Throwable) {
                     // ignore the error for a single address call
                 }
