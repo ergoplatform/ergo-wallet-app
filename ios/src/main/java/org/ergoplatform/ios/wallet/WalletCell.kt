@@ -10,10 +10,7 @@ import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.tokens.fillTokenOverview
-import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
-import org.ergoplatform.uilogic.STRING_BUTTON_SEND
-import org.ergoplatform.uilogic.STRING_LABEL_UNCONFIRMED
-import org.ergoplatform.uilogic.STRING_TITLE_TRANSACTIONS
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
@@ -22,7 +19,6 @@ import org.ergoplatform.wallet.getTokensForAllAddresses
 import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
-import org.robovm.apple.foundation.NSCoder
 import org.robovm.apple.uikit.*
 
 const val WALLET_CELL = "EmptyCell"
@@ -34,8 +30,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
     private lateinit var nameLabel: Body1Label
     private lateinit var balanceLabel: ErgoAmountView
     private lateinit var fiatBalance: Body1Label
-    private lateinit var unconfirmedBalance: ErgoAmountView
-    private lateinit var unconfirmedContainer: UIView
+    private lateinit var unconfirmedBalance: Body1BoldLabel
     private lateinit var tokenCount: Headline2Label
     private lateinit var unfoldTokensButton: UIImageView
     private lateinit var transactionButton: UIButton
@@ -65,23 +60,10 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         balanceLabel = ErgoAmountView(true, FONT_SIZE_HEADLINE1)
         fiatBalance = Body1Label()
 
-        unconfirmedBalance = ErgoAmountView(true)
-        val unconfirmedLabel = Body1Label().apply {
-            text = textBundle.get(STRING_LABEL_UNCONFIRMED)
-            // this label should get compressed if not enough space is provided
-            setContentCompressionResistancePriority(500f, UILayoutConstraintAxis.Horizontal)
+        unconfirmedBalance = Body1BoldLabel().apply {
+            isHidden = true
             numberOfLines = 1
         }
-        unconfirmedContainer = UIView(CGRect.Zero()).apply {
-            layoutMargins = UIEdgeInsets(DEFAULT_MARGIN / 2, 0.0, 0.0, 0.0)
-            addSubview(unconfirmedBalance)
-            addSubview(unconfirmedLabel)
-            alpha = 0.0
-        }
-        unconfirmedBalance.enforceKeepIntrinsicWidth()
-        unconfirmedBalance.leftToSuperview().topToSuperview().bottomToSuperview()
-        unconfirmedLabel.centerVerticallyTo(unconfirmedBalance)
-        unconfirmedLabel.leftToRightOf(unconfirmedBalance, DEFAULT_MARGIN).rightToSuperview()
 
         val spacing = UIView(CGRect.Zero())
         tokenCount = Headline2Label()
@@ -105,7 +87,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
                     nameLabel,
                     balanceLabel,
                     fiatBalance,
-                    unconfirmedContainer,
+                    unconfirmedBalance,
                     spacing,
                     tokenCount,
                     tokenStack
@@ -207,8 +189,10 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
             nodeConnector.fiatCurrency, IosStringProvider(textBundle)
         )
         val unconfirmedErgs = wallet.getUnconfirmedBalanceForAllAddresses()
-        unconfirmedBalance.setErgoAmount(ErgoAmount(unconfirmedErgs))
-        unconfirmedContainer.alpha = if (unconfirmedErgs == 0L) 0.0 else 1.0
+        unconfirmedBalance.text =
+            textBundle.format(STRING_LABEL_ERG_AMOUNT, ErgoAmount(unconfirmedErgs).toStringRoundToDecimals()) +
+                    " " + textBundle.get(STRING_LABEL_UNCONFIRMED)
+        unconfirmedBalance.isHidden = (unconfirmedErgs == 0L)
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
         tokenCount.isHidden = tokens.isEmpty()
