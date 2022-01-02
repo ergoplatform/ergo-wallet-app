@@ -12,6 +12,7 @@ import org.ergoplatform.uilogic.STRING_DESC_WALLET_ADDRESSES
 import org.ergoplatform.uilogic.STRING_TITLE_WALLET_ADDRESSES
 import org.ergoplatform.uilogic.wallet.addresses.WalletAddressesUiLogic
 import org.ergoplatform.utils.LogUtils
+import org.ergoplatform.wallet.addresses.isDerivedAddress
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSIndexPath
 import org.robovm.apple.uikit.*
@@ -76,10 +77,14 @@ class WalletAddressesViewController(val walletId: Int) : CoroutineViewController
             return if (index < uiLogic.addresses.size) {
                 val cell = p0.dequeueReusableCell(ADDRESS_CELL)
                 (cell as? AddressCell)?.let {
-                    it.bind(uiLogic.wallet!!, uiLogic.addresses[index])
-                    it.clickListener = { address ->
-                        presentViewController(WalletAddressViewController(address), true) {}
-                    }
+                    val walletAddress = uiLogic.addresses[index]
+                    it.bind(uiLogic.wallet!!, walletAddress)
+                    it.clickListener = if (walletAddress.isDerivedAddress()) {
+                        { address ->
+                            presentViewController(WalletAddressDialogViewController(address), true) {}
+                        }
+                    } else
+                        null
                 }
                 cell
             } else {

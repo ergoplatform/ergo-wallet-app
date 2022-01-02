@@ -18,3 +18,6 @@ SELECT * FROM wallet_states WHERE wallet_first_address = ?;
 
 deleteByFirstAddress:
 DELETE FROM wallet_states WHERE wallet_first_address = ?;
+
+deleteAddressState:
+DELETE FROM wallet_states WHERE public_address = ?;

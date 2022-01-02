@@ -1,19 +1,26 @@
 package org.ergoplatform.ios.wallet.addresses
 
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.getAddressDerivationPath
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.wallet.addresses.WalletAddressDialogUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
-class WalletAddressViewController(val address: WalletAddress) : ViewControllerWithKeyboardLayoutGuide() {
+/**
+ * Wallet address detail dialog to edit an address label or delete the address
+ */
+class WalletAddressDialogViewController(val address: WalletAddress) : ViewControllerWithKeyboardLayoutGuide() {
 
     private lateinit var nameInputField: UITextField
     private lateinit var nameChangeApplyButton: UIButton
+
+    private val uiLogic = WalletAddressDialogUiLogic()
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -48,6 +55,7 @@ class WalletAddressViewController(val address: WalletAddress) : ViewControllerWi
                     return true
                 }
             }
+            text = address.label ?: ""
         }
 
         nameChangeApplyButton = TextButton(texts.get(STRING_BUTTON_APPLY))
@@ -65,7 +73,7 @@ class WalletAddressViewController(val address: WalletAddress) : ViewControllerWi
 
         val removeButton = TextButton(texts.get(STRING_LABEL_REMOVE))
         removeButton.addOnTouchUpInsideListener { _, _ ->
-            // TODO remove address
+            doRemoveAddress()
         }
 
         val removeButtonContainer = UIView(CGRect.Zero())
@@ -97,17 +105,19 @@ class WalletAddressViewController(val address: WalletAddress) : ViewControllerWi
             .bottomToKeyboard(this, DEFAULT_MARGIN)
     }
 
-    private fun doSaveAddressLabel() {
-        nameInputField.text?.let {
-            if (it.isNotBlank()) {
-                viewControllerScope.launch(Dispatchers.IO) {
-                    // TODO do something
-                    runOnMainThread {
-                        nameChangeApplyButton.isEnabled = false
-                        nameInputField.resignFirstResponder()
-                    }
-                }
-            }
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun doRemoveAddress() {
+        GlobalScope.launch {
+            uiLogic.deleteWalletAddress(getAppDelegate().database, address.id)
         }
+        dismissViewController(true) {}
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun doSaveAddressLabel() {
+        GlobalScope.launch {
+            uiLogic.saveWalletAddressLabel(getAppDelegate().database, address.id, nameInputField.text)
+        }
+        dismissViewController(true) {}
     }
 }

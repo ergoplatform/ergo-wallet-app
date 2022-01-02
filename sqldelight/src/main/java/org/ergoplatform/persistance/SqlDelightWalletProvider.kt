@@ -82,6 +82,12 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         }
     }
 
+    override suspend fun deleteAddressState(publicAddress: String) {
+        withContext(Dispatchers.IO) {
+            appDb.walletStateQueries.deleteAddressState(publicAddress)
+        }
+    }
+
     fun getWalletsWithStatesFlow(): Flow<List<Wallet>> {
         return flow {
             appDb.walletConfigQueries.observeWithState().asFlow().collect {
@@ -133,6 +139,12 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         }
     }
 
+    override suspend fun loadWalletAddress(id: Long): WalletAddress? {
+        return withContext(Dispatchers.IO) {
+            appDb.walletAddressQueries.loadWalletAddress(id).executeAsOneOrNull()?.toModel()
+        }
+    }
+
     override suspend fun insertWalletAddress(walletAddress: WalletAddress) {
         withContext(Dispatchers.IO) {
             appDb.walletAddressQueries.insertOrReplace(
@@ -142,6 +154,18 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
                 walletAddress.publicAddress,
                 walletAddress.label
             )
+        }
+    }
+
+    override suspend fun updateWalletAddressLabel(addrId: Long, newLabel: String?) {
+        withContext(Dispatchers.IO) {
+            appDb.walletAddressQueries.updateLabel(newLabel, addrId)
+        }
+    }
+
+    override suspend fun deleteWalletAddress(addrId: Long) {
+        withContext(Dispatchers.IO) {
+            appDb.walletAddressQueries.deleteWalletAddress(addrId)
         }
     }
 

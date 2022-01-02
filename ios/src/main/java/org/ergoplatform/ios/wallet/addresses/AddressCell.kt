@@ -17,6 +17,10 @@ const val ADDRESS_CELL = "address_cell"
 
 class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
     var clickListener: ((WalletAddress) -> Unit)? = null
+        set(value) {
+            field = value
+            moreActionButton.isHidden = value == null
+        }
 
     private lateinit var addrIndexLabel: Headline1Label
     private lateinit var nameLabel: Body1BoldLabel
@@ -24,6 +28,7 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
     private lateinit var separator: UIView
     private lateinit var ergAmount: ErgoAmountView
     private lateinit var tokenCount: Body1BoldLabel
+    private lateinit var moreActionButton: UIImageView
 
     private var walletAddress: WalletAddress? = null
 
@@ -91,7 +96,7 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
             walletAddress?.let { clickListener?.invoke(it) }
         })
 
-        val moreActionButton = UIImageView(getIosSystemImage(IMAGE_MORE_ACTION, UIImageSymbolScale.Small)).apply {
+        moreActionButton = UIImageView(getIosSystemImage(IMAGE_MORE_ACTION, UIImageSymbolScale.Small)).apply {
             tintColor = UIColor.label()
         }
         contentView.addSubview(moreActionButton)
