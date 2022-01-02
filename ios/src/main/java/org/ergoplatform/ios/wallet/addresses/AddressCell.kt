@@ -16,7 +16,7 @@ import org.robovm.apple.uikit.*
 const val ADDRESS_CELL = "address_cell"
 
 class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
-    var clickListener: ((String) -> Unit)? = null
+    var clickListener: ((WalletAddress) -> Unit)? = null
 
     private lateinit var addrIndexLabel: Headline1Label
     private lateinit var nameLabel: Body1BoldLabel
@@ -24,6 +24,8 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
     private lateinit var separator: UIView
     private lateinit var ergAmount: ErgoAmountView
     private lateinit var tokenCount: Body1BoldLabel
+
+    private var walletAddress: WalletAddress? = null
 
     override fun setupView() {
         selectionStyle = UITableViewCellSelectionStyle.None
@@ -80,9 +82,20 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
         contentView.addSubview(horizontalStack)
         ergAmount.leftToSuperview().topToSuperview().bottomToSuperview()
         tokenCount.leftToRightOf(ergAmount).centerVerticallyTo(ergAmount).rightToSuperview()
-        horizontalStack.topToBottomOf(separator, DEFAULT_MARGIN)
+        horizontalStack.topToBottomOf(separator)
             .bottomToSuperview(true, DEFAULT_MARGIN)
             .centerHorizontal()
+
+        contentView.isUserInteractionEnabled = true
+        contentView.addGestureRecognizer(UITapGestureRecognizer {
+            walletAddress?.let { clickListener?.invoke(it) }
+        })
+
+        val moreActionButton = UIImageView(getIosSystemImage(IMAGE_MORE_ACTION, UIImageSymbolScale.Small)).apply {
+            tintColor = UIColor.label()
+        }
+        contentView.addSubview(moreActionButton)
+        moreActionButton.topToSuperview().rightToRightOf(ownContentView).fixedWidth(20.0).fixedHeight(20.0)
     }
 
     fun bind(wallet: Wallet, walletAddress: WalletAddress) {
@@ -100,6 +113,8 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
         tokenCount.isHidden = tokens.isEmpty()
         tokenCount.text = if (tokens.isEmpty()) "" else "   " + // some margin blanks
                 texts.format(STRING_LABEL_WALLET_TOKEN_BALANCE, tokens.size.toString())
+
+        this.walletAddress = walletAddress
     }
 
 }

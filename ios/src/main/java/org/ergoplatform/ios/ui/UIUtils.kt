@@ -30,6 +30,7 @@ const val IMAGE_PLUS = "plus"
 const val IMAGE_MINUS_CIRCLE = "minus.circle.fill"
 const val IMAGE_CROSS_CIRCLE = "xmark.circle"
 const val IMAGE_FULL_AMOUNT = "arrow.down.circle"
+const val IMAGE_MORE_ACTION = "ellipsis"
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
@@ -42,6 +43,7 @@ val ergoLogoImage get() = UIImage.getImage("ergologo")
 
 fun getAppDelegate() = UIApplication.getSharedApplication().delegate as Main
 fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(r)
+@Suppress("DEPRECATION")
 fun openUrlInBrowser(url: String) = UIApplication.getSharedApplication().openURL(NSURL(url))
 
 fun UIViewController.shareText(text: String, sourceView: UIView) {

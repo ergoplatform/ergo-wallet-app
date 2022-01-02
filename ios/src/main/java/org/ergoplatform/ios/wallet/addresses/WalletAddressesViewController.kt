@@ -77,8 +77,8 @@ class WalletAddressesViewController(val walletId: Int) : CoroutineViewController
                 val cell = p0.dequeueReusableCell(ADDRESS_CELL)
                 (cell as? AddressCell)?.let {
                     it.bind(uiLogic.wallet!!, uiLogic.addresses[index])
-                    it.clickListener = { addressId ->
-                        // TODO addresses open details screen
+                    it.clickListener = { address ->
+                        presentViewController(WalletAddressViewController(address), true) {}
                     }
                 }
                 cell
