@@ -101,7 +101,7 @@ class WalletAddressDialogViewController(val address: WalletAddress) : ViewContro
         val scrollView = stackView.wrapInVerticalScrollView()
         view.addSubview(scrollView)
         scrollView.widthMatchesSuperview(false, DEFAULT_MARGIN, MAX_WIDTH)
-            .topToBottomOf(closeButton, DEFAULT_MARGIN)
+            .topToBottomOf(closeButton, DEFAULT_MARGIN * 2)
             .bottomToKeyboard(this, DEFAULT_MARGIN)
     }
 

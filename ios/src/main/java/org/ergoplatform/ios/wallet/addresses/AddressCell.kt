@@ -100,7 +100,7 @@ class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
             tintColor = UIColor.label()
         }
         contentView.addSubview(moreActionButton)
-        moreActionButton.topToSuperview().rightToRightOf(ownContentView).fixedWidth(20.0).fixedHeight(20.0)
+        moreActionButton.topToSuperview().leftToRightOf(ownContentView, -5.0).fixedWidth(20.0).fixedHeight(20.0)
     }
 
     fun bind(wallet: Wallet, walletAddress: WalletAddress) {

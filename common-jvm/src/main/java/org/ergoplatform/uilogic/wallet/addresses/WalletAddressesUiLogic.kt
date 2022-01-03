@@ -2,6 +2,7 @@ package org.ergoplatform.uilogic.wallet.addresses
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.NodeConnector
@@ -20,8 +21,13 @@ abstract class WalletAddressesUiLogic {
         private set
     abstract val coroutineScope: CoroutineScope
 
+    private var flowCollectJob: Job? = null
+
     fun init(database: WalletDbProvider, walletId: Int) {
-        coroutineScope.launch {
+        // cancel an already running job so we don't have multiple flow collections running
+        flowCollectJob?.cancel()
+
+        flowCollectJob = coroutineScope.launch {
             database.walletWithStateByIdAsFlow(walletId).collect {
                 // called every time something (Room) / config (SqlDelight) changes in the DB
                 wallet = it
