@@ -20,7 +20,7 @@ import kotlin.math.roundToInt
 
 const val ADD_ADDR_CELL = "add_addr_cell"
 
-class WalletAddressesViewController(val walletId: Int) : CoroutineViewController() {
+class WalletAddressesViewController(private val walletId: Int) : CoroutineViewController() {
     private val uiLogic = IosWalletAddressesUiLogic()
 
     private val tableView = UITableView(CGRect.Zero())
@@ -76,7 +76,7 @@ class WalletAddressesViewController(val walletId: Int) : CoroutineViewController
             val index = p1.row
             return if (index < uiLogic.addresses.size) {
                 val cell = p0.dequeueReusableCell(ADDRESS_CELL)
-                (cell as? AddressCell)?.let {
+                (cell as? ConfigListAddressCell)?.let {
                     val walletAddress = uiLogic.addresses[index]
                     it.bind(uiLogic.wallet!!, walletAddress)
                     it.clickListener = if (walletAddress.isDerivedAddress()) {
@@ -108,7 +108,7 @@ class WalletAddressesViewController(val walletId: Int) : CoroutineViewController
     }
 
     inner class IosWalletAddressesUiLogic : WalletAddressesUiLogic() {
-        var progressViewController: ProgressViewController? = null
+        private var progressViewController: ProgressViewController? = null
 
         override val coroutineScope: CoroutineScope
             get() = viewControllerScope

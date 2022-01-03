@@ -2,8 +2,6 @@ package org.ergoplatform.ios.wallet.addresses
 
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.persistance.Wallet
-import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.uilogic.STRING_TITLE_CHOOSE_ADDRESS
 import org.ergoplatform.uilogic.wallet.addresses.ChooseAddressListAdapterLogic
 import org.robovm.apple.coregraphics.CGRect
@@ -72,8 +70,8 @@ class ChooseAddressListDialogViewController(
             val cell = p0.dequeueReusableCell(ADDRESS_CELL)
             (cell as? ChooseAddressCell)?.let {
                 adapterLogic?.bindViewHolder(it, p1.row)
-                it.clickListener = {
-                    addressChosen.invoke(it.derivationIndex)
+                it.clickListener = { address ->
+                    addressChosen.invoke(address?.derivationIndex)
                     dismissViewController(true) {}
                 }
             }

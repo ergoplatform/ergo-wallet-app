@@ -1,15 +1,16 @@
 package org.ergoplatform.ios.wallet.addresses
 
+import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.uilogic.STRING_LABEL_ALL_ADDRESSES
 import org.ergoplatform.uilogic.STRING_LABEL_WALLET_TOKEN_BALANCE
 import org.ergoplatform.uilogic.wallet.addresses.ChooseAddressListAdapterLogic
+import org.ergoplatform.wallet.*
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.addresses.isDerivedAddress
-import org.ergoplatform.wallet.getStateForAddress
-import org.ergoplatform.wallet.getTokensForAddress
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -17,7 +18,7 @@ import org.robovm.apple.uikit.*
 const val ADDRESS_CELL = "address_cell"
 
 abstract class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
-    open var clickListener: ((WalletAddress) -> Unit)? = null
+
     abstract val showSeparator: Boolean
 
     protected lateinit var addressIndexLabel: Headline1Label
@@ -32,7 +33,7 @@ abstract class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
     protected lateinit var ownContentView: UIView
         private set
 
-    private var walletAddress: WalletAddress? = null
+    protected var walletAddress: WalletAddress? = null
 
     override fun setupView() {
         selectionStyle = UITableViewCellSelectionStyle.None
@@ -97,9 +98,11 @@ abstract class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
 
         contentView.isUserInteractionEnabled = true
         contentView.addGestureRecognizer(UITapGestureRecognizer {
-            walletAddress?.let { clickListener?.invoke(it) }
+            itemClicked()
         })
     }
+
+    abstract fun itemClicked()
 
     open fun bind(wallet: Wallet, walletAddress: WalletAddress) {
         val texts = getAppDelegate().texts
@@ -107,21 +110,25 @@ abstract class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
         nameLabel.text = walletAddress.getAddressLabel(IosStringProvider(texts))
 
         val state = wallet.getStateForAddress(walletAddress.publicAddress)
-        val tokens = wallet.getTokensForAddress(walletAddress.publicAddress)
-        ergAmount.setErgoAmount(ErgoAmount(state?.balance ?: 0))
-        tokenCount.isHidden = tokens.isEmpty()
-        tokenCount.text = if (tokens.isEmpty()) "" else "   " + // some margin blanks
-                texts.format(STRING_LABEL_WALLET_TOKEN_BALANCE, tokens.size.toString())
+        val ergoAmount = ErgoAmount(state?.balance ?: 0)
+        val tokenNum = wallet.getTokensForAddress(walletAddress.publicAddress).size
+        setBalances(ergoAmount, tokenNum, texts)
 
         this.walletAddress = walletAddress
     }
 
+    protected fun setBalances(ergoAmount: ErgoAmount, tokenNum: Int, texts: I18NBundle) {
+        ergAmount.setErgoAmount(ergoAmount)
+        tokenCount.isHidden = tokenNum == 0
+        tokenCount.text = if (tokenNum == 0) "" else "   " + // some margin blanks
+                texts.format(STRING_LABEL_WALLET_TOKEN_BALANCE, tokenNum.toString())
+    }
 }
 
 class ConfigListAddressCell : AddressCell() {
     private lateinit var moreActionButton: UIImageView
 
-    override var clickListener: ((WalletAddress) -> Unit)? = null
+    var clickListener: ((WalletAddress) -> Unit)? = null
         set(value) {
             field = value
             moreActionButton.isHidden = value == null
@@ -148,9 +155,15 @@ class ConfigListAddressCell : AddressCell() {
             if (isDerivedAddress) walletAddress.derivationIndex.toString() + " " else ""
         publicAddressLabel.text = walletAddress.publicAddress
     }
+
+    override fun itemClicked() {
+        walletAddress?.let { clickListener?.invoke(it) }
+    }
 }
 
 class ChooseAddressCell : AddressCell(), ChooseAddressListAdapterLogic.AddressHolder {
+    var clickListener: ((WalletAddress?) -> Unit)? = null
+
     override val showSeparator get() = false
 
     override fun setupView() {
@@ -163,7 +176,18 @@ class ChooseAddressCell : AddressCell(), ChooseAddressListAdapterLogic.AddressHo
     }
 
     override fun bindAllAddresses(wallet: Wallet) {
-        // TODO addresses implement
+        val texts = getAppDelegate().texts
+
+        walletAddress = null
+        nameLabel.text = texts.format(STRING_LABEL_ALL_ADDRESSES, wallet.getNumOfAddresses())
+
+        val ergoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
+        val tokenNum = wallet.getTokensForAllAddresses().size
+
+        setBalances(ergoAmount, tokenNum, texts)
     }
 
+    override fun itemClicked() {
+        clickListener?.invoke(walletAddress)
+    }
 }

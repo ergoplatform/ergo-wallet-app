@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.*
 import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
@@ -71,9 +72,19 @@ class SendFundsViewController(
 
         walletTitle = Body1Label()
         walletTitle.numberOfLines = 1
-        addressNameLabel = Body1BoldLabel()
-        addressNameLabel.numberOfLines = 1
-        addressNameLabel.textColor = uiColorErgo
+        addressNameLabel = Body1BoldLabel().apply {
+            numberOfLines = 1
+            textColor = uiColorErgo
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UITapGestureRecognizer {
+                presentViewController(
+                    ChooseAddressListDialogViewController(walletId, true) {
+                        uiLogic.derivedAddressIdx = it
+                    }, true
+                ) {}
+            })
+            // TODO addresses show IMAGE_OPEN_LIST
+        }
         balanceLabel = Body1Label()
         balanceLabel.numberOfLines = 1
 
