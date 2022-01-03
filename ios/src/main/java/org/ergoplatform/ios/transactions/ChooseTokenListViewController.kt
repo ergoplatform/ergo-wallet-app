@@ -4,7 +4,6 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.uilogic.STRING_TITLE_ADD_TOKEN
 import org.robovm.apple.coregraphics.CGRect
-import org.robovm.apple.foundation.NSCoder
 import org.robovm.apple.foundation.NSIndexPath
 import org.robovm.apple.uikit.*
 
@@ -16,8 +15,7 @@ const val TOKEN_CELL = "TOKEN_CELL"
 class ChooseTokenListViewController(
     val tokensToChooseFrom: List<WalletToken>,
     val onChoose: (String) -> Unit
-) :
-    UIViewController() {
+) : UIViewController() {
 
 
     override fun viewDidLoad() {
@@ -53,7 +51,6 @@ class ChooseTokenListViewController(
 
     inner class TokenDataSource : UITableViewDataSourceAdapter() {
         override fun getNumberOfRowsInSection(p0: UITableView?, p1: Long): Long {
-            // When we already have data to show, show the empty cell if no wallets configured
             return tokensToChooseFrom.size.toLong()
         }
 

@@ -15,7 +15,7 @@ import org.robovm.apple.uikit.*
 
 const val ADDRESS_CELL = "address_cell"
 
-class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
+open class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
     var clickListener: ((WalletAddress) -> Unit)? = null
         set(value) {
             field = value

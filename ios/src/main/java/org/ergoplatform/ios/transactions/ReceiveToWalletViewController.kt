@@ -2,6 +2,7 @@ package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
 import org.ergoplatform.uilogic.STRING_LABEL_AMOUNT
 import org.ergoplatform.uilogic.wallet.ReceiveToWalletUiLogic
@@ -32,9 +33,20 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
         walletTitle = Headline2Label()
         walletTitle.numberOfLines = 1
         walletTitle.textColor = uiColorErgo
-        addressNameLabel = Body1BoldLabel()
-        addressNameLabel.numberOfLines = 1
-        addressNameLabel.textColor = uiColorErgo
+        addressNameLabel = Body1BoldLabel().apply {
+            numberOfLines = 1
+            textColor = uiColorErgo
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UITapGestureRecognizer {
+                presentViewController(
+                    ChooseAddressListDialogViewController(walletId, false) {
+                        uiLogic.derivationIdx = it ?: 0
+                        addressChanged()
+                    }, true
+                ) {}
+            })
+            // TODO addresses show IMAGE_OPEN_LIST
+        }
 
         val uiBarButtonItem = UIBarButtonItem(UIBarButtonSystemItem.Action)
         uiBarButtonItem.setOnClickListener {
