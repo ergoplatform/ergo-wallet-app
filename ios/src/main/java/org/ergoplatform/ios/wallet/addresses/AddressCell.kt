@@ -5,6 +5,7 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.uilogic.STRING_LABEL_WALLET_TOKEN_BALANCE
+import org.ergoplatform.uilogic.wallet.addresses.ChooseAddressListAdapterLogic
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.addresses.isDerivedAddress
 import org.ergoplatform.wallet.getStateForAddress
@@ -15,45 +16,48 @@ import org.robovm.apple.uikit.*
 
 const val ADDRESS_CELL = "address_cell"
 
-open class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
-    var clickListener: ((WalletAddress) -> Unit)? = null
-        set(value) {
-            field = value
-            moreActionButton.isHidden = value == null
-        }
+abstract class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
+    open var clickListener: ((WalletAddress) -> Unit)? = null
+    abstract val showSeparator: Boolean
 
-    private lateinit var addrIndexLabel: Headline1Label
-    private lateinit var nameLabel: Body1BoldLabel
-    private lateinit var publicAddressLabel: Body1Label
-    private lateinit var separator: UIView
+    protected lateinit var addressIndexLabel: Headline1Label
+        private set
+    protected lateinit var nameLabel: Body1BoldLabel
+        private set
+    protected lateinit var publicAddressLabel: Body1Label
+        private set
+    private var separator: UIView? = null
     private lateinit var ergAmount: ErgoAmountView
     private lateinit var tokenCount: Body1BoldLabel
-    private lateinit var moreActionButton: UIImageView
+    protected lateinit var ownContentView: UIView
+        private set
 
     private var walletAddress: WalletAddress? = null
 
     override fun setupView() {
         selectionStyle = UITableViewCellSelectionStyle.None
-        addrIndexLabel = Headline1Label()
+        addressIndexLabel = Headline1Label()
         nameLabel = Body1BoldLabel()
         publicAddressLabel = Body1Label()
-        separator = createHorizontalSeparator()
+        if (showSeparator) {
+            separator = createHorizontalSeparator()
+        }
         ergAmount = ErgoAmountView(true, FONT_SIZE_HEADLINE2)
         tokenCount = Body1BoldLabel()
 
-        val ownContentView = UIView(CGRect.Zero())
+        ownContentView = UIView(CGRect.Zero())
         contentView.addSubview(ownContentView)
         ownContentView.edgesToSuperview(inset = DEFAULT_MARGIN, maxWidth = MAX_WIDTH)
 
         ownContentView.apply {
-            addSubview(addrIndexLabel)
+            addSubview(addressIndexLabel)
             addSubview(nameLabel)
             addSubview(publicAddressLabel)
-            addSubview(separator)
+            separator?.let { addSubview(separator) }
         }
 
-        addrIndexLabel.leftToSuperview(true)
-        addrIndexLabel.apply {
+        addressIndexLabel.leftToSuperview(true)
+        addressIndexLabel.apply {
             val centerConstraint = centerYAnchor.equalTo(
                 publicAddressLabel.topAnchor,
                 0.0
@@ -64,21 +68,21 @@ open class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
             numberOfLines = 1
         }
 
-        nameLabel.topToSuperview(true).leftToRightOf(addrIndexLabel, DEFAULT_MARGIN)
+        nameLabel.topToSuperview(true).leftToRightOf(addressIndexLabel, DEFAULT_MARGIN)
             .rightToSuperview(true, DEFAULT_MARGIN)
         nameLabel.apply {
             textColor = uiColorErgo
             numberOfLines = 1
         }
 
-        publicAddressLabel.topToBottomOf(nameLabel).leftToRightOf(addrIndexLabel, DEFAULT_MARGIN)
+        publicAddressLabel.topToBottomOf(nameLabel).leftToRightOf(addressIndexLabel, DEFAULT_MARGIN)
             .rightToSuperview(true, DEFAULT_MARGIN)
         publicAddressLabel.apply {
             numberOfLines = 1
             lineBreakMode = NSLineBreakMode.TruncatingMiddle
         }
 
-        separator.widthMatchesSuperview(true).topToBottomOf(publicAddressLabel, DEFAULT_MARGIN)
+        separator?.widthMatchesSuperview(true)?.topToBottomOf(publicAddressLabel, DEFAULT_MARGIN)
 
         val horizontalStack = UIView(CGRect.Zero()).apply {
             addSubview(ergAmount)
@@ -87,7 +91,7 @@ open class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
         contentView.addSubview(horizontalStack)
         ergAmount.leftToSuperview().topToSuperview().bottomToSuperview()
         tokenCount.leftToRightOf(ergAmount).centerVerticallyTo(ergAmount).rightToSuperview()
-        horizontalStack.topToBottomOf(separator)
+        horizontalStack.topToBottomOf(separator ?: publicAddressLabel)
             .bottomToSuperview(true, DEFAULT_MARGIN)
             .centerHorizontal()
 
@@ -95,22 +99,12 @@ open class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
         contentView.addGestureRecognizer(UITapGestureRecognizer {
             walletAddress?.let { clickListener?.invoke(it) }
         })
-
-        moreActionButton = UIImageView(getIosSystemImage(IMAGE_MORE_ACTION, UIImageSymbolScale.Small)).apply {
-            tintColor = UIColor.label()
-        }
-        contentView.addSubview(moreActionButton)
-        moreActionButton.topToSuperview().leftToRightOf(ownContentView, -5.0).fixedWidth(20.0).fixedHeight(20.0)
     }
 
-    fun bind(wallet: Wallet, walletAddress: WalletAddress) {
-        val isDerivedAddress = walletAddress.isDerivedAddress()
+    open fun bind(wallet: Wallet, walletAddress: WalletAddress) {
         val texts = getAppDelegate().texts
 
-        addrIndexLabel.text =
-            if (isDerivedAddress) walletAddress.derivationIndex.toString() + " " else ""
         nameLabel.text = walletAddress.getAddressLabel(IosStringProvider(texts))
-        publicAddressLabel.text = walletAddress.publicAddress
 
         val state = wallet.getStateForAddress(walletAddress.publicAddress)
         val tokens = wallet.getTokensForAddress(walletAddress.publicAddress)
@@ -120,6 +114,56 @@ open class AddressCell : AbstractTableViewCell(ADDRESS_CELL) {
                 texts.format(STRING_LABEL_WALLET_TOKEN_BALANCE, tokens.size.toString())
 
         this.walletAddress = walletAddress
+    }
+
+}
+
+class ConfigListAddressCell : AddressCell() {
+    private lateinit var moreActionButton: UIImageView
+
+    override var clickListener: ((WalletAddress) -> Unit)? = null
+        set(value) {
+            field = value
+            moreActionButton.isHidden = value == null
+        }
+
+    override val showSeparator get() = true
+
+    override fun setupView() {
+        super.setupView()
+
+        moreActionButton = UIImageView(getIosSystemImage(IMAGE_MORE_ACTION, UIImageSymbolScale.Small)).apply {
+            tintColor = UIColor.label()
+        }
+        contentView.addSubview(moreActionButton)
+        moreActionButton.topToSuperview().leftToRightOf(ownContentView, -5.0).fixedWidth(20.0).fixedHeight(20.0)
+
+    }
+
+    override fun bind(wallet: Wallet, walletAddress: WalletAddress) {
+        super.bind(wallet, walletAddress)
+
+        val isDerivedAddress = walletAddress.isDerivedAddress()
+        addressIndexLabel.text =
+            if (isDerivedAddress) walletAddress.derivationIndex.toString() + " " else ""
+        publicAddressLabel.text = walletAddress.publicAddress
+    }
+}
+
+class ChooseAddressCell : AddressCell(), ChooseAddressListAdapterLogic.AddressHolder {
+    override val showSeparator get() = false
+
+    override fun setupView() {
+        super.setupView()
+        nameLabel.textAlignment = NSTextAlignment.Center
+    }
+
+    override fun bindAddress(address: WalletAddress, wallet: Wallet) {
+        bind(wallet, address)
+    }
+
+    override fun bindAllAddresses(wallet: Wallet) {
+        // TODO addresses implement
     }
 
 }

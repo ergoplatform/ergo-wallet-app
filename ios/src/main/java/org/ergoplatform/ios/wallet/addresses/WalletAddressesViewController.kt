@@ -45,7 +45,7 @@ class WalletAddressesViewController(val walletId: Int) : CoroutineViewController
 
             dataSource = AddressesDataSource()
             separatorStyle = UITableViewCellSeparatorStyle.SingleLine
-            registerReusableCellClass(AddressCell::class.java, ADDRESS_CELL)
+            registerReusableCellClass(ConfigListAddressCell::class.java, ADDRESS_CELL)
             registerReusableCellClass(AddAddressCell::class.java, ADD_ADDR_CELL)
             rowHeight = UITableView.getAutomaticDimension()
             estimatedRowHeight = UITableView.getAutomaticDimension()

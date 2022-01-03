@@ -42,10 +42,10 @@ class ChooseAddressListDialogViewController(
             widthMatchesSuperview().bottomToSuperview().topToBottomOf(titleLabel, DEFAULT_MARGIN * 2)
 
             dataSource = AddressesDataSource()
-            separatorStyle = UITableViewCellSeparatorStyle.None
             registerReusableCellClass(ChooseAddressCell::class.java, ADDRESS_CELL)
             rowHeight = UITableView.getAutomaticDimension()
             estimatedRowHeight = UITableView.getAutomaticDimension()
+            tableFooterView = UIView(CGRect.Zero()) // causes iOS to hide trailing empty cells
         }
 
     }
@@ -91,17 +91,5 @@ class ChooseAddressListDialogViewController(
         override fun canMoveRow(p0: UITableView?, p1: NSIndexPath?): Boolean {
             return false
         }
-    }
-
-    class ChooseAddressCell : AddressCell(), ChooseAddressListAdapterLogic.AddressHolder {
-        override fun bindAddress(address: WalletAddress, wallet: Wallet) {
-            bind(wallet, address)
-            // TODO addresses show less information
-        }
-
-        override fun bindAllAddresses(wallet: Wallet) {
-            // TODO addresses implement
-        }
-
     }
 }
