@@ -24,6 +24,7 @@ const val IMAGE_READONLY_WALLET = "magnifyingglass"
 const val IMAGE_EXCLAMATION_MARK = "exclamationmark.circle.fill"
 const val IMAGE_NO_CONNECTION = "icloud.slash"
 const val IMAGE_SEND = "paperplane"
+const val IMAGE_RECEIVE = "arrow.down.left"
 const val IMAGE_QR_SCAN = "qrcode.viewfinder"
 const val IMAGE_PLUS_CIRCLE = "plus.circle.fill"
 const val IMAGE_PLUS = "plus"
@@ -32,6 +33,8 @@ const val IMAGE_CROSS_CIRCLE = "xmark.circle"
 const val IMAGE_FULL_AMOUNT = "arrow.down.circle"
 const val IMAGE_MORE_ACTION = "ellipsis"
 const val IMAGE_OPEN_LIST = "arrowtriangle.down.circle.fill"
+val IMAGE_ADDRESS = if (Foundation.getMajorSystemVersion() >= 14) "arrow.triangle.branch" else "personalhotspot"
+const val IMAGE_ADDRESS_LIST = "list.number"
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0

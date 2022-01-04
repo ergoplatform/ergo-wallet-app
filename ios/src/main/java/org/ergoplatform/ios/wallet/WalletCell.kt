@@ -33,7 +33,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
     private lateinit var unconfirmedBalance: Body1BoldLabel
     private lateinit var tokenCount: Headline2Label
     private lateinit var unfoldTokensButton: UIImageView
-    private lateinit var transactionButton: UIButton
+    private lateinit var detailsButton: UIButton
     private lateinit var receiveButton: UIButton
     private lateinit var sendButton: UIButton
     private lateinit var textBundle: I18NBundle
@@ -42,7 +42,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
 
     private var wallet: Wallet? = null
 
-   override fun setupView() {
+    override fun setupView() {
         this.selectionStyle = UITableViewCellSelectionStyle.None
         val cardView = CardView()
         contentView.addSubview(cardView)
@@ -77,7 +77,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
             tintColor = UIColor.label()
         }
 
-        transactionButton = CommonButton(textBundle.get(STRING_TITLE_TRANSACTIONS))
+        detailsButton = CommonButton(textBundle.get(STRING_LABEL_DETAILS))
         receiveButton = CommonButton(textBundle.get(STRING_BUTTON_RECEIVE))
         sendButton = PrimaryButton(textBundle.get(STRING_BUTTON_SEND))
 
@@ -112,7 +112,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
             listOf(
                 stackView,
                 walletImage,
-                transactionButton,
+                detailsButton,
                 transactionButtonStack,
                 unfoldTokensButton,
                 configButton
@@ -128,11 +128,11 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
 
         fiatBalance.textColor = UIColor.secondaryLabel()
 
-        transactionButton.widthMatchesSuperview(false, DEFAULT_MARGIN)
+        detailsButton.widthMatchesSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(stackView, DEFAULT_MARGIN * 3)
 
         transactionButtonStack.widthMatchesSuperview(false, DEFAULT_MARGIN)
-            .topToBottomOf(transactionButton, DEFAULT_MARGIN)
+            .topToBottomOf(detailsButton, DEFAULT_MARGIN)
             .bottomToSuperview(false, DEFAULT_MARGIN)
 
         configButton.topToSuperview().rightToSuperview()
@@ -140,9 +140,11 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         unfoldTokensButton.centerVerticallyTo(tokenCount)
         unfoldTokensButton.rightToLeftOf(tokenCount, DEFAULT_MARGIN)
 
-        transactionButton.addOnTouchUpInsideListener { _, _ ->
-            transactionButtonClicked()
-        }
+        cardView.contentView.isUserInteractionEnabled = true
+        cardView.contentView.addGestureRecognizer(UITapGestureRecognizer {
+            detailsButtonClicked()
+        })
+        detailsButton.addOnTouchUpInsideListener { _, _ -> detailsButtonClicked() }
 
         receiveButton.addOnTouchUpInsideListener { _, _ ->
             receiveButtonClicked()
@@ -152,7 +154,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
 
         configButton.isUserInteractionEnabled = true
         configButton.addGestureRecognizer(UITapGestureRecognizer {
-            walletCardClicked()
+            configButtonClicked()
         })
 
         unfoldTokensButton.isUserInteractionEnabled = true
@@ -212,11 +214,8 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         }
     }
 
-    private fun transactionButtonClicked() {
-        openUrlInBrowser(
-            getExplorerWebUrl() + "en/addresses/" +
-                    wallet!!.getDerivedAddress(0)
-        )
+    private fun detailsButtonClicked() {
+        clickListener?.invoke(WalletDetailsViewController(wallet!!.walletConfig.id))
     }
 
     private fun receiveButtonClicked() {
@@ -228,7 +227,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         clickListener?.invoke(SendFundsViewController(wallet!!.walletConfig.id))
     }
 
-    private fun walletCardClicked() {
+    private fun configButtonClicked() {
         clickListener?.invoke(WalletConfigViewController(wallet!!.walletConfig.id))
     }
 }
