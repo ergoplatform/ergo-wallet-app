@@ -4,7 +4,7 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.UIColor
 import org.robovm.apple.uikit.UIView
 
-class CardView: UIView(CGRect.Zero()) {
+open class CardView: UIView(CGRect.Zero()) {
     val contentView = UIView(CGRect.Zero())
 
     init {

@@ -33,7 +33,8 @@ const val IMAGE_CROSS_CIRCLE = "xmark.circle"
 const val IMAGE_FULL_AMOUNT = "arrow.down.circle"
 const val IMAGE_MORE_ACTION = "ellipsis"
 const val IMAGE_OPEN_LIST = "arrowtriangle.down.circle.fill"
-val IMAGE_ADDRESS = if (Foundation.getMajorSystemVersion() >= 14) "arrow.triangle.branch" else "personalhotspot"
+val IMAGE_ADDRESS = if (Foundation.getMajorSystemVersion() >= 14) "arrow.triangle.branch" else "arrow.branch"
+const val IMAGE_TRANSACTIONS = "arrow.right.arrow.left"
 const val IMAGE_ADDRESS_LIST = "list.number"
 
 const val FONT_SIZE_BODY1 = 18.0

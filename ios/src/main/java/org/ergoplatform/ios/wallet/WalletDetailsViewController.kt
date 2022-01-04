@@ -4,13 +4,17 @@ import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
 import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.ios.wallet.addresses.WalletAddressesViewController
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.uilogic.STRING_EXPORER_VIEW_TRANSACTIONS
 import org.ergoplatform.uilogic.STRING_LABEL_ALL_ADDRESSES
+import org.ergoplatform.uilogic.STRING_TITLE_TRANSACTIONS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLET_ADDRESS
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getDerivedAddressEntity
@@ -19,6 +23,8 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
+const val WIDTH_ICONS = 35.0
+
 class WalletDetailsViewController(private val walletId: Int) : CoroutineViewController() {
 
     private lateinit var texts: I18NBundle
@@ -26,6 +32,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
 
     private var wallet: Wallet? = null
     private var addressIdx: Int? = null
+    private var walletAddress: WalletAddress? = null
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -42,11 +49,25 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             navigationController.pushViewController(WalletConfigViewController(walletId), true)
         }
 
+        val ownContainer = UIView(CGRect.Zero())
+        ownContainer.layoutMargins = UIEdgeInsets.Zero()
+        val scrollView = ownContainer.wrapInVerticalScrollView()
+        view.addSubview(scrollView)
+        scrollView.edgesToSuperview(maxWidth = MAX_WIDTH)
+
         addressContainer = AddressContainer()
-        view.addSubview(addressContainer)
+        val transactionsContainer = TransactionsContainer()
+        ownContainer.addSubview(addressContainer)
+        ownContainer.addSubview(transactionsContainer)
 
         addressContainer.topToSuperview(topInset = DEFAULT_MARGIN)
-            .widthMatchesSuperview(inset = DEFAULT_MARGIN, maxWidth = MAX_WIDTH)
+            .widthMatchesSuperview(inset = DEFAULT_MARGIN)
+        val separator = createHorizontalSeparator().apply {
+            ownContainer.addSubview(this)
+            topToBottomOf(addressContainer, DEFAULT_MARGIN * 3).widthMatchesSuperview()
+        }
+        transactionsContainer.topToBottomOf(separator, DEFAULT_MARGIN).widthMatchesSuperview(inset = DEFAULT_MARGIN)
+            .bottomToSuperview(bottomInset = DEFAULT_MARGIN * 2)
     }
 
     override fun viewWillAppear(animated: Boolean) {
@@ -78,6 +99,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         // TODO leave screen when wallet is null (removed)
 
         wallet?.let { wallet ->
+            walletAddress = addressIdx?.let { wallet.getDerivedAddressEntity(it) }
             title = wallet.walletConfig.displayName
             addressContainer.refresh()
         }
@@ -92,7 +114,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             val addressImage = UIImageView(getIosSystemImage(IMAGE_ADDRESS, UIImageSymbolScale.Medium)).apply {
                 tintColor = UIColor.secondaryLabel()
                 contentMode = UIViewContentMode.Center
-                enforceKeepIntrinsicWidth()
+                fixedWidth(WIDTH_ICONS)
             }
             val addressTitle = Body1BoldLabel().apply {
                 text = texts.get(STRING_TITLE_WALLET_ADDRESS)
@@ -169,9 +191,47 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         }
 
         fun refresh() {
-            addressNameLabel.text =
-                addressIdx?.let { wallet?.getDerivedAddressEntity(it)?.getAddressLabel(IosStringProvider(texts)) }
-                    ?: texts.format(STRING_LABEL_ALL_ADDRESSES, wallet!!.getNumOfAddresses())
+            addressNameLabel.text = walletAddress?.getAddressLabel(IosStringProvider(texts))
+                ?: texts.format(STRING_LABEL_ALL_ADDRESSES, wallet!!.getNumOfAddresses())
+        }
+    }
+
+    inner class TransactionsContainer : CardView() {
+        init {
+            val transactionsImage =
+                UIImageView(getIosSystemImage(IMAGE_TRANSACTIONS, UIImageSymbolScale.Medium)).apply {
+                    tintColor = UIColor.secondaryLabel()
+                    contentMode = UIViewContentMode.Center
+                    fixedWidth(WIDTH_ICONS)
+                }
+            val transactionsTitle = Body1BoldLabel().apply {
+                text = texts.get(STRING_TITLE_TRANSACTIONS)
+                textColor = uiColorErgo
+            }
+
+            val transactionsDesc = Body1Label().apply {
+                text = texts.get(STRING_EXPORER_VIEW_TRANSACTIONS)
+            }
+
+            contentView.apply {
+                addSubview(transactionsImage)
+                addSubview(transactionsTitle)
+                addSubview(transactionsDesc)
+            }
+
+            transactionsImage.leftToSuperview().topToSuperview(topInset = DEFAULT_MARGIN)
+            transactionsTitle.leftToRightOf(transactionsImage, DEFAULT_MARGIN).topToTopOf(transactionsImage)
+                .rightToSuperview(inset = DEFAULT_MARGIN)
+            transactionsDesc.leftToLeftOf(transactionsTitle).rightToSuperview(inset = DEFAULT_MARGIN)
+                .bottomToSuperview(bottomInset = DEFAULT_MARGIN).topToBottomOf(transactionsTitle, DEFAULT_MARGIN)
+
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UITapGestureRecognizer {
+                openUrlInBrowser(
+                    getExplorerWebUrl() + "en/addresses/" +
+                            (walletAddress?.publicAddress ?: wallet!!.walletConfig.firstAddress)
+                )
+            })
         }
     }
 }
