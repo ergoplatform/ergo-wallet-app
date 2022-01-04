@@ -1,6 +1,7 @@
 package org.ergoplatform.android.wallet
 
 import android.animation.LayoutTransition
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -29,6 +31,7 @@ import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.getExplorerWebUrl
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.wallet.*
 import org.ergoplatform.wallet.addresses.getAddressLabel
 
@@ -205,13 +208,19 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         // tokens
         val tokensList = (address?.let { wallet.getTokensForAddress(address) }
             ?: wallet.getTokensForAllAddresses()).sortedBy { it.name?.lowercase() }
-        binding.cardviewTokens.visibility = if (tokensList.size > 0) View.VISIBLE else View.GONE
+        binding.cardviewTokens.visibility = if (tokensList.isNotEmpty()) View.VISIBLE else View.GONE
         binding.walletTokenNum.text = tokensList.size.toString()
 
         binding.walletTokenEntries.apply {
             removeAllViews()
             if (wallet.walletConfig.unfoldTokens) {
-                tokensList.forEach { inflateAndBindDetailedTokenEntryView(it, this, layoutInflater) }
+                tokensList.forEach {
+                    inflateAndBindDetailedTokenEntryView(
+                        it,
+                        this,
+                        layoutInflater
+                    )
+                }
             }
         }
 
@@ -220,13 +229,19 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                 R.drawable.ic_chevron_up_24 else R.drawable.ic_chevron_down_24
         )
         binding.cardviewTokens.setOnClickListener {
-            GlobalScope.launch {
-                AppDatabase.getInstance(it.context).walletDao().updateWalletTokensUnfold(
-                    wallet.walletConfig.id,
-                    !wallet.walletConfig.unfoldTokens
-                )
-                // we don't need to update UI here - the DB change will trigger a rebind of the card
-            }
+            val context = it.context
+            updateWalletTokensUnfold(context, wallet)
+            // we don't need to update UI here - the DB change will trigger a rebind of the card
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun updateWalletTokensUnfold(context: Context, wallet: Wallet) {
+        GlobalScope.launch {
+            AppDatabase.getInstance(context).walletDao().updateWalletTokensUnfold(
+                wallet.walletConfig.id,
+                !wallet.walletConfig.unfoldTokens
+            )
         }
     }
 

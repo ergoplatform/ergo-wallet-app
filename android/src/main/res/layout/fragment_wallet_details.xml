@@ -144,7 +144,7 @@
                                 android:background="?selectableItemBackgroundBorderless"
                                 android:contentDescription="@string/title_settings"
                                 android:paddingVertical="@dimen/half_horizontal_margin"
-                                android:src="@drawable/ic_settings_24"
+                                android:src="@drawable/ic_list_numbered_24"
                                 app:tint="?android:textColor" />
 
                         </LinearLayout>
@@ -169,10 +169,10 @@
                             android:layout_width="@dimen/medium_icon_size"
                             android:layout_height="@dimen/medium_icon_size"
                             android:contentDescription="@null"
-                            android:src="@drawable/ic_ergologo"
+                            android:src="@drawable/ic_erglogo_filled"
                             app:layout_constraintBottom_toBottomOf="@id/wallet_balance"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="@id/title_balance"
+                            app:layout_constraintTop_toTopOf="@id/wallet_balance"
                             app:tint="?attr/colorControlNormal" />
 
                         <TextView
@@ -277,9 +277,10 @@
                             android:layout_width="@dimen/medium_icon_size"
                             android:layout_height="@dimen/medium_icon_size"
                             android:contentDescription="@null"
-                            android:src="@drawable/ic_tokens_24"
+                            android:src="@drawable/ic_tokenlogo"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:tint="?attr/colorControlNormal" />
 
                         <TextView
                             android:id="@+id/wallet_token_num"
