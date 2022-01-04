@@ -75,16 +75,20 @@ class SendFundsViewController(
         addressNameLabel = Body1BoldLabel().apply {
             numberOfLines = 1
             textColor = uiColorErgo
-            isUserInteractionEnabled = true
-            addGestureRecognizer(UITapGestureRecognizer {
-                presentViewController(
-                    ChooseAddressListDialogViewController(walletId, true) {
-                        uiLogic.derivedAddressIdx = it
-                    }, true
-                ) {}
-            })
-            // TODO addresses show IMAGE_OPEN_LIST
         }
+        val addressNameContainer =
+            addressNameLabel.wrapWithTrailingImage(
+                getIosSystemImage(IMAGE_OPEN_LIST, UIImageSymbolScale.Small, 20.0)!!
+            ).apply {
+                isUserInteractionEnabled = true
+                addGestureRecognizer(UITapGestureRecognizer {
+                    presentViewController(
+                        ChooseAddressListDialogViewController(walletId, true) {
+                            uiLogic.derivedAddressIdx = it
+                        }, true
+                    ) {}
+                })
+            }
         balanceLabel = Body1Label()
         balanceLabel.numberOfLines = 1
 
@@ -191,7 +195,7 @@ class SendFundsViewController(
         val stackView = UIStackView(
             NSArray(
                 walletTitle,
-                addressNameLabel,
+                addressNameContainer,
                 balanceLabel,
                 readOnlyHint,
                 introLabel,
@@ -208,7 +212,7 @@ class SendFundsViewController(
         stackView.axis = UILayoutConstraintAxis.Vertical
         stackView.spacing = 2 * DEFAULT_MARGIN
         stackView.setCustomSpacing(0.0, walletTitle)
-        stackView.setCustomSpacing(0.0, addressNameLabel)
+        stackView.setCustomSpacing(0.0, addressNameContainer)
         stackView.setCustomSpacing(0.0, inputErgoAmount)
         scrollView = container.wrapInVerticalScrollView()
         container.addSubview(stackView)
@@ -289,7 +293,7 @@ class SendFundsViewController(
     }
 
     inner class IosSendFundsUiLogic : SendFundsUiLogic() {
-        var progressViewController: ProgressViewController? = null
+        private var progressViewController: ProgressViewController? = null
 
         override val coroutineScope: CoroutineScope
             get() = viewControllerScope

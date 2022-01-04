@@ -139,11 +139,11 @@ class ConfigListAddressCell : AddressCell() {
     override fun setupView() {
         super.setupView()
 
-        moreActionButton = UIImageView(getIosSystemImage(IMAGE_MORE_ACTION, UIImageSymbolScale.Small)).apply {
+        moreActionButton = UIImageView(getIosSystemImage(IMAGE_MORE_ACTION, UIImageSymbolScale.Small, 20.0)).apply {
             tintColor = UIColor.label()
         }
         contentView.addSubview(moreActionButton)
-        moreActionButton.topToSuperview().leftToRightOf(ownContentView, -5.0).fixedWidth(20.0).fixedHeight(20.0)
+        moreActionButton.topToSuperview(topInset = -DEFAULT_MARGIN).leftToRightOf(ownContentView, -DEFAULT_MARGIN)
 
     }
 

@@ -206,15 +206,23 @@ fun UIView.leftToSuperview(
 
 fun UIView.rightToSuperview(
     useSafeArea: Boolean = false,
-    inset: Double = 0.0
+    inset: Double = 0.0,
+    canBeLess: Boolean = false
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
-    val topConstraint = this.rightAnchor.equalTo(
-        getSuperviewLayoutGuide(useSafeArea).rightAnchor,
-        inset * -1.0
-    )
-    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+    val rightConstraint =
+        if (canBeLess)
+            this.rightAnchor.lessThanOrEqualTo(
+                getSuperviewLayoutGuide(useSafeArea).rightAnchor,
+                inset * -1.0
+            )
+        else
+            this.rightAnchor.equalTo(
+                getSuperviewLayoutGuide(useSafeArea).rightAnchor,
+                inset * -1.0
+            )
+    NSLayoutConstraint.activateConstraints(NSArray(rightConstraint))
 
     return this
 }
@@ -332,13 +340,6 @@ fun UIView.wrapInVerticalScrollView(): UIScrollView {
     )
 
     return scrollView
-}
-
-fun UIView.addHorizontalSeparator(): UIView {
-    val separator = createHorizontalSeparator()
-    this.addSubview(separator)
-    separator.widthMatchesSuperview()
-    return separator
 }
 
 fun createHorizontalSeparator(): UIView {

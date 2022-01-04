@@ -12,7 +12,7 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
-class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
+class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: Int = 0) :
     ViewControllerWithKeyboardLayoutGuide() {
     val uiLogic = ReceiveToWalletUiLogic().apply { this.derivationIdx = derivationIdx }
 
@@ -36,17 +36,21 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
         addressNameLabel = Body1BoldLabel().apply {
             numberOfLines = 1
             textColor = uiColorErgo
-            isUserInteractionEnabled = true
-            addGestureRecognizer(UITapGestureRecognizer {
-                presentViewController(
-                    ChooseAddressListDialogViewController(walletId, false) {
-                        uiLogic.derivationIdx = it ?: 0
-                        addressChanged()
-                    }, true
-                ) {}
-            })
-            // TODO addresses show IMAGE_OPEN_LIST
         }
+        val addressNameContainer =
+            addressNameLabel.wrapWithTrailingImage(
+                getIosSystemImage(IMAGE_OPEN_LIST, UIImageSymbolScale.Small, 20.0)!!
+            ).apply {
+                isUserInteractionEnabled = true
+                addGestureRecognizer(UITapGestureRecognizer {
+                    presentViewController(
+                        ChooseAddressListDialogViewController(walletId, false) {
+                            uiLogic.derivationIdx = it ?: 0
+                            addressChanged()
+                        }, true
+                    ) {}
+                })
+            }
 
         val uiBarButtonItem = UIBarButtonItem(UIBarButtonSystemItem.Action)
         uiBarButtonItem.setOnClickListener {
@@ -87,14 +91,14 @@ class ReceiveToWalletViewController(val walletId: Int, derivationIdx: Int = 0) :
         val stackView = UIStackView(
             NSArray(
                 walletTitle,
-                addressNameLabel,
+                addressNameContainer,
                 qrCodeContainer,
                 addressLabel,
                 inputErgoAmount
             )
         )
         stackView.axis = UILayoutConstraintAxis.Vertical
-        stackView.setCustomSpacing(DEFAULT_MARGIN * 2, addressNameLabel)
+        stackView.setCustomSpacing(DEFAULT_MARGIN * 2, addressNameContainer)
         stackView.setCustomSpacing(DEFAULT_MARGIN * 2, qrCodeContainer)
         stackView.setCustomSpacing(DEFAULT_MARGIN * 2, addressLabel)
         val scrollView = container.wrapInVerticalScrollView()
