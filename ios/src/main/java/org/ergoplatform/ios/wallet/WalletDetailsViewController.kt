@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.getExplorerWebUrl
+import org.ergoplatform.ios.tokens.TokenEntryView
 import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
 import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
@@ -31,6 +32,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
 
     private val uiLogic = WalletDetailsUiLogic()
     private var newDataLoaded: Boolean = false
+    private var animateNextConfigRefresh = false
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -106,7 +108,13 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 }
 
                 runOnMainThread {
-                    refresh()
+                    // usually, config changes are triggered by changes made on other screens (e.g. addresses list)
+                    // generally, there's no need to animate these changes. An exception is (un)folding tokens list:
+                    // this change should happen animated.
+                    if (animateNextConfigRefresh) {
+                        view.animateLayoutChanges { refresh() }
+                    } else
+                        refresh()
                 }
             }
         }
@@ -125,6 +133,8 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         if (uiLogic.wallet == null) {
             navigationController.popViewController(false)
         }
+
+        animateNextConfigRefresh = false
 
         if (newDataLoaded)
             uiLogic.wallet?.let { wallet ->
@@ -292,9 +302,12 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     }
 
     inner class TokenListContainer : UIView(CGRect.Zero()) {
-        val tokensNumLabel = Headline2Label()
-        val tokensListStack = UIStackView(CGRect.Zero()).apply {
+        private val tokensNumLabel = Headline2Label()
+        private val tokensListStack = UIStackView(CGRect.Zero()).apply {
             axis = UILayoutConstraintAxis.Vertical
+        }
+        private val expandButton = UIImageView().apply {
+            tintColor = UIColor.label()
         }
 
         init {
@@ -313,17 +326,53 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             addSubview(tokensTitle)
             addSubview(tokensNumLabel)
             addSubview(tokensListStack)
+            addSubview(expandButton)
+
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UITapGestureRecognizer {
+                switchTokenVisibility()
+            })
 
             tokenImage.leftToSuperview(inset = DEFAULT_MARGIN).topToSuperview()
             tokensNumLabel.leftToRightOf(tokenImage, DEFAULT_MARGIN * 2).centerVerticallyTo(tokenImage)
+                .enforceKeepIntrinsicWidth()
             tokensTitle.leftToRightOf(tokensNumLabel, DEFAULT_MARGIN).centerVerticallyTo(tokensNumLabel)
-            tokensListStack.topToBottomOf(tokensNumLabel).bottomToSuperview(bottomInset = DEFAULT_MARGIN)
+            expandButton.rightToSuperview(inset = -DEFAULT_MARGIN).leftToRightOf(tokensTitle)
+                .centerVerticallyTo(tokensTitle).enforceKeepIntrinsicWidth()
+            tokensListStack.topToBottomOf(tokenImage).bottomToSuperview()
+                .widthMatchesSuperview(inset = DEFAULT_MARGIN * 5)
+        }
+
+        private fun switchTokenVisibility() {
+            uiLogic.wallet?.walletConfig?.let { walletConfig ->
+                viewControllerScope.launch {
+                    animateNextConfigRefresh = true
+                    getAppDelegate().database.updateWalletDisplayTokens(!walletConfig.unfoldTokens, walletId)
+                }
+            }
         }
 
         fun refresh() {
             val tokensList = uiLogic.getTokensList()
             isHidden = tokensList.isEmpty()
             tokensNumLabel.text = tokensList.size.toString()
+
+            tokensListStack.clearArrangedSubviews()
+            val listExpanded = uiLogic.wallet?.walletConfig?.unfoldTokens == true
+            if (listExpanded) {
+                // first element is just to add some space that shouldn't be there when list is not expanded
+                tokensListStack.addArrangedSubview(UIView(CGRect.Zero()).fixedHeight(DEFAULT_MARGIN * 2))
+
+                tokensList.forEach {
+                    tokensListStack.addArrangedSubview(TokenEntryView().bindWalletToken(it))
+                }
+            }
+
+            expandButton.image = getIosSystemImage(
+                if (listExpanded) IMAGE_CHEVRON_UP else IMAGE_CHEVRON_DOWN,
+                UIImageSymbolScale.Small,
+                20.0
+            )
         }
     }
 

@@ -36,6 +36,8 @@ const val IMAGE_OPEN_LIST = "arrowtriangle.down.circle.fill"
 val IMAGE_ADDRESS = if (Foundation.getMajorSystemVersion() >= 14) "arrow.triangle.branch" else "arrow.branch"
 const val IMAGE_TRANSACTIONS = "arrow.right.arrow.left"
 const val IMAGE_ADDRESS_LIST = "list.number"
+const val IMAGE_CHEVRON_DOWN = "chevron.down"
+const val IMAGE_CHEVRON_UP = "chevron.up"
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
