@@ -103,7 +103,7 @@ class SettingsViewController : CoroutineViewController() {
         changeFiatCurrencyButton.addOnTouchUpInsideListener { _, _ ->
             presentViewController(DisplayCurrencyListViewController { currency ->
                 preferences.prefDisplayCurrency = currency
-                NodeConnector.getInstance().invalidateCache()
+                NodeConnector.getInstance().invalidateCache(resetFiatValue = true)
                 changeFiatCurrencyButton.setTitle(
                     uiLogic.getFiatCurrencyButtonText(
                         preferences,

@@ -10,7 +10,7 @@ import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.wallet.*
 import org.ergoplatform.wallet.addresses.getAddressLabel
 
-class WalletDetailsUiLogic() {
+class WalletDetailsUiLogic {
     var wallet: Wallet? = null
         set(value) {
             field = value

@@ -57,7 +57,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         walletDetailsViewModel.init(requireContext(), args.walletId)
         _binding = FragmentWalletDetailsBinding.inflate(layoutInflater, container, false)
 
-        walletDetailsViewModel.address.observe(viewLifecycleOwner) { addressChanged(it) }
+        walletDetailsViewModel.address.observe(viewLifecycleOwner) { addressChanged() }
 
         return binding.root
     }
@@ -153,7 +153,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         walletDetailsViewModel.selectedIdx = addressDerivationIdx
     }
 
-    private fun addressChanged(address: String?) {
+    private fun addressChanged() {
         // The selected address changed. It is null for "all addresses"
 
         if (walletDetailsViewModel.wallet == null) {

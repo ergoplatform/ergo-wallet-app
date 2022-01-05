@@ -51,8 +51,9 @@ class NodeConnector {
         return ergoApiService!!
     }
 
-    fun invalidateCache() {
+    fun invalidateCache(resetFiatValue: Boolean = false) {
         lastRefreshMs = 0
+        if (resetFiatValue) fiatValue.value = 0.0f
     }
 
     fun resetApiService() {
