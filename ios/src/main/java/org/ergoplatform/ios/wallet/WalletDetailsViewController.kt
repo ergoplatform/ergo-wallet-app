@@ -23,7 +23,7 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
-const val WIDTH_ICONS = 35.0
+const val WIDTH_ICONS = 40.0
 
 class WalletDetailsViewController(private val walletId: Int) : CoroutineViewController() {
 
@@ -49,25 +49,33 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             navigationController.pushViewController(WalletConfigViewController(walletId), true)
         }
 
-        val ownContainer = UIView(CGRect.Zero())
-        ownContainer.layoutMargins = UIEdgeInsets.Zero()
+        addressContainer = AddressContainer()
+        val transactionsContainer = TransactionsContainer()
+
+        val ownContainer = UIStackView(
+            NSArray(
+                addressContainer,
+                createHorizontalSeparator(),
+                transactionsContainer
+                )
+        ).apply {
+            axis = UILayoutConstraintAxis.Vertical
+            spacing = DEFAULT_MARGIN
+        }
         val scrollView = ownContainer.wrapInVerticalScrollView()
         view.addSubview(scrollView)
         scrollView.edgesToSuperview(maxWidth = MAX_WIDTH)
 
-        addressContainer = AddressContainer()
-        val transactionsContainer = TransactionsContainer()
-        ownContainer.addSubview(addressContainer)
-        ownContainer.addSubview(transactionsContainer)
-
-        addressContainer.topToSuperview(topInset = DEFAULT_MARGIN)
-            .widthMatchesSuperview(inset = DEFAULT_MARGIN)
-        val separator = createHorizontalSeparator().apply {
-            ownContainer.addSubview(this)
-            topToBottomOf(addressContainer, DEFAULT_MARGIN * 3).widthMatchesSuperview()
+        val uiRefreshControl = UIRefreshControl()
+        scrollView.refreshControl = uiRefreshControl
+        uiRefreshControl.addOnValueChangedListener {
+            if (uiRefreshControl.isRefreshing) {
+                uiRefreshControl.endRefreshing()
+                val appDelegate = getAppDelegate()
+                NodeConnector.getInstance().refreshByUser(appDelegate.prefs, appDelegate.database)
+            }
         }
-        transactionsContainer.topToBottomOf(separator, DEFAULT_MARGIN).widthMatchesSuperview(inset = DEFAULT_MARGIN)
-            .bottomToSuperview(bottomInset = DEFAULT_MARGIN * 2)
+
     }
 
     override fun viewWillAppear(animated: Boolean) {
@@ -109,8 +117,6 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         private val addressNameLabel = Body1BoldLabel()
 
         init {
-            layoutMargins = UIEdgeInsets.Zero()
-
             val addressImage = UIImageView(getIosSystemImage(IMAGE_ADDRESS, UIImageSymbolScale.Medium)).apply {
                 tintColor = UIColor.secondaryLabel()
                 contentMode = UIViewContentMode.Center
@@ -183,7 +189,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             addressImage.leftToSuperview().topToSuperview().bottomToBottomOf(addressNameContainer)
             addressTitle.leftToRightOf(addressImage, DEFAULT_MARGIN).topToSuperview()
                 .rightToSuperview(inset = DEFAULT_MARGIN)
-            addressNameContainer.leftToLeftOf(addressTitle).topToBottomOf(addressTitle)
+            addressNameContainer.leftToLeftOf(addressTitle).topToBottomOf(addressTitle, DEFAULT_MARGIN / 2)
                 .rightToSuperview(inset = DEFAULT_MARGIN)
             horizontalStack.topToBottomOf(addressNameContainer, DEFAULT_MARGIN).rightToSuperview(inset = DEFAULT_MARGIN)
                 .leftToLeftOf(addressNameContainer)
