@@ -45,6 +45,8 @@ const val FONT_SIZE_TEXTBUTTON = 20.0
 // See https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#system-colors
 val uiColorErgo get() = UIColor.systemRed()
 val ergoLogoImage get() = UIImage.getImage("ergologo")
+val ergoLogoFilledImage get() = UIImage.getImage("ergologofilled")
+val tokenLogoImage get() = UIImage.getImage("tokenlogo")
 
 fun getAppDelegate() = UIApplication.getSharedApplication().delegate as Main
 fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(r)
