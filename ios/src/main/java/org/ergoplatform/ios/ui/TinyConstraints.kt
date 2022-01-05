@@ -2,7 +2,10 @@ package org.ergoplatform.ios.ui
 
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
-import org.robovm.apple.uikit.*
+import org.robovm.apple.uikit.NSLayoutConstraint
+import org.robovm.apple.uikit.UIColor
+import org.robovm.apple.uikit.UIScrollView
+import org.robovm.apple.uikit.UIView
 
 // https://github.com/roberthein/TinyConstraints
 
@@ -221,14 +224,22 @@ fun UIView.bottomToSuperview(
 
 fun UIView.leftToSuperview(
     useSafeArea: Boolean = false,
-    inset: Double = 0.0
+    inset: Double = 0.0,
+    canBeMore: Boolean = false
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
-    val topConstraint = this.leftAnchor.equalTo(
-        getSuperviewLayoutGuide(useSafeArea).leftAnchor,
-        inset
-    )
+    val topConstraint =
+        if (canBeMore)
+            this.leftAnchor.greaterThanOrEqualTo(
+                getSuperviewLayoutGuide(useSafeArea).leftAnchor,
+                inset
+            )
+        else
+            this.leftAnchor.equalTo(
+                getSuperviewLayoutGuide(useSafeArea).leftAnchor,
+                inset
+            )
     NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
 
     return this
@@ -293,11 +304,17 @@ fun UIView.centerVertical(): UIView {
     return this
 }
 
-fun UIView.centerHorizontal(): UIView {
+fun UIView.centerHorizontal(superViewRestrictsWidth: Boolean = false): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
     val centerConstraint = this.centerXAnchor.equalTo(superview.centerXAnchor)
     centerConstraint.priority = 1000f
-    NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
+    if (superViewRestrictsWidth) {
+        val widthConstraint = this.widthAnchor.lessThanOrEqual(superview.layoutMarginsGuide.widthAnchor)
+        widthConstraint.priority = 1000f
+        NSLayoutConstraint.activateConstraints(NSArray(centerConstraint, widthConstraint))
+    } else {
+        NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
+    }
     return this
 }
 

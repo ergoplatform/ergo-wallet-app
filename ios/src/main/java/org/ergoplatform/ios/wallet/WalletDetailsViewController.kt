@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.getExplorerWebUrl
-import org.ergoplatform.ios.tokens.TokenEntryView
+import org.ergoplatform.ios.tokens.DetailTokenEntryView
 import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
 import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
@@ -340,7 +340,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             expandButton.rightToSuperview(inset = -DEFAULT_MARGIN).leftToRightOf(tokensTitle)
                 .centerVerticallyTo(tokensTitle).enforceKeepIntrinsicWidth()
             tokensListStack.topToBottomOf(tokenImage).bottomToSuperview()
-                .widthMatchesSuperview(inset = DEFAULT_MARGIN * 5)
+                .widthMatchesSuperview(inset = DEFAULT_MARGIN * 2)
         }
 
         private fun switchTokenVisibility() {
@@ -360,11 +360,8 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             tokensListStack.clearArrangedSubviews()
             val listExpanded = uiLogic.wallet?.walletConfig?.unfoldTokens == true
             if (listExpanded) {
-                // first element is just to add some space that shouldn't be there when list is not expanded
-                tokensListStack.addArrangedSubview(UIView(CGRect.Zero()).fixedHeight(DEFAULT_MARGIN * 2))
-
                 tokensList.forEach {
-                    tokensListStack.addArrangedSubview(TokenEntryView().bindWalletToken(it))
+                    tokensListStack.addArrangedSubview(DetailTokenEntryView().bindWalletToken(it))
                 }
             }
 
