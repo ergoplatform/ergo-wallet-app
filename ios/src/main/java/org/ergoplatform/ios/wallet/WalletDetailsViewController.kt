@@ -3,7 +3,6 @@ package org.ergoplatform.ios.wallet
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
@@ -11,13 +10,11 @@ import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.ios.wallet.addresses.WalletAddressesViewController
-import org.ergoplatform.persistance.Wallet
-import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.wallet.WalletDetailsUiLogic
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
-import org.ergoplatform.wallet.*
-import org.ergoplatform.wallet.addresses.getAddressLabel
+import org.ergoplatform.wallet.getNumOfAddresses
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -29,10 +26,10 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     private lateinit var texts: I18NBundle
     private lateinit var addressContainer: AddressContainer
     private lateinit var balanceContainer: ErgoBalanceContainer
+    private lateinit var tokenContainer: TokenListContainer
+    private lateinit var tokenSeparator: UIView
 
-    private var wallet: Wallet? = null
-    private var addressIdx: Int? = null
-    private var walletAddress: WalletAddress? = null
+    private val uiLogic = WalletDetailsUiLogic()
     private var newDataLoaded: Boolean = false
 
     override fun viewDidLoad() {
@@ -52,6 +49,8 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
 
         addressContainer = AddressContainer()
         balanceContainer = ErgoBalanceContainer()
+        tokenContainer = TokenListContainer()
+        tokenSeparator = createHorizontalSeparator()
         val transactionsContainer = TransactionsContainer()
 
         val ownContainer = UIStackView(
@@ -60,6 +59,8 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 createHorizontalSeparator(),
                 balanceContainer,
                 createHorizontalSeparator(),
+                tokenContainer,
+                tokenSeparator,
                 transactionsContainer
             )
         ).apply {
@@ -86,8 +87,8 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         super.viewWillAppear(animated)
         viewControllerScope.launch {
             NodeConnector.getInstance().isRefreshing.collect { isRefreshing ->
-                if (!isRefreshing && wallet != null) {
-                    wallet = getAppDelegate().database.loadWalletWithStateById(walletId)
+                if (!isRefreshing && uiLogic.wallet != null) {
+                    uiLogic.wallet = getAppDelegate().database.loadWalletWithStateById(walletId)
                     newDataLoaded = true
                     runOnMainThread {
                         view.animateLayoutChanges { refresh() }
@@ -96,12 +97,12 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             }
         }
         viewControllerScope.launch {
-            getAppDelegate().database.walletWithStateByIdAsFlow(walletId).collect {
-                wallet = it
+            getAppDelegate().database.walletWithStateByIdAsFlow(walletId).collect { wallet ->
+                uiLogic.wallet = wallet
                 newDataLoaded = true
 
-                if (addressIdx == null && wallet?.getNumOfAddresses() == 1) {
-                    addressIdx = 0
+                if (uiLogic.addressIdx == null && wallet?.getNumOfAddresses() == 1) {
+                    uiLogic.addressIdx = 0
                 }
 
                 runOnMainThread {
@@ -121,16 +122,19 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     }
 
     fun refresh() {
-        // TODO leave screen when wallet is null (removed)
+        if (uiLogic.wallet == null) {
+            navigationController.popViewController(false)
+        }
 
         if (newDataLoaded)
-            wallet?.let { wallet ->
+            uiLogic.wallet?.let { wallet ->
                 newDataLoaded = false
                 LogUtils.logDebug("WalletDetailsViewController", "Refresh UI")
-                walletAddress = addressIdx?.let { wallet.getDerivedAddressEntity(it) }
                 title = wallet.walletConfig.displayName
                 addressContainer.refresh()
                 balanceContainer.refresh()
+                tokenContainer.refresh()
+                tokenSeparator.isHidden = tokenContainer.isHidden
             }
     }
 
@@ -162,7 +166,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 addGestureRecognizer(UITapGestureRecognizer {
                     presentViewController(
                         ChooseAddressListDialogViewController(walletId, true) {
-                            addressIdx = it
+                            uiLogic.addressIdx = it
                             newDataLoaded = true
                             this@WalletDetailsViewController.refresh()
                         }, true
@@ -175,7 +179,10 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 tintColor = UIColor.label()
                 isUserInteractionEnabled = true
                 addGestureRecognizer(UITapGestureRecognizer {
-                    navigationController.pushViewController(SendFundsViewController(walletId, addressIdx ?: -1), true)
+                    navigationController.pushViewController(
+                        SendFundsViewController(walletId, uiLogic.addressIdx ?: -1),
+                        true
+                    )
                 })
             }
             val receiveButton = UIImageView(getIosSystemImage(IMAGE_RECEIVE, UIImageSymbolScale.Small)).apply {
@@ -184,7 +191,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 isUserInteractionEnabled = true
                 addGestureRecognizer(UITapGestureRecognizer {
                     navigationController.pushViewController(
-                        ReceiveToWalletViewController(walletId, addressIdx ?: 0),
+                        ReceiveToWalletViewController(walletId, uiLogic.addressIdx ?: 0),
                         true
                     )
                 })
@@ -219,8 +226,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         }
 
         fun refresh() {
-            addressNameLabel.text = walletAddress?.getAddressLabel(IosStringProvider(texts))
-                ?: texts.format(STRING_LABEL_ALL_ADDRESSES, wallet!!.getNumOfAddresses())
+            addressNameLabel.text = uiLogic.getAddressLabel(IosStringProvider(texts))
         }
     }
 
@@ -264,29 +270,60 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         }
 
         fun refresh() {
-            wallet?.let { wallet ->
+            // fill balances
+            val ergoAmount = uiLogic.getErgoBalance()
+            balanceLabel.setErgoAmount(ergoAmount)
 
-                // fill balances
-                val addressState = walletAddress?.let { wallet.getStateForAddress(it.publicAddress) }
-                val ergoAmount = ErgoAmount(addressState?.balance ?: wallet.getBalanceForAllAddresses())
-                balanceLabel.setErgoAmount(ergoAmount)
+            val unconfirmed = uiLogic.getUnconfirmedErgoBalance()
+            unconfirmedBalance.text = texts.format(STRING_LABEL_ERG_AMOUNT, unconfirmed.toStringRoundToDecimals()) +
+                    " " + texts.get(STRING_LABEL_UNCONFIRMED)
+            unconfirmedBalance.isHidden = (unconfirmed.nanoErgs == 0L)
 
-                val unconfirmed = addressState?.unconfirmedBalance ?: wallet.getUnconfirmedBalanceForAllAddresses()
-                unconfirmedBalance.text =
-                    texts.format(STRING_LABEL_ERG_AMOUNT, ErgoAmount(unconfirmed).toStringRoundToDecimals()) +
-                            " " + texts.get(STRING_LABEL_UNCONFIRMED)
-                unconfirmedBalance.isHidden = (unconfirmed == 0L)
+            // Fill fiat value
+            val nodeConnector = NodeConnector.getInstance()
+            val ergoPrice = nodeConnector.fiatValue.value
+            fiatBalance.isHidden = ergoPrice == 0f
 
-                // Fill fiat value
-                val nodeConnector = NodeConnector.getInstance()
-                val ergoPrice = nodeConnector.fiatValue.value
-                fiatBalance.isHidden = ergoPrice == 0f
+            fiatBalance.text = formatFiatToString(
+                ergoPrice.toDouble() * ergoAmount.toDouble(),
+                nodeConnector.fiatCurrency, IosStringProvider(texts)
+            )
+        }
+    }
 
-                fiatBalance.text = formatFiatToString(
-                    ergoPrice.toDouble() * ergoAmount.toDouble(),
-                    nodeConnector.fiatCurrency, IosStringProvider(texts)
-                )
+    inner class TokenListContainer : UIView(CGRect.Zero()) {
+        val tokensNumLabel = Headline2Label()
+        val tokensListStack = UIStackView(CGRect.Zero()).apply {
+            axis = UILayoutConstraintAxis.Vertical
+        }
+
+        init {
+            val tokenImage = UIImageView(tokenLogoImage.imageWithTintColor(UIColor.secondaryLabel())).apply {
+                contentMode = UIViewContentMode.ScaleAspectFit
+                fixedWidth(WIDTH_ICONS)
+                fixedHeight(WIDTH_ICONS)
             }
+            val tokensTitle = Body1BoldLabel().apply {
+                text = texts.get(STRING_LABEL_TOKENS)
+                textColor = uiColorErgo
+                numberOfLines = 1
+            }
+
+            addSubview(tokenImage)
+            addSubview(tokensTitle)
+            addSubview(tokensNumLabel)
+            addSubview(tokensListStack)
+
+            tokenImage.leftToSuperview(inset = DEFAULT_MARGIN).topToSuperview()
+            tokensNumLabel.leftToRightOf(tokenImage, DEFAULT_MARGIN * 2).centerVerticallyTo(tokenImage)
+            tokensTitle.leftToRightOf(tokensNumLabel, DEFAULT_MARGIN).centerVerticallyTo(tokensNumLabel)
+            tokensListStack.topToBottomOf(tokensNumLabel).bottomToSuperview(bottomInset = DEFAULT_MARGIN)
+        }
+
+        fun refresh() {
+            val tokensList = uiLogic.getTokensList()
+            isHidden = tokensList.isEmpty()
+            tokensNumLabel.text = tokensList.size.toString()
         }
     }
 
@@ -323,7 +360,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             addGestureRecognizer(UITapGestureRecognizer {
                 openUrlInBrowser(
                     getExplorerWebUrl() + "en/addresses/" +
-                            (walletAddress?.publicAddress ?: wallet!!.walletConfig.firstAddress)
+                            (uiLogic.walletAddress?.publicAddress ?: uiLogic.wallet!!.walletConfig.firstAddress)
                 )
             })
         }
