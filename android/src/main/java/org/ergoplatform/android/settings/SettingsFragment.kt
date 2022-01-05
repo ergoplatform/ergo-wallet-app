@@ -18,7 +18,7 @@ import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.enableLinks
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.showDialogWithCopyOption
-import org.ergoplatform.settings.SettingsUiLogic
+import org.ergoplatform.uilogic.settings.SettingsUiLogic
 
 class SettingsFragment : Fragment() {
 

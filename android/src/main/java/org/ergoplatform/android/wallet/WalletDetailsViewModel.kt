@@ -9,18 +9,20 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.uilogic.wallet.WalletDetailsUiLogic
 import org.ergoplatform.wallet.getDerivedAddress
 import org.ergoplatform.wallet.getNumOfAddresses
 
 class WalletDetailsViewModel : ViewModel() {
 
-    var wallet: Wallet? = null
-        private set
+    val uiLogic = WalletDetailsUiLogic()
+    val wallet: Wallet? get() = uiLogic.wallet
 
     // the selected index is null for "all addresses"
-    var selectedIdx: Int? = null
+    var selectedIdx: Int?
+        get() = uiLogic.addressIdx
         set(value) {
-            field = value
+            uiLogic.addressIdx = value
             notifyObserversDerivedIdxChanged()
         }
 
@@ -31,7 +33,7 @@ class WalletDetailsViewModel : ViewModel() {
         viewModelScope.launch {
             AppDatabase.getInstance(ctx).walletDao().walletWithStateByIdAsFlow(walletId).collect {
                 // called every time something changes in the DB
-                wallet = it?.toModel()
+                uiLogic.wallet = it?.toModel()
 
                 // no address set (yet) and there is only a single address available, fix it to this one
                 if (selectedIdx == null && wallet?.getNumOfAddresses() == 1) {

@@ -1,6 +1,7 @@
 package org.ergoplatform.android.wallet
 
 import android.animation.LayoutTransition
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,10 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
@@ -29,8 +30,8 @@ import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.getExplorerWebUrl
-import org.ergoplatform.wallet.*
-import org.ergoplatform.wallet.addresses.getAddressLabel
+import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.wallet.getDerivedAddress
 
 class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
@@ -56,7 +57,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         walletDetailsViewModel.init(requireContext(), args.walletId)
         _binding = FragmentWalletDetailsBinding.inflate(layoutInflater, container, false)
 
-        walletDetailsViewModel.address.observe(viewLifecycleOwner, { addressChanged(it) })
+        walletDetailsViewModel.address.observe(viewLifecycleOwner) { addressChanged() }
 
         return binding.root
     }
@@ -152,7 +153,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         walletDetailsViewModel.selectedIdx = addressDerivationIdx
     }
 
-    private fun addressChanged(address: String?) {
+    private fun addressChanged() {
         // The selected address changed. It is null for "all addresses"
 
         if (walletDetailsViewModel.wallet == null) {
@@ -167,28 +168,16 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         binding.walletName.text = wallet.walletConfig.displayName
 
         // fill address or label
-        if (address != null) {
-            val addressDbEntity =
-                wallet.getSortedDerivedAddressesList().find { it.publicAddress.equals(address) }
-            binding.addressLabel.text =
-                addressDbEntity?.getAddressLabel(AndroidStringProvider(requireContext()))
-        } else {
-            binding.addressLabel.text =
-                getString(R.string.label_all_addresses, wallet.getNumOfAddresses())
-        }
+        binding.addressLabel.text =
+            walletDetailsViewModel.uiLogic.getAddressLabel(AndroidStringProvider(requireContext()))
 
         // fill balances
-        val addressState = address?.let { wallet.getStateForAddress(address) }
-        val ergoAmount = ErgoAmount(
-            addressState?.balance
-                ?: wallet.getBalanceForAllAddresses()
-        )
-        binding.walletBalance.amount = ergoAmount.toDouble()
+        val ergoAmount = walletDetailsViewModel.uiLogic.getErgoBalance()
+        val unconfirmed = walletDetailsViewModel.uiLogic.getUnconfirmedErgoBalance()
 
-        val unconfirmed = addressState?.unconfirmedBalance
-            ?: wallet.getUnconfirmedBalanceForAllAddresses()
-        binding.walletUnconfirmed.amount = ErgoAmount(unconfirmed).toDouble()
-        binding.walletUnconfirmed.visibility = if (unconfirmed == 0L) View.GONE else View.VISIBLE
+        binding.walletBalance.amount = ergoAmount.toDouble()
+        binding.walletUnconfirmed.amount = unconfirmed.toDouble()
+        binding.walletUnconfirmed.visibility = if (unconfirmed.nanoErgs == 0L) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
 
         // Fill fiat value
@@ -203,15 +192,20 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         }
 
         // tokens
-        val tokensList = (address?.let { wallet.getTokensForAddress(address) }
-            ?: wallet.getTokensForAllAddresses()).sortedBy { it.name?.lowercase() }
-        binding.cardviewTokens.visibility = if (tokensList.size > 0) View.VISIBLE else View.GONE
+        val tokensList = walletDetailsViewModel.uiLogic.getTokensList()
+        binding.cardviewTokens.visibility = if (tokensList.isNotEmpty()) View.VISIBLE else View.GONE
         binding.walletTokenNum.text = tokensList.size.toString()
 
         binding.walletTokenEntries.apply {
             removeAllViews()
             if (wallet.walletConfig.unfoldTokens) {
-                tokensList.forEach { inflateAndBindDetailedTokenEntryView(it, this, layoutInflater) }
+                tokensList.forEach {
+                    inflateAndBindDetailedTokenEntryView(
+                        it,
+                        this,
+                        layoutInflater
+                    )
+                }
             }
         }
 
@@ -220,13 +214,19 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                 R.drawable.ic_chevron_up_24 else R.drawable.ic_chevron_down_24
         )
         binding.cardviewTokens.setOnClickListener {
-            GlobalScope.launch {
-                AppDatabase.getInstance(it.context).walletDao().updateWalletTokensUnfold(
-                    wallet.walletConfig.id,
-                    !wallet.walletConfig.unfoldTokens
-                )
-                // we don't need to update UI here - the DB change will trigger a rebind of the card
-            }
+            val context = it.context
+            updateWalletTokensUnfold(context, wallet)
+            // we don't need to update UI here - the DB change will trigger rebinding of the card
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun updateWalletTokensUnfold(context: Context, wallet: Wallet) {
+        GlobalScope.launch {
+            AppDatabase.getInstance(context).walletDao().updateWalletTokensUnfold(
+                wallet.walletConfig.id,
+                !wallet.walletConfig.unfoldTokens
+            )
         }
     }
 
@@ -240,6 +240,15 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             binding.layoutOuter.layoutTransition = LayoutTransition()
             binding.layoutOuter.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val context = requireContext()
+        NodeConnector.getInstance().refreshWhenNeeded(
+            Preferences(context),
+            RoomWalletDbProvider(AppDatabase.getInstance(context))
+        )
     }
 
     override fun onDestroyView() {

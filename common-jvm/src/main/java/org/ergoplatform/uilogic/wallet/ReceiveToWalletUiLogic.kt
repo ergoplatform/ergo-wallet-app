@@ -29,6 +29,7 @@ class ReceiveToWalletUiLogic {
 
     private fun refreshAddressInformation() {
         address = wallet?.getDerivedAddressEntity(derivationIdx)
+            ?: wallet?.getDerivedAddressEntity(0)
     }
 
     fun getTextToShare(amount: Double, purpose: String): String? {

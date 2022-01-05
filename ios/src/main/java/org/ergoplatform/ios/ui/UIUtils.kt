@@ -24,12 +24,20 @@ const val IMAGE_READONLY_WALLET = "magnifyingglass"
 const val IMAGE_EXCLAMATION_MARK = "exclamationmark.circle.fill"
 const val IMAGE_NO_CONNECTION = "icloud.slash"
 const val IMAGE_SEND = "paperplane"
+const val IMAGE_RECEIVE = "arrow.down.left"
 const val IMAGE_QR_SCAN = "qrcode.viewfinder"
 const val IMAGE_PLUS_CIRCLE = "plus.circle.fill"
 const val IMAGE_PLUS = "plus"
 const val IMAGE_MINUS_CIRCLE = "minus.circle.fill"
 const val IMAGE_CROSS_CIRCLE = "xmark.circle"
 const val IMAGE_FULL_AMOUNT = "arrow.down.circle"
+const val IMAGE_MORE_ACTION = "ellipsis"
+const val IMAGE_OPEN_LIST = "arrowtriangle.down.circle.fill"
+val IMAGE_ADDRESS = if (Foundation.getMajorSystemVersion() >= 14) "arrow.triangle.branch" else "arrow.branch"
+const val IMAGE_TRANSACTIONS = "arrow.right.arrow.left"
+const val IMAGE_ADDRESS_LIST = "list.number"
+const val IMAGE_CHEVRON_DOWN = "chevron.down"
+const val IMAGE_CHEVRON_UP = "chevron.up"
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
@@ -39,9 +47,13 @@ const val FONT_SIZE_TEXTBUTTON = 20.0
 // See https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#system-colors
 val uiColorErgo get() = UIColor.systemRed()
 val ergoLogoImage get() = UIImage.getImage("ergologo")
+val ergoLogoFilledImage get() = UIImage.getImage("ergologofilled")
+val tokenLogoImage get() = UIImage.getImage("tokenlogo")
 
 fun getAppDelegate() = UIApplication.getSharedApplication().delegate as Main
 fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(r)
+
+@Suppress("DEPRECATION")
 fun openUrlInBrowser(url: String) = UIApplication.getSharedApplication().openURL(NSURL(url))
 
 fun UIViewController.shareText(text: String, sourceView: UIView) {
@@ -86,6 +98,39 @@ fun UITextView.setHtmlText(html: String) {
     isEditable = false
     textColor = UIColor.label()
     tintColor = uiColorErgo
+}
+
+/**
+ * adds a trailing image in text. If text length exceeds image will get ellipsized
+ */
+fun UILabel.insertTrailingImage(image: UIImage) {
+    val attachment = NSTextAttachment(image)
+    val attributedString = NSAttributedString(attachment)
+    val string = NSMutableAttributedString(text)
+    string.append(attributedString)
+    attributedText = string
+}
+
+fun UIView.wrapWithTrailingImage(image: UIImage, fixedWith: Double = 0.0, fixedHeight: Double = 0.0): UIView {
+    val imageView = UIImageView(image)
+    imageView.tintColor = (this as? UILabel)?.textColor ?: this.tintColor
+
+    val container = UIView(CGRect.Zero())
+    container.layoutMargins = UIEdgeInsets.Zero()
+    container.addSubview(this)
+    container.addSubview(imageView)
+    if (fixedWith == 0.0) {
+        imageView.enforceKeepIntrinsicWidth()
+    } else {
+        imageView.fixedWidth(fixedWith)
+    }
+    if (fixedHeight != 0.0) {
+        imageView.fixedHeight(fixedHeight)
+    }
+    imageView.contentMode = UIViewContentMode.ScaleAspectFit
+    imageView.centerVerticallyTo(this).leftToRightOf(this, DEFAULT_MARGIN * .7).rightToSuperview(canBeLess = true)
+    this.leftToSuperview().topToSuperview().bottomToSuperview()
+    return container
 }
 
 fun createTextview(): UITextView {
@@ -147,11 +192,11 @@ fun UITextField.setCustomActionField(image: UIImage, action: Runnable) {
     })
 }
 
-fun getIosSystemImage(name: String, scale: UIImageSymbolScale): UIImage? {
+fun getIosSystemImage(name: String, scale: UIImageSymbolScale, pointSize: Double = 30.0): UIImage? {
     return UIImage.getSystemImage(
         name,
         UIImageSymbolConfiguration.getConfigurationWithPointSizeWeightScale(
-            30.0,
+            pointSize,
             UIImageSymbolWeight.Regular,
             scale
         )

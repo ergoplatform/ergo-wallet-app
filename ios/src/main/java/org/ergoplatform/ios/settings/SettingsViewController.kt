@@ -4,7 +4,7 @@ import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.ios.CrashHandler
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.settings.SettingsUiLogic
+import org.ergoplatform.uilogic.settings.SettingsUiLogic
 import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
@@ -103,7 +103,7 @@ class SettingsViewController : CoroutineViewController() {
         changeFiatCurrencyButton.addOnTouchUpInsideListener { _, _ ->
             presentViewController(DisplayCurrencyListViewController { currency ->
                 preferences.prefDisplayCurrency = currency
-                NodeConnector.getInstance().invalidateCache()
+                NodeConnector.getInstance().invalidateCache(resetFiatValue = true)
                 changeFiatCurrencyButton.setTitle(
                     uiLogic.getFiatCurrencyButtonText(
                         preferences,
