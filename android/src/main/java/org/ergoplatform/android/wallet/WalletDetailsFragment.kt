@@ -59,7 +59,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         walletDetailsViewModel.init(requireContext(), args.walletId)
         _binding = FragmentWalletDetailsBinding.inflate(layoutInflater, container, false)
 
-        walletDetailsViewModel.address.observe(viewLifecycleOwner, { addressChanged(it) })
+        walletDetailsViewModel.address.observe(viewLifecycleOwner) { addressChanged(it) }
 
         return binding.root
     }
@@ -231,7 +231,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         binding.cardviewTokens.setOnClickListener {
             val context = it.context
             updateWalletTokensUnfold(context, wallet)
-            // we don't need to update UI here - the DB change will trigger a rebind of the card
+            // we don't need to update UI here - the DB change will trigger rebinding of the card
         }
     }
 
@@ -255,6 +255,15 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             binding.layoutOuter.layoutTransition = LayoutTransition()
             binding.layoutOuter.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val context = requireContext()
+        NodeConnector.getInstance().refreshWhenNeeded(
+            Preferences(context),
+            RoomWalletDbProvider(AppDatabase.getInstance(context))
+        )
     }
 
     override fun onDestroyView() {
