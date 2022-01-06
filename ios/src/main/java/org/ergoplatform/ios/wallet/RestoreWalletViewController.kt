@@ -70,6 +70,8 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
         descLabel.widthMatchesSuperview(false, DEFAULT_MARGIN).topToSuperview(false, DEFAULT_MARGIN)
         wordListHint.widthMatchesSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(descLabel, DEFAULT_MARGIN)
+        // make the word list get compressed on iPhone SE
+        wordListHint.setContentCompressionResistancePriority(500f, UILayoutConstraintAxis.Vertical)
         tvMnemonic.widthMatchesSuperview(false, DEFAULT_MARGIN)
             .topToBottomOf(wordListHint, DEFAULT_MARGIN * 2)
         errorLabel.widthMatchesSuperview().topToBottomOf(tvMnemonic)
