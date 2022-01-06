@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.*
 import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
@@ -56,14 +57,14 @@ class SendFundsViewController(
         uiBarButtonItem.setOnClickListener {
             presentViewController(QrScannerViewController {
                 // TODO check cold wallet QR
-                val content = parsePaymentRequestFromQrCode(it)
+                val content = parsePaymentRequest(it)
                 content?.let {
                     inputReceiver.text = content.address
                     inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
                     content.amount.let { amount ->
                         if (amount.nanoErgs > 0) setInputAmount(amount)
                     }
-                    uiLogic.addTokensFromQr(content.tokens)
+                    uiLogic.addTokensFromPaymentRequest(content.tokens)
                 }
             }, true) {}
         }
@@ -71,9 +72,23 @@ class SendFundsViewController(
 
         walletTitle = Body1Label()
         walletTitle.numberOfLines = 1
-        addressNameLabel = Body1BoldLabel()
-        addressNameLabel.numberOfLines = 1
-        addressNameLabel.textColor = uiColorErgo
+        addressNameLabel = Body1BoldLabel().apply {
+            numberOfLines = 1
+            textColor = uiColorErgo
+        }
+        val addressNameContainer =
+            addressNameLabel.wrapWithTrailingImage(
+                getIosSystemImage(IMAGE_OPEN_LIST, UIImageSymbolScale.Small, 20.0)!!
+            ).apply {
+                isUserInteractionEnabled = true
+                addGestureRecognizer(UITapGestureRecognizer {
+                    presentViewController(
+                        ChooseAddressListDialogViewController(walletId, true) {
+                            uiLogic.derivedAddressIdx = it
+                        }, true
+                    ) {}
+                })
+            }
         balanceLabel = Body1Label()
         balanceLabel.numberOfLines = 1
 
@@ -180,7 +195,7 @@ class SendFundsViewController(
         val stackView = UIStackView(
             NSArray(
                 walletTitle,
-                addressNameLabel,
+                addressNameContainer,
                 balanceLabel,
                 readOnlyHint,
                 introLabel,
@@ -197,7 +212,7 @@ class SendFundsViewController(
         stackView.axis = UILayoutConstraintAxis.Vertical
         stackView.spacing = 2 * DEFAULT_MARGIN
         stackView.setCustomSpacing(0.0, walletTitle)
-        stackView.setCustomSpacing(0.0, addressNameLabel)
+        stackView.setCustomSpacing(0.0, addressNameContainer)
         stackView.setCustomSpacing(0.0, inputErgoAmount)
         scrollView = container.wrapInVerticalScrollView()
         container.addSubview(stackView)
@@ -240,6 +255,9 @@ class SendFundsViewController(
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         uiLogic.initWallet(getAppDelegate().database, walletId, derivationIdx, paymentRequest)
+
+        inputReceiver.text = uiLogic.receiverAddress
+        if (uiLogic.amountToSend.nanoErgs > 0) setInputAmount(uiLogic.amountToSend)
     }
 
     private fun startPayment() {
@@ -259,7 +277,12 @@ class SendFundsViewController(
 
         if (checkResponse.canPay) {
             startAuthFlow(uiLogic.wallet!!.walletConfig) { mnemonic ->
-                uiLogic.startPaymentWithMnemonicAsync(mnemonic, getAppDelegate().prefs)
+                val appDelegate = getAppDelegate()
+                uiLogic.startPaymentWithMnemonicAsync(
+                    mnemonic, appDelegate.prefs, IosStringProvider(
+                        appDelegate.texts
+                    )
+                )
             }
         }
     }
@@ -270,7 +293,7 @@ class SendFundsViewController(
     }
 
     inner class IosSendFundsUiLogic : SendFundsUiLogic() {
-        var progressViewController: ProgressViewController? = null
+        private var progressViewController: ProgressViewController? = null
 
         override val coroutineScope: CoroutineScope
             get() = viewControllerScope
@@ -295,18 +318,27 @@ class SendFundsViewController(
         }
 
         override fun notifyTokensChosenChanged() {
-            addTokenButton.isHidden = (uiLogic.tokensChosen.size >= uiLogic.tokensAvail.size)
-            tokensUiList.clearArrangedSubviews()
-            tokensError.isHidden = true
-            uiLogic.tokensChosen.forEach {
-                val ergoId = it.key
-                tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
-                        val tokenEntry = SendTokenEntryView(uiLogic, tokensError, tokenEntity, it.value)
+            runOnMainThread {
+                addTokenButton.isHidden = (uiLogic.tokensChosen.size >= uiLogic.tokensAvail.size)
+                tokensUiList.clearArrangedSubviews()
+                tokensError.isHidden = true
+                uiLogic.tokensChosen.forEach {
+                    val ergoId = it.key
+                    tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
+                        val tokenEntry =
+                            SendTokenEntryView(uiLogic, tokensError, tokenEntity, it.value)
                         tokensUiList.addArrangedSubview(tokenEntry)
                     }
+                }
+                tokensUiList.isHidden = uiLogic.tokensChosen.isEmpty()
+                setFocusToEmptyTokenAmountInput()
+
+                uiLogic.getPaymentRequestWarnings(IosStringProvider(texts))?.let {
+                    val uac = buildSimpleAlertController("", it, texts)
+                    presentViewController(uac, true) {}
+
+                }
             }
-            tokensUiList.isHidden = uiLogic.tokensChosen.isEmpty()
-            setFocusToEmptyTokenAmountInput()
         }
 
         override fun notifyAmountsChanged() {

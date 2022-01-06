@@ -82,6 +82,12 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         }
     }
 
+    override suspend fun deleteAddressState(publicAddress: String) {
+        withContext(Dispatchers.IO) {
+            appDb.walletStateQueries.deleteAddressState(publicAddress)
+        }
+    }
+
     fun getWalletsWithStatesFlow(): Flow<List<Wallet>> {
         return flow {
             appDb.walletConfigQueries.observeWithState().asFlow().collect {
@@ -117,10 +123,49 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         }
     }
 
+    override suspend fun walletWithStateByIdAsFlow(id: Int): Flow<Wallet?> {
+        return flow {
+            appDb.walletConfigQueries.observeWithState().asFlow().collect {
+                // we detected a change in any of the database tables - do all queries and return
+                emit(loadWalletWithStateById(id))
+            }
+        }
+    }
+
     override suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddress> {
         return withContext(Dispatchers.IO) {
             appDb.walletAddressQueries.loadWalletAddresses(firstAddress).executeAsList()
                 .map { it.toModel() }
+        }
+    }
+
+    override suspend fun loadWalletAddress(id: Long): WalletAddress? {
+        return withContext(Dispatchers.IO) {
+            appDb.walletAddressQueries.loadWalletAddress(id).executeAsOneOrNull()?.toModel()
+        }
+    }
+
+    override suspend fun insertWalletAddress(walletAddress: WalletAddress) {
+        withContext(Dispatchers.IO) {
+            appDb.walletAddressQueries.insertOrReplace(
+                if (walletAddress.id > 0) walletAddress.id else null,
+                walletAddress.walletFirstAddress,
+                walletAddress.derivationIndex,
+                walletAddress.publicAddress,
+                walletAddress.label
+            )
+        }
+    }
+
+    override suspend fun updateWalletAddressLabel(addrId: Long, newLabel: String?) {
+        withContext(Dispatchers.IO) {
+            appDb.walletAddressQueries.updateLabel(newLabel, addrId)
+        }
+    }
+
+    override suspend fun deleteWalletAddress(addrId: Long) {
+        withContext(Dispatchers.IO) {
+            appDb.walletAddressQueries.deleteWalletAddress(addrId)
         }
     }
 

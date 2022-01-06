@@ -17,6 +17,7 @@ import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SigningResult
+import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 class ColdWalletSigningViewModel : ViewModel() {
@@ -82,7 +83,7 @@ class ColdWalletSigningViewModel : ViewModel() {
         }
     }
 
-    fun signTxWithPassword(password: String): Boolean {
+    fun signTxWithPassword(password: String, texts: StringProvider): Boolean {
         wallet?.walletConfig?.secretStorage?.let {
             val mnemonic: String?
             try {
@@ -98,7 +99,7 @@ class ColdWalletSigningViewModel : ViewModel() {
                 return false
             }
 
-            signTxWithMnemonicAsync(mnemonic)
+            signTxWithMnemonicAsync(mnemonic, texts)
 
             return true
         }
@@ -106,7 +107,7 @@ class ColdWalletSigningViewModel : ViewModel() {
         return false
     }
 
-    fun signTxUserAuth() {
+    fun signTxUserAuth(texts: StringProvider) {
         // we don't handle exceptions here by intention: we throw them back to the caller which
         // will show a snackbar to give the user a hint what went wrong
         wallet?.walletConfig?.secretStorage?.let {
@@ -115,12 +116,12 @@ class ColdWalletSigningViewModel : ViewModel() {
             val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
             mnemonic = deserializeSecrets(String(decryptData!!))
 
-            signTxWithMnemonicAsync(mnemonic!!)
+            signTxWithMnemonicAsync(mnemonic!!, texts)
 
         }
     }
 
-    private fun signTxWithMnemonicAsync(mnemonic: String) {
+    private fun signTxWithMnemonicAsync(mnemonic: String, texts: StringProvider) {
         signingRequest?.let { signingRequest ->
             val derivedAddresses =
                 wallet!!.getSortedDerivedAddressesList().map { it.derivationIndex }
@@ -130,7 +131,7 @@ class ColdWalletSigningViewModel : ViewModel() {
                 withContext(Dispatchers.IO) {
                     ergoTxResult = signSerializedErgoTx(
                         signingRequest.serializedTx!!, mnemonic, "",
-                        derivedAddresses
+                        derivedAddresses, texts
                     )
                     signedQrCode = buildColdSigningResponse(ergoTxResult)?.let {
                         coldSigningResponseToQrChunks(

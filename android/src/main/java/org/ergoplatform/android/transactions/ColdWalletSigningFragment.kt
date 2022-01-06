@@ -16,10 +16,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.EntryTransactionBoxBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
-import org.ergoplatform.android.ui.AbstractAuthenticationFragment
-import org.ergoplatform.android.ui.ProgressBottomSheetDialogFragment
-import org.ergoplatform.android.ui.QrPagerAdapter
-import org.ergoplatform.android.ui.showDialogWithCopyOption
+import org.ergoplatform.android.ui.*
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.transactions.reduceBoxes
 
@@ -202,11 +199,11 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
     }
 
     override fun proceedAuthFlowWithPassword(password: String): Boolean {
-        return viewModel.signTxWithPassword(password)
+        return viewModel.signTxWithPassword(password, AndroidStringProvider(requireContext()))
     }
 
     override fun proceedAuthFlowFromBiometrics() {
-        viewModel.signTxUserAuth()
+        viewModel.signTxUserAuth(AndroidStringProvider(requireContext()))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

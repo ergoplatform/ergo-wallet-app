@@ -10,8 +10,8 @@ java {
 }
 
 task convertStrings {
-    def source = '../android/build/intermediates/incremental/mergeErgomainnetDebugResources/merged.dir/values/values.xml'
-    def dest = 'resources/i18n/strings.properties'
+    def source = '../android/build/intermediates/incremental/mergeErgomainnetDebugResources/merged.dir/values{l}/values{l}.xml'
+    def dest = 'resources/i18n/strings{l}.properties'
     def dest2 = '../common-jvm/src/main/java/org/ergoplatform/uilogic/StringResources.kt'
 
     ext.changePlaceHolders = { stringText ->
@@ -28,10 +28,12 @@ task convertStrings {
             return line + "\\"
     }
 
-    doFirst {
-        def output = project.file(dest)
+    ext.convertFile = { language ->
+        def primaryLanguage = language == ""
+
+        def output = project.file(dest.replace("{l}", primaryLanguage ? "" : "_" + language))
         def output2 = project.file(dest2)
-        def input = project.file(source)
+        def input = project.file(source.replace("{l}", primaryLanguage ? "" : "-" + language))
 
         try {
             if (!output.parentFile.exists())
@@ -82,11 +84,17 @@ task convertStrings {
             }
 
             output.write(strings.join('\n'))
-            output2.write(names.join('\n'))
+            if (primaryLanguage) output2.write(names.join('\n'))
             logger.info("Updated strings")
         } catch (ex) {
             throw new GradleException('Exception writing strings file', ex)
         }
+    }
+
+    doFirst {
+        convertFile("")
+        convertFile("zh")
+        convertFile("es")
     }
 }
 
@@ -95,16 +103,9 @@ dependencies {
         // normal compile no change iOS: 90 sec
         // exclude kiama, sigma-state, ergo-wallet: 20 sec
         //exclude group: 'org.scorexfoundation', module: 'sigma-state_2.11'
-        exclude group: 'org.ergoplatform', module: 'ergo-wallet_2.11'
+        //exclude group: 'org.ergoplatform', module: 'ergo-wallet_2.11'
     }
     implementation project(path: ':sqldelight')
-    // 4.0.15 snapshot for ergo-wallet with java 7 compatibility,
-    // TODO can be removed when appkit is on ergo-wallet 4.0.15
-    implementation ('org.ergoplatform:ergo-wallet_2.11:4.0.15-158-d0584eae-SNAPSHOT') {
-        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
-        exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
-        exclude group: 'com.google.guava', module: 'guava'
-    }
 
     implementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
     implementation "com.mobidevelop.robovm:robovm-rt:${robovm_version}"

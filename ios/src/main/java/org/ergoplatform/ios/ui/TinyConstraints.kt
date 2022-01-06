@@ -2,7 +2,10 @@ package org.ergoplatform.ios.ui
 
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
-import org.robovm.apple.uikit.*
+import org.robovm.apple.uikit.NSLayoutConstraint
+import org.robovm.apple.uikit.UIColor
+import org.robovm.apple.uikit.UIScrollView
+import org.robovm.apple.uikit.UIView
 
 // https://github.com/roberthein/TinyConstraints
 
@@ -73,6 +76,21 @@ fun UIView.topToBottomOf(
     return this
 }
 
+fun UIView.bottomToBottomOf(
+    sibling: UIView,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val bottomConstraint = this.bottomAnchor.equalTo(
+        sibling.bottomAnchor,
+        inset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(bottomConstraint))
+
+    return this
+}
+
 fun UIView.topToTopOf(
     sibling: UIView,
     inset: Double = 0.0
@@ -94,11 +112,11 @@ fun UIView.centerVerticallyTo(
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
-    val topConstraint = this.centerYAnchor.equalTo(
+    val centerConstraint = this.centerYAnchor.equalTo(
         sibling.centerYAnchor,
         inset
     )
-    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+    NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
 
     return this
 }
@@ -135,11 +153,26 @@ fun UIView.leftToRightOf(
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
-    val topConstraint = this.leftAnchor.equalTo(
+    val leftConstraint = this.leftAnchor.equalTo(
         sibling.rightAnchor,
         inset
     )
-    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+    NSLayoutConstraint.activateConstraints(NSArray(leftConstraint))
+
+    return this
+}
+
+fun UIView.leftToLeftOf(
+    sibling: UIView,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val leftConstraint = this.leftAnchor.equalTo(
+        sibling.leftAnchor,
+        inset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(leftConstraint))
 
     return this
 }
@@ -152,6 +185,21 @@ fun UIView.rightToLeftOf(
 
     val topConstraint = this.rightAnchor.equalTo(
         sibling.leftAnchor,
+        -inset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+
+    return this
+}
+
+fun UIView.rightToRightOf(
+    sibling: UIView,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val topConstraint = this.rightAnchor.equalTo(
+        sibling.rightAnchor,
         -inset
     )
     NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
@@ -176,14 +224,22 @@ fun UIView.bottomToSuperview(
 
 fun UIView.leftToSuperview(
     useSafeArea: Boolean = false,
-    inset: Double = 0.0
+    inset: Double = 0.0,
+    canBeMore: Boolean = false
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
-    val topConstraint = this.leftAnchor.equalTo(
-        getSuperviewLayoutGuide(useSafeArea).leftAnchor,
-        inset
-    )
+    val topConstraint =
+        if (canBeMore)
+            this.leftAnchor.greaterThanOrEqualTo(
+                getSuperviewLayoutGuide(useSafeArea).leftAnchor,
+                inset
+            )
+        else
+            this.leftAnchor.equalTo(
+                getSuperviewLayoutGuide(useSafeArea).leftAnchor,
+                inset
+            )
     NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
 
     return this
@@ -191,15 +247,23 @@ fun UIView.leftToSuperview(
 
 fun UIView.rightToSuperview(
     useSafeArea: Boolean = false,
-    inset: Double = 0.0
+    inset: Double = 0.0,
+    canBeLess: Boolean = false
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
-    val topConstraint = this.rightAnchor.equalTo(
-        getSuperviewLayoutGuide(useSafeArea).rightAnchor,
-        inset * -1.0
-    )
-    NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
+    val rightConstraint =
+        if (canBeLess)
+            this.rightAnchor.lessThanOrEqualTo(
+                getSuperviewLayoutGuide(useSafeArea).rightAnchor,
+                inset * -1.0
+            )
+        else
+            this.rightAnchor.equalTo(
+                getSuperviewLayoutGuide(useSafeArea).rightAnchor,
+                inset * -1.0
+            )
+    NSLayoutConstraint.activateConstraints(NSArray(rightConstraint))
 
     return this
 }
@@ -240,11 +304,17 @@ fun UIView.centerVertical(): UIView {
     return this
 }
 
-fun UIView.centerHorizontal(): UIView {
+fun UIView.centerHorizontal(superViewRestrictsWidth: Boolean = false): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
     val centerConstraint = this.centerXAnchor.equalTo(superview.centerXAnchor)
     centerConstraint.priority = 1000f
-    NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
+    if (superViewRestrictsWidth) {
+        val widthConstraint = this.widthAnchor.lessThanOrEqual(superview.layoutMarginsGuide.widthAnchor)
+        widthConstraint.priority = 1000f
+        NSLayoutConstraint.activateConstraints(NSArray(centerConstraint, widthConstraint))
+    } else {
+        NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
+    }
     return this
 }
 
@@ -317,13 +387,6 @@ fun UIView.wrapInVerticalScrollView(): UIScrollView {
     )
 
     return scrollView
-}
-
-fun UIView.addHorizontalSeparator(): UIView {
-    val separator = createHorizontalSeparator()
-    this.addSubview(separator)
-    separator.widthMatchesSuperview()
-    return separator
 }
 
 fun createHorizontalSeparator(): UIView {

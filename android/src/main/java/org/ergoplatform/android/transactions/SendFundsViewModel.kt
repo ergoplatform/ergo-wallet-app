@@ -10,6 +10,7 @@ import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.RoomWalletDbProvider
+import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.api.AndroidEncryptionManager
@@ -72,7 +73,11 @@ class SendFundsViewModel : ViewModel() {
                 return false
             }
 
-            uiLogic.startPaymentWithMnemonicAsync(mnemonic, Preferences(context))
+            uiLogic.startPaymentWithMnemonicAsync(
+                mnemonic,
+                Preferences(context),
+                AndroidStringProvider(context)
+            )
 
             return true
         }
@@ -89,7 +94,11 @@ class SendFundsViewModel : ViewModel() {
             val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
             mnemonic = deserializeSecrets(String(decryptData!!))
 
-            uiLogic.startPaymentWithMnemonicAsync(mnemonic!!, Preferences(context))
+            uiLogic.startPaymentWithMnemonicAsync(
+                mnemonic!!,
+                Preferences(context),
+                AndroidStringProvider(context)
+            )
 
         }
     }

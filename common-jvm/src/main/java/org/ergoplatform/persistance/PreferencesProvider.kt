@@ -26,6 +26,7 @@ abstract class PreferencesProvider {
         }
         set(currency) {
             saveString(KEY_FIAT_CURRENCY, currency)
+            lastFiatValue = 0.0f
         }
 
     var prefNodeUrl: String

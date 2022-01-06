@@ -6,15 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import androidx.room.withTransaction
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentWalletAddressDetailsDialogBinding
 import org.ergoplatform.getAddressDerivationPath
 import org.ergoplatform.android.ui.copyStringToClipboard
+import org.ergoplatform.uilogic.wallet.addresses.WalletAddressDialogUiLogic
 
 /**
  * Wallet address detail bottom sheet to edit an address label or delete the address
@@ -24,6 +26,8 @@ class WalletAddressDetailsDialog : BottomSheetDialogFragment() {
     private val binding get() = _binding!!
 
     private val args: WalletAddressDetailsDialogArgs by navArgs()
+
+    private val uiLogic = WalletAddressDialogUiLogic()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,14 +47,14 @@ class WalletAddressDetailsDialog : BottomSheetDialogFragment() {
             true
         }
 
-        val addrId = args.walletAddressId
+        val addrId = args.walletAddressId.toLong()
 
         binding.buttonApply.setOnClickListener { saveLabel(addrId) }
         binding.buttonRemove.setOnClickListener { deleteAddress(addrId) }
 
         lifecycleScope.launch {
             val walletAddress =
-                AppDatabase.getInstance(requireContext()).walletDao().loadWalletAddress(addrId)
+                AppDatabase.getInstance(requireContext()).walletDao().loadWalletAddress(addrId.toInt())
 
             binding.publicAddress.text = walletAddress?.publicAddress
             binding.descriptiveLabel.editText?.setText(walletAddress?.label)
@@ -65,28 +69,22 @@ class WalletAddressDetailsDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun deleteAddress(addrId: Int) {
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun deleteAddress(addrId: Long) {
         GlobalScope.launch(Dispatchers.IO) {
-            val database = AppDatabase.getInstance(requireContext())
-            val walletDao = database.walletDao()
-            database.withTransaction {
-                val dbEntity = walletDao.loadWalletAddress(addrId)
-                dbEntity?.publicAddress?.let {
-                    walletDao.deleteAddressState(it)
-                    walletDao.deleteTokensByAddress(it)
-                }
-                walletDao.deleteWalletAddress(addrId)
-            }
+            uiLogic.deleteWalletAddress(RoomWalletDbProvider(AppDatabase.getInstance(requireContext())), addrId)
         }
         dismiss()
     }
 
-    private fun saveLabel(addrId: Int) {
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun saveLabel(addrId: Long) {
         GlobalScope.launch(Dispatchers.IO) {
             val label = binding.descriptiveLabel.editText?.text?.toString()
-            AppDatabase.getInstance(requireContext()).walletDao().updateWalletAddressLabel(
+            uiLogic.saveWalletAddressLabel(
+                RoomWalletDbProvider(AppDatabase.getInstance(requireContext())),
                 addrId,
-                if (label.isNullOrBlank()) null else label
+                label
             )
         }
         dismiss()

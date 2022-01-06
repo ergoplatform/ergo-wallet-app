@@ -15,6 +15,10 @@ import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.TransactionResult
+import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_AMOUNT
+import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_BUT_NO_ERG
+import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_NOT_FOUND
+import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.wallet.*
 import kotlin.math.max
 
@@ -57,6 +61,8 @@ abstract class SendFundsUiLogic {
     val tokensAvail: ArrayList<WalletToken> = ArrayList()
     val tokensChosen: HashMap<String, ErgoToken> = HashMap()
 
+    private val paymentRequestWarnings = ArrayList<PaymentRequestWarning>()
+
     fun initWallet(
         database: WalletDbProvider,
         walletId: Int,
@@ -69,7 +75,7 @@ abstract class SendFundsUiLogic {
         // to not mess with user inputs
         val content: PaymentRequest?
         if (firstInit) {
-            content = paymentRequest?.let { parsePaymentRequestFromQuery(paymentRequest) }
+            content = paymentRequest?.let { parsePaymentRequest(paymentRequest) }
             content?.let {
                 receiverAddress = content.address
                 amountToSend = content.amount
@@ -95,7 +101,7 @@ abstract class SendFundsUiLogic {
             }
 
             content?.let {
-                addTokensFromQr(content.tokens)
+                addTokensFromPaymentRequest(content.tokens)
                 notifyTokensChosenChanged()
             }
         }
@@ -168,7 +174,11 @@ abstract class SendFundsUiLogic {
         )
     }
 
-    fun startPaymentWithMnemonicAsync(mnemonic: String, preferences: PreferencesProvider) {
+    fun startPaymentWithMnemonicAsync(
+        mnemonic: String,
+        preferences: PreferencesProvider,
+        texts: StringProvider
+    ) {
         val derivedAddresses =
             derivedAddressIdx?.let { listOf(it) }
                 ?: wallet?.getSortedDerivedAddressesList()?.map { it.derivationIndex }
@@ -181,7 +191,7 @@ abstract class SendFundsUiLogic {
                     Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
                     tokensChosen.values.toList(),
                     mnemonic, "", derivedAddresses,
-                    preferences.prefNodeUrl, preferences.prefExplorerApiUrl
+                    preferences, texts
                 )
             }
             notifyUiLocked(false)
@@ -195,7 +205,7 @@ abstract class SendFundsUiLogic {
         notifyUiLocked(true)
     }
 
-    fun startColdWalletPayment(preferences: PreferencesProvider) {
+    fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
         wallet?.let { wallet ->
             val derivedAddresses =
                 derivedAddressIdx?.let { listOf(wallet.getDerivedAddress(it)!!) }
@@ -209,7 +219,7 @@ abstract class SendFundsUiLogic {
                         Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
                         tokensChosen.values.toList(),
                         derivedAddresses.map { Address.create(it) },
-                        preferences.prefNodeUrl, preferences.prefExplorerApiUrl
+                        preferences, texts
                     )
                 }
                 notifyUiLocked(false)
@@ -221,7 +231,11 @@ abstract class SendFundsUiLogic {
         }
     }
 
-    fun sendColdWalletSignedTx(qrCodes: List<String>, preferences: PreferencesProvider) {
+    fun sendColdWalletSignedTx(
+        qrCodes: List<String>,
+        preferences: PreferencesProvider,
+        texts: StringProvider
+    ) {
         notifyUiLocked(true)
         coroutineScope.launch {
             val ergoTxResult: SendTransactionResult
@@ -230,7 +244,7 @@ abstract class SendFundsUiLogic {
                 if (signingResult.success) {
                     ergoTxResult = sendSignedErgoTx(
                         signingResult.serializedTx!!,
-                        preferences.prefNodeUrl, preferences.prefExplorerApiUrl
+                        preferences, texts
                     )
                 } else {
                     ergoTxResult = SendTransactionResult(false, errorMsg = signingResult.errorMsg)
@@ -290,7 +304,15 @@ abstract class SendFundsUiLogic {
             TokenAmount(amount, decimals).toStringTrimTrailingZeros()
         else ""
 
-    fun addTokensFromQr(tokens: HashMap<String, String>) {
+    fun addTokensFromPaymentRequest(tokens: HashMap<String, String>) {
+        // at the moment, tokens are the only thing provided by a payment request apart from
+        // amount and receiver. New features added in the future should be handled
+        // here as well. addPaymentRequestWarning is only called from this method.
+        // If this changes, we might need a new callback onPaymentRequestProcessed() to display
+        // the warnings in the UI. For the time being, it is sufficient without a dedicated
+        // callback because calls to notifyTokensChosenChanged() going on before reaching this here
+        // have no impact on showing warnings messages.
+
         var changed = false
         tokens.forEach {
             val tokenId = it.key
@@ -303,11 +325,37 @@ abstract class SendFundsUiLogic {
                     if (amountFromRequest == 0L && it.isSingularToken()) 1 else amountFromRequest
                 tokensChosen.put(tokenId, ErgoToken(tokenId, amountToUse))
                 changed = true
-            }
+                if (amountToUse != amountFromRequest) {
+                    addPaymentRequestWarning(
+                        STRING_ERROR_REQUEST_TOKEN_AMOUNT,
+                        it.name ?: it.tokenId
+                    )
+                }
+            } ?: addPaymentRequestWarning(STRING_ERROR_REQUEST_TOKEN_NOT_FOUND, tokenId)
         }
         if (changed) {
+            if (amountToSend.nanoErgs == 0L) {
+                addPaymentRequestWarning(STRING_ERROR_REQUEST_TOKEN_BUT_NO_ERG)
+            }
+
             notifyTokensChosenChanged()
         }
+    }
+
+    private fun addPaymentRequestWarning(errorId: String, args: String? = null) {
+        paymentRequestWarnings.add(PaymentRequestWarning(errorId, args))
+    }
+
+    fun getPaymentRequestWarnings(texts: StringProvider): String? {
+        val stringWarnings = paymentRequestWarnings.map { warning ->
+            warning.arguments?.let { args -> texts.getString(warning.errorCode, args) }
+                ?: texts.getString(warning.errorCode)
+        }
+        // don't show twice
+        paymentRequestWarnings.clear()
+
+        return (if (stringWarnings.isEmpty()) null
+        else stringWarnings.joinToString("\n"))
     }
 
     abstract fun notifyWalletStateLoaded()

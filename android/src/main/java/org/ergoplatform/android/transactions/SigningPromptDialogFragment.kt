@@ -14,6 +14,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPromptSigningDialogBinding
+import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.QrPagerAdapter
 
 class SigningPromptDialogFragment : BottomSheetDialogFragment() {
@@ -79,9 +80,11 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
                             Snackbar.LENGTH_LONG
                         ).setAnchorView(R.id.nav_view).show()
                     } else {
+                        val context = requireContext()
                         getViewModel().uiLogic.sendColdWalletSignedTx(
                             listOf(it),
-                            Preferences(requireContext())
+                            Preferences(context),
+                            AndroidStringProvider(context)
                         )
                         dismiss()
                     }

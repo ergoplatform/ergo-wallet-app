@@ -15,7 +15,7 @@ import org.ergoplatform.android.databinding.FragmentChooseAddressDialogBinding
 import org.ergoplatform.android.databinding.FragmentChooseAddressDialogItemBinding
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
-import org.ergoplatform.wallet.getSortedDerivedAddressesList
+import org.ergoplatform.uilogic.wallet.addresses.ChooseAddressListAdapterLogic
 
 /**
  * Let the user choose a derived address
@@ -60,8 +60,10 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
             AppDatabase.getInstance(context).walletDao()
                 .loadWalletWithStateById(requireArguments().getInt(ARG_WALLET_ID))?.let {
                     binding.list.adapter = DisplayAddressesAdapter(
-                        it.toModel(),
-                        requireArguments().getBoolean(ARG_SHOW_ALL_ADDRESSES)
+                        ChooseAddressListAdapterLogic(
+                            it.toModel(),
+                            requireArguments().getBoolean(ARG_SHOW_ALL_ADDRESSES)
+                        )
                     )
                 }
         }
@@ -73,9 +75,9 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
     }
 
     private inner class ViewHolder(val binding: FragmentChooseAddressDialogItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+        RecyclerView.ViewHolder(binding.root), ChooseAddressListAdapterLogic.AddressHolder {
 
-        fun bindAddress(address: WalletAddress, wallet: Wallet) {
+        override fun bindAddress(address: WalletAddress, wallet: Wallet) {
             binding.addressInformation.fillAddressInformation(address, wallet)
             binding.addressInformation.addressIndex.visibility = View.GONE
             binding.root.setOnClickListener {
@@ -83,7 +85,7 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
             }
         }
 
-        fun bindAllAddresses(wallet: Wallet) {
+        override fun bindAllAddresses(wallet: Wallet) {
             binding.addressInformation.fillWalletAddressesInformation(wallet)
             binding.root.setOnClickListener {
                 onChooseAddress(null)
@@ -92,14 +94,8 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
 
     }
 
-    private inner class DisplayAddressesAdapter(
-        val wallet: Wallet,
-        showAllAddresses: Boolean
-    ) :
+    private inner class DisplayAddressesAdapter(val adapterLogic: ChooseAddressListAdapterLogic) :
         RecyclerView.Adapter<ViewHolder>() {
-
-        val addresses = wallet.getSortedDerivedAddressesList()
-        val addAllAddresses = showAllAddresses && addresses.size > 1
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -116,19 +112,11 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            if (!addAllAddresses) {
-                val address = addresses.get(position)
-                holder.bindAddress(address, wallet)
-            } else if (position > 0) {
-                val address = addresses.get(position - 1)
-                holder.bindAddress(address, wallet)
-            } else {
-                holder.bindAllAddresses(wallet)
-            }
+            adapterLogic.bindViewHolder(holder, position)
         }
 
         override fun getItemCount(): Int {
-            return if (addAllAddresses) addresses.size + 1 else addresses.size
+            return adapterLogic.itemCount
         }
     }
 

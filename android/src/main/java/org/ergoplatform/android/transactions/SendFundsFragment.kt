@@ -15,6 +15,7 @@ import androidx.core.view.descendants
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
@@ -301,6 +302,8 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
 
             setFocusToEmptyTokenAmountInput()
         }
+
+        showPaymentRequestWarnings()
     }
 
     private fun setFocusToEmptyTokenAmountInput() {
@@ -337,7 +340,11 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
     override fun startAuthFlow(walletConfig: WalletConfig) {
         if (walletConfig.secretStorage == null) {
             // we have a read only wallet here, let's go to cold wallet support mode
-            viewModel.uiLogic.startColdWalletPayment(Preferences(requireContext()))
+            val context = requireContext()
+            viewModel.uiLogic.startColdWalletPayment(
+                Preferences(context),
+                AndroidStringProvider(context)
+            )
         } else {
             super.startAuthFlow(walletConfig)
         }
@@ -383,7 +390,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                             )
                     )
                 } else {
-                    val content = parsePaymentRequestFromQrCode(it)
+                    val content = parsePaymentRequest(it)
                     content?.let {
                         binding.tvReceiver.editText?.setText(content.address)
                         content.amount.let { amount ->
@@ -391,12 +398,21 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                                 amount
                             )
                         }
-                        viewModel.uiLogic.addTokensFromQr(content.tokens)
+                        viewModel.uiLogic.addTokensFromPaymentRequest(content.tokens)
                     }
                 }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    private fun showPaymentRequestWarnings() {
+        viewModel.uiLogic.getPaymentRequestWarnings(AndroidStringProvider(requireContext()))?.let {
+            MaterialAlertDialogBuilder(requireContext())
+                .setMessage(it)
+                .setPositiveButton(R.string.zxing_button_ok, null)
+                .show()
         }
     }
 
