@@ -73,6 +73,7 @@ class SettingsViewController : CoroutineViewController() {
                     ergoLogo,
                     title,
                     version,
+                    compiledBy,
                     moreInfo,
                     createHorizontalSeparator(),
                     fiatCurrencyContainer,
