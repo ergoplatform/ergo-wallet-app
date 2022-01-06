@@ -27,6 +27,7 @@ const val STRING_ABC_SEARCHVIEW_DESCRIPTION_VOICE = "abc_searchview_description_
 const val STRING_ABC_SHAREACTIONPROVIDER_SHARE_WITH = "abc_shareactionprovider_share_with"
 const val STRING_ABC_SHAREACTIONPROVIDER_SHARE_WITH_APPLICATION = "abc_shareactionprovider_share_with_application"
 const val STRING_ABC_TOOLBAR_COLLAPSE_DESCRIPTION = "abc_toolbar_collapse_description"
+const val STRING_ABOUT_YEAR = "about_year"
 const val STRING_APP_NAME = "app_name"
 const val STRING_APP_VERSION = "app_version"
 const val STRING_APPBAR_SCROLLING_VIEW_BEHAVIOR = "appbar_scrolling_view_behavior"

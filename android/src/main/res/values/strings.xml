@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">Ergo Wallet</string>
+    <string name="app_name" translatable="false">Ergo Wallet</string>
     <string name="title_transactions">Transactions</string>
     <string name="title_wallets">Wallets</string>
     <string name="title_settings">Settings</string>
-    <string name="format_erg">###,##0.0000</string>
-    <string name="format_erg_more_precise">###,##0.000000</string>
-    <string name="format_fiat">###,##0.00</string>
+    <string name="format_erg" translatable="false">###,##0.0000</string>
+    <string name="format_erg_more_precise" translatable="false">###,##0.000000</string>
+    <string name="format_fiat" translatable="false">###,##0.00</string>
 
     <string name="hint_password">Please enter your spending password</string>
     <string name="label_forgot_password">Forgot your password?</string>
@@ -178,7 +178,8 @@
         Scan these QR codes to proceed.</string>
 
     <!-- Settings -->
-    <string name="desc_about">Brought to you by Benjamin Schulte, 2021</string>
+    <string name="desc_about">Brought to you by Benjamin Schulte, %1s</string>
+    <string name="about_year" translatable="false">2022</string>
     <string name="desc_about_moreinfo">Licensed under <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Apache 2 License</a>\n
         This project is <a href="https://github.com/ergoplatform/ergo-wallet-app">open source software</a>\n
     Find help on <a href="https://discord.gg/kj7s7nb">Discord</a> or <a href="https://t.me/ergosupport">Telegram</a></string>
