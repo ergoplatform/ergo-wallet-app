@@ -17,9 +17,8 @@ import org.ergoplatform.android.databinding.FragmentPromptSigningDialogBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.QrPagerAdapter
 import org.ergoplatform.transactions.QR_SIZE_LIMIT
-import org.ergoplatform.transactions.coldSigninRequestToQrChunks
-import org.ergoplatform.transactions.getQrChunkPagesCount
-import org.ergoplatform.transactions.isColdSignedTxChunk
+import org.ergoplatform.transactions.coldSigningRequestToQrChunks
+import org.ergoplatform.transactions.getColdSignedTxChunk
 
 class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentPromptSigningDialogBinding? = null
@@ -39,7 +38,7 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
         val viewModel = getViewModel()
         viewModel.signingPromptData.observe(viewLifecycleOwner, {
             it?.let {
-                val qrPages = coldSigninRequestToQrChunks(it, QR_SIZE_LIMIT)
+                val qrPages = coldSigningRequestToQrChunks(it, QR_SIZE_LIMIT)
                 binding.qrCodePager.adapter = QrPagerAdapter(qrPages)
 
                 refreshButtonState()
@@ -74,9 +73,10 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
-            result.contents?.let {
-                if (isColdSignedTxChunk(it)) {
-                    if (getQrChunkPagesCount(it) > 1) {
+            result.contents?.let { qrCode ->
+                val qrChunk = getColdSignedTxChunk(qrCode)
+                qrChunk?.let {
+                    if (it.pages > 1) {
                         // TODO handle paged QR codes
                         Snackbar.make(
                             requireView(),
@@ -86,7 +86,7 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
                     } else {
                         val context = requireContext()
                         getViewModel().uiLogic.sendColdWalletSignedTx(
-                            listOf(it),
+                            listOf(qrCode),
                             Preferences(context),
                             AndroidStringProvider(context)
                         )

@@ -45,14 +45,16 @@ abstract class ColdWalletSigningUiLogic {
 
         lastErrorMessage = null
 
+        val qrChunk = getColdSigningRequestChunk(qrCodeChunk)
+
         // qr code not fitting or no qr code chunk
-        if (!isColdSigningRequestChunk(qrCodeChunk)) {
+        if (qrChunk == null) {
             lastErrorMessage = "Not a cold signing QR code"
             return null
         }
 
-        val page = getQrChunkIndex(qrCodeChunk)
-        val count = getQrChunkPagesCount(qrCodeChunk)
+        val page = qrChunk.index
+        val count = qrChunk.pages
 
         if (pagesQrCode != 0 && count != pagesQrCode) {
             lastErrorMessage = "QR code does not belong to the formerly scanned codes"
