@@ -12,6 +12,7 @@ import org.ergoplatform.signSerializedErgoTx
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SigningResult
 import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 abstract class ColdWalletSigningUiLogic {
@@ -28,24 +29,36 @@ abstract class ColdWalletSigningUiLogic {
         private set
 
     private var transactionInfo: TransactionInfo? = null
+    var lastErrorMessage: String? = null
+        private set
 
     /**
      * Adds QR code chunk when applicable
      *
-     * @return TransactionInfo when it could be built, null otherwise
+     * @return TransactionInfo when it could be built, null otherwise. In case no info is built there
+     *         might be warnings or error messages available in lastErrorMessage.
      */
     fun addQrCodeChunk(qrCodeChunk: String): TransactionInfo? {
 
-        // qr code not fitting, no qr code chunk, or we are already done? => don't add
-        if (transactionInfo != null || !isColdSigningRequestChunk(qrCodeChunk)) {
+        // are we are already done? => don't add
+        if (transactionInfo != null) {
             return transactionInfo
+        }
+
+        lastErrorMessage = null
+
+        // qr code not fitting or no qr code chunk
+        if (!isColdSigningRequestChunk(qrCodeChunk)) {
+            lastErrorMessage = "Not a cold signing QR code"
+            return null
         }
 
         val page = getQrChunkIndex(qrCodeChunk)
         val count = getQrChunkPagesCount(qrCodeChunk)
 
         if (pagesQrCode != 0 && count != pagesQrCode) {
-            return transactionInfo
+            lastErrorMessage = "QR code does not belong to the formerly scanned codes"
+            return null
         }
 
         qrCodeChunks.put(page, qrCodeChunk)
@@ -66,7 +79,9 @@ abstract class ColdWalletSigningUiLogic {
                     sr.serializedInputs
                 )
             } catch (t: Throwable) {
-
+                LogUtils.logDebug("ColdWalletSigning", "Error thrown on signing", t)
+                val message = t.message ?: t.javaClass.name
+                lastErrorMessage = "Error: $message"
             }
         }
 

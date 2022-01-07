@@ -11,30 +11,20 @@ import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.api.AndroidEncryptionManager
 import org.ergoplatform.deserializeSecrets
-import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.transactions.SigningResult
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.uilogic.transactions.ColdWalletSigningUiLogic
 
 class ColdWalletSigningViewModel : ViewModel() {
 
-    private val _transactionInfo = MutableLiveData<TransactionInfo?>()
-    val transactionInfo: LiveData<TransactionInfo?> = _transactionInfo
     private val _lockInterface = MutableLiveData<Boolean>()
     val lockInterface: LiveData<Boolean> = _lockInterface
     private val _signingResult = MutableLiveData<SigningResult?>()
     val signingResult: LiveData<SigningResult?> = _signingResult
 
-    private val uiLogic = AndroidColdWalletSigningUiLogic()
+    val uiLogic = AndroidColdWalletSigningUiLogic()
     val wallet get() = uiLogic.wallet
     val signedQrCode get() = uiLogic.signedQrCode
-    val pagesQrCode get() = uiLogic.pagesQrCode
-    val pagesAdded get() = uiLogic.pagesAdded
-
-    fun addQrCodeChunk(qrCodeChunk: String) {
-        val ti = uiLogic.addQrCodeChunk(qrCodeChunk)
-        _transactionInfo.postValue(ti)
-    }
 
     fun setWalletId(walletId: Int, ctx: Context) {
         uiLogic.setWalletId(walletId, RoomWalletDbProvider(AppDatabase.getInstance(ctx)))

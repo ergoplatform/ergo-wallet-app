@@ -213,6 +213,20 @@
                         android:gravity="center"
                         tools:text="1 of 2" />
 
+                    <TextView
+                        android:id="@+id/label_error_message"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                        android:layout_marginTop="@dimen/half_horizontal_margin"
+                        android:gravity="center"
+                        android:textColor="@color/primary"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        tools:text="Error message"
+                        tools:visibility="visible" />
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_scan_more"
                         style="?attr/materialButtonStyle"
