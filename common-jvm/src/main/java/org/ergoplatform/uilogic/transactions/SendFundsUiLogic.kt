@@ -5,8 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.*
-import org.ergoplatform.android.transactions.buildColdSigningRequest
-import org.ergoplatform.android.transactions.coldSigningResponseFromQrChunks
+import org.ergoplatform.transactions.buildColdSigningRequest
+import org.ergoplatform.transactions.coldSigningResponseFromQrChunks
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters

@@ -1,9 +1,6 @@
-package org.ergoplatform.android.transactions
+package org.ergoplatform.transactions
 
-import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import com.google.gson.*
 import org.ergoplatform.ErgoBox
 import org.ergoplatform.deserializeErgobox
 import org.ergoplatform.deserializeUnsignedTx
@@ -15,8 +12,6 @@ import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.InputInfo
 import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.explorer.client.model.TransactionInfo
-import org.ergoplatform.transactions.PromptSigningResult
-import org.ergoplatform.transactions.SigningResult
 import org.ergoplatform.utils.Base64Coder
 import scala.Tuple2
 import scala.collection.JavaConversions
@@ -32,7 +27,7 @@ private const val JSON_FIELD_INPUTS = "inputs"
  */
 fun buildColdSigningRequest(data: PromptSigningResult): String? {
     if (data.success) {
-        val gson = Gson()
+        val gson = GsonBuilder().disableHtmlEscaping().create()
         val root = JsonObject()
         root.addProperty(JSON_FIELD_REDUCED_TX, String(Base64Coder.encode(data.serializedTx!!)))
         root.addProperty(JSON_FIELD_SENDER, data.address)
@@ -49,7 +44,7 @@ fun buildColdSigningRequest(data: PromptSigningResult): String? {
 
 fun buildColdSigningResponse(data: SigningResult): String? {
     if (data.success) {
-        val gson = Gson()
+        val gson = GsonBuilder().disableHtmlEscaping().create()
         val root = JsonObject()
         root.addProperty(JSON_FIELD_SIGNED_TX, String(Base64Coder.encode(data.serializedTx!!)))
         return gson.toJson(root)
@@ -237,25 +232,27 @@ fun buildTransactionInfoFromReduced(
         val boxid = ErgoId(it.boxId()).toString()
         val inputInfo = InputInfo()
         inputInfo.boxId = boxid
-        inputBoxes.get(boxid)?.let {
-            inputInfo.address = Address.fromErgoTree(it.ergoTree(), getErgoNetworkType()).toString()
-            inputInfo.value = it.value()
-            getAssetInstanceInfos(it.additionalTokens()).forEach {
-                inputInfo.addAssetsItem(it)
+        inputBoxes.get(boxid)?.let { ergoBox ->
+            inputInfo.address =
+                Address.fromErgoTree(ergoBox.ergoTree(), getErgoNetworkType()).toString()
+            inputInfo.value = ergoBox.value()
+            getAssetInstanceInfos(ergoBox.additionalTokens()).forEach { assetsItem ->
+                inputInfo.addAssetsItem(assetsItem)
             }
-        }
+        } ?: throw java.lang.IllegalArgumentException("No information for input box $boxid")
         retVal.addInputsItem(inputInfo)
     }
 
-    JavaConversions.seqAsJavaList(unsignedTx.outputCandidates())!!.forEach {
+    JavaConversions.seqAsJavaList(unsignedTx.outputCandidates())!!.forEach { ergoBoxCandidate ->
         val outputInfo = OutputInfo()
 
-        outputInfo.address = Address.fromErgoTree(it.ergoTree(), getErgoNetworkType()).toString()
-        outputInfo.value = it.value()
+        outputInfo.address =
+            Address.fromErgoTree(ergoBoxCandidate.ergoTree(), getErgoNetworkType()).toString()
+        outputInfo.value = ergoBoxCandidate.value()
 
         retVal.addOutputsItem(outputInfo)
 
-        getAssetInstanceInfos(it.additionalTokens()).forEach {
+        getAssetInstanceInfos(ergoBoxCandidate.additionalTokens()).forEach {
             outputInfo.addAssetsItem(it)
         }
     }
@@ -264,8 +261,8 @@ fun buildTransactionInfoFromReduced(
 
 }
 
-private fun getAssetInstanceInfos(tokens: Coll<Tuple2<ByteArray, Any>>): List<AssetInstanceInfo> {
-    val tokens = Iso.isoTokensListToPairsColl().from(tokens)
+private fun getAssetInstanceInfos(tokensColl: Coll<Tuple2<ByteArray, Any>>): List<AssetInstanceInfo> {
+    val tokens = Iso.isoTokensListToPairsColl().from(tokensColl)
     return tokens.map {
         val tokenInfo = AssetInstanceInfo()
         tokenInfo.amount = it.value

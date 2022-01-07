@@ -32,6 +32,7 @@ import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses

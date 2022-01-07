@@ -16,6 +16,10 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPromptSigningDialogBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.QrPagerAdapter
+import org.ergoplatform.transactions.QR_SIZE_LIMIT
+import org.ergoplatform.transactions.coldSigninRequestToQrChunks
+import org.ergoplatform.transactions.getQrChunkPagesCount
+import org.ergoplatform.transactions.isColdSignedTxChunk
 
 class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentPromptSigningDialogBinding? = null
