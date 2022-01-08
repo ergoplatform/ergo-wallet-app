@@ -47,7 +47,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
         super.onViewCreated(view, savedInstanceState)
         val viewModel = viewModel
 
-        args.qrCode?.let { addQrCodeChunk(it) }
+        addQrCodeChunk(args.qrCode)
         viewModel.setWalletId(args.walletId, requireContext())
 
         viewModel.lockInterface.observe(viewLifecycleOwner, {
@@ -115,8 +115,10 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
         })
     }
 
-    private fun addQrCodeChunk(qrCode: String) {
-        val transactionInfo = viewModel.uiLogic.addQrCodeChunk(qrCode)
+    private fun addQrCodeChunk(qrCode: String?) {
+        qrCode?.let { viewModel.uiLogic.addQrCodeChunk(qrCode) }
+
+        val transactionInfo = viewModel.uiLogic.transactionInfo
 
         // don't show transaction info when we already have a signing result
         if (viewModel.signedQrCode != null)
@@ -131,7 +133,8 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             )
             binding.cardScanMore.visibility = View.VISIBLE
             val errorMessage = viewModel.uiLogic.lastErrorMessage
-            binding.labelErrorMessage.visibility = if (errorMessage.isNullOrBlank()) View.GONE else View.VISIBLE
+            binding.labelErrorMessage.visibility =
+                if (errorMessage.isNullOrBlank()) View.GONE else View.VISIBLE
             binding.labelErrorMessage.text = errorMessage
         }
 

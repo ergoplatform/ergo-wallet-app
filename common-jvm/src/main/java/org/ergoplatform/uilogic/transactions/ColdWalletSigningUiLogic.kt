@@ -26,7 +26,8 @@ abstract class ColdWalletSigningUiLogic {
     var wallet: Wallet? = null
         private set
 
-    private var transactionInfo: TransactionInfo? = null
+    var transactionInfo: TransactionInfo? = null
+        private set
     var lastErrorMessage: String? = null
         private set
 
