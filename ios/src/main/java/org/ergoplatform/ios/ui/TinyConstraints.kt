@@ -389,6 +389,25 @@ fun UIView.wrapInVerticalScrollView(): UIScrollView {
     return scrollView
 }
 
+fun UIView.wrapInHorizontalPager(width: Double): UIScrollView {
+    val scrollView = UIScrollView(CGRect.Zero())
+    scrollView.addSubview(this)
+    scrollView.isPagingEnabled = true
+    scrollView.fixedWidth(width)
+    this.setTranslatesAutoresizingMaskIntoConstraints(false)
+    NSLayoutConstraint.activateConstraints(
+        NSArray(
+            this.heightAnchor.equalTo(scrollView.heightAnchor),
+            this.trailingAnchor.equalTo(scrollView.trailingAnchor),
+            this.leadingAnchor.equalTo(scrollView.leadingAnchor),
+            this.topAnchor.equalTo(scrollView.topAnchor),
+            this.bottomAnchor.equalTo(scrollView.bottomAnchor),
+        )
+    )
+
+    return scrollView
+}
+
 fun createHorizontalSeparator(): UIView {
     val separator = UIView(CGRect.Zero())
     separator.backgroundColor = UIColor.systemGray()

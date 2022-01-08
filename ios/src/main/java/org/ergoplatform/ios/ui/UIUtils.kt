@@ -4,6 +4,7 @@ import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.Main
 import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
 import org.robovm.apple.coregraphics.CGAffineTransform
+import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.coreimage.CIFilter
 import org.robovm.apple.foundation.*
@@ -14,6 +15,7 @@ import org.robovm.objc.Selector
 const val MAX_WIDTH = 500.0
 const val DEFAULT_MARGIN = 6.0
 const val DEFAULT_TEXT_FIELD_HEIGHT = 40.0
+const val DEFAULT_QR_CODE_SIZE = 280.0
 
 const val IMAGE_WALLET = "rectangle.on.rectangle.angled"
 val IMAGE_SETTINGS = if (Foundation.getMajorSystemVersion() >= 14) "gearshape" else "gear"
@@ -64,7 +66,7 @@ fun UIViewController.shareText(text: String, sourceView: UIView) {
     presentViewController(share, true, null)
 }
 
-fun UIImageView.setQrCode(data: String, size: Int) {
+fun UIImageView.setQrCode(data: String, size: Double) {
     val nsString = NSString(data).toData(NSStringEncoding.ASCII)
     val filter = CIFilter("CIQRCodeGenerator")
     filter.keyValueCoder.setValue("inputMessage", nsString)
@@ -78,8 +80,6 @@ fun UIImageView.setQrCode(data: String, size: Int) {
         val output = unscaledOutput.newImageByApplyingTransform(transform)
         val image = UIImage(output)
         setImage(image)
-        contentMode = UIViewContentMode.ScaleAspectFit
-        backgroundColor = UIColor.systemRed()
     }
 }
 
@@ -262,3 +262,9 @@ fun buildSimpleAlertController(title: String, message: String, texts: I18NBundle
         ) {})
     return uac
 }
+
+var UIScrollView.page
+    get() = (contentOffset.x / frame.size.width).toInt()
+    set(value) {
+        setContentOffset(CGPoint(frame.size.width * value.toDouble(), contentOffset.y), true)
+    }

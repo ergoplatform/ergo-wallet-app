@@ -3,10 +3,14 @@ package org.ergoplatform.ios.transactions
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.*
+import org.ergoplatform.ios.IOSPreferences
 import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
+import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.transactions.QR_SIZE_LIMIT
 import org.ergoplatform.transactions.TransactionResult
+import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.utils.LogUtils
@@ -276,14 +280,14 @@ class SendFundsViewController(
         }
 
         if (checkResponse.canPay) {
-            startAuthFlow(uiLogic.wallet!!.walletConfig) { mnemonic ->
-                val appDelegate = getAppDelegate()
-                uiLogic.startPaymentWithMnemonicAsync(
-                    mnemonic, appDelegate.prefs, IosStringProvider(
-                        appDelegate.texts
-                    )
-                )
-            }
+            val walletConfig = uiLogic.wallet!!.walletConfig
+            val appDelegate = getAppDelegate()
+            val stringProvider = IosStringProvider(appDelegate.texts)
+            walletConfig.secretStorage?.let {
+                startAuthFlow(walletConfig) { mnemonic ->
+                    uiLogic.startPaymentWithMnemonicAsync(mnemonic, appDelegate.prefs, stringProvider)
+                }
+            } ?: uiLogic.startColdWalletPayment(appDelegate.prefs, stringProvider)
         }
     }
 
@@ -304,7 +308,6 @@ class SendFundsViewController(
                 if (txDoneView == null) {
                     walletTitle.text = texts.format(STRING_LABEL_SEND_FROM, wallet!!.walletConfig.displayName)
                     readOnlyHint.isHidden = uiLogic.wallet!!.walletConfig.secretStorage != null
-                    sendButton.isEnabled = readOnlyHint.isHidden // TODO cold wallet
                     scrollView.isHidden = false
                 }
             }
@@ -442,8 +445,20 @@ class SendFundsViewController(
             }
         }
 
-        override fun notifyHasSigningPromptData(signingPrompt: String?) {
-            TODO("Cold wallet not yet implemented")
+        override fun notifyHasSigningPromptData(signingPrompt: String) {
+            runOnMainThread {
+                // TODO cold wallet open signing prompt dialog
+                presentViewController(
+                    SigningPromptViewController(
+                        coldSigningRequestToQrChunks(
+                            signingPrompt,
+                            QR_SIZE_LIMIT
+                        ),
+                        uiLogic
+                    ), true
+                ) {}
+            }
+
         }
     }
 }

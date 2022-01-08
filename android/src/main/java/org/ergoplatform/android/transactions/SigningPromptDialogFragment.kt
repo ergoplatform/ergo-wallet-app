@@ -77,7 +77,7 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
                 val qrChunk = getColdSignedTxChunk(qrCode)
                 qrChunk?.let {
                     if (it.pages > 1) {
-                        // TODO handle paged QR codes
+                        // TODO cold wallet handle paged QR codes
                         Snackbar.make(
                             requireView(),
                             R.string.error_qr_pages_num,
