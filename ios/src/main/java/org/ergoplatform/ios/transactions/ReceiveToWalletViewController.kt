@@ -63,7 +63,9 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
         }
         navigationController.topViewController.navigationItem.rightBarButtonItem = uiBarButtonItem
 
-        qrCode = UIImageView(CGRect.Zero())
+        qrCode = UIImageView(CGRect.Zero()).apply {
+            contentMode = UIViewContentMode.ScaleAspectFit
+        }
         val qrCodeContainer = UIView()
         qrCodeContainer.addSubview(qrCode)
         addressLabel = Headline2Label()
@@ -102,7 +104,8 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
         stackView.setCustomSpacing(DEFAULT_MARGIN * 2, qrCodeContainer)
         stackView.setCustomSpacing(DEFAULT_MARGIN * 2, addressLabel)
         val scrollView = container.wrapInVerticalScrollView()
-        qrCode.fixedWidth(300.0).fixedHeight(300.0).centerHorizontal().topToSuperview().bottomToSuperview()
+        qrCode.fixedWidth(DEFAULT_QR_CODE_SIZE).fixedHeight(DEFAULT_QR_CODE_SIZE).centerHorizontal().topToSuperview()
+            .bottomToSuperview()
         container.addSubview(stackView)
         stackView.topToSuperview(topInset = DEFAULT_MARGIN)
             .widthMatchesSuperview(inset = DEFAULT_MARGIN, maxWidth = MAX_WIDTH)
@@ -136,7 +139,7 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
 
     private fun refreshQrCode() {
         uiLogic.getTextToShare(getInputAmount(), getInputPurpose())?.let {
-            qrCode.setQrCode(it, 300)
+            qrCode.setQrCode(it, DEFAULT_QR_CODE_SIZE)
         }
     }
 

@@ -141,7 +141,7 @@ class SendFundsViewModel : ViewModel() {
             _txWorkDoneLiveData.postValue(txResult)
         }
 
-        override fun notifyHasSigningPromptData(signingPrompt: String?) {
+        override fun notifyHasSigningPromptData(signingPrompt: String) {
             _signingPromptData.postValue(signingPrompt)
         }
     }

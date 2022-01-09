@@ -224,7 +224,9 @@ abstract class SendFundsUiLogic {
                 }
                 notifyUiLocked(false)
                 if (serializedTx.success) {
-                    notifyHasSigningPromptData(buildColdSigningRequest(serializedTx))
+                    buildColdSigningRequest(serializedTx)?.let {
+                        notifyHasSigningPromptData(it)
+                    }
                 }
                 notifyHasErgoTxResult(serializedTx)
             }
@@ -368,7 +370,7 @@ abstract class SendFundsUiLogic {
     abstract fun notifyUiLocked(locked: Boolean)
     abstract fun notifyHasTxId(txId: String)
     abstract fun notifyHasErgoTxResult(txResult: TransactionResult)
-    abstract fun notifyHasSigningPromptData(signingPrompt: String?)
+    abstract fun notifyHasSigningPromptData(signingPrompt: String)
 
     data class CheckCanPayResponse(
         val canPay: Boolean,

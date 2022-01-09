@@ -20,6 +20,10 @@ import org.ergoplatform.transactions.QR_SIZE_LIMIT
 import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.transactions.getColdSignedTxChunk
 
+/**
+ * SigningPromptDialogFragment is shown when user makes a transaction on a read-only address, presenting QR code(s)
+ * to scan with a cold wallet device.
+ */
 class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentPromptSigningDialogBinding? = null
     private val binding get() = _binding!!
@@ -36,14 +40,14 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val viewModel = getViewModel()
-        viewModel.signingPromptData.observe(viewLifecycleOwner, {
+        viewModel.signingPromptData.observe(viewLifecycleOwner) {
             it?.let {
                 val qrPages = coldSigningRequestToQrChunks(it, QR_SIZE_LIMIT)
                 binding.qrCodePager.adapter = QrPagerAdapter(qrPages)
 
                 refreshButtonState()
             }
-        })
+        }
         binding.qrCodePager.registerOnPageChangeCallback(object :
             ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
@@ -77,7 +81,7 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
                 val qrChunk = getColdSignedTxChunk(qrCode)
                 qrChunk?.let {
                     if (it.pages > 1) {
-                        // TODO handle paged QR codes
+                        // TODO cold wallet handle paged QR codes
                         Snackbar.make(
                             requireView(),
                             R.string.error_qr_pages_num,
