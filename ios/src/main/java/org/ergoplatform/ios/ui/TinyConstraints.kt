@@ -209,14 +209,22 @@ fun UIView.rightToRightOf(
 
 fun UIView.bottomToSuperview(
     useSafeArea: Boolean = false,
-    bottomInset: Double = 0.0
+    bottomInset: Double = 0.0,
+    canBeLess: Boolean = false
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
-    val topConstraint = this.bottomAnchor.equalTo(
-        getSuperviewLayoutGuide(useSafeArea).bottomAnchor,
-        bottomInset * -1.0
-    )
+    val topConstraint =
+        if (canBeLess)
+            this.bottomAnchor.lessThanOrEqualTo(
+                getSuperviewLayoutGuide(useSafeArea).bottomAnchor,
+                bottomInset * -1.0
+            )
+        else
+            this.bottomAnchor.equalTo(
+                getSuperviewLayoutGuide(useSafeArea).bottomAnchor,
+                bottomInset * -1.0
+            )
     NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
 
     return this

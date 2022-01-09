@@ -50,7 +50,10 @@ class SigningPromptViewController(
 
         currPageLabel = Headline2Label()
 
-        description = Body1Label()
+        description = Body1Label().apply {
+            // make this compress as first (iPhone SE)
+            setContentCompressionResistancePriority(500f, UILayoutConstraintAxis.Vertical)
+        }
 
         val texts = getAppDelegate().texts
         nextButton = PrimaryButton(texts.get(STRING_BUTTON_NEXT))
@@ -102,9 +105,12 @@ class SigningPromptViewController(
         pager.topToBottomOf(closeButton, DEFAULT_MARGIN).centerHorizontal()
         currPageLabel.topToBottomOf(pager, DEFAULT_MARGIN).centerHorizontal()
         descContainer.topToBottomOf(currPageLabel, DEFAULT_MARGIN * 3).widthMatchesSuperview(maxWidth = MAX_WIDTH)
+            .bottomToSuperview(bottomInset = DEFAULT_MARGIN)
         description.topToSuperview().widthMatchesSuperview(inset = DEFAULT_MARGIN)
         nextButton.topToBottomOf(description, DEFAULT_MARGIN * 3).centerHorizontal().fixedWidth(120.0)
-        scanButton.topToTopOf(nextButton).centerHorizontal().fixedWidth(200.0).bottomToSuperview()
+            .bottomToSuperview(canBeLess = true)
+        scanButton.topToTopOf(nextButton).centerHorizontal().fixedWidth(200.0)
+            .bottomToSuperview(canBeLess = true)
 
         pageChanged(0)
     }
