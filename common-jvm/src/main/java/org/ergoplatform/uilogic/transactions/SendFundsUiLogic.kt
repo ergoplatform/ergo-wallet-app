@@ -339,6 +339,8 @@ abstract class SendFundsUiLogic {
             }
 
             notifyTokensChosenChanged()
+        } else if (paymentRequestWarnings.isNotEmpty()) {
+            notifyTokensChosenChanged()
         }
     }
 
