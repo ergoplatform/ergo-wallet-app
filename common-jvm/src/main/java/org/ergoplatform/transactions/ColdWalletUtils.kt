@@ -96,8 +96,8 @@ fun parseColdSigningResponse(qrData: String): SigningResult {
     }
 }
 
-// TODO cold wallet make this configurable for QR code scan problems
-const val QR_SIZE_LIMIT = 2900
+const val QR_DATA_LENGTH_LIMIT = 2000
+const val QR_DATA_LENGTH_LOW_RES = 400
 private const val QR_PROPERTY_COLD_SIGNING_REQUEST = "CSR"
 private const val QR_PROPERTY_COLD_SIGNED_TX = "CSTX"
 private const val QR_PROPERTY_INDEX = "p"

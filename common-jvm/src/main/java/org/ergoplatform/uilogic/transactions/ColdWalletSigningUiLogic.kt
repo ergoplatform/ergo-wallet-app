@@ -19,7 +19,7 @@ abstract class ColdWalletSigningUiLogic {
     var pagesQrCode = 0
     val pagesAdded get() = qrCodeChunks.size
     private val qrCodeChunks = HashMap<Int, String>()
-    var signedQrCode: List<String>? = null
+    var signedQrCode: String? = null
         private set
     private var signingRequest: PromptSigningResult? = null
 
@@ -107,12 +107,7 @@ abstract class ColdWalletSigningUiLogic {
                         signingRequest.serializedTx!!, mnemonic, "",
                         derivedAddresses, texts
                     )
-                    signedQrCode = buildColdSigningResponse(ergoTxResult)?.let {
-                        coldSigningResponseToQrChunks(
-                            it,
-                            QR_SIZE_LIMIT
-                        )
-                    }
+                    signedQrCode = buildColdSigningResponse(ergoTxResult)
                 }
                 notifyUiLocked(false)
 

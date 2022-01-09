@@ -6,7 +6,7 @@ import org.ergoplatform.*
 import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
-import org.ergoplatform.transactions.QR_SIZE_LIMIT
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.uilogic.*
@@ -444,12 +444,13 @@ class SendFundsViewController(
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
+            // TODO cold wallet make size limit switchable for QR code scan problems
             runOnMainThread {
                 presentViewController(
                     SigningPromptViewController(
                         coldSigningRequestToQrChunks(
                             signingPrompt,
-                            QR_SIZE_LIMIT
+                            QR_DATA_LENGTH_LIMIT
                         ),
                         uiLogic
                     ), true

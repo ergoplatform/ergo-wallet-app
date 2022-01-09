@@ -16,7 +16,8 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPromptSigningDialogBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.QrPagerAdapter
-import org.ergoplatform.transactions.QR_SIZE_LIMIT
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
 import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.transactions.getColdSignedTxChunk
 
@@ -27,6 +28,8 @@ import org.ergoplatform.transactions.getColdSignedTxChunk
 class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentPromptSigningDialogBinding? = null
     private val binding get() = _binding!!
+
+    private var scaleDown = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,10 +45,7 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
         val viewModel = getViewModel()
         viewModel.signingPromptData.observe(viewLifecycleOwner) {
             it?.let {
-                val qrPages = coldSigningRequestToQrChunks(it, QR_SIZE_LIMIT)
-                binding.qrCodePager.adapter = QrPagerAdapter(qrPages)
-
-                refreshButtonState()
+                setQrCodePagerData(it)
             }
         }
         binding.qrCodePager.registerOnPageChangeCallback(object :
@@ -61,6 +61,24 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
         binding.buttonScanNextQr.setOnClickListener {
             binding.qrCodePager.currentItem = binding.qrCodePager.currentItem + 1
         }
+        binding.switchResolution.setOnClickListener {
+            viewModel.signingPromptData.value?.let {
+                scaleDown = !scaleDown
+                setQrCodePagerData(it)
+            }
+        }
+    }
+
+    private fun setQrCodePagerData(data: String) {
+        binding.switchResolution.visibility =
+            if (data.length > QR_DATA_LENGTH_LOW_RES) View.VISIBLE else View.GONE
+        val qrPages = coldSigningRequestToQrChunks(
+            data,
+            if (scaleDown) QR_DATA_LENGTH_LOW_RES else QR_DATA_LENGTH_LIMIT
+        )
+        binding.qrCodePager.adapter = QrPagerAdapter(qrPages)
+
+        refreshButtonState()
     }
 
     private fun refreshButtonState() {

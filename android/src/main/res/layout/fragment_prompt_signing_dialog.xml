@@ -11,6 +11,16 @@
         android:orientation="vertical"
         tools:background="?attr/colorSurface">
 
+        <ImageView
+            android:id="@+id/switch_resolution"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_margin="@dimen/activity_vertical_margin"
+            android:contentDescription="@null"
+            android:padding="@dimen/half_horizontal_margin"
+            android:src="@drawable/ic_burst_mode_24" />
+
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/qr_code_pager"
             android:layout_width="match_parent"

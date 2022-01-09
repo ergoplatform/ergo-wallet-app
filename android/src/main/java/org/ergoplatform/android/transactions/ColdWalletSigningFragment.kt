@@ -18,6 +18,9 @@ import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
+import org.ergoplatform.transactions.coldSigningResponseToQrChunks
 import org.ergoplatform.transactions.reduceBoxes
 
 /**
@@ -29,6 +32,8 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
     val binding get() = _binding!!
 
     private val args: ColdWalletSigningFragmentArgs by navArgs()
+
+    private var scaleDown = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,8 +68,9 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
                 binding.cardSigningResult.visibility = View.VISIBLE
                 binding.cardScanMore.visibility = View.GONE
 
-                binding.qrCodePager.adapter = QrPagerAdapter(viewModel.signedQrCode!!)
-                refreshButtonState()
+                binding.switchResolution.visibility =
+                    if (viewModel.signedQrCode!!.length > QR_DATA_LENGTH_LOW_RES) View.VISIBLE else View.GONE
+                setQrData()
 
             } else {
                 binding.cardSigningResult.visibility = View.GONE
@@ -98,6 +104,11 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             binding.qrCodePager.currentItem = binding.qrCodePager.currentItem + 1
         }
 
+        binding.switchResolution.setOnClickListener {
+            scaleDown = !scaleDown
+            setQrData()
+        }
+
         binding.buttonDismiss.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -113,6 +124,18 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
                 refreshButtonState()
             }
         })
+    }
+
+    private fun setQrData() {
+        viewModel.signedQrCode?.let {
+            binding.qrCodePager.adapter = QrPagerAdapter(
+                coldSigningResponseToQrChunks(
+                    it,
+                    if (scaleDown) QR_DATA_LENGTH_LOW_RES else QR_DATA_LENGTH_LIMIT
+                )
+            )
+            refreshButtonState()
+        }
     }
 
     private fun addQrCodeChunk(qrCode: String?) {
