@@ -3,11 +3,9 @@ package org.ergoplatform.ios.transactions
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.*
-import org.ergoplatform.ios.IOSPreferences
 import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
-import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.QR_SIZE_LIMIT
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.transactions.coldSigningRequestToQrChunks
@@ -447,7 +445,6 @@ class SendFundsViewController(
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
             runOnMainThread {
-                // TODO cold wallet open signing prompt dialog
                 presentViewController(
                     SigningPromptViewController(
                         coldSigningRequestToQrChunks(
