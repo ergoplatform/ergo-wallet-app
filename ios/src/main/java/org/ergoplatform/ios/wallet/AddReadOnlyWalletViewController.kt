@@ -45,7 +45,7 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
             }
 
             setCustomActionField(getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small)!!) {
-                presentViewController(QrScannerViewController {
+                presentViewController(QrScannerViewController(invokeAfterDismissal = false) {
                     val content = parsePaymentRequest(it)
                     content?.let { text = content.address }
                 }, true) {}

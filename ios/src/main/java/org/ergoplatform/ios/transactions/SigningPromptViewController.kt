@@ -61,25 +61,31 @@ class SigningPromptViewController(
 
         scanButton = PrimaryButton(texts.get(STRING_BUTTON_SCAN_SIGNED_TX))
         scanButton.addOnTouchUpInsideListener { _, _ ->
-            presentViewController(QrScannerViewController { qrCode ->
-                getColdSignedTxChunk(qrCode)?.let {
-                    if (it.pages > 1) {
-                        // TODO cold wallet handle paged QR codes
-                        val uac =
-                            buildSimpleAlertController("", texts.get(STRING_ERROR_QR_PAGES_NUM), getAppDelegate().texts)
-                        presentViewController(uac, false) {}
-                    } else {
-                        dismissViewController(false) {
-                            val delegate = getAppDelegate()
-                            uiLogic.sendColdWalletSignedTx(
-                                listOf(qrCode),
-                                delegate.prefs,
-                                IosStringProvider(delegate.texts)
-                            )
+            presentViewController(
+                QrScannerViewController(dismissAnimated = false) { qrCode ->
+                    getColdSignedTxChunk(qrCode)?.let {
+                        if (it.pages > 1) {
+                            // TODO cold wallet handle paged QR codes
+                            val uac =
+                                buildSimpleAlertController(
+                                    "",
+                                    texts.get(STRING_ERROR_QR_PAGES_NUM),
+                                    getAppDelegate().texts
+                                )
+                            presentViewController(uac, false) {}
+                        } else {
+                            dismissViewController(false) {
+                                val delegate = getAppDelegate()
+                                uiLogic.sendColdWalletSignedTx(
+                                    listOf(qrCode),
+                                    delegate.prefs,
+                                    IosStringProvider(delegate.texts)
+                                )
+                            }
                         }
                     }
-                }
-            }, true) {}
+                }, true
+            ) {}
         }
 
         descContainer = UIView(CGRect.Zero()).apply {
