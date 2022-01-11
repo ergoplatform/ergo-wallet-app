@@ -16,6 +16,8 @@ import org.ergoplatform.wallet.getSortedDerivedAddressesList
 abstract class ColdWalletSigningUiLogic {
     abstract val coroutineScope: CoroutineScope
 
+    var state = State.SCANNING
+        private set
     var pagesQrCode = 0
     val pagesAdded get() = qrCodeChunks.size
     private val qrCodeChunks = HashMap<Int, String>()
@@ -66,6 +68,7 @@ abstract class ColdWalletSigningUiLogic {
         pagesQrCode = count
 
         transactionInfo = buildRequestWhenApplicable()
+        transactionInfo?.let { state = State.WAITING_TO_CONFIRM }
 
         return transactionInfo
     }
@@ -111,6 +114,7 @@ abstract class ColdWalletSigningUiLogic {
                 }
                 notifyUiLocked(false)
 
+                state = State.PRESENT_RESULT
                 notifySigningResult(ergoTxResult)
             }
 
@@ -121,4 +125,5 @@ abstract class ColdWalletSigningUiLogic {
     abstract fun notifyUiLocked(locked: Boolean)
     abstract fun notifySigningResult(ergoTxResult: SigningResult)
 
+    enum class State { SCANNING, WAITING_TO_CONFIRM, PRESENT_RESULT }
 }

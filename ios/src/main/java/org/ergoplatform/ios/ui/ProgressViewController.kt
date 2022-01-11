@@ -25,4 +25,21 @@ class ProgressViewController : UIViewController() {
         isModalInPresentation = true
         vc.presentViewController(this, false) {}
     }
+
+    class ProgressViewControllerPresenter(private val vc: UIViewController) {
+        private var progressViewController: ProgressViewController? = null
+
+        fun setUiLocked(locked: Boolean) {
+            if (locked) {
+                if (progressViewController == null) {
+                    forceDismissKeyboard()
+                    progressViewController = ProgressViewController()
+                    progressViewController?.presentModalAbove(vc)
+                }
+            } else {
+                progressViewController?.dismissViewController(false) {}
+                progressViewController = null
+            }
+        }
+    }
 }

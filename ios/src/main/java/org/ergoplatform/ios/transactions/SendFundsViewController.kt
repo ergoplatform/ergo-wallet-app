@@ -57,7 +57,7 @@ class SendFundsViewController(
         uiBarButtonItem.setOnClickListener {
             presentViewController(QrScannerViewController {
                 uiLogic.qrCodeScanned(it, { data, walletId ->
-                    // TODO cold wallet navigate to signing screen
+                    navigationController.pushViewController(ColdWalletSigningViewController(data, walletId), true)
                 }, { address, amount ->
                     inputReceiver.text = address
                     inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
@@ -290,7 +290,8 @@ class SendFundsViewController(
     }
 
     inner class IosSendFundsUiLogic : SendFundsUiLogic() {
-        private var progressViewController: ProgressViewController? = null
+        private val progressViewController =
+            ProgressViewController.ProgressViewControllerPresenter(this@SendFundsViewController)
 
         override val coroutineScope: CoroutineScope
             get() = viewControllerScope
@@ -361,16 +362,7 @@ class SendFundsViewController(
 
         override fun notifyUiLocked(locked: Boolean) {
             runOnMainThread {
-                if (locked) {
-                    if (progressViewController == null) {
-                        forceDismissKeyboard()
-                        progressViewController = ProgressViewController()
-                        progressViewController?.presentModalAbove(this@SendFundsViewController)
-                    }
-                } else {
-                    progressViewController?.dismissViewController(false) {}
-                    progressViewController = null
-                }
+                progressViewController.setUiLocked(true)
             }
         }
 
