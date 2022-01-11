@@ -56,16 +56,13 @@ class SendFundsViewController(
         )
         uiBarButtonItem.setOnClickListener {
             presentViewController(QrScannerViewController {
-                // TODO check cold wallet QR
-                val content = parsePaymentRequest(it)
-                content?.let {
-                    inputReceiver.text = content.address
+                uiLogic.qrCodeScanned(it, { data, walletId ->
+                    // TODO cold wallet navigate to signing screen
+                }, { address, amount ->
+                    inputReceiver.text = address
                     inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
-                    content.amount.let { amount ->
-                        if (amount.nanoErgs > 0) setInputAmount(amount)
-                    }
-                    uiLogic.addTokensFromPaymentRequest(content.tokens)
-                }
+                    amount?.let { setInputAmount(amount) }
+                })
             }, true) {}
         }
         navigationController.topViewController.navigationItem.rightBarButtonItem = uiBarButtonItem

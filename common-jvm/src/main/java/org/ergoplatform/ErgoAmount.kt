@@ -48,6 +48,10 @@ class ErgoAmount(val nanoErgs: Long) {
     operator fun minus(other: ErgoAmount): ErgoAmount {
         return ErgoAmount(this.nanoErgs - other.nanoErgs)
     }
+
+    fun isZero(): Boolean {
+        return nanoErgs == 0L
+    }
 }
 
 fun String.toErgoAmount(): ErgoAmount? {
