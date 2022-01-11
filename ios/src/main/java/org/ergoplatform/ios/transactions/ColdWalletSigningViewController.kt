@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.SigningResult
+import org.ergoplatform.transactions.coldSigningResponseToQrChunks
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.ColdWalletSigningUiLogic
@@ -18,6 +19,7 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
 
     private val scanningContainer = ScanningContainer()
     private val transactionContainer = TransactionContainer()
+    private val signedQrCodesContainer = SignedQrCodeContainer()
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -34,9 +36,11 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         view.addSubview(scrollView)
         scrollingContainer.addSubview(scanningContainer)
         scrollingContainer.addSubview(transactionContainer)
+        scrollingContainer.addSubview(signedQrCodesContainer)
 
         scanningContainer.edgesToSuperview(maxWidth = MAX_WIDTH)
         transactionContainer.edgesToSuperview(maxWidth = MAX_WIDTH)
+        signedQrCodesContainer.edgesToSuperview(maxWidth = MAX_WIDTH)
         scrollView.edgesToSuperview()
     }
 
@@ -57,12 +61,13 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
             transactionContainer.bindTransaction(it)
         }
 
-        refreshState()
+        refreshUiState()
     }
 
-    private fun refreshState() {
+    private fun refreshUiState() {
         scanningContainer.isHidden = uiLogic.state != ColdWalletSigningUiLogic.State.SCANNING
         transactionContainer.isHidden = uiLogic.state != ColdWalletSigningUiLogic.State.WAITING_TO_CONFIRM
+        signedQrCodesContainer.isHidden = uiLogic.state != ColdWalletSigningUiLogic.State.PRESENT_RESULT
     }
 
     private fun scanNext() {
@@ -182,6 +187,16 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         }
     }
 
+    inner class SignedQrCodeContainer : PagedQrCodeContainer(texts, texts.get(STRING_LABEL_DISMISS)) {
+        override fun calcChunksFromRawData(rawData: String, limit: Int): List<String> {
+            return coldSigningResponseToQrChunks(rawData, limit)
+        }
+
+        override fun continueButtonPressed() {
+            navigationController.popViewController(true)
+        }
+    }
+
     inner class IosUiLogic : ColdWalletSigningUiLogic() {
         private val progressViewController =
             ProgressViewController.ProgressViewControllerPresenter(this@ColdWalletSigningViewController)
@@ -196,7 +211,16 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         }
 
         override fun notifySigningResult(ergoTxResult: SigningResult) {
-            TODO("Not yet implemented")
+            runOnMainThread {
+                if (ergoTxResult.success && uiLogic.signedQrCode != null) {
+                    signedQrCodesContainer.rawData = uiLogic.signedQrCode
+                    refreshUiState()
+                } else {
+                    val message = texts.get(STRING_ERROR_PREPARE_TRANSACTION) +
+                            ergoTxResult.errorMsg?.let { "\n\n$it" }
+                    presentViewController(buildSimpleAlertController("", message, texts), true) {}
+                }
+            }
         }
     }
 }

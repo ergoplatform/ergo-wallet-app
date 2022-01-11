@@ -362,7 +362,7 @@ class SendFundsViewController(
 
         override fun notifyUiLocked(locked: Boolean) {
             runOnMainThread {
-                progressViewController.setUiLocked(true)
+                progressViewController.setUiLocked(locked)
             }
         }
 

@@ -114,7 +114,9 @@ abstract class ColdWalletSigningUiLogic {
                 }
                 notifyUiLocked(false)
 
-                state = State.PRESENT_RESULT
+                if (ergoTxResult.success && signedQrCode != null) {
+                    state = State.PRESENT_RESULT
+                }
                 notifySigningResult(ergoTxResult)
             }
 
