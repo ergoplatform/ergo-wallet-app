@@ -1,11 +1,11 @@
 package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.CoroutineScope
+import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.SigningResult
-import org.ergoplatform.uilogic.STRING_LABEL_QR_PAGES_INFO
-import org.ergoplatform.uilogic.STRING_LABEL_SCAN_QR
-import org.ergoplatform.uilogic.STRING_TITLE_SIGNING_REQUEST
+import org.ergoplatform.transactions.reduceBoxes
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.ColdWalletSigningUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
@@ -16,7 +16,8 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
     val uiLogic = IosUiLogic()
     val texts = getAppDelegate().texts
 
-    val scanningContainer = ScanningContainer()
+    private val scanningContainer = ScanningContainer()
+    private val transactionContainer = TransactionContainer()
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -31,9 +32,11 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         val scrollView = scrollingContainer.wrapInVerticalScrollView()
 
         view.addSubview(scrollView)
-        scrollView.addSubview(scanningContainer)
+        scrollingContainer.addSubview(scanningContainer)
+        scrollingContainer.addSubview(transactionContainer)
 
-        scanningContainer.edgesToSuperview()
+        scanningContainer.edgesToSuperview(maxWidth = MAX_WIDTH)
+        transactionContainer.edgesToSuperview(maxWidth = MAX_WIDTH)
         scrollView.edgesToSuperview()
     }
 
@@ -50,8 +53,8 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
             texts.format(STRING_LABEL_QR_PAGES_INFO, uiLogic.pagesAdded, uiLogic.pagesQrCode)
         scanningContainer.errorText.text = uiLogic.lastErrorMessage ?: ""
 
-        uiLogic.transactionInfo?.let {
-            // TODO new tx info, fill container
+        uiLogic.transactionInfo?.reduceBoxes()?.let {
+            transactionContainer.bindTransaction(it)
         }
 
         refreshState()
@@ -59,6 +62,13 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
 
     private fun refreshState() {
         scanningContainer.isHidden = uiLogic.state != ColdWalletSigningUiLogic.State.SCANNING
+        transactionContainer.isHidden = uiLogic.state != ColdWalletSigningUiLogic.State.WAITING_TO_CONFIRM
+    }
+
+    private fun scanNext() {
+        presentViewController(QrScannerViewController(invokeAfterDismissal = false) {
+            addQrCodeChunk(it)
+        }, true) {}
     }
 
     inner class ScanningContainer : UIView(CGRect.Zero()) {
@@ -90,15 +100,86 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
             image.fixedHeight(200.0).topToSuperview().widthMatchesSuperview()
             statusText.topToBottomOf(image, DEFAULT_MARGIN * 2).widthMatchesSuperview()
             errorText.topToBottomOf(statusText, DEFAULT_MARGIN * 2).widthMatchesSuperview()
-            scanNextButton.topToBottomOf(errorText).bottomToSuperview(canBeLess = true).fixedWidth(200.0)
-                .centerHorizontal()
+            scanNextButton.topToBottomOf(errorText, DEFAULT_MARGIN * 2).bottomToSuperview(canBeLess = true)
+                .fixedWidth(200.0).centerHorizontal()
         }
     }
 
-    private fun scanNext() {
-        presentViewController(QrScannerViewController {
-            addQrCodeChunk(it)
-        }, true) {}
+    inner class TransactionContainer : UIStackView() {
+        private val inboxesList = UIStackView().apply {
+            axis = UILayoutConstraintAxis.Vertical
+        }
+        private val outBoxesList = UIStackView().apply {
+            axis = UILayoutConstraintAxis.Vertical
+        }
+
+        init {
+            axis = UILayoutConstraintAxis.Vertical
+            spacing = DEFAULT_MARGIN
+            layoutMargins = UIEdgeInsets(DEFAULT_MARGIN * 2, 0.0, DEFAULT_MARGIN * 2, 0.0)
+            isLayoutMarginsRelativeArrangement = true
+
+            addArrangedSubview(Body2BoldLabel().apply {
+                text = texts.get(STRING_DESC_SIGNING_REQUEST)
+            })
+            addArrangedSubview(createHorizontalSeparator())
+            addArrangedSubview(Body1BoldLabel().apply {
+                text = texts.get(STRING_TITLE_INBOXES)
+                textColor = uiColorErgo
+            })
+            addArrangedSubview(Body2Label().apply {
+                text = texts.get(STRING_DESC_INBOXES)
+            })
+            addArrangedSubview(inboxesList)
+            addArrangedSubview(createHorizontalSeparator())
+            addArrangedSubview(Body1BoldLabel().apply {
+                text = texts.get(STRING_TITLE_OUTBOXES)
+                textColor = uiColorErgo
+            })
+            addArrangedSubview(Body2Label().apply {
+                text = texts.get(STRING_DESC_OUTBOXES)
+            })
+            addArrangedSubview(outBoxesList)
+
+            val signButton = PrimaryButton(texts.get(STRING_LABEL_CONFIRM)).apply {
+                addOnTouchUpInsideListener { _, _ ->
+                    startAuthFlow(uiLogic.wallet!!.walletConfig) { mnemonic ->
+                        uiLogic.signTxWithMnemonicAsync(mnemonic, IosStringProvider(texts))
+                    }
+                }
+            }
+            val buttonContainer = UIView(CGRect.Zero()).apply {
+                addSubview(signButton)
+                signButton.fixedWidth(100.0).centerHorizontal().bottomToSuperview()
+                    .topToSuperview(topInset = DEFAULT_MARGIN * 2)
+            }
+            addArrangedSubview(buttonContainer)
+        }
+
+        fun bindTransaction(transactionInfo: TransactionInfo) {
+            inboxesList.clearArrangedSubviews()
+            transactionInfo.inputs.forEach { input ->
+                inboxesList.addArrangedSubview(
+                    TransactionBoxEntryView().bindBoxView(
+                        input.value,
+                        input.address,
+                        input.assets,
+                        texts
+                    )
+                )
+            }
+            outBoxesList.clearArrangedSubviews()
+            transactionInfo.outputs.forEach { output ->
+                outBoxesList.addArrangedSubview(
+                    TransactionBoxEntryView().bindBoxView(
+                        output.value,
+                        output.address,
+                        output.assets,
+                        texts
+                    )
+                )
+            }
+        }
     }
 
     inner class IosUiLogic : ColdWalletSigningUiLogic() {

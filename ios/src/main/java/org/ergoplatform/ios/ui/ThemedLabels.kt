@@ -41,8 +41,14 @@ class Body1BoldLabel() : Body1Label() {
     }
 }
 
-class Body2Label() : ThemedLabel() {
+open class Body2Label() : ThemedLabel() {
     override fun getFontSize() = 16.0
+}
+
+class Body2BoldLabel() : Body2Label() {
+    override fun isBold(): Boolean {
+        return true
+    }
 }
 
 class Headline1Label() : ThemedLabel() {
