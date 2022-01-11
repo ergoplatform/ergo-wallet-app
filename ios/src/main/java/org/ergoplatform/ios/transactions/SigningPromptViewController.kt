@@ -1,6 +1,9 @@
 package org.ergoplatform.ios.transactions
 
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
+import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.transactions.getColdSignedTxChunk
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
@@ -12,7 +15,7 @@ import org.robovm.apple.uikit.*
  * to scan with a cold wallet device.
  */
 class SigningPromptViewController(
-    private val qrPages: List<String>,
+    private val signingPrompt: String,
     private val uiLogic: SendFundsUiLogic
 ) : UIViewController() {
     private lateinit var description: UILabel
@@ -21,6 +24,11 @@ class SigningPromptViewController(
     private lateinit var nextButton: PrimaryButton
     private lateinit var scanButton: PrimaryButton
     private lateinit var descContainer: UIView
+    private lateinit var switchResButton: UIImageView
+    private lateinit var qrContainer: UIStackView
+
+    private lateinit var qrPages: List<String>
+    private var showLowRes = false
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -28,16 +36,8 @@ class SigningPromptViewController(
         view.backgroundColor = UIColor.systemBackground()
         val closeButton = addCloseButton()
 
-        val qrContainer = UIStackView(CGRect.Zero()).apply {
+        qrContainer = UIStackView(CGRect.Zero()).apply {
             axis = UILayoutConstraintAxis.Horizontal
-        }
-
-        qrPages.forEach {
-            val qrCode = UIImageView(CGRect.Zero())
-            qrCode.fixedWidth(DEFAULT_QR_CODE_SIZE + DEFAULT_MARGIN * 2).fixedHeight(DEFAULT_QR_CODE_SIZE)
-            qrCode.setQrCode(it, DEFAULT_QR_CODE_SIZE)
-            qrCode.contentMode = UIViewContentMode.Center
-            qrContainer.addArrangedSubview(qrCode)
         }
 
         pager = qrContainer.wrapInHorizontalPager(DEFAULT_QR_CODE_SIZE + DEFAULT_MARGIN * 2)
@@ -90,6 +90,15 @@ class SigningPromptViewController(
                 }, true
             ) {}
         }
+        switchResButton = UIImageView(getIosSystemImage(IMAGE_SWITCH_RESOLUTION, UIImageSymbolScale.Small)).apply {
+            tintColor = UIColor.label()
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UITapGestureRecognizer {
+                showLowRes = !showLowRes
+                setQrCodesToPager()
+            })
+        }
+        switchResButton.isHidden = signingPrompt.length <= QR_DATA_LENGTH_LOW_RES
 
         descContainer = UIView(CGRect.Zero()).apply {
             layoutMargins = UIEdgeInsets.Zero()
@@ -101,6 +110,7 @@ class SigningPromptViewController(
         view.addSubview(currPageLabel)
         view.addSubview(pager)
         view.addSubview(descContainer)
+        view.addSubview(switchResButton)
 
         pager.topToBottomOf(closeButton, DEFAULT_MARGIN).centerHorizontal()
         currPageLabel.topToBottomOf(pager, DEFAULT_MARGIN).centerHorizontal()
@@ -111,8 +121,30 @@ class SigningPromptViewController(
             .bottomToSuperview(canBeLess = true)
         scanButton.topToTopOf(nextButton).centerHorizontal().fixedWidth(200.0)
             .bottomToSuperview(canBeLess = true)
+        switchResButton.topToSuperview(topInset = DEFAULT_MARGIN).rightToSuperview()
 
-        pageChanged(0)
+    }
+
+    override fun viewWillAppear(animated: Boolean) {
+        super.viewWillAppear(animated)
+        setQrCodesToPager()
+    }
+
+    private fun setQrCodesToPager() {
+        qrPages = coldSigningRequestToQrChunks(
+            signingPrompt,
+            if (showLowRes) QR_DATA_LENGTH_LOW_RES else QR_DATA_LENGTH_LIMIT
+        )
+        qrContainer.clearArrangedSubviews()
+        qrPages.forEach {
+            val qrCode = UIImageView(CGRect.Zero())
+            qrCode.fixedWidth(DEFAULT_QR_CODE_SIZE + DEFAULT_MARGIN * 2).fixedHeight(DEFAULT_QR_CODE_SIZE)
+            qrCode.setQrCode(it, DEFAULT_QR_CODE_SIZE)
+            qrCode.contentMode = UIViewContentMode.Center
+            qrContainer.addArrangedSubview(qrCode)
+        }
+        pager.layoutIfNeeded()
+        scrollToQrCode(0)
     }
 
     private fun scrollToQrCode(nextPage: Int) {
