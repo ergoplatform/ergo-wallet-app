@@ -271,3 +271,10 @@ var UIScrollView.page
     set(value) {
         setContentOffset(CGPoint(frame.size.width * value.toDouble(), contentOffset.y), true)
     }
+
+fun UIScrollView.scrollToBottom(animated: Boolean = true) {
+    setContentOffset(
+        CGPoint(0.0, contentSize.height - bounds.size.height + contentInset.bottom),
+        animated
+    )
+}

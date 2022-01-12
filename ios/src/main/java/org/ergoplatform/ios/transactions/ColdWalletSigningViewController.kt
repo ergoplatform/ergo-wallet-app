@@ -54,7 +54,11 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         uiLogic.addQrCodeChunk(qrCodeChunk)
 
         scanningContainer.statusText.text =
-            texts.format(STRING_LABEL_QR_PAGES_INFO, uiLogic.pagesAdded, uiLogic.pagesQrCode)
+            texts.format(
+                STRING_LABEL_QR_PAGES_INFO,
+                uiLogic.qrPagesCollector.pagesAdded,
+                uiLogic.qrPagesCollector.pagesCount
+            )
         scanningContainer.errorText.text = uiLogic.lastErrorMessage ?: ""
 
         uiLogic.transactionInfo?.reduceBoxes()?.let {
