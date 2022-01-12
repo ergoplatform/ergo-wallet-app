@@ -118,7 +118,7 @@ private fun buildQrChunks(
     sizeLimit: Int,
     serializedSigningRequest: String
 ): List<String> {
-    val actualSizeLimit = sizeLimit - 50 - prefix.length // reserve some space for our prefix
+    val actualSizeLimit = sizeLimit - 30 - prefix.length // reserve some space for our prefix
 
     val gson = GsonBuilder().disableHtmlEscaping().create()
 
@@ -127,7 +127,7 @@ private fun buildQrChunks(
         root.addProperty(prefix, serializedSigningRequest)
         return listOf(gson.toJson(root))
     } else {
-        val chunks = serializedSigningRequest.chunked(sizeLimit)
+        val chunks = serializedSigningRequest.chunked(actualSizeLimit)
         var slice = 0
         return chunks.map {
             slice++
