@@ -3,13 +3,10 @@ package org.ergoplatform.android.transactions
 import android.animation.LayoutTransition
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.EditText
 import androidx.core.view.descendants
 import androidx.lifecycle.ViewModelProvider
@@ -46,6 +43,11 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
     private val binding get() = _binding!!
     private lateinit var viewModel: SendFundsViewModel
     private val args: SendFundsFragmentArgs by navArgs()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -180,9 +182,6 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             startPayment()
         }
 
-        binding.buttonScan.setOnClickListener {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
-        }
         binding.buttonAddToken.setOnClickListener {
             ChooseTokenListDialogFragment().show(childFragmentManager, null)
         }
@@ -218,23 +217,34 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             })
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_send_funds, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_scan_qr) {
+            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            return true
+        } else {
+            return super.onOptionsItemSelected(item)
+        }
+    }
+
     private fun enableLayoutChangeAnimations() {
         // set layout change animations. they are not set in the xml to avoid animations for the first
         // time the layout is displayed, and enabling them is delayed due to the same reason
-        Handler().postDelayed({
+        postDelayed(200) {
             _binding?.let { binding ->
                 binding.container.layoutTransition = LayoutTransition()
                 binding.container.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
             }
-        }, 200)
+        }
     }
 
     private fun ensureAmountVisibleDelayed() {
         // delay 200 to make sure that smart keyboard is already open
-        Handler().postDelayed(
-            { _binding?.let { it.scrollView.smoothScrollTo(0, it.amount.top) } },
-            200
-        )
+        postDelayed(200) { _binding?.let { it.scrollView.smoothScrollTo(0, it.amount.top) } }
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {

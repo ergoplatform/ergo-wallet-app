@@ -247,7 +247,7 @@
                         android:layout_marginBottom="24dp"
                         android:minWidth="120dp"
                         android:text="@string/label_scan_qr"
-                        app:icon="@drawable/ic_qr_code_24" />
+                        app:icon="@drawable/ic_qr_code_scanner_24" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </FrameLayout>
