@@ -39,7 +39,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val query = requireActivity().intent.dataString
+        val query = arguments?.getString(ARG_QUERY)
 
         if (query == null) {
             dismiss()
@@ -101,5 +101,15 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        private const val ARG_QUERY = "ARG_QUERY"
+
+        fun buildArgs(query: String): Bundle {
+            val args = Bundle()
+            args.putString(ARG_QUERY, query)
+            return args
+        }
     }
 }

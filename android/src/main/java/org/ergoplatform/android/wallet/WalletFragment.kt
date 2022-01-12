@@ -19,10 +19,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
-import org.ergoplatform.android.AppDatabase
-import org.ergoplatform.android.Preferences
-import org.ergoplatform.android.R
-import org.ergoplatform.android.RoomWalletDbProvider
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
@@ -99,6 +96,7 @@ class WalletFragment : Fragment() {
                 .navigate(R.id.createWalletDialog)
         }
 
+        binding.buttonScan.setOnClickListener { (requireActivity() as? MainActivity)?.scanQrCode() }
 
         val nodeConnector = NodeConnector.getInstance()
         val rotateAnimation =
@@ -153,9 +151,7 @@ class WalletFragment : Fragment() {
                             binding.ergoPrice.visibility = View.VISIBLE
                             binding.ergoPrice.amount = value.toDouble()
                             binding.ergoPrice.setSymbol(
-                                nodeConnector.fiatCurrency.toUpperCase(
-                                    Locale.getDefault()
-                                )
+                                nodeConnector.fiatCurrency.uppercase()
                             )
                         }
                         binding.labelErgoPrice.visibility = binding.ergoPrice.visibility
@@ -323,7 +319,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         } else {
             binding.walletFiat.visibility = View.VISIBLE
             binding.walletFiat.amount = ergoPrice * binding.walletBalance.amount
-            binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.toUpperCase())
+            binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.uppercase())
         }
 
         // Fill token entries

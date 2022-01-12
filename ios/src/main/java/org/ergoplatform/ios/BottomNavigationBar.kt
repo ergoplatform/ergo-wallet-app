@@ -61,6 +61,8 @@ class BottomNavigationBar : UITabBarController() {
     }
 
     fun handlePaymentRequest(paymentRequest: String) {
+        // TODO ErgoPay integrate MainAppUiLogic#handleRequests here and call from a new scan QR screen
+
         val pr = parsePaymentRequest(paymentRequest)
 
         pr?.let {
