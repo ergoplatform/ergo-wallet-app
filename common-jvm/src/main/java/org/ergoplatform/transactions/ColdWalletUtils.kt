@@ -274,3 +274,34 @@ private fun getAssetInstanceInfos(tokensColl: Coll<Tuple2<ByteArray, Any>>): Lis
     }
 }
 
+class QrCodePagesCollector(private val parser: (String) -> QrChunk?) {
+    private val qrCodeChunks = HashMap<Int, String>()
+    var pagesCount = 0
+    val pagesAdded get() = qrCodeChunks.size
+
+    fun addPage(qrCodeChunk: String): Boolean {
+        // returns false when QR code could not be not parsed
+        val qrChunk = parser.invoke(qrCodeChunk) ?: return false
+
+        val page = qrChunk.index
+        val count = qrChunk.pages
+
+        // returns false if new QR code has other pages count as the former ones, does not fit
+        if (pagesCount != 0 && count != pagesCount) {
+            return false
+        }
+
+        qrCodeChunks.put(page, qrCodeChunk)
+        pagesCount = count
+
+        return true
+    }
+
+    fun hasAllPages(): Boolean {
+        return pagesAdded == pagesCount
+    }
+
+    fun getAllPages(): Collection<String> {
+        return qrCodeChunks.values
+    }
+}

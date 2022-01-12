@@ -54,8 +54,18 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/activity_horizontal_margin"
-            android:layout_marginBottom="24dp"
             android:text="@string/button_scan_signed_tx" />
+
+        <TextView
+            android:id="@+id/qr_scanned_pages_info"
+            style="@style/TextAppearance.App.Headline2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+            android:gravity="center"
+            android:visibility="invisible"
+            tools:text="1 of 2"
+            tools:visibility="visible" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

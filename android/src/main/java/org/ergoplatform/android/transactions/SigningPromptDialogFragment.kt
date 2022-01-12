@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -18,8 +17,11 @@ import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.QrPagerAdapter
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
+import org.ergoplatform.transactions.QrCodePagesCollector
 import org.ergoplatform.transactions.coldSigningRequestToQrChunks
-import org.ergoplatform.transactions.getColdSignedTxChunk
+
+import org.ergoplatform.android.ui.expandBottomSheetOnShow
+
 
 /**
  * SigningPromptDialogFragment is shown when user makes a transaction on a read-only address, presenting QR code(s)
@@ -37,6 +39,7 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPromptSigningDialogBinding.inflate(inflater, container, false)
+        expandBottomSheetOnShow()
         return binding.root
     }
 
@@ -67,6 +70,18 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
                 setQrCodePagerData(it)
             }
         }
+
+        refreshScannedPagesInfo(viewModel.uiLogic.signedTxQrCodePagesCollector)
+    }
+
+    private fun refreshScannedPagesInfo(pagesCollector: QrCodePagesCollector?) {
+        binding.qrScannedPagesInfo.visibility =
+            if (pagesCollector?.pagesAdded ?: 0 > 0) View.VISIBLE else View.INVISIBLE
+
+        pagesCollector?.let {
+            binding.qrScannedPagesInfo.text =
+                getString(R.string.label_qr_pages_info, it.pagesAdded.toString(), it.pagesCount.toString())
+        }
     }
 
     private fun setQrCodePagerData(data: String) {
@@ -96,24 +111,17 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let { qrCode ->
-                val qrChunk = getColdSignedTxChunk(qrCode)
-                qrChunk?.let {
-                    if (it.pages > 1) {
-                        // TODO cold wallet handle paged QR codes
-                        Snackbar.make(
-                            requireView(),
-                            R.string.error_qr_pages_num,
-                            Snackbar.LENGTH_LONG
-                        ).setAnchorView(R.id.nav_view).show()
-                    } else {
-                        val context = requireContext()
-                        getViewModel().uiLogic.sendColdWalletSignedTx(
-                            listOf(qrCode),
-                            Preferences(context),
-                            AndroidStringProvider(context)
-                        )
-                        dismiss()
-                    }
+                val uiLogic = getViewModel().uiLogic
+                uiLogic.signedTxQrCodePagesCollector?.addPage(qrCode)
+                if (uiLogic.signedTxQrCodePagesCollector?.hasAllPages() == true) {
+                    val context = requireContext()
+                    uiLogic.sendColdWalletSignedTx(
+                        Preferences(context),
+                        AndroidStringProvider(context)
+                    )
+                    dismiss()
+                } else {
+                    refreshScannedPagesInfo(uiLogic.signedTxQrCodePagesCollector)
                 }
             }
         } else {

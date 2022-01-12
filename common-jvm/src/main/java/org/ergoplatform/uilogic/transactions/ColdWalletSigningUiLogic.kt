@@ -18,9 +18,7 @@ abstract class ColdWalletSigningUiLogic {
 
     var state = State.SCANNING
         private set
-    var pagesQrCode = 0
-    val pagesAdded get() = qrCodeChunks.size
-    private val qrCodeChunks = HashMap<Int, String>()
+    val qrPagesCollector = QrCodePagesCollector(::getColdSigningRequestChunk)
     var signedQrCode: String? = null
         private set
     private var signingRequest: PromptSigningResult? = null
@@ -46,26 +44,8 @@ abstract class ColdWalletSigningUiLogic {
             return transactionInfo
         }
 
-        lastErrorMessage = null
-
-        val qrChunk = getColdSigningRequestChunk(qrCodeChunk)
-
-        // qr code not fitting or no qr code chunk
-        if (qrChunk == null) {
-            lastErrorMessage = "Not a cold signing QR code"
-            return null
-        }
-
-        val page = qrChunk.index
-        val count = qrChunk.pages
-
-        if (pagesQrCode != 0 && count != pagesQrCode) {
-            lastErrorMessage = "QR code does not belong to the formerly scanned codes"
-            return null
-        }
-
-        qrCodeChunks.put(page, qrCodeChunk)
-        pagesQrCode = count
+        val added = qrPagesCollector.addPage(qrCodeChunk)
+        lastErrorMessage = if (added) null else "QR code does not belong to the formerly scanned codes"
 
         transactionInfo = buildRequestWhenApplicable()
         transactionInfo?.let { state = State.WAITING_TO_CONFIRM }
@@ -74,9 +54,9 @@ abstract class ColdWalletSigningUiLogic {
     }
 
     private fun buildRequestWhenApplicable(): TransactionInfo? {
-        if (pagesAdded == pagesQrCode) {
+        if (qrPagesCollector.hasAllPages()) {
             try {
-                val sr = coldSigningRequestFromQrChunks(qrCodeChunks.values)
+                val sr = coldSigningRequestFromQrChunks(qrPagesCollector.getAllPages())
                 signingRequest = sr
                 return buildTransactionInfoFromReduced(
                     sr.serializedTx!!,

@@ -151,8 +151,8 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             // refresh information on scanned codes
             binding.labelScannedPages.text = getString(
                 R.string.label_qr_pages_info,
-                viewModel.uiLogic.pagesAdded.toString(),
-                viewModel.uiLogic.pagesQrCode.toString()
+                viewModel.uiLogic.qrPagesCollector.pagesAdded.toString(),
+                viewModel.uiLogic.qrPagesCollector.pagesCount.toString()
             )
             binding.cardScanMore.visibility = View.VISIBLE
             val errorMessage = viewModel.uiLogic.lastErrorMessage

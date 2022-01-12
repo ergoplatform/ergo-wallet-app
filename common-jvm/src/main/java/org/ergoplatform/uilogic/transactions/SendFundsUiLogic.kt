@@ -200,7 +200,11 @@ abstract class SendFundsUiLogic {
         notifyUiLocked(true)
     }
 
+    var signedTxQrCodePagesCollector: QrCodePagesCollector? = null
+        private set
+
     fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
+        signedTxQrCodePagesCollector = QrCodePagesCollector(::getColdSignedTxChunk)
         wallet?.let { wallet ->
             val derivedAddresses =
                 derivedAddressIdx?.let { listOf(wallet.getDerivedAddress(it)!!) }
@@ -229,10 +233,14 @@ abstract class SendFundsUiLogic {
     }
 
     fun sendColdWalletSignedTx(
-        qrCodes: List<String>,
         preferences: PreferencesProvider,
         texts: StringProvider
     ) {
+        val qrCodes = signedTxQrCodePagesCollector?.getAllPages()
+        signedTxQrCodePagesCollector = null
+
+        if (qrCodes.isNullOrEmpty()) return // should not happen
+
         notifyUiLocked(true)
         coroutineScope.launch {
             val ergoTxResult: SendTransactionResult

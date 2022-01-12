@@ -2,9 +2,7 @@ package org.ergoplatform.ios.transactions
 
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.coldSigningRequestToQrChunks
-import org.ergoplatform.transactions.getColdSignedTxChunk
 import org.ergoplatform.uilogic.STRING_BUTTON_SCAN_SIGNED_TX
-import org.ergoplatform.uilogic.STRING_ERROR_QR_PAGES_NUM
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.robovm.apple.uikit.UIColor
 import org.robovm.apple.uikit.UIViewController
@@ -39,7 +37,8 @@ class SigningPromptViewController(
         qrPresenter.rawData = signingPrompt
     }
 
-    inner class QrCodeContainer : PagedQrCodeContainer(texts, texts.get(STRING_BUTTON_SCAN_SIGNED_TX)) {
+    inner class QrCodeContainer :
+        PagedQrCodeContainer(texts, texts.get(STRING_BUTTON_SCAN_SIGNED_TX)) {
         override fun calcChunksFromRawData(rawData: String, limit: Int): List<String> {
             return coldSigningRequestToQrChunks(
                 rawData, limit
@@ -49,26 +48,18 @@ class SigningPromptViewController(
         override fun continueButtonPressed() {
             presentViewController(
                 QrScannerViewController(dismissAnimated = false) { qrCode ->
-                    getColdSignedTxChunk(qrCode)?.let {
-                        if (it.pages > 1) {
-                            // TODO cold wallet handle paged QR codes
-                            val uac =
-                                buildSimpleAlertController(
-                                    "",
-                                    texts.get(STRING_ERROR_QR_PAGES_NUM),
-                                    getAppDelegate().texts
-                                )
-                            presentViewController(uac, false) {}
-                        } else {
+                    uiLogic.signedTxQrCodePagesCollector?.let {
+                        it.addPage(qrCode)
+                        if (it.hasAllPages()) {
                             dismissViewController(false) {
                                 val delegate = getAppDelegate()
                                 uiLogic.sendColdWalletSignedTx(
-                                    listOf(qrCode),
                                     delegate.prefs,
                                     IosStringProvider(delegate.texts)
                                 )
                             }
                         }
+                        // TODO cold wallet show pages info
                     }
                 }, true
             ) {}
