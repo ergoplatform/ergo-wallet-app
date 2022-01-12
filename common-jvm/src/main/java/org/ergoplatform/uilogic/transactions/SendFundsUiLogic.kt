@@ -5,16 +5,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.*
-import org.ergoplatform.transactions.buildColdSigningRequest
-import org.ergoplatform.transactions.coldSigningResponseFromQrChunks
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
 import org.ergoplatform.persistance.*
 import org.ergoplatform.tokens.isSingularToken
-import org.ergoplatform.transactions.PromptSigningResult
-import org.ergoplatform.transactions.SendTransactionResult
-import org.ergoplatform.transactions.TransactionResult
+import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_AMOUNT
 import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_BUT_NO_ERG
 import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_NOT_FOUND
@@ -154,11 +150,10 @@ abstract class SendFundsUiLogic {
      * min possible amount in case no amount was entered and token should be sent
      */
     private fun getActualAmountToSendNanoErgs(): Long {
-        val userEnteredNanoErgs = amountToSend.nanoErgs
-        return if (tokensChosen.isNotEmpty() && userEnteredNanoErgs == 0L)
+        return if (tokensChosen.isNotEmpty() && amountToSend.isZero())
             Parameters.MinChangeValue
         else
-            userEnteredNanoErgs
+            amountToSend.nanoErgs
     }
 
     fun checkCanMakePayment(): CheckCanPayResponse {
@@ -205,7 +200,11 @@ abstract class SendFundsUiLogic {
         notifyUiLocked(true)
     }
 
+    var signedTxQrCodePagesCollector: QrCodePagesCollector? = null
+        private set
+
     fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
+        signedTxQrCodePagesCollector = QrCodePagesCollector(::getColdSignedTxChunk)
         wallet?.let { wallet ->
             val derivedAddresses =
                 derivedAddressIdx?.let { listOf(wallet.getDerivedAddress(it)!!) }
@@ -234,10 +233,14 @@ abstract class SendFundsUiLogic {
     }
 
     fun sendColdWalletSignedTx(
-        qrCodes: List<String>,
         preferences: PreferencesProvider,
         texts: StringProvider
     ) {
+        val qrCodes = signedTxQrCodePagesCollector?.getAllPages()
+        signedTxQrCodePagesCollector = null
+
+        if (qrCodes.isNullOrEmpty()) return // should not happen
+
         notifyUiLocked(true)
         coroutineScope.launch {
             val ergoTxResult: SendTransactionResult
@@ -336,7 +339,7 @@ abstract class SendFundsUiLogic {
             } ?: addPaymentRequestWarning(STRING_ERROR_REQUEST_TOKEN_NOT_FOUND, tokenId)
         }
         if (changed) {
-            if (amountToSend.nanoErgs == 0L) {
+            if (amountToSend.isZero()) {
                 addPaymentRequestWarning(STRING_ERROR_REQUEST_TOKEN_BUT_NO_ERG)
             }
 
@@ -360,6 +363,25 @@ abstract class SendFundsUiLogic {
 
         return (if (stringWarnings.isEmpty()) null
         else stringWarnings.joinToString("\n"))
+    }
+
+    fun qrCodeScanned(
+        qrCodeData: String,
+        navigateToColdWalletSigning: ((signingData: String, walletId: Int) -> Unit),
+        setPaymentRequestDataToUi: ((receiverAddress: String, amount: ErgoAmount?) -> Unit)
+    ) {
+        if (wallet?.walletConfig?.secretStorage != null && isColdSigningRequestChunk(qrCodeData)) {
+            navigateToColdWalletSigning.invoke(qrCodeData, wallet!!.walletConfig.id)
+        } else {
+            val content = parsePaymentRequest(qrCodeData)
+            content?.let {
+                setPaymentRequestDataToUi.invoke(
+                    content.address,
+                    content.amount.let { amount -> if (amount.nanoErgs > 0) amount else null }
+                )
+                addTokensFromPaymentRequest(content.tokens)
+            }
+        }
     }
 
     abstract fun notifyWalletStateLoaded()

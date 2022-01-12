@@ -163,7 +163,6 @@
     <string name="title_outboxes">支出金额</string>
     <string name="label_qr_pages_info"> %2s中的 %1s </string>
     <string name="desc_outboxes">这些金额将在处理交易时发送。</string>
-    <string name="error_qr_pages_num">抱歉，此应用版本尚不支持分块二维码。</string>
     <string name="desc_show_signed">您的交易已签名，需要发送到网络。
          扫描此二维码以继续。</string>
     <string name="desc_show_signed_multiple">您的交易已签名，需要发送到网络。

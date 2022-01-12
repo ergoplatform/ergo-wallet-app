@@ -108,7 +108,8 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
     }
 
     inner class IosWalletAddressesUiLogic : WalletAddressesUiLogic() {
-        private var progressViewController: ProgressViewController? = null
+        private val progressViewController =
+            ProgressViewController.ProgressViewControllerPresenter(this@WalletAddressesViewController)
 
         override val coroutineScope: CoroutineScope
             get() = viewControllerScope
@@ -122,16 +123,7 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
 
         override fun notifyUiLocked(locked: Boolean) {
             runOnMainThread {
-                if (locked) {
-                    if (progressViewController == null) {
-                        forceDismissKeyboard()
-                        progressViewController = ProgressViewController()
-                        progressViewController?.presentModalAbove(this@WalletAddressesViewController)
-                    }
-                } else {
-                    progressViewController?.dismissViewController(false) {}
-                    progressViewController = null
-                }
+                progressViewController.setUiLocked(locked)
             }
         }
 

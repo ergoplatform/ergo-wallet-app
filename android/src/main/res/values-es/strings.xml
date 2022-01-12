@@ -163,7 +163,6 @@
     <string name="title_outboxes">Cantidades salientes</string>
     <string name="label_qr_pages_info">%1s de %2s</string>
     <string name="desc_outboxes">Estas cantidades se enviarán cuando se procese la transacción.</string>
-    <string name="error_qr_pages_num">Lo sentimos, los códigos QR fragmentados aún no son compatibles con esta versión de la aplicación.</string>
     <string name="desc_show_signed">Su transacción fue firmada y debe enviarse a la red.
         Escanee este código QR para continuar.</string>
     <string name="desc_show_signed_multiple">Su transacción fue firmada y debe enviarse a la red.

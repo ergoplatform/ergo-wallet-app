@@ -104,7 +104,6 @@ const val STRING_ERROR_ICON_CONTENT_DESCRIPTION = "error_icon_content_descriptio
 const val STRING_ERROR_PASSWORD_EMPTY = "error_password_empty"
 const val STRING_ERROR_PASSWORD_WRONG = "error_password_wrong"
 const val STRING_ERROR_PREPARE_TRANSACTION = "error_prepare_transaction"
-const val STRING_ERROR_QR_PAGES_NUM = "error_qr_pages_num"
 const val STRING_ERROR_RECEIVER_ADDRESS = "error_receiver_address"
 const val STRING_ERROR_REQUEST_TOKEN_AMOUNT = "error_request_token_amount"
 const val STRING_ERROR_REQUEST_TOKEN_BUT_NO_ERG = "error_request_token_but_no_erg"

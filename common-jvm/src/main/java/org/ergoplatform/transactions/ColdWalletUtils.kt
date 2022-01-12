@@ -96,8 +96,8 @@ fun parseColdSigningResponse(qrData: String): SigningResult {
     }
 }
 
-// TODO cold wallet make this configurable for QR code scan problems
-const val QR_SIZE_LIMIT = 2900
+const val QR_DATA_LENGTH_LIMIT = 2000
+const val QR_DATA_LENGTH_LOW_RES = 400
 private const val QR_PROPERTY_COLD_SIGNING_REQUEST = "CSR"
 private const val QR_PROPERTY_COLD_SIGNED_TX = "CSTX"
 private const val QR_PROPERTY_INDEX = "p"
@@ -118,7 +118,7 @@ private fun buildQrChunks(
     sizeLimit: Int,
     serializedSigningRequest: String
 ): List<String> {
-    val actualSizeLimit = sizeLimit - 20 - prefix.length // reserve some space for our prefix
+    val actualSizeLimit = sizeLimit - 30 - prefix.length // reserve some space for our prefix
 
     val gson = GsonBuilder().disableHtmlEscaping().create()
 
@@ -127,7 +127,7 @@ private fun buildQrChunks(
         root.addProperty(prefix, serializedSigningRequest)
         return listOf(gson.toJson(root))
     } else {
-        val chunks = serializedSigningRequest.chunked(sizeLimit)
+        val chunks = serializedSigningRequest.chunked(actualSizeLimit)
         var slice = 0
         return chunks.map {
             slice++
@@ -274,3 +274,34 @@ private fun getAssetInstanceInfos(tokensColl: Coll<Tuple2<ByteArray, Any>>): Lis
     }
 }
 
+class QrCodePagesCollector(private val parser: (String) -> QrChunk?) {
+    private val qrCodeChunks = HashMap<Int, String>()
+    var pagesCount = 0
+    val pagesAdded get() = qrCodeChunks.size
+
+    fun addPage(qrCodeChunk: String): Boolean {
+        // returns false when QR code could not be not parsed
+        val qrChunk = parser.invoke(qrCodeChunk) ?: return false
+
+        val page = qrChunk.index
+        val count = qrChunk.pages
+
+        // returns false if new QR code has other pages count as the former ones, does not fit
+        if (pagesCount != 0 && count != pagesCount) {
+            return false
+        }
+
+        qrCodeChunks.put(page, qrCodeChunk)
+        pagesCount = count
+
+        return true
+    }
+
+    fun hasAllPages(): Boolean {
+        return pagesAdded == pagesCount
+    }
+
+    fun getAllPages(): Collection<String> {
+        return qrCodeChunks.values
+    }
+}

@@ -16,10 +16,10 @@ import org.ergoplatform.wallet.getSortedDerivedAddressesList
 abstract class ColdWalletSigningUiLogic {
     abstract val coroutineScope: CoroutineScope
 
-    var pagesQrCode = 0
-    val pagesAdded get() = qrCodeChunks.size
-    private val qrCodeChunks = HashMap<Int, String>()
-    var signedQrCode: List<String>? = null
+    var state = State.SCANNING
+        private set
+    val qrPagesCollector = QrCodePagesCollector(::getColdSigningRequestChunk)
+    var signedQrCode: String? = null
         private set
     private var signingRequest: PromptSigningResult? = null
 
@@ -44,36 +44,19 @@ abstract class ColdWalletSigningUiLogic {
             return transactionInfo
         }
 
-        lastErrorMessage = null
-
-        val qrChunk = getColdSigningRequestChunk(qrCodeChunk)
-
-        // qr code not fitting or no qr code chunk
-        if (qrChunk == null) {
-            lastErrorMessage = "Not a cold signing QR code"
-            return null
-        }
-
-        val page = qrChunk.index
-        val count = qrChunk.pages
-
-        if (pagesQrCode != 0 && count != pagesQrCode) {
-            lastErrorMessage = "QR code does not belong to the formerly scanned codes"
-            return null
-        }
-
-        qrCodeChunks.put(page, qrCodeChunk)
-        pagesQrCode = count
+        val added = qrPagesCollector.addPage(qrCodeChunk)
+        lastErrorMessage = if (added) null else "QR code does not belong to the formerly scanned codes"
 
         transactionInfo = buildRequestWhenApplicable()
+        transactionInfo?.let { state = State.WAITING_TO_CONFIRM }
 
         return transactionInfo
     }
 
     private fun buildRequestWhenApplicable(): TransactionInfo? {
-        if (pagesAdded == pagesQrCode) {
+        if (qrPagesCollector.hasAllPages()) {
             try {
-                val sr = coldSigningRequestFromQrChunks(qrCodeChunks.values)
+                val sr = coldSigningRequestFromQrChunks(qrPagesCollector.getAllPages())
                 signingRequest = sr
                 return buildTransactionInfoFromReduced(
                     sr.serializedTx!!,
@@ -107,15 +90,13 @@ abstract class ColdWalletSigningUiLogic {
                         signingRequest.serializedTx!!, mnemonic, "",
                         derivedAddresses, texts
                     )
-                    signedQrCode = buildColdSigningResponse(ergoTxResult)?.let {
-                        coldSigningResponseToQrChunks(
-                            it,
-                            QR_SIZE_LIMIT
-                        )
-                    }
+                    signedQrCode = buildColdSigningResponse(ergoTxResult)
                 }
                 notifyUiLocked(false)
 
+                if (ergoTxResult.success && signedQrCode != null) {
+                    state = State.PRESENT_RESULT
+                }
                 notifySigningResult(ergoTxResult)
             }
 
@@ -126,4 +107,5 @@ abstract class ColdWalletSigningUiLogic {
     abstract fun notifyUiLocked(locked: Boolean)
     abstract fun notifySigningResult(ergoTxResult: SigningResult)
 
+    enum class State { SCANNING, WAITING_TO_CONFIRM, PRESENT_RESULT }
 }

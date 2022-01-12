@@ -32,7 +32,6 @@ import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.PromptSigningResult
-import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
@@ -256,49 +255,49 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             tokensChosen.forEach {
                 val ergoId = it.key
                 tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenDbEntity ->
-                        val itemBinding =
-                            FragmentSendFundsTokenItemBinding.inflate(layoutInflater, this, true)
-                        itemBinding.tvTokenName.text = tokenDbEntity.name
+                    val itemBinding =
+                        FragmentSendFundsTokenItemBinding.inflate(layoutInflater, this, true)
+                    itemBinding.tvTokenName.text = tokenDbEntity.name
 
-                        val amountChosen = it.value.value
-                        val isSingular = tokenDbEntity.isSingularToken() && amountChosen == 1L
+                    val amountChosen = it.value.value
+                    val isSingular = tokenDbEntity.isSingularToken() && amountChosen == 1L
 
-                        if (isSingular) {
-                            itemBinding.inputTokenAmount.visibility = View.GONE
-                            itemBinding.buttonTokenAll.visibility = View.INVISIBLE
-                        } else {
-                            itemBinding.inputTokenAmount.inputType =
-                                if (tokenDbEntity.decimals > 0) InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-                                else InputType.TYPE_CLASS_NUMBER
-                            itemBinding.inputTokenAmount.addTextChangedListener(
-                                TokenAmountWatcher(tokenDbEntity, itemBinding)
+                    if (isSingular) {
+                        itemBinding.inputTokenAmount.visibility = View.GONE
+                        itemBinding.buttonTokenAll.visibility = View.INVISIBLE
+                    } else {
+                        itemBinding.inputTokenAmount.inputType =
+                            if (tokenDbEntity.decimals > 0) InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+                            else InputType.TYPE_CLASS_NUMBER
+                        itemBinding.inputTokenAmount.addTextChangedListener(
+                            TokenAmountWatcher(tokenDbEntity, itemBinding)
+                        )
+                        itemBinding.inputTokenAmount.setText(
+                            viewModel.uiLogic.tokenAmountToText(
+                                amountChosen,
+                                tokenDbEntity.decimals
                             )
+                        )
+                        itemBinding.buttonTokenAll.setOnClickListener {
                             itemBinding.inputTokenAmount.setText(
                                 viewModel.uiLogic.tokenAmountToText(
-                                    amountChosen,
+                                    tokenDbEntity.amount!!,
                                     tokenDbEntity.decimals
                                 )
                             )
-                            itemBinding.buttonTokenAll.setOnClickListener {
-                                itemBinding.inputTokenAmount.setText(
-                                    viewModel.uiLogic.tokenAmountToText(
-                                        tokenDbEntity.amount!!,
-                                        tokenDbEntity.decimals
-                                    )
-                                )
-                                itemBinding.buttonTokenAll.visibility = View.INVISIBLE
-                            }
-                        }
-
-                        itemBinding.buttonTokenRemove.setOnClickListener {
-                            if (isSingular || itemBinding.inputTokenAmount.text.isEmpty()) {
-                                viewModel.uiLogic.removeToken(ergoId)
-                            } else {
-                                itemBinding.inputTokenAmount.text = null
-                                itemBinding.inputTokenAmount.requestFocus()
-                            }
+                            itemBinding.buttonTokenAll.visibility = View.INVISIBLE
                         }
                     }
+
+                    itemBinding.buttonTokenRemove.setOnClickListener {
+                        if (isSingular || itemBinding.inputTokenAmount.text.isEmpty()) {
+                            viewModel.uiLogic.removeToken(ergoId)
+                        } else {
+                            itemBinding.inputTokenAmount.text = null
+                            itemBinding.inputTokenAmount.requestFocus()
+                        }
+                    }
+                }
             }
 
             setFocusToEmptyTokenAmountInput()
@@ -380,28 +379,18 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let {
-                if (viewModel.uiLogic.wallet?.walletConfig?.secretStorage != null
-                    && isColdSigningRequestChunk(it)
-                ) {
+                viewModel.uiLogic.qrCodeScanned(it, { data, walletId ->
                     findNavController().navigate(
                         SendFundsFragmentDirections
                             .actionSendFundsFragmentToColdWalletSigningFragment(
-                                it,
-                                viewModel.uiLogic.wallet!!.walletConfig.id
+                                data,
+                                walletId
                             )
                     )
-                } else {
-                    val content = parsePaymentRequest(it)
-                    content?.let {
-                        binding.tvReceiver.editText?.setText(content.address)
-                        content.amount.let { amount ->
-                            if (amount.nanoErgs > 0) setAmountEdittext(
-                                amount
-                            )
-                        }
-                        viewModel.uiLogic.addTokensFromPaymentRequest(content.tokens)
-                    }
-                }
+                }, { address, amount ->
+                    binding.tvReceiver.editText?.setText(address)
+                    amount?.let { setAmountEdittext(amount) }
+                })
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)

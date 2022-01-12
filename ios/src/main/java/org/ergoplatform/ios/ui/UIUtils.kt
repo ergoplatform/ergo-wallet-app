@@ -27,6 +27,7 @@ const val IMAGE_EXCLAMATION_MARK = "exclamationmark.circle.fill"
 const val IMAGE_NO_CONNECTION = "icloud.slash"
 const val IMAGE_SEND = "paperplane"
 const val IMAGE_RECEIVE = "arrow.down.left"
+const val IMAGE_QR_CODE = "qrcode"
 const val IMAGE_QR_SCAN = "qrcode.viewfinder"
 const val IMAGE_PLUS_CIRCLE = "plus.circle.fill"
 const val IMAGE_PLUS = "plus"
@@ -40,6 +41,8 @@ const val IMAGE_TRANSACTIONS = "arrow.right.arrow.left"
 const val IMAGE_ADDRESS_LIST = "list.number"
 const val IMAGE_CHEVRON_DOWN = "chevron.down"
 const val IMAGE_CHEVRON_UP = "chevron.up"
+val IMAGE_SWITCH_RESOLUTION = if (Foundation.getMajorSystemVersion() >= 14)
+    "arrow.up.left.and.down.right.magnifyingglass" else "1.magnifyingglass"
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
@@ -268,3 +271,10 @@ var UIScrollView.page
     set(value) {
         setContentOffset(CGPoint(frame.size.width * value.toDouble(), contentOffset.y), true)
     }
+
+fun UIScrollView.scrollToBottom(animated: Boolean = true) {
+    setContentOffset(
+        CGPoint(0.0, contentSize.height - bounds.size.height + contentInset.bottom),
+        animated
+    )
+}

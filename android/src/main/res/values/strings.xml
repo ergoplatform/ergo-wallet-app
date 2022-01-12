@@ -171,7 +171,6 @@
     <string name="title_outboxes">Outgoing amounts</string>
     <string name="label_qr_pages_info">%1s of %2s</string>
     <string name="desc_outboxes">These amounts will be sent when the transaction is processed.</string>
-    <string name="error_qr_pages_num">Sorry, chunked QR codes are not yet supported by this app version.</string>
     <string name="desc_show_signed">Your transaction was signed and needs to be sent to the network.
         Scan this QR code to proceed.</string>
     <string name="desc_show_signed_multiple">Your transaction was signed and needs to be sent to the network.
