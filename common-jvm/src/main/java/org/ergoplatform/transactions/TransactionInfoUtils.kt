@@ -20,22 +20,31 @@ data class TransactionInfo(
     val outputs: List<OutputInfo>
 )
 
-fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String, ErgoBox>): TransactionInfo {
+data class TransactionInfoBox(
+    val boxId: String,
+    val address: String,
+    val value: Long,
+    val tokens: List<AssetInstanceInfo>
+)
+
+fun UnsignedErgoLikeTransaction.getInputBoxesIds(): List<String> {
+    return JavaConversions.seqAsJavaList(inputs())!!.map {
+        ErgoId(it.boxId()).toString()
+    }
+}
+
+fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String, TransactionInfoBox>): TransactionInfo {
     val inputsList = ArrayList<InputInfo>()
     val outputsList = ArrayList<OutputInfo>()
 
     // now add to TransactionInfo, if possible
-    JavaConversions.seqAsJavaList(inputs())!!.forEach {
-        val boxid = ErgoId(it.boxId()).toString()
+    getInputBoxesIds().forEach { boxid ->
         val inputInfo = InputInfo()
         inputInfo.boxId = boxid
-        inputBoxes.get(boxid)?.let { ergoBox ->
-            inputInfo.address =
-                Address.fromErgoTree(ergoBox.ergoTree(), getErgoNetworkType()).toString()
-            inputInfo.value = ergoBox.value()
-            getAssetInstanceInfos(ergoBox.additionalTokens()).forEach { assetsItem ->
-                inputInfo.addAssetsItem(assetsItem)
-            }
+        inputBoxes.get(boxid)?.let { inboxInfo ->
+            inputInfo.address = inboxInfo.address
+            inputInfo.value = inboxInfo.value
+            inputInfo.assets = inboxInfo.tokens
         } ?: throw java.lang.IllegalArgumentException("No information for input box $boxid")
         inputsList.add(inputInfo)
     }
@@ -49,7 +58,7 @@ fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String,
 
         outputsList.add(outputInfo)
 
-        getAssetInstanceInfos(ergoBoxCandidate.additionalTokens()).forEach {
+        getAssetInstanceInfosFromErgoBoxToken(ergoBoxCandidate.additionalTokens()).forEach {
             outputInfo.addAssetsItem(it)
         }
     }
@@ -57,7 +66,20 @@ fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String,
     return TransactionInfo(id(), inputsList, outputsList)
 }
 
-private fun getAssetInstanceInfos(tokensColl: Coll<Tuple2<ByteArray, Any>>): List<AssetInstanceInfo> {
+fun ErgoBox.toTransactionInfoBox(): TransactionInfoBox {
+    return TransactionInfoBox(
+        ErgoId(id()).toString(),
+        Address.fromErgoTree(ergoTree(), getErgoNetworkType()).toString(),
+        value(),
+        getAssetInstanceInfosFromErgoBoxToken(additionalTokens())
+    )
+}
+
+fun OutputInfo.toTransactionInfoBox(): TransactionInfoBox {
+    return TransactionInfoBox(boxId, address, value, assets)
+}
+
+private fun getAssetInstanceInfosFromErgoBoxToken(tokensColl: Coll<Tuple2<ByteArray, Any>>): List<AssetInstanceInfo> {
     val tokens = Iso.isoTokensListToPairsColl().from(tokensColl)
     return tokens.map {
         val tokenInfo = AssetInstanceInfo()

@@ -4,8 +4,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.ergoplatform.ErgoBox
-import org.ergoplatform.appkit.ErgoId
 import org.ergoplatform.deserializeErgobox
 import org.ergoplatform.deserializeUnsignedTxOffline
 import org.ergoplatform.utils.Base64Coder
@@ -197,12 +195,13 @@ fun PromptSigningResult.buildTransactionInfo(): TransactionInfo {
     val unsignedTx = deserializeUnsignedTxOffline(serializedTx!!)
 
     // deserialize input boxes and store in hashmap
-    val inputBoxes = HashMap<String, ErgoBox>()
+    val inputBoxes = HashMap<String, TransactionInfoBox>()
     serializedInputs?.forEach { input ->
         try {
             val ergoBox = deserializeErgobox(input)
             ergoBox?.let {
-                inputBoxes.put(ErgoId(ergoBox.id()).toString(), ergoBox)
+                val inboxInfo = it.toTransactionInfoBox()
+                inputBoxes.put(inboxInfo.boxId, inboxInfo)
             }
         } catch (t: Throwable) {
             // ignore errors

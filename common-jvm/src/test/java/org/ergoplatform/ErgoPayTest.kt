@@ -16,8 +16,7 @@ class ErgoPayTest {
         assertFalse(isErgoPaySigningRequest(""))
 
         val ergoPaySigningRequest = parseErgoPaySigningRequestFromUri(uri)
-        assertNotNull(ergoPaySigningRequest)
-        ergoPaySigningRequest?.apply {
+        ergoPaySigningRequest.apply {
             assertNotNull(reducedTx)
             assertNull(message)
             assertNull(replyToUrl)
@@ -27,5 +26,9 @@ class ErgoPayTest {
             val parsedTx = deserializeUnsignedTxOffline(reducedTx!!)
             assertNotNull(parsedTx)
         }
+
+        // this will fetch information from ergo explorer, commented since server problems would break build
+        // val txInfo = ergoPaySigningRequest.buildTransactionInfo(ErgoApiService.getOrInit(TestPreferencesProvider()))
+        // assertNotNull(txInfo)
     }
 }

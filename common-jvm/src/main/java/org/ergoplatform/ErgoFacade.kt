@@ -112,12 +112,7 @@ fun sendErgoTx(
     texts: StringProvider
 ): SendTransactionResult {
     try {
-        val ergoClient = RestApiErgoClient.create(
-            prefs.prefNodeUrl,
-            getErgoNetworkType(),
-            "",
-            prefs.prefExplorerApiUrl
-        )
+        val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
             val proverBuilder = ctx.newProverBuilder()
                 .withMnemonic(
@@ -158,12 +153,7 @@ fun prepareSerializedErgoTx(
     texts: StringProvider
 ): PromptSigningResult {
     try {
-        val ergoClient = RestApiErgoClient.create(
-            prefs.prefNodeUrl,
-            getErgoNetworkType(),
-            "",
-            prefs.prefExplorerApiUrl
-        )
+        val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
             val unsigned = BoxOperations.putToContractTxUnsigned(
@@ -227,6 +217,14 @@ fun signSerializedErgoTx(
     }
 }
 
+private fun getRestErgoClient(prefs: PreferencesProvider) =
+    RestApiErgoClient.create(
+        prefs.prefNodeUrl,
+        getErgoNetworkType(),
+        "",
+        prefs.prefExplorerApiUrl
+    )
+
 private fun getColdErgoClient() = ColdErgoClient(
     getErgoNetworkType(),
     Parameters().maxBlockCost(ERG_MAX_BLOCK_COST)
@@ -241,12 +239,7 @@ fun sendSignedErgoTx(
     texts: StringProvider
 ): SendTransactionResult {
     try {
-        val ergoClient = RestApiErgoClient.create(
-            prefs.prefNodeUrl,
-            getErgoNetworkType(),
-            "",
-            prefs.prefExplorerApiUrl
-        )
+        val ergoClient = getRestErgoClient(prefs)
         val txId = ergoClient.execute { ctx ->
             val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
             ctx.sendTransaction(signedTx)

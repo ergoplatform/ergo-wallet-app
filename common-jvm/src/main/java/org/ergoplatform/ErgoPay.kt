@@ -1,5 +1,6 @@
 package org.ergoplatform
 
+import org.ergoplatform.transactions.*
 import org.ergoplatform.utils.Base64Coder
 
 /**
@@ -22,17 +23,30 @@ fun isErgoPaySigningRequest(uri: String): Boolean {
     return uri.startsWith(uriSchemePrefix, true)
 }
 
-fun parseErgoPaySigningRequestFromUri(uri: String): ErgoPaySigningRequest? {
+fun parseErgoPaySigningRequestFromUri(uri: String): ErgoPaySigningRequest {
     if (!isErgoPaySigningRequest(uri)) {
-        return null
+        throw IllegalArgumentException("No ergopay URI provided.")
     }
 
     val uriWithoutPrefix = uri.substring(uriSchemePrefix.length)
-    val reducedTx = try {
-        Base64Coder.decode(uriWithoutPrefix, true)
-    } catch (t: Throwable) {
-        null
+    val reducedTx = Base64Coder.decode(uriWithoutPrefix, true)
+
+    return ErgoPaySigningRequest(reducedTx)
+}
+
+/**
+ * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
+ * call this only from non-UI thread and within an applicable try/catch
+ */
+fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApiService): TransactionInfo {
+    val unsignedTx = deserializeUnsignedTxOffline(reducedTx!!)
+
+    val inputsMap = HashMap<String, TransactionInfoBox>()
+    unsignedTx.getInputBoxesIds().forEach {
+        val boxInfo = ergoApiService.getBoxInformation(it).execute().body()!!
+        inputsMap.put(boxInfo.boxId, boxInfo.toTransactionInfoBox())
     }
 
-    return reducedTx?.let { ErgoPaySigningRequest(reducedTx = it) }
+    return unsignedTx.buildTransactionInfo(inputsMap)
 }
+
