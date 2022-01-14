@@ -143,12 +143,21 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 SigningPromptDialogFragment().show(childFragmentManager, null)
             }
         })
+        viewModel.errorMessageLiveData.observe(viewLifecycleOwner, {
+            MaterialAlertDialogBuilder(requireContext())
+                .setMessage(it)
+                .setPositiveButton(R.string.zxing_button_ok, null)
+                .show()
+        })
         viewModel.txId.observe(viewLifecycleOwner, {
             it?.let {
                 binding.cardviewTxEdit.visibility = View.GONE
                 binding.cardviewTxDone.visibility = View.VISIBLE
                 binding.labelTxId.text = it
             }
+        })
+        viewModel.ergoPayLiveData.observe(viewLifecycleOwner, {
+            // TODO Ergo Pay navigate to confirmation screen
         })
 
         // Add click listeners
@@ -389,18 +398,22 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let {
-                viewModel.uiLogic.qrCodeScanned(it, { data, walletId ->
-                    findNavController().navigate(
-                        SendFundsFragmentDirections
-                            .actionSendFundsFragmentToColdWalletSigningFragment(
-                                data,
-                                walletId
-                            )
-                    )
-                }, { address, amount ->
-                    binding.tvReceiver.editText?.setText(address)
-                    amount?.let { setAmountEdittext(amount) }
-                })
+                viewModel.uiLogic.qrCodeScanned(
+                    it,
+                    AndroidStringProvider(requireContext()),
+                    { data, walletId ->
+                        findNavController().navigate(
+                            SendFundsFragmentDirections
+                                .actionSendFundsFragmentToColdWalletSigningFragment(
+                                    data,
+                                    walletId
+                                )
+                        )
+                    },
+                    { address, amount ->
+                        binding.tvReceiver.editText?.setText(address)
+                        amount?.let { setAmountEdittext(amount) }
+                    })
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)

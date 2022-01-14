@@ -1,5 +1,6 @@
-package org.ergoplatform
+package org.ergoplatform.transactions
 
+import org.ergoplatform.*
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -15,7 +16,7 @@ class ErgoPayTest {
         assertTrue(isErgoPaySigningRequest(uri))
         assertFalse(isErgoPaySigningRequest(""))
 
-        val ergoPaySigningRequest = parseErgoPaySigningRequestFromUri(uri)
+        val ergoPaySigningRequest = getErgoPaySigningRequest(uri)
         ergoPaySigningRequest.apply {
             assertNotNull(reducedTx)
             assertNull(message)

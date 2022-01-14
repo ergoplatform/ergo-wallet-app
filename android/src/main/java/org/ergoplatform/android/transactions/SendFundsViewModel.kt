@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ErgoAmount
+import org.ergoplatform.ErgoPaySigningRequest
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.RoomWalletDbProvider
@@ -47,6 +48,11 @@ class SendFundsViewModel : ViewModel() {
     // the live data gets data posted on adding or removing tokens, not on every amount change
     private val _tokensChosenLiveData = MutableLiveData<List<String>>()
     val tokensChosenLiveData: LiveData<List<String>> = _tokensChosenLiveData
+
+    private val _errorMessageLiveData = SingleLiveEvent<String>()
+    val errorMessageLiveData: LiveData<String> = _errorMessageLiveData
+    private val _ergoPayLiveData = SingleLiveEvent<ErgoPaySigningRequest>()
+    val ergoPayLiveData: LiveData<ErgoPaySigningRequest> = _ergoPayLiveData
 
     fun initWallet(ctx: Context, walletId: Int, derivationIdx: Int, paymentRequest: String?) {
         uiLogic.initWallet(
@@ -143,6 +149,14 @@ class SendFundsViewModel : ViewModel() {
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
             _signingPromptData.postValue(signingPrompt)
+        }
+
+        override fun showErrorMessage(message: String) {
+            _errorMessageLiveData.postValue(message)
+        }
+
+        override fun notifyHasErgoPaySignReq(epsr: ErgoPaySigningRequest) {
+            _ergoPayLiveData.postValue(epsr)
         }
     }
 }

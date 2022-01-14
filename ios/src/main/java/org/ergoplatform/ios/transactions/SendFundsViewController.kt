@@ -56,8 +56,13 @@ class SendFundsViewController(
         )
         uiBarButtonItem.setOnClickListener {
             presentViewController(QrScannerViewController {
-                uiLogic.qrCodeScanned(it, { data, walletId ->
-                    navigationController.pushViewController(ColdWalletSigningViewController(data, walletId), true)
+                uiLogic.qrCodeScanned(it, IosStringProvider(texts), { data, walletId ->
+                    navigationController.pushViewController(
+                        ColdWalletSigningViewController(
+                            data,
+                            walletId
+                        ), true
+                    )
                 }, { address, amount ->
                     inputReceiver.text = address
                     inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
@@ -437,6 +442,17 @@ class SendFundsViewController(
                 ) {}
             }
 
+        }
+
+        override fun showErrorMessage(message: String) {
+            runOnMainThread {
+                val vc = buildSimpleAlertController("", message, texts)
+                presentViewController(vc, true) {}
+            }
+        }
+
+        override fun notifyHasErgoPaySignReq(epsr: ErgoPaySigningRequest) {
+            // TODO Ergo Pay
         }
     }
 }

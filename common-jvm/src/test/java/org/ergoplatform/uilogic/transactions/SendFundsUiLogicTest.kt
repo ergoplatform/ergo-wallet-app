@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.ergoplatform.ErgoAmount
+import org.ergoplatform.ErgoPaySigningRequest
 import org.ergoplatform.appkit.Parameters
 import org.ergoplatform.persistance.*
 import org.ergoplatform.transactions.TransactionResult
@@ -147,6 +148,14 @@ class SendFundsUiLogicTest {
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
+
+        }
+
+        override fun showErrorMessage(message: String) {
+
+        }
+
+        override fun notifyHasErgoPaySignReq(epsr: ErgoPaySigningRequest) {
 
         }
 

@@ -11,10 +11,8 @@ import org.ergoplatform.appkit.Parameters
 import org.ergoplatform.persistance.*
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.*
-import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_AMOUNT
-import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_BUT_NO_ERG
-import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_NOT_FOUND
-import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.*
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.*
 import kotlin.math.max
 
@@ -367,11 +365,26 @@ abstract class SendFundsUiLogic {
 
     fun qrCodeScanned(
         qrCodeData: String,
+        stringProvider: StringProvider,
         navigateToColdWalletSigning: ((signingData: String, walletId: Int) -> Unit),
-        setPaymentRequestDataToUi: ((receiverAddress: String, amount: ErgoAmount?) -> Unit)
+        setPaymentRequestDataToUi: ((receiverAddress: String, amount: ErgoAmount?) -> Unit),
     ) {
         if (wallet?.walletConfig?.secretStorage != null && isColdSigningRequestChunk(qrCodeData)) {
             navigateToColdWalletSigning.invoke(qrCodeData, wallet!!.walletConfig.id)
+        } else if (isErgoPaySigningRequest(qrCodeData)) {
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    if (isErgoPayStaticRequest(qrCodeData)) {
+                        val epsr = getErgoPaySigningRequest(qrCodeData)
+                        notifyHasErgoPaySignReq(epsr)
+                    } else {
+                        TODO("Ergo Pay use background thread")
+                    }
+                } catch (t: Throwable) {
+                    LogUtils.logDebug("ErgoPay", "Error ${t.message}", t)
+                    showErrorMessage("Error: ${t.message}")
+                }
+            }
         } else {
             val content = parsePaymentRequest(qrCodeData)
             content?.let {
@@ -380,7 +393,11 @@ abstract class SendFundsUiLogic {
                     content.amount.let { amount -> if (amount.nanoErgs > 0) amount else null }
                 )
                 addTokensFromPaymentRequest(content.tokens)
-            }
+            } ?: showErrorMessage(
+                stringProvider.getString(
+                    STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
+                )
+            )
         }
     }
 
@@ -393,6 +410,8 @@ abstract class SendFundsUiLogic {
     abstract fun notifyHasTxId(txId: String)
     abstract fun notifyHasErgoTxResult(txResult: TransactionResult)
     abstract fun notifyHasSigningPromptData(signingPrompt: String)
+    abstract fun showErrorMessage(message: String)
+    abstract fun notifyHasErgoPaySignReq(epsr: ErgoPaySigningRequest)
 
     data class CheckCanPayResponse(
         val canPay: Boolean,
