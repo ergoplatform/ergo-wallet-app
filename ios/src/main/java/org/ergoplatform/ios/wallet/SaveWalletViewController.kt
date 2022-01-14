@@ -1,5 +1,6 @@
 package org.ergoplatform.ios.wallet
 
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -150,6 +151,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
         progressIndicator.centerVertical().centerHorizontal()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun saveToDbAndDismissController(encType: Int, secretStorage: ByteArray) {
         GlobalScope.launch(Dispatchers.IO) {
             val appDelegate = getAppDelegate()

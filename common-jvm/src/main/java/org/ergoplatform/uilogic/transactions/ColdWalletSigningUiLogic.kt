@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.signSerializedErgoTx
@@ -58,10 +57,7 @@ abstract class ColdWalletSigningUiLogic {
             try {
                 val sr = coldSigningRequestFromQrChunks(qrPagesCollector.getAllPages())
                 signingRequest = sr
-                return buildTransactionInfoFromReduced(
-                    sr.serializedTx!!,
-                    sr.serializedInputs
-                )
+                return sr.buildTransactionInfo()
             } catch (t: Throwable) {
                 LogUtils.logDebug("ColdWalletSigning", "Error thrown on signing", t)
                 val message = t.message ?: t.javaClass.name

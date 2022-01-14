@@ -1,9 +1,9 @@
 package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.CoroutineScope
-import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.SigningResult
+import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.coldSigningResponseToQrChunks
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*

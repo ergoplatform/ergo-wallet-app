@@ -189,7 +189,7 @@ fun prepareSerializedErgoTx(
     }
 }
 
-fun deserializeUnsignedTx(serializedTx: ByteArray): UnsignedErgoLikeTransaction {
+fun deserializeUnsignedTxOffline(serializedTx: ByteArray): UnsignedErgoLikeTransaction {
     return getColdErgoClient().execute { ctx ->
         return@execute ctx.parseReducedTransaction(serializedTx).tx.unsignedTx()
     }

@@ -1,21 +1,78 @@
 package org.ergoplatform.transactions
 
+import org.ergoplatform.ErgoBox
+import org.ergoplatform.UnsignedErgoLikeTransaction
+import org.ergoplatform.appkit.Address
+import org.ergoplatform.appkit.ErgoId
+import org.ergoplatform.appkit.Iso
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.InputInfo
 import org.ergoplatform.explorer.client.model.OutputInfo
-import org.ergoplatform.explorer.client.model.TransactionInfo
+import org.ergoplatform.getErgoNetworkType
+import scala.Tuple2
+import scala.collection.JavaConversions
+import special.collection.Coll
 import kotlin.math.min
+
+data class TransactionInfo(
+    val id: String,
+    val inputs: List<InputInfo>,
+    val outputs: List<OutputInfo>
+)
+
+fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String, ErgoBox>): TransactionInfo {
+    val inputsList = ArrayList<InputInfo>()
+    val outputsList = ArrayList<OutputInfo>()
+
+    // now add to TransactionInfo, if possible
+    JavaConversions.seqAsJavaList(inputs())!!.forEach {
+        val boxid = ErgoId(it.boxId()).toString()
+        val inputInfo = InputInfo()
+        inputInfo.boxId = boxid
+        inputBoxes.get(boxid)?.let { ergoBox ->
+            inputInfo.address =
+                Address.fromErgoTree(ergoBox.ergoTree(), getErgoNetworkType()).toString()
+            inputInfo.value = ergoBox.value()
+            getAssetInstanceInfos(ergoBox.additionalTokens()).forEach { assetsItem ->
+                inputInfo.addAssetsItem(assetsItem)
+            }
+        } ?: throw java.lang.IllegalArgumentException("No information for input box $boxid")
+        inputsList.add(inputInfo)
+    }
+
+    JavaConversions.seqAsJavaList(outputCandidates())!!.forEach { ergoBoxCandidate ->
+        val outputInfo = OutputInfo()
+
+        outputInfo.address =
+            Address.fromErgoTree(ergoBoxCandidate.ergoTree(), getErgoNetworkType()).toString()
+        outputInfo.value = ergoBoxCandidate.value()
+
+        outputsList.add(outputInfo)
+
+        getAssetInstanceInfos(ergoBoxCandidate.additionalTokens()).forEach {
+            outputInfo.addAssetsItem(it)
+        }
+    }
+
+    return TransactionInfo(id(), inputsList, outputsList)
+}
+
+private fun getAssetInstanceInfos(tokensColl: Coll<Tuple2<ByteArray, Any>>): List<AssetInstanceInfo> {
+    val tokens = Iso.isoTokensListToPairsColl().from(tokensColl)
+    return tokens.map {
+        val tokenInfo = AssetInstanceInfo()
+        tokenInfo.amount = it.value
+        tokenInfo.tokenId = it.id.toString()
+
+        tokenInfo
+    }
+}
 
 /**
  * combines inboxes and outboxes and reduces change amounts for user-friendly outputs
  * returns a new object with less information
- * TODO #13 use own db entity data class (null safe)
  */
 fun TransactionInfo.reduceBoxes(): TransactionInfo {
-    val retVal = TransactionInfo()
-
-    retVal.id = id
-
     // combine boxes to or from same addresses
     val combinedInputs = HashMap<String, InputInfo>()
 
@@ -59,12 +116,12 @@ fun TransactionInfo.reduceBoxes(): TransactionInfo {
             // we can operate on the list entries safely because combineTokens() copied
             // all entries of the original TransactionInfo
             input.assets?.forEach { inputAssetInfo ->
-                output.assets?.filter { inputAssetInfo.tokenId.equals(it.tokenId) }?.firstOrNull()?.let {
-                    outputAssetInfo ->
-                    val tokenAmount = min(inputAssetInfo.amount, outputAssetInfo.amount)
-                    inputAssetInfo.amount = inputAssetInfo.amount - tokenAmount
-                    outputAssetInfo.amount = outputAssetInfo.amount - tokenAmount
-                }
+                output.assets?.filter { inputAssetInfo.tokenId.equals(it.tokenId) }?.firstOrNull()
+                    ?.let { outputAssetInfo ->
+                        val tokenAmount = min(inputAssetInfo.amount, outputAssetInfo.amount)
+                        inputAssetInfo.amount = inputAssetInfo.amount - tokenAmount
+                        outputAssetInfo.amount = outputAssetInfo.amount - tokenAmount
+                    }
             }
 
             input.assets = input.assets?.filter { it.amount != 0L }
@@ -72,18 +129,21 @@ fun TransactionInfo.reduceBoxes(): TransactionInfo {
         }
     }
 
+    val inputsList = ArrayList<InputInfo>()
     combinedInputs.values.forEach {
         // it.address == null needed since we need to keep boxes with null value
         // when no input box information available
         if (it.value > 0 || !it.assets.isNullOrEmpty() || it.address == null)
-            retVal.addInputsItem(it)
-    }
-    combinedOutputs.values.forEach {
-        if (it.value > 0 || !it.assets.isNullOrEmpty())
-            retVal.addOutputsItem(it)
+            inputsList.add(it)
     }
 
-    return retVal
+    val outputsList = ArrayList<OutputInfo>()
+    combinedOutputs.values.forEach {
+        if (it.value > 0 || !it.assets.isNullOrEmpty())
+            outputsList.add(it)
+    }
+
+    return TransactionInfo(id, inputsList, outputsList)
 }
 
 /**

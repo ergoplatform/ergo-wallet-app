@@ -231,7 +231,11 @@ public class Base64Coder {
 	 * @return An array containing the decoded data bytes.
 	 * @throws IllegalArgumentException If the input is not valid Base64 encoded data. */
 	public static byte[] decode (String s) {
-		return decode(s.toCharArray());
+		return decode(s.toCharArray(), false);
+	}
+
+	public static byte[] decode (String s, boolean useUrlSafeEncoding) {
+		return decode(s.toCharArray(), useUrlSafeEncoding);
 	}
 
 	/** Decodes a byte array from Base64 format. No blanks or line breaks are allowed within the Base64 encoded input data.
@@ -255,8 +259,8 @@ public class Base64Coder {
 	 * @param in A character array containing the Base64 encoded data.
 	 * @return An array containing the decoded data bytes.
 	 * @throws IllegalArgumentException If the input is not valid Base64 encoded data. */
-	public static byte[] decode (char[] in) {
-		return decode(in, 0, in.length, regularMap.decodingMap);
+	public static byte[] decode (char[] in, boolean useUrlSafeEncoding) {
+		return decode(in, 0, in.length, useUrlSafeEncoding ? urlsafeMap.decodingMap : regularMap.decodingMap);
 	}
 
 	public static byte[] decode (char[] in, int iOff, int iLen, CharMap inverseCharMap) {

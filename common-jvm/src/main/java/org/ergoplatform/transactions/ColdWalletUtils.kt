@@ -5,20 +5,10 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.ErgoBox
-import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoId
-import org.ergoplatform.appkit.Iso
 import org.ergoplatform.deserializeErgobox
-import org.ergoplatform.deserializeUnsignedTx
-import org.ergoplatform.explorer.client.model.AssetInstanceInfo
-import org.ergoplatform.explorer.client.model.InputInfo
-import org.ergoplatform.explorer.client.model.OutputInfo
-import org.ergoplatform.explorer.client.model.TransactionInfo
-import org.ergoplatform.getErgoNetworkType
+import org.ergoplatform.deserializeUnsignedTxOffline
 import org.ergoplatform.utils.Base64Coder
-import scala.Tuple2
-import scala.collection.JavaConversions
-import special.collection.Coll
 
 private const val JSON_FIELD_REDUCED_TX = "reducedTx"
 private const val JSON_FIELD_SIGNED_TX = "signedTx"
@@ -203,18 +193,8 @@ private fun parseQrChunk(chunk: String, property: String): QrChunk {
     return QrChunk(index, pages, jsonTree.get(property).asString)
 }
 
-/*
- * TODO #13 use own db entity data class (null safe)
- */
-fun buildTransactionInfoFromReduced(
-    serializedTx: ByteArray,
-    serializedInputs: List<ByteArray>? = null
-): TransactionInfo {
-    val unsignedTx = deserializeUnsignedTx(serializedTx)
-
-    val retVal = TransactionInfo()
-
-    retVal.id = unsignedTx.id()
+fun PromptSigningResult.buildTransactionInfo(): TransactionInfo {
+    val unsignedTx = deserializeUnsignedTxOffline(serializedTx!!)
 
     // deserialize input boxes and store in hashmap
     val inputBoxes = HashMap<String, ErgoBox>()
@@ -229,49 +209,7 @@ fun buildTransactionInfoFromReduced(
         }
     }
 
-    // now add to TransactionInfo, if possible
-    JavaConversions.seqAsJavaList(unsignedTx.inputs())!!.forEach {
-        val boxid = ErgoId(it.boxId()).toString()
-        val inputInfo = InputInfo()
-        inputInfo.boxId = boxid
-        inputBoxes.get(boxid)?.let { ergoBox ->
-            inputInfo.address =
-                Address.fromErgoTree(ergoBox.ergoTree(), getErgoNetworkType()).toString()
-            inputInfo.value = ergoBox.value()
-            getAssetInstanceInfos(ergoBox.additionalTokens()).forEach { assetsItem ->
-                inputInfo.addAssetsItem(assetsItem)
-            }
-        } ?: throw java.lang.IllegalArgumentException("No information for input box $boxid")
-        retVal.addInputsItem(inputInfo)
-    }
-
-    JavaConversions.seqAsJavaList(unsignedTx.outputCandidates())!!.forEach { ergoBoxCandidate ->
-        val outputInfo = OutputInfo()
-
-        outputInfo.address =
-            Address.fromErgoTree(ergoBoxCandidate.ergoTree(), getErgoNetworkType()).toString()
-        outputInfo.value = ergoBoxCandidate.value()
-
-        retVal.addOutputsItem(outputInfo)
-
-        getAssetInstanceInfos(ergoBoxCandidate.additionalTokens()).forEach {
-            outputInfo.addAssetsItem(it)
-        }
-    }
-
-    return retVal
-
-}
-
-private fun getAssetInstanceInfos(tokensColl: Coll<Tuple2<ByteArray, Any>>): List<AssetInstanceInfo> {
-    val tokens = Iso.isoTokensListToPairsColl().from(tokensColl)
-    return tokens.map {
-        val tokenInfo = AssetInstanceInfo()
-        tokenInfo.amount = it.value
-        tokenInfo.tokenId = it.id.toString()
-
-        tokenInfo
-    }
+    return unsignedTx.buildTransactionInfo(inputBoxes)
 }
 
 class QrCodePagesCollector(private val parser: (String) -> QrChunk?) {
