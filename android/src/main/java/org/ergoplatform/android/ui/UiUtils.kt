@@ -19,6 +19,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
@@ -117,4 +120,17 @@ fun showDialogWithCopyOption(context: Context, message: String) {
         }
         .setNegativeButton(R.string.label_dismiss, null)
         .show()
+}
+
+/**
+ * expands on first show. Call this in onCreateView()
+ */
+fun BottomSheetDialogFragment.expandBottomSheetOnShow() {
+    dialog?.setOnShowListener { dialog ->
+        val d = dialog as BottomSheetDialog
+        d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.let {
+            BottomSheetBehavior.from(it).state =
+                BottomSheetBehavior.STATE_EXPANDED
+        }
+    }
 }

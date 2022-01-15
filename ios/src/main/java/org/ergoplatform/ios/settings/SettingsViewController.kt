@@ -36,7 +36,7 @@ class SettingsViewController : CoroutineViewController() {
         version.text = CrashHandler.getAppVersion()
         version.textAlignment = NSTextAlignment.Center
         val compiledBy = Body1Label()
-        compiledBy.text = texts.get(STRING_DESC_ABOUT)
+        compiledBy.text = texts.format(STRING_DESC_ABOUT, texts.get(STRING_ABOUT_YEAR))
         compiledBy.textAlignment = NSTextAlignment.Center
 
         val moreInfo = UITextView(CGRect.Zero()).apply {
@@ -73,6 +73,7 @@ class SettingsViewController : CoroutineViewController() {
                     ergoLogo,
                     title,
                     version,
+                    compiledBy,
                     moreInfo,
                     createHorizontalSeparator(),
                     fiatCurrencyContainer,

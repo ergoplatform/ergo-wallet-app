@@ -177,7 +177,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
         binding.walletBalance.amount = ergoAmount.toDouble()
         binding.walletUnconfirmed.amount = unconfirmed.toDouble()
-        binding.walletUnconfirmed.visibility = if (unconfirmed.nanoErgs == 0L) View.GONE else View.VISIBLE
+        binding.walletUnconfirmed.visibility = if (unconfirmed.isZero()) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
 
         // Fill fiat value

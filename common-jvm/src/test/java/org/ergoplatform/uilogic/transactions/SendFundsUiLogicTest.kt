@@ -146,7 +146,7 @@ class SendFundsUiLogicTest {
 
         }
 
-        override fun notifyHasSigningPromptData(signingPrompt: String?) {
+        override fun notifyHasSigningPromptData(signingPrompt: String) {
 
         }
 

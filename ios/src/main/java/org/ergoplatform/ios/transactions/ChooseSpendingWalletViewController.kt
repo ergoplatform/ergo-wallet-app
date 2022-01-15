@@ -77,7 +77,7 @@ class ChooseSpendingWalletViewController(
             .bottomToSuperview(bottomInset = DEFAULT_MARGIN)
 
         amountLabel.setErgoAmount(paymentRequest.amount)
-        amountLabel.isHidden = paymentRequest.amount.nanoErgs == 0L
+        amountLabel.isHidden = paymentRequest.amount.isZero()
         recipientLabel.text = paymentRequest.address
     }
 

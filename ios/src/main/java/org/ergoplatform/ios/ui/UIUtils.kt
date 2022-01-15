@@ -4,6 +4,7 @@ import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.Main
 import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
 import org.robovm.apple.coregraphics.CGAffineTransform
+import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.coreimage.CIFilter
 import org.robovm.apple.foundation.*
@@ -14,6 +15,7 @@ import org.robovm.objc.Selector
 const val MAX_WIDTH = 500.0
 const val DEFAULT_MARGIN = 6.0
 const val DEFAULT_TEXT_FIELD_HEIGHT = 40.0
+const val DEFAULT_QR_CODE_SIZE = 280.0
 
 const val IMAGE_WALLET = "rectangle.on.rectangle.angled"
 val IMAGE_SETTINGS = if (Foundation.getMajorSystemVersion() >= 14) "gearshape" else "gear"
@@ -25,6 +27,7 @@ const val IMAGE_EXCLAMATION_MARK = "exclamationmark.circle.fill"
 const val IMAGE_NO_CONNECTION = "icloud.slash"
 const val IMAGE_SEND = "paperplane"
 const val IMAGE_RECEIVE = "arrow.down.left"
+const val IMAGE_QR_CODE = "qrcode"
 const val IMAGE_QR_SCAN = "qrcode.viewfinder"
 const val IMAGE_PLUS_CIRCLE = "plus.circle.fill"
 const val IMAGE_PLUS = "plus"
@@ -38,6 +41,8 @@ const val IMAGE_TRANSACTIONS = "arrow.right.arrow.left"
 const val IMAGE_ADDRESS_LIST = "list.number"
 const val IMAGE_CHEVRON_DOWN = "chevron.down"
 const val IMAGE_CHEVRON_UP = "chevron.up"
+val IMAGE_SWITCH_RESOLUTION = if (Foundation.getMajorSystemVersion() >= 14)
+    "arrow.up.left.and.down.right.magnifyingglass" else "1.magnifyingglass"
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
@@ -64,7 +69,7 @@ fun UIViewController.shareText(text: String, sourceView: UIView) {
     presentViewController(share, true, null)
 }
 
-fun UIImageView.setQrCode(data: String, size: Int) {
+fun UIImageView.setQrCode(data: String, size: Double) {
     val nsString = NSString(data).toData(NSStringEncoding.ASCII)
     val filter = CIFilter("CIQRCodeGenerator")
     filter.keyValueCoder.setValue("inputMessage", nsString)
@@ -78,8 +83,6 @@ fun UIImageView.setQrCode(data: String, size: Int) {
         val output = unscaledOutput.newImageByApplyingTransform(transform)
         val image = UIImage(output)
         setImage(image)
-        contentMode = UIViewContentMode.ScaleAspectFit
-        backgroundColor = UIColor.systemRed()
     }
 }
 
@@ -261,4 +264,17 @@ fun buildSimpleAlertController(title: String, message: String, texts: I18NBundle
             UIAlertActionStyle.Default
         ) {})
     return uac
+}
+
+var UIScrollView.page
+    get() = (contentOffset.x / frame.size.width).toInt()
+    set(value) {
+        setContentOffset(CGPoint(frame.size.width * value.toDouble(), contentOffset.y), true)
+    }
+
+fun UIScrollView.scrollToBottom(animated: Boolean = true) {
+    setContentOffset(
+        CGPoint(0.0, contentSize.height - bounds.size.height + contentInset.bottom),
+        animated
+    )
 }

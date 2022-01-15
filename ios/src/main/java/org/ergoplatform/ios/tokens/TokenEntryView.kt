@@ -41,6 +41,11 @@ class TokenEntryView : UIStackView(CGRect.Zero()) {
         return this
     }
 
+    fun bindWalletToken(tokenName: String?, amount: String?) {
+        labelTokenName.text = tokenName ?: ""
+        labelTokenVal.text = amount ?: ""
+    }
+
     fun bindHasMoreTokenHint(moreTokenNum: Int): TokenEntryView {
         labelTokenVal.text = "+$moreTokenNum"
         labelTokenName.text = getAppDelegate().texts.get(STRING_LABEL_MORE_TOKENS)

@@ -18,6 +18,9 @@ import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
+import org.ergoplatform.transactions.coldSigningResponseToQrChunks
 import org.ergoplatform.transactions.reduceBoxes
 
 /**
@@ -30,6 +33,8 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
 
     private val args: ColdWalletSigningFragmentArgs by navArgs()
 
+    private var scaleDown = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,53 +45,15 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
 
     private val viewModel: ColdWalletSigningViewModel
         get() {
-            val viewModel = ViewModelProvider(this).get(ColdWalletSigningViewModel::class.java)
-            return viewModel
+            return ViewModelProvider(this).get(ColdWalletSigningViewModel::class.java)
         }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val viewModel = viewModel
 
-        args.qrCode?.let { viewModel.addQrCodeChunk(it) }
+        addQrCodeChunk(args.qrCode)
         viewModel.setWalletId(args.walletId, requireContext())
-
-        viewModel.transactionInfo.observe(viewLifecycleOwner, {
-            // don't show transaction info when we already have a signing result
-            if (viewModel.signedQrCode != null)
-                return@observe
-
-            if (it == null) {
-                // refresh information on scanned codes
-                binding.labelScannedPages.text = getString(
-                    R.string.label_qr_pages_info,
-                    viewModel.pagesAdded.toString(),
-                    viewModel.pagesQrCode.toString()
-                )
-                binding.cardScanMore.visibility = View.VISIBLE
-            }
-
-            it?.reduceBoxes()?.let {
-                binding.transactionInfo.visibility = View.VISIBLE
-                binding.cardScanMore.visibility = View.GONE
-
-                binding.layoutInboxes.apply {
-                    removeAllViews()
-
-                    it.inputs.forEach { input ->
-                        bindBoxView(this, input.value, input.address ?: input.boxId, input.assets)
-                    }
-                }
-
-                binding.layoutOutboxes.apply {
-                    removeAllViews()
-
-                    it.outputs.forEach { output ->
-                        bindBoxView(this, output.value, output.address, output.assets)
-                    }
-                }
-            }
-        })
 
         viewModel.lockInterface.observe(viewLifecycleOwner, {
             if (it)
@@ -101,8 +68,9 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
                 binding.cardSigningResult.visibility = View.VISIBLE
                 binding.cardScanMore.visibility = View.GONE
 
-                binding.qrCodePager.adapter = QrPagerAdapter(viewModel.signedQrCode!!)
-                refreshButtonState()
+                binding.switchResolution.visibility =
+                    if (viewModel.signedQrCode!!.length > QR_DATA_LENGTH_LOW_RES) View.VISIBLE else View.GONE
+                setQrData()
 
             } else {
                 binding.cardSigningResult.visibility = View.GONE
@@ -136,6 +104,11 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             binding.qrCodePager.currentItem = binding.qrCodePager.currentItem + 1
         }
 
+        binding.switchResolution.setOnClickListener {
+            scaleDown = !scaleDown
+            setQrData()
+        }
+
         binding.buttonDismiss.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -151,6 +124,63 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
                 refreshButtonState()
             }
         })
+    }
+
+    private fun setQrData() {
+        viewModel.signedQrCode?.let {
+            binding.qrCodePager.adapter = QrPagerAdapter(
+                coldSigningResponseToQrChunks(
+                    it,
+                    if (scaleDown) QR_DATA_LENGTH_LOW_RES else QR_DATA_LENGTH_LIMIT
+                )
+            )
+            refreshButtonState()
+        }
+    }
+
+    private fun addQrCodeChunk(qrCode: String?) {
+        qrCode?.let { viewModel.uiLogic.addQrCodeChunk(qrCode) }
+
+        val transactionInfo = viewModel.uiLogic.transactionInfo
+
+        // don't show transaction info when we already have a signing result
+        if (viewModel.signedQrCode != null)
+            return
+
+        if (transactionInfo == null) {
+            // refresh information on scanned codes
+            binding.labelScannedPages.text = getString(
+                R.string.label_qr_pages_info,
+                viewModel.uiLogic.qrPagesCollector.pagesAdded.toString(),
+                viewModel.uiLogic.qrPagesCollector.pagesCount.toString()
+            )
+            binding.cardScanMore.visibility = View.VISIBLE
+            val errorMessage = viewModel.uiLogic.lastErrorMessage
+            binding.labelErrorMessage.visibility =
+                if (errorMessage.isNullOrBlank()) View.GONE else View.VISIBLE
+            binding.labelErrorMessage.text = errorMessage
+        }
+
+        transactionInfo?.reduceBoxes()?.let {
+            binding.transactionInfo.visibility = View.VISIBLE
+            binding.cardScanMore.visibility = View.GONE
+
+            binding.layoutInboxes.apply {
+                removeAllViews()
+
+                it.inputs.forEach { input ->
+                    bindBoxView(this, input.value, input.address ?: input.boxId, input.assets)
+                }
+            }
+
+            binding.layoutOutboxes.apply {
+                removeAllViews()
+
+                it.outputs.forEach { output ->
+                    bindBoxView(this, output.value, output.address, output.assets)
+                }
+            }
+        }
     }
 
     private fun refreshButtonState() {
@@ -210,7 +240,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let {
-                viewModel.addQrCodeChunk(it)
+                addQrCodeChunk(it)
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)

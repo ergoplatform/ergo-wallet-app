@@ -56,16 +56,13 @@ class SendFundsViewController(
         )
         uiBarButtonItem.setOnClickListener {
             presentViewController(QrScannerViewController {
-                // TODO check cold wallet QR
-                val content = parsePaymentRequest(it)
-                content?.let {
-                    inputReceiver.text = content.address
+                uiLogic.qrCodeScanned(it, { data, walletId ->
+                    navigationController.pushViewController(ColdWalletSigningViewController(data, walletId), true)
+                }, { address, amount ->
+                    inputReceiver.text = address
                     inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
-                    content.amount.let { amount ->
-                        if (amount.nanoErgs > 0) setInputAmount(amount)
-                    }
-                    uiLogic.addTokensFromPaymentRequest(content.tokens)
-                }
+                    amount?.let { setInputAmount(amount) }
+                })
             }, true) {}
         }
         navigationController.topViewController.navigationItem.rightBarButtonItem = uiBarButtonItem
@@ -276,14 +273,14 @@ class SendFundsViewController(
         }
 
         if (checkResponse.canPay) {
-            startAuthFlow(uiLogic.wallet!!.walletConfig) { mnemonic ->
-                val appDelegate = getAppDelegate()
-                uiLogic.startPaymentWithMnemonicAsync(
-                    mnemonic, appDelegate.prefs, IosStringProvider(
-                        appDelegate.texts
-                    )
-                )
-            }
+            val walletConfig = uiLogic.wallet!!.walletConfig
+            val appDelegate = getAppDelegate()
+            val stringProvider = IosStringProvider(appDelegate.texts)
+            walletConfig.secretStorage?.let {
+                startAuthFlow(walletConfig) { mnemonic ->
+                    uiLogic.startPaymentWithMnemonicAsync(mnemonic, appDelegate.prefs, stringProvider)
+                }
+            } ?: uiLogic.startColdWalletPayment(appDelegate.prefs, stringProvider)
         }
     }
 
@@ -293,7 +290,8 @@ class SendFundsViewController(
     }
 
     inner class IosSendFundsUiLogic : SendFundsUiLogic() {
-        private var progressViewController: ProgressViewController? = null
+        private val progressViewController =
+            ProgressViewController.ProgressViewControllerPresenter(this@SendFundsViewController)
 
         override val coroutineScope: CoroutineScope
             get() = viewControllerScope
@@ -304,7 +302,6 @@ class SendFundsViewController(
                 if (txDoneView == null) {
                     walletTitle.text = texts.format(STRING_LABEL_SEND_FROM, wallet!!.walletConfig.displayName)
                     readOnlyHint.isHidden = uiLogic.wallet!!.walletConfig.secretStorage != null
-                    sendButton.isEnabled = readOnlyHint.isHidden // TODO cold wallet
                     scrollView.isHidden = false
                 }
             }
@@ -365,16 +362,7 @@ class SendFundsViewController(
 
         override fun notifyUiLocked(locked: Boolean) {
             runOnMainThread {
-                if (locked) {
-                    if (progressViewController == null) {
-                        forceDismissKeyboard()
-                        progressViewController = ProgressViewController()
-                        progressViewController?.presentModalAbove(this@SendFundsViewController)
-                    }
-                } else {
-                    progressViewController?.dismissViewController(false) {}
-                    progressViewController = null
-                }
+                progressViewController.setUiLocked(locked)
             }
         }
 
@@ -442,8 +430,13 @@ class SendFundsViewController(
             }
         }
 
-        override fun notifyHasSigningPromptData(signingPrompt: String?) {
-            TODO("Cold wallet not yet implemented")
+        override fun notifyHasSigningPromptData(signingPrompt: String) {
+            runOnMainThread {
+                presentViewController(
+                    SigningPromptViewController(signingPrompt, uiLogic), true
+                ) {}
+            }
+
         }
     }
 }

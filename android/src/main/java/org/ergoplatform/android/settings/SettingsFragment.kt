@@ -38,6 +38,7 @@ class SettingsFragment : Fragment() {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
         binding.labelVersion.text = BuildConfig.VERSION_NAME
+        binding.labelBuildBy.text = getString(R.string.desc_about, getString(R.string.about_year))
 
         return binding.root
     }

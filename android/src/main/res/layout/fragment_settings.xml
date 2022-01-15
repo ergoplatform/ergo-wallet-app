@@ -46,13 +46,14 @@
                 tools:text="0.1.2" />
 
             <TextView
+                android:id="@+id/label_build_by"
                 style="@style/TextAppearance.App.Body1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/half_horizontal_margin"
                 android:gravity="center"
-                android:text="@string/desc_about"
-                app:layout_constraintTop_toBottomOf="@id/screen_header" />
+                app:layout_constraintTop_toBottomOf="@id/screen_header"
+                tools:text="@string/desc_about" />
 
             <TextView
                 android:id="@+id/label_more_info"

@@ -1,22 +1,20 @@
-package org.ergoplatform.android.transactions
+package org.ergoplatform.transactions
 
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.ErgoBox
-import org.ergoplatform.deserializeErgobox
-import org.ergoplatform.deserializeUnsignedTx
-import org.ergoplatform.getErgoNetworkType
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoId
 import org.ergoplatform.appkit.Iso
+import org.ergoplatform.deserializeErgobox
+import org.ergoplatform.deserializeUnsignedTx
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.InputInfo
 import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.explorer.client.model.TransactionInfo
-import org.ergoplatform.transactions.PromptSigningResult
-import org.ergoplatform.transactions.SigningResult
+import org.ergoplatform.getErgoNetworkType
 import org.ergoplatform.utils.Base64Coder
 import scala.Tuple2
 import scala.collection.JavaConversions
@@ -32,7 +30,7 @@ private const val JSON_FIELD_INPUTS = "inputs"
  */
 fun buildColdSigningRequest(data: PromptSigningResult): String? {
     if (data.success) {
-        val gson = Gson()
+        val gson = GsonBuilder().disableHtmlEscaping().create()
         val root = JsonObject()
         root.addProperty(JSON_FIELD_REDUCED_TX, String(Base64Coder.encode(data.serializedTx!!)))
         root.addProperty(JSON_FIELD_SENDER, data.address)
@@ -49,7 +47,7 @@ fun buildColdSigningRequest(data: PromptSigningResult): String? {
 
 fun buildColdSigningResponse(data: SigningResult): String? {
     if (data.success) {
-        val gson = Gson()
+        val gson = GsonBuilder().disableHtmlEscaping().create()
         val root = JsonObject()
         root.addProperty(JSON_FIELD_SIGNED_TX, String(Base64Coder.encode(data.serializedTx!!)))
         return gson.toJson(root)
@@ -98,18 +96,21 @@ fun parseColdSigningResponse(qrData: String): SigningResult {
     }
 }
 
-const val QR_SIZE_LIMIT = 2900
-private const val QR_PREFIX_COLD_SIGNING_REQUEST = "CSR"
-private const val QR_PREFIX_COLD_SIGNED_TX = "CSTX"
-private const val QR_PREFIX_DATA_DELIMITER = '-'
-private const val QR_PREFIX_HEADER_DELIMITER = '/'
+const val QR_DATA_LENGTH_LIMIT = 2000
+const val QR_DATA_LENGTH_LOW_RES = 400
+private const val QR_PROPERTY_COLD_SIGNING_REQUEST = "CSR"
+private const val QR_PROPERTY_COLD_SIGNED_TX = "CSTX"
+private const val QR_PROPERTY_INDEX = "p"
+private const val QR_PROPERTY_PAGES = "n"
 
-fun coldSigninRequestToQrChunks(serializedSigningRequest: String, sizeLimit: Int): List<String> {
-    return buildQrChunks(QR_PREFIX_COLD_SIGNING_REQUEST, sizeLimit, serializedSigningRequest)
+data class QrChunk(val index: Int, val pages: Int, val data: String)
+
+fun coldSigningRequestToQrChunks(serializedSigningRequest: String, sizeLimit: Int): List<String> {
+    return buildQrChunks(QR_PROPERTY_COLD_SIGNING_REQUEST, sizeLimit, serializedSigningRequest)
 }
 
 fun coldSigningResponseToQrChunks(serializedSigningRequest: String, sizeLimit: Int): List<String> {
-    return buildQrChunks(QR_PREFIX_COLD_SIGNED_TX, sizeLimit, serializedSigningRequest)
+    return buildQrChunks(QR_PROPERTY_COLD_SIGNED_TX, sizeLimit, serializedSigningRequest)
 }
 
 private fun buildQrChunks(
@@ -117,28 +118,31 @@ private fun buildQrChunks(
     sizeLimit: Int,
     serializedSigningRequest: String
 ): List<String> {
-    val actualSizeLimit = sizeLimit - 20 // reserve some space for our prefix
+    val actualSizeLimit = sizeLimit - 30 - prefix.length // reserve some space for our prefix
+
+    val gson = GsonBuilder().disableHtmlEscaping().create()
 
     if (serializedSigningRequest.length <= actualSizeLimit) {
-        return listOf(prefix + QR_PREFIX_DATA_DELIMITER + serializedSigningRequest)
+        val root = JsonObject()
+        root.addProperty(prefix, serializedSigningRequest)
+        return listOf(gson.toJson(root))
     } else {
-        val chunks = serializedSigningRequest.chunked(sizeLimit)
+        val chunks = serializedSigningRequest.chunked(actualSizeLimit)
         var slice = 0
         return chunks.map {
             slice++
-            prefix + QR_PREFIX_HEADER_DELIMITER + slice.toString() + QR_PREFIX_HEADER_DELIMITER + chunks.size + QR_PREFIX_DATA_DELIMITER + it
+            val root = JsonObject()
+            root.addProperty(prefix, it)
+            root.addProperty(QR_PROPERTY_PAGES, chunks.size)
+            root.addProperty(QR_PROPERTY_INDEX, slice)
+            gson.toJson(root)
         }
     }
 }
 
 fun coldSigningRequestFromQrChunks(qrChunks: Collection<String>): PromptSigningResult {
     try {
-        // check the list
-        qrChunks.forEach {
-            if (!isColdSigningRequestChunk(it))
-                throw IllegalArgumentException("Not a cold signing request chunk")
-        }
-        val qrdata = joinQrCodeChunks(qrChunks)
+        val qrdata = joinQrCodeChunks(qrChunks, QR_PROPERTY_COLD_SIGNING_REQUEST)
 
         return parseColdSigningRequest(qrdata)
 
@@ -149,11 +153,7 @@ fun coldSigningRequestFromQrChunks(qrChunks: Collection<String>): PromptSigningR
 
 fun coldSigningResponseFromQrChunks(qrChunks: Collection<String>): SigningResult {
     try {
-        qrChunks.forEach {
-            if (!isColdSignedTxChunk(it))
-                throw IllegalArgumentException("Not a cold signing request chunk")
-        }
-        val qrdata = joinQrCodeChunks(qrChunks)
+        val qrdata = joinQrCodeChunks(qrChunks, QR_PROPERTY_COLD_SIGNED_TX)
 
         return parseColdSigningResponse(qrdata)
 
@@ -162,48 +162,45 @@ fun coldSigningResponseFromQrChunks(qrChunks: Collection<String>): SigningResult
     }
 }
 
-private fun joinQrCodeChunks(qrChunks: Collection<String>): String {
-    val chunksSorted = qrChunks.sortedBy { getQrChunkIndex(it) }.map {
-        if (getQrChunkPagesCount(it) != qrChunks.size)
+private fun joinQrCodeChunks(qrChunks: Collection<String>, property: String): String {
+    val qrList = qrChunks.map { parseQrChunk(it, property) }
+    val chunksSorted = qrList.sortedBy { it.index }.map {
+        if (it.pages != qrChunks.size)
             throw IllegalArgumentException("QR code chunk sizes differ")
 
-        it.substringAfter(
-            QR_PREFIX_DATA_DELIMITER
-        )
+        it.data
     }
-    val qrdata = chunksSorted.joinToString("") { it }
-    return qrdata
+    return chunksSorted.joinToString("") { it }
 }
 
 fun isColdSigningRequestChunk(chunk: String): Boolean {
-    return chunk.startsWith(QR_PREFIX_COLD_SIGNING_REQUEST) &&
-            chunk.contains(QR_PREFIX_DATA_DELIMITER)
+    return getColdSigningRequestChunk(chunk) != null
 }
 
-fun isColdSignedTxChunk(chunk: String): Boolean {
-    return chunk.startsWith(QR_PREFIX_COLD_SIGNED_TX) &&
-            chunk.contains(QR_PREFIX_DATA_DELIMITER)
+fun getColdSigningRequestChunk(chunk: String): QrChunk? {
+    return try {
+        parseQrChunk(chunk, QR_PROPERTY_COLD_SIGNING_REQUEST)
+    } catch (t: Throwable) {
+        null
+    }
 }
 
-fun getQrChunkIndex(chunk: String): Int {
-    val chunkWithoutData = chunk.substringBefore(QR_PREFIX_DATA_DELIMITER)
-    if (!chunkWithoutData.contains(QR_PREFIX_HEADER_DELIMITER))
-        return 0
-
-    val chunkWithoutHeaderPrefix = chunk.substringAfter(QR_PREFIX_HEADER_DELIMITER)
-    val pages = chunkWithoutHeaderPrefix.substringBefore(QR_PREFIX_DATA_DELIMITER)
-        .split(QR_PREFIX_HEADER_DELIMITER)
-    return pages.firstOrNull()?.toIntOrNull() ?: 0
+fun getColdSignedTxChunk(chunk: String): QrChunk? {
+    return try {
+        parseQrChunk(chunk, QR_PROPERTY_COLD_SIGNED_TX)
+    } catch (t: Throwable) {
+        null
+    }
 }
 
-fun getQrChunkPagesCount(chunk: String): Int {
-    val chunkWithoutData = chunk.substringBefore(QR_PREFIX_DATA_DELIMITER)
-    if (!chunkWithoutData.contains(QR_PREFIX_HEADER_DELIMITER))
-        return 1
-
-    val pages = chunkWithoutData.substringBefore(QR_PREFIX_DATA_DELIMITER)
-        .split(QR_PREFIX_HEADER_DELIMITER)
-    return pages.lastOrNull()?.toIntOrNull() ?: 1
+private fun parseQrChunk(chunk: String, property: String): QrChunk {
+    val jsonTree = JsonParser().parse(chunk) as JsonObject
+    if (!jsonTree.has(property)) {
+        throw java.lang.IllegalArgumentException("QR code does not contain element $property")
+    }
+    val index = if (jsonTree.has(QR_PROPERTY_INDEX)) jsonTree.get(QR_PROPERTY_INDEX).asInt else 1
+    val pages = if (jsonTree.has(QR_PROPERTY_PAGES)) jsonTree.get(QR_PROPERTY_PAGES).asInt else 1
+    return QrChunk(index, pages, jsonTree.get(property).asString)
 }
 
 /*
@@ -237,25 +234,27 @@ fun buildTransactionInfoFromReduced(
         val boxid = ErgoId(it.boxId()).toString()
         val inputInfo = InputInfo()
         inputInfo.boxId = boxid
-        inputBoxes.get(boxid)?.let {
-            inputInfo.address = Address.fromErgoTree(it.ergoTree(), getErgoNetworkType()).toString()
-            inputInfo.value = it.value()
-            getAssetInstanceInfos(it.additionalTokens()).forEach {
-                inputInfo.addAssetsItem(it)
+        inputBoxes.get(boxid)?.let { ergoBox ->
+            inputInfo.address =
+                Address.fromErgoTree(ergoBox.ergoTree(), getErgoNetworkType()).toString()
+            inputInfo.value = ergoBox.value()
+            getAssetInstanceInfos(ergoBox.additionalTokens()).forEach { assetsItem ->
+                inputInfo.addAssetsItem(assetsItem)
             }
-        }
+        } ?: throw java.lang.IllegalArgumentException("No information for input box $boxid")
         retVal.addInputsItem(inputInfo)
     }
 
-    JavaConversions.seqAsJavaList(unsignedTx.outputCandidates())!!.forEach {
+    JavaConversions.seqAsJavaList(unsignedTx.outputCandidates())!!.forEach { ergoBoxCandidate ->
         val outputInfo = OutputInfo()
 
-        outputInfo.address = Address.fromErgoTree(it.ergoTree(), getErgoNetworkType()).toString()
-        outputInfo.value = it.value()
+        outputInfo.address =
+            Address.fromErgoTree(ergoBoxCandidate.ergoTree(), getErgoNetworkType()).toString()
+        outputInfo.value = ergoBoxCandidate.value()
 
         retVal.addOutputsItem(outputInfo)
 
-        getAssetInstanceInfos(it.additionalTokens()).forEach {
+        getAssetInstanceInfos(ergoBoxCandidate.additionalTokens()).forEach {
             outputInfo.addAssetsItem(it)
         }
     }
@@ -264,8 +263,8 @@ fun buildTransactionInfoFromReduced(
 
 }
 
-private fun getAssetInstanceInfos(tokens: Coll<Tuple2<ByteArray, Any>>): List<AssetInstanceInfo> {
-    val tokens = Iso.isoTokensListToPairsColl().from(tokens)
+private fun getAssetInstanceInfos(tokensColl: Coll<Tuple2<ByteArray, Any>>): List<AssetInstanceInfo> {
+    val tokens = Iso.isoTokensListToPairsColl().from(tokensColl)
     return tokens.map {
         val tokenInfo = AssetInstanceInfo()
         tokenInfo.amount = it.value
@@ -275,3 +274,34 @@ private fun getAssetInstanceInfos(tokens: Coll<Tuple2<ByteArray, Any>>): List<As
     }
 }
 
+class QrCodePagesCollector(private val parser: (String) -> QrChunk?) {
+    private val qrCodeChunks = HashMap<Int, String>()
+    var pagesCount = 0
+    val pagesAdded get() = qrCodeChunks.size
+
+    fun addPage(qrCodeChunk: String): Boolean {
+        // returns false when QR code could not be not parsed
+        val qrChunk = parser.invoke(qrCodeChunk) ?: return false
+
+        val page = qrChunk.index
+        val count = qrChunk.pages
+
+        // returns false if new QR code has other pages count as the former ones, does not fit
+        if (pagesCount != 0 && count != pagesCount) {
+            return false
+        }
+
+        qrCodeChunks.put(page, qrCodeChunk)
+        pagesCount = count
+
+        return true
+    }
+
+    fun hasAllPages(): Boolean {
+        return pagesAdded == pagesCount
+    }
+
+    fun getAllPages(): Collection<String> {
+        return qrCodeChunks.values
+    }
+}

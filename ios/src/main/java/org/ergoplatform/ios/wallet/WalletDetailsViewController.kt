@@ -287,7 +287,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             val unconfirmed = uiLogic.getUnconfirmedErgoBalance()
             unconfirmedBalance.text = texts.format(STRING_LABEL_ERG_AMOUNT, unconfirmed.toStringRoundToDecimals()) +
                     " " + texts.get(STRING_LABEL_UNCONFIRMED)
-            unconfirmedBalance.isHidden = (unconfirmed.nanoErgs == 0L)
+            unconfirmedBalance.isHidden = (unconfirmed.isZero())
 
             // Fill fiat value
             val nodeConnector = NodeConnector.getInstance()

@@ -1,7 +1,6 @@
 package org.ergoplatform.transactions
 
 import org.ergoplatform.isErgoMainNet
-import org.ergoplatform.android.transactions.*
 import org.junit.Assert
 import org.junit.Test
 
@@ -19,16 +18,13 @@ class ColdWalletUtilsKtTest {
 
         Assert.assertNotNull(csr)
 
-        val manyChunks = coldSigninRequestToQrChunks(csr!!, 30)
-        val oneChunk = coldSigninRequestToQrChunks(csr, 50000000)
+        val manyChunks = coldSigningRequestToQrChunks(csr!!, 50)
+        val oneChunk = coldSigningRequestToQrChunks(csr, 50000000)
         Assert.assertEquals(1, oneChunk.size)
-        Assert.assertEquals(0, getQrChunkIndex(oneChunk.first()))
-        Assert.assertEquals(1, getQrChunkIndex(manyChunks.first()))
-        Assert.assertEquals(1, getQrChunkPagesCount(oneChunk.first()))
-        Assert.assertEquals(
-            manyChunks.size,
-            getQrChunkPagesCount(manyChunks.first())
-        )
+        Assert.assertEquals(1, getColdSigningRequestChunk(oneChunk.first())?.index)
+        Assert.assertEquals(1, getColdSigningRequestChunk(manyChunks.first())?.index)
+        Assert.assertEquals(1, getColdSigningRequestChunk(oneChunk.first())?.pages)
+        Assert.assertEquals(manyChunks.size, getColdSigningRequestChunk(manyChunks.first())?.pages)
 
         val prompt1 = coldSigningRequestFromQrChunks(manyChunks)
         val prompt2 = coldSigningRequestFromQrChunks(oneChunk)
@@ -62,7 +58,9 @@ class ColdWalletUtilsKtTest {
         Assert.assertEquals(2, ti.reduceBoxes().outputs.size)
 
         val csr2 =
-            parseColdSigningRequest("{\"reducedTx\":\"0QMDCp28G2Gct69t0D+IMK8h0kKEjj7f49cAtGwvUtSOPesAAGPk+W6yjBzn2jPcoFiaufhsXy52IsuIQjiCCE/q8m9DAACuLv3AeVnq+cluQls7Kz/8+YsWGTDNCl9HiVzLMP4oNgAAAARRQIOhcPxzQHHAd0j/RElAYGZUMXvVFoZRIO1wKVKrG/n/BLk/9n7C3gSwVnXkGjjA+vQJ1Jn9NExtNOXppL7dzaVi/TpNypHLwgdakRo6WxG37YEAl7GsWlS3Yqh3sGKW1lsZOJnBVNdbw6VbLTwjEfCfArnW7S2skTyxDDgwgAOA3qDLBQAIzQKDM/n3RU+NX/c9usmDN2ftb8OobPCnPflGsy6pkn2Rl7WLBQEA8zkAwIQ9EAUEAAQADjYQAgSQAQjNAnm+Zn753LusVaBilc6HCwcCm/zbLc4o2VnygVsW+BeY6gLRkqOajMenAXMAcwEQAQIEAtGWgwMBk6OMx7KlcwAAAZPCsqVzAQB0cwJzA4MBCM3urJOxpXMEtYsFAADA7/HRyQIACM0CLecmo/oGlC3SIpWWYFq5MkBM44Y0Rxm0lh3tkwZ7ITq1iwUEAQECgNDbw/QCAPCB28P0AgPQ2JatAwDNAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/NAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/NAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/QjAE\\u003d\",\"sender\":\"3WvxRdGA2Ce3otzqtc7jUb61H67NiugArk9mTCxKwMQjrKgsjwwj\",\"inputs\":[\"gJTr3AMACM0CLecmo/oGlC3SIpWWYFq5MkBM44Y0Rxm0lh3tkwZ7ITqlywQAAGRGq63RnvOuuPeM07c0y1ZzwTcilEjMaNkS/Ws2WuLVAA\\u003d\\u003d\",\"gJTr3AMACM0CLecmo/oGlC3SIpWWYFq5MkBM44Y0Rxm0lh3tkwZ7ITrk5wQAAPRQZ9K80uxdbpd1Zwx4DA1zakyULHJh/yfOl8ocdz6uAA\\u003d\\u003d\",\"gKr548cCAAjNAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE67OcEBPn/BLk/9n7C3gSwVnXkGjjA+vQJ1Jn9NExtNOXppL7dAc2lYv06TcqRy8IHWpEaOlsRt+2BAJexrFpUt2Kod7BigNDbw/QCUUCDoXD8c0BxwHdI/0RJQGBmVDF71RaGUSDtcClSqxvju9vD9AKW1lsZOJnBVNdbw6VbLTwjEfCfArnW7S2skTyxDDgwgNDYlq0DANXS4I5Ac3ygmxQ6/8SYHikzLoKK0T4jDBvcoZVjWvIvAg\\u003d\\u003d\"]}")
+            parseColdSigningRequest(
+                "{\"reducedTx\":\"0QMDCp28G2Gct69t0D+IMK8h0kKEjj7f49cAtGwvUtSOPesAAGPk+W6yjBzn2jPcoFiaufhsXy52IsuIQjiCCE/q8m9DAACuLv3AeVnq+cluQls7Kz/8+YsWGTDNCl9HiVzLMP4oNgAAAARRQIOhcPxzQHHAd0j/RElAYGZUMXvVFoZRIO1wKVKrG/n/BLk/9n7C3gSwVnXkGjjA+vQJ1Jn9NExtNOXppL7dzaVi/TpNypHLwgdakRo6WxG37YEAl7GsWlS3Yqh3sGKW1lsZOJnBVNdbw6VbLTwjEfCfArnW7S2skTyxDDgwgAOA3qDLBQAIzQKDM/n3RU+NX/c9usmDN2ftb8OobPCnPflGsy6pkn2Rl7WLBQEA8zkAwIQ9EAUEAAQADjYQAgSQAQjNAnm+Zn753LusVaBilc6HCwcCm/zbLc4o2VnygVsW+BeY6gLRkqOajMenAXMAcwEQAQIEAtGWgwMBk6OMx7KlcwAAAZPCsqVzAQB0cwJzA4MBCM3urJOxpXMEtYsFAADA7/HRyQIACM0CLecmo/oGlC3SIpWWYFq5MkBM44Y0Rxm0lh3tkwZ7ITq1iwUEAQECgNDbw/QCAPCB28P0AgPQ2JatAwDNAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/NAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/NAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/QjAE\\u003d\",\"sender\":\"3WvxRdGA2Ce3otzqtc7jUb61H67NiugArk9mTCxKwMQjrKgsjwwj\",\"inputs\":[\"gJTr3AMACM0CLecmo/oGlC3SIpWWYFq5MkBM44Y0Rxm0lh3tkwZ7ITqlywQAAGRGq63RnvOuuPeM07c0y1ZzwTcilEjMaNkS/Ws2WuLVAA\\u003d\\u003d\",\"gJTr3AMACM0CLecmo/oGlC3SIpWWYFq5MkBM44Y0Rxm0lh3tkwZ7ITrk5wQAAPRQZ9K80uxdbpd1Zwx4DA1zakyULHJh/yfOl8ocdz6uAA\\u003d\\u003d\",\"gKr548cCAAjNAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE67OcEBPn/BLk/9n7C3gSwVnXkGjjA+vQJ1Jn9NExtNOXppL7dAc2lYv06TcqRy8IHWpEaOlsRt+2BAJexrFpUt2Kod7BigNDbw/QCUUCDoXD8c0BxwHdI/0RJQGBmVDF71RaGUSDtcClSqxvju9vD9AKW1lsZOJnBVNdbw6VbLTwjEfCfArnW7S2skTyxDDgwgNDYlq0DANXS4I5Ac3ygmxQ6/8SYHikzLoKK0T4jDBvcoZVjWvIvAg\\u003d\\u003d\"]}"
+            )
         val ti2 = buildTransactionInfoFromReduced(csr2.serializedTx!!, csr2.serializedInputs)
 
         Assert.assertNotNull(ti2.outputs)
@@ -80,15 +78,16 @@ class ColdWalletUtilsKtTest {
         Assert.assertEquals(4, ti2.outputs.last().assets.size)
         Assert.assertEquals(tokenAmountBeforeReduce, ti2.outputs.last().assets.last().amount)
 
-        // same without input boxes
+        // exception raised without input boxes
         val csr3 =
             parseColdSigningRequest("{\"reducedTx\":\"0QMDCp28G2Gct69t0D+IMK8h0kKEjj7f49cAtGwvUtSOPesAAGPk+W6yjBzn2jPcoFiaufhsXy52IsuIQjiCCE/q8m9DAACuLv3AeVnq+cluQls7Kz/8+YsWGTDNCl9HiVzLMP4oNgAAAARRQIOhcPxzQHHAd0j/RElAYGZUMXvVFoZRIO1wKVKrG/n/BLk/9n7C3gSwVnXkGjjA+vQJ1Jn9NExtNOXppL7dzaVi/TpNypHLwgdakRo6WxG37YEAl7GsWlS3Yqh3sGKW1lsZOJnBVNdbw6VbLTwjEfCfArnW7S2skTyxDDgwgAOA3qDLBQAIzQKDM/n3RU+NX/c9usmDN2ftb8OobPCnPflGsy6pkn2Rl7WLBQEA8zkAwIQ9EAUEAAQADjYQAgSQAQjNAnm+Zn753LusVaBilc6HCwcCm/zbLc4o2VnygVsW+BeY6gLRkqOajMenAXMAcwEQAQIEAtGWgwMBk6OMx7KlcwAAAZPCsqVzAQB0cwJzA4MBCM3urJOxpXMEtYsFAADA7/HRyQIACM0CLecmo/oGlC3SIpWWYFq5MkBM44Y0Rxm0lh3tkwZ7ITq1iwUEAQECgNDbw/QCAPCB28P0AgPQ2JatAwDNAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/NAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/NAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6nU/QjAE\\u003d\"}")
 
-        val ti3 = buildTransactionInfoFromReduced(csr3.serializedTx!!, csr3.serializedInputs)
-        val ti3b = ti3.reduceBoxes()
-        Assert.assertEquals(3, ti3.inputs.size)
-        Assert.assertEquals(3, ti3b.inputs.size)
-        Assert.assertEquals(3, ti3.outputs.size)
-        Assert.assertEquals(3, ti3b.outputs.size)
+        var exceptionThrown = false
+        try {
+            buildTransactionInfoFromReduced(csr3.serializedTx!!, csr3.serializedInputs)
+        } catch (t: Throwable) {
+            exceptionThrown = true
+        }
+        Assert.assertTrue(exceptionThrown)
     }
 }

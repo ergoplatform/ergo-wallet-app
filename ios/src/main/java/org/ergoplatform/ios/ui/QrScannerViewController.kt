@@ -11,7 +11,19 @@ import org.robovm.apple.uikit.UIColor
 import org.robovm.apple.uikit.UIInterfaceOrientationMask
 import org.robovm.apple.uikit.UIViewController
 
-class QrScannerViewController(val qrCodeScannedListener: (String) -> Unit) : UIViewController() {
+/**
+ * Shows a view for scanning QR codes
+ *
+ * @param qrCodeScannedListener invoked when QR code is scanned
+ * @param dismissAnimated whether to dismiss this ViewController with animation after scan
+ * @param invokeAfterDismissal if true, qrCodeScannedListener is invoked after this ViewController was dismissed
+ *                             otherwise, it is invoked before dismissal
+ */
+class QrScannerViewController(
+    private val dismissAnimated: Boolean = true,
+    private val invokeAfterDismissal: Boolean = true,
+    private val qrCodeScannedListener: (String) -> Unit
+) : UIViewController() {
     private lateinit var captureSession: AVCaptureSession
     private var previewLayer: AVCaptureVideoPreviewLayer? = null
 
@@ -72,6 +84,17 @@ class QrScannerViewController(val qrCodeScannedListener: (String) -> Unit) : UIV
         label.centerVertical().widthMatchesSuperview(inset = DEFAULT_MARGIN)
     }
 
+    private fun didScanQrCode(stringValue: String?) {
+        if (!invokeAfterDismissal) {
+            stringValue?.let { qrCodeScannedListener.invoke(stringValue) }
+        }
+        dismissViewController(dismissAnimated) {
+            if (invokeAfterDismissal) {
+                stringValue?.let { qrCodeScannedListener.invoke(stringValue) }
+            }
+        }
+    }
+
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
 
@@ -104,13 +127,12 @@ class QrScannerViewController(val qrCodeScannedListener: (String) -> Unit) : UIV
         ) {
             captureSession.stopRunning()
 
-            (metadataObjects?.firstOrNull() as? AVMetadataMachineReadableCodeObject)?.let {
-                val stringValue = it.stringValue
-                qrCodeScannedListener.invoke(stringValue)
+            val stringValue = (metadataObjects?.firstOrNull() as? AVMetadataMachineReadableCodeObject)?.let {
                 AudioServices.playSystemSound(AudioServices.SystemSoundVibrate)
+                it.stringValue
             }
 
-            this@QrScannerViewController.dismissViewController(true) {}
+            didScanQrCode(stringValue)
         }
     }
 }
