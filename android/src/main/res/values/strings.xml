@@ -179,6 +179,9 @@
     <string name="desc_show_signed_multiple">Your transaction was signed and needs to be sent to the network.
         Scan these QR codes to proceed.</string>
 
+    <!-- Ergo Pay Signing -->
+    <string name="label_fetching_data">Fetching data...</string>
+
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1s</string>
     <string name="about_year" translatable="false">2022</string>

@@ -64,6 +64,8 @@ fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApiService): 
         inputsMap.put(boxInfo.boxId, boxInfo.toTransactionInfoBox())
     }
 
+    // TODO Ergo Pay fetch token information
+
     return unsignedTx.buildTransactionInfo(inputsMap)
 }
 

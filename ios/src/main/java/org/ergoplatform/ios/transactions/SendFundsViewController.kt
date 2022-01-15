@@ -63,6 +63,8 @@ class SendFundsViewController(
                             walletId
                         ), true
                     )
+                }, { ergoPayRequest, address ->
+                    // TODO ergo pay navigate to signing screen
                 }, { address, amount ->
                     inputReceiver.text = address
                     inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
@@ -449,10 +451,6 @@ class SendFundsViewController(
                 val vc = buildSimpleAlertController("", message, texts)
                 presentViewController(vc, true) {}
             }
-        }
-
-        override fun notifyHasErgoPaySignReq(epsr: ErgoPaySigningRequest) {
-            // TODO Ergo Pay
         }
     }
 }

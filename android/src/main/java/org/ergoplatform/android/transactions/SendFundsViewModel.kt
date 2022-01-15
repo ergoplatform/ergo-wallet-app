@@ -51,8 +51,6 @@ class SendFundsViewModel : ViewModel() {
 
     private val _errorMessageLiveData = SingleLiveEvent<String>()
     val errorMessageLiveData: LiveData<String> = _errorMessageLiveData
-    private val _ergoPayLiveData = SingleLiveEvent<ErgoPaySigningRequest>()
-    val ergoPayLiveData: LiveData<ErgoPaySigningRequest> = _ergoPayLiveData
 
     fun initWallet(ctx: Context, walletId: Int, derivationIdx: Int, paymentRequest: String?) {
         uiLogic.initWallet(
@@ -153,10 +151,6 @@ class SendFundsViewModel : ViewModel() {
 
         override fun showErrorMessage(message: String) {
             _errorMessageLiveData.postValue(message)
-        }
-
-        override fun notifyHasErgoPaySignReq(epsr: ErgoPaySigningRequest) {
-            _ergoPayLiveData.postValue(epsr)
         }
     }
 }

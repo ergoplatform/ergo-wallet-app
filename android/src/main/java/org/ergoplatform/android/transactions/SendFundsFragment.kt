@@ -156,9 +156,6 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 binding.labelTxId.text = it
             }
         })
-        viewModel.ergoPayLiveData.observe(viewLifecycleOwner, {
-            // TODO Ergo Pay navigate to confirmation screen
-        })
 
         // Add click listeners
         binding.addressLabel.setOnClickListener {
@@ -397,27 +394,36 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
-            result.contents?.let {
-                viewModel.uiLogic.qrCodeScanned(
-                    it,
-                    AndroidStringProvider(requireContext()),
-                    { data, walletId ->
-                        findNavController().navigate(
-                            SendFundsFragmentDirections
-                                .actionSendFundsFragmentToColdWalletSigningFragment(
-                                    data,
-                                    walletId
-                                )
-                        )
-                    },
-                    { address, amount ->
-                        binding.tvReceiver.editText?.setText(address)
-                        amount?.let { setAmountEdittext(amount) }
-                    })
-            }
+            result.contents?.let { qrCodeScanned(it) }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
+    }
+
+    private fun qrCodeScanned(qrCode: String) {
+        viewModel.uiLogic.qrCodeScanned(
+            qrCode,
+            AndroidStringProvider(requireContext()),
+            { data, walletId ->
+                findNavController().navigate(
+                    SendFundsFragmentDirections
+                        .actionSendFundsFragmentToColdWalletSigningFragment(
+                            data,
+                            walletId
+                        )
+                )
+            },
+            { ergoPayRequest, address ->
+                findNavController().navigateSafe(
+                    SendFundsFragmentDirections.actionSendFundsFragmentToErgoPaySigningFragment(
+                        ergoPayRequest, address
+                    )
+                )
+            },
+            { address, amount ->
+                binding.tvReceiver.editText?.setText(address)
+                amount?.let { setAmountEdittext(amount) }
+            })
     }
 
     private fun showPaymentRequestWarnings() {

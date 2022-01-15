@@ -11,13 +11,9 @@ import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
-import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.R
-import org.ergoplatform.android.databinding.EntryTransactionBoxBinding
-import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
 import org.ergoplatform.android.ui.*
-import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
 import org.ergoplatform.transactions.coldSigningResponseToQrChunks
@@ -64,7 +60,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
 
         viewModel.signingResult.observe(viewLifecycleOwner, {
             if (it?.success == true && viewModel.signedQrCode != null) {
-                binding.transactionInfo.visibility = View.GONE
+                binding.transactionInfo.root.visibility = View.GONE
                 binding.cardSigningResult.visibility = View.VISIBLE
                 binding.cardScanMore.visibility = View.GONE
 
@@ -94,7 +90,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
         })
 
         // Button click listeners
-        binding.buttonSignTx.setOnClickListener {
+        binding.transactionInfo.buttonSignTx.setOnClickListener {
             viewModel.wallet?.let {
                 startAuthFlow(it.walletConfig)
             }
@@ -162,24 +158,10 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
         }
 
         transactionInfo?.reduceBoxes()?.let {
-            binding.transactionInfo.visibility = View.VISIBLE
+            binding.transactionInfo.root.visibility = View.VISIBLE
             binding.cardScanMore.visibility = View.GONE
 
-            binding.layoutInboxes.apply {
-                removeAllViews()
-
-                it.inputs.forEach { input ->
-                    bindBoxView(this, input.value, input.address ?: input.boxId, input.assets)
-                }
-            }
-
-            binding.layoutOutboxes.apply {
-                removeAllViews()
-
-                it.outputs.forEach { output ->
-                    bindBoxView(this, output.value, output.address, output.assets)
-                }
-            }
+            binding.transactionInfo.bindTransactionInfo(it, layoutInflater)
         }
     }
 
@@ -192,40 +174,6 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             if (lastPage) R.string.desc_show_signed
             else R.string.desc_show_signed_multiple
         )
-    }
-
-    private fun bindBoxView(
-        container: ViewGroup,
-        value: Long?,
-        address: String,
-        assets: List<AssetInstanceInfo>?
-    ) {
-        val boxBinding = EntryTransactionBoxBinding.inflate(layoutInflater, container, true)
-        boxBinding.boxErgAmount.text = getString(
-            R.string.label_erg_amount,
-            ErgoAmount(value ?: 0).toStringTrimTrailingZeros()
-        )
-        boxBinding.boxErgAmount.visibility =
-            if (value == null || value == 0L) View.GONE else View.VISIBLE
-        boxBinding.labelBoxAddress.text = address
-        boxBinding.labelBoxAddress.setOnClickListener {
-            boxBinding.labelBoxAddress.maxLines =
-                if (boxBinding.labelBoxAddress.maxLines == 1) 10 else 1
-        }
-
-        boxBinding.boxTokenEntries.apply {
-            removeAllViews()
-            visibility = View.GONE
-
-            assets?.forEach {
-                visibility = View.VISIBLE
-                val tokenBinding =
-                    EntryWalletTokenBinding.inflate(layoutInflater, this, true)
-                // we use the token id here, we don't have the name in the cold wallet context
-                tokenBinding.labelTokenName.text = it.tokenId
-                tokenBinding.labelTokenVal.text = it.amount.toString()
-            }
-        }
     }
 
     override fun proceedAuthFlowWithPassword(password: String): Boolean {

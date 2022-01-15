@@ -367,24 +367,16 @@ abstract class SendFundsUiLogic {
         qrCodeData: String,
         stringProvider: StringProvider,
         navigateToColdWalletSigning: ((signingData: String, walletId: Int) -> Unit),
+        navigateToErgoPaySigning: ((ergoPayRequest: String, address: String) -> Unit),
         setPaymentRequestDataToUi: ((receiverAddress: String, amount: ErgoAmount?) -> Unit),
     ) {
         if (wallet?.walletConfig?.secretStorage != null && isColdSigningRequestChunk(qrCodeData)) {
             navigateToColdWalletSigning.invoke(qrCodeData, wallet!!.walletConfig.id)
         } else if (isErgoPaySigningRequest(qrCodeData)) {
-            coroutineScope.launch(Dispatchers.IO) {
-                try {
-                    if (isErgoPayStaticRequest(qrCodeData)) {
-                        val epsr = getErgoPaySigningRequest(qrCodeData)
-                        notifyHasErgoPaySignReq(epsr)
-                    } else {
-                        TODO("Ergo Pay use background thread")
-                    }
-                } catch (t: Throwable) {
-                    LogUtils.logDebug("ErgoPay", "Error ${t.message}", t)
-                    showErrorMessage("Error: ${t.message}")
-                }
-            }
+            navigateToErgoPaySigning.invoke(
+                qrCodeData,
+                derivedAddress?.publicAddress ?: wallet!!.walletConfig.firstAddress!!
+            )
         } else {
             val content = parsePaymentRequest(qrCodeData)
             content?.let {
@@ -411,7 +403,6 @@ abstract class SendFundsUiLogic {
     abstract fun notifyHasErgoTxResult(txResult: TransactionResult)
     abstract fun notifyHasSigningPromptData(signingPrompt: String)
     abstract fun showErrorMessage(message: String)
-    abstract fun notifyHasErgoPaySignReq(epsr: ErgoPaySigningRequest)
 
     data class CheckCanPayResponse(
         val canPay: Boolean,

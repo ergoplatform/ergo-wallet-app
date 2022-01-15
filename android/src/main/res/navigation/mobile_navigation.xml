@@ -183,6 +183,13 @@
             app:exitAnim="@anim/slide_out_to_left"
             app:popEnterAnim="@anim/slide_in_from_left"
             app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_sendFundsFragment_to_ergoPaySigningFragment"
+            app:destination="@id/ergoPaySigningFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
     <dialog
         android:id="@+id/addReadOnlyWalletFragmentDialog"
@@ -269,7 +276,7 @@
         android:id="@+id/coldWalletSigningFragment"
         android:name="org.ergoplatform.android.transactions.ColdWalletSigningFragment"
         android:label="ColdWalletSigningFragment"
-        tools:layout="@layout/fragment_cold_wallet_signing" >
+        tools:layout="@layout/fragment_cold_wallet_signing">
         <argument
             android:name="qr_code"
             app:argType="string"
@@ -277,5 +284,18 @@
         <argument
             android:name="wallet_id"
             app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/ergoPaySigningFragment"
+        android:name="org.ergoplatform.android.transactions.ErgoPaySigningFragment"
+        android:label="ErgoPaySigningFragment"
+        tools:layout="@layout/fragment_ergo_pay_signing">
+        <argument
+            android:name="request"
+            app:argType="string" />
+        <argument
+            android:name="address"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 </navigation>

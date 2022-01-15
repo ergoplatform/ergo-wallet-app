@@ -155,9 +155,5 @@ class SendFundsUiLogicTest {
 
         }
 
-        override fun notifyHasErgoPaySignReq(epsr: ErgoPaySigningRequest) {
-
-        }
-
     }
 }
