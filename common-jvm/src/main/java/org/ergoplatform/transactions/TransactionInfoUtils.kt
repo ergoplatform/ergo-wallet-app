@@ -36,6 +36,7 @@ fun UnsignedErgoLikeTransaction.getInputBoxesIds(): List<String> {
 fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String, TransactionInfoBox>): TransactionInfo {
     val inputsList = ArrayList<InputInfo>()
     val outputsList = ArrayList<OutputInfo>()
+    val tokensMap = HashMap<String, AssetInstanceInfo>()
 
     // now add to TransactionInfo, if possible
     getInputBoxesIds().forEach { boxid ->
@@ -45,6 +46,13 @@ fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String,
             inputInfo.address = inboxInfo.address
             inputInfo.value = inboxInfo.value
             inputInfo.assets = inboxInfo.tokens
+
+            // store token information in map to use on outbox info
+            inboxInfo.tokens.forEach { tokenInfo ->
+                if (tokenInfo.name != null || tokenInfo.decimals != null) {
+                    tokensMap.put(tokenInfo.tokenId, tokenInfo)
+                }
+            }
         } ?: throw java.lang.IllegalArgumentException("No information for input box $boxid")
         inputsList.add(inputInfo)
     }
@@ -60,6 +68,12 @@ fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String,
 
         getAssetInstanceInfosFromErgoBoxToken(ergoBoxCandidate.additionalTokens()).forEach {
             outputInfo.addAssetsItem(it)
+
+            // if we know about the token from the inboxes, add more information
+            tokensMap.get(it.tokenId)?.let { tokenInfo ->
+                it.name = tokenInfo.name
+                it.decimals = tokenInfo.decimals
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import org.ergoplatform.ErgoAmount
+import org.ergoplatform.TokenAmount
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.CardTransactionInfoBinding
 import org.ergoplatform.android.databinding.EntryTransactionBoxBinding
@@ -69,8 +70,9 @@ private fun bindBoxView(
             val tokenBinding =
                 EntryWalletTokenBinding.inflate(layoutInflater, this, true)
             // we use the token id here, we don't have the name in the cold wallet context
-            tokenBinding.labelTokenName.text = it.tokenId
-            tokenBinding.labelTokenVal.text = it.amount.toString()
+            tokenBinding.labelTokenName.text = it.name ?: it.tokenId
+            tokenBinding.labelTokenVal.text =
+                TokenAmount(it.amount, it.decimals ?: 0).toStringTrimTrailingZeros()
         }
     }
 }

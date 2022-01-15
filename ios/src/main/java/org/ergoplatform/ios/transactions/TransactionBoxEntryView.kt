@@ -2,6 +2,7 @@ package org.ergoplatform.ios.transactions
 
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ErgoAmount
+import org.ergoplatform.TokenAmount
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.ios.tokens.TokenEntryView
 import org.ergoplatform.ios.ui.*
@@ -58,7 +59,10 @@ class TransactionBoxEntryView : UIView(CGRect.Zero()) {
             assets?.forEach {
                 addArrangedSubview(TokenEntryView().apply {
                     // we use the token id here, we don't have the name in the cold wallet context
-                    bindWalletToken(it.tokenId, it.amount.toString())
+                    bindWalletToken(
+                        it.name ?: it.tokenId,
+                        TokenAmount(it.amount, it.decimals ?: 0).toStringTrimTrailingZeros()
+                    )
                 })
             }
         }

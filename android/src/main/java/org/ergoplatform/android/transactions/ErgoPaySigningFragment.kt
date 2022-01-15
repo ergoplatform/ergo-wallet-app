@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
+import org.ergoplatform.MessageSeverity
 import org.ergoplatform.android.Preferences
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentErgoPaySigningBinding
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.transactions.reduceBoxes
@@ -42,6 +44,8 @@ class ErgoPaySigningFragment : AbstractAuthenticationFragment() {
                 visibleWhen(state, ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION)
             binding.layoutProgress.visibility =
                 visibleWhen(state, ErgoPaySigningUiLogic.State.FETCH_DATA)
+            binding.layoutDoneInfo.visibility =
+                visibleWhen(state, ErgoPaySigningUiLogic.State.DONE)
 
             when (state) {
                 ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> TODO()
@@ -64,7 +68,18 @@ class ErgoPaySigningFragment : AbstractAuthenticationFragment() {
     }
 
     private fun showDoneInfo() {
-        // TODO Ergo Pay Show done info and/or error messages
+        // TODO Ergo Pay use normal tx done message in case of success
+        binding.tvMessage.text = viewModel.uiLogic.lastMessage
+        binding.tvMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            0,
+            when (viewModel.uiLogic.lastMessageSeverity) {
+                MessageSeverity.NONE -> 0
+                MessageSeverity.INFORMATION -> R.drawable.ic_info_24
+                MessageSeverity.WARNING -> R.drawable.ic_warning_amber_24
+                MessageSeverity.ERROR -> R.drawable.ic_error_outline_24
+            },
+            0, 0
+        )
     }
 
     private fun showTransactionInfo() {
