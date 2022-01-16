@@ -18,14 +18,10 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.*
-import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
 import org.ergoplatform.android.ui.*
-import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
-import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
-import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.PromptSigningResult
@@ -37,11 +33,10 @@ import org.ergoplatform.wallet.getNumOfAddresses
 /**
  * Here's the place to send transactions
  */
-class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallback,
-    AddressChooserCallback {
+class SendFundsFragment : SubmitTransactionFragment() {
     private var _binding: FragmentSendFundsBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: SendFundsViewModel
+    override lateinit var viewModel: SendFundsViewModel
     private val args: SendFundsFragmentArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -159,11 +154,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
 
         // Add click listeners
         binding.addressLabel.setOnClickListener {
-            viewModel.uiLogic.wallet?.let { wallet ->
-                ChooseAddressListDialogFragment.newInstance(
-                    wallet.walletConfig.id, true
-                ).show(childFragmentManager, null)
-            }
+            showChooseAddressList()
         }
         binding.buttonShareTx.setOnClickListener {
             val txUrl = getExplorerTxUrl(binding.labelTxId.text.toString())
@@ -251,10 +242,6 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
     private fun ensureAmountVisibleDelayed() {
         // delay 200 to make sure that smart keyboard is already open
         postDelayed(200) { _binding?.let { it.scrollView.smoothScrollTo(0, it.amount.top) } }
-    }
-
-    override fun onAddressChosen(addressDerivationIdx: Int?) {
-        viewModel.uiLogic.derivedAddressIdx = addressDerivationIdx
     }
 
     private fun refreshTokensList() {
@@ -353,30 +340,9 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         }
     }
 
-    override fun startAuthFlow(walletConfig: WalletConfig) {
-        if (walletConfig.secretStorage == null) {
-            // we have a read only wallet here, let's go to cold wallet support mode
-            val context = requireContext()
-            viewModel.uiLogic.startColdWalletPayment(
-                Preferences(context),
-                AndroidStringProvider(context)
-            )
-        } else {
-            super.startAuthFlow(walletConfig)
-        }
-    }
-
-    override fun proceedAuthFlowWithPassword(password: String): Boolean {
-        return viewModel.startPaymentWithPassword(password, requireContext())
-    }
-
     override fun showBiometricPrompt() {
         hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
         super.showBiometricPrompt()
-    }
-
-    override fun proceedAuthFlowFromBiometrics() {
-        context?.let { viewModel.startPaymentUserAuth(it) }
     }
 
     private fun inputChangesToViewModel() {

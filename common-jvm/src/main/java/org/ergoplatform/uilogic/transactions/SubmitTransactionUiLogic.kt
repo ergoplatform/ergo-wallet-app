@@ -12,8 +12,10 @@ import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.sendSignedErgoTx
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.wallet.getDerivedAddress
 import org.ergoplatform.wallet.getDerivedAddressEntity
 import org.ergoplatform.wallet.getNumOfAddresses
+import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 abstract class SubmitTransactionUiLogic {
     abstract val coroutineScope: CoroutineScope
@@ -63,6 +65,19 @@ abstract class SubmitTransactionUiLogic {
         preferences: PreferencesProvider,
         texts: StringProvider
     )
+
+    abstract fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider)
+
+    fun getSigningDerivedAddressesIndices(): List<Int> {
+        return derivedAddressIdx?.let { listOf(it) }
+            ?: wallet?.getSortedDerivedAddressesList()?.map { it.derivationIndex }
+            ?: listOf(0)
+    }
+
+    fun getSigningDerivedAddresses(): List<String> {
+        return derivedAddressIdx?.let { listOf(wallet!!.getDerivedAddress(it)!!) }
+            ?: wallet!!.getSortedDerivedAddressesList().map { it.publicAddress }
+    }
 
     fun startColdWalletPaymentPrompt(serializedTx: PromptSigningResult) {
         signedTxQrCodePagesCollector = QrCodePagesCollector(::getColdSignedTxChunk)

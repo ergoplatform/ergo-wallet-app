@@ -8,8 +8,8 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
 
-class ErgoPaySigningViewModel: ViewModel() {
-    val uiLogic = AndroidErgoPaySigningUiLogic()
+class ErgoPaySigningViewModel: SubmitTransactionViewModel() {
+    override val uiLogic = AndroidErgoPaySigningUiLogic()
 
     private var _uiStateRefresh = MutableLiveData<ErgoPaySigningUiLogic.State?>()
     val uiStateRefresh: LiveData<ErgoPaySigningUiLogic.State?> get() = _uiStateRefresh

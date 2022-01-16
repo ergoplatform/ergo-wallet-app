@@ -15,7 +15,10 @@ import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.uilogic.*
-import org.ergoplatform.wallet.*
+import org.ergoplatform.wallet.getBalanceForAllAddresses
+import org.ergoplatform.wallet.getStateForAddress
+import org.ergoplatform.wallet.getTokensForAddress
+import org.ergoplatform.wallet.getTokensForAllAddresses
 import kotlin.math.max
 
 abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
@@ -146,10 +149,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         preferences: PreferencesProvider,
         texts: StringProvider
     ) {
-        val derivedAddresses =
-            derivedAddressIdx?.let { listOf(it) }
-                ?: wallet?.getSortedDerivedAddressesList()?.map { it.derivationIndex }
-                ?: listOf(0)
+        val derivedAddresses = getSigningDerivedAddressesIndices()
 
         coroutineScope.launch {
             val ergoTxResult: SendTransactionResult
@@ -172,11 +172,9 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         notifyUiLocked(true)
     }
 
-    fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
+    override fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
         wallet?.let { wallet ->
-            val derivedAddresses =
-                derivedAddressIdx?.let { listOf(wallet.getDerivedAddress(it)!!) }
-                    ?: wallet.getSortedDerivedAddressesList().map { it.publicAddress }
+            val derivedAddresses = getSigningDerivedAddresses()
 
             notifyUiLocked(true)
             coroutineScope.launch {

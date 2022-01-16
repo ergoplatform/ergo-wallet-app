@@ -16,16 +16,14 @@ import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
 
-class ErgoPaySigningFragment : AbstractAuthenticationFragment() {
+class ErgoPaySigningFragment : SubmitTransactionFragment() {
     private var _binding: FragmentErgoPaySigningBinding? = null
     private val binding get() = _binding!!
 
     private val args: ErgoPaySigningFragmentArgs by navArgs()
 
-    private val viewModel: ErgoPaySigningViewModel
-        get() {
-            return ViewModelProvider(this).get(ErgoPaySigningViewModel::class.java)
-        }
+    override val viewModel: ErgoPaySigningViewModel
+        get() = ViewModelProvider(this).get(ErgoPaySigningViewModel::class.java)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,6 +61,10 @@ class ErgoPaySigningFragment : AbstractAuthenticationFragment() {
                 null -> throw IllegalStateException("Not allowed")
             }
         })
+
+        binding.transactionInfo.buttonSignTx.setOnClickListener {
+            startAuthFlow(viewModel.uiLogic.wallet!!.walletConfig)
+        }
     }
 
     private fun visibleWhen(

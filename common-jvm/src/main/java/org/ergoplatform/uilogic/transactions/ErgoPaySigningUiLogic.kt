@@ -75,6 +75,10 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         TODO("Not yet implemented")
     }
 
+    override fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
+        TODO("Not yet implemented")
+    }
+
     enum class State { WAIT_FOR_ADDRESS, FETCH_DATA, WAIT_FOR_CONFIRMATION, DONE }
 
     /**
