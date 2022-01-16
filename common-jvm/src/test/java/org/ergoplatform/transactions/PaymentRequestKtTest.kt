@@ -28,7 +28,7 @@ class PaymentRequestKtTest {
         Assert.assertEquals("12345", parse2?.tokens?.keys?.first())
         Assert.assertEquals("22.3", parse2?.tokens?.get("12345"))
 
-        parsePaymentRequest("ergoplatform:testaddr&amount=1&token-2345=22.3").apply {
+        parsePaymentRequest("ergo:testaddr&amount=1&token-2345=22.3").apply {
             Assert.assertEquals(Parameters.OneErg, this?.amount?.nanoErgs)
             Assert.assertEquals("testaddr", this?.address)
             Assert.assertEquals(1, this?.tokens?.size)
