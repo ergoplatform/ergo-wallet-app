@@ -234,14 +234,17 @@
         android:label="ChooseSpendingWalletFragmentDialog">
         <action
             android:id="@+id/action_chooseSpendingWalletFragmentDialog_to_sendFundsFragment"
-            app:destination="@id/sendFundsFragment"
-            app:enterAnim="@anim/slide_in_from_right"
-            app:exitAnim="@anim/slide_out_to_left"
-            app:popEnterAnim="@anim/slide_in_from_left"
-            app:popExitAnim="@anim/slide_out_to_right">
+            app:destination="@id/sendFundsFragment">
             <argument
                 android:name="paymentRequest"
                 app:nullable="false" />
+            <argument
+                android:name="derivation_idx"
+                android:defaultValue="-1" />
+        </action>
+        <action
+            android:id="@+id/action_chooseSpendingWalletFragmentDialog_to_ergoPaySigningFragment"
+            app:destination="@id/ergoPaySigningFragment">
             <argument
                 android:name="derivation_idx"
                 android:defaultValue="-1" />

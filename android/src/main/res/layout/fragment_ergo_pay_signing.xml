@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/title_signing_request" />
+            android:text="@string/title_ergo_pay_request" />
 
     </FrameLayout>
 

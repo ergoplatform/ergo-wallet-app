@@ -180,6 +180,7 @@
         Scan these QR codes to proceed.</string>
 
     <!-- Ergo Pay Signing -->
+    <string name="title_ergo_pay_request">Ergo Pay Request</string>
     <string name="label_fetching_data">Fetching data...</string>
 
     <!-- Settings -->

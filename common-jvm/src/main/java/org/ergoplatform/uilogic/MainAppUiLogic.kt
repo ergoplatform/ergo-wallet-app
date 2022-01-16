@@ -1,5 +1,6 @@
 package org.ergoplatform.uilogic
 
+import org.ergoplatform.isErgoPaySigningRequest
 import org.ergoplatform.isPaymentRequestUrl
 import org.ergoplatform.transactions.getColdSignedTxChunk
 import org.ergoplatform.transactions.isColdSigningRequestChunk
@@ -10,11 +11,11 @@ object MainAppUiLogic {
         data: String,
         fromQrCode: Boolean,
         stringProvider: StringProvider,
-        navigateToSpendingWallet: (String) -> Unit,
+        navigateToChooseWalletDialog: (String) -> Unit,
         presentUserMessage: (String) -> Unit
     ) {
-        if (isPaymentRequestUrl(data)) {
-            navigateToSpendingWallet.invoke(data)
+        if (isPaymentRequestUrl(data) || isErgoPaySigningRequest(data)) {
+            navigateToChooseWalletDialog.invoke(data)
         } else if (fromQrCode && (isColdSigningRequestChunk(data) || getColdSignedTxChunk(data) != null)) {
             // present a hint to the user to go to send funds
             presentUserMessage.invoke(stringProvider.getString(STRING_HINT_SIGNING_REQUEST))

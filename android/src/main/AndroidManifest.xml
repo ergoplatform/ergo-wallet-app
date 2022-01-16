@@ -34,6 +34,7 @@
                 <!-- URI schemes not supported by nav component at the moment (2.3.5) -->
                 <!-- PaymentRequest.PAYMENT_URI_SCHEME -->
                 <data android:scheme="ergo" />
+                <data android:scheme="ergopay" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
