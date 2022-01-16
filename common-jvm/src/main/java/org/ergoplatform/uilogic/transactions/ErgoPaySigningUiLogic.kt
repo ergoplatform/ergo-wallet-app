@@ -130,7 +130,6 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                 if (ergoTxResult.success) {
                     NodeConnector.getInstance().invalidateCache()
                     notifyHasTxId(ergoTxResult.txId!!)
-                    notifyStateChanged(State.DONE)
                 }
                 notifyHasErgoTxResult(ergoTxResult)
             }
@@ -141,11 +140,24 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
 
     override fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
         resetLastMessage()
-        TODO("Not yet implemented")
+        epsr?.reducedTx?.let {
+            notifyUiLocked(true)
+            coroutineScope.launch(Dispatchers.IO) {
+                val serializedTx = buildPromptSigningResultFromErgoPayRequest(
+                    it,
+                    getSigningDerivedAddresses().first(),
+                    preferences,
+                    texts
+                )
+                notifyUiLocked(false)
+                startColdWalletPaymentPrompt(serializedTx)
+            }
+        }
     }
 
     override fun notifyHasTxId(txId: String) {
         this.txId = txId
+        notifyStateChanged(State.DONE)
     }
 
     fun getDoneMessage(texts: StringProvider): String =

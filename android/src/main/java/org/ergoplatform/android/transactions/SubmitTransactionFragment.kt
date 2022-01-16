@@ -17,7 +17,7 @@ import org.ergoplatform.transactions.PromptSigningResult
 abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
     AddressChooserCallback {
 
-    protected abstract val viewModel: SubmitTransactionViewModel
+    abstract val viewModel: SubmitTransactionViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

@@ -5,12 +5,14 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.ErgoTreeContract
+import org.ergoplatform.appkit.impl.InputBoxImpl
 import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.restapi.client.Parameters
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
+import org.ergoplatform.transactions.getInputBoxesIds
 import org.ergoplatform.uilogic.STRING_ERROR_BALANCE_ERG
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
@@ -138,6 +140,32 @@ fun sendErgoTx(
     } catch (t: Throwable) {
         LogUtils.logDebug("sendErgoTx", "Error caught", t)
         return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
+    }
+}
+
+fun buildPromptSigningResultFromErgoPayRequest(
+    serializedTx: ByteArray,
+    senderAddress: String,
+    prefs: PreferencesProvider,
+    texts: StringProvider
+): PromptSigningResult {
+
+    try {
+        return getRestErgoClient(prefs).execute { ctx ->
+            val reducedTx = ctx.parseReducedTransaction(serializedTx)
+            val inputs =
+                ctx.getBoxesById(*reducedTx.tx.unsignedTx().getInputBoxesIds().toTypedArray())
+                    .map { inputBox ->
+                        (inputBox as InputBoxImpl).ergoBox.bytes()
+                    }
+
+            return@execute PromptSigningResult(
+                true, serializedTx,
+                inputs, senderAddress
+            )
+        }
+    } catch (t: Throwable) {
+        return PromptSigningResult(false, errorMsg = getErrorMessage(t, texts))
     }
 }
 
