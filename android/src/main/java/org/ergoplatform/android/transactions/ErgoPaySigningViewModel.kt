@@ -2,7 +2,6 @@ package org.ergoplatform.android.transactions
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.transactions.TransactionResult
@@ -27,15 +26,11 @@ class ErgoPaySigningViewModel: SubmitTransactionViewModel() {
         }
 
         override fun notifyUiLocked(locked: Boolean) {
-            TODO("Not yet implemented")
-        }
-
-        override fun notifyHasTxId(txId: String) {
-            TODO("Not yet implemented")
+            _lockInterface.postValue(locked)
         }
 
         override fun notifyHasErgoTxResult(txResult: TransactionResult) {
-            TODO("Not yet implemented")
+            _txWorkDoneLiveData.postValue(txResult)
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {

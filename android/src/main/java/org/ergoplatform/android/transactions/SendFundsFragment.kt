@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
@@ -24,7 +23,6 @@ import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.tokens.isSingularToken
-import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
@@ -109,34 +107,6 @@ class SendFundsFragment : SubmitTransactionFragment() {
         })
         viewModel.tokensChosenLiveData.observe(viewLifecycleOwner, {
             refreshTokensList()
-        })
-        viewModel.lockInterface.observe(viewLifecycleOwner, {
-            if (it)
-                ProgressBottomSheetDialogFragment.showProgressDialog(childFragmentManager)
-            else
-                ProgressBottomSheetDialogFragment.dismissProgressDialog(childFragmentManager)
-        })
-        viewModel.txWorkDoneLiveData.observe(viewLifecycleOwner, {
-            if (!it.success) {
-                val snackbar = Snackbar.make(
-                    requireView(),
-                    if (it is PromptSigningResult)
-                        R.string.error_prepare_transaction
-                    else R.string.error_send_transaction,
-                    Snackbar.LENGTH_LONG
-                )
-                it.errorMsg?.let { errorMsg ->
-                    snackbar.setAction(
-                        R.string.label_details
-                    ) {
-                        showDialogWithCopyOption(requireContext(), errorMsg)
-                    }
-                }
-                snackbar.setAnchorView(R.id.nav_view).show()
-            } else if (it is PromptSigningResult) {
-                // if this is a prompt signing result, switch to prompt signing dialog
-                SigningPromptDialogFragment().show(childFragmentManager, null)
-            }
         })
         viewModel.errorMessageLiveData.observe(viewLifecycleOwner, {
             MaterialAlertDialogBuilder(requireContext())

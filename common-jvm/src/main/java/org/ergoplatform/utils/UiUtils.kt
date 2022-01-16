@@ -55,3 +55,5 @@ fun formatDoubleWithPrettyReduction(amount: Double): String {
         formatter.format(amount / 1000.0.pow(exp.toDouble())) + suffixChars[exp - 1]
     }
 }
+
+fun Throwable.getMessageOrName(): String = message ?: javaClass.name

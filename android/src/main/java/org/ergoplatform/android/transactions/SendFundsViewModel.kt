@@ -26,6 +26,8 @@ class SendFundsViewModel : SubmitTransactionViewModel() {
         value = ErgoAmount.ZERO
     }
     val grossAmount: LiveData<ErgoAmount> = _grossAmount
+    private val _txId = MutableLiveData<String?>()
+    val txId: LiveData<String?> = _txId
 
     // the live data gets data posted on adding or removing tokens, not on every amount change
     private val _tokensChosenLiveData = MutableLiveData<List<String>>()

@@ -23,8 +23,6 @@ abstract class SubmitTransactionViewModel : ViewModel() {
     val address: LiveData<WalletAddress?> = _address
     protected val _txWorkDoneLiveData = SingleLiveEvent<TransactionResult>()
     val txWorkDoneLiveData: LiveData<TransactionResult> = _txWorkDoneLiveData
-    protected val _txId = MutableLiveData<String?>()
-    val txId: LiveData<String?> = _txId
     protected val _signingPromptData = MutableLiveData<String?>()
     val signingPromptData: LiveData<String?> = _signingPromptData
 

@@ -10,6 +10,7 @@ import org.ergoplatform.signSerializedErgoTx
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
+import org.ergoplatform.utils.getMessageOrName
 import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 abstract class ColdWalletSigningUiLogic {
@@ -60,7 +61,7 @@ abstract class ColdWalletSigningUiLogic {
                 return sr.buildTransactionInfo()
             } catch (t: Throwable) {
                 LogUtils.logDebug("ColdWalletSigning", "Error thrown on signing", t)
-                val message = t.message ?: t.javaClass.name
+                val message = t.getMessageOrName()
                 lastErrorMessage = "Error: $message"
             }
         }

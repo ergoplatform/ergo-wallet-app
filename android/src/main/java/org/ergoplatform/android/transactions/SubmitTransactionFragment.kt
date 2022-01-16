@@ -1,16 +1,58 @@
 package org.ergoplatform.android.transactions
 
+import android.os.Bundle
+import android.view.View
+import com.google.android.material.snackbar.Snackbar
 import org.ergoplatform.android.Preferences
+import org.ergoplatform.android.R
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.ProgressBottomSheetDialogFragment
+import org.ergoplatform.android.ui.showDialogWithCopyOption
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.transactions.PromptSigningResult
 
 abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
     AddressChooserCallback {
 
     protected abstract val viewModel: SubmitTransactionViewModel
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val viewModel = this.viewModel
+        viewModel.lockInterface.observe(viewLifecycleOwner, {
+            if (it)
+                ProgressBottomSheetDialogFragment.showProgressDialog(childFragmentManager)
+            else
+                ProgressBottomSheetDialogFragment.dismissProgressDialog(childFragmentManager)
+        })
+        viewModel.txWorkDoneLiveData.observe(viewLifecycleOwner, {
+            if (!it.success) {
+                val snackbar = Snackbar.make(
+                    requireView(),
+                    if (it is PromptSigningResult)
+                        R.string.error_prepare_transaction
+                    else R.string.error_send_transaction,
+                    Snackbar.LENGTH_LONG
+                )
+                it.errorMsg?.let { errorMsg ->
+                    snackbar.setAction(
+                        R.string.label_details
+                    ) {
+                        showDialogWithCopyOption(requireContext(), errorMsg)
+                    }
+                }
+                snackbar.setAnchorView(R.id.nav_view).show()
+            } else if (it is PromptSigningResult) {
+                // if this is a prompt signing result, switch to prompt signing dialog
+                SigningPromptDialogFragment().show(childFragmentManager, null)
+            }
+        })
+
+    }
 
     fun showChooseAddressList() {
         viewModel.uiLogic.wallet?.let { wallet ->

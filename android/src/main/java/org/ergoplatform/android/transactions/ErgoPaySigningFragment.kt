@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import org.ergoplatform.MessageSeverity
 import org.ergoplatform.android.AppDatabase
@@ -12,7 +13,7 @@ import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentErgoPaySigningBinding
-import org.ergoplatform.android.ui.AbstractAuthenticationFragment
+import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
 
@@ -35,6 +36,8 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         val viewModel = this.viewModel
         val context = requireContext()
         viewModel.uiLogic.init(
@@ -54,7 +57,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
                 visibleWhen(state, ErgoPaySigningUiLogic.State.DONE)
 
             when (state) {
-                ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> TODO()
+                ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> TODO("Ergo pay choose address")
                 ErgoPaySigningUiLogic.State.FETCH_DATA -> showFetchData()
                 ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION -> showTransactionInfo()
                 ErgoPaySigningUiLogic.State.DONE -> showDoneInfo()
@@ -62,8 +65,12 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
             }
         })
 
+        // Click listeners
         binding.transactionInfo.buttonSignTx.setOnClickListener {
             startAuthFlow(viewModel.uiLogic.wallet!!.walletConfig)
+        }
+        binding.buttonDismiss.setOnClickListener {
+            findNavController().popBackStack()
         }
     }
 
@@ -78,11 +85,12 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
     }
 
     private fun showDoneInfo() {
-        // TODO Ergo Pay use normal tx done message in case of success
-        binding.tvMessage.text = viewModel.uiLogic.lastMessage
+        // use normal tx done message in case of success
+        val uiLogic = viewModel.uiLogic
+        binding.tvMessage.text = uiLogic.getDoneMessage(AndroidStringProvider(requireContext()))
         binding.tvMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(
             0,
-            when (viewModel.uiLogic.lastMessageSeverity) {
+            when (uiLogic.getDoneSeverity()) {
                 MessageSeverity.NONE -> 0
                 MessageSeverity.INFORMATION -> R.drawable.ic_info_24
                 MessageSeverity.WARNING -> R.drawable.ic_warning_amber_24
@@ -97,14 +105,6 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
             viewModel.uiLogic.transactionInfo!!.reduceBoxes(),
             layoutInflater
         )
-    }
-
-    override fun proceedAuthFlowFromBiometrics() {
-        TODO("Not yet implemented")
-    }
-
-    override fun proceedAuthFlowWithPassword(password: String): Boolean {
-        TODO("Not yet implemented")
     }
 
     override fun onDestroyView() {
