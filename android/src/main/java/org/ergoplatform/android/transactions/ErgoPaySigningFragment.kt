@@ -7,13 +7,14 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import org.ergoplatform.MessageSeverity
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
+import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentErgoPaySigningBinding
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
-import java.lang.IllegalStateException
 
 class ErgoPaySigningFragment : AbstractAuthenticationFragment() {
     private var _binding: FragmentErgoPaySigningBinding? = null
@@ -37,7 +38,14 @@ class ErgoPaySigningFragment : AbstractAuthenticationFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val viewModel = this.viewModel
-        viewModel.uiLogic.init(args.request, args.address, Preferences(requireContext()))
+        val context = requireContext()
+        viewModel.uiLogic.init(
+            args.request,
+            args.walletId,
+            args.derivationIdx,
+            RoomWalletDbProvider(AppDatabase.getInstance(context)),
+            Preferences(context)
+        )
 
         viewModel.uiStateRefresh.observe(viewLifecycleOwner, { state ->
             binding.transactionInfo.root.visibility =

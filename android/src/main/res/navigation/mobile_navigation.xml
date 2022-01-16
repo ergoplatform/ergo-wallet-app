@@ -294,8 +294,10 @@
             android:name="request"
             app:argType="string" />
         <argument
-            android:name="address"
-            app:argType="string"
-            app:nullable="true" />
+            android:name="wallet_id"
+            app:argType="integer" />
+        <argument
+            android:name="derivation_idx"
+            app:argType="integer" />
     </fragment>
 </navigation>

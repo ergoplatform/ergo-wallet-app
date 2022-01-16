@@ -1,17 +1,15 @@
 package org.ergoplatform.uilogic.transactions
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ergoplatform.*
 import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.transactions.TransactionInfo
+import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
 
-abstract class ErgoPaySigningUiLogic {
-    abstract val coroutineScope: CoroutineScope
-    private var initialized = false
-
+abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     var epsr: ErgoPaySigningRequest? = null
         private set
     var transactionInfo: TransactionInfo? = null
@@ -21,17 +19,27 @@ abstract class ErgoPaySigningUiLogic {
     var lastMessageSeverity = MessageSeverity.NONE
         private set
 
-    fun init(request: String, address: String?, prefs: PreferencesProvider) {
+    fun init(
+        request: String,
+        walletId: Int,
+        derivationIndex: Int,
+        database: WalletDbProvider,
+        prefs: PreferencesProvider
+    ) {
         // prevent reinitialization on device rotation
-        if (initialized)
+        if (wallet != null)
             return
 
-        initialized = true
+        notifyStateChanged(State.FETCH_DATA)
 
-        // TODO Ergo Pay in case of need for address
-        // notifyStateChanged(State.WAIT_FOR_ADDRESS)
+        coroutineScope.launch {
+            initWallet(database, walletId, derivationIndex)
 
-        hasNewRequest(request, prefs)
+            // TODO Ergo Pay in case of need for address
+            // notifyStateChanged(State.WAIT_FOR_ADDRESS)
+
+            hasNewRequest(request, prefs)
+        }
     }
 
     private fun hasNewRequest(request: String, prefs: PreferencesProvider) {
@@ -57,6 +65,14 @@ abstract class ErgoPaySigningUiLogic {
     private fun resetLastMessage() {
         lastMessage = null
         lastMessageSeverity = MessageSeverity.NONE
+    }
+
+    override fun startPaymentWithMnemonicAsync(
+        mnemonic: String,
+        preferences: PreferencesProvider,
+        texts: StringProvider
+    ) {
+        TODO("Not yet implemented")
     }
 
     enum class State { WAIT_FOR_ADDRESS, FETCH_DATA, WAIT_FOR_CONFIRMATION, DONE }

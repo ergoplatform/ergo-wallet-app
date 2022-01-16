@@ -63,7 +63,7 @@ class SendFundsViewController(
                             walletId
                         ), true
                     )
-                }, { ergoPayRequest, address ->
+                }, { ergoPayRequest ->
                     // TODO ergo pay navigate to signing screen
                 }, { address, amount ->
                     inputReceiver.text = address

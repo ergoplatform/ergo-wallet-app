@@ -413,10 +413,10 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                         )
                 )
             },
-            { ergoPayRequest, address ->
+            { ergoPayRequest ->
                 findNavController().navigateSafe(
                     SendFundsFragmentDirections.actionSendFundsFragmentToErgoPaySigningFragment(
-                        ergoPayRequest, address
+                        ergoPayRequest, args.walletId, viewModel.uiLogic.derivedAddressIdx ?: -1
                     )
                 )
             },
