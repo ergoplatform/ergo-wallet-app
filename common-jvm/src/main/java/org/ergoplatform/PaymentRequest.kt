@@ -21,7 +21,7 @@ private val explorerPaymentUrlPrefix
 /**
  * referenced in AndroidManifest.xml and Info.plist.xml
  */
-private val PAYMENT_URI_SCHEME = "ergoplatform:"
+private val PAYMENT_URI_SCHEME = "ergo:"
 
 fun getExplorerPaymentRequestAddress(
     address: String,

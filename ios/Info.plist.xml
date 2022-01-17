@@ -33,7 +33,7 @@
                 <string>Editor</string>
                 <key>CFBundleURLSchemes</key>
                 <array>
-                    <string>ergoplatform</string>
+                    <string>ergo</string>
                 </array>
             </dict>
         </array>
