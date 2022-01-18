@@ -1,7 +1,11 @@
 <resources>
+    <string name="app_name" translatable="false">Ergo Wallet</string>
     <string name="title_transactions">Transacciones</string>
     <string name="title_wallets">Billeteras</string>
     <string name="title_settings">Opciones</string>
+    <string name="format_erg" translatable="false">###,##0.0000</string>
+    <string name="format_erg_more_precise" translatable="false">###,##0.000000</string>
+    <string name="format_fiat" translatable="false">###,##0.00</string>
 
     <string name="hint_password">Por favor introduce tu contraseña de gastos</string>
     <string name="label_forgot_password">¿Olvidaste tu contraseña?</string>
@@ -62,7 +66,8 @@
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">Esta es su frase semilla de 15 palabras. Estas palabras también se conocen como llave de papel.
-        Con estas 15 palabras, puede restaurar su billetera en otros dispositivos si pierde el acceso a este.\nEs crucial
+        Con estas 15 palabras, puede restaurar su billetera en otros dispositivos si pierde el acceso a este.\n
+        Es crucial
     que escribas cuidadosamente las 15 palabras (con lápiz y papel) y guárdelas en un lugar seguro.</string>
     <string name="intro_confirm_create_wallet">Para confirmar que su frase semilla escrita a mano es correcto, ingrese dos palabras de la frase ahora:</string>
     <string name="check_confirm_create_wallet">Entiendo que soy responsable de guardar mi frase semilla en un lugar seguro.
@@ -96,7 +101,7 @@
     <string name="device_enc_security_biometric_weak">Biométrico, Clase 2</string>
 
     <!-- Wallet config -->
-    <string name="title_wallet_details">Configuración de billetera</string>
+    <string name="title_wallet_details">Configura la wallet</string>
     <string name="label_wallet_name">Nombre descriptivo de la billetera</string>
     <string name="label_changes_saved">Cambios guardados</string>
     <string name="label_confirm_delete">¿Estás seguro de que deseas borrar la billetera de este dispositivo?\nEsta acción no se puede deshacer.</string>
@@ -154,6 +159,9 @@
     <string name="title_add_token">Elija el token para enviar</string>
     <string name="error_token_amount">Ingrese cantidades de tokens válidas o elimine las entradas de tokens no válidas</string>
     <string name="error_balance_erg">No hay saldo suficiente para enviar la cantidad especificada: solo hay %1s ERG disponibles.</string>
+    <string name="error_request_token_not_found">No se pudo añadir el token \'%1s\'</string>
+    <string name="error_request_token_amount">No se pudo poner la cantidad solicitada del token \'%1s\'</string>
+    <string name="error_request_token_but_no_erg">Tokens solicitados, pero no hay ERG suficiente. Una cantidad predeterminada será enviada</string>
 
     <!-- Cold wallet signing request screen -->
     <string name="title_signing_request">Firma</string>
@@ -170,6 +178,7 @@
 
     <!-- Settings -->
     <string name="desc_about">Creado por Benjamin Schulte, %1s</string>
+    <string name="about_year" translatable="false">2022</string>
     <string name="desc_about_moreinfo">Licenciado bajo <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Licencia de Apache 2</a>\n
         Este proyecto es <a href="https://github.com/ergoplatform/ergo-wallet-app">software de código abierto</a>\n
     Encuentra ayuda en <a href="https://discord.gg/kj7s7nb">Discord</a> o <a href="https://t.me/ergosupport">Telegram</a></string>
