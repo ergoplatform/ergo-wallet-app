@@ -1,11 +1,7 @@
 <resources>
-    <string name="app_name" translatable="false">Ergo Wallet</string>
     <string name="title_transactions">Transacciones</string>
     <string name="title_wallets">Billeteras</string>
     <string name="title_settings">Opciones</string>
-    <string name="format_erg" translatable="false">###,##0.0000</string>
-    <string name="format_erg_more_precise" translatable="false">###,##0.000000</string>
-    <string name="format_fiat" translatable="false">###,##0.00</string>
 
     <string name="hint_password">Por favor introduce tu contraseña de gastos</string>
     <string name="label_forgot_password">¿Olvidaste tu contraseña?</string>
@@ -66,9 +62,8 @@
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">Esta es su frase semilla de 15 palabras. Estas palabras también se conocen como llave de papel.
-        Con estas 15 palabras, puede restaurar su billetera en otros dispositivos si pierde el acceso a este.\n
-        Es crucial
-    que escribas cuidadosamente las 15 palabras (con lápiz y papel) y guárdelas en un lugar seguro.</string>
+        Con estas 15 palabras, puede restaurar su billetera en otros dispositivos si pierde el acceso a este.\nEs crucial
+        que escribas cuidadosamente las 15 palabras (con lápiz y papel) y guárdelas en un lugar seguro.</string>
     <string name="intro_confirm_create_wallet">Para confirmar que su frase semilla escrita a mano es correcto, ingrese dos palabras de la frase ahora:</string>
     <string name="check_confirm_create_wallet">Entiendo que soy responsable de guardar mi frase semilla en un lugar seguro.
     Es la única forma de acceder a mi billetera si las claves almacenadas en este dispositivo se pierden o son inaccesibles.</string>
@@ -178,7 +173,6 @@
 
     <!-- Settings -->
     <string name="desc_about">Creado por Benjamin Schulte, %1s</string>
-    <string name="about_year" translatable="false">2022</string>
     <string name="desc_about_moreinfo">Licenciado bajo <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Licencia de Apache 2</a>\n
         Este proyecto es <a href="https://github.com/ergoplatform/ergo-wallet-app">software de código abierto</a>\n
     Encuentra ayuda en <a href="https://discord.gg/kj7s7nb">Discord</a> o <a href="https://t.me/ergosupport">Telegram</a></string>
