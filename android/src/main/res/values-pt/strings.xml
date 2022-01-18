@@ -67,7 +67,7 @@
     que você escreva cuidadosamente todas as 15 palavras (com caneta e papel) e guarde-as em um local seguro.</string>
     <string name="intro_confirm_create_wallet">Para confirmar que sua frase escrita a mão estão correta, digite agora duas palavras da frase:</string>
     <string name="check_confirm_create_wallet">Eu entendo que sou responsável por armazenar minhas frases mnemônicas em um local seguro.
-    É a unica maneira de acessar minha carteira se as chaves armazenadas neste aparelho forem perdidas ou se tornarem inacessíveis.</string>
+    É a única maneira de acessar minha carteira se as chaves armazenadas neste aparelho forem perdidas ou se tornarem inacessíveis.</string>
     <string name="label_word_confirm_create_wallet">Palavra %1s</string>
     <string name="error_word_confirm_create_wallet">Palavra incorreta</string>
 
@@ -146,7 +146,7 @@
         enviá-la para a rede.</string>
     <string name="desc_prompt_signing_multiple">Sua transação está preparada. Escaneie estes códigos QR
        com seu aparelho assinado para prosseguir.</string>
-    <string name="button_scan_signed_tx">Escaneie tx assinada</string>
+    <string name="button_scan_signed_tx">Escaneie transação assinada</string>
     <string name="button_next">Próximo</string>
     <string name="title_authenticate">Autenticação requerida</string>
     <string name="error_device_security">Erro de segurança: %1s</string>
