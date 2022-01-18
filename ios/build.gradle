@@ -95,6 +95,7 @@ task convertStrings {
         convertFile("")
         convertFile("zh")
         convertFile("es")
+        convertFile("pt")
     }
 }
 

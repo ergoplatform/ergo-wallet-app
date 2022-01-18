@@ -12,6 +12,7 @@
         <array>
             <string>en</string>
             <string>es</string>
+            <string>pt</string>
             <string>zh</string>
         </array>
         <key>CFBundleIdentifier</key>
