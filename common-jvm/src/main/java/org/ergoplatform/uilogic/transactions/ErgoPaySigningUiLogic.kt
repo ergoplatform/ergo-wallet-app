@@ -84,6 +84,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                 }
                 notifyStateChanged(State.WAIT_FOR_CONFIRMATION)
             } catch (t: Throwable) {
+                // TODO Ergo Pay show a Repeat button for user convenience when it is an IOException
                 LogUtils.logDebug("ErgoPay", "Error getting signing request", t)
                 lastMessage = "An error occurred:\n${t.getMessageOrName()}"
                 lastMessageSeverity = MessageSeverity.ERROR

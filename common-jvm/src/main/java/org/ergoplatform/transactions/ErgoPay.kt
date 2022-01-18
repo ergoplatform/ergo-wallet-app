@@ -1,7 +1,10 @@
 package org.ergoplatform
 
+import com.google.gson.JsonParser
 import org.ergoplatform.transactions.*
 import org.ergoplatform.utils.Base64Coder
+import org.ergoplatform.utils.fetchHttpGetStringSync
+import org.ergoplatform.utils.isLocalOrIpAddress
 
 /**
  * EIP-0020 ErgoPaySigningRequest
@@ -37,12 +40,40 @@ fun getErgoPaySigningRequest(requestData: String): ErgoPaySigningRequest {
     if (isErgoPayStaticRequest(requestData)) {
         return parseErgoPaySigningRequestFromUri(requestData)
     } else {
-        TODO("Ergo Pay implement URL request")
+        // TODO Ergo Pay check for address placeholder
+
+        // use http for development purposes
+        val httpUrl = (if (isLocalOrIpAddress(requestData)) "http:" else "https:") +
+                requestData.substringAfter(uriSchemePrefix)
+
+        val jsonResponse = fetchHttpGetStringSync(httpUrl)
+        return parseErgoPaySigningRequestFromJson(jsonResponse)
     }
 }
 
+private const val JSON_KEY_REDUCED_TX = "reducedTx"
+private const val JSON_KEY_ADDRESS = "address"
+private const val JSON_KEY_REPLY_TO = "replyTo"
+private const val JSON_KEY_MESSAGE = "message"
+private const val JSON_KEY_MESSAGE_SEVERITY = "messageSeverity"
+
+fun parseErgoPaySigningRequestFromJson(jsonString: String): ErgoPaySigningRequest {
+    val jsonObject = JsonParser().parse(jsonString).asJsonObject
+    val reducedTx = jsonObject.get(JSON_KEY_REDUCED_TX)?.asString?.let {
+        Base64Coder.decode(it, true)
+    }
+
+    return ErgoPaySigningRequest(
+        reducedTx, jsonObject.get(JSON_KEY_ADDRESS)?.asString,
+        jsonObject.get(JSON_KEY_MESSAGE)?.asString,
+        jsonObject.get(JSON_KEY_MESSAGE_SEVERITY)?.asString?.let { MessageSeverity.valueOf(it) }
+            ?: MessageSeverity.NONE,
+        jsonObject.get(JSON_KEY_REPLY_TO)?.asString
+    )
+}
+
 fun isErgoPayStaticRequest(requestData: String) =
-    !requestData.startsWith(uriSchemePrefix + "//")
+    isErgoPaySigningRequest(requestData) && !requestData.startsWith("$uriSchemePrefix//", true)
 
 private fun parseErgoPaySigningRequestFromUri(uri: String): ErgoPaySigningRequest {
     val uriWithoutPrefix = uri.substring(uriSchemePrefix.length)
@@ -63,6 +94,8 @@ fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApiService): 
         val boxInfo = ergoApiService.getBoxInformation(it).execute().body()!!
         inputsMap.put(boxInfo.boxId, boxInfo.toTransactionInfoBox())
     }
+
+    // TODO Ergo Pay when minting new tokens, check if information about name and decimals can be obtianed
 
     return unsignedTx.buildTransactionInfo(inputsMap)
 }
