@@ -54,13 +54,10 @@ fun parseColdSigningRequest(qrData: String): PromptSigningResult {
         val serializedTx = Base64Coder.decode(jsonTree.get(JSON_FIELD_REDUCED_TX).asString)
 
         // sender is optional
-        val sender =
-            if (jsonTree.has(JSON_FIELD_SENDER)) jsonTree.get(JSON_FIELD_SENDER).asString else null
+        val sender = jsonTree.get(JSON_FIELD_SENDER)?.asString
 
-        val inputs = if (jsonTree.has(JSON_FIELD_INPUTS)) {
-            jsonTree.get(JSON_FIELD_INPUTS).asJsonArray.toList()
-                .map { Base64Coder.decode(it.asString) }
-        } else null
+        val inputs = jsonTree.get(JSON_FIELD_INPUTS)?.asJsonArray?.toList()
+                ?.map { Base64Coder.decode(it.asString) }
 
         return PromptSigningResult(true, serializedTx, inputs, sender)
 
@@ -186,8 +183,8 @@ private fun parseQrChunk(chunk: String, property: String): QrChunk {
     if (!jsonTree.has(property)) {
         throw java.lang.IllegalArgumentException("QR code does not contain element $property")
     }
-    val index = if (jsonTree.has(QR_PROPERTY_INDEX)) jsonTree.get(QR_PROPERTY_INDEX).asInt else 1
-    val pages = if (jsonTree.has(QR_PROPERTY_PAGES)) jsonTree.get(QR_PROPERTY_PAGES).asInt else 1
+    val index = jsonTree.get(QR_PROPERTY_INDEX)?.asInt ?: 1
+    val pages = jsonTree.get(QR_PROPERTY_PAGES)?.asInt ?: 1
     return QrChunk(index, pages, jsonTree.get(property).asString)
 }
 
