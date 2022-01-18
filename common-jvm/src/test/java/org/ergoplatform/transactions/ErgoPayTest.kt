@@ -35,7 +35,7 @@ class ErgoPayTest {
         // assertNotNull(txInfo)
 
         // commented since will fail when no server runs locally
-        // val fetchedRequest = getErgoPaySigningRequest("ergopay://localhost:8080/roundTrip/3W2oseMJ33tkQUcXANnwHhq8gVsQLUPthXRiPsisKzGB74Zc9HD/")
+        // val fetchedRequest = getErgoPaySigningRequest("ergopay://localhost:8080/roundTrip/3Ww2oseMJ33tkQUcXANnwHhq8gVsQLUPthXRiPsisKzGB74Zc9HD/")
         // assertNotNull(fetchedRequest)
     }
 }

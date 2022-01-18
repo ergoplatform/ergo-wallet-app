@@ -12,6 +12,7 @@ import org.ergoplatform.uilogic.STRING_DESC_TRANSACTION_SEND
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
+import java.lang.IllegalStateException
 
 abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     var epsr: ErgoPaySigningRequest? = null
@@ -81,8 +82,21 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
             try {
                 epsr = getErgoPaySigningRequest(request).apply {
                     transactionInfo = buildTransactionInfo(ErgoApiService.getOrInit(prefs))
+
+                    p2pkAddress?.let {
+                        val hasAddress =
+                            getSigningDerivedAddresses().any { p2pkAddress.equals(it, true) }
+
+                        if (!hasAddress)
+                            throw IllegalStateException("Signing Request for address $p2pkAddress, which does not belong to this wallet.")
+                    }
                 }
-                notifyStateChanged(State.WAIT_FOR_CONFIRMATION)
+
+                lastMessage = epsr?.message
+                lastMessageSeverity = epsr?.messageSeverity ?: MessageSeverity.NONE
+
+                notifyStateChanged(transactionInfo?.let { State.WAIT_FOR_CONFIRMATION }
+                    ?: State.DONE)
             } catch (t: Throwable) {
                 // TODO Ergo Pay show a Repeat button for user convenience when it is an IOException
                 LogUtils.logDebug("ErgoPay", "Error getting signing request", t)
@@ -162,10 +176,13 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     }
 
     fun getDoneMessage(texts: StringProvider): String =
-        lastMessage ?: (texts.getString(STRING_DESC_TRANSACTION_SEND) + txId?.let { "\n\n$it" })
+        lastMessage ?: txId?.let {
+            texts.getString(STRING_DESC_TRANSACTION_SEND) + "\n\n$it"
+        } ?: "Unknown error occurred."
 
     fun getDoneSeverity(): MessageSeverity =
-        if (lastMessage == null && txId != null) MessageSeverity.INFORMATION else lastMessageSeverity
+        if (lastMessage == null && txId != null) MessageSeverity.INFORMATION else
+            lastMessage?.let { lastMessageSeverity } ?: MessageSeverity.ERROR
 
     enum class State { WAIT_FOR_ADDRESS, FETCH_DATA, WAIT_FOR_CONFIRMATION, DONE }
 

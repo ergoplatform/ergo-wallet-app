@@ -5,6 +5,7 @@ import org.ergoplatform.transactions.*
 import org.ergoplatform.utils.Base64Coder
 import org.ergoplatform.utils.fetchHttpGetStringSync
 import org.ergoplatform.utils.isLocalOrIpAddress
+import java.lang.IllegalStateException
 
 /**
  * EIP-0020 ErgoPaySigningRequest
@@ -37,8 +38,8 @@ fun getErgoPaySigningRequest(requestData: String): ErgoPaySigningRequest {
     }
 
     // static request?
-    if (isErgoPayStaticRequest(requestData)) {
-        return parseErgoPaySigningRequestFromUri(requestData)
+    val epsr = if (isErgoPayStaticRequest(requestData)) {
+        parseErgoPaySigningRequestFromUri(requestData)
     } else {
         // TODO Ergo Pay check for address placeholder
 
@@ -47,8 +48,15 @@ fun getErgoPaySigningRequest(requestData: String): ErgoPaySigningRequest {
                 requestData.substringAfter(uriSchemePrefix)
 
         val jsonResponse = fetchHttpGetStringSync(httpUrl)
-        return parseErgoPaySigningRequestFromJson(jsonResponse)
+        parseErgoPaySigningRequestFromJson(jsonResponse)
     }
+
+    // either message or reducedTx should be set
+    if (epsr.message == null && epsr.reducedTx == null) {
+        throw IllegalStateException("Ergo Pay Signing Request should contain at least message or reducedTx")
+    }
+
+    return epsr
 }
 
 private const val JSON_KEY_REDUCED_TX = "reducedTx"
@@ -86,8 +94,10 @@ private fun parseErgoPaySigningRequestFromUri(uri: String): ErgoPaySigningReques
  * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
  * call this only from non-UI thread and within an applicable try/catch phrase
  */
-fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApiService): TransactionInfo {
-    val unsignedTx = deserializeUnsignedTxOffline(reducedTx!!)
+fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApiService): TransactionInfo? {
+    if (reducedTx == null) return null
+
+    val unsignedTx = deserializeUnsignedTxOffline(reducedTx)
 
     val inputsMap = HashMap<String, TransactionInfoBox>()
     unsignedTx.getInputBoxesIds().forEach {
