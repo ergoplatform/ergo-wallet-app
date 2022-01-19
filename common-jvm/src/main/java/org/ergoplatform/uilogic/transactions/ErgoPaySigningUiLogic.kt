@@ -8,8 +8,7 @@ import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.TransactionInfo
-import org.ergoplatform.uilogic.STRING_DESC_TRANSACTION_SEND
-import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
 import java.lang.IllegalStateException
@@ -31,7 +30,8 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         walletId: Int,
         derivationIndex: Int,
         database: WalletDbProvider,
-        prefs: PreferencesProvider
+        prefs: PreferencesProvider,
+        texts: StringProvider
     ) {
         // prevent reinitialization on device rotation
         if (wallet != null)
@@ -68,11 +68,11 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
 //                )
 //            } ?:
 
-            hasNewRequest(request, prefs)
+            hasNewRequest(request, prefs, texts)
         }
     }
 
-    private fun hasNewRequest(request: String, prefs: PreferencesProvider) {
+    private fun hasNewRequest(request: String, prefs: PreferencesProvider, texts: StringProvider) {
         // reset if we already have a request
         notifyStateChanged(State.FETCH_DATA)
         txId = null
@@ -88,19 +88,26 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                             getSigningDerivedAddresses().any { p2pkAddress.equals(it, true) }
 
                         if (!hasAddress)
-                            throw IllegalStateException("Signing Request for address $p2pkAddress, which does not belong to this wallet.")
+                            throw IllegalStateException(
+                                texts.getString(STRING_LABEL_ERGO_PAY_WRONG_ADDRESS, p2pkAddress)
+                            )
                     }
                 }
 
-                lastMessage = epsr?.message
-                lastMessageSeverity = epsr?.messageSeverity ?: MessageSeverity.NONE
+                if (transactionInfo == null) {
+                    epsr?.message?.let {
+                        lastMessage = texts.getString(STRING_LABEL_MESSAGE_FROM_DAPP, it)
+                        lastMessageSeverity = epsr?.messageSeverity ?: MessageSeverity.NONE
+                    }
 
-                notifyStateChanged(transactionInfo?.let { State.WAIT_FOR_CONFIRMATION }
-                    ?: State.DONE)
+                    notifyStateChanged(State.DONE)
+                } else {
+                    notifyStateChanged(State.WAIT_FOR_CONFIRMATION)
+                }
             } catch (t: Throwable) {
                 // TODO Ergo Pay show a Repeat button for user convenience when it is an IOException
                 LogUtils.logDebug("ErgoPay", "Error getting signing request", t)
-                lastMessage = "An error occurred:\n${t.getMessageOrName()}"
+                lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, t.getMessageOrName())
                 lastMessageSeverity = MessageSeverity.ERROR
                 notifyStateChanged(State.DONE)
             }

@@ -52,10 +52,56 @@
                     android:textAlignment="center" />
             </androidx.appcompat.widget.LinearLayoutCompat>
 
-            <include
-                android:id="@+id/transaction_info"
-                layout="@layout/card_transaction_info"
-                tools:visibility="gone" />
+            <LinearLayout
+                android:id="@+id/layout_transaction_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/layout_ti_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/activity_vertical_margin"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/activity_horizontal_margin"
+                        android:orientation="horizontal"
+                        tools:ignore="UseCompoundDrawables">
+
+                        <ImageView
+                            android:id="@+id/image_ti_message"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="@dimen/half_horizontal_margin"
+                            android:contentDescription="@null"
+                            tools:src="@drawable/ic_warning_amber_24" />
+
+                        <TextView
+                            android:id="@+id/tv_ti_message"
+                            style="@style/TextAppearance.App.Body1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            tools:text="@string/label_message_from_dapp" />
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <include
+                    android:id="@+id/transaction_info"
+                    layout="@layout/card_transaction_info"
+                    android:visibility="visible" />
+            </LinearLayout>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/layout_done_info"
@@ -64,7 +110,7 @@
                 android:layout_gravity="center"
                 android:layout_margin="@dimen/activity_horizontal_margin"
                 android:visibility="gone"
-                tools:visibility="visible">
+                tools:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"

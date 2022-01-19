@@ -45,11 +45,12 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
             args.walletId,
             args.derivationIdx,
             RoomWalletDbProvider(AppDatabase.getInstance(context)),
-            Preferences(context)
+            Preferences(context),
+            AndroidStringProvider(context)
         )
 
         viewModel.uiStateRefresh.observe(viewLifecycleOwner, { state ->
-            binding.transactionInfo.root.visibility =
+            binding.layoutTransactionInfo.visibility =
                 visibleWhen(state, ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION)
             binding.layoutProgress.visibility =
                 visibleWhen(state, ErgoPaySigningUiLogic.State.FETCH_DATA)
@@ -90,21 +91,34 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
         binding.tvMessage.text = uiLogic.getDoneMessage(AndroidStringProvider(requireContext()))
         binding.tvMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(
             0,
-            when (uiLogic.getDoneSeverity()) {
-                MessageSeverity.NONE -> 0
-                MessageSeverity.INFORMATION -> R.drawable.ic_info_24
-                MessageSeverity.WARNING -> R.drawable.ic_warning_amber_24
-                MessageSeverity.ERROR -> R.drawable.ic_error_outline_24
-            },
+            getSeverityDrawableResId(uiLogic.getDoneSeverity()),
             0, 0
         )
     }
 
+    private fun getSeverityDrawableResId(severity: MessageSeverity) =
+        when (severity) {
+            MessageSeverity.NONE -> 0
+            MessageSeverity.INFORMATION -> R.drawable.ic_info_24
+            MessageSeverity.WARNING -> R.drawable.ic_warning_amber_24
+            MessageSeverity.ERROR -> R.drawable.ic_error_outline_24
+        }
+
     private fun showTransactionInfo() {
+        val uiLogic = viewModel.uiLogic
         binding.transactionInfo.bindTransactionInfo(
-            viewModel.uiLogic.transactionInfo!!.reduceBoxes(),
+            uiLogic.transactionInfo!!.reduceBoxes(),
             layoutInflater
         )
+        binding.layoutTiMessage.visibility = uiLogic.epsr?.message?.let {
+            binding.tvTiMessage.text = getString(R.string.label_message_from_dapp, it)
+            val severityResId = getSeverityDrawableResId(
+                uiLogic.epsr?.messageSeverity ?: MessageSeverity.NONE
+            )
+            binding.imageTiMessage.setImageResource(severityResId)
+            binding.imageTiMessage.visibility = if (severityResId == 0) View.GONE else View.VISIBLE
+            View.VISIBLE
+        } ?: View.GONE
     }
 
     override fun onDestroyView() {
