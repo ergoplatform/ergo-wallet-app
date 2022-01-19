@@ -6,6 +6,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import okhttp3.Request
 import okhttp3.ResponseBody
+import okhttp3.mockwebserver.MockWebServer
 import org.ergoplatform.ErgoApi
 import org.ergoplatform.MessageSeverity
 import org.ergoplatform.TestPreferencesProvider
@@ -21,8 +22,16 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import kotlin.coroutines.EmptyCoroutineContext
+import okhttp3.mockwebserver.MockResponse
+import org.ergoplatform.uilogic.STRING_LABEL_MESSAGE_FROM_DAPP
+import org.ergoplatform.utils.LogUtils
+
 
 class ErgoPaySigningUiLogicTest : TestCase() {
+
+    override fun setUp() {
+        LogUtils.logDebug = true
+    }
 
     fun testStatic() {
         runBlocking {
@@ -61,6 +70,69 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 assertEquals(MessageSeverity.ERROR, getDoneSeverity())
                 assertEquals(STRING_LABEL_ERROR_OCCURED, getDoneMessage(TestStringProvider()))
             }
+        }
+    }
+
+    fun testDynamic() {
+        val server = MockWebServer()
+        server.enqueue(MockResponse().setBody("{\"message\":\"Here is your 1 ERG round trip.\",\"messageSeverity\":\"INFORMATION\",\"address\":\"${TestUiWallet.firstAddress}\",\"reducedTx\":\"vAIBsY8KufROXCUQyk05e7UCm4hdh-afd4BXlhyy-i7xo8YAAAACUUCDoXD8c0BxwHdI_0RJQGBmVDF71RaGUSDtcClSqxuW1lsZOJnBVNdbw6VbLTwjEfCfArnW7S2skTyxDDgwgAOAlOvcAwAIzQKya10Oh0WJx8V1Smpq9AgIH___4xEYT0SiW4DH8rxitYSUCQAAwIQ9EAUEAAQADjYQAgSQAQjNAnm-Zn753LusVaBilc6HCwcCm_zbLc4o2VnygVsW-BeY6gLRkqOajMenAXMAcwEQAQIEAtGWgwMBk6OMx7KlcwAAAZPCsqVzAQB0cwJzA4MBCM3urJOxpXMEhJQJAADZptHA6wkACM0CsmtdDodFicfFdUpqavQICB___-MRGE9EoluAx_K8YrWElAkCAPgKAeC00S8AzQKya10Oh0WJx8V1Smpq9AgIH___4xEYT0SiW4DH8rxitZ1PrGY=\"}"))
+        server.enqueue(MockResponse().setBody("hello, world!"))
+        server.enqueue(MockResponse().setBody("{\"message\":\"Here is your 1 ERG round trip.\",\"messageSeverity\":\"INFORMATION\",\"address\":\"someAddressNotHere\",\"reducedTx\":\"vAIBsY8KufROXCUQyk05e7UCm4hdh-afd4BXlhyy-i7xo8YAAAACUUCDoXD8c0BxwHdI_0RJQGBmVDF71RaGUSDtcClSqxuW1lsZOJnBVNdbw6VbLTwjEfCfArnW7S2skTyxDDgwgAOAlOvcAwAIzQKya10Oh0WJx8V1Smpq9AgIH___4xEYT0SiW4DH8rxitYSUCQAAwIQ9EAUEAAQADjYQAgSQAQjNAnm-Zn753LusVaBilc6HCwcCm_zbLc4o2VnygVsW-BeY6gLRkqOajMenAXMAcwEQAQIEAtGWgwMBk6OMx7KlcwAAAZPCsqVzAQB0cwJzA4MBCM3urJOxpXMEhJQJAADZptHA6wkACM0CsmtdDodFicfFdUpqavQICB___-MRGE9EoluAx_K8YrWElAkCAPgKAeC00S8AzQKya10Oh0WJx8V1Smpq9AgIH___4xEYT0SiW4DH8rxitZ1PrGY=\"}"))
+        server.enqueue(MockResponse().setBody("{\"message\":\"Out of order. Please try again later.\",\"messageSeverity\":\"WARNING\"}"))
+
+        runBlocking {
+            server.start()
+            val url = "ergopay://" + server.url("/").toString().substringAfter("http://")
+
+            // acutal thing going through
+            buildUiLogicWithWallet(url).apply {
+                assertEquals(ErgoPaySigningUiLogic.State.FETCH_DATA, state)
+                waitWhileFetching(this)
+                assertEquals(ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION, state)
+                assertNotNull(epsr)
+                assertNotNull(epsr?.reducedTx)
+                assertNotNull(epsr?.message)
+                assertEquals(MessageSeverity.INFORMATION, epsr?.messageSeverity)
+                assertEquals(TestUiWallet.firstAddress, epsr?.p2pkAddress)
+                assertNull(epsr?.replyToUrl)
+
+            }
+
+            // hello, world will fail
+            buildUiLogicWithWallet(url).apply {
+                assertEquals(ErgoPaySigningUiLogic.State.FETCH_DATA, state)
+                waitWhileFetching(this)
+                assertEquals(ErgoPaySigningUiLogic.State.DONE, state)
+                assertNull(epsr)
+                assertNull(transactionInfo)
+                assertEquals(MessageSeverity.ERROR, getDoneSeverity())
+                assertEquals(STRING_LABEL_ERROR_OCCURED, getDoneMessage(TestStringProvider()))
+
+            }
+
+            // wrong address - fail
+            buildUiLogicWithWallet(url).apply {
+                assertEquals(ErgoPaySigningUiLogic.State.FETCH_DATA, state)
+                waitWhileFetching(this)
+                assertEquals(ErgoPaySigningUiLogic.State.DONE, state)
+                assertNotNull(epsr)
+                assertNotNull(transactionInfo)
+                assertEquals(MessageSeverity.ERROR, getDoneSeverity())
+                assertEquals(STRING_LABEL_ERROR_OCCURED, getDoneMessage(TestStringProvider()))
+            }
+
+            // no reduced tx, but information message
+            buildUiLogicWithWallet(url).apply {
+                assertEquals(ErgoPaySigningUiLogic.State.FETCH_DATA, state)
+                waitWhileFetching(this)
+                assertEquals(ErgoPaySigningUiLogic.State.DONE, state)
+                assertNotNull(epsr)
+                assertNull(transactionInfo)
+                assertEquals(MessageSeverity.WARNING, getDoneSeverity())
+                assertEquals(STRING_LABEL_MESSAGE_FROM_DAPP, getDoneMessage(TestStringProvider()))
+            }
+
+            server.shutdown()
         }
     }
 

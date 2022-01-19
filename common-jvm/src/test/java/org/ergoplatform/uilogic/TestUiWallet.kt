@@ -5,7 +5,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 object TestUiWallet {
-    private const val firstAddress = "address"
+    const val firstAddress = "address"
     internal val token = WalletToken(
         1,
         firstAddress,

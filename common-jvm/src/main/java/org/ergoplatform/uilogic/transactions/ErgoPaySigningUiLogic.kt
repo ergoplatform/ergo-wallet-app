@@ -79,7 +79,8 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
 
         coroutineScope.launch(Dispatchers.IO) {
             try {
-                epsr = getErgoPaySigningRequest(request).apply {
+                epsr = getErgoPaySigningRequest(request)
+                epsr?.apply {
                     transactionInfo = buildTransactionInfo(getErgoApiService(prefs))
 
                     p2pkAddress?.let {
