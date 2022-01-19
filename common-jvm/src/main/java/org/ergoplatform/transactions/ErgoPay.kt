@@ -94,7 +94,7 @@ private fun parseErgoPaySigningRequestFromUri(uri: String): ErgoPaySigningReques
  * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
  * call this only from non-UI thread and within an applicable try/catch phrase
  */
-fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApiService): TransactionInfo? {
+fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApi): TransactionInfo? {
     if (reducedTx == null) return null
 
     val unsignedTx = deserializeUnsignedTxOffline(reducedTx)

@@ -31,7 +31,7 @@ abstract class SubmitTransactionUiLogic {
     var signedTxQrCodePagesCollector: QrCodePagesCollector? = null
         private set
 
-    suspend fun initWallet(
+    protected suspend fun initWallet(
         database: WalletDbProvider,
         walletId: Int,
         derivationIdx: Int

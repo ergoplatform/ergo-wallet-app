@@ -11,7 +11,6 @@ import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
-import java.lang.IllegalStateException
 
 abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     var epsr: ErgoPaySigningRequest? = null
@@ -81,7 +80,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         coroutineScope.launch(Dispatchers.IO) {
             try {
                 epsr = getErgoPaySigningRequest(request).apply {
-                    transactionInfo = buildTransactionInfo(ErgoApiService.getOrInit(prefs))
+                    transactionInfo = buildTransactionInfo(getErgoApiService(prefs))
 
                     p2pkAddress?.let {
                         val hasAddress =
@@ -113,6 +112,10 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
             }
         }
     }
+
+    // override in unit tests
+    protected open fun getErgoApiService(prefs: PreferencesProvider): ErgoApi =
+        ErgoApiService.getOrInit(prefs)
 
     private fun resetLastMessage() {
         lastMessage = null
