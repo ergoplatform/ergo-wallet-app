@@ -43,7 +43,7 @@ task convertStrings {
                 output2.parentFile.mkdirs()
 
             if (!input.exists())
-                logger.error("Android merged values file not found, please build for Android first.")
+                logger.error("Android merged values file not found. Please run gradlew clean convertStrings")
 
             def endTag = "</string>"
 
