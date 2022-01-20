@@ -66,7 +66,9 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 assertEquals(ErgoPaySigningUiLogic.State.FETCH_DATA, state)
                 waitWhileFetching(this)
                 assertEquals(ErgoPaySigningUiLogic.State.DONE, state)
-                assertNull(epsr)
+                assertNotNull(epsr)
+                assertNotNull(epsr?.reducedTx)
+                assertNull(transactionInfo)
                 assertEquals(MessageSeverity.ERROR, getDoneSeverity())
                 assertEquals(STRING_LABEL_ERROR_OCCURED, getDoneMessage(TestStringProvider()))
             }
