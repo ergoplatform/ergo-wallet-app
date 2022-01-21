@@ -1,10 +1,10 @@
 package org.ergoplatform
 
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.transactions.*
-import org.ergoplatform.utils.Base64Coder
-import org.ergoplatform.utils.fetchHttpGetStringSync
-import org.ergoplatform.utils.isLocalOrIpAddress
+import org.ergoplatform.utils.*
 import java.lang.IllegalStateException
 
 /**
@@ -124,3 +124,21 @@ fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApi): Transac
     return unsignedTx.buildTransactionInfo(inputsMap)
 }
 
+private const val JSON_FIELD_TX_ID = "txId"
+
+/**
+ * Sends a reply to dapp, if necessary. Will make a https request to dapp
+ * Call this only from non-UI thread and within an applicable try/catch phrase
+ */
+fun ErgoPaySigningRequest.sendReplyToDApp(txId: String) {
+    replyToUrl?.let {
+        val jsonString = run {
+            val gson = GsonBuilder().disableHtmlEscaping().create()
+            val root = JsonObject()
+            root.addProperty(JSON_FIELD_TX_ID, txId)
+            gson.toJson(root)
+        }
+
+        httpPostStringSync(it, jsonString, MEDIA_TYPE_JSON)
+    }
+}

@@ -1,6 +1,7 @@
 package org.ergoplatform.uilogic.transactions
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.*
@@ -192,6 +193,20 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     override fun notifyHasTxId(txId: String) {
         this.txId = txId
         notifyStateChanged(State.DONE)
+        sendReplyToDapp(txId)
+    }
+
+    private fun sendReplyToDapp(txId: String) {
+        epsr?.replyToUrl?.let {
+            // fire & forget type of reply
+            GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    epsr?.sendReplyToDApp(txId)
+                } catch (t: Throwable) {
+                    // ignore
+                }
+            }
+        }
     }
 
     fun getDoneMessage(texts: StringProvider): String =

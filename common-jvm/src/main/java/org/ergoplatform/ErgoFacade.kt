@@ -270,7 +270,7 @@ fun sendSignedErgoTx(
         val ergoClient = getRestErgoClient(prefs)
         val txId = ergoClient.execute { ctx ->
             val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
-            ctx.sendTransaction(signedTx)
+            ctx.sendTransaction(signedTx).trim('"')
         }
 
         return SendTransactionResult(txId.isNotEmpty(), txId)
