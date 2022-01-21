@@ -73,43 +73,51 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
 
     private fun hasNewRequest(request: String, prefs: PreferencesProvider, texts: StringProvider) {
         // reset if we already have a request
-        notifyStateChanged(State.FETCH_DATA)
         txId = null
         resetLastMessage()
 
-        coroutineScope.launch(Dispatchers.IO) {
-            try {
-                epsr = getErgoPaySigningRequest(request)
-                epsr?.apply {
-                    transactionInfo = buildTransactionInfo(getErgoApiService(prefs))
+        if (derivedAddress == null && isErgoPayDynamicWithAddressRequest(request)) {
+            // if we have a address request but no address set, ask user to choose an address
+            notifyStateChanged(State.WAIT_FOR_ADDRESS)
+        } else {
+            notifyStateChanged(State.FETCH_DATA)
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    epsr = getErgoPaySigningRequest(request, derivedAddress?.publicAddress)
+                    epsr?.apply {
+                        transactionInfo = buildTransactionInfo(getErgoApiService(prefs))
 
-                    p2pkAddress?.let {
-                        val hasAddress =
-                            getSigningDerivedAddresses().any { p2pkAddress.equals(it, true) }
+                        p2pkAddress?.let {
+                            val hasAddress =
+                                getSigningDerivedAddresses().any { p2pkAddress.equals(it, true) }
 
-                        if (!hasAddress)
-                            throw IllegalStateException(
-                                texts.getString(STRING_LABEL_ERGO_PAY_WRONG_ADDRESS, p2pkAddress)
-                            )
+                            if (!hasAddress)
+                                throw IllegalStateException(
+                                    texts.getString(
+                                        STRING_LABEL_ERGO_PAY_WRONG_ADDRESS,
+                                        p2pkAddress
+                                    )
+                                )
+                        }
                     }
-                }
 
-                if (transactionInfo == null) {
-                    epsr?.message?.let {
-                        lastMessage = texts.getString(STRING_LABEL_MESSAGE_FROM_DAPP, it)
-                        lastMessageSeverity = epsr?.messageSeverity ?: MessageSeverity.NONE
+                    if (transactionInfo == null) {
+                        epsr?.message?.let {
+                            lastMessage = texts.getString(STRING_LABEL_MESSAGE_FROM_DAPP, it)
+                            lastMessageSeverity = epsr?.messageSeverity ?: MessageSeverity.NONE
+                        }
+
+                        notifyStateChanged(State.DONE)
+                    } else {
+                        notifyStateChanged(State.WAIT_FOR_CONFIRMATION)
                     }
-
+                } catch (t: Throwable) {
+                    // TODO Ergo Pay show a Repeat button for user convenience when it is an IOException
+                    LogUtils.logDebug("ErgoPay", "Error getting signing request", t)
+                    lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, t.getMessageOrName())
+                    lastMessageSeverity = MessageSeverity.ERROR
                     notifyStateChanged(State.DONE)
-                } else {
-                    notifyStateChanged(State.WAIT_FOR_CONFIRMATION)
                 }
-            } catch (t: Throwable) {
-                // TODO Ergo Pay show a Repeat button for user convenience when it is an IOException
-                LogUtils.logDebug("ErgoPay", "Error getting signing request", t)
-                lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, t.getMessageOrName())
-                lastMessageSeverity = MessageSeverity.ERROR
-                notifyStateChanged(State.DONE)
             }
         }
     }

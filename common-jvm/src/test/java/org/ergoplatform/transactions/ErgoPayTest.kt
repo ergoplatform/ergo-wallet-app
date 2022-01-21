@@ -6,6 +6,7 @@ import org.junit.Test
 
 const val STATIC_ERGO_PAY_URI =
     "ergoPay:9AEBJmPrKJW357sXF3WsClhAxbyYRt1quzw3ch4Vy5sclX4AAAAAA4CU69wDAAjNAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6o4oFAADAhD0QBQQABAAONhACBJABCM0Ceb5mfvncu6xVoGKVzocLBwKb_NstzijZWfKBWxb4F5jqAtGSo5qMx6cBcwBzARABAgQC0ZaDAwGTo4zHsqVzAAABk8KypXMBAHRzAnMDgwEIze6sk7GlcwSjigUAAOaW4NLqAQAIzQKDM_n3RU-NX_c9usmDN2ftb8OobPCnPflGsy6pkn2Rl6OKBQAAzQKDM_n3RU-NX_c9usmDN2ftb8OobPCnPflGsy6pkn2Rl51PjGA="
+const val DYNAMIC_ERGO_PAY_URI = "ergopay://10.0.2.2:8080/roundTrip/#P2PK_ADDRESS#/"
 
 class ErgoPayTest {
 
@@ -19,6 +20,8 @@ class ErgoPayTest {
 
         assertTrue(isErgoPaySigningRequest(uri))
         assertFalse(isErgoPaySigningRequest(""))
+        assertFalse(isErgoPayDynamicRequest(uri))
+        assertFalse(isErgoPayDynamicWithAddressRequest(uri))
 
         val ergoPaySigningRequest = getErgoPaySigningRequest(uri)
         ergoPaySigningRequest.apply {
@@ -36,8 +39,20 @@ class ErgoPayTest {
         // val txInfo = ergoPaySigningRequest.buildTransactionInfo(ErgoApiService.getOrInit(TestPreferencesProvider()))
         // assertNotNull(txInfo)
 
+        assertTrue(isErgoPaySigningRequest(DYNAMIC_ERGO_PAY_URI))
+        assertTrue(isErgoPayDynamicRequest(DYNAMIC_ERGO_PAY_URI))
+        assertTrue(isErgoPayDynamicWithAddressRequest(DYNAMIC_ERGO_PAY_URI))
+
+        val errorThrown = try {
+            getErgoPaySigningRequest(DYNAMIC_ERGO_PAY_URI)
+            false
+        } catch (t: Throwable) {
+            true
+        }
+        assertTrue(errorThrown)
+
         // commented since will fail when no server runs locally
-        // val fetchedRequest = getErgoPaySigningRequest("ergopay://localhost:8080/roundTrip/3Ww2oseMJ33tkQUcXANnwHhq8gVsQLUPthXRiPsisKzGB74Zc9HD/")
+        // val fetchedRequest = getErgoPaySigningRequest(DYNAMIC_ERGO_PAY_URI, "3Ww2oseMJ33tkQUcXANnwHhq8gVsQLUPthXRiPsisKzGB74Zc9HD")
         // assertNotNull(fetchedRequest)
     }
 }

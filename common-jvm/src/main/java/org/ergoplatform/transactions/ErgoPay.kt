@@ -22,6 +22,7 @@ data class ErgoPaySigningRequest(
 enum class MessageSeverity { NONE, INFORMATION, WARNING, ERROR }
 
 private const val uriSchemePrefix = "ergopay:"
+private const val placeHolderP2Pk = "#P2PK_ADDRESS#"
 
 fun isErgoPaySigningRequest(uri: String): Boolean {
     return uri.startsWith(uriSchemePrefix, true)
@@ -32,7 +33,10 @@ fun isErgoPaySigningRequest(uri: String): Boolean {
  * do a network request, so call this only from non-UI thread and within an applicable try/catch
  * phrase
  */
-fun getErgoPaySigningRequest(requestData: String): ErgoPaySigningRequest {
+fun getErgoPaySigningRequest(
+    requestData: String,
+    p2pkAddress: String? = null
+): ErgoPaySigningRequest {
     if (!isErgoPaySigningRequest(requestData)) {
         throw IllegalArgumentException("No ergopay URI provided.")
     }
@@ -41,11 +45,15 @@ fun getErgoPaySigningRequest(requestData: String): ErgoPaySigningRequest {
     val epsr = if (isErgoPayStaticRequest(requestData)) {
         parseErgoPaySigningRequestFromUri(requestData)
     } else {
-        // TODO Ergo Pay check for address placeholder
+        val ergopayUrl = if (isErgoPayDynamicWithAddressRequest(requestData)) {
+            p2pkAddress?.let {
+                requestData.replace(placeHolderP2Pk, p2pkAddress)
+            } ?: throw IllegalArgumentException("Ergo Pay address request, but no address given")
+        } else requestData
 
         // use http for development purposes
         val httpUrl = (if (isLocalOrIpAddress(requestData)) "http:" else "https:") +
-                requestData.substringAfter(uriSchemePrefix)
+                ergopayUrl.substringAfter(uriSchemePrefix)
 
         val jsonResponse = fetchHttpGetStringSync(httpUrl)
         parseErgoPaySigningRequestFromJson(jsonResponse)
@@ -81,7 +89,13 @@ fun parseErgoPaySigningRequestFromJson(jsonString: String): ErgoPaySigningReques
 }
 
 fun isErgoPayStaticRequest(requestData: String) =
-    isErgoPaySigningRequest(requestData) && !requestData.startsWith("$uriSchemePrefix//", true)
+    isErgoPaySigningRequest(requestData) && !isErgoPayDynamicRequest(requestData)
+
+fun isErgoPayDynamicRequest(requestData: String) =
+    requestData.startsWith("$uriSchemePrefix//", true)
+
+fun isErgoPayDynamicWithAddressRequest(requestData: String) =
+    isErgoPayDynamicRequest(requestData) && requestData.contains(placeHolderP2Pk)
 
 private fun parseErgoPaySigningRequestFromUri(uri: String): ErgoPaySigningRequest {
     val uriWithoutPrefix = uri.substring(uriSchemePrefix.length)

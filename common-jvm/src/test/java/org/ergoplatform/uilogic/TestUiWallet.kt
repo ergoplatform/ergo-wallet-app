@@ -5,7 +5,8 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 object TestUiWallet {
-    const val firstAddress = "address"
+    const val firstAddress = "main_address"
+    const val secondAddress = "second_address"
     internal val token = WalletToken(
         1,
         firstAddress,
@@ -24,17 +25,32 @@ object TestUiWallet {
         0,
         "nft"
     )
-    private val wallet = Wallet(
+    private val singleAddressWallet = Wallet(
         WalletConfig(1, "test", firstAddress, 0, null, false),
         listOf(WalletState(firstAddress, firstAddress, 1000L * 1000 * 1000, 0)),
         listOf(token, singularToken),
         emptyList()
     )
 
-    suspend fun getWalletDbProvider(walletId: Int): WalletDbProvider {
+    private val firstDerivedAddress = WalletAddress(1, firstAddress, 1, secondAddress, null)
+    private val twoAddressesWallet = Wallet(
+        WalletConfig(1, "test", firstAddress, 0, null, false),
+        listOf(WalletState(firstAddress, firstAddress, 1000L * 1000 * 1000, 0)),
+        listOf(token, singularToken),
+        listOf(firstDerivedAddress)
+    )
+
+    suspend fun getSingleWalletSingleAddressDbProvider(walletId: Int): WalletDbProvider {
         val walletDbProvider = mock<WalletDbProvider> {
         }
-        whenever(walletDbProvider.loadWalletWithStateById(walletId)).thenReturn(wallet)
+        whenever(walletDbProvider.loadWalletWithStateById(walletId)).thenReturn(singleAddressWallet)
+        return walletDbProvider
+    }
+
+    suspend fun getSingleWalletTwoAddressesDbProvider(walletId: Int): WalletDbProvider {
+        val walletDbProvider = mock<WalletDbProvider> {
+        }
+        whenever(walletDbProvider.loadWalletWithStateById(walletId)).thenReturn(twoAddressesWallet)
         return walletDbProvider
     }
 }
