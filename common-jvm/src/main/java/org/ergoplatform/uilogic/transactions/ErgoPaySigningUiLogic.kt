@@ -23,6 +23,8 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         private set
     var txId: String? = null
         private set
+    var lastRequest: String? = null
+        private set
 
     fun init(
         request: String,
@@ -40,9 +42,6 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
 
         coroutineScope.launch {
             initWallet(database, walletId, derivationIndex)
-
-            // TODO Ergo Pay in case of need for address
-            // notifyStateChanged(State.WAIT_FOR_ADDRESS)
 
             // fake a request
 //            withContext(Dispatchers.IO) {
@@ -71,10 +70,11 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         }
     }
 
-    private fun hasNewRequest(request: String, prefs: PreferencesProvider, texts: StringProvider) {
+    fun hasNewRequest(request: String, prefs: PreferencesProvider, texts: StringProvider) {
         // reset if we already have a request
         txId = null
         resetLastMessage()
+        lastRequest = request
 
         if (derivedAddress == null && isErgoPayDynamicWithAddressRequest(request)) {
             // if we have a address request but no address set, ask user to choose an address

@@ -155,6 +155,14 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 assertEquals(ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS, state)
                 assertNull(epsr)
                 assertNull(transactionInfo)
+                derivedAddressIdx = 0
+                hasNewRequest(lastRequest!!, TestPreferencesProvider(), TestStringProvider())
+                assertEquals(ErgoPaySigningUiLogic.State.FETCH_DATA, state)
+                waitWhileFetching(this)
+                assertEquals(ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION, state)
+                assertNotNull(epsr)
+                assertNotNull(epsr?.reducedTx)
+                assertNotNull(epsr?.message)
             }
 
             server.shutdown()

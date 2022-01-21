@@ -54,10 +54,10 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
 
     }
 
-    fun showChooseAddressList() {
+    fun showChooseAddressList(addShowAllEntry: Boolean) {
         viewModel.uiLogic.wallet?.let { wallet ->
             ChooseAddressListDialogFragment.newInstance(
-                wallet.walletConfig.id, true
+                wallet.walletConfig.id, addShowAllEntry
             ).show(childFragmentManager, null)
         }
     }

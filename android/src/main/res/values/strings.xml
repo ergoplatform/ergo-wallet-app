@@ -181,10 +181,11 @@
 
     <!-- Ergo Pay Signing -->
     <string name="title_ergo_pay_request">Ergo Pay Request</string>
-    <string name="label_fetching_data">Requesting data from dApp...</string>
+    <string name="label_fetching_data">Requesting data from dApp…</string>
     <string name="label_message_from_dapp">Message from dApp:\n%1s</string>
     <string name="label_error_occured">An error occurred:\n%1s</string>
     <string name="label_ergo_pay_wrong_address">Signing Request received for address %1s, which does not belong to this wallet.</string>
+    <string name="label_ergo_pay_choose_address">Please choose an address to process the Ergo Pay Request.</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1s</string>

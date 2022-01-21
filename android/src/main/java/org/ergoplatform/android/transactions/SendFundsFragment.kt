@@ -124,7 +124,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
 
         // Add click listeners
         binding.addressLabel.setOnClickListener {
-            showChooseAddressList()
+            showChooseAddressList(true)
         }
         binding.buttonShareTx.setOnClickListener {
             val txUrl = getExplorerTxUrl(binding.labelTxId.text.toString())

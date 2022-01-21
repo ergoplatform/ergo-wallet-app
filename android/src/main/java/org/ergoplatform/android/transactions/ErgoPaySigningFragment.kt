@@ -56,9 +56,13 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
                 visibleWhen(state, ErgoPaySigningUiLogic.State.FETCH_DATA)
             binding.layoutDoneInfo.visibility =
                 visibleWhen(state, ErgoPaySigningUiLogic.State.DONE)
+            binding.layoutChooseAddress.visibility =
+                visibleWhen(state, ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS)
 
             when (state) {
-                ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> TODO("Ergo pay choose address")
+                ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> {
+                    // nothing to do
+                }
                 ErgoPaySigningUiLogic.State.FETCH_DATA -> showFetchData()
                 ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION -> showTransactionInfo()
                 ErgoPaySigningUiLogic.State.DONE -> showDoneInfo()
@@ -72,6 +76,23 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
         }
         binding.buttonDismiss.setOnClickListener {
             findNavController().popBackStack()
+        }
+        binding.buttonChooseAddress.setOnClickListener {
+            showChooseAddressList(false)
+        }
+    }
+
+    override fun onAddressChosen(addressDerivationIdx: Int?) {
+        super.onAddressChosen(addressDerivationIdx)
+        // redo the request
+        val uiLogic = viewModel.uiLogic
+        uiLogic.lastRequest?.let {
+            val context = requireContext()
+            uiLogic.hasNewRequest(
+                it,
+                Preferences(context),
+                AndroidStringProvider(context)
+            )
         }
     }
 
