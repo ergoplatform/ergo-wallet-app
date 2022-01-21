@@ -16,6 +16,8 @@ import org.ergoplatform.android.databinding.FragmentErgoPaySigningBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
+import org.ergoplatform.wallet.addresses.getAddressLabel
+import org.ergoplatform.wallet.getNumOfAddresses
 
 class ErgoPaySigningFragment : SubmitTransactionFragment() {
     private var _binding: FragmentErgoPaySigningBinding? = null
@@ -68,6 +70,18 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
                 ErgoPaySigningUiLogic.State.DONE -> showDoneInfo()
                 null -> throw IllegalStateException("Not allowed")
             }
+        })
+
+        viewModel.addressChosen.observe(viewLifecycleOwner, {
+            val walletLabel = viewModel.uiLogic.wallet?.walletConfig?.displayName ?: ""
+            val addressLabel =
+                it?.getAddressLabel(AndroidStringProvider(requireContext()))
+                    ?: getString(
+                        R.string.label_all_addresses,
+                        viewModel.uiLogic.wallet?.getNumOfAddresses()
+                    )
+            binding.addressLabel.text =
+                getString(R.string.label_sign_with, addressLabel, walletLabel)
         })
 
         // Click listeners
