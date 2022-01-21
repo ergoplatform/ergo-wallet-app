@@ -38,3 +38,8 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+task convertStrings {
+    dependsOn clean
+    dependsOn ':android:assembleDebug'
+}
