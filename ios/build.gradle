@@ -104,16 +104,9 @@ dependencies {
         // normal compile no change iOS: 90 sec
         // exclude kiama, sigma-state, ergo-wallet: 20 sec
         //exclude group: 'org.scorexfoundation', module: 'sigma-state_2.11'
-        exclude group: 'org.ergoplatform', module: 'ergo-wallet_2.11'
+        //exclude group: 'org.ergoplatform', module: 'ergo-wallet_2.11'
     }
     implementation project(path: ':sqldelight')
-    // 4.0.15 snapshot for ergo-wallet with java 7 compatibility,
-    // TODO can be removed when appkit is on ergo-wallet 4.0.17+
-    implementation ('org.ergoplatform:ergo-wallet_2.11:4.0.15-158-d0584eae-SNAPSHOT') {
-        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
-        exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
-        exclude group: 'com.google.guava', module: 'guava'
-    }
 
     implementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
     implementation "com.mobidevelop.robovm:robovm-rt:${robovm_version}"
