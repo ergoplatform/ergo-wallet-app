@@ -35,6 +35,7 @@
                 <key>CFBundleURLSchemes</key>
                 <array>
                     <string>ergo</string>
+                    <string>ergopay</string>
                 </array>
             </dict>
         </array>

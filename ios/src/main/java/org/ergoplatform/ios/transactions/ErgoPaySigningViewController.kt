@@ -108,10 +108,9 @@ class ErgoPaySigningViewController(
 
     private fun populateWaitForAddressView() {
         if (addressChooserContainer.contentView.subviews.isEmpty()) {
-            val image = UIImageView(ergoLogoImage).apply {
+            val image = UIImageView(ergoLogoImage.imageWithTintColor(UIColor.label())).apply {
                 fixedHeight(100.0)
                 contentMode = UIViewContentMode.ScaleAspectFit
-                tintColor = UIColor.label()
             }
 
             val label = Body1Label().apply {
@@ -128,10 +127,10 @@ class ErgoPaySigningViewController(
                 addSubview(label)
                 addSubview(button)
 
-                image.topToSuperview(topInset = DEFAULT_MARGIN).centerHorizontal()
+                image.topToSuperview(topInset = DEFAULT_MARGIN * 2).centerHorizontal()
                 label.topToBottomOf(image, DEFAULT_MARGIN * 3).widthMatchesSuperview(inset = DEFAULT_MARGIN)
                 button.topToBottomOf(label, DEFAULT_MARGIN * 2).centerHorizontal()
-                    .bottomToSuperview(bottomInset = DEFAULT_MARGIN)
+                    .bottomToSuperview(bottomInset = DEFAULT_MARGIN * 2)
             }
         }
     }
