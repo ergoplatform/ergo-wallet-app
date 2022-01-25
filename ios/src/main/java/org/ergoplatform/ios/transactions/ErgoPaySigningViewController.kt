@@ -10,6 +10,7 @@ import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
 import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
 class ErgoPaySigningViewController(
@@ -20,7 +21,7 @@ class ErgoPaySigningViewController(
 
     override val uiLogic = IosErgoPaySigningUiLogic()
 
-    private val addressChooserContainer = UIView()
+    private val addressChooserContainer = CardView()
     private lateinit var fetchingContainer: FetchDataContainer
     private lateinit var transactionContainer: TransactionWithHeaderContainer
     private val stateDoneContainer = CardView()
@@ -52,16 +53,15 @@ class ErgoPaySigningViewController(
         val scrollView = scrollingContainer.wrapInVerticalScrollView()
 
         view.addSubview(scrollView)
-        scrollingContainer.addSubview(addressChooserContainer)
-        scrollingContainer.addSubview(fetchingContainer)
+        view.addSubview(fetchingContainer)
+        view.addSubview(stateDoneContainer)
+        view.addSubview(addressChooserContainer)
         scrollingContainer.addSubview(transactionContainer)
-        scrollingContainer.addSubview(stateDoneContainer)
 
-        addressChooserContainer.edgesToSuperview(maxWidth = MAX_WIDTH)
+        addressChooserContainer.widthMatchesSuperview(maxWidth = MAX_WIDTH).centerVertical()
         fetchingContainer.widthMatchesSuperview(maxWidth = MAX_WIDTH).centerVertical()
         transactionContainer.edgesToSuperview(maxWidth = MAX_WIDTH)
-        stateDoneContainer.topToSuperview().bottomToSuperview(canBeLess = true)
-            .widthMatchesSuperview(maxWidth = MAX_WIDTH)
+        stateDoneContainer.centerVertical().widthMatchesSuperview(maxWidth = MAX_WIDTH)
         scrollView.topToBottomOf(walletAddressLabel, DEFAULT_MARGIN).widthMatchesSuperview().bottomToSuperview()
 
         uiLogic.init(
@@ -96,13 +96,43 @@ class ErgoPaySigningViewController(
 
         when (state) {
             ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> {
-                // nothing to do
+                populateWaitForAddressView()
             }
             ErgoPaySigningUiLogic.State.FETCH_DATA -> {
                 // nothing to do
             }
             ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION -> transactionContainer.showTransactionInfo()
             ErgoPaySigningUiLogic.State.DONE -> showDoneInfo()
+        }
+    }
+
+    private fun populateWaitForAddressView() {
+        if (addressChooserContainer.contentView.subviews.isEmpty()) {
+            val image = UIImageView(ergoLogoImage).apply {
+                fixedHeight(100.0)
+                contentMode = UIViewContentMode.ScaleAspectFit
+                tintColor = UIColor.label()
+            }
+
+            val label = Body1Label().apply {
+                text = texts.get(STRING_LABEL_ERGO_PAY_CHOOSE_ADDRESS)
+                textAlignment = NSTextAlignment.Center
+            }
+
+            val button = PrimaryButton(texts.get(STRING_TITLE_CHOOSE_ADDRESS)).apply {
+                addOnTouchUpInsideListener { _, _ -> showChooseAddressList(false) }
+            }
+
+            addressChooserContainer.contentView.apply {
+                addSubview(image)
+                addSubview(label)
+                addSubview(button)
+
+                image.topToSuperview(topInset = DEFAULT_MARGIN).centerHorizontal()
+                label.topToBottomOf(image, DEFAULT_MARGIN * 3).widthMatchesSuperview(inset = DEFAULT_MARGIN)
+                button.topToBottomOf(label, DEFAULT_MARGIN * 2).centerHorizontal()
+                    .bottomToSuperview(bottomInset = DEFAULT_MARGIN)
+            }
         }
     }
 
@@ -117,7 +147,6 @@ class ErgoPaySigningViewController(
 
     private fun showDoneInfo() {
         if (stateDoneContainer.contentView.subviews.isEmpty()) {
-            // TODO Ergo Pay width is too small
             val image = getImageFromSeverity(uiLogic.getDoneSeverity())?.let {
                 UIImageView(getIosSystemImage(it, UIImageSymbolScale.Large)).apply {
                     contentMode = UIViewContentMode.ScaleAspectFit
@@ -142,7 +171,7 @@ class ErgoPaySigningViewController(
 
                 image?.let { addArrangedSubview(image) }
                 addArrangedSubview(descLabel)
-                addArrangedSubview(dismissButton)
+                addArrangedSubview(doneButtonContainer)
             }
 
             stateDoneContainer.contentView.addSubview(txDoneStack)
@@ -152,7 +181,11 @@ class ErgoPaySigningViewController(
 
     inner class TransactionWithHeaderContainer : TransactionContainer(texts, { startPayment() }) {
         private val messageFromDApp = Body1Label()
-        private val messageIcon = UIImageView()
+        private val messageIcon = UIImageView().apply {
+            tintColor = UIColor.secondaryLabel()
+            contentMode = UIViewContentMode.ScaleAspectFit
+            fixedWidth(40.0)
+        }
         private val cardView = CardView()
 
         init {
@@ -161,7 +194,12 @@ class ErgoPaySigningViewController(
             cardView.contentView.addSubview(messageFromDApp)
             cardView.contentView.addSubview(messageIcon)
 
-            messageFromDApp.edgesToSuperview(inset = DEFAULT_MARGIN)
+            val messageStackView = UIStackView(NSArray(messageIcon, messageFromDApp)).apply {
+                axis = UILayoutConstraintAxis.Horizontal
+                spacing = DEFAULT_MARGIN * 2
+            }
+            cardView.contentView.addSubview(messageStackView)
+            messageStackView.edgesToSuperview(inset = DEFAULT_MARGIN)
         }
 
         fun showTransactionInfo() {
@@ -169,12 +207,12 @@ class ErgoPaySigningViewController(
 
             cardView.isHidden = uiLogic.epsr?.message?.let {
                 messageFromDApp.text = texts.format(STRING_LABEL_MESSAGE_FROM_DAPP, it)
-                // TODO Ergo Pay
-                //val severityResId = getSeverityDrawableResId(
-                //    uiLogic.epsr?.messageSeverity ?: MessageSeverity.NONE
-                //)
-                //binding.imageTiMessage.setImageResource(severityResId)
-                //binding.imageTiMessage.visibility = if (severityResId == 0) View.GONE else View.VISIBLE
+
+
+                messageIcon.isHidden = getImageFromSeverity(uiLogic.epsr!!.messageSeverity)?.let {
+                    messageIcon.image = getIosSystemImage(it, UIImageSymbolScale.Medium)
+                    false
+                } ?: true
                 false
             } ?: true
         }
