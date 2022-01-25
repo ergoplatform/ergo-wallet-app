@@ -1,11 +1,9 @@
 package org.ergoplatform.ios.transactions
 
-import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.*
 import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
@@ -21,9 +19,9 @@ class SendFundsViewController(
     private val walletId: Int,
     private val derivationIdx: Int = -1,
     private val paymentRequest: String? = null
-) : ViewControllerWithKeyboardLayoutGuide() {
-    private lateinit var texts: I18NBundle
-    private val uiLogic = IosSendFundsUiLogic()
+) : SubmitTransactionViewController(walletId) {
+
+    override val uiLogic = IosSendFundsUiLogic()
     private lateinit var scrollView: UIView
     private lateinit var walletTitle: UILabel
     private lateinit var addressNameLabel: UILabel
@@ -64,7 +62,11 @@ class SendFundsViewController(
                         ), true
                     )
                 }, { ergoPayRequest ->
-                    // TODO ergo pay navigate to signing screen
+                    navigationController.pushViewController(
+                        ErgoPaySigningViewController(
+                            ergoPayRequest, walletId, uiLogic.derivedAddressIdx ?: -1
+                        ), true
+                    )
                 }, { address, amount ->
                     inputReceiver.text = address
                     inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
@@ -86,11 +88,7 @@ class SendFundsViewController(
             ).apply {
                 isUserInteractionEnabled = true
                 addGestureRecognizer(UITapGestureRecognizer {
-                    presentViewController(
-                        ChooseAddressListDialogViewController(walletId, true) {
-                            uiLogic.derivedAddressIdx = it
-                        }, true
-                    ) {}
+                    showChooseAddressList(true)
                 })
             }
         balanceLabel = Body1Label()
@@ -169,7 +167,7 @@ class SendFundsViewController(
             texts.get(STRING_BUTTON_SEND),
             getIosSystemImage(IMAGE_SEND, UIImageSymbolScale.Small)
         )
-        sendButton.addOnTouchUpInsideListener { _, _ -> startPayment() }
+        sendButton.addOnTouchUpInsideListener { _, _ -> checkAndStartPayment() }
 
         addTokenButton = CommonButton(
             texts.get(STRING_LABEL_ADD_TOKEN), getIosSystemImage(
@@ -264,7 +262,7 @@ class SendFundsViewController(
         if (uiLogic.amountToSend.nanoErgs > 0) setInputAmount(uiLogic.amountToSend)
     }
 
-    private fun startPayment() {
+    private fun checkAndStartPayment() {
         val checkResponse = uiLogic.checkCanMakePayment()
 
         inputReceiver.setHasError(checkResponse.receiverError)
@@ -280,14 +278,7 @@ class SendFundsViewController(
         }
 
         if (checkResponse.canPay) {
-            val walletConfig = uiLogic.wallet!!.walletConfig
-            val appDelegate = getAppDelegate()
-            val stringProvider = IosStringProvider(appDelegate.texts)
-            walletConfig.secretStorage?.let {
-                startAuthFlow(walletConfig) { mnemonic ->
-                    uiLogic.startPaymentWithMnemonicAsync(mnemonic, appDelegate.prefs, stringProvider)
-                }
-            } ?: uiLogic.startColdWalletPayment(appDelegate.prefs, stringProvider)
+            startPayment()
         }
     }
 
@@ -419,29 +410,14 @@ class SendFundsViewController(
         override fun notifyHasErgoTxResult(txResult: TransactionResult) {
             if (!txResult.success) {
                 runOnMainThread {
-                    val message =
-                        texts.get(STRING_ERROR_SEND_TRANSACTION) + (txResult.errorMsg?.let { "\n\n$it" } ?: "")
-                    val alertVc =
-                        UIAlertController(
-                            texts.get(STRING_BUTTON_SEND),
-                            message,
-                            UIAlertControllerStyle.Alert
-                        )
-                    alertVc.addAction(
-                        UIAlertAction(
-                            texts.get(STRING_ZXING_BUTTON_OK),
-                            UIAlertActionStyle.Default
-                        ) {})
-                    presentViewController(alertVc, true) {}
+                    showTxResultError(txResult)
                 }
             }
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
             runOnMainThread {
-                presentViewController(
-                    SigningPromptViewController(signingPrompt, uiLogic), true
-                ) {}
+                showSigningPromptVc(signingPrompt)
             }
 
         }

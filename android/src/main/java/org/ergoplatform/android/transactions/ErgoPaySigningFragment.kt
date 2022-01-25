@@ -98,7 +98,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
         super.onAddressChosen(addressDerivationIdx)
-        // redo the request
+        // redo the request - can't be done within uilogic because the context is needed
         val uiLogic = viewModel.uiLogic
         uiLogic.lastRequest?.let {
             val context = requireContext()
