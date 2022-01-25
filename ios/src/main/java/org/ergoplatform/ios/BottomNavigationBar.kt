@@ -85,7 +85,7 @@ class BottomNavigationBar : UITabBarController() {
                 }
 
             }, { message ->
-                buildSimpleAlertController("", message, texts)
+                presentViewController(buildSimpleAlertController("", message, texts), true) {}
             })
     }
 

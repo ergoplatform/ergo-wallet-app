@@ -232,7 +232,7 @@ class QrCodePagesCollector(private val parser: (String) -> QrChunk?) {
     }
 
     fun hasAllPages(): Boolean {
-        return pagesAdded == pagesCount
+        return pagesAdded == pagesCount && pagesCount > 0
     }
 
     fun getAllPages(): Collection<String> {
