@@ -205,6 +205,7 @@ fun prepareSerializedErgoTx(
             )
         }
     } catch (t: Throwable) {
+        LogUtils.logDebug("prepareSerializedErgoTx", "Error caught", t)
         return PromptSigningResult(false, errorMsg = getErrorMessage(t, texts))
     }
 }
@@ -243,6 +244,7 @@ fun signSerializedErgoTx(
         }
         return SigningResult(true, signedTxSerialized)
     } catch (t: Throwable) {
+        LogUtils.logDebug("signSerializedErgoTx", "Error caught", t)
         return SigningResult(false, errorMsg = getErrorMessage(t, texts))
     }
 }
