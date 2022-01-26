@@ -16,6 +16,8 @@ Features:
 * Displays and sends tokens and NFT
 * Your secrets are stored password-encrypted or authentication-protected
 * Show wallet balance, configurable comparison fiat currency
+* Cold wallet capable ([more information](https://github.com/ergoplatform/ergo-wallet-app/wiki/Cold-wallet))
+* ErgoPay support
 
 You need at least Android 7 or iOS 13 to run Ergo Wallet.
 
@@ -42,6 +44,18 @@ The APK file can be installed on your Android device. If you sideload for the fi
 
 * [Android](android/BUILD.md)
 * [iOS](ios/BUILD.md)
+
+### Translations
+
+Every translation is welcome! There is a single 
+[strings file to translate](https://github.com/ergoplatform/ergo-wallet-app/blob/develop/android/src/main/res/values/strings.xml) 
+to your language.
+
+Either send me the translated file on Discord or Telegram, or open a PR here. For this, move the 
+file to a values-xx directory where xx is your language's ISO code. 
+([Spanish example](https://github.com/ergoplatform/ergo-wallet-app/tree/develop/android/src/main/res/values-es))
+
+Thanks in advance!
 
 ### Tip the developer
 
