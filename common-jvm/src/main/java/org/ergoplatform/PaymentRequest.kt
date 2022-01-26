@@ -29,18 +29,11 @@ fun getExplorerPaymentRequestAddress(
     description: String = ""
 ): String {
     return explorerPaymentUrlPrefix + RECIPIENT_PARAM_PREFIX +
-            URLEncoder.encode(
-                address,
-                URI_ENCODING
-            ) + PARAM_DELIMITER + AMOUNT_PARAM_PREFIX +
-            URLEncoder.encode(
-                amount.toString(),
-                URI_ENCODING
-            ) + PARAM_DELIMITER + DESCRIPTION_PARAM_PREFIX +
-            URLEncoder.encode(
-                description,
-                URI_ENCODING
-            )
+            URLEncoder.encode(address, URI_ENCODING) +
+            (if (amount > 0) PARAM_DELIMITER + AMOUNT_PARAM_PREFIX +
+                    URLEncoder.encode(amount.toString(), URI_ENCODING) else "") +
+            PARAM_DELIMITER + DESCRIPTION_PARAM_PREFIX +
+            URLEncoder.encode(description, URI_ENCODING)
 }
 
 fun isPaymentRequestUrl(url: String): Boolean {
