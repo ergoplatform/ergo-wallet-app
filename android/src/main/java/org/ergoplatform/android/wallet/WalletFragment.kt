@@ -237,7 +237,8 @@ class WalletAdapter(initWalletList: List<Wallet>) :
 class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder(binding.root) {
     fun bind(wallet: Wallet) {
         binding.walletName.text = wallet.walletConfig.displayName
-        binding.walletBalance.setAmount(ErgoAmount(wallet.getBalanceForAllAddresses()).toBigDecimal())
+        val walletBalance = ErgoAmount(wallet.getBalanceForAllAddresses())
+        binding.walletBalance.setAmount(walletBalance.toBigDecimal())
 
         // Fill token headline
         val tokens = wallet.getTokensForAllAddresses()
@@ -318,7 +319,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
             binding.walletFiat.visibility = View.GONE
         } else {
             binding.walletFiat.visibility = View.VISIBLE
-            binding.walletFiat.amount = ergoPrice * binding.walletBalance.amount
+            binding.walletFiat.amount = ergoPrice * walletBalance.toDouble()
             binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.uppercase())
         }
 

@@ -186,7 +186,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             binding.walletFiat.visibility = View.GONE
         } else {
             binding.walletFiat.visibility = View.VISIBLE
-            binding.walletFiat.amount = ergoPrice * binding.walletBalance.amount
+            binding.walletFiat.amount = ergoPrice * ergoAmount.toDouble()
             binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.uppercase())
         }
 
