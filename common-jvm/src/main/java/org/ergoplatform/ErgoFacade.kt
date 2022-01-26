@@ -14,12 +14,14 @@ import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
 import org.ergoplatform.transactions.getInputBoxesIds
 import org.ergoplatform.uilogic.STRING_ERROR_BALANCE_ERG
+import org.ergoplatform.uilogic.STRING_ERROR_PROVER_CANT_SIGN
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
 import sigmastate.serialization.`SigmaSerializer$`
+import java.lang.AssertionError
 
 const val MNEMONIC_WORDS_COUNT = 15
 const val MNEMONIC_MIN_WORDS_COUNT = 12
@@ -286,6 +288,9 @@ fun getErrorMessage(t: Throwable, texts: StringProvider): String? {
             STRING_ERROR_BALANCE_ERG,
             ErgoAmount(t.balanceFound).toStringTrimTrailingZeros()
         )
+    } else if (t is AssertionError && t.message?.contains("Tree root should be real") == true) {
+        // ProverInterpreter.scala
+        texts.getString(STRING_ERROR_PROVER_CANT_SIGN)
     } else {
         t.message
     }

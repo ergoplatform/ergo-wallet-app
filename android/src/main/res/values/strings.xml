@@ -187,6 +187,7 @@
     <string name="label_error_occured">An error occurred:\n%1s</string>
     <string name="label_ergo_pay_wrong_address">Signing Request received for address %1s, which does not belong to this wallet.</string>
     <string name="label_ergo_pay_choose_address">Please choose an address to process the Ergo Pay Request.</string>
+    <string name="error_prover_cant_sign">The transaction could not be signed with this wallet\'s keys.</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1s</string>
