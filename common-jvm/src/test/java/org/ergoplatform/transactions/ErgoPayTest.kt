@@ -7,6 +7,7 @@ import org.junit.Test
 const val STATIC_ERGO_PAY_URI =
     "ergoPay:9AEBJmPrKJW357sXF3WsClhAxbyYRt1quzw3ch4Vy5sclX4AAAAAA4CU69wDAAjNAi3nJqP6BpQt0iKVlmBauTJATOOGNEcZtJYd7ZMGeyE6o4oFAADAhD0QBQQABAAONhACBJABCM0Ceb5mfvncu6xVoGKVzocLBwKb_NstzijZWfKBWxb4F5jqAtGSo5qMx6cBcwBzARABAgQC0ZaDAwGTo4zHsqVzAAABk8KypXMBAHRzAnMDgwEIze6sk7GlcwSjigUAAOaW4NLqAQAIzQKDM_n3RU-NX_c9usmDN2ftb8OobPCnPflGsy6pkn2Rl6OKBQAAzQKDM_n3RU-NX_c9usmDN2ftb8OobPCnPflGsy6pkn2Rl51PjGA="
 const val DYNAMIC_ERGO_PAY_URI = "ergopay://10.0.2.2:8080/roundTrip/#P2PK_ADDRESS#/"
+const val DYNAMIC_ERGO_PAY_URI2 = "ergopay://10.0.2.2:8080/roundTrip/#P2PK_ADDRESS%23/"
 
 class ErgoPayTest {
 
@@ -40,8 +41,11 @@ class ErgoPayTest {
         // assertNotNull(txInfo)
 
         assertTrue(isErgoPaySigningRequest(DYNAMIC_ERGO_PAY_URI))
+        assertTrue(isErgoPaySigningRequest(DYNAMIC_ERGO_PAY_URI2))
         assertTrue(isErgoPayDynamicRequest(DYNAMIC_ERGO_PAY_URI))
+        assertTrue(isErgoPayDynamicRequest(DYNAMIC_ERGO_PAY_URI2))
         assertTrue(isErgoPayDynamicWithAddressRequest(DYNAMIC_ERGO_PAY_URI))
+        assertTrue(isErgoPayDynamicWithAddressRequest(DYNAMIC_ERGO_PAY_URI2))
 
         val errorThrown = try {
             getErgoPaySigningRequest(DYNAMIC_ERGO_PAY_URI)

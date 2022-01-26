@@ -23,6 +23,7 @@ enum class MessageSeverity { NONE, INFORMATION, WARNING, ERROR }
 
 private const val uriSchemePrefix = "ergopay:"
 private const val placeHolderP2Pk = "#P2PK_ADDRESS#"
+private const val urlEncodedPlaceHolderP2Pk = "#P2PK_ADDRESS%23"
 
 fun isErgoPaySigningRequest(uri: String): Boolean {
     return uri.startsWith(uriSchemePrefix, true)
@@ -47,7 +48,7 @@ fun getErgoPaySigningRequest(
     } else {
         val ergopayUrl = if (isErgoPayDynamicWithAddressRequest(requestData)) {
             p2pkAddress?.let {
-                requestData.replace(placeHolderP2Pk, p2pkAddress)
+                requestData.replace(placeHolderP2Pk, p2pkAddress).replace(urlEncodedPlaceHolderP2Pk, p2pkAddress)
             } ?: throw IllegalArgumentException("Ergo Pay address request, but no address given")
         } else requestData
 
@@ -95,7 +96,8 @@ fun isErgoPayDynamicRequest(requestData: String) =
     requestData.startsWith("$uriSchemePrefix//", true)
 
 fun isErgoPayDynamicWithAddressRequest(requestData: String) =
-    isErgoPayDynamicRequest(requestData) && requestData.contains(placeHolderP2Pk)
+    isErgoPayDynamicRequest(requestData) &&
+            (requestData.contains(placeHolderP2Pk) || requestData.contains(urlEncodedPlaceHolderP2Pk))
 
 private fun parseErgoPaySigningRequestFromUri(uri: String): ErgoPaySigningRequest {
     val uriWithoutPrefix = uri.substring(uriSchemePrefix.length)
