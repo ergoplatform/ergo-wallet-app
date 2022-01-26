@@ -91,7 +91,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
                 R.string.desc_fee,
                 viewModel.uiLogic.feeAmount.toStringRoundToDecimals()
             )
-            binding.grossAmount.amount = it.toDouble()
+            binding.grossAmount.setAmount(it.toBigDecimal())
             val nodeConnector = NodeConnector.getInstance()
             binding.tvFiat.visibility =
                 if (nodeConnector.fiatCurrency.isNotEmpty()) View.VISIBLE else View.GONE

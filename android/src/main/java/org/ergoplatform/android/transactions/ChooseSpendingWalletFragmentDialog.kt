@@ -56,7 +56,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
             val content = parsePaymentRequest(query)
             binding.receiverAddress.text = content?.address
             val amount = content?.amount ?: ErgoAmount.ZERO
-            binding.grossAmount.amount = amount.toDouble()
+            binding.grossAmount.setAmount(amount.toBigDecimal())
             binding.grossAmount.visibility = if (amount.nanoErgs > 0) View.VISIBLE else View.GONE
         }
 
@@ -74,8 +74,9 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
                         layoutInflater, binding.listWallets, true
                     )
 
-                    itemBinding.walletBalance.amount =
-                        ErgoAmount(wallet.getBalanceForAllAddresses()).toDouble()
+                    itemBinding.walletBalance.setAmount(
+                        ErgoAmount(wallet.getBalanceForAllAddresses()).toBigDecimal()
+                    )
                     itemBinding.walletName.text = wallet.walletConfig.displayName
 
                     itemBinding.root.setOnClickListener {

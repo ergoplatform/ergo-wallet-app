@@ -16,17 +16,19 @@ class ErgoAmount(val nanoErgs: Long) {
     )
 
     override fun toString(): String {
-        return nanoErgs.toBigDecimal().movePointLeft(nanoPowerOfTen).toPlainString()
+        return toBigDecimal().toPlainString()
     }
 
     /**
      * converts the amount to a string rounded to given number of decimals places
      */
     fun toStringRoundToDecimals(numDecimals: Int = 4): String {
-        return nanoErgs.toBigDecimal().movePointLeft(nanoPowerOfTen)
+        return toBigDecimal()
             .setScale(numDecimals, RoundingMode.HALF_UP)
             .toPlainString()
     }
+
+    fun toBigDecimal() = nanoErgs.toBigDecimal().movePointLeft(nanoPowerOfTen)
 
     fun toStringTrimTrailingZeros(): String {
         return toString().trimEnd('0').trimEnd('.')

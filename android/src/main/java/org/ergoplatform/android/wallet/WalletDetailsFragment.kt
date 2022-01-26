@@ -174,8 +174,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         val ergoAmount = walletDetailsViewModel.uiLogic.getErgoBalance()
         val unconfirmed = walletDetailsViewModel.uiLogic.getUnconfirmedErgoBalance()
 
-        binding.walletBalance.amount = ergoAmount.toDouble()
-        binding.walletUnconfirmed.amount = unconfirmed.toDouble()
+        binding.walletBalance.setAmount(ergoAmount.toBigDecimal())
+        binding.walletUnconfirmed.setAmount(unconfirmed.toBigDecimal())
         binding.walletUnconfirmed.visibility = if (unconfirmed.isZero()) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
 
