@@ -17,6 +17,7 @@ import android.view.View;
 
 import org.ergoplatform.android.R;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
@@ -42,6 +43,7 @@ public class MoneyTextView extends View {
     private Section       mDecimalSection;
     private char          mDecimalSeparator;
     private double        mAmount;
+    private BigDecimal    bigDecimalAmount;
     private int           mGravity;
     private int           mSymbolGravity;
     private int           mDecimalGravity;
@@ -153,11 +155,13 @@ public class MoneyTextView extends View {
 
     public void setAmount(double amount) {
         mAmount = amount;
+        bigDecimalAmount = null;
         requestLayout();
     }
 
     private void createTextFromAmount() {
-        String formattedAmount = mDecimalFormat.format(mAmount);
+        String formattedAmount = bigDecimalAmount != null ? mDecimalFormat.format(bigDecimalAmount)
+                : mDecimalFormat.format(mAmount);
 
         int separatorIndex = formattedAmount.lastIndexOf(mDecimalSeparator);
 
@@ -284,12 +288,6 @@ public class MoneyTextView extends View {
     /// SETTERS
     ///
 
-    public void setAmount(float amount, String symbol) {
-        mAmount = amount;
-        mSymbolSection.text = symbol;
-        requestLayout();
-    }
-
     public void setDecimalFormat(DecimalFormat decimalFormat) {
         mDecimalFormat = decimalFormat;
         requestLayout();
@@ -352,6 +350,15 @@ public class MoneyTextView extends View {
 
     public double getAmount() {
         return mAmount;
+    }
+
+    public BigDecimal getBigDecimalAmount() {
+        return bigDecimalAmount;
+    }
+
+    public void setAmount(BigDecimal bigDecimalAmount) {
+        this.bigDecimalAmount = bigDecimalAmount;
+        requestLayout();
     }
 
     private int getMinPadding(int padding) {

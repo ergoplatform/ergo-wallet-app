@@ -3,6 +3,7 @@ package org.ergoplatform
 import org.ergoplatform.appkit.Parameters
 import org.junit.Assert
 import org.junit.Test
+import java.math.BigDecimal
 
 class ErgoAmountTest {
 
@@ -13,9 +14,11 @@ class ErgoAmountTest {
 
         val oneErg = ErgoAmount("1")
         Assert.assertEquals(Parameters.OneErg, oneErg.nanoErgs)
+        Assert.assertEquals(BigDecimal.ONE, oneErg.toBigDecimal().stripTrailingZeros())
 
         val zeroErg = ErgoAmount("")
         Assert.assertEquals(0, zeroErg.nanoErgs)
+        Assert.assertEquals(BigDecimal.ZERO, zeroErg.toBigDecimal().stripTrailingZeros())
 
         val floatPrecisionProblem = ErgoAmount("4.503")
         Assert.assertEquals(4503000000, floatPrecisionProblem.nanoErgs)

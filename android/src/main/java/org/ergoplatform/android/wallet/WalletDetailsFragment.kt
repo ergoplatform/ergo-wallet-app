@@ -3,8 +3,6 @@ package org.ergoplatform.android.wallet
 import android.animation.LayoutTransition
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -27,6 +25,7 @@ import org.ergoplatform.android.tokens.inflateAndBindDetailedTokenEntryView
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.openUrlWithBrowser
+import org.ergoplatform.android.ui.postDelayed
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.getExplorerWebUrl
@@ -128,7 +127,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         }
 
         // enable layout change animations after a short wait time
-        Handler(Looper.getMainLooper()).postDelayed({ enableLayoutChangeAnimations() }, 500)
+        postDelayed(500) { enableLayoutChangeAnimations() }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -175,8 +174,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         val ergoAmount = walletDetailsViewModel.uiLogic.getErgoBalance()
         val unconfirmed = walletDetailsViewModel.uiLogic.getUnconfirmedErgoBalance()
 
-        binding.walletBalance.amount = ergoAmount.toDouble()
-        binding.walletUnconfirmed.amount = unconfirmed.toDouble()
+        binding.walletBalance.setAmount(ergoAmount.toBigDecimal())
+        binding.walletUnconfirmed.setAmount(unconfirmed.toBigDecimal())
         binding.walletUnconfirmed.visibility = if (unconfirmed.isZero()) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
 
@@ -187,7 +186,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             binding.walletFiat.visibility = View.GONE
         } else {
             binding.walletFiat.visibility = View.VISIBLE
-            binding.walletFiat.amount = ergoPrice * binding.walletBalance.amount
+            binding.walletFiat.amount = ergoPrice * ergoAmount.toDouble()
             binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.uppercase())
         }
 

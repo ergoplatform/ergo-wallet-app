@@ -4,7 +4,7 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.uilogic.STRING_BUTTON_SCAN_SIGNED_TX
 import org.ergoplatform.uilogic.STRING_LABEL_QR_PAGES_INFO
-import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
+import org.ergoplatform.uilogic.transactions.SubmitTransactionUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.UIColor
 import org.robovm.apple.uikit.UIScrollView
@@ -17,7 +17,7 @@ import org.robovm.apple.uikit.UIViewController
  */
 class SigningPromptViewController(
     private val signingPrompt: String,
-    private val uiLogic: SendFundsUiLogic
+    private val uiLogic: SubmitTransactionUiLogic
 ) : UIViewController() {
     private lateinit var qrPresenter: PagedQrCodeContainer
 

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/transaction_info"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_margin="@dimen/activity_horizontal_margin"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/TextAppearance.App.Body2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/desc_signing_request"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="@dimen/half_horizontal_margin"
+            android:background="@color/lightgrey" />
+
+        <TextView
+            style="@style/TextAppearance.App.Body1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/title_inboxes"
+            android:textColor="?attr/colorSecondary"
+            android:textStyle="bold" />
+
+        <TextView
+            style="@style/TextAppearance.App.Body2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/desc_inboxes" />
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/layout_inboxes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/half_horizontal_margin"
+            android:orientation="vertical" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="@dimen/half_horizontal_margin"
+            android:background="@color/lightgrey" />
+
+        <TextView
+            style="@style/TextAppearance.App.Body1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/title_outboxes"
+            android:textColor="?attr/colorSecondary"
+            android:textStyle="bold" />
+
+        <TextView
+            style="@style/TextAppearance.App.Body2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/desc_outboxes" />
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/layout_outboxes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/half_horizontal_margin"
+            android:orientation="vertical">
+
+            <include layout="@layout/entry_transaction_box" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <Button
+            android:id="@+id/button_sign_tx"
+            style="?attr/materialButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:minWidth="120dp"
+            android:text="@string/label_confirm" />
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

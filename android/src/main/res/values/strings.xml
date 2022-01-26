@@ -48,6 +48,9 @@
     <string name="label_erg_price">1 ERG ≈</string>
     <string name="label_fiat_amount">≈ %1s</string>
     <string name="label_wallet_default">My wallet</string>
+    <string name="hint_signing_request">Please scan the signing request from the appropriate
+       Wallet\'s Send funds screen.</string>
+    <string name="error_qr_code_content_unknown">The scanned QR code was not of a known format.</string>
 
     <!-- add wallet -->
     <string name="menu_add_wallet">Add wallet</string>
@@ -175,6 +178,16 @@
         Scan this QR code to proceed.</string>
     <string name="desc_show_signed_multiple">Your transaction was signed and needs to be sent to the network.
         Scan these QR codes to proceed.</string>
+
+    <!-- Ergo Pay Signing -->
+    <string name="title_ergo_pay_request">Ergo Pay Request</string>
+    <string name="label_sign_with">Sign with: %1s (%2s)</string>
+    <string name="label_fetching_data">Requesting data from dApp…</string>
+    <string name="label_message_from_dapp">Message from dApp:\n%1s</string>
+    <string name="label_error_occured">An error occurred:\n%1s</string>
+    <string name="label_ergo_pay_wrong_address">Signing Request received for address %1s, which does not belong to this wallet.</string>
+    <string name="label_ergo_pay_choose_address">Please choose an address to process the Ergo Pay Request.</string>
+    <string name="error_prover_cant_sign">The transaction could not be signed with this wallet\'s keys.</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1s</string>

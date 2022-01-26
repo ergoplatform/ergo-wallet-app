@@ -1,6 +1,8 @@
-package org.ergoplatform
+package org.ergoplatform.transactions
 
 import org.ergoplatform.appkit.Parameters
+import org.ergoplatform.isErgoMainNet
+import org.ergoplatform.parsePaymentRequest
 import org.junit.Assert
 import org.junit.Test
 

@@ -137,6 +137,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/half_horizontal_margin"
                         android:hint="@string/label_purpose"
+                        android:visibility="gone"
                         app:layout_constraintTop_toBottomOf="@id/tv_fiat">
 
                         <com.google.android.material.textfield.TextInputEditText

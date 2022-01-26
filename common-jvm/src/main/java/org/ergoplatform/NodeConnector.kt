@@ -5,7 +5,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.ergoplatform.api.CoinGeckoApi
-import org.ergoplatform.explorer.client.DefaultApi
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.persistance.WalletState
@@ -28,7 +27,6 @@ class NodeConnector {
         private set
     var fiatCurrency: String = ""
         private set
-    private var ergoApiService: DefaultApi? = null
     private val coinGeckoApi: CoinGeckoApi
 
     init {
@@ -38,27 +36,11 @@ class NodeConnector {
         coinGeckoApi = retrofitCoinGecko.create(CoinGeckoApi::class.java)
     }
 
-    private fun getOrInitErgoApiService(preferences: PreferencesProvider): DefaultApi {
-        if (ergoApiService == null) {
-
-            val retrofit = Retrofit.Builder()
-                .baseUrl(preferences.prefExplorerApiUrl)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-
-            ergoApiService = retrofit.create(DefaultApi::class.java)
-        }
-        return ergoApiService!!
-    }
-
     fun invalidateCache(resetFiatValue: Boolean = false) {
         lastRefreshMs = 0
         if (resetFiatValue) fiatValue.value = 0.0f
     }
 
-    fun resetApiService() {
-        ergoApiService = null
-    }
 
     fun refreshByUser(preferences: PreferencesProvider, database: WalletDbProvider): Boolean {
         if (System.currentTimeMillis() - lastRefreshMs > 1000L * 10) {
@@ -163,7 +145,7 @@ class NodeConnector {
 
                 refreshAddresses.forEach { address ->
                     val balanceInfoCall =
-                        getOrInitErgoApiService(preferences).getApiV1AddressesP1BalanceTotal(
+                        ErgoApiService.getOrInit(preferences).getTotalBalanceForAddress(
                             address.publicAddress
                         ).execute()
 
