@@ -1,11 +1,11 @@
-package org.ergoplatform
+package org.ergoplatform.transactions
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.ergoplatform.transactions.*
+import org.ergoplatform.ErgoApi
+import org.ergoplatform.deserializeUnsignedTxOffline
 import org.ergoplatform.utils.*
-import java.lang.IllegalStateException
 
 /**
  * EIP-0020 ErgoPaySigningRequest
@@ -17,14 +17,26 @@ data class ErgoPaySigningRequest(
     val message: String? = null,
     val messageSeverity: MessageSeverity = MessageSeverity.NONE,
     val replyToUrl: String? = null
-)
+) {
+    init {
+        require(message != null || reducedTx != null) {
+            "Ergo Pay Signing Request should contain at least message or reducedTx"
+        }
+    }
+}
 
+/**
+ * MessageSeverity for showing a symbol next to a ErgoPaySigningRequest#message
+ */
 enum class MessageSeverity { NONE, INFORMATION, WARNING, ERROR }
 
 private const val uriSchemePrefix = "ergopay:"
 private const val placeHolderP2Pk = "#P2PK_ADDRESS#"
 private const val urlEncodedPlaceHolderP2Pk = "#P2PK_ADDRESS%23"
 
+/**
+ * @return true if the given `uri` is a ErgoPay signing request URI
+ */
 fun isErgoPaySigningRequest(uri: String): Boolean {
     return uri.startsWith(uriSchemePrefix, true)
 }
@@ -48,7 +60,8 @@ fun getErgoPaySigningRequest(
     } else {
         val ergopayUrl = if (isErgoPayDynamicWithAddressRequest(requestData)) {
             p2pkAddress?.let {
-                requestData.replace(placeHolderP2Pk, p2pkAddress).replace(urlEncodedPlaceHolderP2Pk, p2pkAddress)
+                requestData.replace(placeHolderP2Pk, p2pkAddress)
+                    .replace(urlEncodedPlaceHolderP2Pk, p2pkAddress)
             } ?: throw IllegalArgumentException("Ergo Pay address request, but no address given")
         } else requestData
 
@@ -60,11 +73,6 @@ fun getErgoPaySigningRequest(
         parseErgoPaySigningRequestFromJson(jsonResponse)
     }
 
-    // either message or reducedTx should be set
-    if (epsr.message == null && epsr.reducedTx == null) {
-        throw IllegalStateException("Ergo Pay Signing Request should contain at least message or reducedTx")
-    }
-
     return epsr
 }
 
@@ -74,6 +82,9 @@ private const val JSON_KEY_REPLY_TO = "replyTo"
 private const val JSON_KEY_MESSAGE = "message"
 private const val JSON_KEY_MESSAGE_SEVERITY = "messageSeverity"
 
+/**
+ * @return ErgoPaySigningRequest parsed from `jsonString`, may throw Exceptions
+ */
 fun parseErgoPaySigningRequestFromJson(jsonString: String): ErgoPaySigningRequest {
     val jsonObject = JsonParser().parse(jsonString).asJsonObject
     val reducedTx = jsonObject.get(JSON_KEY_REDUCED_TX)?.asString?.let {
@@ -89,12 +100,24 @@ fun parseErgoPaySigningRequestFromJson(jsonString: String): ErgoPaySigningReques
     )
 }
 
+/**
+ * @return true if `requestData` is a static ErgoPay signing request holding a reduced transaction
+ */
 fun isErgoPayStaticRequest(requestData: String) =
     isErgoPaySigningRequest(requestData) && !isErgoPayDynamicRequest(requestData)
 
+/**
+ * @return true if `requestData` is a dynamic ErgoPay signing request, holding an URL to fetch
+ *         the actual signing request data from
+ */
 fun isErgoPayDynamicRequest(requestData: String) =
     requestData.startsWith("$uriSchemePrefix//", true)
 
+/**
+ * @return true if `requestData` is a dynamic ErgoPay signing request, holding an URL to fetch
+ *         the actual signing request data from, and the URL contains a placeholder to fill with
+ *         the user's p2pk address
+ */
 fun isErgoPayDynamicWithAddressRequest(requestData: String) =
     isErgoPayDynamicRequest(requestData) &&
             (requestData.contains(placeHolderP2Pk) || requestData.contains(urlEncodedPlaceHolderP2Pk))
@@ -129,7 +152,7 @@ fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApi): Transac
 private const val JSON_FIELD_TX_ID = "txId"
 
 /**
- * Sends a reply to dapp, if necessary. Will make a https request to dapp
+ * Sends a reply to dApp, if necessary. Will make a https request to dApp
  * Call this only from non-UI thread and within an applicable try/catch phrase
  */
 fun ErgoPaySigningRequest.sendReplyToDApp(txId: String) {

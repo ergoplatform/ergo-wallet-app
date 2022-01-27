@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import org.ergoplatform.MessageSeverity
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -68,7 +68,6 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
                 ErgoPaySigningUiLogic.State.FETCH_DATA -> showFetchData()
                 ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION -> showTransactionInfo()
                 ErgoPaySigningUiLogic.State.DONE -> showDoneInfo()
-                null -> throw IllegalStateException("Not allowed")
             }
         })
 

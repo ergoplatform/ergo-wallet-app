@@ -3,7 +3,7 @@ package org.ergoplatform.ios.transactions
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.isErgoPaySigningRequest
+import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND

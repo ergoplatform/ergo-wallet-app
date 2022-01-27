@@ -1,6 +1,6 @@
 package org.ergoplatform.uilogic
 
-import org.ergoplatform.isErgoPaySigningRequest
+import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.isPaymentRequestUrl
 import org.ergoplatform.transactions.getColdSignedTxChunk
 import org.ergoplatform.transactions.isColdSigningRequestChunk

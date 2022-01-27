@@ -1,7 +1,7 @@
 package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.CoroutineScope
-import org.ergoplatform.MessageSeverity
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.transactions.reduceBoxes

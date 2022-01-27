@@ -7,8 +7,7 @@ import kotlinx.coroutines.withContext
 import org.ergoplatform.*
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletDbProvider
-import org.ergoplatform.transactions.SendTransactionResult
-import org.ergoplatform.transactions.TransactionInfo
+import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
@@ -44,7 +43,9 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         coroutineScope.launch {
             initWallet(database, walletId, derivationIndex)
 
-            // fake a request
+            // uncomment this code to fake a request to a server URL. This will build an
+            // ergo pay signing request that sends 0.5 ERG from and to the first address of the
+            // current wallet
 //            withContext(Dispatchers.IO) {
 //                val serializedTx = prepareSerializedErgoTx(
 //                    Address.create(wallet!!.walletConfig.firstAddress), 1000L * 1000L * 500,

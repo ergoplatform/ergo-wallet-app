@@ -14,12 +14,20 @@ import scala.collection.JavaConversions
 import special.collection.Coll
 import kotlin.math.min
 
+/**
+ * describes a transaction with its ID and lists of inputs (boxes to spend) and outputs (boxes
+ * to issue)
+ */
 data class TransactionInfo(
     val id: String,
     val inputs: List<InputInfo>,
     val outputs: List<OutputInfo>
 )
 
+/**
+ * describes a box to spend or a box to issue with its box ID, address that secures the box,
+ * value of nanoergs and list of tokens the box holds or will hold.
+ */
 data class TransactionInfoBox(
     val boxId: String,
     val address: String,
@@ -27,12 +35,20 @@ data class TransactionInfoBox(
     val tokens: List<AssetInstanceInfo>
 )
 
+/**
+ * @return list of IDs of boxes to spend for this `UnsignedErgoLikeTransaction`
+ */
 fun UnsignedErgoLikeTransaction.getInputBoxesIds(): List<String> {
     return JavaConversions.seqAsJavaList(inputs())!!.map {
         ErgoId(it.boxId()).toString()
     }
 }
 
+/**
+ * @return TransactionInfo data class for this UnsignedErgoLikeTransaction. The TransactionInfo
+ *         is more Kotlin-friendly to work with and holds information for the boxes to spend
+ *         and more information for tokens on the boxes to issue.
+ */
 fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String, TransactionInfoBox>): TransactionInfo {
     val inputsList = ArrayList<InputInfo>()
     val outputsList = ArrayList<OutputInfo>()
@@ -80,6 +96,9 @@ fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String,
     return TransactionInfo(id(), inputsList, outputsList)
 }
 
+/**
+ * @return TransactionInfoBox, which is more Kotlin-friendly to work with
+ */
 fun ErgoBox.toTransactionInfoBox(): TransactionInfoBox {
     return TransactionInfoBox(
         ErgoId(id()).toString(),
@@ -89,6 +108,9 @@ fun ErgoBox.toTransactionInfoBox(): TransactionInfoBox {
     )
 }
 
+/**
+ * @return TransactionInfoBox, which is more Kotlin-friendly to work with
+ */
 fun OutputInfo.toTransactionInfoBox(): TransactionInfoBox {
     return TransactionInfoBox(boxId, address, value, assets)
 }

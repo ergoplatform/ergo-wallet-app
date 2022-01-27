@@ -14,6 +14,7 @@ import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.isColdSigningRequestChunk
+import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getStateForAddress

@@ -13,7 +13,7 @@ import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserBindin
 import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserItemBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.isErgoPaySigningRequest
+import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 
