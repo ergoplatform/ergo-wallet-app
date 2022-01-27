@@ -3,7 +3,7 @@
     <string name="title_wallets">Portafogli</string>
     <string name="title_settings">Impostazioni</string>
 
-    <string name="hint_password">Inserisci la password, per favore</string>
+    <string name="hint_password">Inserisci la password</string>
     <string name="label_forgot_password">Dimenticato la password?</string>
     <string name="err_password">La password deve essere composta da almeno 8 caratteri</string>
     <string name="label_password">Password</string>
@@ -34,8 +34,8 @@
     <string name="error_camera">Errore inizializzazione camera. Per favore, controlla le impostazioni sulla privacy.</string>
 
     <!-- Wallet -->
-    <string name="label_tokens">Gettoni</string>
-    <string name="label_more_tokens">altri gettoni</string>
+    <string name="label_tokens">Tokens</string>
+    <string name="label_more_tokens">altri token</string>
     <string name="label_unconfirmed">non confermato</string>
     <string name="button_receive">Ricevi</string>
     <string name="button_send">Invia</string>
@@ -61,13 +61,13 @@
     <string name="label_wallet_address">Indirizzo del portafoglio</string>
 
     <!-- Create wallet -->
-    <string name="intro_create_wallet">Questo è il tuo mnemonico del portafoglio Ergo di 15 parole. Queste parole sono anche conosciute come una frase seme o
-         chiave di carta.
+    <string name="intro_create_wallet">Questa è la tua frase mnemonica di 15 parole del portafoglio Ergo.
+        Queste parole sono anche conosciute come "frase seme" o "chiave di carta".
         Con queste 15 parole, puoi ripristinare il tuo portafoglio su altri dispositivi se perdi l\'accesso a questo.\nÈ fondamentale
      annotare con cura tutte le 15 parole (con carta e penna) e conservarle in un luogo sicuro.</string>
     <string name="intro_confirm_create_wallet">Per confermare che il tuo mnemonico scritto a mano sia corretto, inserisci ora due parole della frase:</string>
     <string name="check_confirm_create_wallet">Comprendo di essere responsabile della conservazione del mio mnemonico in un luogo sicuro.
-    È l\'unico modo per accedere al mio portafoglio se le chiavi memorizzate su questo dispositivo vengono perse o inaccessibili.</string>
+        È l\'unico modo per accedere al mio portafoglio se le chiavi memorizzate su questo dispositivo vengono perse o diventano inaccessibili.</string>
     <string name="label_word_confirm_create_wallet">Word %1s</string>
     <string name="error_word_confirm_create_wallet">Word not correct</string>
 
