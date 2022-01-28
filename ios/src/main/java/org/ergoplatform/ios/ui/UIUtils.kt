@@ -23,7 +23,7 @@ val IMAGE_TX_DONE = if (Foundation.getMajorSystemVersion() >= 15) "clock.badge.c
 const val IMAGE_CREATE_WALLET = "folder.badge.plus"
 const val IMAGE_RESTORE_WALLET = "arrow.clockwise"
 const val IMAGE_READONLY_WALLET = "magnifyingglass"
-const val IMAGE_EXCLAMATION_MARK = "exclamationmark.circle.fill"
+const val IMAGE_EXCLAMATION_MARK_FILLED = "exclamationmark.circle.fill"
 const val IMAGE_NO_CONNECTION = "icloud.slash"
 const val IMAGE_SEND = "paperplane"
 const val IMAGE_RECEIVE = "arrow.down.left"
@@ -43,6 +43,9 @@ const val IMAGE_CHEVRON_DOWN = "chevron.down"
 const val IMAGE_CHEVRON_UP = "chevron.up"
 val IMAGE_SWITCH_RESOLUTION = if (Foundation.getMajorSystemVersion() >= 14)
     "arrow.up.left.and.down.right.magnifyingglass" else "1.magnifyingglass"
+const val IMAGE_WARNING = "exclamationmark.circle"
+const val IMAGE_INFORMATION = "info.circle"
+const val IMAGE_ERROR = "xmark.circle"
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
@@ -166,7 +169,7 @@ fun UITextField.setHasError(hasError: Boolean) {
     layer.borderColor = (if (hasError) UIColor.systemRed() else UIColor.systemGray()).cgColor
     if (hasError) {
         val errorView = prepareTextFieldImageContainer(
-            getIosSystemImage(IMAGE_EXCLAMATION_MARK, UIImageSymbolScale.Small)!!,
+            getIosSystemImage(IMAGE_EXCLAMATION_MARK_FILLED, UIImageSymbolScale.Small)!!,
             UIColor.systemRed()
         )
         rightView = errorView

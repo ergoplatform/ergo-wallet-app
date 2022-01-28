@@ -4,21 +4,9 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.ergoplatform.ErgoBox
-import org.ergoplatform.appkit.Address
-import org.ergoplatform.appkit.ErgoId
-import org.ergoplatform.appkit.Iso
 import org.ergoplatform.deserializeErgobox
-import org.ergoplatform.deserializeUnsignedTx
-import org.ergoplatform.explorer.client.model.AssetInstanceInfo
-import org.ergoplatform.explorer.client.model.InputInfo
-import org.ergoplatform.explorer.client.model.OutputInfo
-import org.ergoplatform.explorer.client.model.TransactionInfo
-import org.ergoplatform.getErgoNetworkType
+import org.ergoplatform.deserializeUnsignedTxOffline
 import org.ergoplatform.utils.Base64Coder
-import scala.Tuple2
-import scala.collection.JavaConversions
-import special.collection.Coll
 
 private const val JSON_FIELD_REDUCED_TX = "reducedTx"
 private const val JSON_FIELD_SIGNED_TX = "signedTx"
@@ -66,19 +54,19 @@ fun parseColdSigningRequest(qrData: String): PromptSigningResult {
         val serializedTx = Base64Coder.decode(jsonTree.get(JSON_FIELD_REDUCED_TX).asString)
 
         // sender is optional
-        val sender =
-            if (jsonTree.has(JSON_FIELD_SENDER)) jsonTree.get(JSON_FIELD_SENDER).asString else null
+        val sender = jsonTree.get(JSON_FIELD_SENDER)?.asString
 
-        val inputs = if (jsonTree.has(JSON_FIELD_INPUTS)) {
-            jsonTree.get(JSON_FIELD_INPUTS).asJsonArray.toList()
-                .map { Base64Coder.decode(it.asString) }
-        } else null
+        val inputs = jsonTree.decodeBase64StringList(JSON_FIELD_INPUTS)
 
         return PromptSigningResult(true, serializedTx, inputs, sender)
 
     } catch (t: Throwable) {
         return PromptSigningResult(false, errorMsg = t.message)
     }
+}
+
+private fun JsonObject.decodeBase64StringList(fieldName: String): List<ByteArray>? {
+    return get(fieldName)?.asJsonArray?.toList()?.map { Base64Coder.decode(it.asString) }
 }
 
 fun parseColdSigningResponse(qrData: String): SigningResult {
@@ -198,80 +186,29 @@ private fun parseQrChunk(chunk: String, property: String): QrChunk {
     if (!jsonTree.has(property)) {
         throw java.lang.IllegalArgumentException("QR code does not contain element $property")
     }
-    val index = if (jsonTree.has(QR_PROPERTY_INDEX)) jsonTree.get(QR_PROPERTY_INDEX).asInt else 1
-    val pages = if (jsonTree.has(QR_PROPERTY_PAGES)) jsonTree.get(QR_PROPERTY_PAGES).asInt else 1
+    val index = jsonTree.get(QR_PROPERTY_INDEX)?.asInt ?: 1
+    val pages = jsonTree.get(QR_PROPERTY_PAGES)?.asInt ?: 1
     return QrChunk(index, pages, jsonTree.get(property).asString)
 }
 
-/*
- * TODO #13 use own db entity data class (null safe)
- */
-fun buildTransactionInfoFromReduced(
-    serializedTx: ByteArray,
-    serializedInputs: List<ByteArray>? = null
-): TransactionInfo {
-    val unsignedTx = deserializeUnsignedTx(serializedTx)
-
-    val retVal = TransactionInfo()
-
-    retVal.id = unsignedTx.id()
+fun PromptSigningResult.buildTransactionInfo(): TransactionInfo {
+    val unsignedTx = deserializeUnsignedTxOffline(serializedTx!!)
 
     // deserialize input boxes and store in hashmap
-    val inputBoxes = HashMap<String, ErgoBox>()
+    val inputBoxes = HashMap<String, TransactionInfoBox>()
     serializedInputs?.forEach { input ->
         try {
             val ergoBox = deserializeErgobox(input)
             ergoBox?.let {
-                inputBoxes.put(ErgoId(ergoBox.id()).toString(), ergoBox)
+                val inboxInfo = it.toTransactionInfoBox()
+                inputBoxes.put(inboxInfo.boxId, inboxInfo)
             }
         } catch (t: Throwable) {
             // ignore errors
         }
     }
 
-    // now add to TransactionInfo, if possible
-    JavaConversions.seqAsJavaList(unsignedTx.inputs())!!.forEach {
-        val boxid = ErgoId(it.boxId()).toString()
-        val inputInfo = InputInfo()
-        inputInfo.boxId = boxid
-        inputBoxes.get(boxid)?.let { ergoBox ->
-            inputInfo.address =
-                Address.fromErgoTree(ergoBox.ergoTree(), getErgoNetworkType()).toString()
-            inputInfo.value = ergoBox.value()
-            getAssetInstanceInfos(ergoBox.additionalTokens()).forEach { assetsItem ->
-                inputInfo.addAssetsItem(assetsItem)
-            }
-        } ?: throw java.lang.IllegalArgumentException("No information for input box $boxid")
-        retVal.addInputsItem(inputInfo)
-    }
-
-    JavaConversions.seqAsJavaList(unsignedTx.outputCandidates())!!.forEach { ergoBoxCandidate ->
-        val outputInfo = OutputInfo()
-
-        outputInfo.address =
-            Address.fromErgoTree(ergoBoxCandidate.ergoTree(), getErgoNetworkType()).toString()
-        outputInfo.value = ergoBoxCandidate.value()
-
-        retVal.addOutputsItem(outputInfo)
-
-        getAssetInstanceInfos(ergoBoxCandidate.additionalTokens()).forEach {
-            outputInfo.addAssetsItem(it)
-        }
-    }
-
-    return retVal
-
-}
-
-private fun getAssetInstanceInfos(tokensColl: Coll<Tuple2<ByteArray, Any>>): List<AssetInstanceInfo> {
-    val tokens = Iso.isoTokensListToPairsColl().from(tokensColl)
-    return tokens.map {
-        val tokenInfo = AssetInstanceInfo()
-        tokenInfo.amount = it.value
-        tokenInfo.tokenId = it.id.toString()
-
-        tokenInfo
-    }
+    return unsignedTx.buildTransactionInfo(inputBoxes)
 }
 
 class QrCodePagesCollector(private val parser: (String) -> QrChunk?) {
@@ -298,7 +235,7 @@ class QrCodePagesCollector(private val parser: (String) -> QrChunk?) {
     }
 
     fun hasAllPages(): Boolean {
-        return pagesAdded == pagesCount
+        return pagesAdded == pagesCount && pagesCount > 0
     }
 
     fun getAllPages(): Collection<String> {

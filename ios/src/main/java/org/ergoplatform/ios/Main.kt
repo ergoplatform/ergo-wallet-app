@@ -72,10 +72,8 @@ class Main : UIApplicationDelegateAdapter() {
     ): Boolean {
         url?.absoluteString?.let {
             LogUtils.logDebug("openURL", it)
-            if (isPaymentRequestUrl(it)) {
-                (window.rootViewController as? BottomNavigationBar)?.handlePaymentRequest(it)
-                return true
-            }
+            (window.rootViewController as? BottomNavigationBar)?.handlePaymentRequest(it, false)
+            return true
         }
 
         return super.openURL(app, url, options)

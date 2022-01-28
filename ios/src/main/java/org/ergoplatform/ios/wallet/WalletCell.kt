@@ -3,7 +3,6 @@ package org.ergoplatform.ios.wallet
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.NodeConnector
-import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.ios.tokens.TokenEntryView
 import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
 import org.ergoplatform.ios.transactions.SendFundsViewController
@@ -14,7 +13,6 @@ import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
-import org.ergoplatform.wallet.getDerivedAddress
 import org.ergoplatform.wallet.getTokensForAllAddresses
 import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
 import org.robovm.apple.coregraphics.CGRect
@@ -61,7 +59,6 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         fiatBalance = Body1Label()
 
         unconfirmedBalance = Body1BoldLabel().apply {
-            isHidden = true
             numberOfLines = 1
         }
 
@@ -191,10 +188,11 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
             nodeConnector.fiatCurrency, IosStringProvider(textBundle)
         )
         val unconfirmedErgs = wallet.getUnconfirmedBalanceForAllAddresses()
-        unconfirmedBalance.text =
-            textBundle.format(STRING_LABEL_ERG_AMOUNT, ErgoAmount(unconfirmedErgs).toStringRoundToDecimals()) +
-                    " " + textBundle.get(STRING_LABEL_UNCONFIRMED)
-        unconfirmedBalance.isHidden = (unconfirmedErgs == 0L)
+        unconfirmedBalance.text = if (unconfirmedErgs == 0L) "" else
+            textBundle.format(
+                STRING_LABEL_ERG_AMOUNT,
+                ErgoAmount(unconfirmedErgs).toStringRoundToDecimals()
+            ) + " " + textBundle.get(STRING_LABEL_UNCONFIRMED)
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
         tokenCount.isHidden = tokens.isEmpty()

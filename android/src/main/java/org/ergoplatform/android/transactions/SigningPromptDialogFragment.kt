@@ -104,8 +104,7 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
         binding.tvDesc.setText(if (lastPage) R.string.desc_prompt_signing else R.string.desc_prompt_signing_multiple)
     }
 
-    private fun getViewModel() = ViewModelProvider(parentFragment as ViewModelStoreOwner)
-        .get(SendFundsViewModel::class.java)
+    private fun getViewModel() = (parentFragment as SubmitTransactionFragment).viewModel
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)

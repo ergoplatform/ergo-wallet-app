@@ -12,6 +12,8 @@
         <array>
             <string>en</string>
             <string>es</string>
+            <string>it</string>
+            <string>pt</string>
             <string>zh</string>
         </array>
         <key>CFBundleIdentifier</key>
@@ -33,7 +35,8 @@
                 <string>Editor</string>
                 <key>CFBundleURLSchemes</key>
                 <array>
-                    <string>ergoplatform</string>
+                    <string>ergo</string>
+                    <string>ergopay</string>
                 </array>
             </dict>
         </array>

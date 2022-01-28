@@ -1,6 +1,5 @@
 package org.ergoplatform.uilogic.transactions
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -8,29 +7,22 @@ import org.ergoplatform.*
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
-import org.ergoplatform.persistance.*
+import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.WalletDbProvider
+import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.tokens.isSingularToken
-import org.ergoplatform.transactions.*
-import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_AMOUNT
-import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_BUT_NO_ERG
-import org.ergoplatform.uilogic.STRING_ERROR_REQUEST_TOKEN_NOT_FOUND
-import org.ergoplatform.uilogic.StringProvider
-import org.ergoplatform.wallet.*
+import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.transactions.SendTransactionResult
+import org.ergoplatform.transactions.isColdSigningRequestChunk
+import org.ergoplatform.transactions.isErgoPaySigningRequest
+import org.ergoplatform.uilogic.*
+import org.ergoplatform.wallet.getBalanceForAllAddresses
+import org.ergoplatform.wallet.getStateForAddress
+import org.ergoplatform.wallet.getTokensForAddress
+import org.ergoplatform.wallet.getTokensForAllAddresses
 import kotlin.math.max
 
-abstract class SendFundsUiLogic {
-    abstract val coroutineScope: CoroutineScope
-
-    var wallet: Wallet? = null
-        private set
-
-    var derivedAddressIdx: Int? = null
-        set(value) {
-            field = value
-            derivedAddressChanged()
-        }
-    var derivedAddress: WalletAddress? = null
-        private set
+abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
 
     var receiverAddress: String = ""
         set(value) {
@@ -79,22 +71,7 @@ abstract class SendFundsUiLogic {
         } else content = null
 
         coroutineScope.launch {
-            wallet = database.loadWalletWithStateById(walletId)
-
-            wallet?.let {
-                notifyWalletStateLoaded()
-            }
-
-            // no address set (yet)?
-            if (derivedAddressIdx == null && firstInit) {
-                // if there is only a single address available, fix it to this one
-                if (wallet?.getNumOfAddresses() == 1) {
-                    derivedAddressIdx = 0
-                } else {
-                    // make sure to post to observer the first time
-                    derivedAddressIdx = if (derivationIdx >= 0) derivationIdx else null
-                }
-            }
+            initWallet(database, walletId, derivationIdx)
 
             content?.let {
                 addTokensFromPaymentRequest(content.tokens)
@@ -104,9 +81,10 @@ abstract class SendFundsUiLogic {
         calcGrossAmount()
     }
 
-    private fun derivedAddressChanged() {
-        val addressDbEntity = derivedAddressIdx?.let { wallet?.getDerivedAddressEntity(it) }
-        val address = addressDbEntity?.publicAddress
+    override fun derivedAddressChanged() {
+        super.derivedAddressChanged()
+
+        val address = derivedAddress?.publicAddress
         val addressState = address?.let { wallet?.getStateForAddress(it) }
         wallet?.let { wallet ->
             balance = ErgoAmount(
@@ -126,8 +104,6 @@ abstract class SendFundsUiLogic {
                 tokensChosen.remove(tokenId)
         }
 
-        derivedAddress = addressDbEntity
-        notifyDerivedAddressChanged()
         notifyTokensChosenChanged()
     }
 
@@ -169,15 +145,12 @@ abstract class SendFundsUiLogic {
         )
     }
 
-    fun startPaymentWithMnemonicAsync(
+    override fun startPaymentWithMnemonicAsync(
         mnemonic: String,
         preferences: PreferencesProvider,
         texts: StringProvider
     ) {
-        val derivedAddresses =
-            derivedAddressIdx?.let { listOf(it) }
-                ?: wallet?.getSortedDerivedAddressesList()?.map { it.derivationIndex }
-                ?: listOf(0)
+        val derivedAddresses = getSigningDerivedAddressesIndices()
 
         coroutineScope.launch {
             val ergoTxResult: SendTransactionResult
@@ -200,15 +173,9 @@ abstract class SendFundsUiLogic {
         notifyUiLocked(true)
     }
 
-    var signedTxQrCodePagesCollector: QrCodePagesCollector? = null
-        private set
-
-    fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
-        signedTxQrCodePagesCollector = QrCodePagesCollector(::getColdSignedTxChunk)
+    override fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
         wallet?.let { wallet ->
-            val derivedAddresses =
-                derivedAddressIdx?.let { listOf(wallet.getDerivedAddress(it)!!) }
-                    ?: wallet.getSortedDerivedAddressesList().map { it.publicAddress }
+            val derivedAddresses = getSigningDerivedAddresses()
 
             notifyUiLocked(true)
             coroutineScope.launch {
@@ -222,47 +189,9 @@ abstract class SendFundsUiLogic {
                     )
                 }
                 notifyUiLocked(false)
-                if (serializedTx.success) {
-                    buildColdSigningRequest(serializedTx)?.let {
-                        notifyHasSigningPromptData(it)
-                    }
-                }
-                notifyHasErgoTxResult(serializedTx)
+                startColdWalletPaymentPrompt(serializedTx)
             }
         }
-    }
-
-    fun sendColdWalletSignedTx(
-        preferences: PreferencesProvider,
-        texts: StringProvider
-    ) {
-        val qrCodes = signedTxQrCodePagesCollector?.getAllPages()
-        signedTxQrCodePagesCollector = null
-
-        if (qrCodes.isNullOrEmpty()) return // should not happen
-
-        notifyUiLocked(true)
-        coroutineScope.launch {
-            val ergoTxResult: SendTransactionResult
-            withContext(Dispatchers.IO) {
-                val signingResult = coldSigningResponseFromQrChunks(qrCodes)
-                if (signingResult.success) {
-                    ergoTxResult = sendSignedErgoTx(
-                        signingResult.serializedTx!!,
-                        preferences, texts
-                    )
-                } else {
-                    ergoTxResult = SendTransactionResult(false, errorMsg = signingResult.errorMsg)
-                }
-            }
-            notifyUiLocked(false)
-            if (ergoTxResult.success) {
-                NodeConnector.getInstance().invalidateCache()
-                notifyHasTxId(ergoTxResult.txId!!)
-            }
-            notifyHasErgoTxResult(ergoTxResult)
-        }
-
     }
 
     /**
@@ -367,11 +296,17 @@ abstract class SendFundsUiLogic {
 
     fun qrCodeScanned(
         qrCodeData: String,
+        stringProvider: StringProvider,
         navigateToColdWalletSigning: ((signingData: String, walletId: Int) -> Unit),
-        setPaymentRequestDataToUi: ((receiverAddress: String, amount: ErgoAmount?) -> Unit)
+        navigateToErgoPaySigning: ((ergoPayRequest: String) -> Unit),
+        setPaymentRequestDataToUi: ((receiverAddress: String, amount: ErgoAmount?) -> Unit),
     ) {
         if (wallet?.walletConfig?.secretStorage != null && isColdSigningRequestChunk(qrCodeData)) {
             navigateToColdWalletSigning.invoke(qrCodeData, wallet!!.walletConfig.id)
+        } else if (isErgoPaySigningRequest(qrCodeData)) {
+            navigateToErgoPaySigning.invoke(
+                qrCodeData
+            )
         } else {
             val content = parsePaymentRequest(qrCodeData)
             content?.let {
@@ -380,19 +315,18 @@ abstract class SendFundsUiLogic {
                     content.amount.let { amount -> if (amount.nanoErgs > 0) amount else null }
                 )
                 addTokensFromPaymentRequest(content.tokens)
-            }
+            } ?: showErrorMessage(
+                stringProvider.getString(
+                    STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
+                )
+            )
         }
     }
 
-    abstract fun notifyWalletStateLoaded()
-    abstract fun notifyDerivedAddressChanged()
     abstract fun notifyTokensChosenChanged()
     abstract fun notifyAmountsChanged()
     abstract fun notifyBalanceChanged()
-    abstract fun notifyUiLocked(locked: Boolean)
-    abstract fun notifyHasTxId(txId: String)
-    abstract fun notifyHasErgoTxResult(txResult: TransactionResult)
-    abstract fun notifyHasSigningPromptData(signingPrompt: String)
+    abstract fun showErrorMessage(message: String)
 
     data class CheckCanPayResponse(
         val canPay: Boolean,

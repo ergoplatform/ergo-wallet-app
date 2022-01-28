@@ -2,12 +2,14 @@ package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.PaymentRequest
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.transactions.isErgoPaySigningRequest
+import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 import org.ergoplatform.uilogic.STRING_DESC_CHOOSE_WALLET
 import org.ergoplatform.uilogic.STRING_LABEL_TO
+import org.ergoplatform.uilogic.STRING_TITLE_ERGO_PAY_REQUEST
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
@@ -16,11 +18,11 @@ import org.robovm.apple.uikit.*
  * Deep link to send funds: Choose wallet to spend from
  */
 class ChooseSpendingWalletViewController(
-    private val paymentRequest: PaymentRequest,
+    private val paymentRequest: String,
     val callback: ((Int) -> Unit)
 ) : CoroutineViewController() {
 
-    lateinit var walletsStackView: UIStackView
+    private lateinit var walletsStackView: UIStackView
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -30,7 +32,6 @@ class ChooseSpendingWalletViewController(
         addCloseButton()
 
         val titleLabel = Body1Label().apply {
-            text = texts.get(STRING_BUTTON_SEND)
             textAlignment = NSTextAlignment.Center
         }
 
@@ -76,9 +77,17 @@ class ChooseSpendingWalletViewController(
             .widthMatchesSuperview(inset = DEFAULT_MARGIN * 2, maxWidth = MAX_WIDTH)
             .bottomToSuperview(bottomInset = DEFAULT_MARGIN)
 
-        amountLabel.setErgoAmount(paymentRequest.amount)
-        amountLabel.isHidden = paymentRequest.amount.isZero()
-        recipientLabel.text = paymentRequest.address
+        if (isErgoPaySigningRequest(paymentRequest)) {
+            amountLabel.isHidden = true
+            recipientLabel.text = ""
+            toLabel.text = ""
+            titleLabel.text = texts.get(STRING_TITLE_ERGO_PAY_REQUEST)
+        } else parsePaymentRequest(paymentRequest)?.let {
+            amountLabel.setErgoAmount(it.amount)
+            amountLabel.isHidden = it.amount.isZero()
+            recipientLabel.text = it.address
+            titleLabel.text = texts.get(STRING_BUTTON_SEND)
+        }
     }
 
     override fun viewWillAppear(animated: Boolean) {

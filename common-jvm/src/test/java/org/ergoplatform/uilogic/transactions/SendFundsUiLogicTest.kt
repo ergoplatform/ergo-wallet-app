@@ -5,13 +5,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.appkit.Parameters
-import org.ergoplatform.persistance.*
 import org.ergoplatform.transactions.TransactionResult
+import org.ergoplatform.uilogic.TestUiWallet
 import org.junit.Assert.*
 
 import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import kotlin.coroutines.EmptyCoroutineContext
 
 class SendFundsUiLogicTest {
@@ -27,7 +25,7 @@ class SendFundsUiLogicTest {
             assertTrue(checkResponse.amountError)
             assertFalse(checkResponse.tokenError)
 
-            uiLogic.newTokenChosen(token.tokenId!!)
+            uiLogic.newTokenChosen(TestUiWallet.token.tokenId!!)
 
             // when a token is chosen there's no amount error any more
             checkResponse = uiLogic.checkCanMakePayment()
@@ -45,6 +43,9 @@ class SendFundsUiLogicTest {
     fun testTokenAmounts() {
         runBlocking {
             val uiLogic = buildUiLogicWithWallet()
+            val token = TestUiWallet.token
+            val singularToken = TestUiWallet.singularToken
+
             uiLogic.newTokenChosen(token.tokenId!!)
             uiLogic.newTokenChosen(singularToken.tokenId!!)
 
@@ -73,41 +74,11 @@ class SendFundsUiLogicTest {
         val uiLogic = TestSendFundsUiLogic()
 
         val walletId = 1
-        val walletDbProvider = mock<WalletDbProvider> {
-        }
-        whenever(walletDbProvider.loadWalletWithStateById(walletId)).thenReturn(wallet)
-
-        uiLogic.initWallet(walletDbProvider, walletId, 0, null)
+        uiLogic.initWallet(TestUiWallet.getSingleWalletSingleAddressDbProvider(walletId), walletId, 0, null)
 
         delay(100)
         return uiLogic
     }
-
-    private val firstAddress = "address"
-    private val token = WalletToken(
-        1,
-        firstAddress,
-        firstAddress,
-        "74251ce2cb4eb2024a1a155e19ad1d1f58ff8b9e6eb034a3bb1fd58802757d23",
-        10,
-        0,
-        "testtoken"
-    )
-    private val singularToken = WalletToken(
-        2,
-        firstAddress,
-        firstAddress,
-        "ba5856162d6342d2a0072f464a5a8b62b4ac4dd77195bec18c6bf268c2def831",
-        1,
-        0,
-        "nft"
-    )
-    private val wallet = Wallet(
-        WalletConfig(1, "test", firstAddress, 0, null, false),
-        listOf(WalletState(firstAddress, firstAddress, 1000L * 1000 * 1000, 0)),
-        listOf(token, singularToken),
-        emptyList()
-    )
 
     class TestSendFundsUiLogic : SendFundsUiLogic() {
 
@@ -147,6 +118,10 @@ class SendFundsUiLogicTest {
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
+
+        }
+
+        override fun showErrorMessage(message: String) {
 
         }
 

@@ -3,12 +3,16 @@ package org.ergoplatform
 import java.net.URLDecoder
 import java.net.URLEncoder
 
-private val PARAM_DELIMITER = "&"
-private val RECIPIENT_PARAM_PREFIX = "address="
-private val AMOUNT_PARAM_PREFIX = "amount="
-private val TOKEN_PARAM_PREFIX = "token-"
-private val DESCRIPTION_PARAM_PREFIX = "description="
-private val URI_ENCODING = "utf-8"
+private const val PARAM_DELIMITER = "&"
+private const val RECIPIENT_PARAM_PREFIX = "address="
+private const val AMOUNT_PARAM_PREFIX = "amount="
+private const val DESCRIPTION_PARAM_PREFIX = "description="
+private const val URI_ENCODING = "utf-8"
+
+/**
+ * Token prefix is "token-<ErgoID>=", see https://github.com/ergoplatform/eips/blob/master/eip-0025.md#format
+ */
+private const val TOKEN_PARAM_PREFIX = "token-"
 
 /**
  * referenced in AndroidManifest.xml
@@ -21,7 +25,7 @@ private val explorerPaymentUrlPrefix
 /**
  * referenced in AndroidManifest.xml and Info.plist.xml
  */
-private val PAYMENT_URI_SCHEME = "ergoplatform:"
+private val PAYMENT_URI_SCHEME = "ergo:"
 
 fun getExplorerPaymentRequestAddress(
     address: String,
@@ -29,18 +33,11 @@ fun getExplorerPaymentRequestAddress(
     description: String = ""
 ): String {
     return explorerPaymentUrlPrefix + RECIPIENT_PARAM_PREFIX +
-            URLEncoder.encode(
-                address,
-                URI_ENCODING
-            ) + PARAM_DELIMITER + AMOUNT_PARAM_PREFIX +
-            URLEncoder.encode(
-                amount.toString(),
-                URI_ENCODING
-            ) + PARAM_DELIMITER + DESCRIPTION_PARAM_PREFIX +
-            URLEncoder.encode(
-                description,
-                URI_ENCODING
-            )
+            URLEncoder.encode(address, URI_ENCODING) +
+            (if (amount > 0) PARAM_DELIMITER + AMOUNT_PARAM_PREFIX +
+                    URLEncoder.encode(amount.toString(), URI_ENCODING) else "") +
+            PARAM_DELIMITER + DESCRIPTION_PARAM_PREFIX +
+            URLEncoder.encode(description, URI_ENCODING)
 }
 
 fun isPaymentRequestUrl(url: String): Boolean {

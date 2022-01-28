@@ -3,35 +3,26 @@ package org.ergoplatform.android.transactions
 import android.animation.LayoutTransition
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.EditText
 import androidx.core.view.descendants
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.*
-import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
 import org.ergoplatform.android.ui.*
-import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
-import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
-import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.tokens.isSingularToken
-import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
@@ -40,12 +31,16 @@ import org.ergoplatform.wallet.getNumOfAddresses
 /**
  * Here's the place to send transactions
  */
-class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallback,
-    AddressChooserCallback {
+class SendFundsFragment : SubmitTransactionFragment() {
     private var _binding: FragmentSendFundsBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: SendFundsViewModel
+    override lateinit var viewModel: SendFundsViewModel
     private val args: SendFundsFragmentArgs by navArgs()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -96,7 +91,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
                 R.string.desc_fee,
                 viewModel.uiLogic.feeAmount.toStringRoundToDecimals()
             )
-            binding.grossAmount.amount = it.toDouble()
+            binding.grossAmount.setAmount(it.toBigDecimal())
             val nodeConnector = NodeConnector.getInstance()
             binding.tvFiat.visibility =
                 if (nodeConnector.fiatCurrency.isNotEmpty()) View.VISIBLE else View.GONE
@@ -113,33 +108,11 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         viewModel.tokensChosenLiveData.observe(viewLifecycleOwner, {
             refreshTokensList()
         })
-        viewModel.lockInterface.observe(viewLifecycleOwner, {
-            if (it)
-                ProgressBottomSheetDialogFragment.showProgressDialog(childFragmentManager)
-            else
-                ProgressBottomSheetDialogFragment.dismissProgressDialog(childFragmentManager)
-        })
-        viewModel.txWorkDoneLiveData.observe(viewLifecycleOwner, {
-            if (!it.success) {
-                val snackbar = Snackbar.make(
-                    requireView(),
-                    if (it is PromptSigningResult)
-                        R.string.error_prepare_transaction
-                    else R.string.error_send_transaction,
-                    Snackbar.LENGTH_LONG
-                )
-                it.errorMsg?.let { errorMsg ->
-                    snackbar.setAction(
-                        R.string.label_details
-                    ) {
-                        showDialogWithCopyOption(requireContext(), errorMsg)
-                    }
-                }
-                snackbar.setAnchorView(R.id.nav_view).show()
-            } else if (it is PromptSigningResult) {
-                // if this is a prompt signing result, switch to prompt signing dialog
-                SigningPromptDialogFragment().show(childFragmentManager, null)
-            }
+        viewModel.errorMessageLiveData.observe(viewLifecycleOwner, {
+            MaterialAlertDialogBuilder(requireContext())
+                .setMessage(it)
+                .setPositiveButton(R.string.zxing_button_ok, null)
+                .show()
         })
         viewModel.txId.observe(viewLifecycleOwner, {
             it?.let {
@@ -151,11 +124,7 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
 
         // Add click listeners
         binding.addressLabel.setOnClickListener {
-            viewModel.uiLogic.wallet?.let { wallet ->
-                ChooseAddressListDialogFragment.newInstance(
-                    wallet.walletConfig.id, true
-                ).show(childFragmentManager, null)
-            }
+            showChooseAddressList(true)
         }
         binding.buttonShareTx.setOnClickListener {
             val txUrl = getExplorerTxUrl(binding.labelTxId.text.toString())
@@ -180,9 +149,6 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             startPayment()
         }
 
-        binding.buttonScan.setOnClickListener {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
-        }
         binding.buttonAddToken.setOnClickListener {
             ChooseTokenListDialogFragment().show(childFragmentManager, null)
         }
@@ -218,27 +184,34 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
             })
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_send_funds, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_scan_qr) {
+            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            return true
+        } else {
+            return super.onOptionsItemSelected(item)
+        }
+    }
+
     private fun enableLayoutChangeAnimations() {
         // set layout change animations. they are not set in the xml to avoid animations for the first
         // time the layout is displayed, and enabling them is delayed due to the same reason
-        Handler().postDelayed({
+        postDelayed(200) {
             _binding?.let { binding ->
                 binding.container.layoutTransition = LayoutTransition()
                 binding.container.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
             }
-        }, 200)
+        }
     }
 
     private fun ensureAmountVisibleDelayed() {
         // delay 200 to make sure that smart keyboard is already open
-        Handler().postDelayed(
-            { _binding?.let { it.scrollView.smoothScrollTo(0, it.amount.top) } },
-            200
-        )
-    }
-
-    override fun onAddressChosen(addressDerivationIdx: Int?) {
-        viewModel.uiLogic.derivedAddressIdx = addressDerivationIdx
+        postDelayed(200) { _binding?.let { it.scrollView.smoothScrollTo(0, it.amount.top) } }
     }
 
     private fun refreshTokensList() {
@@ -337,30 +310,9 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
         }
     }
 
-    override fun startAuthFlow(walletConfig: WalletConfig) {
-        if (walletConfig.secretStorage == null) {
-            // we have a read only wallet here, let's go to cold wallet support mode
-            val context = requireContext()
-            viewModel.uiLogic.startColdWalletPayment(
-                Preferences(context),
-                AndroidStringProvider(context)
-            )
-        } else {
-            super.startAuthFlow(walletConfig)
-        }
-    }
-
-    override fun proceedAuthFlowWithPassword(password: String): Boolean {
-        return viewModel.startPaymentWithPassword(password, requireContext())
-    }
-
     override fun showBiometricPrompt() {
         hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
         super.showBiometricPrompt()
-    }
-
-    override fun proceedAuthFlowFromBiometrics() {
-        context?.let { viewModel.startPaymentUserAuth(it) }
     }
 
     private fun inputChangesToViewModel() {
@@ -378,23 +330,36 @@ class SendFundsFragment : AbstractAuthenticationFragment(), PasswordDialogCallba
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
-            result.contents?.let {
-                viewModel.uiLogic.qrCodeScanned(it, { data, walletId ->
-                    findNavController().navigate(
-                        SendFundsFragmentDirections
-                            .actionSendFundsFragmentToColdWalletSigningFragment(
-                                data,
-                                walletId
-                            )
-                    )
-                }, { address, amount ->
-                    binding.tvReceiver.editText?.setText(address)
-                    amount?.let { setAmountEdittext(amount) }
-                })
-            }
+            result.contents?.let { qrCodeScanned(it) }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
+    }
+
+    private fun qrCodeScanned(qrCode: String) {
+        viewModel.uiLogic.qrCodeScanned(
+            qrCode,
+            AndroidStringProvider(requireContext()),
+            { data, walletId ->
+                findNavController().navigate(
+                    SendFundsFragmentDirections
+                        .actionSendFundsFragmentToColdWalletSigningFragment(
+                            data,
+                            walletId
+                        )
+                )
+            },
+            { ergoPayRequest ->
+                findNavController().navigateSafe(
+                    SendFundsFragmentDirections.actionSendFundsFragmentToErgoPaySigningFragment(
+                        ergoPayRequest, args.walletId, viewModel.uiLogic.derivedAddressIdx ?: -1
+                    )
+                )
+            },
+            { address, amount ->
+                binding.tvReceiver.editText?.setText(address)
+                amount?.let { setAmountEdittext(amount) }
+            })
     }
 
     private fun showPaymentRequestWarnings() {

@@ -26,7 +26,7 @@ fun IncludeWalletAddressInfoBinding.fillAddressInformation(
 
     val state = wallet.getStateForAddress(walletAddress.publicAddress)
     val tokens = wallet.getTokensForAddress(walletAddress.publicAddress)
-    addressBalance.amount = ErgoAmount(state?.balance ?: 0).toDouble()
+    addressBalance.setAmount(ErgoAmount(state?.balance ?: 0).toBigDecimal())
     labelTokenNum.visibility =
         if (tokens.isNullOrEmpty()) View.GONE else View.VISIBLE
     labelTokenNum.text =
@@ -47,6 +47,7 @@ fun IncludeWalletAddressInfoBinding.fillWalletAddressesInformation(
     labelTokenNum.text =
         ctx.getString(R.string.label_wallet_token_balance, tokenNum.toString())
 
-    addressBalance.amount =
-        ErgoAmount(wallet.getBalanceForAllAddresses()).toDouble()
+    addressBalance.setAmount(
+        ErgoAmount(wallet.getBalanceForAllAddresses()).toBigDecimal()
+    )
 }

@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.View
@@ -133,4 +135,8 @@ fun BottomSheetDialogFragment.expandBottomSheetOnShow() {
                 BottomSheetBehavior.STATE_EXPANDED
         }
     }
+}
+
+fun postDelayed(delayMs: Long, r: Runnable) {
+    Handler(Looper.getMainLooper()).postDelayed(r, delayMs)
 }

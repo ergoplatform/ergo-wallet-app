@@ -5,10 +5,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.settings.SettingsViewController
 import org.ergoplatform.ios.transactions.ChooseSpendingWalletViewController
+import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
 import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WalletViewController
-import org.ergoplatform.parsePaymentRequest
+import org.ergoplatform.transactions.isErgoPaySigningRequest
+import org.ergoplatform.uilogic.MainAppUiLogic
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
 import org.robovm.apple.foundation.NSArray
@@ -16,7 +18,7 @@ import org.robovm.apple.uikit.*
 
 class BottomNavigationBar : UITabBarController() {
 
-    fun setupVcs() {
+    private fun setupVcs() {
         val appDelegate = getAppDelegate()
 
         setViewControllers(
@@ -60,29 +62,34 @@ class BottomNavigationBar : UITabBarController() {
         setupVcs()
     }
 
-    fun handlePaymentRequest(paymentRequest: String) {
-        val pr = parsePaymentRequest(paymentRequest)
+    fun handlePaymentRequest(paymentRequest: String, fromQr: Boolean) {
+        val texts = getAppDelegate().texts
+        MainAppUiLogic.handleRequests(paymentRequest,
+            fromQr,
+            IosStringProvider(texts),
+            {
+                CoroutineScope(Dispatchers.Default).launch {
+                    val wallets = getAppDelegate().database.getAllWalletConfigsSynchronous()
 
-        pr?.let {
-            CoroutineScope(Dispatchers.Default).launch {
-                val wallets = getAppDelegate().database.getAllWalletConfigsSynchronous()
-
-                runOnMainThread {
-                    if (wallets.size == 1) {
-                        navigateToSendFundsScreen(wallets.first().id, paymentRequest, false)
-                    } else {
-                        presentViewController(
-                            ChooseSpendingWalletViewController(pr) { walletId ->
-                                navigateToSendFundsScreen(walletId, paymentRequest, true)
-                            }, true
-                        ) {}
+                    runOnMainThread {
+                        if (wallets.size == 1) {
+                            navigateToNextScreen(wallets.first().id, paymentRequest, false)
+                        } else {
+                            presentViewController(
+                                ChooseSpendingWalletViewController(paymentRequest) { walletId ->
+                                    navigateToNextScreen(walletId, paymentRequest, true)
+                                }, true
+                            ) {}
+                        }
                     }
                 }
-            }
-        }
+
+            }, { message ->
+                presentViewController(buildSimpleAlertController("", message, texts), true) {}
+            })
     }
 
-    private fun navigateToSendFundsScreen(
+    private fun navigateToNextScreen(
         walletId: Int,
         paymentRequest: String,
         fromChooseScreen: Boolean
@@ -93,7 +100,8 @@ class BottomNavigationBar : UITabBarController() {
         (selectedViewController as? UINavigationController)?.apply {
             popToRootViewController(false)
             pushViewController(
-                SendFundsViewController(walletId, paymentRequest = paymentRequest),
+                if (isErgoPaySigningRequest(paymentRequest)) ErgoPaySigningViewController(paymentRequest, walletId)
+                else SendFundsViewController(walletId, paymentRequest = paymentRequest),
                 !fromChooseScreen
             )
         }

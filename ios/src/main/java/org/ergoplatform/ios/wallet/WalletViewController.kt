@@ -3,6 +3,7 @@ package org.ergoplatform.ios.wallet
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.ios.BottomNavigationBar
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.STRING_LABEL_ERG_PRICE
@@ -43,6 +44,18 @@ class WalletViewController : CoroutineViewController() {
             navController.isModalInPresentation = true
             this.presentViewController(navController, true) { }
         }
+
+        val uiBarButtonItem = UIBarButtonItem(
+            getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small),
+            UIBarButtonItemStyle.Plain
+        )
+        uiBarButtonItem.setOnClickListener {
+            presentViewController(QrScannerViewController(dismissAnimated = false) {
+                (navigationController.parentViewController as? BottomNavigationBar)?.handlePaymentRequest(it, true)
+            }, true) {}
+        }
+        uiBarButtonItem.tintColor = UIColor.label()
+        navigationItem.leftBarButtonItem = uiBarButtonItem
 
         view.addSubview(tableView)
         tableView.edgesToSuperview(true)

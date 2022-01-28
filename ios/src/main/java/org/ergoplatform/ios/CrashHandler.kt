@@ -14,7 +14,7 @@ object CrashHandler {
     private const val LAST_CRASH_FILE_NAME = "lastcrash.txt"
 
     fun registerUncaughtExceptionHandler() {
-        Thread.setDefaultUncaughtExceptionHandler { t, e ->
+        Thread.setDefaultUncaughtExceptionHandler { _, e ->
             var exceptionAsString: String? = null
             try {
                 exceptionAsString = e.stackTraceToString()
@@ -36,7 +36,7 @@ object CrashHandler {
     fun writeToDebugFile(exceptionAsString: String) {
         val file = getCrashFile()
 
-        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
+        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ", Locale.US)
         val nowAsString: String = df.format(Date())
         val osVersion = UIDevice.getCurrentDevice().systemVersion
         val device = UIDevice.getCurrentDevice().name

@@ -1,7 +1,7 @@
 <resources>
     <string name="title_transactions">Transacciones</string>
     <string name="title_wallets">Billeteras</string>
-    <string name="title_settings">Opcines</string>
+    <string name="title_settings">Opciones</string>
 
     <string name="hint_password">Por favor introduce tu contraseña de gastos</string>
     <string name="label_forgot_password">¿Olvidaste tu contraseña?</string>
@@ -63,7 +63,7 @@
     <!-- Create wallet -->
     <string name="intro_create_wallet">Esta es su frase semilla de 15 palabras. Estas palabras también se conocen como llave de papel.
         Con estas 15 palabras, puede restaurar su billetera en otros dispositivos si pierde el acceso a este.\nEs crucial
-    que escribas cuidadosamente las 15 palabras (con lápiz y papel) y guárdelas en un lugar seguro.</string>
+        que escribas cuidadosamente las 15 palabras (con lápiz y papel) y guárdelas en un lugar seguro.</string>
     <string name="intro_confirm_create_wallet">Para confirmar que su frase semilla escrita a mano es correcto, ingrese dos palabras de la frase ahora:</string>
     <string name="check_confirm_create_wallet">Entiendo que soy responsable de guardar mi frase semilla en un lugar seguro.
     Es la única forma de acceder a mi billetera si las claves almacenadas en este dispositivo se pierden o son inaccesibles.</string>
@@ -96,7 +96,7 @@
     <string name="device_enc_security_biometric_weak">Biométrico, Clase 2</string>
 
     <!-- Wallet config -->
-    <string name="title_wallet_details">Configuración de billetera</string>
+    <string name="title_wallet_details">Configura la wallet</string>
     <string name="label_wallet_name">Nombre descriptivo de la billetera</string>
     <string name="label_changes_saved">Cambios guardados</string>
     <string name="label_confirm_delete">¿Estás seguro de que deseas borrar la billetera de este dispositivo?\nEsta acción no se puede deshacer.</string>
@@ -154,6 +154,9 @@
     <string name="title_add_token">Elija el token para enviar</string>
     <string name="error_token_amount">Ingrese cantidades de tokens válidas o elimine las entradas de tokens no válidas</string>
     <string name="error_balance_erg">No hay saldo suficiente para enviar la cantidad especificada: solo hay %1s ERG disponibles.</string>
+    <string name="error_request_token_not_found">No se pudo añadir el token \'%1s\'</string>
+    <string name="error_request_token_amount">No se pudo poner la cantidad solicitada del token \'%1s\'</string>
+    <string name="error_request_token_but_no_erg">Tokens solicitados, pero no hay ERG suficiente. Una cantidad predeterminada será enviada</string>
 
     <!-- Cold wallet signing request screen -->
     <string name="title_signing_request">Firma</string>
