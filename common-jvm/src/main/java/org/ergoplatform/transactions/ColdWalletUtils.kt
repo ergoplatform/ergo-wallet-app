@@ -56,14 +56,17 @@ fun parseColdSigningRequest(qrData: String): PromptSigningResult {
         // sender is optional
         val sender = jsonTree.get(JSON_FIELD_SENDER)?.asString
 
-        val inputs = jsonTree.get(JSON_FIELD_INPUTS)?.asJsonArray?.toList()
-                ?.map { Base64Coder.decode(it.asString) }
+        val inputs = jsonTree.decodeBase64StringList(JSON_FIELD_INPUTS)
 
         return PromptSigningResult(true, serializedTx, inputs, sender)
 
     } catch (t: Throwable) {
         return PromptSigningResult(false, errorMsg = t.message)
     }
+}
+
+private fun JsonObject.decodeBase64StringList(fieldName: String): List<ByteArray>? {
+    return get(fieldName)?.asJsonArray?.toList()?.map { Base64Coder.decode(it.asString) }
 }
 
 fun parseColdSigningResponse(qrData: String): SigningResult {

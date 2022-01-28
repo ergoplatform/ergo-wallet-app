@@ -6,9 +6,13 @@ import java.net.URLEncoder
 private const val PARAM_DELIMITER = "&"
 private const val RECIPIENT_PARAM_PREFIX = "address="
 private const val AMOUNT_PARAM_PREFIX = "amount="
-private const val TOKEN_PARAM_PREFIX = "token-"
 private const val DESCRIPTION_PARAM_PREFIX = "description="
 private const val URI_ENCODING = "utf-8"
+
+/**
+ * Token prefix is "token-<ErgoID>=", see https://github.com/ergoplatform/eips/blob/master/eip-0025.md#format
+ */
+private const val TOKEN_PARAM_PREFIX = "token-"
 
 /**
  * referenced in AndroidManifest.xml
