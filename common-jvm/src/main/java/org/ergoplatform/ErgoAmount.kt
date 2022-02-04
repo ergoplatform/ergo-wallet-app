@@ -44,11 +44,11 @@ class ErgoAmount(val nanoErgs: Long) {
     }
 
     operator fun plus(other: ErgoAmount): ErgoAmount {
-        return ErgoAmount(this.nanoErgs + other.nanoErgs)
+        return ErgoAmount(java7.compat.Math.addExact(this.nanoErgs, other.nanoErgs))
     }
 
     operator fun minus(other: ErgoAmount): ErgoAmount {
-        return ErgoAmount(this.nanoErgs - other.nanoErgs)
+        return ErgoAmount(java7.compat.Math.subtractExact(this.nanoErgs, other.nanoErgs))
     }
 
     fun isZero(): Boolean {
