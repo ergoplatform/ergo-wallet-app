@@ -12,6 +12,9 @@ SELECT * FROM wallet_addresses WHERE wallet_first_address = ?;
 loadWalletAddress:
 SELECT * FROM wallet_addresses WHERE id = ?;
 
+loadWalletAddressByPk:
+SELECT * FROM wallet_addresses WHERE public_address = ?;
+
 deleteWalletAddressByFirstAddress:
 DELETE FROM wallet_addresses WHERE wallet_first_address = ?;
 

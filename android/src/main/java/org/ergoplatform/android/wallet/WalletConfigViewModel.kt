@@ -9,6 +9,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
+import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.deserializeSecrets
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.api.AesEncryptionManager
@@ -52,11 +53,8 @@ class WalletConfigViewModel : ViewModel() {
             walletConfig?.let {
                 database.withTransaction {
                     walletConfig.firstAddress?.let { firstAddress ->
-                        walletDao.deleteWalletStates(firstAddress)
-                        walletDao.deleteTokensByWallet(firstAddress)
-                        walletDao.deleteWalletAddresses(firstAddress)
+                        RoomWalletDbProvider(database).deleteWalletConfigAndStates(firstAddress, walletId)
                     }
-                    walletDao.deleteWalletConfig(walletId)
                 }
 
                 // After we deleted a wallet, we can prune the keystore if it is not needed

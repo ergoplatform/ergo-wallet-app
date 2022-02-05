@@ -58,14 +58,21 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         updateWalletConfig(walletConfig)
     }
 
+    override suspend fun deleteWalletConfigAndStates(firstAddress: String, walletId: Int?) {
+        appDb.walletStateQueries.deleteByFirstAddress(firstAddress)
+        appDb.walletTokenQueries.deleteTokensByFirstAddress(firstAddress)
+        appDb.walletAddressQueries.deleteWalletAddressByFirstAddress(firstAddress)
+
+        (walletId ?: loadWalletByFirstAddress(firstAddress)?.id)?.let { id ->
+            appDb.walletConfigQueries.deleteWalletById(id.toLong())
+        }
+    }
+
     suspend fun deleteAllWalletData(walletConfig: WalletConfig) {
         withTransaction {
             walletConfig.firstAddress?.let { firstAddress ->
-                appDb.walletStateQueries.deleteByFirstAddress(firstAddress)
-                appDb.walletTokenQueries.deleteTokensByFirstAddress(firstAddress)
-                appDb.walletAddressQueries.deleteWalletAddressByFirstAddress(firstAddress)
-            }
-            appDb.walletConfigQueries.deleteWalletById(walletConfig.id.toLong())
+                deleteWalletConfigAndStates(firstAddress, walletConfig.id)
+            } ?: appDb.walletConfigQueries.deleteWalletById(walletConfig.id.toLong())
         }
     }
 
@@ -142,6 +149,12 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
     override suspend fun loadWalletAddress(id: Long): WalletAddress? {
         return withContext(Dispatchers.IO) {
             appDb.walletAddressQueries.loadWalletAddress(id).executeAsOneOrNull()?.toModel()
+        }
+    }
+
+    override suspend fun loadWalletAddress(publicAddress: String): WalletAddress? {
+        return withContext(Dispatchers.IO) {
+            appDb.walletAddressQueries.loadWalletAddressByPk(publicAddress).executeAsOneOrNull()?.toModel()
         }
     }
 

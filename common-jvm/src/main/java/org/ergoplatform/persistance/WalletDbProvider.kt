@@ -12,6 +12,7 @@ interface WalletDbProvider {
     suspend fun loadWalletConfigById(id: Int): WalletConfig?
     suspend fun updateWalletConfig(walletConfig: WalletConfig)
     suspend fun insertWalletConfig(walletConfig: WalletConfig)
+    suspend fun deleteWalletConfigAndStates(firstAddress: String, walletId: Int? = null)
     fun getAllWalletConfigsSynchronous(): List<WalletConfig>
 
     // State functions
@@ -23,6 +24,7 @@ interface WalletDbProvider {
     // Address functions
     suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddress>
     suspend fun loadWalletAddress(id: Long): WalletAddress?
+    suspend fun loadWalletAddress(publicAddress: String): WalletAddress?
     suspend fun insertWalletAddress(walletAddress: WalletAddress)
     suspend fun updateWalletAddressLabel(addrId: Long, newLabel: String?)
     suspend fun deleteWalletAddress(addrId: Long)
