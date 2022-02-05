@@ -159,7 +159,8 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
     }
 
     override suspend fun insertWalletAddress(walletAddress: WalletAddress) {
-        withContext(Dispatchers.IO) {
+        // do not use withContext(Dispatchers.IO) here. Caused freeze on iOS and the only caller
+        // WalletAddressesUiLogic calls in IO context anyway.
             appDb.walletAddressQueries.insertOrReplace(
                 if (walletAddress.id > 0) walletAddress.id else null,
                 walletAddress.walletFirstAddress,
@@ -167,7 +168,6 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
                 walletAddress.publicAddress,
                 walletAddress.label
             )
-        }
     }
 
     override suspend fun updateWalletAddressLabel(addrId: Long, newLabel: String?) {
