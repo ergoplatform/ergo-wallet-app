@@ -56,6 +56,9 @@ interface WalletDbDao {
     @Query("SELECT * FROM wallet_addresses WHERE id = :id")
     suspend fun loadWalletAddress(id: Int): WalletAddressDbEntity?
 
+    @Query("SELECT * FROM wallet_addresses WHERE public_address = :publicAddress")
+    suspend fun loadWalletAddress(publicAddress: String): WalletAddressDbEntity?
+
     @Query("UPDATE wallet_addresses SET label = :label WHERE id = :id")
     suspend fun updateWalletAddressLabel(id: Int, label: String?)
 

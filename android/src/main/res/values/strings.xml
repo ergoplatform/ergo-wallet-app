@@ -48,6 +48,7 @@
     <string name="label_erg_price">1 ERG ≈</string>
     <string name="label_fiat_amount">≈ %1s</string>
     <string name="label_wallet_default">My wallet</string>
+    <string name="label_readonly_wallet_default">My wallet (Read only)</string>
     <string name="hint_signing_request">Please scan the signing request from the appropriate
        Wallet\'s Send funds screen.</string>
     <string name="error_qr_code_content_unknown">The scanned QR code was not of a known format.</string>
@@ -66,6 +67,7 @@
     <!-- add readonly wallet -->
     <string name="intro_add_readonly">Enter your public wallet address to add the wallet in read-only mode.</string>
     <string name="label_wallet_address">Wallet address</string>
+    <string name="error_address_already_added">Address already added to \'%1s\'</string>
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">This is your 15-word Ergo wallet mnemonic. These words are also known as a seed phrase or

@@ -91,6 +91,15 @@ class RoomWalletDbProvider(val database: AppDatabase) : WalletDbProvider {
         database.walletDao().insertAll(walletConfig.toDbEntity())
     }
 
+    override suspend fun deleteWalletConfigAndStates(firstAddress: String, walletId: Int?) {
+        database.walletDao().deleteWalletStates(firstAddress)
+        database.walletDao().deleteTokensByWallet(firstAddress)
+        database.walletDao().deleteWalletAddresses(firstAddress)
+        (walletId ?: database.walletDao().loadWalletByFirstAddress(firstAddress)?.id)?.let { id ->
+            database.walletDao().deleteWalletConfig(id)
+        }
+    }
+
     override fun getAllWalletConfigsSynchronous(): List<WalletConfig> {
         return database.walletDao().getAllWalletConfigsSyncronous().map { it.toModel() }
     }
@@ -118,6 +127,10 @@ class RoomWalletDbProvider(val database: AppDatabase) : WalletDbProvider {
 
     override suspend fun loadWalletAddress(id: Long): WalletAddress? {
         return database.walletDao().loadWalletAddress(id.toInt())?.toModel()
+    }
+
+    override suspend fun loadWalletAddress(publicAddress: String): WalletAddress? {
+        return database.walletDao().loadWalletAddress(publicAddress)?.toModel()
     }
 
     override suspend fun insertWalletAddress(walletAddress: WalletAddress) {

@@ -68,6 +68,9 @@ abstract class WalletAddressesUiLogic {
                         // okay, we have the next address idx - now get the address
                         val nextAddress = getPublicErgoAddressFromMnemonic(mnemonic, nextIdx)
 
+                        // this address could be already added as a read only address - delete it
+                        database.deleteWalletConfigAndStates(nextAddress)
+
                         database.insertWalletAddress(
                             WalletAddress(
                                 0, wallet.walletConfig.firstAddress!!, nextIdx,
