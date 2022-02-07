@@ -3,6 +3,7 @@ package org.ergoplatform.android.tokens
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenDetailsBinding
 import org.ergoplatform.persistance.WalletToken
@@ -21,7 +22,8 @@ fun inflateAndBindTokenView(
             true
         )
 
-    itemBinding.labelTokenName.text = walletToken.name
+    itemBinding.labelTokenName.text =
+        walletToken.name ?: layoutInflater.context.getString(R.string.label_unnamed_token)
     itemBinding.labelTokenVal.text =
         formatTokenAmounts(
             walletToken.amount ?: 0,
@@ -41,7 +43,8 @@ fun inflateAndBindDetailedTokenEntryView(
             true
         )
 
-    itemBinding.labelTokenName.text = walletToken.name
+    itemBinding.labelTokenName.text =
+        walletToken.name ?: layoutInflater.context.getString(R.string.label_unnamed_token)
     itemBinding.labelTokenId.text = walletToken.tokenId
     itemBinding.labelTokenVal.text =
         formatTokenAmounts(

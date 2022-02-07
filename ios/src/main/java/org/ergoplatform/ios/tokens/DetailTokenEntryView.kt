@@ -1,8 +1,10 @@
 package org.ergoplatform.ios.tokens
 
+import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.tokens.isSingularToken
+import org.ergoplatform.uilogic.STRING_LABEL_UNNAMED_TOKEN
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
@@ -34,15 +36,15 @@ class DetailTokenEntryView : UIView(CGRect.Zero()) {
         tokenId.topToBottomOf(tokenName).widthMatchesSuperview().bottomToSuperview()
     }
 
-    fun bindWalletToken(walletToken: WalletToken): DetailTokenEntryView {
+    fun bindWalletToken(walletToken: WalletToken, texts: I18NBundle): DetailTokenEntryView {
         tokenId.text = walletToken.tokenId
-        tokenName.text = walletToken.name
+        tokenName.text = walletToken.name ?: texts.get(STRING_LABEL_UNNAMED_TOKEN)
 
         valAndName.isHidden = walletToken.isSingularToken()
         tokenName.isHidden = !walletToken.isSingularToken()
 
         if (!valAndName.isHidden)
-            valAndName.bindWalletToken(walletToken)
+            valAndName.bindWalletToken(walletToken, texts)
         return this
     }
 }

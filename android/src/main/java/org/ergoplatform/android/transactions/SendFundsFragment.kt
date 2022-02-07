@@ -230,7 +230,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
                 tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenDbEntity ->
                     val itemBinding =
                         FragmentSendFundsTokenItemBinding.inflate(layoutInflater, this, true)
-                    itemBinding.tvTokenName.text = tokenDbEntity.name
+                    itemBinding.tvTokenName.text = tokenDbEntity.name ?: getString(R.string.label_unnamed_token)
 
                     val amountChosen = it.value.value
                     val isSingular = tokenDbEntity.isSingularToken() && amountChosen == 1L

@@ -361,7 +361,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             val listExpanded = uiLogic.wallet?.walletConfig?.unfoldTokens == true
             if (listExpanded) {
                 tokensList.forEach {
-                    tokensListStack.addArrangedSubview(DetailTokenEntryView().bindWalletToken(it))
+                    tokensListStack.addArrangedSubview(DetailTokenEntryView().bindWalletToken(it, texts))
                 }
             }
 

@@ -1,11 +1,13 @@
 package org.ergoplatform.ios.tokens
 
+import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.TokenAmount
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.toTokenAmount
 import org.ergoplatform.tokens.isSingularToken
+import org.ergoplatform.uilogic.STRING_LABEL_UNNAMED_TOKEN
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
@@ -15,7 +17,8 @@ import org.robovm.apple.uikit.*
  */
 class SendTokenEntryView(
     val uiLogic: SendFundsUiLogic, private val amountErrorField: UIView,
-    private val token: WalletToken, ergoToken: ErgoToken
+    private val token: WalletToken, ergoToken: ErgoToken,
+    texts: I18NBundle
 ) :
     UIStackView(CGRect.Zero()) {
 
@@ -93,7 +96,7 @@ class SendTokenEntryView(
         inputTokenVal.enforceKeepIntrinsicWidth()
 
         amountDelegate.decimals = token.decimals > 0
-        labelTokenName.text = token.name
+        labelTokenName.text = token.name ?: texts.get(STRING_LABEL_UNNAMED_TOKEN)
         inputTokenVal.keyboardType =
             if (token.decimals > 0) UIKeyboardType.NumbersAndPunctuation else UIKeyboardType.NumberPad
         inputTokenVal.text = uiLogic.tokenAmountToText(amountChosen, token.decimals)

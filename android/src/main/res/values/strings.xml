@@ -40,6 +40,7 @@
     <!-- Wallet -->
     <string name="label_tokens">tokens</string>
     <string name="label_more_tokens">more tokens</string>
+    <string name="label_unnamed_token">(unnamed token)</string>
     <string name="label_unconfirmed">unconfirmed</string>
     <string name="button_receive">Receive</string>
     <string name="button_send">Send</string>

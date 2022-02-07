@@ -205,7 +205,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         tokenStack.clearArrangedSubviews()
         if (wallet.walletConfig.unfoldTokens) {
             fillTokenOverview(tokens, {
-                tokenStack.addArrangedSubview(TokenEntryView().bindWalletToken(it))
+                tokenStack.addArrangedSubview(TokenEntryView().bindWalletToken(it, textBundle))
             }, {
                 tokenStack.addArrangedSubview(TokenEntryView().bindHasMoreTokenHint(it))
             })

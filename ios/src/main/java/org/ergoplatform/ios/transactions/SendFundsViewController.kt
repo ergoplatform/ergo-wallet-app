@@ -321,7 +321,7 @@ class SendFundsViewController(
                     val ergoId = it.key
                     tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
                         val tokenEntry =
-                            SendTokenEntryView(uiLogic, tokensError, tokenEntity, it.value)
+                            SendTokenEntryView(uiLogic, tokensError, tokenEntity, it.value, texts)
                         tokensUiList.addArrangedSubview(tokenEntry)
                     }
                 }
