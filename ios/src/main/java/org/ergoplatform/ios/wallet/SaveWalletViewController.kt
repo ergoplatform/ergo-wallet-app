@@ -53,6 +53,13 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
         }
         nameInputField = createTextField().apply {
             clearButtonMode = UITextFieldViewMode.Always
+            returnKeyType = UIReturnKeyType.Done
+            delegate = object : UITextFieldDelegateAdapter() {
+                override fun shouldReturn(textField: UITextField?): Boolean {
+                    textField?.resignFirstResponder()
+                    return true
+                }
+            }
         }
 
         val buttonSavePassword = TextButton(texts.get(STRING_BUTTON_SAVE_PASSWORD_ENCRYPTED))
