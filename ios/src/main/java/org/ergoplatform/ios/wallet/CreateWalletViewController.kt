@@ -42,10 +42,21 @@ class CreateWalletViewController : UIViewController() {
         mnemonicPadding.addSubview(mnemonicLabel)
         mnemonicLabel.topToSuperview().bottomToSuperview().widthMatchesSuperview(inset = DEFAULT_MARGIN * 2)
 
+        val copyButton = CommonButton(texts.get(STRING_BUTTON_COPY)).apply {
+            addOnTouchUpInsideListener { _, _ ->
+                presentViewController(buildSensitiveDataCopyDialog(texts, mnemonicLabel.text), true) {}
+            }
+            fixedWidth(100.0)
+        }
+        val copyButtonContainer = UIView(CGRect.Zero())
+        copyButtonContainer.addSubview(copyButton)
+        copyButton.topToSuperview().bottomToSuperview().rightToSuperview()
+
         val verticalStack = UIStackView(
             NSArray(
                 introLabel,
                 mnemonicPadding,
+                copyButtonContainer
             )
         )
         verticalStack.axis = UILayoutConstraintAxis.Vertical

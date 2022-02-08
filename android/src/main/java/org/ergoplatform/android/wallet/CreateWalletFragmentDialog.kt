@@ -10,6 +10,7 @@ import androidx.navigation.fragment.NavHostFragment
 import org.ergoplatform.android.databinding.FragmentCreateWalletDialogBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.android.ui.showSensitiveDataCopyDialog
 
 /**
  * Create a new wallet, step 1
@@ -40,6 +41,11 @@ class CreateWalletFragmentDialog : FullScreenFragmentDialog() {
                         )
                     )
             }
+        }
+
+        binding.buttonCopy.setOnClickListener {
+            binding.tvMnemonic.text?.toString()
+                ?.let { showSensitiveDataCopyDialog(requireContext(), it) }
         }
 
         return binding.root
