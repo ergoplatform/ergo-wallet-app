@@ -154,7 +154,10 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
                 val texts = getAppDelegate().texts
                 val alert =
                     UIAlertController(texts.get(STRING_BUTTON_DISPLAY_MNEMONIC), mnemonic, UIAlertControllerStyle.Alert)
-                alert.addAction(UIAlertAction(texts.get(STRING_ZXING_BUTTON_OK), UIAlertActionStyle.Default) {})
+                alert.addAction(UIAlertAction(texts.get(STRING_BUTTON_COPY), UIAlertActionStyle.Default) {
+                    presentViewController(buildSensitiveDataCopyDialog(texts, mnemonic), true) {}
+                })
+                alert.addAction(UIAlertAction(texts.get(STRING_ZXING_BUTTON_OK), UIAlertActionStyle.Cancel) {})
 
                 presentViewController(alert, true) {}
             }
