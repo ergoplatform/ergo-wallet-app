@@ -93,8 +93,8 @@
 
     <!-- Save wallet -->
     <string name="intro_save_wallet">Your wallet\'s main public address is:</string>
-    <string name="intro_save_wallet2">You can add additional addresses later.\n\n
-        Choose how the wallet and keys should be saved on this device.</string>
+    <string name="intro_save_wallet2">You can add additional addresses later.</string>
+    <string name="intro_save_wallet3">Choose how the wallet and keys should be saved on this device.</string>
     <string name="button_save_password_encrypted">Save password-encrypted</string>
     <string name="desc_save_password_encrypted">Enter a password-phrase that you will need to reenter every time you want to send funds.</string>
     <string name="button_save_device_encrypted">Save device-encrypted</string>

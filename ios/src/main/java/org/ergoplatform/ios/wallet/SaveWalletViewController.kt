@@ -19,10 +19,12 @@ import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.localauthentication.LAContext
 import org.robovm.apple.uikit.*
 
-class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineViewController() {
+class SaveWalletViewController(private val mnemonic: SecretString) :
+    ViewControllerWithKeyboardLayoutGuide() {
     private lateinit var progressIndicator: UIActivityIndicatorView
     private lateinit var scrollView: UIScrollView
     private lateinit var addressLabel: UILabel
+    private lateinit var nameInputField: UITextField
     private val uiLogic = SaveWalletUiLogic(mnemonic)
 
     override fun viewDidLoad() {
@@ -37,7 +39,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
         val container = UIView()
         scrollView = container.wrapInVerticalScrollView()
         view.addSubview(scrollView)
-        scrollView.edgesToSuperview()
+        scrollView.widthMatchesSuperview().topToSuperview().bottomToKeyboard(this)
 
         val introLabel = Body1Label()
         introLabel.text = texts.get(STRING_INTRO_SAVE_WALLET)
@@ -46,6 +48,12 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
 
         val addressInfoLabel = Body1Label()
         addressInfoLabel.text = texts.get(STRING_INTRO_SAVE_WALLET2)
+        val saveInfoLabel = Body1Label().apply {
+            text = texts.get(STRING_INTRO_SAVE_WALLET3)
+        }
+        nameInputField = createTextField().apply {
+            clearButtonMode = UITextFieldViewMode.Always
+        }
 
         val buttonSavePassword = TextButton(texts.get(STRING_BUTTON_SAVE_PASSWORD_ENCRYPTED))
         buttonSavePassword.addOnTouchUpInsideListener { _, _ ->
@@ -83,7 +91,12 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
                                 context
                             )
 
-                            runOnMainThread { saveToDbAndDismissController(ENC_TYPE_DEVICE, encrypted) }
+                            runOnMainThread {
+                                saveToDbAndDismissController(
+                                    ENC_TYPE_DEVICE,
+                                    encrypted
+                                )
+                            }
                         } catch (t: Throwable) {
                             LogUtils.logDebug("KeychainEnc", "Error encrypting mnemonic", t)
                             runOnMainThread {
@@ -127,6 +140,8 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
                 introLabel,
                 addressLabel,
                 addressInfoLabel,
+                saveInfoLabel,
+                nameInputField,
                 createHorizontalSeparator(),
                 buttonSavePassword,
                 savePwInfoLabel,
@@ -140,6 +155,8 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
         addressInfoStack.arrangedSubviews.forEach { it.widthMatchesSuperview() }
         container.addSubview(addressInfoStack)
         addressInfoStack.setCustomSpacing(DEFAULT_MARGIN * 4, addressInfoLabel)
+        addressInfoStack.setCustomSpacing(DEFAULT_MARGIN * 4, saveInfoLabel)
+        addressInfoStack.setCustomSpacing(DEFAULT_MARGIN * 4, nameInputField)
         addressInfoStack.topToSuperview(false, DEFAULT_MARGIN * 2)
             .widthMatchesSuperview(inset = DEFAULT_MARGIN, maxWidth = MAX_WIDTH).bottomToSuperview()
 
@@ -156,7 +173,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
         GlobalScope.launch(Dispatchers.IO) {
             val appDelegate = getAppDelegate()
             uiLogic.suspendSaveToDb(
-                appDelegate.database, IosStringProvider(appDelegate.texts),
+                appDelegate.database, nameInputField.text,
                 encType, secretStorage
             )
         }
@@ -165,17 +182,24 @@ class SaveWalletViewController(private val mnemonic: SecretString) : CoroutineVi
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        calculateAndShowPkAddress()
+        calculatePkAddressAndFillView()
     }
 
-    private fun calculateAndShowPkAddress() {
+    private fun calculatePkAddressAndFillView() {
         scrollView.isHidden = true
         progressIndicator.startAnimating()
 
         viewControllerScope.launch {
             val publicErgoAddressFromMnemonic = uiLogic.publicAddress
+            val db = getAppDelegate().database
+            val walletDisplayName =
+                uiLogic.getSuggestedDisplayName(db, IosStringProvider(getAppDelegate().texts))
+            val showDisplayName = uiLogic.showSuggestedDisplayName(db)
+
             runOnMainThread {
                 addressLabel.text = publicErgoAddressFromMnemonic
+                nameInputField.text = walletDisplayName
+                nameInputField.isHidden = !showDisplayName
                 progressIndicator.isHidden = true
                 scrollView.isHidden = false
             }

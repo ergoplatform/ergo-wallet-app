@@ -83,8 +83,8 @@
 
     <!-- Save wallet -->
     <string name="intro_save_wallet">L\'indirizzo pubblico principale del tuo portafoglio è:</string>
-    <string name="intro_save_wallet2">Puoi aggiungere altri indirizzi in un secondo momento.\n\n
-        Scegli come salvare il portafoglio e le chiavi su questo dispositivo.</string>
+    <string name="intro_save_wallet2">Puoi aggiungere altri indirizzi in un secondo momento.</string>
+    <string name="intro_save_wallet3">Scegli come salvare il portafoglio e le chiavi su questo dispositivo.</string>
     <string name="button_save_password_encrypted">Save password-encrypted</string>
     <string name="desc_save_password_encrypted">Inserisci una frase-password che dovrai reinserire ogni volta che desideri inviare fondi.</string>
     <string name="button_save_device_encrypted">Salva crittografato dal dispositivo</string>

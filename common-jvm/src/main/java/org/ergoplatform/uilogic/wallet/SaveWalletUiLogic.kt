@@ -10,27 +10,49 @@ import org.ergoplatform.uilogic.StringProvider
 
 class SaveWalletUiLogic(val mnemonic: SecretString) {
 
-    val publicAddress get() = getPublicErgoAddressFromMnemonic(mnemonic)
+    private var _publicAddress: String? = null
+
+    val publicAddress
+        get() = if (_publicAddress == null) {
+            _publicAddress = getPublicErgoAddressFromMnemonic(mnemonic)
+            _publicAddress!!
+        } else
+            _publicAddress!!
+
+    suspend fun getSuggestedDisplayName(
+        walletDbProvider: WalletDbProvider,
+        strings: StringProvider
+    ) = getExistingWallet(walletDbProvider)?.displayName
+        ?: strings.getString(STRING_LABEL_WALLET_DEFAULT)
+
+    private suspend fun getExistingWallet(walletDbProvider: WalletDbProvider) =
+        walletDbProvider.loadWalletByFirstAddress(publicAddress)
+
+    /**
+     * show display name input text field only when there are already wallets set up
+     */
+    fun showSuggestedDisplayName(walletDbProvider: WalletDbProvider) =
+        walletDbProvider.getAllWalletConfigsSynchronous().isNotEmpty()
 
     /**
      * Saves the wallet data to DB
      */
     suspend fun suspendSaveToDb(
         walletDbProvider: WalletDbProvider,
-        strings: StringProvider,
+        displayName: String,
         encType: Int,
         secretStorage: ByteArray?
     ) {
         val publicAddress = this.publicAddress
 
         // check if the wallet already exists
-        val existingWallet = walletDbProvider.loadWalletByFirstAddress(publicAddress)
+        val existingWallet = getExistingWallet(walletDbProvider)
 
         if (existingWallet != null) {
             // update encType and secret storage
             val walletConfig = WalletConfig(
                 existingWallet.id,
-                existingWallet.displayName,
+                displayName,
                 existingWallet.firstAddress,
                 encType,
                 secretStorage
@@ -40,7 +62,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString) {
             val walletConfig =
                 WalletConfig(
                     0,
-                    strings.getString(STRING_LABEL_WALLET_DEFAULT),
+                    displayName,
                     publicAddress,
                     encType,
                     secretStorage

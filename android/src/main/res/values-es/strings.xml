@@ -82,8 +82,8 @@
 
     <!-- Save wallet -->
     <string name="intro_save_wallet">La dirección pública de su billetera principal es:</string>
-    <string name="intro_save_wallet2">Puede agregar direcciones adicionales más tarde.\n\n
-        Elija cómo se deben guardar la billetera y las claves en este dispositivo.</string>
+    <string name="intro_save_wallet2">Puede agregar direcciones adicionales más tarde.</string>
+    <string name="intro_save_wallet3">Elija cómo se deben guardar la billetera y las claves en este dispositivo.</string>
     <string name="button_save_password_encrypted">Guardar contraseña encriptada</string>
     <string name="desc_save_password_encrypted">Ingrese una frase de contraseña que deberá volver a ingresar cada vez que desee enviar fondos.</string>
     <string name="button_save_device_encrypted">Guardar dispositivo encriptado</string>
