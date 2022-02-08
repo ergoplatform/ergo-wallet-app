@@ -124,6 +124,21 @@ fun showDialogWithCopyOption(context: Context, message: String) {
         .show()
 }
 
+fun showSensitiveDataCopyDialog(context: Context, dataToCopy: String) {
+    MaterialAlertDialogBuilder(context)
+        .setMessage(R.string.desc_copy_sensitive_data)
+        .setPositiveButton(R.string.button_copy_sensitive_data) { _, _ ->
+            val clipboard = ContextCompat.getSystemService(
+                context,
+                ClipboardManager::class.java
+            )
+            val clip = ClipData.newPlainText("", dataToCopy)
+            clipboard?.setPrimaryClip(clip)
+        }
+        .setNegativeButton(R.string.label_cancel, null)
+        .show()
+}
+
 /**
  * expands on first show. Call this in onCreateView()
  */

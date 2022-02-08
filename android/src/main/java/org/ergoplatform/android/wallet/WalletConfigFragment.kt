@@ -47,7 +47,8 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
 
         lifecycleScope.launch {
             val wallet =
-                AppDatabase.getInstance(requireContext()).walletDao().loadWalletConfigById(args.walletId)
+                AppDatabase.getInstance(requireContext()).walletDao()
+                    .loadWalletConfigById(args.walletId)
 
             wallet?.let {
                 binding.publicAddress.text = wallet.firstAddress
@@ -139,7 +140,10 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
     private fun displayMnemonic(mnemonic: String) {
         MaterialAlertDialogBuilder(requireContext())
             .setMessage(mnemonic)
-            .setPositiveButton(R.string.button_done, null)
+            .setPositiveButton(R.string.button_copy) { _, _ ->
+                showSensitiveDataCopyDialog(requireContext(), mnemonic)
+            }
+            .setNegativeButton(R.string.label_dismiss, null)
             .show()
     }
 
