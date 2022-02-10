@@ -144,8 +144,6 @@ fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApi): Transac
         inputsMap.put(boxInfo.boxId, boxInfo.toTransactionInfoBox())
     }
 
-    // TODO Ergo Pay when minting new tokens, check if information about name and decimals can be obtianed
-
     return unsignedTx.buildTransactionInfo(inputsMap)
 }
 
