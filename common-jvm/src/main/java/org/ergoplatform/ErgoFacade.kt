@@ -4,9 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.*
-import org.ergoplatform.appkit.impl.ErgoTreeContract
-import org.ergoplatform.appkit.impl.InputBoxImpl
-import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
+import org.ergoplatform.appkit.impl.*
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.restapi.client.Parameters
 import org.ergoplatform.transactions.PromptSigningResult
@@ -129,9 +127,10 @@ fun sendErgoTx(
             val prover = proverBuilder.build()
 
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
-            val signed = BoxOperations.putToContractTx(
-                ctx, prover, true,
-                contract, amountToSend, tokensToSend
+            val signed = BoxOperations(prover, true).withAmountToSpend(amountToSend)
+                .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader(ctx as BlockchainContextImpl))
+                .withTokensToSpend(tokensToSend).putToContractTx(
+                    ctx, contract
             )
             ctx.sendTransaction(signed)
 
@@ -186,10 +185,9 @@ fun prepareSerializedErgoTx(
         val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
-            val unsigned = BoxOperations.putToContractTxUnsigned(
-                ctx, senderAddresses,
-                contract, amountToSend, tokensToSend
-            )
+            val unsigned = BoxOperations(senderAddresses).withAmountToSpend(amountToSend)
+                .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader(ctx as BlockchainContextImpl))
+                .withTokensToSpend(tokensToSend).putToContractTxUnsigned(ctx, contract)
 
             val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
                 val ergoBox = box.box()
