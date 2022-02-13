@@ -2,6 +2,7 @@ package org.ergoplatform.android.wallet
 
 import android.animation.LayoutTransition
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -11,6 +12,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
@@ -124,6 +127,10 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                 walletDetailsViewModel.wallet!!.walletConfig.id,
                 true
             ).show(childFragmentManager, null)
+        }
+
+        binding.buttonScan.setOnClickListener {
+            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
         }
 
         // enable layout change animations after a short wait time
@@ -253,5 +260,50 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            result.contents?.let { qrCodeScanned(it) }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    private fun qrCodeScanned(qrCode: String) {
+        walletDetailsViewModel.uiLogic.qrCodeScanned(
+            qrCode,
+            AndroidStringProvider(requireContext()),
+            { data ->
+                findNavController().navigate(
+                    WalletDetailsFragmentDirections
+                        .actionNavigationWalletDetailsToColdWalletSigningFragment(
+                            data,
+                            walletDetailsViewModel.wallet!!.walletConfig.id,
+                        )
+                )
+            },
+            { ergoPayRequest ->
+                findNavController().navigateSafe(
+                    WalletDetailsFragmentDirections.actionNavigationWalletDetailsToErgoPaySigningFragment(
+                        ergoPayRequest, walletDetailsViewModel.selectedIdx ?: -1,
+                        walletDetailsViewModel.wallet!!.walletConfig.id,
+                    )
+                )
+            },
+            { data ->
+                findNavController().navigate(
+                    WalletDetailsFragmentDirections
+                        .actionNavigationWalletDetailsToSendFundsFragment(
+                            walletDetailsViewModel.wallet!!.walletConfig.id,
+                            walletDetailsViewModel.selectedIdx ?: -1
+                        ).setPaymentRequest(data)
+                )
+            }, {
+                MaterialAlertDialogBuilder(requireContext()).setMessage(it)
+                    .setPositiveButton(R.string.zxing_button_ok, null)
+                    .show()
+            })
     }
 }
