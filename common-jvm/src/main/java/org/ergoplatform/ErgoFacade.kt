@@ -19,7 +19,6 @@ import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
 import sigmastate.serialization.`SigmaSerializer$`
-import java.lang.AssertionError
 
 const val MNEMONIC_WORDS_COUNT = 15
 const val MNEMONIC_MIN_WORDS_COUNT = 12
@@ -127,8 +126,8 @@ fun sendErgoTx(
             val prover = proverBuilder.build()
 
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
-            val signed = BoxOperations(prover, true).withAmountToSpend(amountToSend)
-                .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader(ctx as BlockchainContextImpl))
+            val signed = BoxOperations.createForEip3Prover(prover).withAmountToSpend(amountToSend)
+                .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
                 .withTokensToSpend(tokensToSend).putToContractTx(
                     ctx, contract
             )
@@ -185,8 +184,8 @@ fun prepareSerializedErgoTx(
         val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
-            val unsigned = BoxOperations(senderAddresses).withAmountToSpend(amountToSend)
-                .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader(ctx as BlockchainContextImpl))
+            val unsigned = BoxOperations.createForSenders(senderAddresses).withAmountToSpend(amountToSend)
+                .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
                 .withTokensToSpend(tokensToSend).putToContractTxUnsigned(ctx, contract)
 
             val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
