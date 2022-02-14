@@ -27,8 +27,8 @@ const val URL_COLD_WALLET_HELP =
 const val URL_FORGOT_PASSWORD_HELP =
     "https://github.com/ergoplatform/ergo-wallet-app/wiki/FAQ#i-forgot-my-spending-password"
 
-val ERG_BASE_COST = 0
-val ERG_MAX_BLOCK_COST = 1000000
+const val ERG_BASE_COST = 0
+const val ERG_MAX_BLOCK_COST = 1000000
 
 var isErgoMainNet: Boolean = true
 
