@@ -6,6 +6,8 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.NodeConnector
 import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.ios.tokens.DetailTokenEntryView
+import org.ergoplatform.ios.transactions.ColdWalletSigningViewController
+import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
 import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
 import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
@@ -160,6 +162,44 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             val addressTitle = Body1BoldLabel().apply {
                 text = texts.get(STRING_TITLE_WALLET_ADDRESS)
             }
+            val scanQrButton =
+                UIImageView(getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small)).apply {
+                    enforceKeepIntrinsicWidth()
+                    tintColor = UIColor.label()
+                    isUserInteractionEnabled = true
+                    addGestureRecognizer(UITapGestureRecognizer {
+                        presentViewController(QrScannerViewController(false) {
+                            uiLogic.qrCodeScanned(it, IosStringProvider(texts), { data ->
+                                navigationController.pushViewController(
+                                    ColdWalletSigningViewController(
+                                        data,
+                                        walletId
+                                    ), true
+                                )
+                            }, { ergoPayRequest ->
+                                navigationController.pushViewController(
+                                    ErgoPaySigningViewController(
+                                        ergoPayRequest, walletId, uiLogic.addressIdx ?: -1
+                                    ), true
+                                )
+                            }, { requestData ->
+                                navigationController.pushViewController(
+                                    SendFundsViewController(walletId, uiLogic.addressIdx ?: -1, requestData),
+                                    true
+                                )
+                            }, { errorMessage ->
+                                    presentViewController(
+                                        buildSimpleAlertController(
+                                            "",
+                                            errorMessage,
+                                            texts
+                                        ), true
+                                    ) {}
+                                }
+                            )
+                        }, true) {}
+                    })
+                }
 
             addressNameLabel.apply {
                 numberOfLines = 1
@@ -223,11 +263,13 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
 
             addSubview(addressImage)
             addSubview(addressTitle)
+            addSubview(scanQrButton)
             addSubview(addressNameContainer)
             addSubview(horizontalStack)
             addressImage.leftToSuperview(inset = DEFAULT_MARGIN).topToSuperview().bottomToBottomOf(addressNameContainer)
             addressTitle.leftToRightOf(addressImage, DEFAULT_MARGIN * 2).topToSuperview()
                 .rightToSuperview(inset = DEFAULT_MARGIN)
+            scanQrButton.rightToSuperview(inset = -DEFAULT_MARGIN).centerVerticallyTo(addressTitle)
             addressNameContainer.leftToLeftOf(addressTitle).topToBottomOf(addressTitle, DEFAULT_MARGIN / 2)
                 .rightToSuperview(inset = DEFAULT_MARGIN)
             horizontalStack.topToBottomOf(addressNameContainer, DEFAULT_MARGIN).rightToSuperview(inset = DEFAULT_MARGIN)
@@ -361,7 +403,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             val listExpanded = uiLogic.wallet?.walletConfig?.unfoldTokens == true
             if (listExpanded) {
                 tokensList.forEach {
-                    tokensListStack.addArrangedSubview(DetailTokenEntryView().bindWalletToken(it))
+                    tokensListStack.addArrangedSubview(DetailTokenEntryView().bindWalletToken(it, texts))
                 }
             }
 

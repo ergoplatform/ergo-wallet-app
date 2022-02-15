@@ -33,7 +33,7 @@ task convertStrings {
 
         def output = project.file(dest.replace("{l}", primaryLanguage ? "" : "_" + language))
         def output2 = project.file(dest2)
-        def input = project.file(source.replace("{l}", primaryLanguage ? "" : "-" + language))
+        def input = project.file(source.replace("{l}", primaryLanguage ? "" : "-" + language.replace("_", "-r")))
 
         try {
             if (!output.parentFile.exists())
@@ -96,6 +96,7 @@ task convertStrings {
         convertFile("zh")
         convertFile("es")
         convertFile("pt")
+        convertFile("pt_PT")
         convertFile("it")
     }
 }

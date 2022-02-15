@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentChooseTokenDialogBinding
 import org.ergoplatform.android.databinding.FragmentChooseTokenDialogItemBinding
 import org.ergoplatform.persistance.WalletToken
@@ -75,7 +76,7 @@ class ChooseTokenListDialogFragment : BottomSheetDialogFragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val token = items.get(position)
-            holder.tokenName.text = token.name
+            holder.tokenName.text = token.name ?: getString(R.string.label_unnamed_token)
             holder.tokenId.text = token.tokenId
             holder.itemView.setOnClickListener { onChooseToken(token.tokenId!!) }
         }

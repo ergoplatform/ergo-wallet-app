@@ -1,7 +1,9 @@
 package org.ergoplatform.ios.transactions
 
+import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.uilogic.STRING_LABEL_UNNAMED_TOKEN
 import org.ergoplatform.uilogic.STRING_TITLE_ADD_TOKEN
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSIndexPath
@@ -17,6 +19,7 @@ class ChooseTokenListViewController(
     val onChoose: (String) -> Unit
 ) : UIViewController() {
 
+    private val texts = getAppDelegate().texts
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -25,7 +28,7 @@ class ChooseTokenListViewController(
         addCloseButton()
 
         val titleLabel = Body1Label().apply {
-            text = getAppDelegate().texts.get(STRING_TITLE_ADD_TOKEN)
+            text = texts.get(STRING_TITLE_ADD_TOKEN)
             textAlignment = NSTextAlignment.Center
         }
 
@@ -57,7 +60,7 @@ class ChooseTokenListViewController(
         override fun getCellForRow(p0: UITableView, p1: NSIndexPath): UITableViewCell {
             val cell = p0.dequeueReusableCell(TOKEN_CELL)
             (cell as? TokenCell)?.let {
-                it.bind(tokensToChooseFrom[p1.row])
+                it.bind(tokensToChooseFrom[p1.row], texts)
                 it.clickListener = { tokenId ->
                     onChoose.invoke(tokenId)
                     dismissViewController(true) {}
@@ -105,9 +108,9 @@ class ChooseTokenListViewController(
             })
         }
 
-        fun bind(walletToken: WalletToken) {
+        fun bind(walletToken: WalletToken, texts: I18NBundle) {
             token = walletToken
-            nameLabel.text = walletToken.name
+            nameLabel.text = walletToken.name ?: texts.get(STRING_LABEL_UNNAMED_TOKEN)
             tokenIdLabel.text = walletToken.tokenId
         }
     }

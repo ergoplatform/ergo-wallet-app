@@ -13,10 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.RoomWalletDbProvider
@@ -64,15 +61,23 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         //   Drawback: It is completely out of control when static variables get reset and the
         //             variable might leak into a process reusing the JVM
         uiLogic = SaveWalletUiLogic(SecretString.create(args.mnemonic))
+        val db = RoomWalletDbProvider(AppDatabase.getInstance(requireContext()))
+        val texts = AndroidStringProvider(requireContext())
 
         // firing up appkit for the first time needs some time on medium end devices, so do this on
         // background thread while showing infinite progress bar
         lifecycleScope.launch(Dispatchers.IO) {
             val publicErgoAddressFromMnemonic = uiLogic.publicAddress
+            val walletDisplayName = uiLogic.getSuggestedDisplayName(db, texts)
+            val showDisplayName = uiLogic.showSuggestedDisplayName(db)
+
             withContext(Dispatchers.Main) {
                 binding.publicAddress.text = publicErgoAddressFromMnemonic
                 binding.cardViewContainer.visibility = View.VISIBLE
                 binding.progressBar.visibility = View.GONE
+                binding.inputWalletName.editText?.setText(walletDisplayName)
+                binding.inputWalletName.visibility =
+                    if (showDisplayName) View.VISIBLE else View.GONE
             }
         }
 
@@ -108,7 +113,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         }
     }
 
-    fun showBiometricPrompt() {
+    private fun showBiometricPrompt() {
 
         // setDeviceCredentialAllowed is deprecated, but needed for older SDK level
         @Suppress("DEPRECATION") val promptInfo = PromptInfo.Builder()
@@ -148,6 +153,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         ).show()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun saveToDbAndNavigateToWallet(encType: Int, secretStorage: ByteArray) {
 
         val context = requireContext()
@@ -155,7 +161,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
             // make sure not to use dialog context within this block
             uiLogic.suspendSaveToDb(
                 RoomWalletDbProvider(AppDatabase.getInstance(context)),
-                AndroidStringProvider(context),
+                binding.inputWalletName.editText!!.text.toString(),
                 encType,
                 secretStorage
             )

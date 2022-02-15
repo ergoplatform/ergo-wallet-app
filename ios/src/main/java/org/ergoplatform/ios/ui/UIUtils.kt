@@ -2,7 +2,7 @@ package org.ergoplatform.ios.ui
 
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.Main
-import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
+import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGAffineTransform
 import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
@@ -265,6 +265,23 @@ fun buildSimpleAlertController(title: String, message: String, texts: I18NBundle
         UIAlertAction(
             texts.get(STRING_ZXING_BUTTON_OK),
             UIAlertActionStyle.Default
+        ) {})
+    return uac
+}
+
+fun buildSensitiveDataCopyDialog(texts: I18NBundle, dataToCopy: String): UIAlertController {
+    val uac = UIAlertController("", texts.get(STRING_DESC_COPY_SENSITIVE_DATA), UIAlertControllerStyle.Alert)
+    uac.addAction(
+        UIAlertAction(
+            texts.get(STRING_BUTTON_COPY_SENSITIVE_DATA),
+            UIAlertActionStyle.Default
+        ) {
+            UIPasteboard.getGeneralPasteboard()?.string = dataToCopy
+        })
+    uac.addAction(
+        UIAlertAction(
+            texts.get(STRING_LABEL_CANCEL),
+            UIAlertActionStyle.Cancel
         ) {})
     return uac
 }

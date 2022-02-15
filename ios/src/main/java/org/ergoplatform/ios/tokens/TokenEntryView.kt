@@ -1,8 +1,10 @@
 package org.ergoplatform.ios.tokens
 
+import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.uilogic.STRING_LABEL_MORE_TOKENS
+import org.ergoplatform.uilogic.STRING_LABEL_UNNAMED_TOKEN
 import org.ergoplatform.utils.formatTokenAmounts
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.UILayoutConstraintAxis
@@ -30,8 +32,8 @@ class TokenEntryView : UIStackView(CGRect.Zero()) {
         labelTokenVal.enforceKeepIntrinsicWidth()
     }
 
-    fun bindWalletToken(walletToken: WalletToken): TokenEntryView {
-        labelTokenName.text = walletToken.name
+    fun bindWalletToken(walletToken: WalletToken, texts: I18NBundle): TokenEntryView {
+        labelTokenName.text = walletToken.name ?: texts.get(STRING_LABEL_UNNAMED_TOKEN)
         labelTokenVal.text =
             formatTokenAmounts(
                 walletToken.amount ?: 0,

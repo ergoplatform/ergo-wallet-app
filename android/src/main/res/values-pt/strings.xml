@@ -83,8 +83,8 @@
 
     <!-- Save wallet -->
     <string name="intro_save_wallet">O endereço público principal da sua carteira é:</string>
-    <string name="intro_save_wallet2">Você pode adicionar mais endereços depois.\n\n
-        Escolha como a carteira e as chaves devem ser salvas neste aparelho.</string>
+    <string name="intro_save_wallet2">Você pode adicionar mais endereços depois.</string>
+    <string name="intro_save_wallet3">Escolha como a carteira e as chaves devem ser salvas neste aparelho.</string>
     <string name="button_save_password_encrypted">Salvar senha criptografada</string>
     <string name="desc_save_password_encrypted">Entre uma frase-senha que você precisará usar toda vez que você quiser fazer uma transferência.</string>
     <string name="button_save_device_encrypted">Salvar dispositivo criptografado</string>

@@ -55,6 +55,7 @@ class ErgoAmountTest {
     fun math() {
         val minusTest = ErgoAmount(100) - ErgoAmount(1)
         Assert.assertEquals(99, minusTest.nanoErgs)
+        Assert.assertEquals(100, (ErgoAmount(1) + minusTest).nanoErgs)
     }
 
 

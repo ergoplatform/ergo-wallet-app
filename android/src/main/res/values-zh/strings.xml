@@ -83,8 +83,8 @@
 
     <!-- Save wallet -->
     <string name="intro_save_wallet">您的钱包的主公共地址是：</string>
-    <string name="intro_save_wallet2">您可以稍后添加附加地址。\n\n
-        现在选择应如何在此设备上保存钱包和密钥。</string>
+    <string name="intro_save_wallet2">您可以稍后添加附加地址。</string>
+    <string name="intro_save_wallet3">现在选择应如何在此设备上保存钱包和密钥。</string>
     <string name="button_save_password_encrypted">保存已加密密码</string>
     <string name="desc_save_password_encrypted">您须输入每次您打算发送资金时都需要重新输入的密码短语。</string>
     <string name="button_save_device_encrypted">保存已加密设备</string>
