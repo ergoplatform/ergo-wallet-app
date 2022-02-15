@@ -3,15 +3,13 @@ package org.ergoplatform.uilogic.wallet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
-import org.ergoplatform.appkit.Address
-import org.ergoplatform.appkit.Bip32Serialization
-import org.ergoplatform.getErgoNetworkType
-import org.ergoplatform.isValidErgoAddress
-import org.ergoplatform.parsePaymentRequest
+import org.ergoplatform.*
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletDbProvider
-import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.STRING_ERROR_ADDRESS_ALREADY_ADDED
+import org.ergoplatform.uilogic.STRING_ERROR_INVALID_READONLY_INPUT
+import org.ergoplatform.uilogic.STRING_LABEL_READONLY_WALLET_DEFAULT
+import org.ergoplatform.uilogic.StringProvider
 
 abstract class AddReadOnlyWalletUiLogic {
     suspend fun addWalletToDb(
@@ -20,14 +18,10 @@ abstract class AddReadOnlyWalletUiLogic {
         stringProvider: StringProvider,
         displayName: String?
     ): Boolean {
-        val xpubkey = try {
-            Bip32Serialization.parseExtendedPublicKeyFromHex(userInput, getErgoNetworkType())
-        } catch (t: Throwable) {
-            null
-        }
+        val xpubkey = deserializeExtendedPublicKeySafe(userInput)
 
         val walletAddress = xpubkey?.let {
-            Address.createEip3Address(0, getErgoNetworkType(), xpubkey).toString()
+            getPublicErgoAddressFromXPubKey(xpubkey)
         } ?: userInput
 
         // check for valid address

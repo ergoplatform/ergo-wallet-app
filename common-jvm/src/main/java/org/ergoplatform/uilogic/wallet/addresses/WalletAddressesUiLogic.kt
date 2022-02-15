@@ -6,7 +6,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.deserializeExtendedPublicKeySafe
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
+import org.ergoplatform.getPublicErgoAddressFromXPubKey
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
@@ -44,13 +46,17 @@ abstract class WalletAddressesUiLogic {
         database: WalletDbProvider,
         prefs: PreferencesProvider,
         number: Int,
-        mnemonic: String
+        mnemonic: String?
     ) {
         // firing up appkit for the first time needs some time on medium end devices, so do this on
         // background thread while showing infinite progress bar
         coroutineScope.launch(Dispatchers.IO) {
             val sortedAddresses = addresses
             wallet?.let { wallet ->
+                val xpubkey = wallet.walletConfig.extendedPublicKey?.let {
+                    deserializeExtendedPublicKeySafe(it)
+                }
+
                 val addedAddresses = mutableListOf<String>()
 
                 var nextIdx = 0
@@ -66,7 +72,15 @@ abstract class WalletAddressesUiLogic {
                         }
 
                         // okay, we have the next address idx - now get the address
-                        val nextAddress = getPublicErgoAddressFromMnemonic(mnemonic, nextIdx)
+                        // we either have the mnemonic or the xpubkey (-> canDeriveAddresses() )
+                        val nextAddress = mnemonic?.let {
+                            getPublicErgoAddressFromMnemonic(
+                                mnemonic,
+                                nextIdx
+                            )
+                        } ?: xpubkey?.let {
+                            getPublicErgoAddressFromXPubKey(it, nextIdx)
+                        }!!
 
                         // this address could be already added as a read only address - delete it
                         database.deleteWalletConfigAndStates(nextAddress)
@@ -87,6 +101,10 @@ abstract class WalletAddressesUiLogic {
                 NodeConnector.getInstance().refreshSingleAddresses(prefs, database, addedAddresses)
             }
         }
+    }
+
+    fun canDeriveAddresses(): Boolean {
+        return wallet?.walletConfig?.secretStorage != null || wallet?.walletConfig?.extendedPublicKey != null
     }
 
     abstract fun notifyNewAddresses()

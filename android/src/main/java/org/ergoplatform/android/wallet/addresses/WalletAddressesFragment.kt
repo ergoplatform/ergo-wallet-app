@@ -141,11 +141,13 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
             val walletConfig = viewModel.wallet?.walletConfig
             binding.buttonAddAddress.setOnClickListener {
                 viewModel.numAddressesToAdd = getNumAddressesToAdd()
-                walletConfig?.let {
-                    startAuthFlow(it)
+                walletConfig?.let { walletConfig ->
+                    walletConfig.secretStorage?.let {
+                        startAuthFlow(walletConfig)
+                    } ?: viewModel.addNextAddresses(requireContext(), null)
                 }
             }
-            binding.buttonAddAddress.isEnabled = walletConfig?.secretStorage != null
+            binding.buttonAddAddress.isEnabled = viewModel.uiLogic.canDeriveAddresses()
             binding.sliderNumAddresses.progress = 0
             refreshAddButtonLabel()
             binding.sliderNumAddresses.setOnSeekBarChangeListener(object :

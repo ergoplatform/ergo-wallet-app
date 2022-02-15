@@ -17,6 +17,7 @@ import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
+import org.ergoplatform.wallet.secrets.ExtendedPublicKey
 import scala.collection.JavaConversions
 import sigmastate.serialization.`SigmaSerializer$`
 
@@ -88,6 +89,20 @@ fun getPublicErgoAddressFromMnemonic(mnemonic: SecretString, index: Int = 0): St
         mnemonic,
         SecretString.create("")
     ).ergoAddress.toString()
+}
+
+fun getPublicErgoAddressFromXPubKey(xPubKey: ExtendedPublicKey, index: Int = 0): String {
+    return Address.createEip3Address(
+        index,
+        getErgoNetworkType(),
+        xPubKey
+    ).ergoAddress.toString()
+}
+
+fun deserializeExtendedPublicKeySafe(serializedKey: String) = try {
+    Bip32Serialization.parseExtendedPublicKeyFromHex(serializedKey, getErgoNetworkType())
+} catch (t: Throwable) {
+    null
 }
 
 /**
