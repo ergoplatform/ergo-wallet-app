@@ -25,6 +25,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
     private lateinit var scrollView: UIScrollView
     private lateinit var addressLabel: UILabel
     private lateinit var nameInputField: UITextField
+    private lateinit var labelDisplayName: Body1BoldLabel
     private val uiLogic = SaveWalletUiLogic(mnemonic)
 
     override fun viewDidLoad() {
@@ -50,6 +51,11 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
         addressInfoLabel.text = texts.get(STRING_INTRO_SAVE_WALLET2)
         val saveInfoLabel = Body1Label().apply {
             text = texts.get(STRING_INTRO_SAVE_WALLET3)
+        }
+
+        labelDisplayName = Body1BoldLabel().apply {
+            textColor = uiColorErgo
+            text = texts.get(STRING_LABEL_WALLET_NAME)
         }
         nameInputField = createTextField().apply {
             clearButtonMode = UITextFieldViewMode.Always
@@ -148,6 +154,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
                 addressLabel,
                 addressInfoLabel,
                 saveInfoLabel,
+                labelDisplayName,
                 nameInputField,
                 createHorizontalSeparator(),
                 buttonSavePassword,
@@ -163,6 +170,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
         container.addSubview(addressInfoStack)
         addressInfoStack.setCustomSpacing(DEFAULT_MARGIN * 4, addressInfoLabel)
         addressInfoStack.setCustomSpacing(DEFAULT_MARGIN * 4, saveInfoLabel)
+        addressInfoStack.setCustomSpacing(DEFAULT_MARGIN, labelDisplayName)
         addressInfoStack.setCustomSpacing(DEFAULT_MARGIN * 4, nameInputField)
         addressInfoStack.topToSuperview(false, DEFAULT_MARGIN * 2)
             .widthMatchesSuperview(inset = DEFAULT_MARGIN, maxWidth = MAX_WIDTH).bottomToSuperview()
@@ -207,6 +215,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
                 addressLabel.text = publicErgoAddressFromMnemonic
                 nameInputField.text = walletDisplayName
                 nameInputField.isHidden = !showDisplayName
+                labelDisplayName.isHidden = !showDisplayName
                 progressIndicator.isHidden = true
                 scrollView.isHidden = false
             }
