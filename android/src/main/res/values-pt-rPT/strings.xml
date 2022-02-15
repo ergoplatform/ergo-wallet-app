@@ -61,9 +61,6 @@
     <string name="desc_readonly_wallet">Adicionar um endereço de uma carteira em modo leitura. Desta forma não irão ser salvaguardadas nenhumas chaves neste dispositivo.</string>
 
     <!-- add readonly wallet -->
-    <string name="intro_add_readonly">Introduza o seu endereço público para adicionar a carteira em modo leitura.</string>
-    <string name="label_wallet_address">Endereço carteira</string>
-    <string name="error_address_already_added">Endereço já se encontra adicionado a \'%1s\'</string>
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">Estas são as 15 palavras (frase mnemónica) da sua carteira Ergo. Estas palavras são também conhecidas como frase-semente 

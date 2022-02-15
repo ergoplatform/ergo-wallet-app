@@ -70,9 +70,11 @@
     <string name="desc_readonly_wallet">Add a wallet address in read-only mode. This won\'t save any keys on this device.</string>
 
     <!-- add readonly wallet -->
-    <string name="intro_add_readonly">Enter your public wallet address to add the wallet in read-only mode.</string>
-    <string name="label_wallet_address">Wallet address</string>
+    <string name="intro_add_readonly">Enter your public wallet address or your extended public key to add the
+        wallet in read-only mode.</string>
+    <string name="label_wallet_address">Wallet address or key</string>
     <string name="error_address_already_added">Address already added to \'%1s\'</string>
+    <string name="error_invalid_readonly_input">Not a valid ERG address or public key</string>
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">This is your 15-word Ergo wallet mnemonic. These words are also known as a seed phrase or

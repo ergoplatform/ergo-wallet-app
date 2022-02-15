@@ -57,8 +57,6 @@
     <string name="desc_readonly_wallet">Aggiungi un indirizzo di portafoglio in modalità di sola lettura. Questo non salverà alcuna chiave su questo dispositivo.</string>
 
     <!-- add readonly wallet -->
-    <string name="intro_add_readonly">Inserisci l\'indirizzo del tuo portafoglio pubblico per aggiungere il portafoglio in modalità di sola lettura.</string>
-    <string name="label_wallet_address">Indirizzo del portafoglio</string>
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">Questa è la tua frase mnemonica di 15 parole del portafoglio Ergo.

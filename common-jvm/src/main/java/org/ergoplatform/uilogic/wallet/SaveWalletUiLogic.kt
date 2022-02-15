@@ -49,7 +49,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString) {
         val existingWallet = getExistingWallet(walletDbProvider)
 
         if (existingWallet != null) {
-            // update encType and secret storage
+            // update encType and secret storage, removes existing xpubkey
             val walletConfig = WalletConfig(
                 existingWallet.id,
                 displayName,
