@@ -4,9 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.*
-import org.ergoplatform.appkit.impl.ErgoTreeContract
-import org.ergoplatform.appkit.impl.InputBoxImpl
-import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
+import org.ergoplatform.appkit.impl.*
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.restapi.client.Parameters
 import org.ergoplatform.transactions.PromptSigningResult
@@ -21,7 +19,6 @@ import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
 import scala.collection.JavaConversions
 import sigmastate.serialization.`SigmaSerializer$`
-import java.lang.AssertionError
 
 const val MNEMONIC_WORDS_COUNT = 15
 const val MNEMONIC_MIN_WORDS_COUNT = 12
@@ -30,8 +27,8 @@ const val URL_COLD_WALLET_HELP =
 const val URL_FORGOT_PASSWORD_HELP =
     "https://github.com/ergoplatform/ergo-wallet-app/wiki/FAQ#i-forgot-my-spending-password"
 
-val ERG_BASE_COST = 0
-val ERG_MAX_BLOCK_COST = 1000000
+const val ERG_BASE_COST = 0
+const val ERG_MAX_BLOCK_COST = 1000000
 
 var isErgoMainNet: Boolean = true
 
@@ -129,9 +126,10 @@ fun sendErgoTx(
             val prover = proverBuilder.build()
 
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
-            val signed = BoxOperations.putToContractTx(
-                ctx, prover, true,
-                contract, amountToSend, tokensToSend
+            val signed = BoxOperations.createForEip3Prover(prover).withAmountToSpend(amountToSend)
+                .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
+                .withTokensToSpend(tokensToSend).putToContractTx(
+                    ctx, contract
             )
             ctx.sendTransaction(signed)
 
@@ -186,10 +184,9 @@ fun prepareSerializedErgoTx(
         val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
             val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
-            val unsigned = BoxOperations.putToContractTxUnsigned(
-                ctx, senderAddresses,
-                contract, amountToSend, tokensToSend
-            )
+            val unsigned = BoxOperations.createForSenders(senderAddresses).withAmountToSpend(amountToSend)
+                .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
+                .withTokensToSpend(tokensToSend).putToContractTxUnsigned(ctx, contract)
 
             val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
                 val ergoBox = box.box()
