@@ -79,7 +79,7 @@ class PersistanceTest {
                     false
                 )
             )
-            delay(200)
+            delay(500)
 
             database.withTransaction {
                 database.insertWalletConfig(
@@ -105,7 +105,7 @@ class PersistanceTest {
 
 
             }
-            delay(2000)
+            delay(3000)
 
             // two changes: insertWalletConfig and transaction
             assertEquals(2, changes)
@@ -122,7 +122,7 @@ class PersistanceTest {
                 )
             )
 
-            delay(1000)
+            delay(2000)
             assertEquals(changeBeforeCancel, changes)
         }
     }

@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS `wallet_configs` (
     `public_address` TEXT,
     `enc_type` INTEGER AS Int,
     `secret_storage` BLOB,
-    `unfold_tokens` INTEGER AS Boolean NOT NULL
+    `unfold_tokens` INTEGER AS Boolean NOT NULL,
+    `xpubkey` TEXT
 );
 
 selectAll:
