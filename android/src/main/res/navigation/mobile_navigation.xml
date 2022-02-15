@@ -87,6 +87,12 @@
             app:exitAnim="@anim/slide_out_to_left"
             app:popEnterAnim="@anim/slide_in_from_left"
             app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_navigation_wallet_details_to_ergoPaySigningFragment"
+            app:destination="@id/ergoPaySigningFragment" />
+        <action
+            android:id="@+id/action_navigation_wallet_details_to_coldWalletSigningFragment"
+            app:destination="@id/coldWalletSigningFragment" />
     </fragment>
 
     <fragment
