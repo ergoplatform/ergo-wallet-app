@@ -14,7 +14,7 @@ data class WalletConfig(
     val encryptionType: Int?,
     val secretStorage: ByteArray?,
     val unfoldTokens: Boolean = false,
-    val extendedPublicKey: String? = null,
+    val extendedPublicKey: String?,
 )
 
 data class WalletState(

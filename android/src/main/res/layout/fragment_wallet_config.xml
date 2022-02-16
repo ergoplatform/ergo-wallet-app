@@ -112,10 +112,29 @@
                         style="@style/Widget.App.Button.PrimaryTint"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_vertical_margin"
+                        android:layout_marginTop="@dimen/half_horizontal_margin"
                         android:text="@string/title_wallet_addresses"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/desc_wallet_addresses" />
+
+                    <TextView
+                        android:id="@+id/display_xpubkey_desc"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_and_half"
+                        android:text="@string/desc_display_xpubkey"
+                        app:layout_constraintTop_toBottomOf="@id/button_addresses" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_display_xpubkey"
+                        style="@style/Widget.App.Button.PrimaryTint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/half_horizontal_margin"
+                        android:text="@string/button_display_xpubkey"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/display_xpubkey_desc" />
 
                     <TextView
                         android:id="@+id/display_mnemonic_desc"
@@ -124,14 +143,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/margin_and_half"
                         android:text="@string/desc_display_mnemonic"
-                        app:layout_constraintTop_toBottomOf="@id/button_addresses" />
+                        app:layout_constraintTop_toBottomOf="@id/button_display_xpubkey" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_export"
                         style="@style/Widget.App.Button.PrimaryTint"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_vertical_margin"
+                        android:layout_marginTop="@dimen/half_horizontal_margin"
                         android:text="@string/button_display_mnemonic"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/display_mnemonic_desc" />

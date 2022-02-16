@@ -105,6 +105,14 @@ fun deserializeExtendedPublicKeySafe(serializedKey: String) = try {
     null
 }
 
+fun getSerializedXpubKeyFromMnemonic(mnemonic: String) =
+    Bip32Serialization.serializeExtendedPublicKeyToHex(
+        JavaHelpers.seedToMasterKey(
+            SecretString.create(mnemonic),
+            SecretString.empty()
+        ), getErgoNetworkType()
+    )
+
 /**
  * loads the word list used to generate new mnemonics into a list
  */

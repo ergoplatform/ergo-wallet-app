@@ -55,7 +55,8 @@ class SaveWalletUiLogic(val mnemonic: SecretString) {
                 displayName,
                 existingWallet.firstAddress,
                 encType,
-                secretStorage
+                secretStorage,
+                extendedPublicKey = null
             )
             walletDbProvider.updateWalletConfig(walletConfig)
         } else {
@@ -65,7 +66,8 @@ class SaveWalletUiLogic(val mnemonic: SecretString) {
                     displayName,
                     publicAddress,
                     encType,
-                    secretStorage
+                    secretStorage,
+                    extendedPublicKey = null
                 )
             walletDbProvider.insertWalletConfig(walletConfig)
             NodeConnector.getInstance().invalidateCache()
