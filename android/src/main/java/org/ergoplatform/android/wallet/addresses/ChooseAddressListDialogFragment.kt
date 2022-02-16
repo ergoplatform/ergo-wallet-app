@@ -56,7 +56,7 @@ class ChooseAddressListDialogFragment : BottomSheetDialogFragment() {
             LinearLayoutManager(context)
 
         val context = requireContext()
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             AppDatabase.getInstance(context).walletDao()
                 .loadWalletWithStateById(requireArguments().getInt(ARG_WALLET_ID))?.let {
                     binding.list.adapter = DisplayAddressesAdapter(

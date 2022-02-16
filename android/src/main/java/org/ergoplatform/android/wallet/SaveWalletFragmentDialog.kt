@@ -66,7 +66,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
 
         // firing up appkit for the first time needs some time on medium end devices, so do this on
         // background thread while showing infinite progress bar
-        lifecycleScope.launch(Dispatchers.IO) {
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             val publicErgoAddressFromMnemonic = uiLogic.publicAddress
             val walletDisplayName = uiLogic.getSuggestedDisplayName(db, texts)
             val showDisplayName = uiLogic.showSuggestedDisplayName(db)
