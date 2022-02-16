@@ -33,10 +33,10 @@ class WalletAddressesViewModel : ViewModel() {
     }
 
 
-    private fun addNextAddresses(ctx: Context, number: Int, mnemonic: String) {
+    fun addNextAddresses(ctx: Context, mnemonic: String?) {
         uiLogic.addNextAddresses(
             RoomWalletDbProvider(AppDatabase.getInstance(ctx)),
-            Preferences(ctx), number, mnemonic
+            Preferences(ctx), numAddressesToAdd, mnemonic
         )
     }
 
@@ -44,7 +44,7 @@ class WalletAddressesViewModel : ViewModel() {
         wallet?.walletConfig?.secretStorage?.let {
             val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
             deserializeSecrets(String(decryptData!!))?.let { mnemonic ->
-                addNextAddresses(ctx, numAddressesToAdd, mnemonic)
+                addNextAddresses(ctx, mnemonic)
             }
         }
     }
@@ -54,7 +54,7 @@ class WalletAddressesViewModel : ViewModel() {
             try {
                 val decryptData = AesEncryptionManager.decryptData(password, it)
                 deserializeSecrets(String(decryptData!!))?.let { mnemonic ->
-                    addNextAddresses(ctx, numAddressesToAdd, mnemonic)
+                    addNextAddresses(ctx, mnemonic)
                     return true
                 }
             } catch (t: Throwable) {

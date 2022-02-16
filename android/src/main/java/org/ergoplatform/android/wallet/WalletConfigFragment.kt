@@ -3,16 +3,14 @@ package org.ergoplatform.android.wallet
 import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.launch
-import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentWalletConfigBinding
 import org.ergoplatform.android.ui.*
+import org.ergoplatform.getSerializedXpubKeyFromMnemonic
 
 /**
  * Shows settings and details for a wallet
@@ -45,11 +43,9 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        lifecycleScope.launch {
-            val wallet =
-                AppDatabase.getInstance(requireContext()).walletDao()
-                    .loadWalletConfigById(args.walletId)
+        viewModel.init(args.walletId, requireContext())
 
+        viewModel.walletConfig.observe(viewLifecycleOwner) { wallet ->
             wallet?.let {
                 binding.publicAddress.text = wallet.firstAddress
                 binding.inputWalletName.editText?.setText(wallet.displayName)
@@ -67,6 +63,8 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
                 }
 
                 binding.buttonExport.isEnabled = it.secretStorage != null
+                binding.buttonDisplayXpubkey.isEnabled =
+                    it.extendedPublicKey != null || it.secretStorage != null
             }
         }
 
@@ -79,13 +77,25 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
             hideForcedSoftKeyboard(requireContext(), binding.inputWalletName.editText!!)
             viewModel.saveChanges(
                 requireContext(),
-                args.walletId,
                 binding.inputWalletName.editText?.text?.toString()
             )
         }
 
         binding.buttonExport.setOnClickListener {
-            viewModel.prepareDisplayMnemonic(this, args.walletId)
+            viewModel.uiLogic.wallet?.let {
+                viewModel.mnemonicNeededFor =
+                    WalletConfigViewModel.MnemonicNeededFor.DISPLAY_MNEMONIC
+                startAuthFlow(it)
+            }
+        }
+
+        binding.buttonDisplayXpubkey.setOnClickListener {
+            viewModel.uiLogic.wallet?.secretStorage?.let {
+                viewModel.mnemonicNeededFor = WalletConfigViewModel.MnemonicNeededFor.SHOW_XPUB
+                startAuthFlow(viewModel.uiLogic.wallet!!)
+            } ?: viewModel.uiLogic.wallet?.extendedPublicKey?.let {
+                displayXpubKey(it)
+            }
         }
 
         viewModel.snackbarEvent.observe(
@@ -126,15 +136,33 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
         val mnemonic = viewModel.decryptMnemonicWithPass(password)
         if (mnemonic == null) {
             return false
-        } else {
+        } else if (viewModel.mnemonicNeededFor == WalletConfigViewModel.MnemonicNeededFor.DISPLAY_MNEMONIC) {
             displayMnemonic(mnemonic)
-            return true
+        } else {
+            displayXpubKeyFromMnemonic(mnemonic)
         }
+        return true
     }
 
     override fun proceedAuthFlowFromBiometrics() {
-        val mnemonic = viewModel.decryptMnemonicWithUserAuth()
-        displayMnemonic(mnemonic!!)
+        val mnemonic = viewModel.decryptMnemonicWithUserAuth()!!
+        if (viewModel.mnemonicNeededFor == WalletConfigViewModel.MnemonicNeededFor.DISPLAY_MNEMONIC) {
+            displayMnemonic(mnemonic)
+        } else {
+            displayXpubKeyFromMnemonic(mnemonic)
+        }
+    }
+
+    private fun displayXpubKeyFromMnemonic(mnemonic: String) {
+        displayXpubKey(getSerializedXpubKeyFromMnemonic(mnemonic))
+    }
+
+    private fun displayXpubKey(xpubkey: String) {
+        findNavController().navigateSafe(
+            WalletConfigFragmentDirections.actionWalletConfigFragmentToShareWithQrDialogFragment(
+                xpubkey
+            )
+        )
     }
 
     private fun displayMnemonic(mnemonic: String) {

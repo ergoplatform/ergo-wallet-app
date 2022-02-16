@@ -158,14 +158,12 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
 
             addButton = PrimaryButton(texts.get(STRING_BUTTON_ADD_ADDRESS))
             addButton.addOnTouchUpInsideListener { _, _ ->
-                parentVc?.uiLogic?.wallet?.walletConfig?.let {
-                    parentVc?.startAuthFlow(it) { mnemonic ->
-                        LogUtils.logDebug("WalletAddressesVc", "Adding $addrCount addresses")
-                        parentVc!!.uiLogic.addNextAddresses(
-                            getAppDelegate().database,
-                            getAppDelegate().prefs, addrCount, mnemonic
-                        )
-                    }
+                parentVc?.uiLogic?.wallet?.walletConfig?.let { walletConfig ->
+                    walletConfig.secretStorage?.let {
+                        parentVc?.startAuthFlow(walletConfig) { mnemonic ->
+                            addAddresses(mnemonic)
+                        }
+                    } ?: addAddresses(null)
                 }
             }
 
@@ -186,6 +184,15 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
 
         }
 
+        private fun addAddresses(mnemonic: String?) {
+            LogUtils.logDebug("WalletAddressesVc", "Adding $addrCount addresses")
+            val appDelegate = getAppDelegate()
+            parentVc!!.uiLogic.addNextAddresses(
+                appDelegate.database,
+                appDelegate.prefs, addrCount, mnemonic
+            )
+        }
+
         private fun refreshButtonText(texts: I18NBundle) {
             addButton.setTitle(
                 if (addrCount == 1) texts.get(STRING_BUTTON_ADD_ADDRESS)
@@ -195,7 +202,7 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
         }
 
         fun bind(vc: WalletAddressesViewController) {
-            addButton.isEnabled = vc.uiLogic.wallet?.walletConfig?.secretStorage != null
+            addButton.isEnabled = vc.uiLogic.canDeriveAddresses()
             this.parentVc = vc
         }
     }

@@ -58,8 +58,6 @@
     <string name="desc_readonly_wallet">以只读模式添加钱包地址。这不会将任何密钥保存在此设备上。</string>
 
     <!-- add readonly wallet -->
-    <string name="intro_add_readonly">输入您的公共钱包地址以便以只读模式添加钱包。</string>
-    <string name="label_wallet_address">钱包地址</string>
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">这是您的15个单词的Ergo钱包助记词。这些单词也称为种子词或纸质密钥。

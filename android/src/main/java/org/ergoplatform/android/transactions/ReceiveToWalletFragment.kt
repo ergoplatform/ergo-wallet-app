@@ -56,7 +56,7 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
         super.onViewCreated(view, savedInstanceState)
 
         uiLogic.derivationIdx = args.derivationIdx
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             uiLogic.loadWallet(
                 args.walletId,
                 RoomWalletDbProvider(AppDatabase.getInstance(requireContext()))

@@ -26,7 +26,8 @@ class PersistanceTest {
                     "9xxx",
                     0,
                     null,
-                    false
+                    false,
+                    null
                 )
             )
         }
@@ -37,7 +38,7 @@ class PersistanceTest {
         runBlocking {
             try {
                 database.withTransaction {
-                    database.insertWalletConfig(WalletConfig(0, "Test2", "x9x", 0, null, false))
+                    database.insertWalletConfig(WalletConfig(0, "Test2", "x9x", 0, null, false, null))
 
                     val entities = database.getAllWalletConfigsSynchronous()
                     println(entities.toString())
@@ -76,10 +77,11 @@ class PersistanceTest {
                     firstAddress,
                     0,
                     null,
-                    false
+                    false,
+                    null
                 )
             )
-            delay(200)
+            delay(500)
 
             database.withTransaction {
                 database.insertWalletConfig(
@@ -89,7 +91,8 @@ class PersistanceTest {
                         firstAddress + "2",
                         0,
                         null,
-                        false
+                        false,
+                        null
                     )
                 )
                 database.insertWalletConfig(
@@ -99,13 +102,14 @@ class PersistanceTest {
                         firstAddress + "3",
                         0,
                         null,
-                        false
+                        false,
+                        null
                     )
                 )
 
 
             }
-            delay(2000)
+            delay(3000)
 
             // two changes: insertWalletConfig and transaction
             assertEquals(2, changes)
@@ -118,11 +122,12 @@ class PersistanceTest {
                     firstAddress + "4",
                     0,
                     null,
-                    false
+                    false,
+                    null
                 )
             )
 
-            delay(1000)
+            delay(2000)
             assertEquals(changeBeforeCancel, changes)
         }
     }
@@ -143,7 +148,7 @@ class PersistanceTest {
         whenever(prefs.prefExplorerApiUrl).thenReturn(getDefaultExplorerApiUrl())
 
         runBlocking {
-            db.insertWalletConfig(WalletConfig(0, "Test2", "3Wwxnaem5ojTfp91qfLw3Y4Sr7ZWVcLPvYSzTsZ4LKGcoxujbxd3", 0, null, false))
+            db.insertWalletConfig(WalletConfig(0, "Test2", "3Wwxnaem5ojTfp91qfLw3Y4Sr7ZWVcLPvYSzTsZ4LKGcoxujbxd3", 0, null, false, null))
             NodeConnector.getInstance().refreshByUser(prefs, db)
             delay(10000)
         }

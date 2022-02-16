@@ -67,12 +67,14 @@
     <string name="label_import_wallet">Import wallet</string>
     <string name="desc_import_wallet">Use an exported or saved wallet file to import an existing wallet (keys and addresses).</string>
     <string name="label_readonly_wallet">Read-only wallet</string>
-    <string name="desc_readonly_wallet">Add a wallet address in read-only mode. This won\'t save any keys on this device.</string>
+    <string name="desc_readonly_wallet">Add a wallet address in read-only mode. This won\'t save any secrets on this device.</string>
 
     <!-- add readonly wallet -->
-    <string name="intro_add_readonly">Enter your public wallet address to add the wallet in read-only mode.</string>
-    <string name="label_wallet_address">Wallet address</string>
+    <string name="intro_add_readonly">Enter your public wallet address or your extended public key to add the
+        wallet in read-only mode.</string>
+    <string name="label_wallet_address">Wallet address or key</string>
     <string name="error_address_already_added">Address already added to \'%1s\'</string>
+    <string name="error_invalid_readonly_input">Not a valid ERG address or public key</string>
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">This is your 15-word Ergo wallet mnemonic. These words are also known as a seed phrase or
@@ -117,6 +119,8 @@
     <string name="label_confirm_delete">Are you sure you want to erase the wallet from this device?\nThis can\'t be undone.</string>
     <string name="desc_display_mnemonic">You can display your mnemonic (seed phrase, paper key) in case you have lost your backup, or to confirm that your backup is correct.</string>
     <string name="button_display_mnemonic">Display mnemonic</string>
+    <string name="desc_display_xpubkey">You can add this wallet as a read-only wallet to other wallet applications with your extended public key. No secrets will be shared.</string>
+    <string name="button_display_xpubkey">Display public key</string>
 
     <!-- Wallet details -->
     <string name="title_wallet_balance">Balance</string>

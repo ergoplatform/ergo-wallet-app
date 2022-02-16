@@ -7,7 +7,8 @@ fun Wallet_configs.toModel(): WalletConfig {
         public_address,
         enc_type,
         secret_storage,
-        unfold_tokens
+        unfold_tokens,
+        xpubkey
     )
 }
 
@@ -18,7 +19,8 @@ fun WalletConfig.toDbEntity(): Wallet_configs {
         firstAddress,
         encryptionType,
         secretStorage,
-        unfoldTokens
+        unfoldTokens,
+        extendedPublicKey
     )
 }
 

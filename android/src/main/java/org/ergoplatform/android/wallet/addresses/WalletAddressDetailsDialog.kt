@@ -52,7 +52,7 @@ class WalletAddressDetailsDialog : BottomSheetDialogFragment() {
         binding.buttonApply.setOnClickListener { saveLabel(addrId) }
         binding.buttonRemove.setOnClickListener { deleteAddress(addrId) }
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             val walletAddress =
                 AppDatabase.getInstance(requireContext()).walletDao().loadWalletAddress(addrId.toInt())
 
