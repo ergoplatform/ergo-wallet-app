@@ -134,7 +134,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     }
 
     override fun startPaymentWithMnemonicAsync(
-        mnemonic: String,
+        signingSecrets: SigningSecrets,
         preferences: PreferencesProvider,
         texts: StringProvider
     ) {
@@ -147,7 +147,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                 val ergoTxResult: SendTransactionResult
                 withContext(Dispatchers.IO) {
                     val signingResult = signSerializedErgoTx(
-                        signingRequest, mnemonic, "",
+                        signingRequest, signingSecrets,
                         derivedAddresses, texts
                     )
                     if (signingResult.success) {

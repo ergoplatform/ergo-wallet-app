@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
@@ -61,7 +62,7 @@ abstract class SubmitTransactionUiLogic {
     }
 
     abstract fun startPaymentWithMnemonicAsync(
-        mnemonic: String,
+        signingSecrets: SigningSecrets,
         preferences: PreferencesProvider,
         texts: StringProvider
     )

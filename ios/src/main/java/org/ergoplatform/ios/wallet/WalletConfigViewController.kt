@@ -167,8 +167,9 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
 
     private fun onDisplaySecretsClicked() {
         uiLogic.wallet?.let {
-            startAuthFlow(it) { mnemonic ->
+            startAuthFlow(it) { signingSecrets ->
                 val texts = getAppDelegate().texts
+                val mnemonic = signingSecrets.mnemonic.toStringUnsecure()
                 val alert =
                     UIAlertController(texts.get(STRING_BUTTON_DISPLAY_MNEMONIC), mnemonic, UIAlertControllerStyle.Alert)
                 alert.addAction(UIAlertAction(texts.get(STRING_BUTTON_COPY), UIAlertActionStyle.Default) {

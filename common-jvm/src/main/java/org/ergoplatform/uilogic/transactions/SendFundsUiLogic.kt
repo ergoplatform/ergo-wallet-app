@@ -146,7 +146,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     }
 
     override fun startPaymentWithMnemonicAsync(
-        mnemonic: String,
+        signingSecrets: SigningSecrets,
         preferences: PreferencesProvider,
         texts: StringProvider
     ) {
@@ -158,7 +158,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 ergoTxResult = sendErgoTx(
                     Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
                     tokensChosen.values.toList(),
-                    mnemonic, "", derivedAddresses,
+                    signingSecrets, derivedAddresses,
                     preferences, texts
                 )
             }

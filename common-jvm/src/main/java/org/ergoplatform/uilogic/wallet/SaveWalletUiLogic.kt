@@ -1,6 +1,7 @@
 package org.ergoplatform.uilogic.wallet
 
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.persistance.WalletConfig
@@ -10,14 +11,22 @@ import org.ergoplatform.uilogic.StringProvider
 
 class SaveWalletUiLogic(val mnemonic: SecretString) {
 
+    private var useDeprecatedDerivation: Boolean = true
+        set(value) {
+            field = value
+            _publicAddress = null
+        }
+
     private var _publicAddress: String? = null
 
     val publicAddress
         get() = if (_publicAddress == null) {
-            _publicAddress = getPublicErgoAddressFromMnemonic(mnemonic)
+            _publicAddress = getPublicErgoAddressFromMnemonic(signingSecrets)
             _publicAddress!!
         } else
             _publicAddress!!
+
+    val signingSecrets get() = SigningSecrets(mnemonic, useDeprecatedDerivation)
 
     suspend fun getSuggestedDisplayName(
         walletDbProvider: WalletDbProvider,

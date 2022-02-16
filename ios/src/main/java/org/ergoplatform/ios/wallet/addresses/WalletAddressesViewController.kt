@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.NodeConnector
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_BUTTON_ADD_ADDRESS
 import org.ergoplatform.uilogic.STRING_BUTTON_ADD_ADDRESSES
@@ -184,7 +185,7 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
 
         }
 
-        private fun addAddresses(mnemonic: String?) {
+        private fun addAddresses(mnemonic: SigningSecrets?) {
             LogUtils.logDebug("WalletAddressesVc", "Adding $addrCount addresses")
             val appDelegate = getAppDelegate()
             parentVc!!.uiLogic.addNextAddresses(

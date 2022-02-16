@@ -33,24 +33,6 @@ const val ERG_MAX_BLOCK_COST = 1000000
 
 var isErgoMainNet: Boolean = true
 
-fun serializeSecrets(mnemonic: String): String {
-    val gson = Gson()
-    val root = JsonObject()
-    root.addProperty("mnemonic", mnemonic)
-    return gson.toJson(root)
-}
-
-fun deserializeSecrets(json: String): String? {
-
-    try {
-        val jsonTree = JsonParser().parse(json)
-
-        return (jsonTree as? JsonObject)?.get("mnemonic")?.asString
-    } catch (t: Throwable) {
-        return null
-    }
-}
-
 fun isValidErgoAddress(addressString: String): Boolean {
     if (addressString.isEmpty())
         return false
@@ -78,16 +60,13 @@ fun getAddressDerivationPath(index: Int): String {
     return "m/44'/429'/0'/0/$index"
 }
 
-fun getPublicErgoAddressFromMnemonic(mnemonic: String, index: Int = 0): String {
-    return getPublicErgoAddressFromMnemonic(SecretString.create(mnemonic), index)
-}
-
-fun getPublicErgoAddressFromMnemonic(mnemonic: SecretString, index: Int = 0): String {
+fun getPublicErgoAddressFromMnemonic(secrets: SigningSecrets, index: Int = 0): String {
     return Address.createEip3Address(
         index,
         getErgoNetworkType(),
-        mnemonic,
-        SecretString.create("")
+        secrets.mnemonic,
+        secrets.password,
+        secrets.deprecatedDerivation
     ).ergoAddress.toString()
 }
 
@@ -105,11 +84,12 @@ fun deserializeExtendedPublicKeySafe(serializedKey: String) = try {
     null
 }
 
-fun getSerializedXpubKeyFromMnemonic(mnemonic: String) =
+fun getSerializedXpubKeyFromMnemonic(signingSecrets: SigningSecrets) =
     Bip32Serialization.serializeExtendedPublicKeyToHex(
         JavaHelpers.seedToMasterKey(
-            SecretString.create(mnemonic),
-            SecretString.empty()
+            signingSecrets.mnemonic,
+            signingSecrets.password,
+            signingSecrets.deprecatedDerivation
         ), getErgoNetworkType()
     )
 
@@ -129,8 +109,7 @@ fun sendErgoTx(
     recipient: Address,
     amountToSend: Long,
     tokensToSend: List<ErgoToken>,
-    mnemonic: String,
-    mnemonicPass: String,
+    signingSecrets: SigningSecrets,
     derivedKeyIndices: List<Int>,
     prefs: PreferencesProvider,
     texts: StringProvider
@@ -140,8 +119,9 @@ fun sendErgoTx(
         return ergoClient.execute { ctx: BlockchainContext ->
             val proverBuilder = ctx.newProverBuilder()
                 .withMnemonic(
-                    SecretString.create(mnemonic),
-                    SecretString.create(mnemonicPass)
+                    signingSecrets.mnemonic,
+                    signingSecrets.password,
+                    signingSecrets.deprecatedDerivation
                 )
             derivedKeyIndices.forEach {
                 proverBuilder.withEip3Secret(it)
@@ -241,8 +221,7 @@ fun deserializeUnsignedTxOffline(serializedTx: ByteArray): UnsignedErgoLikeTrans
  */
 fun signSerializedErgoTx(
     serializedTx: ByteArray,
-    mnemonic: String,
-    mnemonicPass: String,
+    signingSecrets: SigningSecrets,
     derivedKeyIndices: List<Int>,
     texts: StringProvider
 ): SigningResult {
@@ -250,8 +229,9 @@ fun signSerializedErgoTx(
         val signedTxSerialized = getColdErgoClient().execute { ctx ->
             val proverBuilder = ctx.newProverBuilder()
                 .withMnemonic(
-                    SecretString.create(mnemonic),
-                    SecretString.create(mnemonicPass)
+                    signingSecrets.mnemonic,
+                    signingSecrets.password,
+                    signingSecrets.deprecatedDerivation
                 )
 
             derivedKeyIndices.forEach {

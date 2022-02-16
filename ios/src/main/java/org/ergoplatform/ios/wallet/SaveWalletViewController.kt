@@ -11,7 +11,6 @@ import org.ergoplatform.ios.api.IosEncryptionManager
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
-import org.ergoplatform.serializeSecrets
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
 import org.ergoplatform.utils.LogUtils
@@ -19,7 +18,7 @@ import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.localauthentication.LAContext
 import org.robovm.apple.uikit.*
 
-class SaveWalletViewController(private val mnemonic: SecretString) :
+class SaveWalletViewController(mnemonic: SecretString) :
     ViewControllerWithKeyboardLayoutGuide() {
     private lateinit var progressIndicator: UIActivityIndicatorView
     private lateinit var scrollView: UIScrollView
@@ -79,7 +78,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
 
                     val encrypted = AesEncryptionManager.encryptData(
                         password,
-                        serializeSecrets(mnemonic.toStringUnsecure()).toByteArray()
+                        uiLogic.signingSecrets.toJson().toByteArray()
                     )
 
                     saveToDbAndDismissController(ENC_TYPE_PASSWORD, encrypted)
@@ -100,7 +99,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
                     override fun onAuthenticationSucceeded(context: LAContext) {
                         try {
                             val encrypted = IosEncryptionManager.encryptDataWithKeychain(
-                                serializeSecrets(mnemonic.toStringUnsecure()).toByteArray(),
+                                uiLogic.signingSecrets.toJson().toByteArray(),
                                 context
                             )
 

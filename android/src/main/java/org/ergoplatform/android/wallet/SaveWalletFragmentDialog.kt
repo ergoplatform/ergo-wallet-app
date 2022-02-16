@@ -24,7 +24,6 @@ import org.ergoplatform.api.AndroidEncryptionManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
-import org.ergoplatform.serializeSecrets
 import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
 
 /**
@@ -126,7 +125,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 try {
                     val secretStorage = AndroidEncryptionManager.encryptDataOnDevice(
-                        serializeSecrets(args.mnemonic).toByteArray()
+                        uiLogic.signingSecrets.toJson().toByteArray()
                     )
                     saveToDbAndNavigateToWallet(
                         ENC_TYPE_DEVICE, secretStorage
@@ -178,7 +177,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
                 ENC_TYPE_PASSWORD,
                 AesEncryptionManager.encryptData(
                     password,
-                    serializeSecrets(args.mnemonic).toByteArray()
+                    uiLogic.signingSecrets.toJson().toByteArray()
                 )
             )
             return null
