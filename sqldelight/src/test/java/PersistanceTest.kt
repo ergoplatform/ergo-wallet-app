@@ -56,7 +56,6 @@ class PersistanceTest {
         assertEquals(entities.size, entities2.size)
     }
 
-    @Test
     fun testObserving() {
         val database = setupDb()
         var changes = 0
