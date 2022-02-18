@@ -112,7 +112,7 @@
     <string name="title_wallet_address">Mostra contenuto per</string>
     <string name="label_wallet_main_address">Indirizzo principale</string>
     <string name="label_wallet_address_derived">Indirizzo derivato %1s</string>
-    <string name="label_wallet_token_balance">gettoni 1s%</string>
+    <string name="label_wallet_token_balance">gettoni %1s</string>
     <string name="desc_wallet_addresses">Un portafoglio può avere più indirizzi pubblici derivati dall\'indirizzo principale.</string>
     <string name="button_add_address">Aggiungi indirizzo</string>
     <string name="button_add_addresses">Aggiungi %1d indirizzi</string>
