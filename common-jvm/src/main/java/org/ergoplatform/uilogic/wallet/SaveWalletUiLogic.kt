@@ -9,24 +9,32 @@ import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.uilogic.STRING_LABEL_WALLET_DEFAULT
 import org.ergoplatform.uilogic.StringProvider
 
-class SaveWalletUiLogic(val mnemonic: SecretString) {
+class SaveWalletUiLogic(val mnemonic: SecretString, fromRestore: Boolean) {
 
-    private var useDeprecatedDerivation: Boolean = true
-        set(value) {
-            field = value
-            _publicAddress = null
-        }
+    // Constructor
 
-    private var _publicAddress: String? = null
+    private var useDeprecatedDerivation: Boolean = false
 
-    val publicAddress
-        get() = if (_publicAddress == null) {
-            _publicAddress = getPublicErgoAddressFromMnemonic(signingSecrets)
-            _publicAddress!!
-        } else
-            _publicAddress!!
+    var publicAddress: String = getPublicErgoAddressFromMnemonic(signingSecrets)
+        private set
+
+    val hasAlternativeAddress = fromRestore &&
+            (!publicAddress.equals(
+                getPublicErgoAddressFromMnemonic(
+                    SigningSecrets(mnemonic, true)
+                )
+            ))
+
+    // methods
 
     val signingSecrets get() = SigningSecrets(mnemonic, useDeprecatedDerivation)
+
+    fun switchAddress() {
+        if (hasAlternativeAddress) {
+            useDeprecatedDerivation = !useDeprecatedDerivation
+            publicAddress = getPublicErgoAddressFromMnemonic(signingSecrets)
+        }
+    }
 
     suspend fun getSuggestedDisplayName(
         walletDbProvider: WalletDbProvider,

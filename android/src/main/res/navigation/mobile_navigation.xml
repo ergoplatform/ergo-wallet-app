@@ -153,6 +153,9 @@
         <argument
             android:name="mnemonic"
             app:argType="string" />
+        <argument
+            android:name="fromRestore"
+            app:argType="boolean" />
     </dialog>
     <fragment
         android:id="@+id/receiveToWalletFragment"

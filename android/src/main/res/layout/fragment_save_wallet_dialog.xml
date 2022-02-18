@@ -46,6 +46,21 @@
                     tools:text="9ewA9T53dy5qvAkcR5jVCtbaDW2XgWzbLPs5H4uCJJavmA4fzDx" />
 
                 <TextView
+                    android:id="@+id/button_alt_address"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:paddingHorizontal="@dimen/activity_horizontal_margin"
+                    android:paddingBottom="@dimen/activity_vertical_margin"
+                    android:text="@string/button_alt_address"
+                    android:textColor="?attr/colorControlActivated"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
                     style="@style/TextAppearance.App.Body1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -34,6 +34,7 @@ const val STRING_APPBAR_SCROLLING_VIEW_BEHAVIOR = "appbar_scrolling_view_behavio
 const val STRING_BOTTOM_SHEET_BEHAVIOR = "bottom_sheet_behavior"
 const val STRING_BUTTON_ADD_ADDRESS = "button_add_address"
 const val STRING_BUTTON_ADD_ADDRESSES = "button_add_addresses"
+const val STRING_BUTTON_ALT_ADDRESS = "button_alt_address"
 const val STRING_BUTTON_APPLY = "button_apply"
 const val STRING_BUTTON_CONNECTION_SETTINGS = "button_connection_settings"
 const val STRING_BUTTON_COPY = "button_copy"

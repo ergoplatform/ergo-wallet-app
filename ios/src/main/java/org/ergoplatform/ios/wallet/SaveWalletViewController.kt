@@ -18,14 +18,17 @@ import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.localauthentication.LAContext
 import org.robovm.apple.uikit.*
 
-class SaveWalletViewController(mnemonic: SecretString) :
-    ViewControllerWithKeyboardLayoutGuide() {
+class SaveWalletViewController(
+    private val mnemonic: SecretString,
+    private val fromRestore: Boolean
+) : ViewControllerWithKeyboardLayoutGuide() {
     private lateinit var progressIndicator: UIActivityIndicatorView
     private lateinit var scrollView: UIScrollView
     private lateinit var addressLabel: UILabel
     private lateinit var nameInputField: UITextField
     private lateinit var labelDisplayName: Body1BoldLabel
-    private val uiLogic = SaveWalletUiLogic(mnemonic)
+    private lateinit var buttonAltAddress: UIButton
+    private lateinit var uiLogic: SaveWalletUiLogic
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -64,6 +67,14 @@ class SaveWalletViewController(mnemonic: SecretString) :
                     textField?.resignFirstResponder()
                     return true
                 }
+            }
+        }
+
+        buttonAltAddress = TextButton(texts.get(STRING_BUTTON_ALT_ADDRESS))
+        buttonAltAddress.addOnTouchUpInsideListener { _, _ ->
+            uiLogic.switchAddress()
+            viewControllerScope.launch(Dispatchers.IO) {
+                refreshAddressInfo()
             }
         }
 
@@ -151,6 +162,7 @@ class SaveWalletViewController(mnemonic: SecretString) :
             NSArray(
                 introLabel,
                 addressLabel,
+                buttonAltAddress,
                 addressInfoLabel,
                 saveInfoLabel,
                 labelDisplayName,
@@ -203,21 +215,27 @@ class SaveWalletViewController(mnemonic: SecretString) :
         scrollView.isHidden = true
         progressIndicator.startAnimating()
 
-        viewControllerScope.launch {
-            val publicErgoAddressFromMnemonic = uiLogic.publicAddress
-            val db = getAppDelegate().database
-            val walletDisplayName =
-                uiLogic.getSuggestedDisplayName(db, IosStringProvider(getAppDelegate().texts))
-            val showDisplayName = uiLogic.showSuggestedDisplayName(db)
+        viewControllerScope.launch(Dispatchers.IO) {
+            uiLogic = SaveWalletUiLogic(mnemonic, fromRestore)
+            refreshAddressInfo()
+        }
+    }
 
-            runOnMainThread {
-                addressLabel.text = publicErgoAddressFromMnemonic
-                nameInputField.text = walletDisplayName
-                nameInputField.isHidden = !showDisplayName
-                labelDisplayName.isHidden = !showDisplayName
-                progressIndicator.isHidden = true
-                scrollView.isHidden = false
-            }
+    private suspend fun refreshAddressInfo() {
+        val publicErgoAddressFromMnemonic = uiLogic.publicAddress
+        val db = getAppDelegate().database
+        val walletDisplayName =
+            uiLogic.getSuggestedDisplayName(db, IosStringProvider(getAppDelegate().texts))
+        val showDisplayName = uiLogic.showSuggestedDisplayName(db)
+
+        runOnMainThread {
+            addressLabel.text = publicErgoAddressFromMnemonic
+            nameInputField.text = walletDisplayName
+            nameInputField.isHidden = !showDisplayName
+            labelDisplayName.isHidden = !showDisplayName
+            progressIndicator.isHidden = true
+            scrollView.isHidden = false
+            buttonAltAddress.isHidden = !uiLogic.hasAlternativeAddress
         }
     }
 }
