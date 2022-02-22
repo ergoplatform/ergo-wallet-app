@@ -63,26 +63,10 @@ class NodeConnector {
                 var hadError = false
                 var didSync = false
 
-                // Refresh Ergo fiat value
-                fiatCurrency = preferences.prefDisplayCurrency
-
-                var fFiatValue = fiatValue.value
-                if (fiatCurrency.isNotEmpty()) {
-                    LogUtils.logDebug("NodeConnector", "Refresh fiat value")
-                    try {
-                        val currencyGetPrice =
-                            coinGeckoApi.currencyGetPrice(fiatCurrency).execute().body()
-                        fFiatValue = currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f
-                    } catch (t: Throwable) {
-                        LogUtils.logDebug("NodeConnector", "Error: " + t.message, t)
-                        // don't set to zero here, keep last value in case of connection error
-                    }
-                } else {
-                    fFiatValue = 0f
+                val refreshFiatValueJob = launch {
+                    // Refresh Ergo fiat value
+                    refreshErgFiatValue(preferences)
                 }
-                preferences.lastFiatValue = fFiatValue
-                fiatValue.value = fFiatValue
-
 
                 // Refresh wallet states
                 try {
@@ -95,6 +79,8 @@ class NodeConnector {
                     hadError = true
                 }
 
+                refreshFiatValueJob.join()
+
                 if (!hadError && didSync) {
                     lastRefreshMs = System.currentTimeMillis()
                     preferences.lastRefreshMs = lastRefreshMs
@@ -104,6 +90,27 @@ class NodeConnector {
                 isRefreshing.value = false
             }
         }
+    }
+
+    private fun refreshErgFiatValue(preferences: PreferencesProvider) {
+        fiatCurrency = preferences.prefDisplayCurrency
+
+        var fFiatValue = fiatValue.value
+        if (fiatCurrency.isNotEmpty()) {
+            LogUtils.logDebug("NodeConnector", "Refresh fiat value")
+            try {
+                val currencyGetPrice =
+                    coinGeckoApi.currencyGetPrice(fiatCurrency).execute().body()
+                fFiatValue = currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f
+            } catch (t: Throwable) {
+                LogUtils.logDebug("NodeConnector", "Error: " + t.message, t)
+                // don't set to zero here, keep last value in case of connection error
+            }
+        } else {
+            fFiatValue = 0f
+        }
+        preferences.lastFiatValue = fFiatValue
+        fiatValue.value = fFiatValue
     }
 
     fun refreshSingleAddresses(
