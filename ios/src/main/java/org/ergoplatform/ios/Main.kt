@@ -3,12 +3,11 @@ package org.ergoplatform.ios
 import SQLite.JDBCDriver
 import com.badlogic.gdx.utils.I18NBundle
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.ios.ui.CoroutineViewController
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.isErgoMainNet
-import org.ergoplatform.isPaymentRequestUrl
 import org.ergoplatform.persistance.AppDatabase
 import org.ergoplatform.persistance.DbInitializer
 import org.ergoplatform.persistance.SqlDelightWalletProvider
@@ -49,7 +48,7 @@ class Main : UIApplicationDelegateAdapter() {
         database = SqlDelightWalletProvider(setupDatabase())
         texts = I18NBundle.createBundle(File(internalPath, "i18n/strings"))
         prefs = Preferences()
-        NodeConnector.getInstance().loadPreferenceValues(prefs)
+        WalletStateSyncManager.getInstance().loadPreferenceValues(prefs)
 
         // Set up the view controller.
         val rootViewController = BottomNavigationBar()

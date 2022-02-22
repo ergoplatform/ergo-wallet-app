@@ -18,7 +18,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -65,7 +65,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         binding.swipeRefreshLayout.setOnRefreshListener {
             if (!nodeConnector.refreshByUser(
                     Preferences(requireContext()),
@@ -187,7 +187,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
 
         // Fill fiat value
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         val ergoPrice = nodeConnector.fiatValue.value
         if (ergoPrice == 0f) {
             binding.walletFiat.visibility = View.GONE
@@ -251,7 +251,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     override fun onResume() {
         super.onResume()
         val context = requireContext()
-        NodeConnector.getInstance().refreshWhenNeeded(
+        WalletStateSyncManager.getInstance().refreshWhenNeeded(
             Preferences(context),
             RoomWalletDbProvider(AppDatabase.getInstance(context))
         )

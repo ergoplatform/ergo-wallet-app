@@ -340,7 +340,7 @@ class SendFundsViewController(
             runOnMainThread {
                 feeLabel.text = texts.format(STRING_DESC_FEE, feeAmount.toStringRoundToDecimals())
                 grossAmountLabel.setErgoAmount(grossAmount)
-                val nodeConnector = NodeConnector.getInstance()
+                val nodeConnector = WalletStateSyncManager.getInstance()
                 fiatLabel.isHidden = (nodeConnector.fiatCurrency.isEmpty())
                 fiatLabel.text = texts.format(
                     STRING_LABEL_FIAT_AMOUNT,

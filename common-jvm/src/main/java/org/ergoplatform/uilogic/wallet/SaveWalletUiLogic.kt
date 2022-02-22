@@ -1,6 +1,6 @@
 package org.ergoplatform.uilogic.wallet
 
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.persistance.WalletConfig
@@ -70,7 +70,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString) {
                     extendedPublicKey = null
                 )
             walletDbProvider.insertWalletConfig(walletConfig)
-            NodeConnector.getInstance().invalidateCache()
+            WalletStateSyncManager.getInstance().invalidateCache()
         }
     }
 

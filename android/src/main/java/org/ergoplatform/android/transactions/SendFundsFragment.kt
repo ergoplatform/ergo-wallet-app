@@ -92,7 +92,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
                 viewModel.uiLogic.feeAmount.toStringRoundToDecimals()
             )
             binding.grossAmount.setAmount(it.toBigDecimal())
-            val nodeConnector = NodeConnector.getInstance()
+            val nodeConnector = WalletStateSyncManager.getInstance()
             binding.tvFiat.visibility =
                 if (nodeConnector.fiatCurrency.isNotEmpty()) View.VISIBLE else View.GONE
             binding.tvFiat.setText(

@@ -18,7 +18,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
@@ -98,7 +98,7 @@ class WalletFragment : Fragment() {
 
         binding.buttonScan.setOnClickListener { (requireActivity() as? MainActivity)?.scanQrCode() }
 
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         val rotateAnimation =
             AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_indefinitely)
         rotateAnimation.setAnimationListener(object : Animation.AnimationListener {
@@ -162,7 +162,7 @@ class WalletFragment : Fragment() {
     }
 
     private fun refreshTimeSinceSyncLabel() {
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         val lastRefresMs = nodeConnector.lastRefreshMs
         binding.synctime.text = if (lastRefresMs > 0) getString(
             R.string.label_last_sync,
@@ -195,7 +195,7 @@ class WalletFragment : Fragment() {
         super.onResume()
         refreshTimeSinceSyncLabel()
         val context = requireContext()
-        NodeConnector.getInstance().refreshWhenNeeded(
+        WalletStateSyncManager.getInstance().refreshWhenNeeded(
             Preferences(context),
             RoomWalletDbProvider(AppDatabase.getInstance(context))
         )
@@ -313,7 +313,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         binding.walletTokenNum.setOnClickListener(launchUnfoldTokenFieldChange)
 
         // Fill fiat value
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         val ergoPrice = nodeConnector.fiatValue.value
         if (ergoPrice == 0f) {
             binding.walletFiat.visibility = View.GONE

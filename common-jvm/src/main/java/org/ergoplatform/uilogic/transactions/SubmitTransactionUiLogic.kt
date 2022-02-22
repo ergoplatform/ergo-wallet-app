@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
@@ -114,7 +114,7 @@ abstract class SubmitTransactionUiLogic {
             }
             notifyUiLocked(false)
             if (ergoTxResult.success) {
-                NodeConnector.getInstance().invalidateCache()
+                WalletStateSyncManager.getInstance().invalidateCache()
                 notifyHasTxId(ergoTxResult.txId!!)
             }
             notifyHasErgoTxResult(ergoTxResult)

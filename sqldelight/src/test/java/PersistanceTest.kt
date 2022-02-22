@@ -2,7 +2,7 @@ import com.squareup.sqldelight.db.SqlDriver
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.getDefaultExplorerApiUrl
 import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.persistance.*
@@ -149,7 +149,7 @@ class PersistanceTest {
 
         runBlocking {
             db.insertWalletConfig(WalletConfig(0, "Test2", "3Wwxnaem5ojTfp91qfLw3Y4Sr7ZWVcLPvYSzTsZ4LKGcoxujbxd3", 0, null, false, null))
-            NodeConnector.getInstance().refreshByUser(prefs, db)
+            WalletStateSyncManager.getInstance().refreshByUser(prefs, db)
             delay(10000)
         }
     }

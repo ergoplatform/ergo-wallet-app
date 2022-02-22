@@ -3,7 +3,7 @@ package org.ergoplatform.ios.wallet
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.ios.tokens.DetailTokenEntryView
 import org.ergoplatform.ios.transactions.ColdWalletSigningViewController
@@ -81,7 +81,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             if (uiRefreshControl.isRefreshing) {
                 uiRefreshControl.endRefreshing()
                 val appDelegate = getAppDelegate()
-                NodeConnector.getInstance().refreshByUser(appDelegate.prefs, appDelegate.database)
+                WalletStateSyncManager.getInstance().refreshByUser(appDelegate.prefs, appDelegate.database)
             }
         }
 
@@ -90,7 +90,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         viewControllerScope.launch {
-            NodeConnector.getInstance().isRefreshing.collect { isRefreshing ->
+            WalletStateSyncManager.getInstance().isRefreshing.collect { isRefreshing ->
                 if (!isRefreshing && uiLogic.wallet != null) {
                     uiLogic.wallet = getAppDelegate().database.loadWalletWithStateById(walletId)
                     newDataLoaded = true
@@ -125,7 +125,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
 
     override fun onResume() {
         val appDelegate = getAppDelegate()
-        NodeConnector.getInstance().refreshWhenNeeded(
+        WalletStateSyncManager.getInstance().refreshWhenNeeded(
             appDelegate.prefs,
             appDelegate.database
         )
@@ -332,7 +332,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             unconfirmedBalance.isHidden = (unconfirmed.isZero())
 
             // Fill fiat value
-            val nodeConnector = NodeConnector.getInstance()
+            val nodeConnector = WalletStateSyncManager.getInstance()
             val ergoPrice = nodeConnector.fiatValue.value
             fiatBalance.isHidden = ergoPrice == 0f
 

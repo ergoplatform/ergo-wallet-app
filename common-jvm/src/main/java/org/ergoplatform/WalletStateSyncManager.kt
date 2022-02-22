@@ -14,8 +14,10 @@ import org.ergoplatform.wallet.addresses.ensureWalletAddressListHasFirstAddress
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-
-class NodeConnector {
+/**
+ * fetches Wallet balances and fiat values
+ */
+class WalletStateSyncManager {
 
     val isRefreshing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val singleAddressRefresh: MutableStateFlow<Long> = MutableStateFlow(0)
@@ -221,11 +223,11 @@ class NodeConnector {
 
         // For Singleton instantiation
         @Volatile
-        private var instance: NodeConnector? = null
+        private var instance: WalletStateSyncManager? = null
 
-        fun getInstance(): NodeConnector {
+        fun getInstance(): WalletStateSyncManager {
             return instance ?: synchronized(this) {
-                instance ?: NodeConnector().also { instance = it }
+                instance ?: WalletStateSyncManager().also { instance = it }
             }
         }
 

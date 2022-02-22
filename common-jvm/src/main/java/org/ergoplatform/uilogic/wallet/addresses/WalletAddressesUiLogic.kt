@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.deserializeExtendedPublicKeySafe
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.getPublicErgoAddressFromXPubKey
@@ -98,7 +98,7 @@ abstract class WalletAddressesUiLogic {
                 notifyUiLocked(false)
                 // make NodeConnector fetch the balances of the added addresses, in case they
                 // were used before
-                NodeConnector.getInstance().refreshSingleAddresses(prefs, database, addedAddresses)
+                WalletStateSyncManager.getInstance().refreshSingleAddresses(prefs, database, addedAddresses)
             }
         }
     }
