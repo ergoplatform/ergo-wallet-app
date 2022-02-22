@@ -72,7 +72,7 @@ private fun bindBoxView(
             // we use the token id here, we don't have the name in the cold wallet context
             tokenBinding.labelTokenName.text = it.name ?: it.tokenId
             tokenBinding.labelTokenVal.text =
-                TokenAmount(it.amount, it.decimals ?: 0).toStringTrimTrailingZeros()
+                TokenAmount(it.amount, it.decimals ?: 0).toStringUsFormatted()
         }
     }
 }

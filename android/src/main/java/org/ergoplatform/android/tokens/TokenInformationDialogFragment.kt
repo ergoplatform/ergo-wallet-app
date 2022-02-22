@@ -51,12 +51,14 @@ class TokenInformationDialogFragment : BottomSheetDialogFragment() {
                     binding.labelTokenId.text = tokenId
                     binding.labelTokenDescription.text =
                         if (description.isNotBlank()) description else getString(R.string.label_no_description)
-                    binding.labelSupplyAmount.text = TokenAmount(fullSupply, decimals).toString()
-                    binding.labelBalanceAmount.text = TokenAmount(args.amount, decimals).toString()
+                    binding.labelSupplyAmount.text = TokenAmount(fullSupply, decimals).toStringUsFormatted(false)
+                    binding.labelBalanceAmount.text = TokenAmount(args.amount, decimals).toStringUsFormatted(false)
 
                     val showBalance = args.amount > 0 && !isSingularToken()
                     binding.labelBalanceAmount.visibility = if (showBalance) View.VISIBLE else View.GONE
                     binding.titleBalanceAmount.visibility = binding.labelBalanceAmount.visibility
+                    binding.labelSupplyAmount.visibility = if (isSingularToken()) View.GONE else View.VISIBLE
+                    binding.titleSupplyAmount.visibility = binding.labelSupplyAmount.visibility
 
                     binding.labelMintingTxId.setOnClickListener {
                         openUrlWithBrowser(requireContext(), getExplorerTxUrl(mintingTxId))

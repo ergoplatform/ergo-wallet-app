@@ -43,6 +43,50 @@
                 app:drawableEndCompat="@drawable/ic_open_in_browser_24"
                 tools:text="ba5856162d6342d2a0072f464a5a8b62b4ac4dd77195bec18c6bf268c2def831" />
 
+            <TextView
+                android:id="@+id/title_balance_amount"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:gravity="center"
+                android:text="@string/title_wallet_balance"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/label_balance_amount"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="5"
+                tools:text="100000000000000" />
+
+            <TextView
+                android:id="@+id/title_supply_amount"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:gravity="center"
+                android:text="@string/label_token_supply"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/label_supply_amount"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="5"
+                tools:text="100000000000000" />
+
             <ImageView
                 android:id="@+id/token_image"
                 android:layout_width="match_parent"
@@ -72,49 +116,6 @@
                 android:gravity="center"
                 android:maxLines="5"
                 tools:text="@tools:sample/lorem/random" />
-
-            <TextView
-                android:id="@+id/title_balance_amount"
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:gravity="center"
-                android:text="@string/title_wallet_balance"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/label_balance_amount"
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:maxLines="5"
-                tools:text="100000000000000" />
-
-            <TextView
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:gravity="center"
-                android:text="@string/label_token_supply"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/label_supply_amount"
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:maxLines="5"
-                tools:text="100000000000000" />
 
             <TextView
                 android:id="@+id/label_minting_tx_id"

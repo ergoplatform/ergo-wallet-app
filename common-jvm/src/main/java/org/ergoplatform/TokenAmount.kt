@@ -1,5 +1,7 @@
 package org.ergoplatform
 
+import java.text.NumberFormat
+import java.util.*
 import kotlin.math.pow
 
 class TokenAmount(val rawValue: Long, val decimals: Int) {
@@ -9,10 +11,16 @@ class TokenAmount(val rawValue: Long, val decimals: Int) {
         else tokenString.toBigDecimal().movePointRight(decimals).longValueExact(), decimals
     )
 
+    /**
+     * formats with full amount of decimals and without thousands separator
+     */
     override fun toString(): String {
         return rawValue.toBigDecimal().movePointLeft(decimals).toPlainString()
     }
 
+    /**
+     * formats with needed amount of decimals and without thousands separator
+     */
     fun toStringTrimTrailingZeros(): String {
         val stringWithTrailingZeros = toString()
         if (decimals > 0) {
@@ -20,6 +28,17 @@ class TokenAmount(val rawValue: Long, val decimals: Int) {
         } else {
             return stringWithTrailingZeros
         }
+    }
+
+    /**
+     * formats with thousands separators
+     */
+    fun toStringUsFormatted(trimTrailingZeros: Boolean = true): String {
+        val numberInstance = NumberFormat.getNumberInstance(Locale.US)
+        numberInstance.maximumFractionDigits = decimals
+        if (!trimTrailingZeros)
+            numberInstance.minimumFractionDigits = decimals
+        return numberInstance.format(rawValue.toBigDecimal().movePointLeft(decimals))
     }
 
     fun toDouble(): Double {

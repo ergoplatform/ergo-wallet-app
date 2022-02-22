@@ -38,7 +38,7 @@ fun formatTokenAmounts(
     val doubleValue: Double = tokenAmount.toDouble()
     val preciseString = tokenAmount.toString()
     return if (doubleValue < 1000 && preciseString.length < 8 || doubleValue < 1) {
-        preciseString
+        tokenAmount.toStringUsFormatted(false)
     } else {
         formatDoubleWithPrettyReduction(doubleValue)
     }
