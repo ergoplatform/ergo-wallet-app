@@ -1,5 +1,7 @@
 package org.ergoplatform.tokens
 
+import org.ergoplatform.appkit.Eip4Token
+import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
 
 /**
@@ -29,4 +31,18 @@ fun fillTokenOverview(tokens: List<WalletToken>, addToken: (WalletToken) -> Unit
  */
 fun WalletToken.isSingularToken(): Boolean {
     return amount == 1L && decimals == 0
+}
+
+/**
+ * @return if this is a singular token, or so-called NFT
+ */
+fun TokenInformation.isSingularToken(): Boolean {
+    return fullSupply == 1L && decimals == 0
+}
+
+/**
+ * @return if this is a singular token, or so-called NFT
+ */
+fun Eip4Token.isSingularToken(): Boolean {
+    return value == 1L && decimals == 0
 }

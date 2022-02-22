@@ -13,7 +13,7 @@ interface ErgoApi {
     fun getBoxInformation(boxId: String): Call<OutputInfo>
 }
 
-class ErgoApiService(private val defaultApi: DefaultApi) : ErgoApi {
+class ErgoApiService(val defaultApi: DefaultApi) : ErgoApi {
 
     override fun getTotalBalanceForAddress(publicAddress: String): Call<TotalBalance> =
         defaultApi.getApiV1AddressesP1BalanceTotal(publicAddress)

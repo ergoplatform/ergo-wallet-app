@@ -16,16 +16,16 @@ data class TokenInformation(
     val description: String,
     val decimals: Int,
     val fullSupply: Long,
-    val reg7hex: String,
-    val reg8hex: String,
-    val reg9hex: String,
+    val reg7hex: String?,
+    val reg8hex: String?,
+    val reg9hex: String?,
 
     // these need to be updatable
-    val genuineFlag: Int,
-    val issuerLink: String,
-    val thumbnailBytes: ByteArray?,
-    val thumbnailType: Int,
-    val updatedMs: Long
+    val genuineFlag: Int = GENUINE_UNKNOWN,
+    val issuerLink: String? = null,
+    val thumbnailBytes: ByteArray? = null,
+    val thumbnailType: Int = THUMBNAIL_TYPE_NONE,
+    val updatedMs: Long = 0
 )
 
 const val THUMBNAIL_TYPE_NONE = 0

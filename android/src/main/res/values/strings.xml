@@ -200,6 +200,13 @@
     <string name="label_ergo_pay_choose_address">Please choose an address to process the Ergo Pay Request.</string>
     <string name="error_prover_cant_sign">The transaction could not be signed with this wallet\'s keys.</string>
 
+    <!-- Token information dialog -->
+    <string name="label_minting_tx">Minting transaction</string>
+    <string name="label_token_description">Token description</string>
+    <string name="label_no_description">None</string>
+    <string name="label_token_supply">Full supply amount</string>
+    <string name="label_error_fetching">Could not fetch requested information</string>
+
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1s</string>
     <string name="about_year" translatable="false">2022</string>

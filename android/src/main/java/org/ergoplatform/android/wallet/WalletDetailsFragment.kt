@@ -205,12 +205,20 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         binding.walletTokenEntries.apply {
             removeAllViews()
             if (wallet.walletConfig.unfoldTokens) {
-                tokensList.forEach {
+                tokensList.forEach { token ->
                     inflateAndBindDetailedTokenEntryView(
-                        it,
+                        token,
                         this,
                         layoutInflater
-                    )
+                    ).also {
+                        it.root.setOnClickListener {
+                            findNavController().navigateSafe(
+                                WalletDetailsFragmentDirections.actionNavigationWalletDetailsToTokenInformationDialogFragment(
+                                    token.tokenId!!
+                                ).setAmount(token.amount ?: 0)
+                            )
+                        }
+                    }
                 }
             }
         }

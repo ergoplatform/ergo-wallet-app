@@ -35,7 +35,7 @@ fun inflateAndBindDetailedTokenEntryView(
     walletToken: WalletToken,
     linearLayout: LinearLayout,
     layoutInflater: LayoutInflater
-) {
+): EntryWalletTokenDetailsBinding {
     val itemBinding =
         EntryWalletTokenDetailsBinding.inflate(
             layoutInflater,
@@ -53,4 +53,6 @@ fun inflateAndBindDetailedTokenEntryView(
         )
     itemBinding.labelTokenVal.visibility =
         if (walletToken.isSingularToken()) View.GONE else View.VISIBLE
+
+    return itemBinding
 }
