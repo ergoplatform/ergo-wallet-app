@@ -23,4 +23,9 @@ public class ErgoDexSwap {
     @SerializedName("lastPrice")
     public BigDecimal lastPrice;
 
+    public ErgoDexSwapVolume baseVolume;
+
+    public static class ErgoDexSwapVolume {
+        long value;
+    }
 }

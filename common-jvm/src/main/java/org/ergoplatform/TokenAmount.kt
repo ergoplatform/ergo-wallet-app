@@ -1,5 +1,7 @@
 package org.ergoplatform
 
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.NumberFormat
 import java.util.*
 import kotlin.math.pow
@@ -15,7 +17,7 @@ class TokenAmount(val rawValue: Long, val decimals: Int) {
      * formats with full amount of decimals and without thousands separator
      */
     override fun toString(): String {
-        return rawValue.toBigDecimal().movePointLeft(decimals).toPlainString()
+        return toBigDecimal().toPlainString()
     }
 
     /**
@@ -38,11 +40,17 @@ class TokenAmount(val rawValue: Long, val decimals: Int) {
         numberInstance.maximumFractionDigits = decimals
         if (!trimTrailingZeros)
             numberInstance.minimumFractionDigits = decimals
-        return numberInstance.format(rawValue.toBigDecimal().movePointLeft(decimals))
+        return numberInstance.format(toBigDecimal())
     }
+
+    fun toBigDecimal() = rawValue.toBigDecimal().movePointLeft(decimals)
 
     fun toDouble(): Double {
         return (rawValue.toDouble()) / (10.0.pow(decimals))
+    }
+
+    fun toErgoValue(pricePerErg: BigDecimal): ErgoAmount {
+        return ErgoAmount(toBigDecimal().divide(pricePerErg, nanoPowerOfTen, RoundingMode.HALF_UP))
     }
 }
 

@@ -9,12 +9,15 @@ import androidx.navigation.fragment.navArgs
 import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.ergoplatform.TokenAmount
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentTokenInformationBinding
+import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.getExplorerTokenUrl
 import org.ergoplatform.getExplorerTxUrl
 import org.ergoplatform.tokens.isSingularToken
+import org.ergoplatform.utils.formatTokenPriceToString
 
 // TODO https://developer.android.com/guide/topics/media/media-formats
 class TokenInformationDialogFragment : BottomSheetDialogFragment() {
@@ -53,12 +56,27 @@ class TokenInformationDialogFragment : BottomSheetDialogFragment() {
                     if (description.isNotBlank()) description else getString(R.string.label_no_description)
                 binding.labelSupplyAmount.text =
                     TokenAmount(fullSupply, decimals).toStringUsFormatted(false)
+                val balanceAmount = TokenAmount(args.amount, decimals)
                 binding.labelBalanceAmount.text =
-                    TokenAmount(args.amount, decimals).toStringUsFormatted(false)
+                    balanceAmount.toStringUsFormatted(false)
 
                 val showBalance = args.amount > 0 && !isSingularToken()
+                val walletSyncManager = WalletStateSyncManager.getInstance()
+                val tokenPrice = walletSyncManager.tokenPrices.get(tokenId)
+
+                if (showBalance) tokenPrice?.let {
+                    binding.labelBalanceValue.text = formatTokenPriceToString(
+                        balanceAmount,
+                        it.ergValue,
+                        walletSyncManager,
+                        AndroidStringProvider(requireContext())
+                    )
+                }
+
                 binding.labelBalanceAmount.visibility = if (showBalance) View.VISIBLE else View.GONE
                 binding.titleBalanceAmount.visibility = binding.labelBalanceAmount.visibility
+                binding.labelBalanceValue.visibility =
+                    if (showBalance && tokenPrice != null) View.VISIBLE else View.GONE
                 binding.labelSupplyAmount.visibility =
                     if (isSingularToken()) View.GONE else View.VISIBLE
                 binding.titleSupplyAmount.visibility = binding.labelSupplyAmount.visibility

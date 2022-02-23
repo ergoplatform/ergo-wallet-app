@@ -1,8 +1,11 @@
 package org.ergoplatform.utils
 
 import org.ergoplatform.TokenAmount
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.uilogic.STRING_FORMAT_FIAT
+import org.ergoplatform.uilogic.STRING_LABEL_ERG_AMOUNT
 import org.ergoplatform.uilogic.StringProvider
+import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -15,6 +18,24 @@ fun inputTextToDouble(amountStr: String?): Double {
         return if (amountStr.isNullOrEmpty()) 0.0 else amountStr.toDouble()
     } catch (t: Throwable) {
         return 0.0
+    }
+}
+
+fun formatTokenPriceToString(
+    balanceAmount: TokenAmount,
+    pricePerErg: BigDecimal,
+    walletSyncManager: WalletStateSyncManager,
+    text: StringProvider
+): String {
+    val ergValue = balanceAmount.toErgoValue(pricePerErg)
+
+    return if (walletSyncManager.fiatCurrency.isNotEmpty()) {
+        formatFiatToString(
+            ergValue.toDouble() * walletSyncManager.fiatValue.value,
+            walletSyncManager.fiatCurrency, text
+        )
+    } else {
+        text.getString(STRING_LABEL_ERG_AMOUNT, ergValue.toStringRoundToDecimals())
     }
 }
 

@@ -66,6 +66,18 @@
                 tools:text="100000000000000" />
 
             <TextView
+                android:id="@+id/label_balance_value"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="5"
+                android:textColor="@color/lightgrey"
+                tools:text="904.2 ERG" />
+
+            <TextView
                 android:id="@+id/title_supply_amount"
                 style="@style/TextAppearance.App.Body1"
                 android:layout_width="wrap_content"

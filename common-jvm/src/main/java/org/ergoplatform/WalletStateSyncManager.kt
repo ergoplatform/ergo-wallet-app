@@ -119,7 +119,7 @@ class WalletStateSyncManager {
     }
 
     private fun fillTokenPriceHashMap(tokenPrices: List<TokenPrice>) {
-        synchronized(this) {
+        synchronized(this.tokenPrices) {
             this.tokenPrices.clear()
             tokenPrices.forEach {
                 this.tokenPrices[it.tokenId] = it

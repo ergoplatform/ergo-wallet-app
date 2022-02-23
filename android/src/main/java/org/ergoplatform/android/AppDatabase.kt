@@ -186,9 +186,11 @@ class RoomTokenDbProvider(private val database: AppDatabase) : TokenDbProvider {
     }
 
     override suspend fun updateTokenPrices(priceList: List<TokenPrice>) {
-        database.tokenDao().deleteAllTokenPrices()
-        database.tokenDao()
-            .insertTokenPrices(*(priceList.map { it.toDbEntity() }.toTypedArray()))
+        database.withTransaction {
+            database.tokenDao().deleteAllTokenPrices()
+            database.tokenDao()
+                .insertTokenPrices(*(priceList.map { it.toDbEntity() }.toTypedArray()))
+        }
     }
 
     override suspend fun loadTokenInformation(tokenId: String): TokenInformation? {
