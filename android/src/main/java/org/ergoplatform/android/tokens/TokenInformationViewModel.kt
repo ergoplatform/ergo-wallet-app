@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoApiService
-import org.ergoplatform.TokenInfoManager
+import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.persistance.TokenInformation

@@ -1,14 +1,15 @@
-package org.ergoplatform
+package org.ergoplatform.tokens
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ergoplatform.ErgoApiService
+import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.explorer.client.model.OutputInfo
-import org.ergoplatform.persistance.TokenDbProvider
-import org.ergoplatform.persistance.TokenInformation
+import org.ergoplatform.persistance.*
 import org.ergoplatform.utils.LogUtils
 
 class TokenInfoManager {
@@ -45,8 +46,63 @@ class TokenInfoManager {
     ): TokenInformation? {
         val fromDb = tokenDbProvider.loadTokenInformation(tokenId)
 
-        // TODO mark for update if necessary
+        fromDb?.let {
+            updateTokenInformationWhenNecessary(it, tokenDbProvider, null)
+        }
+
         return fromDb
+    }
+
+    private fun updateTokenInformationWhenNecessary(
+        token: TokenInformation,
+        tokenDbProvider: TokenDbProvider,
+        eip4Token: Eip4Token?
+    ) {
+        if (System.currentTimeMillis() - token.updatedMs > 1000L * 60 * 60) {
+            GlobalScope.launch(Dispatchers.IO) {
+
+                // check if genuine
+                val genuineToken = TokenVerifier.checkTokenGenuine(token.tokenId, token.displayName)
+
+                val tokenGenuine = when {
+                    genuineToken == null -> GENUINE_UNKNOWN
+                    genuineToken.tokenId == token.tokenId -> GENUINE_VERIFIED
+                    else -> GENUINE_SUSPICIOUS
+                }
+
+                // check for NFT
+                val thumbnailType =
+                    if (token.thumbnailType == THUMBNAIL_TYPE_BYTES_PNG && token.thumbnailBytes != null)
+                        THUMBNAIL_TYPE_BYTES_PNG else
+                        try {
+                            val eip4 = eip4Token ?: token.toEip4Token()
+
+                            when (eip4.assetType) {
+                                Eip4Token.AssetType.NFT_PICTURE -> THUMBNAIL_TYPE_NFT_IMG
+                                Eip4Token.AssetType.NFT_AUDIO -> THUMBNAIL_TYPE_NFT_AUDIO
+                                Eip4Token.AssetType.NFT_VIDEO -> THUMBNAIL_TYPE_NFT_VID
+                                else -> THUMBNAIL_TYPE_NONE
+                            }
+                        } catch (t: Throwable) {
+                            LogUtils.logDebug("TokenInfoManager", "Error processing EIP4 token", t)
+                            THUMBNAIL_TYPE_NONE
+                        }
+
+                val timeNow = System.currentTimeMillis()
+                val newToken = TokenInformation(
+                    token,
+                    tokenGenuine,
+                    if (tokenGenuine == GENUINE_VERIFIED) genuineToken!!.issuer else null,
+                    token.thumbnailBytes,
+                    thumbnailType,
+                    timeNow
+                )
+
+                tokenDbProvider.insertOrReplaceTokenInformation(newToken)
+                tokenDbProvider.pruneUnusedTokenInformation()
+                lastRepoRefresh.value = timeNow
+            }
+        }
     }
 
     private fun fetchTokenInformationFromApi(
@@ -74,8 +130,6 @@ class TokenInfoManager {
             boxInfo.additionalRegisters
         )
 
-        // TODO fill more fields with Eip4Token Information
-
         val tokenInformation = TokenInformation(
             tokenId,
             issuingBoxId,
@@ -91,14 +145,13 @@ class TokenInfoManager {
 
         GlobalScope.launch(Dispatchers.IO) {
             tokenDbProvider.insertOrReplaceTokenInformation(tokenInformation)
+            lastRepoRefresh.value = System.currentTimeMillis()
 
-            // TODO mark for update
+            updateTokenInformationWhenNecessary(tokenInformation, tokenDbProvider, eip4Token)
         }
 
         return tokenInformation
     }
-
-    // TODO prune old objects after an update
 
     companion object {
 

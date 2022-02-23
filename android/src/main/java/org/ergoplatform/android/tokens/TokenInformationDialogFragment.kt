@@ -70,7 +70,7 @@ class TokenInformationDialogFragment : BottomSheetDialogFragment() {
                         it.ergValue,
                         walletSyncManager,
                         AndroidStringProvider(requireContext())
-                    )
+                    ) + " [${it.priceSource}]"
                 }
 
                 binding.labelBalanceAmount.visibility = if (showBalance) View.VISIBLE else View.GONE
