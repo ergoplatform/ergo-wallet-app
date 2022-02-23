@@ -8,12 +8,14 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoApiService
 import org.ergoplatform.TokenInfoManager
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
+import org.ergoplatform.persistance.TokenInformation
 
 class TokenInformationViewModel : ViewModel() {
     private var tokenId: String? = null
-    private val _tokenInfo = MutableLiveData<TokenInfoManager.TokenInformationAndEip4Token?>()
-    val tokenInfo: LiveData<TokenInfoManager.TokenInformationAndEip4Token?> = _tokenInfo
+    private val _tokenInfo = MutableLiveData<TokenInformation?>()
+    val tokenInfo: LiveData<TokenInformation?> = _tokenInfo
 
     fun init(tokenId: String, ctx: Context) {
         if (this.tokenId != null)
@@ -22,8 +24,9 @@ class TokenInformationViewModel : ViewModel() {
         this.tokenId = tokenId
 
         viewModelScope.launch {
-            val info = TokenInfoManager.getTokenInformation(
+            val info = TokenInfoManager.getInstance().getTokenInformation(
                 tokenId,
+                AppDatabase.getInstance(ctx).tokenDbProvider,
                 ErgoApiService.getOrInit(Preferences(ctx))
             )
             _tokenInfo.postValue(info)

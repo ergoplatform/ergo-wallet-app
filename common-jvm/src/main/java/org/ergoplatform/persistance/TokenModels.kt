@@ -1,10 +1,12 @@
 package org.ergoplatform.persistance
 
+import java.math.BigDecimal
+
 data class TokenPrice(
     val tokenId: String,
-    val displayName: String,
+    val displayName: String?,
     val priceSource: String,
-    val nanoErgValue: Long
+    val ergValue: BigDecimal
 )
 
 data class TokenInformation(

@@ -1,30 +1,33 @@
 package org.ergoplatform
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.explorer.client.model.OutputInfo
+import org.ergoplatform.persistance.TokenDbProvider
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.utils.LogUtils
 
-object TokenInfoManager {
+class TokenInfoManager {
+    val lastRepoRefresh: MutableStateFlow<Long> = MutableStateFlow(0)
+
     /**
      * @returns token information, from db if possible, from Explorer API if not available in DB
      *          updatable information might not be loaded or outdated
      */
     suspend fun getTokenInformation(
         tokenId: String,
+        tokenDbProvider: TokenDbProvider,
         apiService: ErgoApiService
-    ): TokenInformationAndEip4Token? {
-        // TODO load from DB first and construct
-
-        // load from API
+    ): TokenInformation? {
         return withContext(Dispatchers.IO) {
+            getTokenInformationFromDb(tokenId, tokenDbProvider) ?:
+            // load from API
             try {
-                fetchTokenInformationFromApi(apiService, tokenId)
-
-                // TODO insert into db
+                fetchTokenInformationFromApi(apiService, tokenDbProvider, tokenId)
             } catch (t: Throwable) {
                 LogUtils.logDebug(
                     "TokenInfoManager",
@@ -36,10 +39,21 @@ object TokenInfoManager {
         }
     }
 
+    private suspend fun getTokenInformationFromDb(
+        tokenId: String,
+        tokenDbProvider: TokenDbProvider
+    ): TokenInformation? {
+        val fromDb = tokenDbProvider.loadTokenInformation(tokenId)
+
+        // TODO mark for update if necessary
+        return fromDb
+    }
+
     private fun fetchTokenInformationFromApi(
         apiService: ErgoApiService,
+        tokenDbProvider: TokenDbProvider,
         tokenId: String
-    ): TokenInformationAndEip4Token {
+    ): TokenInformation {
         val defaultApi = apiService.defaultApi
         val tokenApiResponse = defaultApi.getApiV1TokensP1(tokenId).execute()
 
@@ -60,28 +74,43 @@ object TokenInfoManager {
             boxInfo.additionalRegisters
         )
 
-        return TokenInformationAndEip4Token(
-            eip4Token, TokenInformation(
-                tokenId,
-                issuingBoxId,
-                boxInfo.transactionId,
-                eip4Token.tokenName,
-                eip4Token.tokenDescription,
-                eip4Token.decimals,
-                eip4Token.value,
-                eip4Token.mintingBoxR7?.toHex(),
-                eip4Token.mintingBoxR8?.toHex(),
-                eip4Token.mintingBoxR9?.toHex()
-            )
+        // TODO fill more fields with Eip4Token Information
+
+        val tokenInformation = TokenInformation(
+            tokenId,
+            issuingBoxId,
+            boxInfo.transactionId,
+            eip4Token.tokenName,
+            eip4Token.tokenDescription,
+            eip4Token.decimals,
+            eip4Token.value,
+            eip4Token.mintingBoxR7?.toHex(),
+            eip4Token.mintingBoxR8?.toHex(),
+            eip4Token.mintingBoxR9?.toHex(),
         )
+
+        GlobalScope.launch(Dispatchers.IO) {
+            tokenDbProvider.insertOrReplaceTokenInformation(tokenInformation)
+
+            // TODO mark for update
+        }
+
+        return tokenInformation
     }
 
-    /**
-     * EIP4Token can be constructed from TokenInformation, but as this is a costly operation we
-     * pass both objects around together
-     */
-    data class TokenInformationAndEip4Token(
-        val eip4Token: Eip4Token,
-        val tokenInformation: TokenInformation
-    )
+    // TODO prune old objects after an update
+
+    companion object {
+
+        // For Singleton instantiation
+        @Volatile
+        private var instance: TokenInfoManager? = null
+
+        fun getInstance(): TokenInfoManager {
+            return instance ?: synchronized(this) {
+                instance ?: TokenInfoManager().also { instance = it }
+            }
+        }
+
+    }
 }

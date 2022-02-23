@@ -16,6 +16,7 @@ import org.ergoplatform.getExplorerTokenUrl
 import org.ergoplatform.getExplorerTxUrl
 import org.ergoplatform.tokens.isSingularToken
 
+// TODO https://developer.android.com/guide/topics/media/media-formats
 class TokenInformationDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentTokenInformationBinding? = null
     private val binding get() = _binding!!
@@ -43,26 +44,27 @@ class TokenInformationDialogFragment : BottomSheetDialogFragment() {
 
         viewModel.tokenInfo.observe(viewLifecycleOwner) { token ->
             binding.progressCircular.visibility = View.GONE
-            token?.let {
-                token.tokenInformation.apply {
-                    binding.mainLayout.visibility = View.VISIBLE
-                    binding.labelTokenName.text =
-                        if (displayName.isBlank()) getString(R.string.label_unnamed_token) else displayName
-                    binding.labelTokenId.text = tokenId
-                    binding.labelTokenDescription.text =
-                        if (description.isNotBlank()) description else getString(R.string.label_no_description)
-                    binding.labelSupplyAmount.text = TokenAmount(fullSupply, decimals).toStringUsFormatted(false)
-                    binding.labelBalanceAmount.text = TokenAmount(args.amount, decimals).toStringUsFormatted(false)
+            token?.apply {
+                binding.mainLayout.visibility = View.VISIBLE
+                binding.labelTokenName.text =
+                    if (displayName.isBlank()) getString(R.string.label_unnamed_token) else displayName
+                binding.labelTokenId.text = tokenId
+                binding.labelTokenDescription.text =
+                    if (description.isNotBlank()) description else getString(R.string.label_no_description)
+                binding.labelSupplyAmount.text =
+                    TokenAmount(fullSupply, decimals).toStringUsFormatted(false)
+                binding.labelBalanceAmount.text =
+                    TokenAmount(args.amount, decimals).toStringUsFormatted(false)
 
-                    val showBalance = args.amount > 0 && !isSingularToken()
-                    binding.labelBalanceAmount.visibility = if (showBalance) View.VISIBLE else View.GONE
-                    binding.titleBalanceAmount.visibility = binding.labelBalanceAmount.visibility
-                    binding.labelSupplyAmount.visibility = if (isSingularToken()) View.GONE else View.VISIBLE
-                    binding.titleSupplyAmount.visibility = binding.labelSupplyAmount.visibility
+                val showBalance = args.amount > 0 && !isSingularToken()
+                binding.labelBalanceAmount.visibility = if (showBalance) View.VISIBLE else View.GONE
+                binding.titleBalanceAmount.visibility = binding.labelBalanceAmount.visibility
+                binding.labelSupplyAmount.visibility =
+                    if (isSingularToken()) View.GONE else View.VISIBLE
+                binding.titleSupplyAmount.visibility = binding.labelSupplyAmount.visibility
 
-                    binding.labelMintingTxId.setOnClickListener {
-                        openUrlWithBrowser(requireContext(), getExplorerTxUrl(mintingTxId))
-                    }
+                binding.labelMintingTxId.setOnClickListener {
+                    openUrlWithBrowser(requireContext(), getExplorerTxUrl(mintingTxId))
                 }
 
             } ?: run { binding.tvError.visibility = View.VISIBLE }
