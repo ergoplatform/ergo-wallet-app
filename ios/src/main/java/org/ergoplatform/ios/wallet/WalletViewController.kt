@@ -86,7 +86,7 @@ class WalletViewController : CoroutineViewController() {
         val appDelegate = getAppDelegate()
         val nodeConnector = WalletStateSyncManager.getInstance()
         viewControllerScope.launch {
-            appDelegate.database.getWalletsWithStatesFlow().collect {
+            appDelegate.database.walletDbProvider.getWalletsWithStatesFlow().collect {
                 LogUtils.logDebug("WalletViewController", "New wallet data from flow change")
                 newDataLoaded(it)
                 // do we have a new wallet or wallet address and need to trigger NodeConnector?
@@ -109,7 +109,7 @@ class WalletViewController : CoroutineViewController() {
                         "WalletViewController",
                         "Node connector refresh done, reload shown data"
                     )
-                    newDataLoaded(appDelegate.database.getWalletsWithStates())
+                    newDataLoaded(appDelegate.database.walletDbProvider.getWalletsWithStates())
                     runOnMainThread { refreshListShownData() }
                 }
             }

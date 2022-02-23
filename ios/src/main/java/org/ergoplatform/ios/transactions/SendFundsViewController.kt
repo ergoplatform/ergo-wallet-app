@@ -256,7 +256,7 @@ class SendFundsViewController(
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        uiLogic.initWallet(getAppDelegate().database, walletId, derivationIdx, paymentRequest)
+        uiLogic.initWallet(getAppDelegate().database.walletDbProvider, walletId, derivationIdx, paymentRequest)
 
         inputReceiver.text = uiLogic.receiverAddress
         if (uiLogic.amountToSend.nanoErgs > 0) setInputAmount(uiLogic.amountToSend)

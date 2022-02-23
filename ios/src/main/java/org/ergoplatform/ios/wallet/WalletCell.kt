@@ -162,7 +162,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
 
     private fun toggleTokenUnfold() {
         wallet?.walletConfig?.let { config ->
-            getAppDelegate().database.updateWalletDisplayTokens(!config.unfoldTokens, config.id)
+            getAppDelegate().database.walletDbProvider.updateWalletDisplayTokens(!config.unfoldTokens, config.id)
         }
     }
 

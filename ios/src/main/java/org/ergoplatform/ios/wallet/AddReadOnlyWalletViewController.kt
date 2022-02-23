@@ -104,7 +104,7 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
     private fun userPressedDone(uiLogic: IosAddReadOnlyWalletUiLogic) {
         viewControllerScope.launch {
             val appDelegate = getAppDelegate()
-            val success = uiLogic.addWalletToDb(tvAddress.text, appDelegate.database,
+            val success = uiLogic.addWalletToDb(tvAddress.text, appDelegate.database.walletDbProvider,
                 IosStringProvider(appDelegate.texts), tvDisplayName.text)
             if (success) {
                 runOnMainThread {

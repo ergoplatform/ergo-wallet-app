@@ -92,7 +92,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         viewControllerScope.launch {
             WalletStateSyncManager.getInstance().isRefreshing.collect { isRefreshing ->
                 if (!isRefreshing && uiLogic.wallet != null) {
-                    uiLogic.wallet = getAppDelegate().database.loadWalletWithStateById(walletId)
+                    uiLogic.wallet = getAppDelegate().database.walletDbProvider.loadWalletWithStateById(walletId)
                     newDataLoaded = true
                     runOnMainThread {
                         view.animateLayoutChanges { refresh() }
@@ -101,7 +101,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             }
         }
         viewControllerScope.launch {
-            getAppDelegate().database.walletWithStateByIdAsFlow(walletId).collect { wallet ->
+            getAppDelegate().database.walletDbProvider.walletWithStateByIdAsFlow(walletId).collect { wallet ->
                 uiLogic.wallet = wallet
                 newDataLoaded = true
 
@@ -389,7 +389,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             uiLogic.wallet?.walletConfig?.let { walletConfig ->
                 viewControllerScope.launch {
                     animateNextConfigRefresh = true
-                    getAppDelegate().database.updateWalletDisplayTokens(!walletConfig.unfoldTokens, walletId)
+                    getAppDelegate().database.walletDbProvider.updateWalletDisplayTokens(!walletConfig.unfoldTokens, walletId)
                 }
             }
         }

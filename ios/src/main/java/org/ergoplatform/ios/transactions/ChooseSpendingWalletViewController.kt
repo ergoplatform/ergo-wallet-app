@@ -93,7 +93,7 @@ class ChooseSpendingWalletViewController(
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         viewControllerScope.launch {
-            val wallets = getAppDelegate().database.getWalletsWithStates()
+            val wallets = getAppDelegate().database.walletDbProvider.getWalletsWithStates()
 
             runOnMainThread {
                 walletsStackView.clearArrangedSubviews()

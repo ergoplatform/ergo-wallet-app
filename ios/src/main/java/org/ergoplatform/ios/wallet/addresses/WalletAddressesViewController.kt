@@ -62,7 +62,7 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
         viewControllerScope.launch {
             val nodeConnector = WalletStateSyncManager.getInstance()
             nodeConnector.singleAddressRefresh.collect {
-                uiLogic.init(getAppDelegate().database, walletId)
+                uiLogic.init(getAppDelegate().database.walletDbProvider, walletId)
             }
         }
     }
@@ -188,7 +188,7 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
             LogUtils.logDebug("WalletAddressesVc", "Adding $addrCount addresses")
             val appDelegate = getAppDelegate()
             parentVc!!.uiLogic.addNextAddresses(
-                appDelegate.database,
+                appDelegate.database.walletDbProvider,
                 appDelegate.prefs, addrCount, mnemonic
             )
         }

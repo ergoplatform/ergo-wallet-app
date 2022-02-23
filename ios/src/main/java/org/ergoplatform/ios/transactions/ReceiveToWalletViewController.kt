@@ -118,7 +118,7 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         viewControllerScope.launch {
-            uiLogic.loadWallet(walletId, getAppDelegate().database)
+            uiLogic.loadWallet(walletId, getAppDelegate().database.walletDbProvider)
             uiLogic.wallet?.let {
                 runOnMainThread {
                     walletTitle.text = it.walletConfig.displayName

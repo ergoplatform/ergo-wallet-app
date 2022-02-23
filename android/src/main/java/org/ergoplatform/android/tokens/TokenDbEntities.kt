@@ -13,15 +13,14 @@ data class TokenPriceDbEntity(
     @PrimaryKey val tokenId: String,
     @ColumnInfo(name = "display_name") val displayName: String?,
     @ColumnInfo(name = "source") val priceSource: String,
-    @ColumnInfo(name = "erg_value") val ergValue: Long,
-    @ColumnInfo(name = "scale") val scale: Int
+    @ColumnInfo(name = "erg_value") val ergValue: String
 ) {
     fun toModel(): TokenPrice {
         return TokenPrice(
             tokenId,
             displayName,
             priceSource,
-            BigDecimal.valueOf(ergValue, scale)
+            BigDecimal(ergValue)
         )
     }
 }
@@ -31,8 +30,7 @@ fun TokenPrice.toDbEntity(): TokenPriceDbEntity {
         tokenId,
         displayName,
         priceSource,
-        ergValue.unscaledValue().toLong(),
-        ergValue.scale()
+        ergValue.toString()
     )
 }
 

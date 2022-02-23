@@ -19,7 +19,7 @@ class App : Application() {
         isErgoMainNet = (StageConstants.NETWORK_TYPE == NetworkType.MAINNET)
         val preferences = Preferences(applicationContext)
         AppCompatDelegate.setDefaultNightMode(preferences.dayNightMode)
-        WalletStateSyncManager.getInstance().loadPreferenceValues(preferences)
+        WalletStateSyncManager.getInstance().loadPreferenceValues(preferences, AppDatabase.getInstance(applicationContext))
 
         LogUtils.stackTraceLogger = { lastStackTrace = it }
     }

@@ -68,7 +68,7 @@ class ErgoPaySigningViewController(
             request,
             walletId,
             derivationIndex,
-            appDelegate.database,
+            appDelegate.database.walletDbProvider,
             appDelegate.prefs,
             IosStringProvider(texts)
         )

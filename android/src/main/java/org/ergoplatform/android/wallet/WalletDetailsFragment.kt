@@ -69,7 +69,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         binding.swipeRefreshLayout.setOnRefreshListener {
             if (!nodeConnector.refreshByUser(
                     Preferences(requireContext()),
-                    RoomWalletDbProvider(AppDatabase.getInstance(requireContext()))
+                    AppDatabase.getInstance(requireContext())
                 )
             ) {
                 binding.swipeRefreshLayout.isRefreshing = false
@@ -261,7 +261,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         val context = requireContext()
         WalletStateSyncManager.getInstance().refreshWhenNeeded(
             Preferences(context),
-            RoomWalletDbProvider(AppDatabase.getInstance(context))
+            AppDatabase.getInstance(context)
         )
     }
 

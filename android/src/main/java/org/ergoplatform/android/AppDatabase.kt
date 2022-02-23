@@ -26,7 +26,7 @@ import org.ergoplatform.persistance.*
         TokenInformationDbEntity::class
     ), version = 6
 )
-abstract class AppDatabase : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase(), IAppDatabase {
     abstract fun walletDao(): WalletDbDao
     abstract fun tokenDao(): TokenDbDao
 
@@ -85,14 +85,14 @@ abstract class AppDatabase : RoomDatabase() {
 
         private val MIGRATION_5_6 = object : Migration(5, 6) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("CREATE TABLE IF NOT EXISTS `token_price` (`tokenId` TEXT NOT NULL, `display_name` TEXT, `source` TEXT NOT NULL, `erg_value` INTEGER NOT NULL, `scale` INTEGER NOT NULL, PRIMARY KEY(`tokenId`))")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `token_price` (`tokenId` TEXT NOT NULL, `display_name` TEXT, `source` TEXT NOT NULL, `erg_value` TEXT NOT NULL, PRIMARY KEY(`tokenId`))")
                 database.execSQL("CREATE TABLE IF NOT EXISTS `token_info` (`tokenId` TEXT NOT NULL, `issuing_box` TEXT NOT NULL, `minting_tx` TEXT NOT NULL, `display_name` TEXT NOT NULL, `description` TEXT NOT NULL, `decimals` INTEGER NOT NULL, `full_supply` INTEGER NOT NULL, `reg7` TEXT, `reg8` TEXT, `reg9` TEXT, `genuine_flag` INTEGER NOT NULL, `issuer_link` TEXT, `thumbnail_bytes` BLOB, `thunbnail_type` INTEGER NOT NULL, `updated_ms` INTEGER NOT NULL, PRIMARY KEY(`tokenId`))")
             }
         }
     }
 
-    val tokenDbProvider get() = RoomTokenDbProvider(this)
-    val walletDbProvider get() = RoomWalletDbProvider(this)
+    override val tokenDbProvider get() = RoomTokenDbProvider(this)
+    override val walletDbProvider get() = RoomWalletDbProvider(this)
 }
 
 class RoomWalletDbProvider(private val database: AppDatabase) : WalletDbProvider {
@@ -186,6 +186,7 @@ class RoomTokenDbProvider(private val database: AppDatabase) : TokenDbProvider {
     }
 
     override suspend fun updateTokenPrices(priceList: List<TokenPrice>) {
+        database.tokenDao().deleteAllTokenPrices()
         database.tokenDao()
             .insertTokenPrices(*(priceList.map { it.toDbEntity() }.toTypedArray()))
     }
