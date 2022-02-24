@@ -2,7 +2,8 @@ package org.ergoplatform.tokens
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.ErgoApiService
@@ -13,101 +14,97 @@ import org.ergoplatform.persistance.*
 import org.ergoplatform.utils.LogUtils
 
 class TokenInfoManager {
-    val lastRepoRefresh: MutableStateFlow<Long> = MutableStateFlow(0)
-
     /**
-     * @returns token information, from db if possible, from Explorer API if not available in DB
-     *          updatable information might not be loaded or outdated
+     * @returns Flow with token information, from db if possible, from Explorer API if not available
+     *              in DB. If updates need to be done, the Flow might emit updates at a later time
      */
-    suspend fun getTokenInformation(
+    fun getTokenInformationFlow(
         tokenId: String,
         tokenDbProvider: TokenDbProvider,
         apiService: ErgoApiService
-    ): TokenInformation? {
-        return withContext(Dispatchers.IO) {
-            getTokenInformationFromDb(tokenId, tokenDbProvider) ?:
-            // load from API
-            try {
-                fetchTokenInformationFromApi(apiService, tokenDbProvider, tokenId)
-            } catch (t: Throwable) {
-                LogUtils.logDebug(
-                    "TokenInfoManager",
-                    "Could not fetch information for token $tokenId",
-                    t
-                )
-                null
+    ): Flow<TokenInformation?> {
+        return flow {
+            val emittedToken = withContext(Dispatchers.IO) {
+                // load from DB; if not found, try to load from API
+                tokenDbProvider.loadTokenInformation(tokenId) ?: try {
+                    val tokenFromApi = fetchTokenInformationFromApi(apiService, tokenId)
+                    tokenDbProvider.insertOrReplaceTokenInformation(tokenFromApi)
+                    tokenFromApi
+                } catch (t: Throwable) {
+                    LogUtils.logDebug(
+                        "TokenInfoManager",
+                        "Could not fetch information for token $tokenId",
+                        t
+                    )
+                    null
+                }
+            }
+            // emit what we've found, null if there was an error
+            emit(emittedToken)
+
+            // if necessary, update token information and emit again
+            emittedToken?.let {
+                withContext(Dispatchers.IO) {
+                    updateTokenInformationWhenNecessary(emittedToken, tokenDbProvider)
+                }?.let { emit(it) }
             }
         }
-    }
-
-    private suspend fun getTokenInformationFromDb(
-        tokenId: String,
-        tokenDbProvider: TokenDbProvider
-    ): TokenInformation? {
-        val fromDb = tokenDbProvider.loadTokenInformation(tokenId)
-
-        fromDb?.let {
-            updateTokenInformationWhenNecessary(it, tokenDbProvider, null)
-        }
-
-        return fromDb
     }
 
     private fun updateTokenInformationWhenNecessary(
         token: TokenInformation,
-        tokenDbProvider: TokenDbProvider,
-        eip4Token: Eip4Token?
-    ) {
-        if (System.currentTimeMillis() - token.updatedMs > 1000L * 60 * 60) {
-            GlobalScope.launch(Dispatchers.IO) {
+        tokenDbProvider: TokenDbProvider
+    ): TokenInformation? {
+        return if (System.currentTimeMillis() - token.updatedMs > 1000L * 60 * 60) {
 
-                // check if genuine
-                val genuineToken = TokenVerifier.checkTokenGenuine(token.tokenId, token.displayName)
+            // check if genuine
+            val genuineToken = TokenVerifier.checkTokenGenuine(token.tokenId, token.displayName)
 
-                val tokenGenuine = when {
-                    genuineToken == null -> GENUINE_UNKNOWN
-                    genuineToken.tokenId == token.tokenId -> GENUINE_VERIFIED
-                    else -> GENUINE_SUSPICIOUS
-                }
+            val tokenGenuine = when {
+                genuineToken == null -> GENUINE_UNKNOWN
+                genuineToken.tokenId == token.tokenId -> GENUINE_VERIFIED
+                else -> GENUINE_SUSPICIOUS
+            }
 
-                // check for NFT
-                val thumbnailType =
-                    if (token.thumbnailType == THUMBNAIL_TYPE_BYTES_PNG && token.thumbnailBytes != null)
-                        THUMBNAIL_TYPE_BYTES_PNG else
-                        try {
-                            val eip4 = eip4Token ?: token.toEip4Token()
+            // check for NFT
+            val thumbnailType =
+                if (token.thumbnailType == THUMBNAIL_TYPE_BYTES_PNG && token.thumbnailBytes != null)
+                    THUMBNAIL_TYPE_BYTES_PNG else
+                    try {
+                        val eip4 = token.toEip4Token()
 
-                            when (eip4.assetType) {
-                                Eip4Token.AssetType.NFT_PICTURE -> THUMBNAIL_TYPE_NFT_IMG
-                                Eip4Token.AssetType.NFT_AUDIO -> THUMBNAIL_TYPE_NFT_AUDIO
-                                Eip4Token.AssetType.NFT_VIDEO -> THUMBNAIL_TYPE_NFT_VID
-                                else -> THUMBNAIL_TYPE_NONE
-                            }
-                        } catch (t: Throwable) {
-                            LogUtils.logDebug("TokenInfoManager", "Error processing EIP4 token", t)
-                            THUMBNAIL_TYPE_NONE
+                        when (eip4.assetType) {
+                            Eip4Token.AssetType.NFT_PICTURE -> THUMBNAIL_TYPE_NFT_IMG
+                            Eip4Token.AssetType.NFT_AUDIO -> THUMBNAIL_TYPE_NFT_AUDIO
+                            Eip4Token.AssetType.NFT_VIDEO -> THUMBNAIL_TYPE_NFT_VID
+                            else -> THUMBNAIL_TYPE_NONE
                         }
+                    } catch (t: Throwable) {
+                        LogUtils.logDebug("TokenInfoManager", "Error processing EIP4 token", t)
+                        THUMBNAIL_TYPE_NONE
+                    }
 
-                val timeNow = System.currentTimeMillis()
-                val newToken = TokenInformation(
-                    token,
-                    tokenGenuine,
-                    if (tokenGenuine == GENUINE_VERIFIED) genuineToken!!.issuer else null,
-                    token.thumbnailBytes,
-                    thumbnailType,
-                    timeNow
-                )
+            val timeNow = System.currentTimeMillis()
+            val newToken = TokenInformation(
+                token,
+                tokenGenuine,
+                if (tokenGenuine == GENUINE_VERIFIED) genuineToken!!.issuer else null,
+                token.thumbnailBytes,
+                thumbnailType,
+                timeNow
+            )
 
+            GlobalScope.launch(Dispatchers.IO) {
                 tokenDbProvider.insertOrReplaceTokenInformation(newToken)
                 tokenDbProvider.pruneUnusedTokenInformation()
-                lastRepoRefresh.value = timeNow
             }
-        }
+
+            newToken
+        } else null
     }
 
     private fun fetchTokenInformationFromApi(
         apiService: ErgoApiService,
-        tokenDbProvider: TokenDbProvider,
         tokenId: String
     ): TokenInformation {
         val defaultApi = apiService.defaultApi
@@ -130,7 +127,7 @@ class TokenInfoManager {
             boxInfo.additionalRegisters
         )
 
-        val tokenInformation = TokenInformation(
+        return TokenInformation(
             tokenId,
             issuingBoxId,
             boxInfo.transactionId,
@@ -142,15 +139,6 @@ class TokenInfoManager {
             eip4Token.mintingBoxR8?.toHex(),
             eip4Token.mintingBoxR9?.toHex(),
         )
-
-        GlobalScope.launch(Dispatchers.IO) {
-            tokenDbProvider.insertOrReplaceTokenInformation(tokenInformation)
-            lastRepoRefresh.value = System.currentTimeMillis()
-
-            updateTokenInformationWhenNecessary(tokenInformation, tokenDbProvider, eip4Token)
-        }
-
-        return tokenInformation
     }
 
     companion object {

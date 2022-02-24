@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoApiService
 import org.ergoplatform.tokens.TokenInfoManager
@@ -24,12 +25,13 @@ class TokenInformationViewModel : ViewModel() {
         this.tokenId = tokenId
 
         viewModelScope.launch {
-            val info = TokenInfoManager.getInstance().getTokenInformation(
+            TokenInfoManager.getInstance().getTokenInformationFlow(
                 tokenId,
                 AppDatabase.getInstance(ctx).tokenDbProvider,
                 ErgoApiService.getOrInit(Preferences(ctx))
-            )
-            _tokenInfo.postValue(info)
+            ).collect {
+                _tokenInfo.postValue(it)
+            }
         }
     }
 }
