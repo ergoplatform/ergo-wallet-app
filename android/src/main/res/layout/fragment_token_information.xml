@@ -22,11 +22,15 @@
             <TextView
                 android:id="@+id/label_token_name"
                 style="@style/TextAppearance.App.Headline2"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:drawablePadding="@dimen/half_horizontal_margin"
                 android:ellipsize="end"
                 android:gravity="center"
                 android:maxLines="1"
+                app:drawableTint="@color/primary"
+                tools:drawableEnd="@drawable/ic_verified_24"
                 tools:text="Very long NFT name here" />
 
             <TextView
@@ -99,14 +103,47 @@
                 android:maxLines="5"
                 tools:text="100000000000000" />
 
-            <ImageView
-                android:id="@+id/token_image"
+            <LinearLayout
+                android:id="@+id/layout_nft"
                 android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:layout_marginVertical="@dimen/half_horizontal_margin"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:orientation="vertical"
                 android:visibility="gone"
-                tools:src="@drawable/ic_qr_code_24"
-                tools:visibility="visible" />
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/token_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_marginVertical="@dimen/half_horizontal_margin"
+                    android:visibility="gone"
+                    tools:src="@drawable/ic_qr_code_24"
+                    tools:visibility="visible" />
+
+                <TextView
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:gravity="center"
+                    android:text="@string/label_content_link"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/label_content_link"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="5"
+                    tools:text="link" />
+
+
+            </LinearLayout>
 
             <TextView
                 style="@style/TextAppearance.App.Body1"
@@ -159,7 +196,8 @@
             android:id="@+id/progress_circular"
             android:layout_width="50dp"
             android:layout_height="200dp"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            tools:visibility="gone" />
 
         <TextView
             android:id="@+id/tv_error"
@@ -171,8 +209,7 @@
             android:gravity="center"
             android:text="@string/label_error_fetching"
             android:visibility="gone"
-            app:drawableTopCompat="@drawable/ic_warning_amber_24"
-            tools:visibility="visible" />
+            app:drawableTopCompat="@drawable/ic_warning_amber_24" />
 
     </FrameLayout>
 

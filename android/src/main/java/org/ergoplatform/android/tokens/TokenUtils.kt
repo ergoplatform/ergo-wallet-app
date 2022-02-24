@@ -6,6 +6,10 @@ import android.widget.LinearLayout
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenDetailsBinding
+import org.ergoplatform.android.databinding.FragmentChooseTokenDialogItemBinding
+import org.ergoplatform.persistance.GENUINE_SUSPICIOUS
+import org.ergoplatform.persistance.GENUINE_VERIFIED
+import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.utils.formatTokenAmounts
@@ -55,4 +59,17 @@ fun inflateAndBindDetailedTokenEntryView(
         if (walletToken.isSingularToken()) View.GONE else View.VISIBLE
 
     return itemBinding
+}
+
+fun FragmentChooseTokenDialogItemBinding.bind(token: WalletToken) {
+    labelTokenName.text = token.name ?: root.context.getString(R.string.label_unnamed_token)
+    labelTokenId.text = token.tokenId
+}
+
+fun TokenInformation.getGenuineDrawableId(): Int {
+    return when (genuineFlag) {
+        GENUINE_VERIFIED -> R.drawable.ic_verified_24
+        GENUINE_SUSPICIOUS -> R.drawable.ic_suspicious_24
+        else -> 0
+    }
 }

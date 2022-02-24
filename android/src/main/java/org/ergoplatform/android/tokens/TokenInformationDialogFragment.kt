@@ -51,6 +51,11 @@ class TokenInformationDialogFragment : BottomSheetDialogFragment() {
                 binding.mainLayout.visibility = View.VISIBLE
                 binding.labelTokenName.text =
                     if (displayName.isBlank()) getString(R.string.label_unnamed_token) else displayName
+
+                binding.labelTokenName.setCompoundDrawablesWithIntrinsicBounds(
+                    0, 0, getGenuineDrawableId(), 0
+                )
+
                 binding.labelTokenId.text = tokenId
                 binding.labelTokenDescription.text =
                     if (description.isNotBlank()) description else getString(R.string.label_no_description)

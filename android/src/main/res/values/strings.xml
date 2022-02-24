@@ -206,6 +206,14 @@
     <string name="label_no_description">None</string>
     <string name="label_token_supply">Full supply amount</string>
     <string name="label_error_fetching">Could not fetch requested information</string>
+    <string name="label_content_link">Content link</string>
+    <string name="label_content_hash">Content Hash</string>
+    <string name="button_validate">Validate</string>
+    <string name="button_use_as_thumbnail">Use as thumbnail</string>
+    <string name="desc_download_content">Ergo Wallet can show content linked to NFT tokens. Please be
+        aware that this might be illegal or disturbing content.</string>
+    <string name="button_download_now">Download</string>
+    <string name="check_download_always">Do not ask again</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1s</string>
@@ -225,4 +233,5 @@
     <string name="label_explorer_api_url">Explorer API URL</string>
     <string name="label_node_url">Node URL</string>
     <string name="button_show_debug_info">Show debug information</string>
+    <string name="check_ask_show_content">Ask before downloading</string>
 </resources>
