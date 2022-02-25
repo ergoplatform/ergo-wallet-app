@@ -47,24 +47,6 @@ fun formatFiatToString(amount: Double, currency: String, text: StringProvider): 
             " " + currency.uppercase(Locale.getDefault())
 }
 
-/**
- * Formats token (asset) amounts, always formatted US-style.
- * For larger amounts, 1,120.00 becomes 1.1K, useful for displaying with less space
- */
-fun formatTokenAmounts(
-    amount: Long,
-    decimals: Int,
-): String {
-    val tokenAmount = TokenAmount(amount, decimals)
-    val doubleValue: Double = tokenAmount.toDouble()
-    val preciseString = tokenAmount.toString()
-    return if (doubleValue < 1000 && preciseString.length < 8 || doubleValue < 1) {
-        tokenAmount.toStringUsFormatted(false)
-    } else {
-        formatDoubleWithPrettyReduction(doubleValue)
-    }
-}
-
 fun formatDoubleWithPrettyReduction(amount: Double): String {
     val suffixChars = "KMGTPE"
     val formatter = DecimalFormat("###.#", DecimalFormatSymbols(Locale.US))

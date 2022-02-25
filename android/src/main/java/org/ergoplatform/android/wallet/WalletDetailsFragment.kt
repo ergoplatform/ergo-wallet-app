@@ -25,7 +25,7 @@ import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.EntryWalletTokenDetailsBinding
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
-import org.ergoplatform.android.tokens.WalletDetailsView
+import org.ergoplatform.android.tokens.WalletEntryView
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.openUrlWithBrowser
@@ -216,8 +216,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                             this,
                             true
                         )
-                    val walletDetailsView = WalletDetailsView(itemBinding)
-                    walletDetailsView.bind(token)
+                    val walletDetailsView = WalletEntryView(itemBinding, token)
+                    walletDetailsView.bind()
                     tokensViewList.add(walletDetailsView)
 
                     walletDetailsView.binding.root.setOnClickListener {
@@ -248,7 +248,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     }
 
     // list of token views currently in view
-    private val tokensViewList = ArrayList<WalletDetailsView>()
+    private val tokensViewList = ArrayList<WalletEntryView>()
 
     private fun onTokenInfoChanged(tokenInfoHashMap: HashMap<String, TokenInformation>) {
         // token info changed, or we have the last call from another view instance

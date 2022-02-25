@@ -52,7 +52,7 @@ class TokenInformationDialogFragment : BottomSheetDialogFragment() {
                 binding.labelTokenName.text =
                     if (displayName.isBlank()) getString(R.string.label_unnamed_token) else displayName
 
-                binding.labelTokenName.setCompoundDrawablesWithIntrinsicBounds(
+                binding.labelTokenName.setCompoundDrawablesRelativeWithIntrinsicBounds(
                     0, 0, getGenuineDrawableId(), 0
                 )
 

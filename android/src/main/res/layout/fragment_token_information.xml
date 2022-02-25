@@ -77,7 +77,7 @@
                 android:layout_gravity="center"
                 android:ellipsize="end"
                 android:gravity="center"
-                android:maxLines="5"
+                android:maxLines="1"
                 android:textColor="@color/lightgrey"
                 tools:text="904.2 ERG" />
 

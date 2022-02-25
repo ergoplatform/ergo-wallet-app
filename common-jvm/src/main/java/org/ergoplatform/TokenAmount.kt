@@ -1,5 +1,7 @@
 package org.ergoplatform
 
+import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.utils.formatDoubleWithPrettyReduction
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.NumberFormat
@@ -43,6 +45,20 @@ class TokenAmount(val rawValue: Long, val decimals: Int) {
         return numberInstance.format(toBigDecimal())
     }
 
+    /**
+     * Formats token (asset) amounts, always formatted US-style.
+     * For larger amounts, 1,120.00 becomes 1.1K, useful for displaying with less space
+     */
+    fun toStringPrettified(): String {
+        val doubleValue: Double = toDouble()
+        val preciseString = toString()
+        return if (doubleValue < 1000 && preciseString.length < 8 || doubleValue < 1) {
+            toStringUsFormatted(false)
+        } else {
+            formatDoubleWithPrettyReduction(doubleValue)
+        }
+    }
+
     fun toBigDecimal() = rawValue.toBigDecimal().movePointLeft(decimals)
 
     fun toDouble(): Double {
@@ -61,3 +77,8 @@ fun String.toTokenAmount(decimals: Int): TokenAmount? {
         return null
     }
 }
+
+fun WalletToken.toTokenAmount(): TokenAmount = TokenAmount(
+    amount ?: 0,
+    decimals
+)

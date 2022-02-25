@@ -1,18 +1,15 @@
 package org.ergoplatform.android.tokens
 
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.LinearLayout
+import org.ergoplatform.TokenAmount
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
-import org.ergoplatform.android.databinding.EntryWalletTokenDetailsBinding
 import org.ergoplatform.android.databinding.FragmentChooseTokenDialogItemBinding
 import org.ergoplatform.persistance.GENUINE_SUSPICIOUS
 import org.ergoplatform.persistance.GENUINE_VERIFIED
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
-import org.ergoplatform.tokens.isSingularToken
-import org.ergoplatform.utils.formatTokenAmounts
 
 fun inflateAndBindTokenView(
     walletToken: WalletToken,
@@ -29,10 +26,10 @@ fun inflateAndBindTokenView(
     itemBinding.labelTokenName.text =
         walletToken.name ?: layoutInflater.context.getString(R.string.label_unnamed_token)
     itemBinding.labelTokenVal.text =
-        formatTokenAmounts(
+        TokenAmount(
             walletToken.amount ?: 0,
             walletToken.decimals,
-        )
+        ).toStringPrettified()
 }
 
 fun FragmentChooseTokenDialogItemBinding.bind(token: WalletToken) {
@@ -40,7 +37,9 @@ fun FragmentChooseTokenDialogItemBinding.bind(token: WalletToken) {
     labelTokenId.text = token.tokenId
 }
 
-fun TokenInformation.getGenuineDrawableId(): Int {
+fun TokenInformation.getGenuineDrawableId() = getGenuineDrawableId(genuineFlag)
+
+fun getGenuineDrawableId(genuineFlag: Int): Int {
     return when (genuineFlag) {
         GENUINE_VERIFIED -> R.drawable.ic_verified_24
         GENUINE_SUSPICIOUS -> R.drawable.ic_suspicious_24

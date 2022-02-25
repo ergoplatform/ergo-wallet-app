@@ -155,3 +155,10 @@ fun BottomSheetDialogFragment.expandBottomSheetOnShow() {
 fun postDelayed(delayMs: Long, r: Runnable) {
     Handler(Looper.getMainLooper()).postDelayed(r, delayMs)
 }
+
+fun TextView.setTextAndVisibility(newText: String?) {
+    newText?.let {
+        visibility = View.VISIBLE
+        text = it
+    } ?: run { visibility = View.GONE }
+}
