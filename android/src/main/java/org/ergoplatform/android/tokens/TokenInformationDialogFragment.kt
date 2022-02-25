@@ -67,7 +67,7 @@ class TokenInformationDialogFragment : BottomSheetDialogFragment() {
 
                 val showBalance = args.amount > 0 && !isSingularToken()
                 val walletSyncManager = WalletStateSyncManager.getInstance()
-                val tokenPrice = walletSyncManager.tokenPrices.get(tokenId)
+                val tokenPrice = walletSyncManager.tokenPrices[tokenId]
 
                 if (showBalance) tokenPrice?.let {
                     binding.labelBalanceValue.text = formatTokenPriceToString(
