@@ -40,11 +40,17 @@ object TestUiWallet {
         listOf(firstDerivedAddress)
     )
 
-    suspend fun getSingleWalletSingleAddressDbProvider(walletId: Int): WalletDbProvider {
+    suspend fun getSingleWalletSingleAddressDbProvider(walletId: Int): IAppDatabase {
         val walletDbProvider = mock<WalletDbProvider> {
         }
         whenever(walletDbProvider.loadWalletWithStateById(walletId)).thenReturn(singleAddressWallet)
-        return walletDbProvider
+        return object : IAppDatabase {
+            override val walletDbProvider: WalletDbProvider
+                get() = walletDbProvider
+            override val tokenDbProvider: TokenDbProvider
+                get() = mock<TokenDbProvider> {}
+
+        }
     }
 
     suspend fun getSingleWalletTwoAddressesDbProvider(walletId: Int): WalletDbProvider {

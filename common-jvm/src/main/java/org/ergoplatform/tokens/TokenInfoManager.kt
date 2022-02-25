@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ergoplatform.ErgoApi
 import org.ergoplatform.ErgoApiService
 import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
@@ -46,7 +47,7 @@ class TokenInfoManager {
     suspend fun getTokenInformation(
         tokenId: String,
         tokenDbProvider: TokenDbProvider,
-        apiService: ErgoApiService
+        apiService: ErgoApi
     ): TokenInformation? {
         return withContext(Dispatchers.IO) {
             val fromDB = loadTokenFromDbOrApi(tokenDbProvider, tokenId, apiService)
@@ -62,7 +63,7 @@ class TokenInfoManager {
     private suspend fun loadTokenFromDbOrApi(
         tokenDbProvider: TokenDbProvider,
         tokenId: String,
-        apiService: ErgoApiService
+        apiService: ErgoApi
     ) = tokenDbProvider.loadTokenInformation(tokenId) ?: try {
         val tokenFromApi = fetchTokenInformationFromApi(apiService, tokenId)
         tokenDbProvider.insertOrReplaceTokenInformation(tokenFromApi)
@@ -129,11 +130,10 @@ class TokenInfoManager {
     }
 
     private fun fetchTokenInformationFromApi(
-        apiService: ErgoApiService,
+        apiService: ErgoApi,
         tokenId: String
     ): TokenInformation {
-        val defaultApi = apiService.defaultApi
-        val tokenApiResponse = defaultApi.getApiV1TokensP1(tokenId).execute()
+        val tokenApiResponse = apiService.getTokenInformation(tokenId).execute()
 
         if (!tokenApiResponse.isSuccessful) {
             throw IllegalStateException("No token information available for $tokenId")
@@ -141,8 +141,7 @@ class TokenInfoManager {
 
         val issuingBoxId = tokenApiResponse.body()!!.boxId
 
-        val boxInfo: OutputInfo =
-            defaultApi.getApiV1BoxesP1(issuingBoxId).execute().body()!!
+        val boxInfo: OutputInfo = apiService.getBoxInformation(issuingBoxId).execute().body()!!
 
         val tokenInfo = boxInfo.assets.find { it.tokenId == tokenId }!!
 

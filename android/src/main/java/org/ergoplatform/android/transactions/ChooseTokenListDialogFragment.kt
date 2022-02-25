@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.ergoplatform.android.databinding.FragmentChooseTokenDialogBinding
 import org.ergoplatform.android.databinding.FragmentChooseTokenDialogItemBinding
-import org.ergoplatform.android.tokens.bind
+import org.ergoplatform.android.tokens.ChooseTokenEntryView
 import org.ergoplatform.persistance.WalletToken
 
 /**
@@ -24,12 +24,15 @@ class ChooseTokenListDialogFragment : BottomSheetDialogFragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    private lateinit var viewModel: SendFundsViewModel
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentChooseTokenDialogBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(parentFragment as ViewModelStoreOwner)
+            .get(SendFundsViewModel::class.java)
         return binding.root
 
     }
@@ -38,21 +41,19 @@ class ChooseTokenListDialogFragment : BottomSheetDialogFragment() {
         binding.list.layoutManager =
             LinearLayoutManager(context)
 
-        val viewModel =
-            ViewModelProvider(parentFragment as ViewModelStoreOwner)
-                .get(SendFundsViewModel::class.java)
         val tokensToChooseFrom = viewModel.uiLogic.getTokensToChooseFrom()
         binding.list.adapter = DisplayTokenAdapter(tokensToChooseFrom)
     }
 
     private fun onChooseToken(tokenId: String) {
-        ViewModelProvider(parentFragment as ViewModelStoreOwner).get(SendFundsViewModel::class.java)
-            .uiLogic.newTokenChosen(tokenId)
+        viewModel.uiLogic.newTokenChosen(tokenId)
         dismiss()
     }
 
     private class ViewHolder(val binding: FragmentChooseTokenDialogItemBinding) :
-        RecyclerView.ViewHolder(binding.root)
+        RecyclerView.ViewHolder(binding.root) {
+        var entryView: ChooseTokenEntryView? = null
+    }
 
     private inner class DisplayTokenAdapter(private val items: List<WalletToken>) :
         RecyclerView.Adapter<ViewHolder>() {
@@ -71,7 +72,8 @@ class ChooseTokenListDialogFragment : BottomSheetDialogFragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val token = items.get(position)
-            holder.binding.bind(token)
+            holder.entryView = ChooseTokenEntryView(holder.binding, token)
+            holder.entryView?.bind(token.tokenId?.let { viewModel.uiLogic.tokensInfo.get(it) })
             holder.itemView.setOnClickListener { onChooseToken(token.tokenId!!) }
         }
 

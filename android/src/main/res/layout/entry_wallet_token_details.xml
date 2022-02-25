@@ -42,7 +42,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 app:drawableTint="@color/primary"
-                tools:drawableEnd="@drawable/ic_verified_24"
+                tools:drawableEnd="@drawable/ic_verified_18"
                 tools:text="Very long NFT name here" />
 
         </LinearLayout>

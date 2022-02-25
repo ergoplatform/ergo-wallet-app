@@ -7,9 +7,11 @@ import org.ergoplatform.*
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
+import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.PreferencesProvider
-import org.ergoplatform.persistance.WalletDbProvider
+import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
@@ -48,11 +50,13 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
 
     val tokensAvail: ArrayList<WalletToken> = ArrayList()
     val tokensChosen: HashMap<String, ErgoToken> = HashMap()
+    val tokensInfo: HashMap<String, TokenInformation> = HashMap()
 
     private val paymentRequestWarnings = ArrayList<PaymentRequestWarning>()
 
     fun initWallet(
-        database: WalletDbProvider,
+        database: IAppDatabase,
+        ergoApiService: ErgoApi,
         walletId: Int,
         derivationIdx: Int,
         paymentRequest: String?
@@ -71,11 +75,24 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         } else content = null
 
         coroutineScope.launch {
-            initWallet(database, walletId, derivationIdx)
+            initWallet(database.walletDbProvider, walletId, derivationIdx)
 
             content?.let {
                 addTokensFromPaymentRequest(content.tokens)
                 notifyTokensChosenChanged()
+            }
+
+            if (firstInit) {
+                wallet?.getTokensForAllAddresses()?.forEach {
+                    it.tokenId?.let {
+                        TokenInfoManager.getInstance()
+                            .getTokenInformation(it, database.tokenDbProvider, ergoApiService)?.let {
+                                synchronized(tokensInfo) {
+                                    tokensInfo.put(it.tokenId, it)
+                                }
+                            }
+                    }
+                }
             }
         }
         calcGrossAmount()

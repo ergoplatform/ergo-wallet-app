@@ -11,7 +11,7 @@ import org.ergoplatform.uilogic.STRING_LABEL_UNNAMED_TOKEN
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.formatTokenPriceToString
 
-abstract class WalletEntryViewUiLogic(val walletToken: WalletToken) {
+abstract class TokenEntryViewUiLogic(val walletToken: WalletToken) {
     abstract val texts: StringProvider
 
     private var tokenInformation: TokenInformation? = null
