@@ -15,15 +15,14 @@ import org.ergoplatform.wallet.getNumOfAddresses
 
 class WalletDetailsViewModel : ViewModel() {
 
-    val uiLogic = WalletDetailsUiLogic()
+    val uiLogic = AndroidDetailsUiLogic()
     val wallet: Wallet? get() = uiLogic.wallet
 
     // the selected index is null for "all addresses"
     var selectedIdx: Int?
         get() = uiLogic.addressIdx
         set(value) {
-            uiLogic.addressIdx = value
-            notifyObserversDerivedIdxChanged()
+            uiLogic.setAddressIdx(value)
         }
 
     private val _address = MutableLiveData<String?>()
@@ -31,22 +30,13 @@ class WalletDetailsViewModel : ViewModel() {
 
     fun init(ctx: Context, walletId: Int) {
         viewModelScope.launch {
-            AppDatabase.getInstance(ctx).walletDao().walletWithStateByIdAsFlow(walletId).collect {
-                // called every time something changes in the DB
-                uiLogic.wallet = it?.toModel()
-
-                // no address set (yet) and there is only a single address available, fix it to this one
-                if (selectedIdx == null && wallet?.getNumOfAddresses() == 1) {
-                    selectedIdx = 0
-                } else {
-                    // make sure to post to observer the first time or on DB change
-                    notifyObserversDerivedIdxChanged()
-                }
-            }
+            uiLogic.setUpWalletStateFlowCollector(AppDatabase.getInstance(ctx).walletDbProvider, walletId)
         }
     }
 
-    private fun notifyObserversDerivedIdxChanged() {
-        _address.postValue(selectedIdx?.let { wallet?.getDerivedAddress(it) })
+    inner class AndroidDetailsUiLogic: WalletDetailsUiLogic() {
+        override fun onDataChanged() {
+            _address.postValue(selectedIdx?.let { wallet?.getDerivedAddress(it) })
+        }
     }
 }

@@ -17,7 +17,6 @@ import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.WalletDetailsUiLogic
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
-import org.ergoplatform.wallet.getNumOfAddresses
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -32,7 +31,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     private lateinit var tokenContainer: TokenListContainer
     private lateinit var tokenSeparator: UIView
 
-    private val uiLogic = WalletDetailsUiLogic()
+    private val uiLogic = IosDetailsUiLogic()
     private var newDataLoaded: Boolean = false
     private var animateNextConfigRefresh = false
 
@@ -90,35 +89,17 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         viewControllerScope.launch {
+            // walletWithStateByIdAsFlow does not observe state and tokens, so we need observe
+            // WalletStateSyncManager here too
             WalletStateSyncManager.getInstance().isRefreshing.collect { isRefreshing ->
                 if (!isRefreshing && uiLogic.wallet != null) {
-                    uiLogic.wallet = getAppDelegate().database.walletDbProvider.loadWalletWithStateById(walletId)
-                    newDataLoaded = true
-                    runOnMainThread {
-                        view.animateLayoutChanges { refresh() }
-                    }
+                    animateNextConfigRefresh = true
+                    uiLogic.onWalletStateChanged(getAppDelegate().database.walletDbProvider.loadWalletWithStateById(walletId))
                 }
             }
         }
         viewControllerScope.launch {
-            getAppDelegate().database.walletDbProvider.walletWithStateByIdAsFlow(walletId).collect { wallet ->
-                uiLogic.wallet = wallet
-                newDataLoaded = true
-
-                if (uiLogic.addressIdx == null && wallet?.getNumOfAddresses() == 1) {
-                    uiLogic.addressIdx = 0
-                }
-
-                runOnMainThread {
-                    // usually, config changes are triggered by changes made on other screens (e.g. addresses list)
-                    // generally, there's no need to animate these changes. An exception is (un)folding tokens list:
-                    // this change should happen animated.
-                    if (animateNextConfigRefresh) {
-                        view.animateLayoutChanges { refresh() }
-                    } else
-                        refresh()
-                }
-            }
+            uiLogic.setUpWalletStateFlowCollector(getAppDelegate().database.walletDbProvider, walletId)
         }
         onResume()
     }
@@ -131,7 +112,20 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         )
     }
 
-    fun refresh() {
+    private fun refreshDataFromBackgroundThread() {
+        newDataLoaded = true
+        runOnMainThread {
+            // usually, config changes are triggered by changes made on other screens (e.g. addresses list)
+            // generally, there's no need to animate these changes. An exception is (un)folding tokens list:
+            // this change should happen animated, as well as state change from WalletStateSyncManager
+            if (animateNextConfigRefresh) {
+                view.animateLayoutChanges { refresh() }
+            } else
+                refresh()
+        }
+    }
+
+    private fun refresh() {
         if (uiLogic.wallet == null) {
             navigationController.popViewController(false)
         }
@@ -216,9 +210,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 addGestureRecognizer(UITapGestureRecognizer {
                     presentViewController(
                         ChooseAddressListDialogViewController(walletId, true) {
-                            uiLogic.addressIdx = it
-                            newDataLoaded = true
-                            this@WalletDetailsViewController.refresh()
+                            uiLogic.setAddressIdx(it)
                         }, true
                     ) {}
                 })
@@ -451,6 +443,13 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                             (uiLogic.walletAddress?.publicAddress ?: uiLogic.wallet!!.walletConfig.firstAddress)
                 )
             })
+        }
+    }
+
+
+    inner class IosDetailsUiLogic: WalletDetailsUiLogic() {
+        override fun onDataChanged() {
+            refreshDataFromBackgroundThread()
         }
     }
 }

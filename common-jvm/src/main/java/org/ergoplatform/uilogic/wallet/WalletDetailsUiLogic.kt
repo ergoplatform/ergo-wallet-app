@@ -1,11 +1,9 @@
 package org.ergoplatform.uilogic.wallet
 
+import kotlinx.coroutines.flow.collect
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.parsePaymentRequest
-import org.ergoplatform.persistance.Wallet
-import org.ergoplatform.persistance.WalletAddress
-import org.ergoplatform.persistance.WalletState
-import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.persistance.*
 import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
@@ -14,22 +12,44 @@ import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.wallet.*
 import org.ergoplatform.wallet.addresses.getAddressLabel
 
-class WalletDetailsUiLogic {
+abstract class WalletDetailsUiLogic {
     var wallet: Wallet? = null
-        set(value) {
-            field = value
-            refreshAddress()
-        }
+        private set
     var addressIdx: Int? = null
-        set(value) {
-            field = value
-            refreshAddress()
-        }
+        private set
     var walletAddress: WalletAddress? = null
         private set
 
+    suspend fun setUpWalletStateFlowCollector(walletDbProvider: WalletDbProvider, walletId: Int) {
+        walletDbProvider.walletWithStateByIdAsFlow(walletId).collect {
+            // called every time something changes in the DB
+            onWalletStateChanged(it)
+        }
+    }
+
+    /**
+     * this needs to be public and callable from outside because on some platforms
+     * walletWithStateByIdAsFlow does not cover all state changes, but only config changes
+     */
+    fun onWalletStateChanged(it: Wallet?) {
+        wallet = it
+
+        // no address set (yet) and there is only a single address available, fix it to this one
+        if (addressIdx == null && wallet?.getNumOfAddresses() == 1) {
+            addressIdx = 0
+        }
+        // make sure to post to observer the first time or on DB change
+        refreshAddress()
+    }
+
+    fun setAddressIdx(newAddressIdx: Int?) {
+        addressIdx = newAddressIdx
+        refreshAddress()
+    }
+
     private fun refreshAddress() {
         walletAddress = addressIdx?.let { wallet?.getDerivedAddressEntity(it) }
+        onDataChanged()
     }
 
     fun getAddressLabel(texts: StringProvider) = walletAddress?.getAddressLabel(texts)
@@ -76,4 +96,6 @@ class WalletDetailsUiLogic {
             )
         }
     }
+
+    abstract fun onDataChanged()
 }
