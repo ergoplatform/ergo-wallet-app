@@ -5,13 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.wallet.WalletDetailsUiLogic
 import org.ergoplatform.wallet.getDerivedAddress
-import org.ergoplatform.wallet.getNumOfAddresses
 
 class WalletDetailsViewModel : ViewModel() {
 
@@ -22,21 +21,31 @@ class WalletDetailsViewModel : ViewModel() {
     var selectedIdx: Int?
         get() = uiLogic.addressIdx
         set(value) {
-            uiLogic.setAddressIdx(value)
+            uiLogic.newAddressIdxChosen(value)
         }
 
     private val _address = MutableLiveData<String?>()
     val address: LiveData<String?> = _address
+    private val _tokenInfo = MutableLiveData<HashMap<String, TokenInformation>>()
+    val tokenInfo: LiveData<HashMap<String, TokenInformation>> = _tokenInfo
 
     fun init(ctx: Context, walletId: Int) {
-        viewModelScope.launch {
-            uiLogic.setUpWalletStateFlowCollector(AppDatabase.getInstance(ctx).walletDbProvider, walletId)
-        }
+        uiLogic.setUpWalletStateFlowCollector(
+            AppDatabase.getInstance(ctx).walletDbProvider,
+            walletId
+        )
     }
 
-    inner class AndroidDetailsUiLogic: WalletDetailsUiLogic() {
+    inner class AndroidDetailsUiLogic : WalletDetailsUiLogic() {
+        override val coroutineScope: CoroutineScope get() = viewModelScope
+
         override fun onDataChanged() {
             _address.postValue(selectedIdx?.let { wallet?.getDerivedAddress(it) })
+        }
+
+        override fun onNewTokenInfoGathered(tokenInformation: TokenInformation) {
+            // cause a UI refresh for tokens
+            _tokenInfo.postValue(this.tokenInformation)
         }
     }
 }

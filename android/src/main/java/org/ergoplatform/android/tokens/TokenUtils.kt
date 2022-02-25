@@ -35,32 +35,6 @@ fun inflateAndBindTokenView(
         )
 }
 
-fun inflateAndBindDetailedTokenEntryView(
-    walletToken: WalletToken,
-    linearLayout: LinearLayout,
-    layoutInflater: LayoutInflater
-): EntryWalletTokenDetailsBinding {
-    val itemBinding =
-        EntryWalletTokenDetailsBinding.inflate(
-            layoutInflater,
-            linearLayout,
-            true
-        )
-
-    itemBinding.labelTokenName.text =
-        walletToken.name ?: layoutInflater.context.getString(R.string.label_unnamed_token)
-    itemBinding.labelTokenId.text = walletToken.tokenId
-    itemBinding.labelTokenVal.text =
-        formatTokenAmounts(
-            walletToken.amount ?: 0,
-            walletToken.decimals,
-        )
-    itemBinding.labelTokenVal.visibility =
-        if (walletToken.isSingularToken()) View.GONE else View.VISIBLE
-
-    return itemBinding
-}
-
 fun FragmentChooseTokenDialogItemBinding.bind(token: WalletToken) {
     labelTokenName.text = token.name ?: root.context.getString(R.string.label_unnamed_token)
     labelTokenId.text = token.tokenId

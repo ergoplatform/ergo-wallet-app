@@ -1,6 +1,7 @@
 package org.ergoplatform.ios.wallet
 
 import com.badlogic.gdx.utils.I18NBundle
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.WalletStateSyncManager
@@ -98,9 +99,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 }
             }
         }
-        viewControllerScope.launch {
-            uiLogic.setUpWalletStateFlowCollector(getAppDelegate().database.walletDbProvider, walletId)
-        }
+        uiLogic.setUpWalletStateFlowCollector(getAppDelegate().database.walletDbProvider, walletId)
         onResume()
     }
 
@@ -210,7 +209,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 addGestureRecognizer(UITapGestureRecognizer {
                     presentViewController(
                         ChooseAddressListDialogViewController(walletId, true) {
-                            uiLogic.setAddressIdx(it)
+                            uiLogic.newAddressIdxChosen(it)
                         }, true
                     ) {}
                 })
@@ -387,7 +386,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         }
 
         fun refresh() {
-            val tokensList = uiLogic.getTokensList()
+            val tokensList = uiLogic.tokensList
             isHidden = tokensList.isEmpty()
             tokensNumLabel.text = tokensList.size.toString()
 
@@ -448,6 +447,8 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
 
 
     inner class IosDetailsUiLogic: WalletDetailsUiLogic() {
+        override val coroutineScope: CoroutineScope get() = viewControllerScope
+
         override fun onDataChanged() {
             refreshDataFromBackgroundThread()
         }

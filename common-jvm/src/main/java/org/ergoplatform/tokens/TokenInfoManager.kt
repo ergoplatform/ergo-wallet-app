@@ -26,18 +26,7 @@ class TokenInfoManager {
         return flow {
             val emittedToken = withContext(Dispatchers.IO) {
                 // load from DB; if not found, try to load from API
-                tokenDbProvider.loadTokenInformation(tokenId) ?: try {
-                    val tokenFromApi = fetchTokenInformationFromApi(apiService, tokenId)
-                    tokenDbProvider.insertOrReplaceTokenInformation(tokenFromApi)
-                    tokenFromApi
-                } catch (t: Throwable) {
-                    LogUtils.logDebug(
-                        "TokenInfoManager",
-                        "Could not fetch information for token $tokenId",
-                        t
-                    )
-                    null
-                }
+                loadTokenFromDbOrApi(tokenDbProvider, tokenId, apiService)
             }
             // emit what we've found, null if there was an error
             emit(emittedToken)
@@ -49,6 +38,42 @@ class TokenInfoManager {
                 }?.let { emit(it) }
             }
         }
+    }
+
+    /**
+     * returns token information, updated if necessary.
+     */
+    suspend fun getTokenInformation(
+        tokenId: String,
+        tokenDbProvider: TokenDbProvider,
+        apiService: ErgoApiService
+    ): TokenInformation? {
+        return withContext(Dispatchers.IO) {
+            val fromDB = loadTokenFromDbOrApi(tokenDbProvider, tokenId, apiService)
+            val updated = fromDB?.let { updateTokenInformationWhenNecessary(it, tokenDbProvider) }
+
+            return@withContext updated ?: fromDB
+        }
+    }
+
+    /**
+     * loads token information from DB. If not present, tries to load from API and inserts into db
+     */
+    private suspend fun loadTokenFromDbOrApi(
+        tokenDbProvider: TokenDbProvider,
+        tokenId: String,
+        apiService: ErgoApiService
+    ) = tokenDbProvider.loadTokenInformation(tokenId) ?: try {
+        val tokenFromApi = fetchTokenInformationFromApi(apiService, tokenId)
+        tokenDbProvider.insertOrReplaceTokenInformation(tokenFromApi)
+        tokenFromApi
+    } catch (t: Throwable) {
+        LogUtils.logDebug(
+            "TokenInfoManager",
+            "Could not fetch information for token $tokenId",
+            t
+        )
+        null
     }
 
     private fun updateTokenInformationWhenNecessary(

@@ -1,9 +1,12 @@
 package org.ergoplatform.uilogic.wallet
 
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.ergoplatform.ErgoAmount
+import org.ergoplatform.ErgoApiService
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.*
+import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
@@ -19,11 +22,20 @@ abstract class WalletDetailsUiLogic {
         private set
     var walletAddress: WalletAddress? = null
         private set
+    var tokensList: List<WalletToken> = emptyList()
+        private set
 
-    suspend fun setUpWalletStateFlowCollector(walletDbProvider: WalletDbProvider, walletId: Int) {
-        walletDbProvider.walletWithStateByIdAsFlow(walletId).collect {
-            // called every time something changes in the DB
-            onWalletStateChanged(it)
+    private var tokenInformationJob: Job? = null
+    val tokenInformation: HashMap<String, TokenInformation> = HashMap()
+
+    abstract val coroutineScope: CoroutineScope
+
+    fun setUpWalletStateFlowCollector(walletDbProvider: WalletDbProvider, walletId: Int) {
+        coroutineScope.launch {
+            walletDbProvider.walletWithStateByIdAsFlow(walletId).collect {
+                // called every time something changes in the DB
+                onWalletStateChanged(it)
+            }
         }
     }
 
@@ -42,14 +54,52 @@ abstract class WalletDetailsUiLogic {
         refreshAddress()
     }
 
-    fun setAddressIdx(newAddressIdx: Int?) {
-        addressIdx = newAddressIdx
-        refreshAddress()
+    fun newAddressIdxChosen(newAddressIdx: Int?) {
+        if (newAddressIdx != addressIdx) {
+            addressIdx = newAddressIdx
+            refreshAddress()
+        }
     }
 
     private fun refreshAddress() {
         walletAddress = addressIdx?.let { wallet?.getDerivedAddressEntity(it) }
+        tokensList = (walletAddress?.let { wallet?.getTokensForAddress(it.publicAddress) }
+            ?: wallet?.getTokensForAllAddresses() ?: emptyList()).sortedBy { it.name?.lowercase() }
+
         onDataChanged()
+    }
+
+    private fun cancelTokenGathering() {
+        tokenInformationJob?.cancel()
+        synchronized(tokenInformation) {
+            tokenInformation.clear()
+        }
+    }
+
+    fun gatherTokenInformation(tokenDbProvider: TokenDbProvider, apiService: ErgoApiService) {
+
+        // cancel former Jobs, if any
+        cancelTokenGathering()
+
+        // copy to an own list to prevent race conditions
+        val tokensList = this.tokensList.toMutableList()
+
+        // start gathering token information
+        if (tokensList.isNotEmpty()) {
+            tokenInformationJob = coroutineScope.launch {
+                tokensList.forEach {
+                    TokenInfoManager.getInstance()
+                        .getTokenInformation(it.tokenId!!, tokenDbProvider, apiService)
+                        ?.let {
+                            synchronized(tokenInformation) {
+                                tokenInformation[it.tokenId] = it
+                                onNewTokenInfoGathered(it)
+                            }
+                        }
+
+                }
+            }
+        }
     }
 
     fun getAddressLabel(texts: StringProvider) = walletAddress?.getAddressLabel(texts)
@@ -67,11 +117,6 @@ abstract class WalletDetailsUiLogic {
     fun getUnconfirmedErgoBalance() = ErgoAmount(
         getAddressState()?.unconfirmedBalance ?: wallet?.getUnconfirmedBalanceForAllAddresses() ?: 0
     )
-
-    fun getTokensList(): List<WalletToken> {
-        return (walletAddress?.let { wallet?.getTokensForAddress(it.publicAddress) }
-            ?: wallet?.getTokensForAllAddresses() ?: emptyList()).sortedBy { it.name?.lowercase() }
-    }
 
     fun qrCodeScanned(
         qrCodeData: String,
@@ -98,4 +143,8 @@ abstract class WalletDetailsUiLogic {
     }
 
     abstract fun onDataChanged()
+
+    open fun onNewTokenInfoGathered(tokenInformation: TokenInformation) {
+    }
+
 }
