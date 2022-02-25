@@ -78,17 +78,19 @@
     <TextView
         android:id="@+id/label_balance_value"
         style="@style/TextAppearance.App.Body1"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:ellipsize="end"
-        android:gravity="center"
-        android:maxLines="5"
+        android:gravity="end"
+        android:maxLines="1"
         android:paddingHorizontal="@dimen/small_padding"
         android:paddingBottom="@dimen/small_padding"
         android:textColor="@color/lightgrey"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/input_token_amount"
+        app:layout_constraintStart_toEndOf="@id/label_token_balance"
         tools:text="904.2 ERG" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

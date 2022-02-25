@@ -66,7 +66,11 @@ class TokenAmount(val rawValue: Long, val decimals: Int) {
     }
 
     fun toErgoValue(pricePerErg: BigDecimal): ErgoAmount {
-        return ErgoAmount(toBigDecimal().divide(pricePerErg, nanoPowerOfTen, RoundingMode.HALF_UP))
+        return try {
+            ErgoAmount(toBigDecimal().divide(pricePerErg, nanoPowerOfTen, RoundingMode.HALF_UP))
+        } catch (t: Throwable) {
+            ErgoAmount.ZERO
+        }
     }
 }
 

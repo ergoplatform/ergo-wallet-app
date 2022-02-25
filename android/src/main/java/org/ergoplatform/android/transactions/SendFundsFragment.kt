@@ -258,7 +258,8 @@ class SendFundsFragment : SubmitTransactionFragment() {
                                 itemBinding
                             )
                         )
-                        itemBinding.labelBalanceValue.visibility = if (tokenPrice == null) View.GONE else View.VISIBLE
+                        itemBinding.labelBalanceValue.visibility =
+                            if (tokenPrice == null) View.GONE else View.VISIBLE
                         itemBinding.inputTokenAmount.setText(
                             viewModel.uiLogic.tokenAmountToText(
                                 amountChosen,
@@ -424,11 +425,13 @@ class SendFundsFragment : SubmitTransactionFragment() {
                 s?.toString()?.toTokenAmount(token.decimals) ?: TokenAmount(0, token.decimals)
             viewModel.uiLogic.setTokenAmount(tokenId, amount)
             tokenPrice?.let {
-                itemBinding.labelBalanceValue.text = formatTokenPriceToString(
-                    amount,
-                    it.ergValue,
-                    WalletStateSyncManager.getInstance(),
-                    AndroidStringProvider(requireContext())
+                itemBinding.labelBalanceValue.text = getString(
+                    R.string.label_fiat_amount, formatTokenPriceToString(
+                        amount,
+                        it.ergValue,
+                        WalletStateSyncManager.getInstance(),
+                        AndroidStringProvider(requireContext())
+                    )
                 )
             }
             binding.labelTokenAmountError.visibility = View.GONE
