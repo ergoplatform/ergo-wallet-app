@@ -237,7 +237,8 @@ class SendFundsFragment : SubmitTransactionFragment() {
                         tokenDbEntity.name ?: getString(R.string.label_unnamed_token)
 
                     val amountChosen = it.value.value
-                    val isSingular = tokenDbEntity.isSingularToken() && amountChosen == 1L
+                    val tokenPrice = walletStateSyncManager.tokenPrices[tokenDbEntity.tokenId!!]
+                    val isSingular = tokenDbEntity.isSingularToken() && amountChosen == 1L && tokenPrice == null
 
                     if (isSingular) {
                         itemBinding.inputTokenAmount.visibility = View.GONE
@@ -250,7 +251,6 @@ class SendFundsFragment : SubmitTransactionFragment() {
                         itemBinding.inputTokenAmount.inputType =
                             if (tokenDbEntity.decimals > 0) InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
                             else InputType.TYPE_CLASS_NUMBER
-                        val tokenPrice = walletStateSyncManager.tokenPrices[tokenDbEntity.tokenId!!]
                         itemBinding.inputTokenAmount.addTextChangedListener(
                             TokenAmountWatcher(
                                 tokenDbEntity,

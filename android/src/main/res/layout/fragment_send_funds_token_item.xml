@@ -18,6 +18,7 @@
         android:inputType="numberDecimal"
         app:layout_constraintBottom_toTopOf="@id/label_balance_value"
         app:layout_constraintEnd_toStartOf="@id/button_token_remove"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@id/guideline"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="123.45" />
@@ -41,7 +42,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         app:layout_constraintBottom_toTopOf="@id/label_token_balance"
-        app:layout_constraintEnd_toStartOf="@id/guideline"
+        app:layout_constraintEnd_toStartOf="@id/input_token_amount"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Token Name" />
