@@ -1,10 +1,7 @@
 package org.ergoplatform.uilogic.tokens
 
 import org.ergoplatform.WalletStateSyncManager
-import org.ergoplatform.persistance.GENUINE_UNKNOWN
-import org.ergoplatform.persistance.GENUINE_VERIFIED
-import org.ergoplatform.persistance.TokenInformation
-import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.persistance.*
 import org.ergoplatform.toTokenAmount
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.uilogic.STRING_LABEL_UNNAMED_TOKEN
@@ -22,6 +19,7 @@ abstract class TokenEntryViewUiLogic(val walletToken: WalletToken) {
     abstract fun setDisplayedBalance(value: String?)
     abstract fun setDisplayedPrice(price: String?)
     abstract fun setGenuineFlag(genuineFlag: Int)
+    abstract fun setThumbnail(thumbnailType: Int)
 
     fun bind(tokenInformation: TokenInformation? = null) {
         this.tokenInformation = tokenInformation
@@ -32,7 +30,7 @@ abstract class TokenEntryViewUiLogic(val walletToken: WalletToken) {
         val genuineFlag = tokenInformation?.genuineFlag ?: GENUINE_UNKNOWN
 
         setDisplayedTokenName(
-            walletToken.name ?: textProvider.getString(STRING_LABEL_UNNAMED_TOKEN)
+            tokenInformation?.displayName ?: walletToken.name ?: textProvider.getString(STRING_LABEL_UNNAMED_TOKEN)
         )
         setGenuineFlag(genuineFlag)
         setDisplayedTokenId(if (genuineFlag == GENUINE_VERIFIED) null else walletToken.tokenId)
@@ -51,8 +49,7 @@ abstract class TokenEntryViewUiLogic(val walletToken: WalletToken) {
             }
         } else null)
 
-        // TODO show thumbnail (also in detail screen)
-
+        setThumbnail(tokenInformation?.thumbnailType ?: THUMBNAIL_TYPE_NONE)
     }
 
     fun addTokenInfo(tokenInformation: TokenInformation) {

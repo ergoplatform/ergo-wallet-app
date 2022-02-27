@@ -1,6 +1,7 @@
 package org.ergoplatform.android.tokens
 
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.LinearLayout
 import org.ergoplatform.TokenAmount
 import org.ergoplatform.android.R
@@ -63,6 +64,12 @@ class WalletDetailsTokenEntryView(val binding: EntryWalletTokenDetailsBinding, w
     override fun setDisplayedPrice(price: String?) {
         binding.labelBalanceValue.setTextAndVisibility(price)
     }
+
+    override fun setThumbnail(thumbnailType: Int) {
+        val thumbnail = getThumbnailDrawableId(thumbnailType)
+        binding.layoutThumbnail.visibility = if (thumbnail != 0) View.VISIBLE else View.GONE
+        binding.imgThumbnail.setImageResource(thumbnail)
+    }
 }
 
 class ChooseTokenEntryView(val binding: FragmentChooseTokenDialogItemBinding, walletToken: WalletToken) : TokenEntryViewUiLogic(walletToken) {
@@ -94,4 +101,9 @@ class ChooseTokenEntryView(val binding: FragmentChooseTokenDialogItemBinding, wa
         )
     }
 
+    override fun setThumbnail(thumbnailType: Int) {
+        val thumbnail = getThumbnailDrawableId(thumbnailType)
+        binding.layoutThumbnail.visibility = if (thumbnail != 0) View.VISIBLE else View.GONE
+        binding.imgThumbnail.setImageResource(thumbnail)
+    }
 }

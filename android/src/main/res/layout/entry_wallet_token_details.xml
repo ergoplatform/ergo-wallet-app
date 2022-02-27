@@ -22,13 +22,35 @@
             android:layout_gravity="center"
             android:orientation="horizontal">
 
+            <FrameLayout
+                android:id="@+id/layout_thumbnail"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/half_horizontal_margin"
+                android:background="@drawable/ic_octagon_48"
+                android:backgroundTint="?attr/colorControlNormal"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/img_thumbnail"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    app:tint="@color/cardview_background"
+                    tools:src="@drawable/ic_photo_camera_24" />
+
+            </FrameLayout>
+
             <TextView
                 android:id="@+id/label_token_val"
                 style="@style/TextAppearance.App.Body1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginHorizontal="6dp"
+                android:layout_marginEnd="@dimen/small_padding"
                 android:maxLines="1"
                 android:textStyle="bold"
                 tools:text="1230000" />
