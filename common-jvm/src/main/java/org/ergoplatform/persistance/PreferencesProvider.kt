@@ -8,8 +8,11 @@ const val KEY_FIAT_CURRENCY = "fiatCurrency"
 const val KEY_FIAT_VALUE = "fiatValue"
 const val KEY_NODE_URL = "nodeUrl"
 const val KEY_EXPLORER_API_URL = "explorerApiUrl"
+const val KEY_IPFS_GATEWAY_URL = "explorerApiUrl"
 const val KEY_LASTREFRESH = "lastRefreshMs"
 const val FIAT_CURRENCY_DEFAULT = "usd"
+
+private const val DEFAULT_IPFS_GATEWAY = "https://cloudflare-ipfs.com/"
 
 abstract class PreferencesProvider {
 
@@ -57,6 +60,20 @@ abstract class PreferencesProvider {
             }
 
             saveString(KEY_EXPLORER_API_URL, savedExplorerApiUrl)
+        }
+
+    var prefIpfsGatewayUrl: String
+        // alts: https://gateway.pinata.cloud https://ipfs.best-practice.se
+        get() = getString(KEY_IPFS_GATEWAY_URL, DEFAULT_IPFS_GATEWAY)
+        set(value) {
+            var ipfsGatewayUrl = value
+            if (ipfsGatewayUrl.isEmpty()) {
+                ipfsGatewayUrl = DEFAULT_IPFS_GATEWAY
+            } else if (!ipfsGatewayUrl.endsWith("/")) {
+                ipfsGatewayUrl += "/"
+            }
+
+            saveString(KEY_EXPLORER_API_URL, ipfsGatewayUrl)
         }
 
     var lastRefreshMs: Long

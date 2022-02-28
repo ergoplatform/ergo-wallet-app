@@ -48,12 +48,17 @@ fun TextView.enableLinks() {
     movementMethod = LinkMovementMethod.getInstance()
 }
 
-fun openUrlWithBrowser(context: Context, url: String) {
-    val browserIntent = Intent(
-        Intent.ACTION_VIEW,
-        Uri.parse(url)
-    )
-    context.startActivity(browserIntent)
+fun openUrlWithBrowser(context: Context, url: String): Boolean {
+    return try {
+        val browserIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse(url)
+        )
+        context.startActivity(browserIntent)
+        true
+    } catch (t: Throwable) {
+        false
+    }
 }
 
 /**

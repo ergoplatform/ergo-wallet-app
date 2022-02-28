@@ -59,4 +59,6 @@ fun formatDoubleWithPrettyReduction(amount: Double): String {
     }
 }
 
+fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
+
 fun Throwable.getMessageOrName(): String = message ?: javaClass.name

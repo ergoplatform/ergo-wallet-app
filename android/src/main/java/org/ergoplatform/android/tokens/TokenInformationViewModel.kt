@@ -11,12 +11,15 @@ import org.ergoplatform.ErgoApiService
 import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
+import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.persistance.TokenInformation
 
 class TokenInformationViewModel : ViewModel() {
     private var tokenId: String? = null
     private val _tokenInfo = MutableLiveData<TokenInformation?>()
     val tokenInfo: LiveData<TokenInformation?> = _tokenInfo
+    var eip4Token: Eip4Token? = null
+        private set
 
     fun init(tokenId: String, ctx: Context) {
         if (this.tokenId != null)
@@ -30,6 +33,12 @@ class TokenInformationViewModel : ViewModel() {
                 AppDatabase.getInstance(ctx).tokenDbProvider,
                 ErgoApiService.getOrInit(Preferences(ctx))
             ).collect {
+                eip4Token = try {
+                    it?.toEip4Token()
+                } catch (t: Throwable) {
+                    null
+                }
+
                 _tokenInfo.postValue(it)
             }
         }
