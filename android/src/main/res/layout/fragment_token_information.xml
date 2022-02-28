@@ -112,14 +112,27 @@
                 android:visibility="gone"
                 tools:visibility="visible">
 
-                <ImageView
-                    android:id="@+id/token_image"
-                    android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:layout_marginVertical="@dimen/half_horizontal_margin"
+                <FrameLayout
+                    android:id="@+id/layout_thumbnail"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="@dimen/half_horizontal_margin"
+                    android:background="@drawable/ic_octagon_48"
+                    android:backgroundTint="?attr/colorControlNormal"
                     android:visibility="gone"
-                    tools:src="@drawable/ic_qr_code_24"
-                    tools:visibility="visible" />
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:id="@+id/img_thumbnail"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        app:tint="@color/cardview_background"
+                        tools:src="@drawable/ic_photo_camera_24" />
+
+                </FrameLayout>
 
                 <TextView
                     style="@style/TextAppearance.App.Body1"

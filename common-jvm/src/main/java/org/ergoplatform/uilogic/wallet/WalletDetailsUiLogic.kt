@@ -30,10 +30,24 @@ abstract class WalletDetailsUiLogic {
 
     abstract val coroutineScope: CoroutineScope
 
-    fun setUpWalletStateFlowCollector(walletDbProvider: WalletDbProvider, walletId: Int) {
+    fun setUpWalletStateFlowCollector(database: IAppDatabase, walletId: Int) {
         coroutineScope.launch {
-            walletDbProvider.walletWithStateByIdAsFlow(walletId).collect {
+            database.walletDbProvider.walletWithStateByIdAsFlow(walletId).collect {
                 // called every time something changes in the DB
+
+                // on first call, prefill the tokenInformation map with information right from the
+                // db. This won't fetch or update existing information, this is done by
+                // gatherTokenInformation after UI is drawn for the first time
+                if (tokenInformation.isEmpty()) {
+                    wallet?.getTokensForAllAddresses()?.forEach { walletToken ->
+                        database.tokenDbProvider.loadTokenInformation(walletToken.tokenId!!)?.let {
+                            synchronized(tokenInformation) {
+                                tokenInformation[it.tokenId] = it
+                            }
+                        }
+                    }
+                }
+
                 onWalletStateChanged(it)
             }
         }
@@ -69,17 +83,10 @@ abstract class WalletDetailsUiLogic {
         onDataChanged()
     }
 
-    private fun cancelTokenGathering() {
-        tokenInformationJob?.cancel()
-        synchronized(tokenInformation) {
-            tokenInformation.clear()
-        }
-    }
-
     fun gatherTokenInformation(tokenDbProvider: TokenDbProvider, apiService: ErgoApiService) {
 
         // cancel former Jobs, if any
-        cancelTokenGathering()
+        tokenInformationJob?.cancel()
 
         // copy to an own list to prevent race conditions
         val tokensList = this.tokensList.toMutableList()

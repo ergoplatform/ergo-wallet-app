@@ -1,5 +1,6 @@
 package org.ergoplatform.uilogic.tokens
 
+import org.ergoplatform.TokenAmount
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.persistance.*
 import org.ergoplatform.toTokenAmount
@@ -25,12 +26,16 @@ abstract class TokenEntryViewUiLogic(val walletToken: WalletToken) {
         this.tokenInformation = tokenInformation
 
         val textProvider = this.texts
-        val balanceAmount = walletToken.toTokenAmount()
+        val balanceAmount =
+            tokenInformation?.let { TokenAmount(walletToken.amount ?: 0, it.decimals) }
+                ?: walletToken.toTokenAmount()
         val singularToken = (tokenInformation?.isSingularToken() ?: walletToken.isSingularToken())
         val genuineFlag = tokenInformation?.genuineFlag ?: GENUINE_UNKNOWN
 
         setDisplayedTokenName(
-            tokenInformation?.displayName ?: walletToken.name ?: textProvider.getString(STRING_LABEL_UNNAMED_TOKEN)
+            tokenInformation?.displayName ?: walletToken.name ?: textProvider.getString(
+                STRING_LABEL_UNNAMED_TOKEN
+            )
         )
         setGenuineFlag(genuineFlag)
         setDisplayedTokenId(if (genuineFlag == GENUINE_VERIFIED) null else walletToken.tokenId)

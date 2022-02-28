@@ -99,7 +99,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 }
             }
         }
-        uiLogic.setUpWalletStateFlowCollector(getAppDelegate().database.walletDbProvider, walletId)
+        uiLogic.setUpWalletStateFlowCollector(getAppDelegate().database, walletId)
         onResume()
     }
 

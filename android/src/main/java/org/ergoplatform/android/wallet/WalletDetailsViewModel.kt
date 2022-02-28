@@ -31,7 +31,7 @@ class WalletDetailsViewModel : ViewModel() {
 
     fun init(ctx: Context, walletId: Int) {
         uiLogic.setUpWalletStateFlowCollector(
-            AppDatabase.getInstance(ctx).walletDbProvider,
+            AppDatabase.getInstance(ctx),
             walletId
         )
     }

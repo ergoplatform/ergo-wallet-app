@@ -209,6 +209,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             removeAllViews()
             tokensViewList.clear()
             if (wallet.walletConfig.unfoldTokens) {
+                val tokenInfoMap = walletDetailsViewModel.uiLogic.tokenInformation
                 tokensList.forEach { token ->
                     val itemBinding =
                         EntryWalletTokenDetailsBinding.inflate(
@@ -217,7 +218,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                             true
                         )
                     val walletDetailsView = WalletDetailsTokenEntryView(itemBinding, token)
-                    walletDetailsView.bind()
+                    walletDetailsView.bind(tokenInfoMap[token.tokenId!!])
                     tokensViewList.add(walletDetailsView)
 
                     walletDetailsView.binding.root.setOnClickListener {
