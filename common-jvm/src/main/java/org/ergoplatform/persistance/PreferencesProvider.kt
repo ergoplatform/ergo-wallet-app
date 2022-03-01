@@ -63,6 +63,8 @@ abstract class PreferencesProvider {
             saveString(KEY_EXPLORER_API_URL, savedExplorerApiUrl)
         }
 
+    val defaultIpfsGatewayUrl = DEFAULT_IPFS_GATEWAY
+
     var prefIpfsGatewayUrl: String
         // alts: https://gateway.pinata.cloud https://ipfs.best-practice.se
         get() = getString(KEY_IPFS_GATEWAY_URL, DEFAULT_IPFS_GATEWAY)
@@ -74,7 +76,7 @@ abstract class PreferencesProvider {
                 ipfsGatewayUrl += "/"
             }
 
-            saveString(KEY_EXPLORER_API_URL, ipfsGatewayUrl)
+            saveString(KEY_IPFS_GATEWAY_URL, ipfsGatewayUrl)
         }
 
     var downloadNftContent: Boolean
