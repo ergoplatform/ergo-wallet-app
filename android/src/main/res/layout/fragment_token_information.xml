@@ -179,9 +179,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:background="?selectableItemBackground"
                     android:drawablePadding="@dimen/small_padding"
-                    android:ellipsize="end"
+                    android:ellipsize="middle"
                     android:gravity="center"
+                    android:maxLines="1"
                     app:drawableTint="@color/primary"
                     tools:drawableEnd="@drawable/ic_verified_18"
                     tools:text="hash" />

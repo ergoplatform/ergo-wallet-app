@@ -9,7 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.persistance.TokenInformation
-import org.ergoplatform.uilogic.tokens.TokenInformationUiLogic
+import org.ergoplatform.uilogic.tokens.TokenInformationModelLogic
 
 class TokenInformationViewModel : ViewModel() {
     val uiLogic = AndroidUiLogic()
@@ -17,8 +17,8 @@ class TokenInformationViewModel : ViewModel() {
     private var tokenId: String? = null
     private val _tokenInfo = MutableLiveData<TokenInformation?>()
     val tokenInfo: LiveData<TokenInformation?> = _tokenInfo
-    private val _downloadState = MutableLiveData<TokenInformationUiLogic.StateDownload>()
-    val downloadState: LiveData<TokenInformationUiLogic.StateDownload> get() = _downloadState
+    private val _downloadState = MutableLiveData<TokenInformationModelLogic.StateDownload>()
+    val downloadState: LiveData<TokenInformationModelLogic.StateDownload> get() = _downloadState
 
     fun init(tokenId: String, ctx: Context) {
         if (this.tokenId != null)
@@ -29,7 +29,7 @@ class TokenInformationViewModel : ViewModel() {
         uiLogic.init(tokenId, AppDatabase.getInstance(ctx), Preferences(ctx))
     }
 
-    inner class AndroidUiLogic : TokenInformationUiLogic() {
+    inner class AndroidUiLogic : TokenInformationModelLogic() {
         override val coroutineScope: CoroutineScope
             get() = viewModelScope
 

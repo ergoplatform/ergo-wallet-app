@@ -8,17 +8,14 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import org.ergoplatform.TokenAmount
-import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.android.Preferences
-import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentTokenInformationBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.copyStringToClipboard
 import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.getExplorerTokenUrl
 import org.ergoplatform.getExplorerTxUrl
-import org.ergoplatform.tokens.isSingularToken
-import org.ergoplatform.utils.formatTokenPriceToString
+import org.ergoplatform.tokens.getHttpContentLink
 
 class TokenInformationDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentTokenInformationBinding? = null
@@ -49,59 +46,15 @@ class TokenInformationDialogFragment : BottomSheetDialogFragment() {
             binding.progressCircular.visibility = View.GONE
             token?.apply {
                 binding.mainLayout.visibility = View.VISIBLE
-                binding.labelTokenName.text =
-                    if (displayName.isBlank()) getString(R.string.label_unnamed_token) else displayName
-
-                binding.labelTokenName.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                    0, 0, getGenuineDrawableId(), 0
-                )
-
-                binding.labelTokenId.text = tokenId
-                binding.labelTokenDescription.text =
-                    if (description.isNotBlank()) description else getString(R.string.label_no_description)
-                binding.labelSupplyAmount.text =
-                    TokenAmount(fullSupply, decimals).toStringUsFormatted(false)
-                val balanceAmount = TokenAmount(args.amount, decimals)
-                binding.labelBalanceAmount.text =
-                    balanceAmount.toStringUsFormatted(false)
-
-                val showBalance = args.amount > 0 && !isSingularToken()
-                val walletSyncManager = WalletStateSyncManager.getInstance()
-                val tokenPrice = walletSyncManager.tokenPrices[tokenId]
-
-                if (showBalance) tokenPrice?.let {
-                    binding.labelBalanceValue.text = formatTokenPriceToString(
-                        balanceAmount,
-                        it.ergValue,
-                        walletSyncManager,
-                        AndroidStringProvider(requireContext())
-                    ) + " [${it.priceSource}]"
-                }
-
-                binding.labelBalanceAmount.visibility = if (showBalance) View.VISIBLE else View.GONE
-                binding.titleBalanceAmount.visibility = binding.labelBalanceAmount.visibility
-                binding.labelBalanceValue.visibility =
-                    if (showBalance && tokenPrice != null) View.VISIBLE else View.GONE
-                binding.labelSupplyAmount.visibility =
-                    if (isSingularToken()) View.GONE else View.VISIBLE
-                binding.titleSupplyAmount.visibility = binding.labelSupplyAmount.visibility
-
+                updateLayout(viewModel)
                 binding.labelMintingTxId.setOnClickListener {
                     openUrlWithBrowser(requireContext(), getExplorerTxUrl(mintingTxId))
-                }
-
-                updateNftLayout(viewModel)
-
-                binding.buttonDownloadContent.setOnClickListener {
-                    viewModel.uiLogic.downloadContent(
-                        Preferences(requireContext())
-                    )
                 }
             } ?: run { binding.tvError.visibility = View.VISIBLE }
         }
 
         viewModel.downloadState.observe(viewLifecycleOwner) {
-            updateNftLayout(viewModel, true)
+            updateLayout(viewModel, true)
         }
 
         binding.labelTokenId.setOnClickListener {
@@ -116,22 +69,41 @@ class TokenInformationDialogFragment : BottomSheetDialogFragment() {
             binding.labelTokenDescription.maxLines =
                 if (binding.labelTokenDescription.maxLines == 5) 1000 else 5
         }
+        binding.buttonDownloadContent.setOnClickListener {
+            viewModel.uiLogic.downloadContent(
+                Preferences(requireContext())
+            )
+        }
+        binding.labelContentLink.setOnClickListener {
+            viewModel.uiLogic.eip4Token?.nftContentLink?.let { contentLink ->
+                val context = requireContext()
+                val success = openUrlWithBrowser(context, contentLink)
+
+                if (!success) {
+                    viewModel.uiLogic.eip4Token!!.getHttpContentLink(Preferences(requireContext()))
+                        ?.let { openUrlWithBrowser(context, it) }
+                }
+            }
+        }
+        binding.labelContentHash.setOnClickListener {
+            copyStringToClipboard(binding.labelContentHash.text.toString(), requireContext(), null)
+        }
     }
 
-    private fun updateNftLayout(
+    private fun updateLayout(
         viewModel: TokenInformationViewModel,
         onlyPreview: Boolean = false
     ) {
         val context = requireContext()
-        val tokenInformationNftLayoutView = TokenInformationNftLayoutView(binding)
+        val tokenInformationLayoutView = TokenInformationLayoutView(binding)
         if (onlyPreview) {
-            tokenInformationNftLayoutView.updatePreview(viewModel.uiLogic)
+            tokenInformationLayoutView.updateNftPreview(viewModel.uiLogic)
         } else {
-            tokenInformationNftLayoutView.update(
+            tokenInformationLayoutView.updateLayout(
                 viewModel.uiLogic,
                 AndroidStringProvider(context),
-                Preferences(context)
-            ) { openUrlWithBrowser(context, it) }
+                args.amount
+            )
         }
     }
 

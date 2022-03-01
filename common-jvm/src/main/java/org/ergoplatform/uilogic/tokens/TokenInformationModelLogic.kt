@@ -16,7 +16,7 @@ import org.ergoplatform.utils.ProgressListener
 import org.ergoplatform.utils.fetchHttpGetWithListener
 import java.security.MessageDigest
 
-abstract class TokenInformationUiLogic {
+abstract class TokenInformationModelLogic {
     abstract val coroutineScope: CoroutineScope
 
     var eip4Token: Eip4Token? = null
