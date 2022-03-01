@@ -17,12 +17,9 @@ import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.getExplorerTokenUrl
 import org.ergoplatform.getExplorerTxUrl
-import org.ergoplatform.tokens.getHttpContentLink
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.utils.formatTokenPriceToString
-import org.ergoplatform.utils.toHex
 
-// TODO https://developer.android.com/guide/topics/media/media-formats
 class TokenInformationDialogFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentTokenInformationBinding? = null
     private val binding get() = _binding!!
@@ -93,37 +90,18 @@ class TokenInformationDialogFragment : BottomSheetDialogFragment() {
                     openUrlWithBrowser(requireContext(), getExplorerTxUrl(mintingTxId))
                 }
 
-                // NFT information
-                val isNft = viewModel.eip4Token?.isNftAssetType ?: false
-                binding.layoutNft.visibility = if (isNft) View.VISIBLE else View.GONE
-                if (isNft) {
-                    val eip4Token = viewModel.eip4Token!!
-                    binding.labelContentLink.text =
-                        eip4Token.nftContentLink ?: getString(R.string.label_none)
-                    binding.labelContentLink.setOnClickListener(eip4Token.nftContentLink?.let {
-                        View.OnClickListener {
-                            val context = requireContext()
-                            val success = openUrlWithBrowser(context, eip4Token.nftContentLink!!)
+                updateNftLayout(viewModel)
 
-                            if (!success) {
-                                eip4Token.getHttpContentLink(Preferences(context))?.let {
-                                    openUrlWithBrowser(context, it)
-                                }
-                            }
-                        }
-                    })
-
-                    binding.labelContentHash.text =
-                        eip4Token.nftContentHash?.let { it.toHex() + " [SHA256]" }
-                            ?: getString(R.string.label_none)
-
-                    val thumbnailDrawable = getThumbnailDrawableId()
-                    binding.layoutThumbnail.visibility =
-                        if (thumbnailDrawable == 0) View.GONE else View.VISIBLE
-                    binding.imgThumbnail.setImageResource(thumbnailDrawable)
+                binding.buttonDownloadContent.setOnClickListener {
+                    viewModel.uiLogic.downloadContent(
+                        Preferences(requireContext())
+                    )
                 }
-
             } ?: run { binding.tvError.visibility = View.VISIBLE }
+        }
+
+        viewModel.downloadState.observe(viewLifecycleOwner) {
+            updateNftLayout(viewModel, true)
         }
 
         binding.labelTokenId.setOnClickListener {
@@ -137,6 +115,23 @@ class TokenInformationDialogFragment : BottomSheetDialogFragment() {
             TransitionManager.beginDelayedTransition(binding.mainLayout)
             binding.labelTokenDescription.maxLines =
                 if (binding.labelTokenDescription.maxLines == 5) 1000 else 5
+        }
+    }
+
+    private fun updateNftLayout(
+        viewModel: TokenInformationViewModel,
+        onlyPreview: Boolean = false
+    ) {
+        val context = requireContext()
+        val tokenInformationNftLayoutView = TokenInformationNftLayoutView(binding)
+        if (onlyPreview) {
+            tokenInformationNftLayoutView.updatePreview(viewModel.uiLogic)
+        } else {
+            tokenInformationNftLayoutView.update(
+                viewModel.uiLogic,
+                AndroidStringProvider(context),
+                Preferences(context)
+            ) { openUrlWithBrowser(context, it) }
         }
     }
 

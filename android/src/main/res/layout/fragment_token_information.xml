@@ -56,12 +56,45 @@
                 android:visibility="gone"
                 tools:visibility="visible">
 
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_preview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:id="@+id/img_preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:scaleType="centerInside"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHeight_max="300dp"
+                        app:layout_constraintHeight_min="100dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:src="@drawable/ic_ergologo" />
+
+                    <ProgressBar
+                        android:id="@+id/preview_progress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:visibility="visible" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
                 <FrameLayout
                     android:id="@+id/layout_thumbnail"
                     android:layout_width="90dp"
                     android:layout_height="90dp"
                     android:layout_gravity="center"
-                    android:layout_marginEnd="@dimen/half_horizontal_margin"
                     android:background="@drawable/ic_octagon_48"
                     android:backgroundTint="?attr/colorControlNormal"
                     android:visibility="gone"
@@ -77,6 +110,36 @@
                         tools:src="@drawable/ic_photo_camera_24" />
 
                 </FrameLayout>
+
+                <LinearLayout
+                    android:id="@+id/desc_download_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_emphasize"
+                    android:orientation="vertical"
+                    android:padding="@dimen/activity_horizontal_margin"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:text="@string/desc_download_content" />
+
+                    <Button
+                        android:id="@+id/button_download_content"
+                        style="@style/Widget.App.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:elegantTextHeight="true"
+                        android:text="@string/button_download_content"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+                </LinearLayout>
 
                 <TextView
                     style="@style/TextAppearance.App.Body1"
@@ -116,9 +179,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:drawablePadding="@dimen/small_padding"
                     android:ellipsize="end"
                     android:gravity="center"
-                    tools:text="link" />
+                    app:drawableTint="@color/primary"
+                    tools:drawableEnd="@drawable/ic_verified_18"
+                    tools:text="hash" />
 
             </LinearLayout>
 
@@ -216,7 +282,7 @@
 
             <Button
                 android:id="@+id/button_done"
-                style="@style/Widget.App.Button"
+                style="@style/Widget.App.Button.PrimaryTint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

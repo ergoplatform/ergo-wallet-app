@@ -5,21 +5,20 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
-import org.ergoplatform.tokens.TokenInfoManager
+import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
-import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.persistance.TokenInformation
+import org.ergoplatform.uilogic.tokens.TokenInformationUiLogic
 
 class TokenInformationViewModel : ViewModel() {
+    val uiLogic = AndroidUiLogic()
+
     private var tokenId: String? = null
     private val _tokenInfo = MutableLiveData<TokenInformation?>()
     val tokenInfo: LiveData<TokenInformation?> = _tokenInfo
-    var eip4Token: Eip4Token? = null
-        private set
+    private val _downloadState = MutableLiveData<TokenInformationUiLogic.StateDownload>()
+    val downloadState: LiveData<TokenInformationUiLogic.StateDownload> get() = _downloadState
 
     fun init(tokenId: String, ctx: Context) {
         if (this.tokenId != null)
@@ -27,20 +26,20 @@ class TokenInformationViewModel : ViewModel() {
 
         this.tokenId = tokenId
 
-        viewModelScope.launch {
-            TokenInfoManager.getInstance().getTokenInformationFlow(
-                tokenId,
-                AppDatabase.getInstance(ctx).tokenDbProvider,
-                ErgoApiService.getOrInit(Preferences(ctx))
-            ).collect {
-                eip4Token = try {
-                    it?.toEip4Token()
-                } catch (t: Throwable) {
-                    null
-                }
+        uiLogic.init(tokenId, AppDatabase.getInstance(ctx), Preferences(ctx))
+    }
 
-                _tokenInfo.postValue(it)
-            }
+    inner class AndroidUiLogic : TokenInformationUiLogic() {
+        override val coroutineScope: CoroutineScope
+            get() = viewModelScope
+
+        override fun onTokenInfoUpdated(tokenInformation: TokenInformation?) {
+            _tokenInfo.postValue(tokenInformation)
         }
+
+        override fun onDownloadStateUpdated() {
+            _downloadState.postValue(downloadState)
+        }
+
     }
 }

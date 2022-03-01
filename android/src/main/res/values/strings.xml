@@ -209,8 +209,8 @@
     <string name="label_content_link">Content link</string>
     <string name="label_content_hash">Content Hash</string>
     <string name="button_validate">Validate</string>
-    <string name="desc_download_content">Ergo Wallet can show content linked to NFT tokens. Please be
-        aware that this might be illegal or disturbing content.</string>
+    <string name="desc_download_content">Ergo Wallet can show a preview of content linked to NFT tokens.
+        Please be aware that this content is created by third parties and might be unwanted.</string>
     <string name="button_download_content">Activate</string>
 
     <!-- Settings -->
