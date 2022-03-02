@@ -34,21 +34,7 @@ abstract class WalletDetailsUiLogic {
         coroutineScope.launch {
             database.walletDbProvider.walletWithStateByIdAsFlow(walletId).collect {
                 // called every time something changes in the DB
-
-                // on first call, prefill the tokenInformation map with information right from the
-                // db. This won't fetch or update existing information, this is done by
-                // gatherTokenInformation after UI is drawn for the first time
-                if (tokenInformation.isEmpty()) {
-                    wallet?.getTokensForAllAddresses()?.forEach { walletToken ->
-                        database.tokenDbProvider.loadTokenInformation(walletToken.tokenId!!)?.let {
-                            synchronized(tokenInformation) {
-                                tokenInformation[it.tokenId] = it
-                            }
-                        }
-                    }
-                }
-
-                onWalletStateChanged(it)
+                onWalletStateChanged(it, database.tokenDbProvider)
             }
         }
     }
@@ -57,8 +43,21 @@ abstract class WalletDetailsUiLogic {
      * this needs to be public and callable from outside because on some platforms
      * walletWithStateByIdAsFlow does not cover all state changes, but only config changes
      */
-    fun onWalletStateChanged(it: Wallet?) {
+    suspend fun onWalletStateChanged(it: Wallet?, tokenDbProvider: TokenDbProvider) {
         wallet = it
+
+        // on first call, prefill the tokenInformation map with information right from the
+        // db. This won't fetch or update existing information, this is done by
+        // gatherTokenInformation after UI is drawn for the first time
+        if (tokenInformation.isEmpty()) {
+            wallet?.getTokensForAllAddresses()?.forEach { walletToken ->
+                tokenDbProvider.loadTokenInformation(walletToken.tokenId!!)?.let {
+                    synchronized(tokenInformation) {
+                        tokenInformation[it.tokenId] = it
+                    }
+                }
+            }
+        }
 
         // no address set (yet) and there is only a single address available, fix it to this one
         if (addressIdx == null && wallet?.getNumOfAddresses() == 1) {

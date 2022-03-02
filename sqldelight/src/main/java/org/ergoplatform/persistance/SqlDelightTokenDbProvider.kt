@@ -23,7 +23,7 @@ class SqlDelightTokenDbProvider(private val appDatabase: AppDatabase) : TokenDbP
 
     override suspend fun loadTokenInformation(tokenId: String): TokenInformation? {
         return withContext(Dispatchers.IO) {
-            appDatabase.tokenInfoQueries.loadAll().executeAsOneOrNull()?.toModel()
+            appDatabase.tokenInfoQueries.loadById(tokenId).executeAsOneOrNull()?.toModel()
         }
     }
 

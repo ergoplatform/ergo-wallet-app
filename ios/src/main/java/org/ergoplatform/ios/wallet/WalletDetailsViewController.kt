@@ -100,7 +100,8 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                     uiLogic.onWalletStateChanged(
                         getAppDelegate().database.walletDbProvider.loadWalletWithStateById(
                             walletId
-                        )
+                        ),
+                        getAppDelegate().database.tokenDbProvider
                     )
                 }
             }

@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS `token_info` (
     PRIMARY KEY(`tokenId`)
 );
 
-loadAll:
-SELECT * FROM token_info;
+loadById:
+SELECT * FROM token_info WHERE `tokenId` = ?;
 
 insertOrReplace:
 INSERT OR REPLACE INTO `token_info` (
