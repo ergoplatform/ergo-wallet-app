@@ -178,7 +178,7 @@ class SendFundsViewController(
         addTokenButton.addOnTouchUpInsideListener { _, _ ->
             presentViewController(
                 ChooseTokenListViewController(
-                    uiLogic.getTokensToChooseFrom()
+                    uiLogic.getTokensToChooseFrom(), uiLogic.tokensInfo
                 ) { tokenToAdd ->
                     tokensUiList.superview.animateLayoutChanges {
                         uiLogic.newTokenChosen(tokenToAdd)

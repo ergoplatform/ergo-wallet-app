@@ -15,34 +15,8 @@ import org.robovm.apple.uikit.*
 class WalletDetailsTokenEntryView(private val walletToken: WalletToken, private val texts: I18NBundle) :
     UIView(CGRect.Zero()) {
 
-    private val genuineImage = UIImageView(CGRect.Zero()).apply {
-        tintColor = uiColorErgo
-        contentMode = UIViewContentMode.ScaleAspectFit
-        fixedWidth(20.0)
-    }
-    private val genuineImageContainer = UIView(CGRect.Zero()).apply {
-        addSubview(genuineImage)
-        genuineImage.edgesToSuperview()
-        layoutMargins = UIEdgeInsets(0.0, DEFAULT_MARGIN, 0.0, 0.0)
-    }
-    private val thumbnailPicture = UIImageView(CGRect.Zero()).apply {
-        contentMode = UIViewContentMode.ScaleAspectFit
-        tintColor = UIColor.systemBackground()
-        fixedWidth(16.0)
-        fixedHeight(16.0)
-    }
-    private val thumbnailContainer = UIView(CGRect.Zero()).apply {
-        val backGround = UIImageView(octagonImage.imageWithTintColor(UIColor.secondaryLabel())).apply {
-            fixedWidth(24.0)
-            fixedHeight(24.0)
-            contentMode = UIViewContentMode.ScaleAspectFit
-        }
-        addSubview(backGround)
-        backGround.edgesToSuperview()
-        addSubview(thumbnailPicture)
-        thumbnailPicture.centerVertical().centerHorizontallyTo(backGround)
-        layoutMargins = UIEdgeInsets(0.0, 0.0, 0.0, DEFAULT_MARGIN)
-    }
+    private val genuineImageContainer = GenuineImageContainer()
+    private val thumbnailContainer = ThumbnailContainer(22.0)
 
     private val valAndName = TokenEntryView().apply {
         addArrangedSubview(genuineImageContainer)
@@ -96,17 +70,11 @@ class WalletDetailsTokenEntryView(private val walletToken: WalletToken, private 
         }
 
         override fun setGenuineFlag(genuineFlag: Int) {
-            val imageName = getTokenGenuineImageName(genuineFlag)
-            genuineImage.image = imageName?.let { getIosSystemImage(it, UIImageSymbolScale.Small, 20.0) }
-            genuineImageContainer.isHidden = imageName == null
+            genuineImageContainer.setGenuineFlag(genuineFlag)
         }
 
         override fun setThumbnail(thumbnailType: Int) {
-            val imageName = getTokenThumbnailImageName(thumbnailType)
-            thumbnailPicture.image = imageName?.let {
-                getIosSystemImage(it, UIImageSymbolScale.Small, 13.0)
-            }
-            thumbnailContainer.isHidden = imageName == null
+            thumbnailContainer.setThumbnail(thumbnailType)
         }
 
     }

@@ -64,7 +64,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="middle"
-            android:gravity="center"
+            android:layout_gravity="center"
             android:maxLines="1"
             android:textColor="@color/darkgrey"
             tools:text="ba5856162d6342d2a0072f464a5a8b62b4ac4dd77195bec18c6bf268c2def831" />

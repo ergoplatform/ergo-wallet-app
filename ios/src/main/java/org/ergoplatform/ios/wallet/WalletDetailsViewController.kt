@@ -411,7 +411,13 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                         it,
                         texts
                     ).bindWalletToken(infoHashMap[it.tokenId!!])
-                    tokensListStack.addArrangedSubview(detailView)
+                    val container = UIView(CGRect.Zero()).apply {
+                        addSubview(detailView)
+                        minHeight(50.0)
+                        detailView.widthMatchesSuperview().centerInSuperviewWhenSmaller()
+                        layoutMargins = UIEdgeInsets.Zero()
+                    }
+                    tokensListStack.addArrangedSubview(container)
                     tokensDetailViewMap[it.tokenId!!] = detailView
                 }
                 val appDelegate = getAppDelegate()
