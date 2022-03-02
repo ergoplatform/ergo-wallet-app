@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoApiService
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.getExplorerWebUrl
-import org.ergoplatform.ios.tokens.DetailTokenEntryView
+import org.ergoplatform.ios.tokens.WalletDetailsTokenEntryView
 import org.ergoplatform.ios.transactions.ColdWalletSigningViewController
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
 import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
@@ -346,7 +346,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         private val tokensListStack = UIStackView(CGRect.Zero()).apply {
             axis = UILayoutConstraintAxis.Vertical
         }
-        private val tokensDetailViewMap = HashMap<String, DetailTokenEntryView>()
+        private val tokensDetailViewMap = HashMap<String, WalletDetailsTokenEntryView>()
         private val expandButton = UIImageView().apply {
             tintColor = UIColor.label()
         }
@@ -407,7 +407,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             val listExpanded = uiLogic.wallet?.walletConfig?.unfoldTokens == true
             if (listExpanded) {
                 tokensList.forEach {
-                    val detailView = DetailTokenEntryView(
+                    val detailView = WalletDetailsTokenEntryView(
                         it,
                         texts
                     ).bindWalletToken(infoHashMap[it.tokenId!!])

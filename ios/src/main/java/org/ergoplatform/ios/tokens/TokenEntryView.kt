@@ -20,7 +20,7 @@ class TokenEntryView : UIStackView(CGRect.Zero()) {
 
     init {
         axis = UILayoutConstraintAxis.Horizontal
-        spacing = DEFAULT_MARGIN
+        spacing = 0.0
 
         addArrangedSubview(labelTokenVal)
         addArrangedSubview(labelTokenName)
@@ -34,12 +34,12 @@ class TokenEntryView : UIStackView(CGRect.Zero()) {
 
     fun bindWalletToken(walletToken: WalletToken, texts: I18NBundle): TokenEntryView {
         labelTokenName.text = walletToken.name ?: texts.get(STRING_LABEL_UNNAMED_TOKEN)
-        labelTokenVal.text =
+        setTokenAmount(
             TokenAmount(
                 walletToken.amount ?: 0,
                 walletToken.decimals,
             ).toStringPrettified()
-
+        )
         return this
     }
 
@@ -53,11 +53,11 @@ class TokenEntryView : UIStackView(CGRect.Zero()) {
     }
 
     fun setTokenAmount(amount: String?) {
-        labelTokenVal.text = amount ?: ""
+        labelTokenVal.text = if (!amount.isNullOrBlank()) "$amount " else ""
     }
 
     fun bindHasMoreTokenHint(moreTokenNum: Int): TokenEntryView {
-        labelTokenVal.text = "+$moreTokenNum"
+        setTokenAmount("+$moreTokenNum")
         labelTokenName.text = getAppDelegate().texts.get(STRING_LABEL_MORE_TOKENS)
         return this
     }

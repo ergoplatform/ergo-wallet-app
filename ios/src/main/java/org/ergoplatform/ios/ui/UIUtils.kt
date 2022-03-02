@@ -46,6 +46,12 @@ val IMAGE_SWITCH_RESOLUTION = if (Foundation.getMajorSystemVersion() >= 14)
 const val IMAGE_WARNING = "exclamationmark.circle"
 const val IMAGE_INFORMATION = "info.circle"
 const val IMAGE_ERROR = "xmark.circle"
+const val IMAGE_VERIFIED = "checkmark.seal.fill"
+const val IMAGE_SUSPICIOUS = "exclamationmark.octagon.fill"
+const val IMAGE_PHOTO_CAMERA = "camera.fill"
+const val IMAGE_VIDEO_PLAY = "play.fill"
+const val IMAGE_MUSIC_NOTE = "music.note"
+
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
@@ -57,6 +63,7 @@ val uiColorErgo get() = UIColor.systemRed()
 val ergoLogoImage get() = UIImage.getImage("ergologo")
 val ergoLogoFilledImage get() = UIImage.getImage("ergologofilled")
 val tokenLogoImage get() = UIImage.getImage("tokenlogo")
+val octagonImage get() = UIImage.getImage("octagon")
 
 fun getAppDelegate() = UIApplication.getSharedApplication().delegate as Main
 fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(r)

@@ -121,6 +121,21 @@ fun UIView.centerVerticallyTo(
     return this
 }
 
+fun UIView.centerHorizontallyTo(
+    sibling: UIView,
+    inset: Double = 0.0
+): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+
+    val centerConstraint = this.centerXAnchor.equalTo(
+        sibling.centerXAnchor,
+        inset
+    )
+    NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
+
+    return this
+}
+
 fun UIView.bottomToKeyboard(
     vc: ViewControllerWithKeyboardLayoutGuide,
     inset: Double = 0.0
