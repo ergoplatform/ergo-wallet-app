@@ -4,6 +4,7 @@ import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.ergoplatform.ErgoApiService
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.ios.tokens.DetailTokenEntryView
@@ -14,6 +15,7 @@ import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.ios.wallet.addresses.WalletAddressesViewController
+import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.WalletDetailsUiLogic
 import org.ergoplatform.utils.LogUtils
@@ -95,7 +97,11 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             WalletStateSyncManager.getInstance().isRefreshing.collect { isRefreshing ->
                 if (!isRefreshing && uiLogic.wallet != null) {
                     animateNextConfigRefresh = true
-                    uiLogic.onWalletStateChanged(getAppDelegate().database.walletDbProvider.loadWalletWithStateById(walletId))
+                    uiLogic.onWalletStateChanged(
+                        getAppDelegate().database.walletDbProvider.loadWalletWithStateById(
+                            walletId
+                        )
+                    )
                 }
             }
         }
@@ -181,14 +187,14 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                                     true
                                 )
                             }, { errorMessage ->
-                                    presentViewController(
-                                        buildSimpleAlertController(
-                                            "",
-                                            errorMessage,
-                                            texts
-                                        ), true
-                                    ) {}
-                                }
+                                presentViewController(
+                                    buildSimpleAlertController(
+                                        "",
+                                        errorMessage,
+                                        texts
+                                    ), true
+                                ) {}
+                            }
                             )
                         }, true) {}
                     })
@@ -339,6 +345,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         private val tokensListStack = UIStackView(CGRect.Zero()).apply {
             axis = UILayoutConstraintAxis.Vertical
         }
+        private val tokensDetailViewMap = HashMap<String, DetailTokenEntryView>()
         private val expandButton = UIImageView().apply {
             tintColor = UIColor.label()
         }
@@ -380,22 +387,36 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             uiLogic.wallet?.walletConfig?.let { walletConfig ->
                 viewControllerScope.launch {
                     animateNextConfigRefresh = true
-                    getAppDelegate().database.walletDbProvider.updateWalletDisplayTokens(!walletConfig.unfoldTokens, walletId)
+                    getAppDelegate().database.walletDbProvider.updateWalletDisplayTokens(
+                        !walletConfig.unfoldTokens,
+                        walletId
+                    )
                 }
             }
         }
 
         fun refresh() {
             val tokensList = uiLogic.tokensList
+            val infoHashMap = uiLogic.tokenInformation
             isHidden = tokensList.isEmpty()
             tokensNumLabel.text = tokensList.size.toString()
 
             tokensListStack.clearArrangedSubviews()
+            tokensDetailViewMap.clear()
             val listExpanded = uiLogic.wallet?.walletConfig?.unfoldTokens == true
             if (listExpanded) {
                 tokensList.forEach {
-                    tokensListStack.addArrangedSubview(DetailTokenEntryView().bindWalletToken(it, texts))
+                    val detailView = DetailTokenEntryView(
+                        it,
+                        texts
+                    ).bindWalletToken(infoHashMap[it.tokenId!!])
+                    tokensListStack.addArrangedSubview(detailView)
+                    tokensDetailViewMap[it.tokenId!!] = detailView
                 }
+                val appDelegate = getAppDelegate()
+                uiLogic.gatherTokenInformation(
+                    appDelegate.database.tokenDbProvider, ErgoApiService.getOrInit(appDelegate.prefs)
+                )
             }
 
             expandButton.image = getIosSystemImage(
@@ -403,6 +424,10 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 UIImageSymbolScale.Small,
                 20.0
             )
+        }
+
+        fun addTokenInfo(tokenInformation: TokenInformation) {
+            tokensDetailViewMap[tokenInformation.tokenId]?.bindWalletToken(tokenInformation)
         }
     }
 
@@ -446,11 +471,15 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     }
 
 
-    inner class IosDetailsUiLogic: WalletDetailsUiLogic() {
+    inner class IosDetailsUiLogic : WalletDetailsUiLogic() {
         override val coroutineScope: CoroutineScope get() = viewControllerScope
 
         override fun onDataChanged() {
             refreshDataFromBackgroundThread()
+        }
+
+        override fun onNewTokenInfoGathered(tokenInformation: TokenInformation) {
+            runOnMainThread { tokenContainer.addTokenInfo(tokenInformation) }
         }
     }
 }

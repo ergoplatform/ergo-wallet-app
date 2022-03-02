@@ -151,7 +151,6 @@ abstract class WalletDetailsUiLogic {
 
     abstract fun onDataChanged()
 
-    open fun onNewTokenInfoGathered(tokenInformation: TokenInformation) {
-    }
+    abstract fun onNewTokenInfoGathered(tokenInformation: TokenInformation)
 
 }

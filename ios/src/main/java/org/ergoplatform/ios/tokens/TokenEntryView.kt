@@ -44,7 +44,15 @@ class TokenEntryView : UIStackView(CGRect.Zero()) {
     }
 
     fun bindWalletToken(tokenName: String?, amount: String?) {
+        setTokenName(tokenName)
+        setTokenAmount(amount)
+    }
+
+    fun setTokenName(tokenName: String?) {
         labelTokenName.text = tokenName ?: ""
+    }
+
+    fun setTokenAmount(amount: String?) {
         labelTokenVal.text = amount ?: ""
     }
 
