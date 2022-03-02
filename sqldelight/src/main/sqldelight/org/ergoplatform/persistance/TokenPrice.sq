@@ -1,0 +1,18 @@
+CREATE TABLE IF NOT EXISTS `token_price` (
+    `tokenId` TEXT NOT NULL,
+    `display_name` TEXT,
+    `source` TEXT NOT NULL,
+    `erg_value` TEXT NOT NULL,
+    PRIMARY KEY(`tokenId`)
+);
+
+loadAll:
+SELECT * FROM token_price;
+
+deletAll:
+DELETE FROM token_price;
+
+insertOrReplace:
+INSERT OR REPLACE INTO `token_price` (
+    `tokenId`,`display_name`,`source`,`erg_value`
+) VALUES ?;

@@ -1,23 +1,41 @@
 package org.ergoplatform.persistance
 
-class SqlDelightTokenDbProvider(private val appDatabase: AppDatabase): TokenDbProvider {
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+class SqlDelightTokenDbProvider(private val appDatabase: AppDatabase) : TokenDbProvider {
     override suspend fun loadTokenPrices(): List<TokenPrice> {
-        TODO("Not yet implemented")
+        return withContext(Dispatchers.IO) {
+            appDatabase.tokenPriceQueries.loadAll().executeAsList().map { it.toModel() }
+        }
     }
 
     override suspend fun updateTokenPrices(priceList: List<TokenPrice>) {
-        TODO("Not yet implemented")
+        withContext(Dispatchers.IO) {
+            appDatabase.transaction {
+                appDatabase.tokenPriceQueries.deletAll()
+                priceList.forEach {
+                    appDatabase.tokenPriceQueries.insertOrReplace(it.toDbEntity())
+                }
+            }
+        }
     }
 
     override suspend fun loadTokenInformation(tokenId: String): TokenInformation? {
-        TODO("Not yet implemented")
+        return withContext(Dispatchers.IO) {
+            appDatabase.tokenInfoQueries.loadAll().executeAsOneOrNull()?.toModel()
+        }
     }
 
     override suspend fun insertOrReplaceTokenInformation(tokenInfo: TokenInformation) {
-        TODO("Not yet implemented")
+        withContext(Dispatchers.IO) {
+            appDatabase.tokenInfoQueries.insertOrReplace(tokenInfo.toDbEntity())
+        }
     }
 
     override suspend fun pruneUnusedTokenInformation() {
-        TODO("Not yet implemented")
+        withContext(Dispatchers.IO) {
+            appDatabase.tokenInfoQueries.pruneUnused(System.currentTimeMillis() - TOKEN_INFO_MS_OUTDATED)
+        }
     }
 }
