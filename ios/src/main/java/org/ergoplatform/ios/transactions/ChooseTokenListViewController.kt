@@ -116,7 +116,7 @@ class ChooseTokenListViewController(
             contentView.addSubview(topStack)
             contentView.addSubview(tokenIdLabel)
             topStack.topToSuperview().centerHorizontal(true)
-            tokenIdLabel.topToBottomOf(nameLabel).widthMatchesSuperview().bottomToSuperview()
+            tokenIdLabel.topToBottomOf(nameLabel, inset = DEFAULT_MARGIN / 2).widthMatchesSuperview().bottomToSuperview()
             contentView.addGestureRecognizer(UITapGestureRecognizer {
                 token?.tokenId?.let { tokenId -> clickListener?.invoke(tokenId) }
             })

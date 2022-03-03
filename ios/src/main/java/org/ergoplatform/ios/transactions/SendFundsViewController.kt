@@ -152,9 +152,8 @@ class SendFundsViewController(
 
         tokensUiList = UIStackView(CGRect.Zero()).apply {
             axis = UILayoutConstraintAxis.Vertical
+            spacing = DEFAULT_MARGIN
             isHidden = true
-            layoutMargins = UIEdgeInsets(0.0, DEFAULT_MARGIN, 0.0, DEFAULT_MARGIN)
-            isLayoutMarginsRelativeArrangement = true
         }
         tokensError = Body1Label().apply {
             text = texts.get(STRING_ERROR_TOKEN_AMOUNT)
@@ -318,11 +317,19 @@ class SendFundsViewController(
                 addTokenButton.isHidden = (uiLogic.tokensChosen.size >= uiLogic.tokensAvail.size)
                 tokensUiList.clearArrangedSubviews()
                 tokensError.isHidden = true
+                val walletStateSyncManager = WalletStateSyncManager.getInstance()
                 uiLogic.tokensChosen.forEach {
                     val ergoId = it.key
                     tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
                         val tokenEntry =
-                            SendTokenEntryView(uiLogic, tokensError, tokenEntity, it.value, texts)
+                            SendTokenEntryView(
+                                uiLogic,
+                                tokensError,
+                                tokenEntity,
+                                it.value,
+                                texts,
+                                walletStateSyncManager.tokenPrices[tokenEntity.tokenId!!]
+                            )
                         tokensUiList.addArrangedSubview(tokenEntry)
                     }
                 }
