@@ -130,14 +130,12 @@ fun UIView.wrapWithTrailingImage(
     fixedWith: Double = 0.0,
     fixedHeight: Double = 0.0,
     keepWidth: Boolean = false
-): UIView {
+): TrailingImageView<UIView> {
     val imageView = UIImageView(image)
     imageView.tintColor = (this as? UILabel)?.textColor ?: this.tintColor
 
-    val container = UIView(CGRect.Zero())
+    val container = TrailingImageView(this, imageView)
     container.layoutMargins = UIEdgeInsets.Zero()
-    container.addSubview(this)
-    container.addSubview(imageView)
     if (fixedWith == 0.0) {
         imageView.enforceKeepIntrinsicWidth()
     } else {
@@ -150,6 +148,13 @@ fun UIView.wrapWithTrailingImage(
     imageView.centerVerticallyTo(this).leftToRightOf(this, DEFAULT_MARGIN * .7).rightToSuperview(canBeLess = !keepWidth)
     this.leftToSuperview().topToSuperview().bottomToSuperview()
     return container
+}
+
+class TrailingImageView<T : UIView>(val content: T, val trailingImage: UIImageView) : UIView(CGRect.Zero()) {
+    init {
+        addSubview(content)
+        addSubview(trailingImage)
+    }
 }
 
 fun createTextview(): UITextView {

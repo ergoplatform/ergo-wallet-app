@@ -25,7 +25,7 @@ class TokenInformationViewController(
         view.addSubview(activityView)
         activityView.centerVertical().centerHorizontal()
 
-        tokenInfoLayout = TokenInformationLayoutView(uiLogic)
+        tokenInfoLayout = TokenInformationLayoutView(this)
         val scrollView = tokenInfoLayout.wrapInVerticalScrollView()
         view.addSubview(scrollView)
         closeButton = addCloseButton()
@@ -64,7 +64,9 @@ class TokenInformationViewController(
         }
 
         override fun onDownloadStateUpdated() {
-            tokenInfoLayout.updateNftPreview()
+            runOnMainThread {
+                tokenInfoLayout.updateNftPreview()
+            }
         }
     }
 }

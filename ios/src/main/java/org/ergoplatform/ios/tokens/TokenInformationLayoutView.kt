@@ -11,8 +11,9 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
-class TokenInformationLayoutView(private val modelLogic: TokenInformationModelLogic) : UIView(CGRect.Zero()) {
+class TokenInformationLayoutView(private val vc: TokenInformationViewController) : UIView(CGRect.Zero()) {
     private val layoutLogic = IosTokenInformationLayoutLogic()
+    private val modelLogic = vc.uiLogic
     private val texts = getAppDelegate().texts
     private val nameLabel = Headline2Label().apply {
         numberOfLines = 1
@@ -129,6 +130,15 @@ class TokenInformationLayoutView(private val modelLogic: TokenInformationModelLo
                 }
             })
         }
+        nftLayout.contentHashLabel.apply {
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UITapGestureRecognizer {
+                vc.shareText(text, this)
+            })
+        }
+        nftLayout.activateDownloadButton.addOnTouchUpInsideListener { _, _ ->
+            modelLogic.downloadContent(getAppDelegate().prefs)
+        }
     }
 
     fun updateTokenInformation(balanceAmount: Long?) {
@@ -147,6 +157,38 @@ class TokenInformationLayoutView(private val modelLogic: TokenInformationModelLo
             lineBreakMode = NSLineBreakMode.TruncatingMiddle
             lineBreakStrategy = NSLineBreakStrategy.None
         }
+        val contentHashLabel = Body1Label().apply {
+            textAlignment = NSTextAlignment.Center
+            numberOfLines = 3
+            lineBreakMode = NSLineBreakMode.TruncatingMiddle
+        }
+        val contentHashContainer = contentHashLabel.wrapWithTrailingImage(
+            getHashValidImage(false), 30.0, 30.0
+        )
+        val activateDownloadButton = TextButton(texts.get(STRING_BUTTON_DOWNLOAD_CONTENT_ON))
+        val activateDownloadContainer = UIView(CGRect.Zero()).apply {
+            layer.borderWidth = 1.0
+            layer.cornerRadius = 4.0
+            layer.borderColor = uiColorErgo.cgColor
+            isHidden = true
+
+            val labelDesc = Body1Label().apply {
+                textAlignment = NSTextAlignment.Center
+                text = texts.get(STRING_DESC_DOWNLOAD_CONTENT)
+            }
+
+            addSubview(labelDesc)
+            addSubview(activateDownloadButton)
+            labelDesc.topToSuperview(topInset = DEFAULT_MARGIN).widthMatchesSuperview(inset = DEFAULT_MARGIN)
+            activateDownloadButton.topToBottomOf(labelDesc, DEFAULT_MARGIN * 2).centerHorizontal()
+                .bottomToSuperview(bottomInset = DEFAULT_MARGIN)
+        }
+
+        fun getHashValidImage(verified: Boolean) =
+            getIosSystemImage(
+                if (verified) IMAGE_VERIFIED
+                else IMAGE_SUSPICIOUS, UIImageSymbolScale.Small
+            )!!
 
         init {
             axis = UILayoutConstraintAxis.Vertical
@@ -156,11 +198,23 @@ class TokenInformationLayoutView(private val modelLogic: TokenInformationModelLo
                 textAlignment = NSTextAlignment.Center
                 text = texts.get(STRING_LABEL_CONTENT_LINK)
             }
+            val contentHashTitle = Body1BoldLabel().apply {
+                textAlignment = NSTextAlignment.Center
+                text = texts.get(STRING_LABEL_CONTENT_HASH)
+            }
+            contentHashContainer.trailingImage.apply {
+                isHidden = true
+                tintColor = uiColorErgo
+            }
 
             addArrangedSubview(thumbnailContainer)
+            addArrangedSubview(activateDownloadContainer)
             addArrangedSubview(contentLinkTitle)
             addArrangedSubview(contentLinkLabel)
             setCustomSpacing(DEFAULT_MARGIN / 2, contentLinkTitle)
+            addArrangedSubview(contentHashTitle)
+            addArrangedSubview(contentHashContainer)
+            setCustomSpacing(DEFAULT_MARGIN / 2, contentHashTitle)
         }
     }
 
@@ -206,7 +260,7 @@ class TokenInformationLayoutView(private val modelLogic: TokenInformationModelLo
         }
 
         override fun setContentHashText(hashText: String) {
-            // TODO("Not yet implemented")
+            nftLayout.contentHashLabel.text = hashText
         }
 
         override fun setThumbnail(thumbnailType: Int) {
@@ -218,11 +272,18 @@ class TokenInformationLayoutView(private val modelLogic: TokenInformationModelLo
             downloadPercent: Float,
             content: ByteArray?
         ) {
-            // TODO("Not yet implemented")
+            nftLayout.activateDownloadContainer.isHidden =
+                downloadState != TokenInformationModelLogic.StateDownload.NOT_STARTED
+            // TODO show progress and show preview
         }
 
         override fun showNftHashValidation(hashValid: Boolean?) {
-            // TODO("Not yet implemented")
+            nftLayout.contentHashContainer.trailingImage.apply {
+                isHidden = hashValid == null
+                hashValid?.let {
+                    image = nftLayout.getHashValidImage(it)
+                }
+            }
         }
 
     }
