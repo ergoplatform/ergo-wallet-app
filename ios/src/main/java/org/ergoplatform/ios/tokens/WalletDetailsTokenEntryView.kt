@@ -12,8 +12,11 @@ import org.robovm.apple.uikit.*
 /**
  * View template for displaying token information on wallet details screen
  */
-class WalletDetailsTokenEntryView(private val walletToken: WalletToken, private val texts: I18NBundle) :
-    UIView(CGRect.Zero()) {
+class WalletDetailsTokenEntryView(
+    private val walletToken: WalletToken,
+    private val texts: I18NBundle,
+    clickListener: () -> Unit
+) : UIView(CGRect.Zero()) {
 
     private val genuineImageContainer = GenuineImageContainer()
     private val thumbnailContainer = ThumbnailContainer(22.0)
@@ -42,6 +45,9 @@ class WalletDetailsTokenEntryView(private val walletToken: WalletToken, private 
         valAndName.topToSuperview(topInset = DEFAULT_MARGIN * 1.5).centerHorizontal(true)
         tokenId.topToBottomOf(valAndName, inset = DEFAULT_MARGIN / 3).widthMatchesSuperview()
         balanceLabel.topToBottomOf(tokenId).widthMatchesSuperview().bottomToSuperview()
+
+        isUserInteractionEnabled = true
+        addGestureRecognizer(UITapGestureRecognizer { clickListener() })
     }
 
     fun bindWalletToken(tokenInformation: TokenInformation? = null): WalletDetailsTokenEntryView {

@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoApiService
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.getExplorerWebUrl
+import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.tokens.WalletDetailsTokenEntryView
 import org.ergoplatform.ios.transactions.ColdWalletSigningViewController
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
@@ -407,10 +408,10 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             val listExpanded = uiLogic.wallet?.walletConfig?.unfoldTokens == true
             if (listExpanded) {
                 tokensList.forEach {
-                    val detailView = WalletDetailsTokenEntryView(
-                        it,
-                        texts
-                    ).bindWalletToken(infoHashMap[it.tokenId!!])
+                    val tokenId = it.tokenId!!
+                    val detailView = WalletDetailsTokenEntryView(it, texts) {
+                        presentViewController(TokenInformationViewController(tokenId, it.amount), true) {}
+                    }.bindWalletToken(infoHashMap[tokenId])
                     val container = UIView(CGRect.Zero()).apply {
                         addSubview(detailView)
                         minHeight(50.0)
@@ -418,7 +419,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                         layoutMargins = UIEdgeInsets.Zero()
                     }
                     tokensListStack.addArrangedSubview(container)
-                    tokensDetailViewMap[it.tokenId!!] = detailView
+                    tokensDetailViewMap[tokenId] = detailView
                 }
                 val appDelegate = getAppDelegate()
                 uiLogic.gatherTokenInformation(
