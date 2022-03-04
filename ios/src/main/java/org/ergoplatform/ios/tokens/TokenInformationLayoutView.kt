@@ -3,18 +3,15 @@ package org.ergoplatform.ios.tokens
 import org.ergoplatform.getExplorerTokenUrl
 import org.ergoplatform.getExplorerTxUrl
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.persistance.TokenInformation
-import org.ergoplatform.uilogic.STRING_LABEL_MINTING_TX
-import org.ergoplatform.uilogic.STRING_LABEL_TOKEN_DESCRIPTION
-import org.ergoplatform.uilogic.STRING_LABEL_TOKEN_SUPPLY
-import org.ergoplatform.uilogic.STRING_TITLE_WALLET_BALANCE
+import org.ergoplatform.tokens.getHttpContentLink
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.tokens.TokenInformationLayoutLogic
 import org.ergoplatform.uilogic.tokens.TokenInformationModelLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
-class TokenInformationLayoutView : UIView(CGRect.Zero()) {
+class TokenInformationLayoutView(private val modelLogic: TokenInformationModelLogic) : UIView(CGRect.Zero()) {
     private val layoutLogic = IosTokenInformationLayoutLogic()
     private val texts = getAppDelegate().texts
     private val nameLabel = Headline2Label().apply {
@@ -53,8 +50,7 @@ class TokenInformationLayoutView : UIView(CGRect.Zero()) {
         textAlignment = NSTextAlignment.Center
         text = texts.get(STRING_TITLE_WALLET_BALANCE)
     }
-
-    private var tokenInformation: TokenInformation? = null
+    private val nftLayout = NftLayoutView()
 
     init {
 
@@ -71,7 +67,12 @@ class TokenInformationLayoutView : UIView(CGRect.Zero()) {
 
         val optionalEntriesStack = UIStackView(
             NSArray(
-                balanceAmountTitle, balanceAmountLabel, balanceAmountValue, supplyAmountTitle, supplyAmountLabel
+                nftLayout,
+                balanceAmountTitle,
+                balanceAmountLabel,
+                balanceAmountValue,
+                supplyAmountTitle,
+                supplyAmountLabel
             )
         ).apply {
             axis = UILayoutConstraintAxis.Vertical
@@ -117,14 +118,50 @@ class TokenInformationLayoutView : UIView(CGRect.Zero()) {
         mintingTxLabel.apply {
             isUserInteractionEnabled = true
             addGestureRecognizer(UITapGestureRecognizer {
-                tokenInformation?.let { openUrlInBrowser(getExplorerTxUrl(it.mintingTxId)) }
+                modelLogic.tokenInformation?.let { openUrlInBrowser(getExplorerTxUrl(it.mintingTxId)) }
+            })
+        }
+        nftLayout.contentLinkLabel.apply {
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UITapGestureRecognizer {
+                modelLogic.eip4Token?.getHttpContentLink(getAppDelegate().prefs)?.let {
+                    openUrlInBrowser(it)
+                }
             })
         }
     }
 
-    fun updateTokenInformation(modelLogic: TokenInformationModelLogic, balanceAmount: Long?) {
-        tokenInformation = modelLogic.tokenInformation
+    fun updateTokenInformation(balanceAmount: Long?) {
         layoutLogic.updateLayout(modelLogic, IosStringProvider(texts), balanceAmount ?: 0)
+    }
+
+    fun updateNftPreview() {
+        layoutLogic.updateNftPreview(modelLogic)
+    }
+
+    inner class NftLayoutView : UIStackView() {
+        val thumbnailContainer = ThumbnailContainer(90.0)
+        val contentLinkLabel = Body1Label().apply {
+            textAlignment = NSTextAlignment.Center
+            numberOfLines = 3
+            lineBreakMode = NSLineBreakMode.TruncatingMiddle
+            lineBreakStrategy = NSLineBreakStrategy.None
+        }
+
+        init {
+            axis = UILayoutConstraintAxis.Vertical
+            spacing = DEFAULT_MARGIN * 3
+
+            val contentLinkTitle = Body1BoldLabel().apply {
+                textAlignment = NSTextAlignment.Center
+                text = texts.get(STRING_LABEL_CONTENT_LINK)
+            }
+
+            addArrangedSubview(thumbnailContainer)
+            addArrangedSubview(contentLinkTitle)
+            addArrangedSubview(contentLinkLabel)
+            setCustomSpacing(DEFAULT_MARGIN / 2, contentLinkTitle)
+        }
     }
 
     inner class IosTokenInformationLayoutLogic : TokenInformationLayoutLogic() {
@@ -161,11 +198,11 @@ class TokenInformationLayoutView : UIView(CGRect.Zero()) {
         }
 
         override fun setContentLinkText(linkText: String) {
-            // todo token
+            nftLayout.contentLinkLabel.text = linkText
         }
 
         override fun setNftLayoutVisibility(visible: Boolean) {
-            // TODO("Not yet implemented")
+            nftLayout.isHidden = !visible
         }
 
         override fun setContentHashText(hashText: String) {
@@ -173,7 +210,7 @@ class TokenInformationLayoutView : UIView(CGRect.Zero()) {
         }
 
         override fun setThumbnail(thumbnailType: Int) {
-            // TODO("Not yet implemented")
+            nftLayout.thumbnailContainer.setThumbnail(thumbnailType)
         }
 
         override fun showNftPreview(

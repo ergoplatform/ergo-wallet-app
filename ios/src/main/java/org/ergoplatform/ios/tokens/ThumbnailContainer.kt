@@ -8,8 +8,8 @@ class ThumbnailContainer(private val baseSize: Double = 24.0) : UIView(CGRect.Ze
     private val thumbnailPicture = UIImageView(CGRect.Zero()).apply {
         contentMode = UIViewContentMode.ScaleAspectFit
         tintColor = UIColor.systemBackground()
-        fixedWidth(baseSize * 2 / 3)
-        fixedHeight(baseSize * 2 / 3)
+        fixedWidth(baseSize / 2)
+        fixedHeight(baseSize / 2)
     }
 
     init {

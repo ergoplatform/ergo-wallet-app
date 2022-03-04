@@ -25,14 +25,14 @@ class TokenInformationViewController(
         view.addSubview(activityView)
         activityView.centerVertical().centerHorizontal()
 
-        tokenInfoLayout = TokenInformationLayoutView()
+        tokenInfoLayout = TokenInformationLayoutView(uiLogic)
         val scrollView = tokenInfoLayout.wrapInVerticalScrollView()
         view.addSubview(scrollView)
-        scrollView.edgesToSuperview(false)
+        closeButton = addCloseButton()
+        scrollView.topToBottomOf(closeButton).widthMatchesSuperview().bottomToSuperview()
 
         tokenInfoLayout.isHidden = true
 
-        closeButton = addCloseButton()
     }
 
     override fun viewWillAppear(animated: Boolean) {
@@ -50,7 +50,7 @@ class TokenInformationViewController(
                 activityView.isHidden = true
                 tokenInformation?.let {
                     tokenInfoLayout.isHidden = false
-                    tokenInfoLayout.updateTokenInformation(this, tokenAmount)
+                    tokenInfoLayout.updateTokenInformation(tokenAmount)
                 } ?: run {
                     val errorView = UIImageView(getIosSystemImage(IMAGE_WARNING, UIImageSymbolScale.Large)).apply {
                         contentMode = UIViewContentMode.ScaleAspectFit
@@ -64,7 +64,7 @@ class TokenInformationViewController(
         }
 
         override fun onDownloadStateUpdated() {
-            // TODO token information
+            tokenInfoLayout.updateNftPreview()
         }
     }
 }
