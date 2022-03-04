@@ -51,6 +51,7 @@ const val IMAGE_SUSPICIOUS = "exclamationmark.octagon.fill"
 const val IMAGE_PHOTO_CAMERA = "camera.fill"
 const val IMAGE_VIDEO_PLAY = "play.fill"
 const val IMAGE_MUSIC_NOTE = "music.note"
+const val IMAGE_OPEN_BROWSER = "arrow.up.right.square"
 
 
 const val FONT_SIZE_BODY1 = 18.0
@@ -124,7 +125,12 @@ fun UILabel.insertTrailingImage(image: UIImage) {
     attributedText = string
 }
 
-fun UIView.wrapWithTrailingImage(image: UIImage, fixedWith: Double = 0.0, fixedHeight: Double = 0.0): UIView {
+fun UIView.wrapWithTrailingImage(
+    image: UIImage,
+    fixedWith: Double = 0.0,
+    fixedHeight: Double = 0.0,
+    keepWidth: Boolean = false
+): UIView {
     val imageView = UIImageView(image)
     imageView.tintColor = (this as? UILabel)?.textColor ?: this.tintColor
 
@@ -141,7 +147,7 @@ fun UIView.wrapWithTrailingImage(image: UIImage, fixedWith: Double = 0.0, fixedH
         imageView.fixedHeight(fixedHeight)
     }
     imageView.contentMode = UIViewContentMode.ScaleAspectFit
-    imageView.centerVerticallyTo(this).leftToRightOf(this, DEFAULT_MARGIN * .7).rightToSuperview(canBeLess = true)
+    imageView.centerVerticallyTo(this).leftToRightOf(this, DEFAULT_MARGIN * .7).rightToSuperview(canBeLess = !keepWidth)
     this.leftToSuperview().topToSuperview().bottomToSuperview()
     return container
 }
