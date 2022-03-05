@@ -9,6 +9,7 @@ import org.ergoplatform.uilogic.tokens.TokenInformationLayoutLogic
 import org.ergoplatform.uilogic.tokens.TokenInformationModelLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
+import org.robovm.apple.foundation.NSData
 import org.robovm.apple.uikit.*
 
 class TokenInformationLayoutView(private val vc: TokenInformationViewController) : UIView(CGRect.Zero()) {
@@ -183,6 +184,7 @@ class TokenInformationLayoutView(private val vc: TokenInformationViewController)
             activateDownloadButton.topToBottomOf(labelDesc, DEFAULT_MARGIN * 2).centerHorizontal()
                 .bottomToSuperview(bottomInset = DEFAULT_MARGIN)
         }
+        val previewContainer = NftPreviewContainer()
 
         fun getHashValidImage(verified: Boolean) =
             getIosSystemImage(
@@ -207,6 +209,7 @@ class TokenInformationLayoutView(private val vc: TokenInformationViewController)
                 tintColor = uiColorErgo
             }
 
+            addArrangedSubview(previewContainer)
             addArrangedSubview(thumbnailContainer)
             addArrangedSubview(activateDownloadContainer)
             addArrangedSubview(contentLinkTitle)
@@ -215,6 +218,62 @@ class TokenInformationLayoutView(private val vc: TokenInformationViewController)
             addArrangedSubview(contentHashTitle)
             addArrangedSubview(contentHashContainer)
             setCustomSpacing(DEFAULT_MARGIN / 2, contentHashTitle)
+        }
+    }
+
+    class NftPreviewContainer : UIView(CGRect.Zero()) {
+        private val progressView = UIActivityIndicatorView(UIActivityIndicatorViewStyle.Large)
+        private val previewImg = UIImageView(CGRect.Zero())
+        private val previewImageHeight: NSLayoutConstraint
+
+        init {
+            layoutMargins = UIEdgeInsets.Zero()
+            isHidden = true
+            addSubview(previewImg)
+            addSubview(progressView)
+
+            progressView.centerHorizontal().centerVertical()
+            previewImg.apply {
+                leftToSuperview().rightToSuperview().centerInSuperviewWhenSmaller()
+                contentMode = UIViewContentMode.ScaleAspectFit
+                setTranslatesAutoresizingMaskIntoConstraints(false)
+                previewImageHeight = heightAnchor.equalTo(100.0)
+                NSLayoutConstraint.activateConstraints(NSArray(previewImageHeight))
+            }
+
+            minHeight(100.0)
+
+        }
+
+        fun showProgress(showProgress: Boolean) {
+            if (showProgress) {
+                progressView.isHidden = false
+                progressView.startAnimating()
+            } else {
+                progressView.isHidden = true
+                progressView.stopAnimating()
+            }
+        }
+
+        fun showImage(content: ByteArray?, downloadError: Boolean) {
+            val hasError = content?.let {
+                try {
+                    val image = UIImage(NSData(it))
+                    previewImg.image = image
+                    previewImg.tintColor = null
+                    val sizeRatio = image.size.width / image.size.height
+                    previewImageHeight.constant = previewImg.frame.width / sizeRatio
+                    false
+                } catch (t: Throwable) {
+                    true
+                }
+            } ?: false
+
+            if (hasError || downloadError) {
+                previewImageHeight.constant = 100.0
+                previewImg.tintColor = UIColor.label()
+                previewImg.image = getIosSystemImage(IMAGE_WARNING, UIImageSymbolScale.Large)
+            }
         }
     }
 
@@ -244,9 +303,9 @@ class TokenInformationLayoutView(private val vc: TokenInformationViewController)
             balanceAmountLabel.isHidden = amount == null
             balanceAmountTitle.isHidden = amount == null
 
-            val stackview = balanceAmountLabel.superview as? UIStackView
-            stackview?.setCustomSpacing(
-                if (balanceAmountValue.isHidden) stackview.spacing else DEFAULT_MARGIN / 2,
+            val stackView = balanceAmountLabel.superview as? UIStackView
+            stackView?.setCustomSpacing(
+                if (balanceAmountValue.isHidden) stackView.spacing else DEFAULT_MARGIN / 2,
                 balanceAmountLabel
             )
         }
@@ -274,7 +333,23 @@ class TokenInformationLayoutView(private val vc: TokenInformationViewController)
         ) {
             nftLayout.activateDownloadContainer.isHidden =
                 downloadState != TokenInformationModelLogic.StateDownload.NOT_STARTED
-            // TODO show progress and show preview
+
+            nftLayout.previewContainer.isHidden = when (downloadState) {
+                TokenInformationModelLogic.StateDownload.NOT_AVAILABLE -> true
+                TokenInformationModelLogic.StateDownload.NOT_STARTED -> true
+                TokenInformationModelLogic.StateDownload.RUNNING -> false
+                TokenInformationModelLogic.StateDownload.DONE -> false
+                TokenInformationModelLogic.StateDownload.ERROR -> false
+            }
+
+            nftLayout.previewContainer.showProgress(
+                downloadState == TokenInformationModelLogic.StateDownload.RUNNING
+            )
+
+            nftLayout.previewContainer.showImage(
+                content,
+                downloadState == TokenInformationModelLogic.StateDownload.ERROR
+            )
         }
 
         override fun showNftHashValidation(hashValid: Boolean?) {
