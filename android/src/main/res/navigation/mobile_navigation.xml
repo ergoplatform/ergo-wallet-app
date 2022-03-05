@@ -93,6 +93,9 @@
         <action
             android:id="@+id/action_navigation_wallet_details_to_coldWalletSigningFragment"
             app:destination="@id/coldWalletSigningFragment" />
+        <action
+            android:id="@+id/action_navigation_wallet_details_to_tokenInformationDialogFragment"
+            app:destination="@id/tokenInformationDialogFragment" />
     </fragment>
 
     <fragment
@@ -323,5 +326,17 @@
         <argument
             android:name="dateToShare"
             app:argType="string" />
+    </dialog>
+    <dialog
+        android:id="@+id/tokenInformationDialogFragment"
+        android:name="org.ergoplatform.android.tokens.TokenInformationDialogFragment"
+        tools:layout="@layout/fragment_token_information" >
+        <argument
+            android:name="tokenId"
+            app:argType="string" />
+        <argument
+            android:name="amount"
+            app:argType="long"
+            android:defaultValue="-1L" />
     </dialog>
 </navigation>

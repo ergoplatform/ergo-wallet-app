@@ -164,7 +164,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                 notifyUiLocked(false)
 
                 if (ergoTxResult.success) {
-                    NodeConnector.getInstance().invalidateCache()
+                    WalletStateSyncManager.getInstance().invalidateCache()
                     notifyHasTxId(ergoTxResult.txId!!)
                 }
                 notifyHasErgoTxResult(ergoTxResult)

@@ -1,32 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
-    android:orientation="vertical"
-    android:paddingHorizontal="@dimen/activity_vertical_margin"
-    android:paddingVertical="@dimen/half_horizontal_margin">
+    android:minHeight="70dp">
 
-    <TextView
-        android:id="@+id/label_token_name"
-        style="@style/TextAppearance.App.Headline2"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:gravity="center"
-        android:maxLines="1"
-        tools:text="Very long NFT name here" />
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/activity_vertical_margin"
+        android:paddingVertical="@dimen/half_horizontal_margin"
+        tools:ignore="UselessParent">
 
-    <TextView
-        android:id="@+id/label_token_id"
-        style="@style/TextAppearance.App.Body2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ellipsize="middle"
-        android:gravity="center"
-        android:maxLines="1"
-        android:textColor="@color/darkgrey"
-        tools:text="ba5856162d6342d2a0072f464a5a8b62b4ac4dd77195bec18c6bf268c2def831" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal">
 
-</LinearLayout>
+            <FrameLayout
+                android:id="@+id/layout_thumbnail"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/half_horizontal_margin"
+                android:background="@drawable/ic_octagon_48"
+                android:backgroundTint="?attr/colorControlNormal"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/img_thumbnail"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    app:tint="@color/cardview_background"
+                    tools:src="@drawable/ic_photo_camera_24" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/label_token_name"
+                style="@style/TextAppearance.App.Headline2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:drawablePadding="@dimen/half_horizontal_margin"
+                android:ellipsize="end"
+                android:maxLines="1"
+                app:drawableTint="@color/primary"
+                tools:drawableEnd="@drawable/ic_verified_18"
+                tools:text="Very long NFT name here" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/label_token_id"
+            style="@style/TextAppearance.App.Body2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:layout_gravity="center"
+            android:maxLines="1"
+            android:textColor="@color/darkgrey"
+            tools:text="ba5856162d6342d2a0072f464a5a8b62b4ac4dd77195bec18c6bf268c2def831" />
+
+    </LinearLayout>
+</FrameLayout>

@@ -200,6 +200,20 @@
     <string name="label_ergo_pay_choose_address">Please choose an address to process the Ergo Pay Request.</string>
     <string name="error_prover_cant_sign">The transaction could not be signed with this wallet\'s keys.</string>
 
+    <!-- Token information dialog -->
+    <string name="label_minting_tx">Minting transaction</string>
+    <string name="label_token_description">Token description</string>
+    <string name="label_no_description">None</string>
+    <string name="label_token_supply">Full supply amount</string>
+    <string name="label_error_fetching">Could not fetch requested information</string>
+    <string name="label_content_link">Content link</string>
+    <string name="label_content_hash">Content Hash</string>
+    <string name="button_validate">Validate</string>
+    <string name="desc_download_content">Ergo Wallet can show a preview of content linked to NFT tokens.
+        Please be aware that this content is created by third parties and might be unwanted.</string>
+    <string name="button_download_content_on">Activate</string>
+    <string name="button_download_content_off">Deactivate</string>
+
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1s</string>
     <string name="about_year" translatable="false">2022</string>
@@ -218,4 +232,5 @@
     <string name="label_explorer_api_url">Explorer API URL</string>
     <string name="label_node_url">Node URL</string>
     <string name="button_show_debug_info">Show debug information</string>
+    <string name="label_ipfs_http_gateway">IPFS HTTP gateway</string>
 </resources>

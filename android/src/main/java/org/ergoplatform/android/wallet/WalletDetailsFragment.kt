@@ -18,13 +18,14 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.ErgoApiService
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
-import org.ergoplatform.android.RoomWalletDbProvider
+import org.ergoplatform.android.databinding.EntryWalletTokenDetailsBinding
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
-import org.ergoplatform.android.tokens.inflateAndBindDetailedTokenEntryView
+import org.ergoplatform.android.tokens.WalletDetailsTokenEntryView
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.openUrlWithBrowser
@@ -32,6 +33,7 @@ import org.ergoplatform.android.ui.postDelayed
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.getExplorerWebUrl
+import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.wallet.getDerivedAddress
 
@@ -59,17 +61,18 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         walletDetailsViewModel.init(requireContext(), args.walletId)
         _binding = FragmentWalletDetailsBinding.inflate(layoutInflater, container, false)
 
-        walletDetailsViewModel.address.observe(viewLifecycleOwner) { addressChanged() }
+        walletDetailsViewModel.address.observe(viewLifecycleOwner) { onDataChanged() }
+        walletDetailsViewModel.tokenInfo.observe(viewLifecycleOwner) { onTokenInfoChanged(it) }
 
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         binding.swipeRefreshLayout.setOnRefreshListener {
             if (!nodeConnector.refreshByUser(
                     Preferences(requireContext()),
-                    RoomWalletDbProvider(AppDatabase.getInstance(requireContext()))
+                    AppDatabase.getInstance(requireContext())
                 )
             ) {
                 binding.swipeRefreshLayout.isRefreshing = false
@@ -159,7 +162,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         walletDetailsViewModel.selectedIdx = addressDerivationIdx
     }
 
-    private fun addressChanged() {
+    private fun onDataChanged() {
         // The selected address changed. It is null for "all addresses"
 
         if (walletDetailsViewModel.wallet == null) {
@@ -187,7 +190,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
 
         // Fill fiat value
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         val ergoPrice = nodeConnector.fiatValue.value
         if (ergoPrice == 0f) {
             binding.walletFiat.visibility = View.GONE
@@ -198,20 +201,39 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         }
 
         // tokens
-        val tokensList = walletDetailsViewModel.uiLogic.getTokensList()
+        val tokensList = walletDetailsViewModel.uiLogic.tokensList
         binding.cardviewTokens.visibility = if (tokensList.isNotEmpty()) View.VISIBLE else View.GONE
         binding.walletTokenNum.text = tokensList.size.toString()
 
         binding.walletTokenEntries.apply {
             removeAllViews()
+            tokensViewList.clear()
             if (wallet.walletConfig.unfoldTokens) {
-                tokensList.forEach {
-                    inflateAndBindDetailedTokenEntryView(
-                        it,
-                        this,
-                        layoutInflater
-                    )
+                val tokenInfoMap = walletDetailsViewModel.uiLogic.tokenInformation
+                tokensList.forEach { token ->
+                    val itemBinding =
+                        EntryWalletTokenDetailsBinding.inflate(
+                            layoutInflater,
+                            this,
+                            true
+                        )
+                    val walletDetailsView = WalletDetailsTokenEntryView(itemBinding, token)
+                    walletDetailsView.bind(tokenInfoMap[token.tokenId!!])
+                    tokensViewList.add(walletDetailsView)
+
+                    walletDetailsView.binding.root.setOnClickListener {
+                        findNavController().navigateSafe(
+                            WalletDetailsFragmentDirections.actionNavigationWalletDetailsToTokenInformationDialogFragment(
+                                token.tokenId!!
+                            ).setAmount(token.amount ?: 0)
+                        )
+                    }
                 }
+                val ctx = requireContext()
+                walletDetailsViewModel.uiLogic.gatherTokenInformation(
+                    AppDatabase.getInstance(ctx).tokenDbProvider,
+                    ErgoApiService.getOrInit(Preferences(ctx))
+                )
             }
         }
 
@@ -223,6 +245,19 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             val context = it.context
             updateWalletTokensUnfold(context, wallet)
             // we don't need to update UI here - the DB change will trigger rebinding of the card
+        }
+    }
+
+    // list of token views currently in view
+    private val tokensViewList = ArrayList<WalletDetailsTokenEntryView>()
+
+    private fun onTokenInfoChanged(tokenInfoHashMap: HashMap<String, TokenInformation>) {
+        // token info changed, or we have the last call from another view instance
+        tokensViewList.forEach { view ->
+            view.tokenId?.let { tokenId ->
+                val tokenInfo = tokenInfoHashMap.get(tokenId)
+                tokenInfo?.let { view.addTokenInfo(tokenInfo) }
+            }
         }
     }
 
@@ -251,9 +286,9 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     override fun onResume() {
         super.onResume()
         val context = requireContext()
-        NodeConnector.getInstance().refreshWhenNeeded(
+        WalletStateSyncManager.getInstance().refreshWhenNeeded(
             Preferences(context),
-            RoomWalletDbProvider(AppDatabase.getInstance(context))
+            AppDatabase.getInstance(context)
         )
     }
 

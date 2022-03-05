@@ -1,14 +1,15 @@
 package org.ergoplatform.ios.settings
 
 import com.badlogic.gdx.utils.I18NBundle
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.ios.CrashHandler
+import org.ergoplatform.ios.Preferences
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.uilogic.settings.SettingsUiLogic
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.settings.SettingsUiLogic
 import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
-import org.robovm.apple.foundation.*
+import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
 class SettingsViewController : CoroutineViewController() {
@@ -47,7 +48,8 @@ class SettingsViewController : CoroutineViewController() {
 
 
         // Fiat currency setting
-        val fiatCurrencyContainer = buildFiatCurrencySettings(texts)
+        val preferences = getAppDelegate().prefs
+        val fiatCurrencyContainer = buildFiatCurrencySettings(texts, preferences)
 
 
         // Debug information
@@ -63,8 +65,10 @@ class SettingsViewController : CoroutineViewController() {
         // Expert settings
         val expertSettingsContainer = buildExpertSettings(texts)
 
+        // NFT settings
+        val nftSettingsContainer = buildNftSettings(texts, preferences)
 
-        // Containers, Stackview, Scrollview
+        // Containers, StackView, Scrollview
 
         val container = UIView()
         val stackView =
@@ -77,6 +81,8 @@ class SettingsViewController : CoroutineViewController() {
                     moreInfo,
                     createHorizontalSeparator(),
                     fiatCurrencyContainer,
+                    createHorizontalSeparator(),
+                    nftSettingsContainer,
                     createHorizontalSeparator(),
                     expertSettingsContainer,
                     createHorizontalSeparator(),
@@ -96,15 +102,14 @@ class SettingsViewController : CoroutineViewController() {
         scrollView.setDelaysContentTouches(false)
     }
 
-    private fun buildFiatCurrencySettings(texts: I18NBundle): UIView {
+    private fun buildFiatCurrencySettings(texts: I18NBundle, preferences: Preferences): UIView {
         val fiatCurrencyContainer = UIView()
-        val preferences = getAppDelegate().prefs
         val changeFiatCurrencyButton =
             TextButton(uiLogic.getFiatCurrencyButtonText(preferences, IosStringProvider(texts)))
         changeFiatCurrencyButton.addOnTouchUpInsideListener { _, _ ->
             presentViewController(DisplayCurrencyListViewController { currency ->
                 preferences.prefDisplayCurrency = currency
-                NodeConnector.getInstance().invalidateCache(resetFiatValue = true)
+                WalletStateSyncManager.getInstance().invalidateCache(resetFiatValue = true)
                 changeFiatCurrencyButton.setTitle(
                     uiLogic.getFiatCurrencyButtonText(
                         preferences,
@@ -127,6 +132,31 @@ class SettingsViewController : CoroutineViewController() {
         return fiatCurrencyContainer
     }
 
+    private fun buildNftSettings(texts: I18NBundle, preferences: Preferences): UIView {
+        val container = UIView(CGRect.Zero())
+        val desc = Body1Label().apply {
+            text = texts.get(STRING_DESC_DOWNLOAD_CONTENT)
+            textAlignment = NSTextAlignment.Center
+        }
+        val getButtonLabel = {
+            texts.get(
+                if (preferences.downloadNftContent) STRING_BUTTON_DOWNLOAD_CONTENT_OFF
+                else STRING_BUTTON_DOWNLOAD_CONTENT_ON
+            )
+        }
+        val button = TextButton(getButtonLabel())
+        button.addOnTouchUpInsideListener { _, _ ->
+            preferences.downloadNftContent = !preferences.downloadNftContent
+            button.setTitle(getButtonLabel(), UIControlState.Normal)
+        }
+
+        container.addSubview(desc)
+        container.addSubview(button)
+        desc.topToSuperview(topInset = DEFAULT_MARGIN).widthMatchesSuperview()
+        button.bottomToSuperview().topToBottomOf(desc, inset = DEFAULT_MARGIN).widthMatchesSuperview()
+        return container
+    }
+
     private fun buildExpertSettings(texts: I18NBundle): UIView {
         val expertSettingsContainer = UIView(CGRect.Zero())
 
@@ -143,15 +173,13 @@ class SettingsViewController : CoroutineViewController() {
 
         expertSettingsContainer.addSubviews(listOf(title, button))
         title.topToSuperview(topInset = DEFAULT_MARGIN).widthMatchesSuperview()
-        button.bottomToSuperview().topToBottomOf(title, inset = DEFAULT_MARGIN).widthMatchesSuperview(
-
-        )
+        button.bottomToSuperview().topToBottomOf(title, inset = DEFAULT_MARGIN).widthMatchesSuperview()
 
         return expertSettingsContainer
     }
 
     class DebugInfoViewController : UIViewController() {
-        lateinit var textView: UITextView
+        private lateinit var textView: UITextView
 
         override fun viewDidLoad() {
             super.viewDidLoad()

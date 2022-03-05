@@ -58,7 +58,7 @@ abstract class AddReadOnlyWalletUiLogic {
 
         GlobalScope.launch(Dispatchers.IO) {
             walletDbProvider.insertWalletConfig(walletConfig)
-            NodeConnector.getInstance().invalidateCache()
+            WalletStateSyncManager.getInstance().invalidateCache()
         }
         return true
     }

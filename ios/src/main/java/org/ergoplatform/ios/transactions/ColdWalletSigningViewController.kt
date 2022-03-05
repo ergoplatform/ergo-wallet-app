@@ -49,7 +49,7 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        uiLogic.setWalletId(walletId, getAppDelegate().database)
+        uiLogic.setWalletId(walletId, getAppDelegate().database.walletDbProvider)
         addQrCodeChunk(signingRequestChunk)
     }
 

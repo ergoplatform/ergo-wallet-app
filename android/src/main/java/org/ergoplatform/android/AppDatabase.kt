@@ -9,6 +9,10 @@ import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.ergoplatform.android.tokens.TokenDbDao
+import org.ergoplatform.android.tokens.TokenInformationDbEntity
+import org.ergoplatform.android.tokens.TokenPriceDbEntity
+import org.ergoplatform.android.tokens.toDbEntity
 import org.ergoplatform.android.wallet.*
 import org.ergoplatform.persistance.*
 
@@ -17,11 +21,14 @@ import org.ergoplatform.persistance.*
         WalletConfigDbEntity::class,
         WalletStateDbEntity::class,
         WalletAddressDbEntity::class,
-        WalletTokenDbEntity::class
-    ), version = 5
+        WalletTokenDbEntity::class,
+        TokenPriceDbEntity::class,
+        TokenInformationDbEntity::class
+    ), version = 6
 )
-abstract class AppDatabase : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase(), IAppDatabase {
     abstract fun walletDao(): WalletDbDao
+    abstract fun tokenDao(): TokenDbDao
 
     companion object {
 
@@ -41,10 +48,11 @@ abstract class AppDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_2_3)
                 .addMigrations(MIGRATION_3_4)
                 .addMigrations(MIGRATION_4_5)
+                .addMigrations(MIGRATION_5_6)
                 .build()
         }
 
-        val MIGRATION_1_2 = object : Migration(1, 2) {
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("DROP TABLE `wallet_states`")
                 // taken from AppDatabase_Impl :-)
@@ -52,7 +60,7 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        val MIGRATION_2_3 = object : Migration(2, 3) {
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("DROP TABLE `wallet_states`")
                 // taken from AppDatabase_Impl :-)
@@ -63,21 +71,31 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        val MIGRATION_3_4 = object : Migration(3, 4) {
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE wallet_addresses ADD COLUMN `label` TEXT")
             }
         }
 
-        val MIGRATION_4_5 = object : Migration(4, 5) {
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE wallet_configs ADD COLUMN `xpubkey` TEXT")
             }
         }
+
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS `token_price` (`tokenId` TEXT NOT NULL, `display_name` TEXT, `source` TEXT NOT NULL, `erg_value` TEXT NOT NULL, PRIMARY KEY(`tokenId`))")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `token_info` (`tokenId` TEXT NOT NULL, `issuing_box` TEXT NOT NULL, `minting_tx` TEXT NOT NULL, `display_name` TEXT NOT NULL, `description` TEXT NOT NULL, `decimals` INTEGER NOT NULL, `full_supply` INTEGER NOT NULL, `reg7` TEXT, `reg8` TEXT, `reg9` TEXT, `genuine_flag` INTEGER NOT NULL, `issuer_link` TEXT, `thumbnail_bytes` BLOB, `thunbnail_type` INTEGER NOT NULL, `updated_ms` INTEGER NOT NULL, PRIMARY KEY(`tokenId`))")
+            }
+        }
     }
+
+    override val tokenDbProvider get() = RoomTokenDbProvider(this)
+    override val walletDbProvider get() = RoomWalletDbProvider(this)
 }
 
-class RoomWalletDbProvider(val database: AppDatabase) : WalletDbProvider {
+class RoomWalletDbProvider(private val database: AppDatabase) : WalletDbProvider {
     override suspend fun <R> withTransaction(block: suspend () -> R): R {
         return database.withTransaction(block)
     }
@@ -160,4 +178,32 @@ class RoomWalletDbProvider(val database: AppDatabase) : WalletDbProvider {
         database.walletDao()
             .insertWalletTokens(*(walletTokens.map { it.toDbEntity() }.toTypedArray()))
     }
+}
+
+class RoomTokenDbProvider(private val database: AppDatabase) : TokenDbProvider {
+    override suspend fun loadTokenPrices(): List<TokenPrice> {
+        return database.tokenDao().getAllTokenPrices().map { it.toModel() }
+    }
+
+    override suspend fun updateTokenPrices(priceList: List<TokenPrice>) {
+        database.withTransaction {
+            database.tokenDao().deleteAllTokenPrices()
+            database.tokenDao()
+                .insertTokenPrices(*(priceList.map { it.toDbEntity() }.toTypedArray()))
+        }
+    }
+
+    override suspend fun loadTokenInformation(tokenId: String): TokenInformation? {
+        return database.tokenDao().getTokenInformation(tokenId)?.toModel()
+    }
+
+    override suspend fun insertOrReplaceTokenInformation(tokenInfo: TokenInformation) {
+        database.tokenDao().insertOrUpdateTokenInformation(tokenInfo.toDbEntity())
+    }
+
+    override suspend fun pruneUnusedTokenInformation() {
+        database.tokenDao()
+            .deleteOutdatedTokenInformation(System.currentTimeMillis() - TOKEN_INFO_MS_OUTDATED)
+    }
+
 }

@@ -1,11 +1,14 @@
 package org.ergoplatform.ios.wallet
 
 import com.badlogic.gdx.utils.I18NBundle
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.ErgoApiService
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.getExplorerWebUrl
-import org.ergoplatform.ios.tokens.DetailTokenEntryView
+import org.ergoplatform.ios.tokens.TokenInformationViewController
+import org.ergoplatform.ios.tokens.WalletDetailsTokenEntryView
 import org.ergoplatform.ios.transactions.ColdWalletSigningViewController
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
 import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
@@ -13,11 +16,11 @@ import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.ios.wallet.addresses.WalletAddressesViewController
+import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.WalletDetailsUiLogic
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
-import org.ergoplatform.wallet.getNumOfAddresses
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -32,7 +35,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     private lateinit var tokenContainer: TokenListContainer
     private lateinit var tokenSeparator: UIView
 
-    private val uiLogic = WalletDetailsUiLogic()
+    private val uiLogic = IosDetailsUiLogic()
     private var newDataLoaded: Boolean = false
     private var animateNextConfigRefresh = false
 
@@ -81,7 +84,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             if (uiRefreshControl.isRefreshing) {
                 uiRefreshControl.endRefreshing()
                 val appDelegate = getAppDelegate()
-                NodeConnector.getInstance().refreshByUser(appDelegate.prefs, appDelegate.database)
+                WalletStateSyncManager.getInstance().refreshByUser(appDelegate.prefs, appDelegate.database)
             }
         }
 
@@ -90,48 +93,46 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         viewControllerScope.launch {
-            NodeConnector.getInstance().isRefreshing.collect { isRefreshing ->
+            // walletWithStateByIdAsFlow does not observe state and tokens, so we need observe
+            // WalletStateSyncManager here too
+            WalletStateSyncManager.getInstance().isRefreshing.collect { isRefreshing ->
                 if (!isRefreshing && uiLogic.wallet != null) {
-                    uiLogic.wallet = getAppDelegate().database.loadWalletWithStateById(walletId)
-                    newDataLoaded = true
-                    runOnMainThread {
-                        view.animateLayoutChanges { refresh() }
-                    }
+                    animateNextConfigRefresh = true
+                    uiLogic.onWalletStateChanged(
+                        getAppDelegate().database.walletDbProvider.loadWalletWithStateById(
+                            walletId
+                        ),
+                        getAppDelegate().database.tokenDbProvider
+                    )
                 }
             }
         }
-        viewControllerScope.launch {
-            getAppDelegate().database.walletWithStateByIdAsFlow(walletId).collect { wallet ->
-                uiLogic.wallet = wallet
-                newDataLoaded = true
-
-                if (uiLogic.addressIdx == null && wallet?.getNumOfAddresses() == 1) {
-                    uiLogic.addressIdx = 0
-                }
-
-                runOnMainThread {
-                    // usually, config changes are triggered by changes made on other screens (e.g. addresses list)
-                    // generally, there's no need to animate these changes. An exception is (un)folding tokens list:
-                    // this change should happen animated.
-                    if (animateNextConfigRefresh) {
-                        view.animateLayoutChanges { refresh() }
-                    } else
-                        refresh()
-                }
-            }
-        }
+        uiLogic.setUpWalletStateFlowCollector(getAppDelegate().database, walletId)
         onResume()
     }
 
     override fun onResume() {
         val appDelegate = getAppDelegate()
-        NodeConnector.getInstance().refreshWhenNeeded(
+        WalletStateSyncManager.getInstance().refreshWhenNeeded(
             appDelegate.prefs,
             appDelegate.database
         )
     }
 
-    fun refresh() {
+    private fun refreshDataFromBackgroundThread() {
+        newDataLoaded = true
+        runOnMainThread {
+            // usually, config changes are triggered by changes made on other screens (e.g. addresses list)
+            // generally, there's no need to animate these changes. An exception is (un)folding tokens list:
+            // this change should happen animated, as well as state change from WalletStateSyncManager
+            if (animateNextConfigRefresh) {
+                view.animateLayoutChanges { refresh() }
+            } else
+                refresh()
+        }
+    }
+
+    private fun refresh() {
         if (uiLogic.wallet == null) {
             navigationController.popViewController(false)
         }
@@ -188,14 +189,14 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                                     true
                                 )
                             }, { errorMessage ->
-                                    presentViewController(
-                                        buildSimpleAlertController(
-                                            "",
-                                            errorMessage,
-                                            texts
-                                        ), true
-                                    ) {}
-                                }
+                                presentViewController(
+                                    buildSimpleAlertController(
+                                        "",
+                                        errorMessage,
+                                        texts
+                                    ), true
+                                ) {}
+                            }
                             )
                         }, true) {}
                     })
@@ -216,9 +217,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 addGestureRecognizer(UITapGestureRecognizer {
                     presentViewController(
                         ChooseAddressListDialogViewController(walletId, true) {
-                            uiLogic.addressIdx = it
-                            newDataLoaded = true
-                            this@WalletDetailsViewController.refresh()
+                            uiLogic.newAddressIdxChosen(it)
                         }, true
                     ) {}
                 })
@@ -332,7 +331,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             unconfirmedBalance.isHidden = (unconfirmed.isZero())
 
             // Fill fiat value
-            val nodeConnector = NodeConnector.getInstance()
+            val nodeConnector = WalletStateSyncManager.getInstance()
             val ergoPrice = nodeConnector.fiatValue.value
             fiatBalance.isHidden = ergoPrice == 0f
 
@@ -348,6 +347,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         private val tokensListStack = UIStackView(CGRect.Zero()).apply {
             axis = UILayoutConstraintAxis.Vertical
         }
+        private val tokensDetailViewMap = HashMap<String, WalletDetailsTokenEntryView>()
         private val expandButton = UIImageView().apply {
             tintColor = UIColor.label()
         }
@@ -389,22 +389,42 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             uiLogic.wallet?.walletConfig?.let { walletConfig ->
                 viewControllerScope.launch {
                     animateNextConfigRefresh = true
-                    getAppDelegate().database.updateWalletDisplayTokens(!walletConfig.unfoldTokens, walletId)
+                    getAppDelegate().database.walletDbProvider.updateWalletDisplayTokens(
+                        !walletConfig.unfoldTokens,
+                        walletId
+                    )
                 }
             }
         }
 
         fun refresh() {
-            val tokensList = uiLogic.getTokensList()
+            val tokensList = uiLogic.tokensList
+            val infoHashMap = uiLogic.tokenInformation
             isHidden = tokensList.isEmpty()
             tokensNumLabel.text = tokensList.size.toString()
 
             tokensListStack.clearArrangedSubviews()
+            tokensDetailViewMap.clear()
             val listExpanded = uiLogic.wallet?.walletConfig?.unfoldTokens == true
             if (listExpanded) {
                 tokensList.forEach {
-                    tokensListStack.addArrangedSubview(DetailTokenEntryView().bindWalletToken(it, texts))
+                    val tokenId = it.tokenId!!
+                    val detailView = WalletDetailsTokenEntryView(it, texts) {
+                        presentViewController(TokenInformationViewController(tokenId, it.amount), true) {}
+                    }.bindWalletToken(infoHashMap[tokenId])
+                    val container = UIView(CGRect.Zero()).apply {
+                        addSubview(detailView)
+                        minHeight(50.0)
+                        detailView.widthMatchesSuperview().centerInSuperviewWhenSmaller()
+                        layoutMargins = UIEdgeInsets.Zero()
+                    }
+                    tokensListStack.addArrangedSubview(container)
+                    tokensDetailViewMap[tokenId] = detailView
                 }
+                val appDelegate = getAppDelegate()
+                uiLogic.gatherTokenInformation(
+                    appDelegate.database.tokenDbProvider, ErgoApiService.getOrInit(appDelegate.prefs)
+                )
             }
 
             expandButton.image = getIosSystemImage(
@@ -412,6 +432,10 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 UIImageSymbolScale.Small,
                 20.0
             )
+        }
+
+        fun addTokenInfo(tokenInformation: TokenInformation) {
+            tokensDetailViewMap[tokenInformation.tokenId]?.bindWalletToken(tokenInformation)
         }
     }
 
@@ -451,6 +475,19 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                             (uiLogic.walletAddress?.publicAddress ?: uiLogic.wallet!!.walletConfig.firstAddress)
                 )
             })
+        }
+    }
+
+
+    inner class IosDetailsUiLogic : WalletDetailsUiLogic() {
+        override val coroutineScope: CoroutineScope get() = viewControllerScope
+
+        override fun onDataChanged() {
+            refreshDataFromBackgroundThread()
+        }
+
+        override fun onNewTokenInfoGathered(tokenInformation: TokenInformation) {
+            runOnMainThread { tokenContainer.addTokenInfo(tokenInformation) }
         }
     }
 }

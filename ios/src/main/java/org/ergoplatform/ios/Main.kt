@@ -3,15 +3,12 @@ package org.ergoplatform.ios
 import SQLite.JDBCDriver
 import com.badlogic.gdx.utils.I18NBundle
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.ios.ui.CoroutineViewController
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.isErgoMainNet
-import org.ergoplatform.isPaymentRequestUrl
-import org.ergoplatform.persistance.AppDatabase
-import org.ergoplatform.persistance.DbInitializer
-import org.ergoplatform.persistance.SqlDelightWalletProvider
+import org.ergoplatform.persistance.*
 import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.foundation.NSAutoreleasePool
 import org.robovm.apple.foundation.NSBundle
@@ -21,7 +18,7 @@ import java.io.File
 import java.sql.DriverManager
 
 class Main : UIApplicationDelegateAdapter() {
-    lateinit var database: SqlDelightWalletProvider
+    lateinit var database: SqlDelightAppDb
         private set
     lateinit var texts: I18NBundle
         private set
@@ -46,10 +43,10 @@ class Main : UIApplicationDelegateAdapter() {
 
         CrashHandler.registerUncaughtExceptionHandler()
         LogUtils.stackTraceLogger = { CrashHandler.writeToDebugFile(it) }
-        database = SqlDelightWalletProvider(setupDatabase())
+        database = SqlDelightAppDb(setupDatabase())
         texts = I18NBundle.createBundle(File(internalPath, "i18n/strings"))
         prefs = Preferences()
-        NodeConnector.getInstance().loadPreferenceValues(prefs)
+        WalletStateSyncManager.getInstance().loadPreferenceValues(prefs, database)
 
         // Set up the view controller.
         val rootViewController = BottomNavigationBar()

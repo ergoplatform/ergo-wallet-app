@@ -195,7 +195,7 @@
                         android:layout_marginTop="@dimen/activity_vertical_margin"
                         android:animateLayoutChanges="true"
                         android:orientation="vertical"
-                        android:padding="@dimen/half_horizontal_margin"
+                        android:paddingVertical="@dimen/half_horizontal_margin"
                         android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"

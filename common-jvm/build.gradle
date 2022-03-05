@@ -9,7 +9,7 @@ java {
 }
 
 dependencies {
-    api('org.ergoplatform:ergo-appkit_2.11:develop-71491aed-SNAPSHOT') {
+    api('org.ergoplatform:ergo-appkit_2.11:24959b3d-SNAPSHOT') {
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
         exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
         exclude group: 'com.google.guava', module: 'guava'

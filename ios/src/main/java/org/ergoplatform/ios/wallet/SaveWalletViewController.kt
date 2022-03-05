@@ -188,7 +188,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
         GlobalScope.launch(Dispatchers.IO) {
             val appDelegate = getAppDelegate()
             uiLogic.suspendSaveToDb(
-                appDelegate.database, nameInputField.text,
+                appDelegate.database.walletDbProvider, nameInputField.text,
                 encType, secretStorage
             )
         }
@@ -206,7 +206,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
 
         viewControllerScope.launch {
             val publicErgoAddressFromMnemonic = uiLogic.publicAddress
-            val db = getAppDelegate().database
+            val db = getAppDelegate().database.walletDbProvider
             val walletDisplayName =
                 uiLogic.getSuggestedDisplayName(db, IosStringProvider(getAppDelegate().texts))
             val showDisplayName = uiLogic.showSuggestedDisplayName(db)

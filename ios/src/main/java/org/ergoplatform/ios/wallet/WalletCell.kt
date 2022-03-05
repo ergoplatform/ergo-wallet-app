@@ -2,7 +2,7 @@ package org.ergoplatform.ios.wallet
 
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.ios.tokens.TokenEntryView
 import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
 import org.ergoplatform.ios.transactions.SendFundsViewController
@@ -162,7 +162,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
 
     private fun toggleTokenUnfold() {
         wallet?.walletConfig?.let { config ->
-            getAppDelegate().database.updateWalletDisplayTokens(!config.unfoldTokens, config.id)
+            getAppDelegate().database.walletDbProvider.updateWalletDisplayTokens(!config.unfoldTokens, config.id)
         }
     }
 
@@ -180,7 +180,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         nameLabel.text = wallet.walletConfig.displayName
         val ergoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
         balanceLabel.setErgoAmount(ergoAmount)
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         val ergoPrice = nodeConnector.fiatValue.value
         fiatBalance.isHidden = ergoPrice == 0f
         fiatBalance.text = formatFiatToString(

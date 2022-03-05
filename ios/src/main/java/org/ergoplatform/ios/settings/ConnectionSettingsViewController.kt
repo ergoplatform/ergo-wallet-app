@@ -2,10 +2,7 @@ package org.ergoplatform.ios.settings
 
 import org.ergoplatform.getDefaultExplorerApiUrl
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.uilogic.STRING_BUTTON_CONNECTION_SETTINGS
-import org.ergoplatform.uilogic.STRING_BUTTON_RESET_DEFAULTS
-import org.ergoplatform.uilogic.STRING_LABEL_EXPLORER_API_URL
-import org.ergoplatform.uilogic.STRING_LABEL_NODE_URL
+import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -14,6 +11,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
 
     private lateinit var explorerApiInput: UITextField
     private lateinit var nodeApiInput: UITextField
+    private lateinit var ipfsGatewayInput: UITextField
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -34,6 +32,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
         saveButton.setOnClickListener {
             prefs.prefNodeUrl = nodeApiInput.text
             prefs.prefExplorerApiUrl = explorerApiInput.text
+            prefs.prefIpfsGatewayUrl = ipfsGatewayInput.text
             dismissViewController(true) {}
         }
 
@@ -57,14 +56,29 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
         }
 
         nodeApiInput = createTextField().apply {
-            returnKeyType = UIReturnKeyType.Done
+            returnKeyType = UIReturnKeyType.Next
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
-                    nodeApiInput.resignFirstResponder()
+                    ipfsGatewayInput.becomeFirstResponder()
                     return true
                 }
             }
             text = prefs.prefNodeUrl
+            clearButtonMode = UITextFieldViewMode.Always
+        }
+
+        val ipfsGatewayTitle = Body1Label().apply {
+            text = texts.get(STRING_LABEL_IPFS_HTTP_GATEWAY)
+        }
+        ipfsGatewayInput = createTextField().apply {
+            returnKeyType = UIReturnKeyType.Done
+            delegate = object : UITextFieldDelegateAdapter() {
+                override fun shouldReturn(textField: UITextField?): Boolean {
+                    textField?.resignFirstResponder()
+                    return true
+                }
+            }
+            text = prefs.prefIpfsGatewayUrl
             clearButtonMode = UITextFieldViewMode.Always
         }
 
@@ -73,28 +87,33 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
             addOnTouchUpInsideListener { _, _ ->
                 nodeApiInput.text = prefs.getDefaultNodeApiUrl()
                 explorerApiInput.text = getDefaultExplorerApiUrl()
+                ipfsGatewayInput.text = prefs.defaultIpfsGatewayUrl
             }
         }
         buttonContainer.addSubview(defaultsButton)
         defaultsButton.topToSuperview().bottomToSuperview().rightToSuperview()
 
-        val stackview =
+        val stackView =
             UIStackView(
                 NSArray(
                     explorerApiLabel,
                     explorerApiInput,
                     nodeApiLabel,
                     nodeApiInput,
+                    ipfsGatewayTitle,
+                    ipfsGatewayInput,
                     buttonContainer
                 )
             ).apply {
                 axis = UILayoutConstraintAxis.Vertical
+                spacing = DEFAULT_MARGIN / 2
                 layoutMargins = UIEdgeInsets(DEFAULT_MARGIN, 0.0, 0.0, 0.0)
                 isLayoutMarginsRelativeArrangement = true
                 setCustomSpacing(DEFAULT_MARGIN * 2, explorerApiInput)
+                setCustomSpacing(DEFAULT_MARGIN * 2, nodeApiInput)
             }
 
-        val scrollView = stackview.wrapInVerticalScrollView()
+        val scrollView = stackView.wrapInVerticalScrollView()
         scrollView.setDelaysContentTouches(false)
 
         view.addSubview(scrollView)

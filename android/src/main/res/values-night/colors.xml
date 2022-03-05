@@ -6,4 +6,5 @@
     <color name="lightgrey">#888888</color>
     <color name="darkgrey">#BBBBBB</color>
     <color name="windowbackground">#333333</color>
+    <color name="cardview_background">@color/cardview_dark_background</color>
 </resources>

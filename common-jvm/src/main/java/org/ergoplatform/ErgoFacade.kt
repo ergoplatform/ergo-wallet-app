@@ -74,6 +74,8 @@ fun getExplorerWebUrl() =
 
 fun getExplorerTxUrl(txId: String) = getExplorerWebUrl() + "en/transactions/" + txId
 
+fun getExplorerTokenUrl(tokenId: String) = getExplorerWebUrl() + "en/token/" + tokenId
+
 fun getAddressDerivationPath(index: Int): String {
     return "m/44'/429'/0'/0/$index"
 }

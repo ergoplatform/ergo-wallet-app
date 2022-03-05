@@ -125,7 +125,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         viewControllerScope.launch {
-            uiLogic.initForWallet(walletId, getAppDelegate().database)
+            uiLogic.initForWallet(walletId, getAppDelegate().database.walletDbProvider)
         }
     }
 
@@ -186,7 +186,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
         // we use GlobalScope here to not cancel the transaction when we leave this view
         uiLogic.wallet?.let {
             GlobalScope.launch {
-                val database = getAppDelegate().database
+                val database = getAppDelegate().database.walletDbProvider
                 database.deleteAllWalletData(it)
 
                 // After we deleted a keychain encrypted wallet, we can prune the keychain data if it is not needed
@@ -204,7 +204,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
     private fun doSaveWalletName() {
         nameInputField.text?.let {
             viewControllerScope.launch(Dispatchers.IO) {
-                uiLogic.saveChanges(getAppDelegate().database, it)
+                uiLogic.saveChanges(getAppDelegate().database.walletDbProvider, it)
                 runOnMainThread {
                     nameInputField.resignFirstResponder()
                 }

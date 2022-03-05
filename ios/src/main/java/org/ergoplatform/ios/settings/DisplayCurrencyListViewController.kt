@@ -2,7 +2,7 @@ package org.ergoplatform.ios.settings
 
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_LABEL_CG_CONN_ERROR
 import org.ergoplatform.uilogic.STRING_LABEL_NONE
@@ -40,7 +40,7 @@ class DisplayCurrencyListViewController(private val clickListener: (String) -> U
         super.viewWillAppear(animated)
 
         activityView.startAnimating()
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         nodeConnector.fetchCurrencies()
         viewControllerScope.launch {
             nodeConnector.currencies.collect {
