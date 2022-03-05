@@ -15,6 +15,7 @@
             <string>it</string>
             <string>pt</string>
             <string>pt_PT</string>
+            <string>tr</string>
             <string>zh</string>
         </array>
         <key>CFBundleIdentifier</key>
