@@ -92,9 +92,9 @@
     <string name="intro_save_wallet">Cüzdanınızın ana genel adresi:</string>
     <string name="intro_save_wallet2">Daha sonra ek adresler ekleyebilirsiniz.</string>
     <string name="intro_save_wallet3">Cüzdanın ve anahtarların bu cihaza nasıl kaydedileceğini seçin.</string>
-    <string name="button_save_password_encrypted">Şifreyi kaydet-şifreli</string>
+    <string name="button_save_password_encrypted">Cüzdan şifresi oluştur</string>
     <string name="desc_save_password_encrypted">Para göndermek istediğiniz her seferinde tekrar girmeniz gereken bir parola girin.</string>
-    <string name="button_save_device_encrypted">Cihaza kaydet-şifreli</string>
+    <string name="button_save_device_encrypted">Cihazın şifresini kullan</string>
     <string name="desc_save_device_encrypted">Cüzdanı kaydetmek ve para göndermek için cihazınızda kimlik doğrulaması yapın.\nGeçerli kimlik doğrulama yöntemi: %1s</string>
     <string name="button_save_keychain">Anahtarlığa kaydet</string>
     <string name="desc_save_keychain">Para göndermek için cihazınızda kimlik doğrulaması yapın.</string>
