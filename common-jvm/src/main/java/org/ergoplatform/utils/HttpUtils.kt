@@ -98,7 +98,15 @@ private class ProgressResponseBody(
     }
 }
 
+/**
+ * Progress listener for downloads started with [fetchHttpGetWithListener]
+ */
 interface ProgressListener {
+    /**
+     * @param bytesRead         number of bytes downloaded so far
+     * @param contentLength     number of bytes to download in total, or <= 0 if not known
+     * @param done              download is not in progress any more
+     */
     fun update(bytesRead: Long, contentLength: Long, done: Boolean)
 }
 

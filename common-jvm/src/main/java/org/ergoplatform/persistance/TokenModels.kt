@@ -4,6 +4,9 @@ import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.appkit.ErgoValue
 import java.math.BigDecimal
 
+/**
+ * Persistence entity class representing a token price
+ */
 data class TokenPrice(
     val tokenId: String,
     val displayName: String?,
@@ -11,6 +14,11 @@ data class TokenPrice(
     val ergValue: BigDecimal
 )
 
+/**
+ * Persistence entity class representing token information.
+ * Compared to [WalletToken] (which represents a token balance in a user's wallet), this references
+ * general, wallet-independent information regarding the token
+ */
 data class TokenInformation(
     // immutable over token lifetime
     val tokenId: String,
@@ -47,6 +55,9 @@ data class TokenInformation(
         genuineFlag, issuerLink, thumbnailBytes, thumbnailType, updatedMs
     )
 
+    /**
+     * constructs [Eip4Token] class from persisted data entity
+     */
     fun toEip4Token(): Eip4Token = Eip4Token(
         tokenId,
         fullSupply,
@@ -59,13 +70,42 @@ data class TokenInformation(
     )
 }
 
+/**
+ * [TokenInformation.thumbnailType] - no thumbnail shown
+ */
 const val THUMBNAIL_TYPE_NONE = 0
+/**
+ * [TokenInformation.thumbnailType] - image NFT thumbnail shown
+ */
 const val THUMBNAIL_TYPE_NFT_IMG = 10
+/**
+ * [TokenInformation.thumbnailType] - audio NFT thumbnail shown
+ */
 const val THUMBNAIL_TYPE_NFT_AUDIO = 11
+/**
+ * [TokenInformation.thumbnailType] - video NFT thumbnail shown
+ */
 const val THUMBNAIL_TYPE_NFT_VID = 12
+
+/**
+ * [TokenInformation.thumbnailType] - for future use
+ */
 const val THUMBNAIL_TYPE_BYTES_PNG = 20
 
+
+/**
+ * [TokenInformation.genuineFlag] - genuine state undefined or not known
+ */
 const val GENUINE_UNKNOWN = 0
+/**
+ * [TokenInformation.genuineFlag] - genuine state verified (EIP-21)
+ */
 const val GENUINE_VERIFIED = 1
+/**
+ * [TokenInformation.genuineFlag] - genuine state suspicious (EIP-21)
+ */
 const val GENUINE_SUSPICIOUS = 2
+/**
+ * [TokenInformation.genuineFlag] - genuine state blocked (EIP-21)
+ */
 const val GENUINE_BLOCKED = 3

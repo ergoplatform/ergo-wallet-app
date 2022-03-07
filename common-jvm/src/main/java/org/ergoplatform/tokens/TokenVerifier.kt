@@ -3,6 +3,9 @@ package org.ergoplatform.tokens
 import org.ergoplatform.WalletStateSyncManager
 
 object TokenVerifier {
+    /**
+     * list entries from https://github.com/ergoplatform/eips/blob/master/eip-0021.md
+     */
     private val genuineTokens: List<Eip21Token> = listOf(
         Eip21Token(
             "03faf2cb329f2e90d6d23b58d91bbb6c046aa143261cc21f52fbe2824bfcbf04",
@@ -18,6 +21,15 @@ object TokenVerifier {
         ),
     )
 
+    /**
+     * This checks if the given token is genuine, suspicious or blocked according to EIP-21
+     * https://github.com/ergoplatform/eips/blob/master/eip-0021.md
+     *
+     * In addition to the tokens defined by EIP-21, this function also marks all tokens of
+     * financial value as verified, and marking all tokens using the name of a token with
+     * financial value as suspicious. Tokens of financial value are tokens that have a price,
+     * see [WalletStateSyncManager.tokenPrices]
+     */
     fun checkTokenGenuine(tokenId: String, tokenDisplayName: String): Eip21Token? {
         // check EIP-21
         val eip21token = genuineTokens.find { it.tokenId.equals(tokenId, true) }
@@ -39,6 +51,9 @@ object TokenVerifier {
     }
 }
 
+/**
+ * Representing a token from EIP-21
+ */
 data class Eip21Token(
     val tokenId: String,
     val displayName: String,

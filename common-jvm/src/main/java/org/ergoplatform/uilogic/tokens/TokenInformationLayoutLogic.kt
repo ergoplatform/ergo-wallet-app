@@ -108,5 +108,10 @@ abstract class TokenInformationLayoutLogic {
         content: ByteArray?
     )
 
+    /**
+     * @param hashValid true if saved hash is the same as content hash, false if not. `null` if
+     *                  no comparison was made so far (due to saved hash not available or
+     *                  content hash not yet available)
+     */
     abstract fun showNftHashValidation(hashValid: Boolean?)
 }
