@@ -4,18 +4,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.ergoplatform.api.CoinGeckoApi
-import org.ergoplatform.persistance.PreferencesProvider
-import org.ergoplatform.persistance.WalletDbProvider
-import org.ergoplatform.persistance.WalletState
-import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.api.TokenPriceApi
+import org.ergoplatform.api.coingecko.CoinGeckoApi
+import org.ergoplatform.api.ergodex.ErgoDexPriceApi
+import org.ergoplatform.persistance.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.addresses.ensureWalletAddressListHasFirstAddress
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-
-class NodeConnector {
+/**
+ * fetches Wallet balances and fiat values
+ */
+class WalletStateSyncManager {
 
     val isRefreshing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val singleAddressRefresh: MutableStateFlow<Long> = MutableStateFlow(0)
@@ -28,6 +29,11 @@ class NodeConnector {
     var fiatCurrency: String = ""
         private set
     private val coinGeckoApi: CoinGeckoApi
+
+    val tokenPrices: HashMap<String, TokenPrice> = HashMap()
+    private val TOKEN_PRICE_REFRESH_DURATION_MS = 1000L * 60
+    private var lastTokenPriceRefreshMs: Long = 0
+    private val tokenPriceApi: TokenPriceApi = ErgoDexPriceApi()
 
     init {
         val retrofitCoinGecko = Retrofit.Builder().baseUrl("https://api.coingecko.com/")
@@ -42,7 +48,7 @@ class NodeConnector {
     }
 
 
-    fun refreshByUser(preferences: PreferencesProvider, database: WalletDbProvider): Boolean {
+    fun refreshByUser(preferences: PreferencesProvider, database: IAppDatabase): Boolean {
         if (System.currentTimeMillis() - lastRefreshMs > 1000L * 10) {
             refreshNow(preferences, database)
             return true
@@ -50,43 +56,32 @@ class NodeConnector {
             return false
     }
 
-    fun refreshWhenNeeded(preferences: PreferencesProvider, database: WalletDbProvider) {
+    fun refreshWhenNeeded(preferences: PreferencesProvider, database: IAppDatabase) {
         if (System.currentTimeMillis() - lastRefreshMs > 1000L * 60) {
             refreshNow(preferences, database)
         }
     }
 
-    private fun refreshNow(preferences: PreferencesProvider, database: WalletDbProvider) {
+    private fun refreshNow(preferences: PreferencesProvider, database: IAppDatabase) {
         if (!(isRefreshing.value)) {
             isRefreshing.value = true
             GlobalScope.launch(Dispatchers.IO) {
                 var hadError = false
                 var didSync = false
 
-                // Refresh Ergo fiat value
-                fiatCurrency = preferences.prefDisplayCurrency
-
-                var fFiatValue = fiatValue.value
-                if (fiatCurrency.isNotEmpty()) {
-                    LogUtils.logDebug("NodeConnector", "Refresh fiat value")
-                    try {
-                        val currencyGetPrice =
-                            coinGeckoApi.currencyGetPrice(fiatCurrency).execute().body()
-                        fFiatValue = currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f
-                    } catch (t: Throwable) {
-                        LogUtils.logDebug("NodeConnector", "Error: " + t.message, t)
-                        // don't set to zero here, keep last value in case of connection error
-                    }
-                } else {
-                    fFiatValue = 0f
+                val refreshFiatValueJob = launch {
+                    // Refresh Ergo fiat value
+                    refreshErgFiatValue(preferences)
                 }
-                preferences.lastFiatValue = fFiatValue
-                fiatValue.value = fFiatValue
 
+                val refreshTokenPriceJob =
+                    if (System.currentTimeMillis() - lastTokenPriceRefreshMs > TOKEN_PRICE_REFRESH_DURATION_MS)
+                        launch { refreshTokenPrices(database.tokenDbProvider) }
+                    else null
 
                 // Refresh wallet states
                 try {
-                    val statesSaved = refreshWalletStates(preferences, database)
+                    val statesSaved = refreshWalletStates(preferences, database.walletDbProvider)
                     didSync = statesSaved.isNotEmpty()
                 } catch (t: Throwable) {
                     LogUtils.logDebug("NodeConnector", "Error: " + t.message, t)
@@ -94,6 +89,9 @@ class NodeConnector {
                     // TODO report to user
                     hadError = true
                 }
+
+                refreshFiatValueJob.join()
+                refreshTokenPriceJob?.join()
 
                 if (!hadError && didSync) {
                     lastRefreshMs = System.currentTimeMillis()
@@ -104,6 +102,50 @@ class NodeConnector {
                 isRefreshing.value = false
             }
         }
+    }
+
+    private suspend fun refreshTokenPrices(tokenDbProvider: TokenDbProvider) {
+        try {
+            val tokensFromPriceApi = tokenPriceApi.getTokenPrices()
+
+            tokensFromPriceApi?.let {
+                fillTokenPriceHashMap(it)
+                lastTokenPriceRefreshMs = System.currentTimeMillis()
+                tokenDbProvider.updateTokenPrices(it)
+            }
+        } catch (t: Throwable) {
+            LogUtils.logDebug("TokenPrices", "Error: " + t.message, t)
+        }
+    }
+
+    private fun fillTokenPriceHashMap(tokenPrices: List<TokenPrice>) {
+        synchronized(this.tokenPrices) {
+            this.tokenPrices.clear()
+            tokenPrices.forEach {
+                this.tokenPrices[it.tokenId] = it
+            }
+        }
+    }
+
+    private fun refreshErgFiatValue(preferences: PreferencesProvider) {
+        fiatCurrency = preferences.prefDisplayCurrency
+
+        var fFiatValue = fiatValue.value
+        if (fiatCurrency.isNotEmpty()) {
+            LogUtils.logDebug("NodeConnector", "Refresh fiat value")
+            try {
+                val currencyGetPrice =
+                    coinGeckoApi.currencyGetPrice(fiatCurrency).execute().body()
+                fFiatValue = currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f
+            } catch (t: Throwable) {
+                LogUtils.logDebug("NodeConnector", "Error: " + t.message, t)
+                // don't set to zero here, keep last value in case of connection error
+            }
+        } else {
+            fFiatValue = 0f
+        }
+        preferences.lastFiatValue = fFiatValue
+        fiatValue.value = fFiatValue
     }
 
     fun refreshSingleAddresses(
@@ -180,7 +222,10 @@ class NodeConnector {
         }
 
         database.withTransaction {
-            LogUtils.logDebug("NodeConnector", "Persisting ${statesToSave.size} wallet states to db")
+            LogUtils.logDebug(
+                "NodeConnector",
+                "Persisting ${statesToSave.size} wallet states to db"
+            )
             database.insertWalletStates(statesToSave)
             tokenAddressesToDelete.forEach { database.deleteTokensByAddress(it) }
             database.insertWalletTokens(tokensToSave)
@@ -203,22 +248,26 @@ class NodeConnector {
         }
     }
 
-    fun loadPreferenceValues(preferences: PreferencesProvider) {
+    fun loadPreferenceValues(preferences: PreferencesProvider, appDatabase: IAppDatabase) {
         lastRefreshMs = preferences.lastRefreshMs
         fiatCurrency = preferences.prefDisplayCurrency
         fiatValue.value = preferences.lastFiatValue
         LogUtils.logDebug("NodeConnector", "Initialized preferences.")
+
+        GlobalScope.launch {
+            fillTokenPriceHashMap(appDatabase.tokenDbProvider.loadTokenPrices())
+        }
     }
 
     companion object {
 
         // For Singleton instantiation
         @Volatile
-        private var instance: NodeConnector? = null
+        private var instance: WalletStateSyncManager? = null
 
-        fun getInstance(): NodeConnector {
+        fun getInstance(): WalletStateSyncManager {
             return instance ?: synchronized(this) {
-                instance ?: NodeConnector().also { instance = it }
+                instance ?: WalletStateSyncManager().also { instance = it }
             }
         }
 

@@ -1,6 +1,6 @@
 package org.ergoplatform.uilogic.wallet
 
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.persistance.WalletConfig
@@ -49,13 +49,14 @@ class SaveWalletUiLogic(val mnemonic: SecretString) {
         val existingWallet = getExistingWallet(walletDbProvider)
 
         if (existingWallet != null) {
-            // update encType and secret storage
+            // update encType and secret storage, removes existing xpubkey
             val walletConfig = WalletConfig(
                 existingWallet.id,
                 displayName,
                 existingWallet.firstAddress,
                 encType,
-                secretStorage
+                secretStorage,
+                extendedPublicKey = null
             )
             walletDbProvider.updateWalletConfig(walletConfig)
         } else {
@@ -65,10 +66,11 @@ class SaveWalletUiLogic(val mnemonic: SecretString) {
                     displayName,
                     publicAddress,
                     encType,
-                    secretStorage
+                    secretStorage,
+                    extendedPublicKey = null
                 )
             walletDbProvider.insertWalletConfig(walletConfig)
-            NodeConnector.getInstance().invalidateCache()
+            WalletStateSyncManager.getInstance().invalidateCache()
         }
     }
 

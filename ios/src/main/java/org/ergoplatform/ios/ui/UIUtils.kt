@@ -32,7 +32,7 @@ const val IMAGE_QR_SCAN = "qrcode.viewfinder"
 const val IMAGE_PLUS_CIRCLE = "plus.circle.fill"
 const val IMAGE_PLUS = "plus"
 const val IMAGE_MINUS_CIRCLE = "minus.circle.fill"
-const val IMAGE_CROSS_CIRCLE = "xmark.circle"
+const val IMAGE_REMOVE_TOKEN = "xmark"
 const val IMAGE_FULL_AMOUNT = "arrow.down.circle"
 const val IMAGE_MORE_ACTION = "ellipsis"
 const val IMAGE_OPEN_LIST = "arrowtriangle.down.circle.fill"
@@ -46,6 +46,13 @@ val IMAGE_SWITCH_RESOLUTION = if (Foundation.getMajorSystemVersion() >= 14)
 const val IMAGE_WARNING = "exclamationmark.circle"
 const val IMAGE_INFORMATION = "info.circle"
 const val IMAGE_ERROR = "xmark.circle"
+const val IMAGE_VERIFIED = "checkmark.seal.fill"
+const val IMAGE_SUSPICIOUS = "exclamationmark.octagon.fill"
+const val IMAGE_PHOTO_CAMERA = "camera.fill"
+const val IMAGE_VIDEO_PLAY = "play.fill"
+const val IMAGE_MUSIC_NOTE = "music.note"
+const val IMAGE_OPEN_BROWSER = "arrow.up.right.square"
+
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
@@ -57,6 +64,7 @@ val uiColorErgo get() = UIColor.systemRed()
 val ergoLogoImage get() = UIImage.getImage("ergologo")
 val ergoLogoFilledImage get() = UIImage.getImage("ergologofilled")
 val tokenLogoImage get() = UIImage.getImage("tokenlogo")
+val octagonImage get() = UIImage.getImage("octagon")
 
 fun getAppDelegate() = UIApplication.getSharedApplication().delegate as Main
 fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(r)
@@ -117,14 +125,17 @@ fun UILabel.insertTrailingImage(image: UIImage) {
     attributedText = string
 }
 
-fun UIView.wrapWithTrailingImage(image: UIImage, fixedWith: Double = 0.0, fixedHeight: Double = 0.0): UIView {
+fun UIView.wrapWithTrailingImage(
+    image: UIImage,
+    fixedWith: Double = 0.0,
+    fixedHeight: Double = 0.0,
+    keepWidth: Boolean = false
+): TrailingImageView<UIView> {
     val imageView = UIImageView(image)
     imageView.tintColor = (this as? UILabel)?.textColor ?: this.tintColor
 
-    val container = UIView(CGRect.Zero())
+    val container = TrailingImageView(this, imageView)
     container.layoutMargins = UIEdgeInsets.Zero()
-    container.addSubview(this)
-    container.addSubview(imageView)
     if (fixedWith == 0.0) {
         imageView.enforceKeepIntrinsicWidth()
     } else {
@@ -134,9 +145,16 @@ fun UIView.wrapWithTrailingImage(image: UIImage, fixedWith: Double = 0.0, fixedH
         imageView.fixedHeight(fixedHeight)
     }
     imageView.contentMode = UIViewContentMode.ScaleAspectFit
-    imageView.centerVerticallyTo(this).leftToRightOf(this, DEFAULT_MARGIN * .7).rightToSuperview(canBeLess = true)
+    imageView.centerVerticallyTo(this).leftToRightOf(this, DEFAULT_MARGIN * .7).rightToSuperview(canBeLess = !keepWidth)
     this.leftToSuperview().topToSuperview().bottomToSuperview()
     return container
+}
+
+class TrailingImageView<T : UIView>(val content: T, val trailingImage: UIImageView) : UIView(CGRect.Zero()) {
+    init {
+        addSubview(content)
+        addSubview(trailingImage)
+    }
 }
 
 fun createTextview(): UITextView {

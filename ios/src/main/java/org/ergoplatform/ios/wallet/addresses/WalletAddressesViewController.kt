@@ -4,7 +4,7 @@ import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_BUTTON_ADD_ADDRESS
 import org.ergoplatform.uilogic.STRING_BUTTON_ADD_ADDRESSES
@@ -60,9 +60,9 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
         // observing NodeConnector refresh. Since the singleAddressRefresh will
         // always return its last saved value, initializing can be done here, too
         viewControllerScope.launch {
-            val nodeConnector = NodeConnector.getInstance()
+            val nodeConnector = WalletStateSyncManager.getInstance()
             nodeConnector.singleAddressRefresh.collect {
-                uiLogic.init(getAppDelegate().database, walletId)
+                uiLogic.init(getAppDelegate().database.walletDbProvider, walletId)
             }
         }
     }
@@ -158,14 +158,12 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
 
             addButton = PrimaryButton(texts.get(STRING_BUTTON_ADD_ADDRESS))
             addButton.addOnTouchUpInsideListener { _, _ ->
-                parentVc?.uiLogic?.wallet?.walletConfig?.let {
-                    parentVc?.startAuthFlow(it) { mnemonic ->
-                        LogUtils.logDebug("WalletAddressesVc", "Adding $addrCount addresses")
-                        parentVc!!.uiLogic.addNextAddresses(
-                            getAppDelegate().database,
-                            getAppDelegate().prefs, addrCount, mnemonic
-                        )
-                    }
+                parentVc?.uiLogic?.wallet?.walletConfig?.let { walletConfig ->
+                    walletConfig.secretStorage?.let {
+                        parentVc?.startAuthFlow(walletConfig) { mnemonic ->
+                            addAddresses(mnemonic)
+                        }
+                    } ?: addAddresses(null)
                 }
             }
 
@@ -186,6 +184,15 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
 
         }
 
+        private fun addAddresses(mnemonic: String?) {
+            LogUtils.logDebug("WalletAddressesVc", "Adding $addrCount addresses")
+            val appDelegate = getAppDelegate()
+            parentVc!!.uiLogic.addNextAddresses(
+                appDelegate.database.walletDbProvider,
+                appDelegate.prefs, addrCount, mnemonic
+            )
+        }
+
         private fun refreshButtonText(texts: I18NBundle) {
             addButton.setTitle(
                 if (addrCount == 1) texts.get(STRING_BUTTON_ADD_ADDRESS)
@@ -195,7 +202,7 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
         }
 
         fun bind(vc: WalletAddressesViewController) {
-            addButton.isEnabled = vc.uiLogic.wallet?.walletConfig?.secretStorage != null
+            addButton.isEnabled = vc.uiLogic.canDeriveAddresses()
             this.parentVc = vc
         }
     }

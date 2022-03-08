@@ -40,7 +40,8 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
                 walletConfig.firstAddress,
                 walletConfig.encryptionType,
                 walletConfig.secretStorage,
-                walletConfig.unfoldTokens
+                walletConfig.unfoldTokens,
+                walletConfig.extendedPublicKey
             )
         }
     }

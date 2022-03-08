@@ -1,46 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
-
-    <ImageView
-        android:id="@+id/button_token_all"
-        android:layout_width="42dp"
-        android:layout_height="match_parent"
-        android:background="?selectableItemBackgroundBorderless"
-        android:contentDescription="@string/label_send_all"
-        android:scaleType="center"
-        android:src="@drawable/ic_use_all_24" />
+    android:layout_marginVertical="2dp"
+    android:background="@drawable/background_group"
+    android:minHeight="60dp"
+    android:orientation="horizontal"
+    android:paddingVertical="@dimen/small_padding">
 
     <EditText
         android:id="@+id/input_token_amount"
-        android:layout_width="85sp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/half_horizontal_margin"
         android:gravity="end"
         android:inputType="numberDecimal"
+        app:layout_constraintBottom_toTopOf="@id/label_balance_value"
+        app:layout_constraintEnd_toStartOf="@id/button_token_remove"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@id/guideline"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="123.45" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.55" />
 
     <TextView
         android:id="@+id/tv_token_name"
         style="@style/TextAppearance.App.Body1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/small_padding"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/half_horizontal_margin"
         android:layout_weight="1"
         android:ellipsize="end"
         android:maxLines="1"
+        app:layout_constraintBottom_toTopOf="@id/label_token_balance"
+        app:layout_constraintEnd_toStartOf="@id/input_token_amount"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="Token Name" />
 
     <ImageView
         android:id="@+id/button_token_remove"
-        android:layout_width="48dp"
+        android:layout_width="38dp"
         android:layout_height="match_parent"
         android:background="?selectableItemBackgroundBorderless"
         android:contentDescription="@string/label_remove"
         android:scaleType="center"
-        android:src="@drawable/ic_close_24" />
+        android:src="@drawable/ic_close_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/label_token_balance"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginEnd="@dimen/half_horizontal_margin"
+        android:background="?selectableItemBackground"
+        android:drawablePadding="@dimen/small_padding"
+        android:maxLines="1"
+        android:paddingBottom="@dimen/small_padding"
+        android:textStyle="bold"
+        app:drawableStartCompat="@drawable/ic_use_all_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tv_token_name"
+        tools:text="1230000" />
+
+    <TextView
+        android:id="@+id/label_balance_value"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:ellipsize="end"
+        android:gravity="end"
+        android:maxLines="1"
+        android:paddingHorizontal="@dimen/small_padding"
+        android:paddingBottom="@dimen/small_padding"
+        android:textColor="@color/lightgrey"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/input_token_amount"
+        app:layout_constraintStart_toEndOf="@id/label_token_balance"
+        tools:text="904.2 ERG" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

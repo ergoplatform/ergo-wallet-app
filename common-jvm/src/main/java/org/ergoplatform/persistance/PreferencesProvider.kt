@@ -8,8 +8,12 @@ const val KEY_FIAT_CURRENCY = "fiatCurrency"
 const val KEY_FIAT_VALUE = "fiatValue"
 const val KEY_NODE_URL = "nodeUrl"
 const val KEY_EXPLORER_API_URL = "explorerApiUrl"
+const val KEY_IPFS_GATEWAY_URL = "ipfsGatewayUrl"
+const val KEY_DOWNLOAD_NFT_CONTENT = "downloadNftContent"
 const val KEY_LASTREFRESH = "lastRefreshMs"
 const val FIAT_CURRENCY_DEFAULT = "usd"
+
+private const val DEFAULT_IPFS_GATEWAY = "https://cloudflare-ipfs.com/"
 
 abstract class PreferencesProvider {
 
@@ -57,6 +61,28 @@ abstract class PreferencesProvider {
             }
 
             saveString(KEY_EXPLORER_API_URL, savedExplorerApiUrl)
+        }
+
+    val defaultIpfsGatewayUrl = DEFAULT_IPFS_GATEWAY
+
+    var prefIpfsGatewayUrl: String
+        // alts: https://gateway.pinata.cloud https://ipfs.best-practice.se
+        get() = getString(KEY_IPFS_GATEWAY_URL, DEFAULT_IPFS_GATEWAY)
+        set(value) {
+            var ipfsGatewayUrl = value
+            if (ipfsGatewayUrl.isEmpty()) {
+                ipfsGatewayUrl = DEFAULT_IPFS_GATEWAY
+            } else if (!ipfsGatewayUrl.endsWith("/")) {
+                ipfsGatewayUrl += "/"
+            }
+
+            saveString(KEY_IPFS_GATEWAY_URL, ipfsGatewayUrl)
+        }
+
+    var downloadNftContent: Boolean
+        get() = getLong(KEY_DOWNLOAD_NFT_CONTENT, 0) != 0L
+        set(value) {
+            saveLong(KEY_DOWNLOAD_NFT_CONTENT, if (value) 1L else 0L)
         }
 
     var lastRefreshMs: Long

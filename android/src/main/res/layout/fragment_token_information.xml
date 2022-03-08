@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:background="?attr/colorSurface">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/main_layout"
+            style="@style/width_match_parent_max_500"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_vertical_margin"
+            android:orientation="vertical"
+            android:visibility="invisible"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/label_token_name"
+                style="@style/TextAppearance.App.Headline2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:drawablePadding="@dimen/half_horizontal_margin"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                app:drawableTint="@color/primary"
+                tools:drawableEnd="@drawable/ic_verified_18"
+                tools:text="Very long NFT name here" />
+
+            <TextView
+                android:id="@+id/label_token_id"
+                style="@style/TextAppearance.App.Body2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackground"
+                android:ellipsize="middle"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingVertical="@dimen/half_horizontal_margin"
+                android:textColor="@color/darkgrey"
+                app:drawableEndCompat="@drawable/ic_open_in_browser_24"
+                tools:text="ba5856162d6342d2a0072f464a5a8b62b4ac4dd77195bec18c6bf268c2def831" />
+
+            <LinearLayout
+                android:id="@+id/layout_nft"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_preview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:id="@+id/img_preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:scaleType="centerInside"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHeight_max="300dp"
+                        app:layout_constraintHeight_min="100dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:src="@drawable/ic_ergologo" />
+
+                    <ProgressBar
+                        android:id="@+id/preview_progress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:visibility="visible" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <FrameLayout
+                    android:id="@+id/layout_thumbnail"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/ic_octagon_48"
+                    android:backgroundTint="?attr/colorControlNormal"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:id="@+id/img_thumbnail"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        app:tint="@color/cardview_background"
+                        tools:src="@drawable/ic_photo_camera_24" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:id="@+id/desc_download_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_emphasize"
+                    android:orientation="vertical"
+                    android:padding="@dimen/activity_horizontal_margin"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:text="@string/desc_download_content" />
+
+                    <Button
+                        android:id="@+id/button_download_content"
+                        style="@style/Widget.App.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:elegantTextHeight="true"
+                        android:text="@string/button_download_content_on"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+                </LinearLayout>
+
+                <TextView
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:gravity="center"
+                    android:text="@string/label_content_link"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/label_content_link"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="?selectableItemBackground"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="5"
+                    tools:text="link" />
+
+                <TextView
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:gravity="center"
+                    android:text="@string/label_content_hash"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/label_content_hash"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="?selectableItemBackground"
+                    android:drawablePadding="@dimen/small_padding"
+                    android:ellipsize="middle"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    app:drawableTint="@color/primary"
+                    tools:drawableEnd="@drawable/ic_verified_18"
+                    tools:text="hash" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/title_balance_amount"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:gravity="center"
+                android:text="@string/title_wallet_balance"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/label_balance_amount"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                tools:text="100000000000000" />
+
+            <TextView
+                android:id="@+id/label_balance_value"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/lightgrey"
+                tools:text="904.2 ERG" />
+
+            <TextView
+                android:id="@+id/title_supply_amount"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:gravity="center"
+                android:text="@string/label_token_supply"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/label_supply_amount"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                tools:text="100000000000000" />
+
+            <TextView
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:gravity="center"
+                android:text="@string/label_token_description"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/label_token_description"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="5"
+                tools:text="@tools:sample/lorem/random" />
+
+            <TextView
+                android:id="@+id/label_minting_tx_id"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:background="?selectableItemBackground"
+                android:drawablePadding="@dimen/half_horizontal_margin"
+                android:gravity="center"
+                android:paddingVertical="@dimen/small_padding"
+                android:text="@string/label_minting_tx"
+                android:textStyle="bold"
+                app:drawableEndCompat="@drawable/ic_open_in_browser_24" />
+
+            <Button
+                android:id="@+id/button_done"
+                style="@style/Widget.App.Button.PrimaryTint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/margin_and_half"
+                android:elegantTextHeight="true"
+                android:text="@string/button_done" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress_circular"
+            android:layout_width="50dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            tools:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tv_error"
+            style="@style/TextAppearance.App.Headline2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+            android:gravity="center"
+            android:text="@string/label_error_fetching"
+            android:visibility="gone"
+            app:drawableTopCompat="@drawable/ic_warning_amber_24" />
+
+    </FrameLayout>
+
+</androidx.core.widget.NestedScrollView>

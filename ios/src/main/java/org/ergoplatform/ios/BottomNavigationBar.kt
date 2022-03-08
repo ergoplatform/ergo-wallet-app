@@ -69,7 +69,7 @@ class BottomNavigationBar : UITabBarController() {
             IosStringProvider(texts),
             {
                 CoroutineScope(Dispatchers.Default).launch {
-                    val wallets = getAppDelegate().database.getAllWalletConfigsSynchronous()
+                    val wallets = getAppDelegate().database.walletDbProvider.getAllWalletConfigsSynchronous()
 
                     runOnMainThread {
                         if (wallets.size == 1) {

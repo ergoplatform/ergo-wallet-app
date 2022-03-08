@@ -13,6 +13,7 @@ import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.TestPreferencesProvider
 import org.ergoplatform.TestStringProvider
 import org.ergoplatform.explorer.client.model.OutputInfo
+import org.ergoplatform.explorer.client.model.TokenInfo
 import org.ergoplatform.explorer.client.model.TotalBalance
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.transactions.STATIC_ERGO_PAY_URI
@@ -203,7 +204,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
         uiLogic.init(
             request, walletId, -1,
             if (twoAddresses) TestUiWallet.getSingleWalletTwoAddressesDbProvider(walletId)
-            else TestUiWallet.getSingleWalletSingleAddressDbProvider(walletId),
+            else TestUiWallet.getSingleWalletSingleAddressDbProvider(walletId).walletDbProvider,
             prefs, TestStringProvider()
         )
 
@@ -288,6 +289,10 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                         }
 
                     }
+                }
+
+                override fun getTokenInformation(tokenId: String): Call<TokenInfo> {
+                    error("Not yet implemented")
                 }
 
             }

@@ -1,0 +1,204 @@
+<resources>
+    <string name="title_transactions">İşlemler</string>
+    <string name="title_wallets">Cüzdanlar</string>
+    <string name="title_settings">Ayarlar</string>
+
+    <string name="hint_password">Lütfen parolanızı giriniz</string>
+    <string name="label_forgot_password">Parolanızı mı unuttunuz?</string>
+    <string name="err_password">Parolanız en az 8 karakter uzunluğunda olmalı</string>
+    <string name="label_password">Parola</string>
+    <string name="label_password_confirm">Parolayı Onaylayın</string>
+    <string name="err_password_confirm">Parolayı onaylayın</string>
+    <string name="button_done">Tamamlandı</string>
+    <string name="button_apply">Uygula</string>
+    <string name="button_copy">Kopyala</string>
+    <string name="label_copied">Kopyalandı!</string>
+    <string name="label_qr_code">QR Kod</string>
+    <string name="label_amount">Miktar</string>
+    <string name="label_purpose">Amaç</string>
+    <string name="label_share">Paylaş</string>
+    <string name="button_delete">Sil</string>
+    <string name="button_yes">Evet</string>
+    <string name="label_cancel">İptal</string>
+    <string name="label_none">Hiçbiri</string>
+    <string name="label_details">Detaylar</string>
+    <string name="label_dismiss">Reddet</string>
+    <string name="label_remove">Kaldır</string>
+    <string name="label_confirm">Onayla</string>
+    <string name="label_erg_amount">%1s ERG</string>
+    <string name="label_time_span_just_now">az önce</string>
+    <string name="label_time_span_moments_ago">birkaç dakika önce</string>
+    <string name="label_time_span_minutes_ago">%1s dakika önce</string>
+    <string name="label_time_span_hours_ago">%1s saat önce</string>
+    <string name="label_time_span_days_ago">%1s gün önce</string>
+    <string name="error_camera">Kamera başlatılırken hata oluştu. Lütfen gizlilik ayarlarınızı kontrol edin.</string>
+    <string name="desc_copy_sensitive_data">Verileri cihaz panosuna kopyaladığınızda lütfen dikkatli olun, yeniden üzerine yazmadığınız sürece bu cihazda çalışan her uygulama cihaz panosu verilerine erişebilir. Bunu kendi sorumluluğunuzda yapıyorsunuz.</string>
+    <string name="button_copy_sensitive_data">Kopyaladım ve oluşabilecek riskleri kabul ediyorum.</string>
+
+    <!-- Wallet -->
+    <string name="label_tokens">token</string>
+    <string name="label_more_tokens">daha fazla token</string>
+    <string name="label_unnamed_token">(adsız token)</string>
+    <string name="label_unconfirmed">doğrulanmamış</string>
+    <string name="button_receive">İste</string>
+    <string name="button_send">Gönder</string>
+    <string name="button_display_currency">Para Birimi: %1s</string>
+    <string name="label_last_sync">son senkronizasyon %1s</string>
+    <string name="label_erg_price">1 ERG ≈</string>
+    <string name="label_fiat_amount">≈ %1s</string>
+    <string name="label_wallet_default">Cüzdanım</string>
+    <string name="label_readonly_wallet_default">Cüzdanım (Salt okunur)</string>
+    <string name="hint_signing_request">Lütfen imzalama talebini ilgili Cüzdanın Para gönder ekranından tarayın.</string>
+    <string name="error_qr_code_content_unknown">Taranan QR kodu bilinen bir formatta değildi.</string>
+
+    <!-- add wallet -->
+    <string name="menu_add_wallet">Cüzdan Ekle</string>
+    <string name="label_create_wallet">Yeni Cüzdan</string>
+    <string name="desc_create_wallet">Rasgele oluşturulmuş bir anımsatıcıdan bir cüzdan (anahtarlar ve adres) oluşturur.</string>
+    <string name="label_restore_wallet">Cüzdanı geri yükle</string>
+    <string name="desc_restore_wallet">Bir cüzdanın anahtarlarını ve adresini anımsatıcı bir ifadeden geri yükler.</string>
+    <string name="label_import_wallet">Cüzdanı İçeri Aktar</string>
+    <string name="desc_import_wallet">Varolan bir cüzdanı (anahtarlar ve adresler) içe aktarmak için dışa aktarılan veya kaydedilmiş bir cüzdan dosyası kullanın.</string>
+    <string name="label_readonly_wallet">Salt Okunur Cüzdan</string>
+    <string name="desc_readonly_wallet">Salt okunur modda bir cüzdan adresi ekleyin. Bu cihazda herhangi bir bilgi saklamayacaktır.</string>
+
+    <!-- add readonly wallet -->
+    <string name="intro_add_readonly">Cüzdanı salt okunur modda eklemek için genel cüzdan adresinizi veya genişletilmiş genel anahtarınızı girin.</string>
+    <string name="label_wallet_address">Cüzdan adresi veya anahtarı</string>
+    <string name="error_address_already_added">Adres zaten \'%1s\'\'a eklendi</string>
+    <string name="error_invalid_readonly_input">Geçerli bir ERG adresi veya ortak anahtar değil</string>
+
+    <!-- Create wallet -->
+    <string name="intro_create_wallet">Bu senin 15 kelimelik Ergo cüzdan anımsatıcın. Bu kelimeler aynı zamanda bir tohum cümlesi veya kâğıt anahtarı olarak da bilinir.
+        Bu 15 kelimeyle, bu cüzdana erişiminizi kaybederseniz cüzdanınızı diğer cihazlara geri yükleyebilirsiniz.\n Tüm 15 kelimeyi (kalem ve kağıtla) dikkatlice yazmanız
+        ve güvenli bir yerde saklamanız çok önemlidir.</string>
+    <string name="intro_confirm_create_wallet">El yazısıyla yazılmış anımsatıcınızın doğru olduğunu doğrulamak için şimdi ifadenin iki kelimesini girin:</string>
+    <string name="check_confirm_create_wallet">Anımsatıcımı güvenli bir yerde saklamaktan sorumlu olduğumu anlıyorum. Eğer bu cihaz üzerinde saklanan anahtarlar kaybolursa,
+      cüzdanıma erişmenin tek yolu anımsatıcımı kullanmaktır.</string>
+    <string name="label_word_confirm_create_wallet">Kelime %1s</string>
+    <string name="error_word_confirm_create_wallet">Kelime doğru değil</string>
+
+    <!-- Restore wallet -->
+    <string name="intro_restore_wallet">Cüzdanı yeniden oluşturmak için Ergo cüzdan anımsatıcınızı girin.</string>
+    <string name="label_restore_wallet_word_list">Notlarınızı okumakta sorun mu yaşıyorsunuz?
+        <a href="https://github.com/ergoplatform/ergo/blob/master/ergo-wallet/src/main/resources/wordlist/english.txt">Kelime listesine göz atın</a>
+            ve karşılaştırın.</string>
+    <string name="button_restore">Cüzdanı geri yükle</string>
+    <string name="mnemonic_length_not_enough">Anımsatıcından bazı kelimeler eksik. En az %1s tane daha ekleyin.</string>
+    <string name="mnemonic_unknown_words">Anımsatıcı geçersiz sözcükler içeriyor. Yazım hatalarını kontrol et.</string>
+    <string name="mnemonic_invalid">Anımsatıcı doğrulama başarısız oldu. Doğru girdiğinizden eminseniz, devam etmek için tekrar dokunabilirsiniz.</string>
+
+    <!-- Save wallet -->
+    <string name="intro_save_wallet">Cüzdanınızın ana genel adresi:</string>
+    <string name="intro_save_wallet2">Daha sonra ek adresler ekleyebilirsiniz.</string>
+    <string name="intro_save_wallet3">Cüzdanın ve anahtarların bu cihaza nasıl kaydedileceğini seçin.</string>
+    <string name="button_save_password_encrypted">Cüzdan şifresi oluştur</string>
+    <string name="desc_save_password_encrypted">Para göndermek istediğiniz her seferinde tekrar girmeniz gereken bir parola girin.</string>
+    <string name="button_save_device_encrypted">Cihazın şifresini kullan</string>
+    <string name="desc_save_device_encrypted">Cüzdanı kaydetmek ve para göndermek için cihazınızda kimlik doğrulaması yapın.\nGeçerli kimlik doğrulama yöntemi: %1s</string>
+    <string name="button_save_keychain">Anahtarlığa kaydet</string>
+    <string name="desc_save_keychain">Para göndermek için cihazınızda kimlik doğrulaması yapın.</string>
+    <string name="device_enc_security_none">Hiçbiri</string>
+    <string name="device_enc_security_pass">Şifre, PIN veya desen</string>
+    <string name="device_enc_security_biometric_strong">Yüksek güvenlikli biyometrik</string>
+    <string name="device_enc_security_biometric_weak">Biyometrik, Sınıf 2</string>
+
+    <!-- Wallet config -->
+    <string name="title_wallet_details">Cüzdan yapılandırması</string>
+    <string name="label_wallet_name">Açıklayıcı cüzdan adı</string>
+    <string name="label_changes_saved">Değişiklikler kaydedildi</string>
+    <string name="label_confirm_delete">Cüzdanı bu cihazdan silmek istediğinize emin misiniz?\Geri alınamaz.</string>
+    <string name="desc_display_mnemonic">Yedeklemenizi kaybetmeniz durumunda anımsatıcınızı (başlangıç cümlesi, kâğıt anahtarı) görüntüleyebilir veya yedeklemenizin doğru olduğunu onaylayabilirsiniz.</string>
+    <string name="button_display_mnemonic">Anımsatıcıyı göster</string>
+    <string name="desc_display_xpubkey">Bu cüzdanı genişletilmiş ortak anahtarınızla diğer cüzdan uygulamalarına salt okunur cüzdan olarak ekleyebilirsiniz. Gizli tutulması gereken hiçbir şey paylaşılmayacak.</string>
+    <string name="button_display_xpubkey">Genel anahtarı görüntüle</string>
+
+    <!-- Wallet details -->
+    <string name="title_wallet_balance">Bakiye</string>
+    <string name="label_all_addresses">Tüm adresler %1d</string>
+    <string name="exporer_view_transactions">Ergo Explorer\'da işlemleri görüntülemek için dokunun - uygulama içi işlem listesi yakında eklenecektir</string>
+
+    <!-- Wallet addresses -->
+    <string name="title_wallet_addresses">Adresler</string>
+    <string name="title_wallet_address">Şunun için içeriği göster</string>
+    <string name="label_wallet_main_address">Ana adres</string>
+    <string name="label_wallet_address_derived">Türetilmiş adres %1s</string>
+    <string name="label_wallet_token_balance">%1s tokens</string>
+    <string name="desc_wallet_addresses">Bir cüzdanın ana adresten türetilmiş birden çok genel adresi olabilir.</string>
+    <string name="button_add_address">Adres ekle</string>
+    <string name="button_add_addresses">%1d adres eklendi.</string>
+    <string name="desc_wallet_addr_label">Bu adres için açıklayıcı bir etiket (yalnızca sizin tarafınızdan görülebilir) ayarlayın:</string>
+    <string name="hint_wallet_addr_label">Açıklayıcı etiket (isteğe bağlı)</string>
+    <string name="desc_wallet_addr_remove">Bu adresi bu uygulamanın görünümünden kaldırabilirsiniz. Ergo Ağında hala mevcuttur, ödemeleri alabilir ve bir bakiye tutabilir. İstediğiniz zaman tekrar ekleyebilirsiniz.</string>
+    <string name="title_choose_address">Bir adres seçin</string>
+
+    <!-- Send funds -->
+    <string name="desc_choose_wallet">Lütfen gönderilecek cüzdanı seçin:</string>
+    <string name="label_to">Hedef</string>
+    <string name="hint_read_only">Bu cüzdan salt okunur. Para göndermek için işleminizi imzalayacak bir cihaza ihtiyacınız vardır. <a href="">Daha fazla bilgi edinin.</a></string>
+    <string name="desc_send_funds">Gönderilecek alıcı adresini ve miktarını girin veya bir QR kodu tarayın.</string>
+    <string name="label_send_from">Kaynak: %1s</string>
+    <string name="label_wallet_balance">Bakiye: %1s ERG</string>
+    <string name="label_receiver_address">Alıcı adresi</string>
+    <string name="label_scan_qr">QR kodunu tara</string>
+    <string name="desc_fee">Komisyon: %1s ERG</string>
+    <string name="error_receiver_address">Lütfen geçerli bir ERG adresi girin</string>
+    <string name="error_amount">Lütfen geçerli bir tutar girin</string>
+    <string name="error_send_transaction">İşlem gönderilemedi</string>
+    <string name="error_prepare_transaction">İşlem hazırlanamadı</string>
+    <string name="error_password_empty">Lütfen geçerli bir parola girin</string>
+    <string name="error_password_wrong">Yanlış parola</string>
+    <string name="desc_transaction_send">İşlem başarıyla gönderildi ve onay bekliyor. İşlem Kimliği:</string>
+    <string name="desc_prompt_signing">Anlaşmanız hazırlandı. Devam etmek için bu QR kodunu imzalama cihazınızla tarayın.\n\nMevcut olduğunda, imzalanan işlemin QR kodunu tarayarak ağa gönderin.</string>
+    <string name="desc_prompt_signing_multiple">Anlaşmanız hazırlandı. Devam etmek için bu QR kodlarını imzalama cihazınızla tarayın.</string>
+    <string name="button_scan_signed_tx">İmzalı işlemi tara</string>
+    <string name="button_next">Sonraki</string>
+    <string name="title_authenticate">Kimlik doğrulaması gerekli</string>
+    <string name="error_device_security">Güvenlik hatası: %1s</string>
+    <string name="label_add_token">Token</string>
+    <string name="label_send_all">Tümünü gönder</string>
+    <string name="title_add_token">Gönderilecek jetonu seçin</string>
+    <string name="error_token_amount">Lütfen geçerli token tutarlarını girin veya geçersiz token girdilerini kaldırın</string>
+    <string name="error_balance_erg">Belirtilen tutarı göndermek için yeterli bakiye yok: yalnızca %1s ERG kullanılabilir.</string>
+    <string name="error_request_token_not_found">Token eklenemedi \'%1s\'</string>
+    <string name="error_request_token_amount">Token için istenen tutar ayarlanamadı \'%1s\'</string>
+    <string name="error_request_token_but_no_erg">Token talep edildi, ancak ERG miktarı girilmedi. Varsayılan bir tutar gönderilecektir.</string>
+
+    <!-- Cold wallet signing request screen -->
+    <string name="title_signing_request">İmzala</string>
+    <string name="desc_signing_request">Lütfen yapılacak işlemin ayrıntılarını kontrol edin.</string>
+    <string name="title_inboxes">Harcanacak tutarlar</string>
+    <string name="desc_inboxes">Bu tutarlar, işlem işlendiğinde harcanacaktır.</string>
+    <string name="title_outboxes">Giden tutarlar</string>
+    <string name="label_qr_pages_info">%1s den %2s</string>
+    <string name="desc_outboxes">İşlem işlendiğinde bu tutarlar gönderilecektir.</string>
+    <string name="desc_show_signed">İşleminiz imzalandı ve ağa gönderilmesi gerekiyor. Devam etmek için bu QR kodunu tarayın.</string>
+    <string name="desc_show_signed_multiple">İşleminiz imzalandı ve ağa gönderilmesi gerekiyor. Devam etmek için bu QR kodlarını tarayın.</string>
+
+    <!-- Ergo Pay Signing -->
+    <string name="title_ergo_pay_request">Ergo Ödeme Talebi</string>
+    <string name="label_sign_with">Şununla imzala: %1s (%2s)</string>
+    <string name="label_fetching_data">dApp\'den veri isteme…</string>
+    <string name="label_message_from_dapp">dApp\'den mesaj:\n%1s</string>
+    <string name="label_error_occured">Bir hata oluştu:\n%1s</string>
+    <string name="label_ergo_pay_wrong_address">Bu cüzdana ait olmayan %1s adresi için imza talebi alındı.</string>
+    <string name="label_ergo_pay_choose_address">Lütfen Ergo Ödeme Talebini işlemek için bir adres seçin.</string>
+    <string name="error_prover_cant_sign">İşlem bu cüzdanın anahtarlarıyla imzalanamadı.</string>
+
+    <!-- Settings -->
+    <string name="desc_about">Benjamin Schulte tarafından getirildi, %1s</string>
+    <string name="desc_about_moreinfo">Bu proje <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Apache 2 License</a> altında lisanslanmıştır. <a href="https://github.com/ergoplatform/ergo-wallet-app">Açık kaynak yazılım</a>\n
+    Yardım için <a href="https://discord.gg/kj7s7nb">Discord</a> veya <a href="https://t.me/ergosupport">Telegram</a></string>
+    <string name="desc_coingecko">Ergo fiyatı <a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a> tarafından desteklenmektedir.</string>
+    <string name="label_cg_conn_error">Coingecko\'ya bağlanırken hata oluştu, lütfen daha sonra tekrar deneyin.</string>
+    <string name="desc_dark_mode">Karanlık veya aydınlık mod?</string>
+    <string name="button_dark_mode_system">Sistem varsayılanı</string>
+    <string name="button_dark_mode_day">Aydınlık</string>
+    <string name="button_dark_mode_night">Karanlık</string>
+    <string name="desc_expert_settings">Uzmanlar için ayarlar</string>
+    <string name="button_connection_settings">Düğüm ve API bağlantıları</string>
+    <string name="button_reset_defaults">Varsayılanlar</string>
+    <string name="label_explorer_api_url">Explorer API URL\'si</string>
+    <string name="label_node_url">Düğüm URL\'si</string>
+    <string name="button_show_debug_info">Hata ayıklama bilgilerini göster</string>
+</resources>

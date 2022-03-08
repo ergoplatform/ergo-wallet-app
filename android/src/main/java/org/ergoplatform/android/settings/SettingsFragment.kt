@@ -73,6 +73,20 @@ class SettingsFragment : Fragment() {
                 showDialogWithCopyOption(requireContext(), it)
             }
         }
+
+        setButtonDownloadContentText()
+        binding.buttonDownloadContent.setOnClickListener {
+            val preferences = Preferences(requireContext())
+            preferences.downloadNftContent = !preferences.downloadNftContent
+            setButtonDownloadContentText()
+        }
+    }
+
+    private fun setButtonDownloadContentText() {
+        binding.buttonDownloadContent.setText(
+            if (Preferences(requireContext()).downloadNftContent) R.string.button_download_content_off
+            else R.string.button_download_content_on
+        )
     }
 
     private fun changeDayNightMode(mode: Int) {

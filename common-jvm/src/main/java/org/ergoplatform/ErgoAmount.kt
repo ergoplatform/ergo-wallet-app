@@ -1,5 +1,6 @@
 package org.ergoplatform
 
+import java.math.BigDecimal
 import java.math.RoundingMode
 
 const val nanoPowerOfTen = 9
@@ -9,6 +10,12 @@ class ErgoAmount(val nanoErgs: Long) {
     companion object {
         val ZERO = ErgoAmount(0)
     }
+
+    constructor(bigDecimal: BigDecimal) :
+            this(
+                bigDecimal.setScale(nanoPowerOfTen, RoundingMode.HALF_UP)
+                    .movePointRight(nanoPowerOfTen).longValueExact()
+            )
 
     constructor(ergString: String) : this(
         if (ergString.isBlank()) 0 else ergString.toBigDecimal()

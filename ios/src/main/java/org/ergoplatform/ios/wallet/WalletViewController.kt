@@ -2,7 +2,7 @@ package org.ergoplatform.ios.wallet
 
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.ios.BottomNavigationBar
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
@@ -68,7 +68,7 @@ class WalletViewController : CoroutineViewController() {
             if (uiRefreshControl.isRefreshing) {
                 uiRefreshControl.endRefreshing()
                 val appDelegate = getAppDelegate()
-                NodeConnector.getInstance().refreshByUser(appDelegate.prefs, appDelegate.database)
+                WalletStateSyncManager.getInstance().refreshByUser(appDelegate.prefs, appDelegate.database)
             }
         }
         tableView.registerReusableCellClass(WalletCell::class.java, WALLET_CELL)
@@ -84,13 +84,13 @@ class WalletViewController : CoroutineViewController() {
     override fun viewWillAppear(p0: Boolean) {
         super.viewWillAppear(p0)
         val appDelegate = getAppDelegate()
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         viewControllerScope.launch {
-            appDelegate.database.getWalletsWithStatesFlow().collect {
+            appDelegate.database.walletDbProvider.getWalletsWithStatesFlow().collect {
                 LogUtils.logDebug("WalletViewController", "New wallet data from flow change")
                 newDataLoaded(it)
                 // do we have a new wallet or wallet address and need to trigger NodeConnector?
-                val needStateRefresh = (NodeConnector.getInstance().lastRefreshMs == 0L)
+                val needStateRefresh = (WalletStateSyncManager.getInstance().lastRefreshMs == 0L)
                 runOnMainThread {
                     refreshListShownData()
                     if (needStateRefresh) {
@@ -109,7 +109,7 @@ class WalletViewController : CoroutineViewController() {
                         "WalletViewController",
                         "Node connector refresh done, reload shown data"
                     )
-                    newDataLoaded(appDelegate.database.getWalletsWithStates())
+                    newDataLoaded(appDelegate.database.walletDbProvider.getWalletsWithStates())
                     runOnMainThread { refreshListShownData() }
                 }
             }
@@ -152,7 +152,7 @@ class WalletViewController : CoroutineViewController() {
     override fun onResume() {
         header.updateLastRefreshLabel()
         val appDelegate = getAppDelegate()
-        NodeConnector.getInstance().refreshWhenNeeded(
+        WalletStateSyncManager.getInstance().refreshWhenNeeded(
             appDelegate.prefs,
             appDelegate.database
         )
@@ -248,7 +248,7 @@ class WalletViewController : CoroutineViewController() {
         }
 
         fun updateLastRefreshLabel() {
-            val nodeConnector = NodeConnector.getInstance()
+            val nodeConnector = WalletStateSyncManager.getInstance()
             val lastRefreshMs = nodeConnector.lastRefreshMs
             val lastRefreshTimeSpan = (System.currentTimeMillis() - lastRefreshMs) / 1000L
             val timeSpanString: String = getTimeSpanString(lastRefreshTimeSpan, stringProvider)
@@ -259,7 +259,7 @@ class WalletViewController : CoroutineViewController() {
         }
 
         fun refreshFiatValue() {
-            val nodeConnector = NodeConnector.getInstance()
+            val nodeConnector = WalletStateSyncManager.getInstance()
             val ergoPrice = nodeConnector.fiatValue.value
             fiatLabel.text =
                 if (ergoPrice == 0f) " " // needs to be a blank, iOS handles empty like hidden

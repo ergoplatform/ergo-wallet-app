@@ -1,0 +1,30 @@
+CREATE TABLE IF NOT EXISTS `token_info` (
+    `tokenId` TEXT NOT NULL,
+    `issuing_box` TEXT NOT NULL,
+    `minting_tx` TEXT NOT NULL,
+    `display_name` TEXT NOT NULL,
+    `description` TEXT NOT NULL,
+    `decimals` INTEGER NOT NULL,
+    `full_supply` INTEGER NOT NULL,
+    `reg7` TEXT,
+    `reg8` TEXT,
+    `reg9` TEXT,
+    `genuine_flag` INTEGER NOT NULL,
+    `issuer_link` TEXT,
+    `thumbnail_bytes` BLOB,
+    `thunbnail_type` INTEGER NOT NULL,
+    `updated_ms` INTEGER NOT NULL,
+    PRIMARY KEY(`tokenId`)
+);
+
+loadById:
+SELECT * FROM token_info WHERE `tokenId` = ?;
+
+insertOrReplace:
+INSERT OR REPLACE INTO `token_info` (
+    `tokenId`, `issuing_box`, `minting_tx`, `display_name`, `description`, `decimals`, `full_supply`, `reg7`, `reg8`, `reg9`,
+    `genuine_flag`, `issuer_link`, `thumbnail_bytes`, `thunbnail_type`, `updated_ms`
+) VALUES ?;
+
+pruneUnused:
+DELETE FROM token_info WHERE updated_ms < ?;

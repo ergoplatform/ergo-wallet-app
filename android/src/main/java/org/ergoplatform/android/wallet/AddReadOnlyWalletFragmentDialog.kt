@@ -1,20 +1,20 @@
 package org.ergoplatform.android.wallet
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.google.zxing.integration.android.IntentIntegrator
+import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentAddReadOnlyWalletDialogBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.uilogic.wallet.AddReadOnlyWalletUiLogic
 
 /**
@@ -42,14 +42,17 @@ class AddReadOnlyWalletFragmentDialog : FullScreenFragmentDialog() {
 
             walletAddress?.let {
                 val context = requireContext()
-                val success =
-                    AndroidAddReadOnlyWalletUiLogic(context).addWalletToDb(
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val success = AndroidAddReadOnlyWalletUiLogic().addWalletToDb(
                         walletAddress,
-                        RoomWalletDbProvider(AppDatabase.getInstance(context))
+                        RoomWalletDbProvider(AppDatabase.getInstance(context)),
+                        AndroidStringProvider(context),
+                        binding.inputWalletName.editText?.text?.toString()
                     )
-                if (success) {
-                    NavHostFragment.findNavController(requireParentFragment())
-                        .navigateSafe(AddReadOnlyWalletFragmentDialogDirections.actionAddReadOnlyWalletFragmentDialogToWalletList())
+                    if (success) {
+                        NavHostFragment.findNavController(requireParentFragment())
+                            .navigateSafe(AddReadOnlyWalletFragmentDialogDirections.actionAddReadOnlyWalletFragmentDialogToWalletList())
+                    }
                 }
             }
         }
@@ -63,8 +66,9 @@ class AddReadOnlyWalletFragmentDialog : FullScreenFragmentDialog() {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let {
-                val content = parsePaymentRequest(it)
-                content?.let { binding.tvWalletAddress.editText?.setText(content.address) }
+                binding.tvWalletAddress.editText?.setText(
+                    AndroidAddReadOnlyWalletUiLogic().getInputFromQrCode(it)
+                )
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
@@ -76,8 +80,8 @@ class AddReadOnlyWalletFragmentDialog : FullScreenFragmentDialog() {
         _binding = null
     }
 
-    inner class AndroidAddReadOnlyWalletUiLogic(context: Context) :
-        AddReadOnlyWalletUiLogic(AndroidStringProvider(context)) {
+    inner class AndroidAddReadOnlyWalletUiLogic :
+        AddReadOnlyWalletUiLogic() {
         override fun setErrorMessage(message: String) {
             binding.tvWalletAddress.error = message
         }

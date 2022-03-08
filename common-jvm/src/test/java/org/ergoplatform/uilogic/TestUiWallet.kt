@@ -26,7 +26,7 @@ object TestUiWallet {
         "nft"
     )
     private val singleAddressWallet = Wallet(
-        WalletConfig(1, "test", firstAddress, 0, null, false),
+        WalletConfig(1, "test", firstAddress, 0, null, false, null),
         listOf(WalletState(firstAddress, firstAddress, 1000L * 1000 * 1000, 0)),
         listOf(token, singularToken),
         emptyList()
@@ -34,17 +34,23 @@ object TestUiWallet {
 
     private val firstDerivedAddress = WalletAddress(1, firstAddress, 1, secondAddress, null)
     private val twoAddressesWallet = Wallet(
-        WalletConfig(1, "test", firstAddress, 0, null, false),
+        WalletConfig(1, "test", firstAddress, 0, null, false, null),
         listOf(WalletState(firstAddress, firstAddress, 1000L * 1000 * 1000, 0)),
         listOf(token, singularToken),
         listOf(firstDerivedAddress)
     )
 
-    suspend fun getSingleWalletSingleAddressDbProvider(walletId: Int): WalletDbProvider {
+    suspend fun getSingleWalletSingleAddressDbProvider(walletId: Int): IAppDatabase {
         val walletDbProvider = mock<WalletDbProvider> {
         }
         whenever(walletDbProvider.loadWalletWithStateById(walletId)).thenReturn(singleAddressWallet)
-        return walletDbProvider
+        return object : IAppDatabase {
+            override val walletDbProvider: WalletDbProvider
+                get() = walletDbProvider
+            override val tokenDbProvider: TokenDbProvider
+                get() = mock<TokenDbProvider> {}
+
+        }
     }
 
     suspend fun getSingleWalletTwoAddressesDbProvider(walletId: Int): WalletDbProvider {

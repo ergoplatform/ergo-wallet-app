@@ -61,7 +61,7 @@ class TransactionBoxEntryView : UIView(CGRect.Zero()) {
                     // we use the token id here, we don't have the name in the cold wallet context
                     bindWalletToken(
                         it.name ?: it.tokenId,
-                        TokenAmount(it.amount, it.decimals ?: 0).toStringTrimTrailingZeros()
+                        TokenAmount(it.amount, it.decimals ?: 0).toStringUsFormatted()
                     )
                 })
             }

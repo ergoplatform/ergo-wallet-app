@@ -2,7 +2,7 @@ import com.squareup.sqldelight.db.SqlDriver
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.getDefaultExplorerApiUrl
 import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.persistance.*
@@ -12,11 +12,11 @@ import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-class PersistanceTest {
+class PersistenceTest {
 
     @Test
     fun main() {
-        val database = setupDb()
+        val database = setupDb().walletDbProvider
 
         runBlocking {
             database.insertWalletConfig(
@@ -26,7 +26,8 @@ class PersistanceTest {
                     "9xxx",
                     0,
                     null,
-                    false
+                    false,
+                    null
                 )
             )
         }
@@ -37,7 +38,7 @@ class PersistanceTest {
         runBlocking {
             try {
                 database.withTransaction {
-                    database.insertWalletConfig(WalletConfig(0, "Test2", "x9x", 0, null, false))
+                    database.insertWalletConfig(WalletConfig(0, "Test2", "x9x", 0, null, false, null))
 
                     val entities = database.getAllWalletConfigsSynchronous()
                     println(entities.toString())
@@ -57,7 +58,7 @@ class PersistanceTest {
 
     @Test
     fun testObserving() {
-        val database = setupDb()
+        val database = setupDb().walletDbProvider
         var changes = 0
         val coroutineScope = CoroutineScope(Dispatchers.IO)
         coroutineScope.launch {
@@ -76,10 +77,11 @@ class PersistanceTest {
                     firstAddress,
                     0,
                     null,
-                    false
+                    false,
+                    null
                 )
             )
-            delay(200)
+            delay(500)
 
             database.withTransaction {
                 database.insertWalletConfig(
@@ -89,7 +91,8 @@ class PersistanceTest {
                         firstAddress + "2",
                         0,
                         null,
-                        false
+                        false,
+                        null
                     )
                 )
                 database.insertWalletConfig(
@@ -99,13 +102,14 @@ class PersistanceTest {
                         firstAddress + "3",
                         0,
                         null,
-                        false
+                        false,
+                        null
                     )
                 )
 
 
             }
-            delay(2000)
+            delay(3000)
 
             // two changes: insertWalletConfig and transaction
             assertEquals(2, changes)
@@ -118,11 +122,12 @@ class PersistanceTest {
                     firstAddress + "4",
                     0,
                     null,
-                    false
+                    false,
+                    null
                 )
             )
 
-            delay(1000)
+            delay(2000)
             assertEquals(changeBeforeCancel, changes)
         }
     }
@@ -132,7 +137,7 @@ class PersistanceTest {
         val coroutineScope = CoroutineScope(Dispatchers.IO)
         isErgoMainNet = false
         coroutineScope.launch {
-            db.getWalletsWithStatesFlow().collect {
+            db.walletDbProvider.getWalletsWithStatesFlow().collect {
                 println(it)
             }
         }
@@ -143,20 +148,20 @@ class PersistanceTest {
         whenever(prefs.prefExplorerApiUrl).thenReturn(getDefaultExplorerApiUrl())
 
         runBlocking {
-            db.insertWalletConfig(WalletConfig(0, "Test2", "3Wwxnaem5ojTfp91qfLw3Y4Sr7ZWVcLPvYSzTsZ4LKGcoxujbxd3", 0, null, false))
-            NodeConnector.getInstance().refreshByUser(prefs, db)
+            db.walletDbProvider.insertWalletConfig(WalletConfig(0, "Test2", "3Wwxnaem5ojTfp91qfLw3Y4Sr7ZWVcLPvYSzTsZ4LKGcoxujbxd3", 0, null, false, null))
+            WalletStateSyncManager.getInstance().refreshByUser(prefs, db)
             delay(10000)
         }
     }
 
-    private fun setupDb(): SqlDelightWalletProvider {
+    private fun setupDb(): SqlDelightAppDb {
         LogUtils.logDebug = true
         val driver: SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         //val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:test.db")
         DbInitializer.initDbSchema(driver)
         DbInitializer.initDbSchema(driver)
 
-        val database = SqlDelightWalletProvider(AppDatabase(driver))
+        val database = SqlDelightAppDb(AppDatabase(driver))
         return database
     }
 }

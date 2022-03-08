@@ -57,8 +57,6 @@
     <string name="desc_readonly_wallet">Agrega una dirección de billetera en modo de solo lectura. Esto no guardará ninguna clave en este dispositivo.</string>
 
     <!-- add readonly wallet -->
-    <string name="intro_add_readonly">Ingrese la dirección de su billetera pública para agregar la billetera en modo de solo lectura.</string>
-    <string name="label_wallet_address">Dirección de billetera</string>
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">Esta es su frase semilla de 15 palabras. Estas palabras también se conocen como llave de papel.

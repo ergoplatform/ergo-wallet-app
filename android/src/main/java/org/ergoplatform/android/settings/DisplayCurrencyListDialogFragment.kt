@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentDisplayCurrencyDialogBinding
@@ -43,7 +43,7 @@ class DisplayCurrencyListDialogFragment : BottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         nodeConnector.fetchCurrencies()
 
         binding.list.layoutManager =
@@ -75,7 +75,7 @@ class DisplayCurrencyListDialogFragment : BottomSheetDialogFragment() {
 
     private fun onChooseCurrency(currency: String) {
         Preferences(requireContext()).prefDisplayCurrency = currency
-        NodeConnector.getInstance().invalidateCache(resetFiatValue = true)
+        WalletStateSyncManager.getInstance().invalidateCache(resetFiatValue = true)
         (parentFragment as? SettingsFragment)?.showDisplayCurrency()
         dismiss()
     }

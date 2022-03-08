@@ -1,11 +1,16 @@
 package org.ergoplatform.ios.transactions
 
 import com.badlogic.gdx.utils.I18NBundle
+import org.ergoplatform.ios.tokens.GenuineImageContainer
+import org.ergoplatform.ios.tokens.ThumbnailContainer
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
-import org.ergoplatform.uilogic.STRING_LABEL_UNNAMED_TOKEN
 import org.ergoplatform.uilogic.STRING_TITLE_ADD_TOKEN
+import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.tokens.TokenEntryViewUiLogic
 import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSIndexPath
 import org.robovm.apple.uikit.*
 
@@ -16,6 +21,7 @@ const val TOKEN_CELL = "TOKEN_CELL"
  */
 class ChooseTokenListViewController(
     val tokensToChooseFrom: List<WalletToken>,
+    val tokenInfoMap: HashMap<String, TokenInformation>,
     val onChoose: (String) -> Unit
 ) : UIViewController() {
 
@@ -60,7 +66,8 @@ class ChooseTokenListViewController(
         override fun getCellForRow(p0: UITableView, p1: NSIndexPath): UITableViewCell {
             val cell = p0.dequeueReusableCell(TOKEN_CELL)
             (cell as? TokenCell)?.let {
-                it.bind(tokensToChooseFrom[p1.row], texts)
+                val walletToken = tokensToChooseFrom[p1.row]
+                it.bind(walletToken, texts, tokenInfoMap[walletToken.tokenId])
                 it.clickListener = { tokenId ->
                     onChoose.invoke(tokenId)
                     dismissViewController(true) {}
@@ -86,6 +93,8 @@ class ChooseTokenListViewController(
         var clickListener: ((tokenId: String) -> Unit)? = null
         private lateinit var nameLabel: Headline2Label
         private lateinit var tokenIdLabel: Body2Label
+        private lateinit var genuineImageContainer: GenuineImageContainer
+        private lateinit var thumbnailContainer: ThumbnailContainer
         private var token: WalletToken? = null
 
         override fun setupView() {
@@ -99,19 +108,53 @@ class ChooseTokenListViewController(
                 lineBreakMode = NSLineBreakMode.TruncatingMiddle
                 textColor = UIColor.secondaryLabel()
             }
-            contentView.addSubview(nameLabel)
+            genuineImageContainer = GenuineImageContainer()
+            thumbnailContainer = ThumbnailContainer()
+            val topStack = UIStackView(NSArray(thumbnailContainer, nameLabel, genuineImageContainer)).apply {
+                axis = UILayoutConstraintAxis.Horizontal
+            }
+            contentView.addSubview(topStack)
             contentView.addSubview(tokenIdLabel)
-            nameLabel.topToSuperview().widthMatchesSuperview()
-            tokenIdLabel.topToBottomOf(nameLabel).widthMatchesSuperview().bottomToSuperview()
+            topStack.topToSuperview().centerHorizontal(true)
+            tokenIdLabel.topToBottomOf(nameLabel, inset = DEFAULT_MARGIN / 2).widthMatchesSuperview().bottomToSuperview()
             contentView.addGestureRecognizer(UITapGestureRecognizer {
                 token?.tokenId?.let { tokenId -> clickListener?.invoke(tokenId) }
             })
         }
 
-        fun bind(walletToken: WalletToken, texts: I18NBundle) {
+        fun bind(walletToken: WalletToken, texts: I18NBundle, tokenInformation: TokenInformation?) {
+            val viewLogic = object : TokenEntryViewUiLogic(walletToken) {
+                override val texts: StringProvider
+                    get() = IosStringProvider(texts)
+
+                override fun setDisplayedTokenName(tokenName: String) {
+                    nameLabel.text = tokenName
+                }
+
+                override fun setDisplayedTokenId(tokenId: String?) {
+                    tokenIdLabel.text = tokenId ?: ""
+                }
+
+                override fun setDisplayedBalance(value: String?) {
+                    // not shown
+                }
+
+                override fun setDisplayedPrice(price: String?) {
+                    // not shown
+                }
+
+                override fun setGenuineFlag(genuineFlag: Int) {
+                    genuineImageContainer.setGenuineFlag(genuineFlag)
+                }
+
+                override fun setThumbnail(thumbnailType: Int) {
+                    thumbnailContainer.setThumbnail(thumbnailType)
+                }
+
+            }
+
             token = walletToken
-            nameLabel.text = walletToken.name ?: texts.get(STRING_LABEL_UNNAMED_TOKEN)
-            tokenIdLabel.text = walletToken.tokenId
+            viewLogic.bind(tokenInformation)
         }
     }
 }

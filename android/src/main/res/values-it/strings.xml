@@ -40,7 +40,7 @@
     <string name="button_receive">Ricevi</string>
     <string name="button_send">Invia</string>
     <string name="button_display_currency">Display currency: %1s</string>
-    <string name="label_last_sync">synced %1s</string>
+    <string name="label_last_sync">Sincronizzato %1s</string>
     <string name="label_erg_price">1 ERG ≈</string>
     <string name="label_fiat_amount">≈ %1s</string>
     <string name="label_wallet_default">Il mio portafoglio</string>
@@ -57,8 +57,6 @@
     <string name="desc_readonly_wallet">Aggiungi un indirizzo di portafoglio in modalità di sola lettura. Questo non salverà alcuna chiave su questo dispositivo.</string>
 
     <!-- add readonly wallet -->
-    <string name="intro_add_readonly">Inserisci l\'indirizzo del tuo portafoglio pubblico per aggiungere il portafoglio in modalità di sola lettura.</string>
-    <string name="label_wallet_address">Indirizzo del portafoglio</string>
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">Questa è la tua frase mnemonica di 15 parole del portafoglio Ergo.
@@ -114,7 +112,7 @@
     <string name="title_wallet_address">Mostra contenuto per</string>
     <string name="label_wallet_main_address">Indirizzo principale</string>
     <string name="label_wallet_address_derived">Indirizzo derivato %1s</string>
-    <string name="label_wallet_token_balance">gettoni 1s%</string>
+    <string name="label_wallet_token_balance">gettoni %1s</string>
     <string name="desc_wallet_addresses">Un portafoglio può avere più indirizzi pubblici derivati dall\'indirizzo principale.</string>
     <string name="button_add_address">Aggiungi indirizzo</string>
     <string name="button_add_addresses">Aggiungi %1d indirizzi</string>

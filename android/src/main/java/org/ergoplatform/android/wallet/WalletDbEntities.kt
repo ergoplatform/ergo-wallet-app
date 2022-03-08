@@ -15,6 +15,7 @@ data class WalletConfigDbEntity(
     @ColumnInfo(name = "enc_type") val encryptionType: Int?,
     @ColumnInfo(name = "secret_storage") val secretStorage: ByteArray?,
     @ColumnInfo(name = "unfold_tokens") val unfoldTokens: Boolean = false,
+    @ColumnInfo(name = "xpubkey") val extendedPublicKey: String? = null,
 ) {
     fun toModel(): WalletConfig {
         return WalletConfig(
@@ -23,7 +24,8 @@ data class WalletConfigDbEntity(
             firstAddress,
             encryptionType,
             secretStorage,
-            unfoldTokens
+            unfoldTokens,
+            extendedPublicKey
         )
     }
 }
@@ -35,7 +37,8 @@ fun WalletConfig.toDbEntity(): WalletConfigDbEntity {
         firstAddress,
         encryptionType,
         secretStorage,
-        unfoldTokens
+        unfoldTokens,
+        extendedPublicKey
     )
 }
 

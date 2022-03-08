@@ -57,8 +57,6 @@
     <string name="desc_readonly_wallet">Adiciona um endereço de carteira em modo somente-leitura. Não salvará as chaves no aparelho.</string>
 
     <!-- add readonly wallet -->
-    <string name="intro_add_readonly">Entre seu endereço público de carteira para adicionar a carteira em modo somente-leitura.</string>
-    <string name="label_wallet_address">Endereço de carteira</string>
 
     <!-- Create wallet -->
     <string name="intro_create_wallet">Está é a sua frase mnemônica de 15 palavras. Estas palavras também são conhecidas como "palavras-semente" ou 

@@ -5,12 +5,14 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.ergoplatform.getSerializedXpubKeyFromMnemonic
 import org.ergoplatform.ios.api.IosEncryptionManager
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.addresses.WalletAddressesViewController
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.wallet.WalletConfigUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -22,7 +24,8 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
     private lateinit var nameChangeApplyButton: UIButton
     private lateinit var addressesButton: UIButton
     private lateinit var displaySecretsButton: UIButton
-    private var wallet: WalletConfig? = null
+    private lateinit var displayXpubButton: UIButton
+    private val uiLogic = IosWalletConfigUiLogic()
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -73,6 +76,11 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
             navigationController.pushViewController(WalletAddressesViewController(walletId), true)
         }
 
+        val descShowXpub = Body1Label()
+        descShowXpub.text = texts.get(STRING_DESC_DISPLAY_XPUBKEY)
+        displayXpubButton = TextButton(texts.get(STRING_BUTTON_DISPLAY_XPUBKEY))
+        displayXpubButton.addOnTouchUpInsideListener { _, _ -> onDisplayXpubClicked() }
+
         val descShowSecrets = Body1Label()
         descShowSecrets.text = texts.get(STRING_DESC_DISPLAY_MNEMONIC)
         displaySecretsButton = TextButton(texts.get(STRING_BUTTON_DISPLAY_MNEMONIC))
@@ -90,6 +98,9 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
                 descAddresses,
                 addressesButton,
                 createHorizontalSeparator(),
+                descShowXpub,
+                displayXpubButton,
+                createHorizontalSeparator(),
                 descShowSecrets,
                 displaySecretsButton
             )
@@ -99,6 +110,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
         stackView.setCustomSpacing(DEFAULT_MARGIN, nameInputLabel)
         stackView.setCustomSpacing(0.0, nameInputField)
         stackView.setCustomSpacing(DEFAULT_MARGIN, descAddresses)
+        stackView.setCustomSpacing(DEFAULT_MARGIN, descShowXpub)
         stackView.setCustomSpacing(DEFAULT_MARGIN, descShowSecrets)
         val scrollView = container.wrapInVerticalScrollView()
         container.addSubview(stackView)
@@ -113,16 +125,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         viewControllerScope.launch {
-            getAppDelegate().database.loadWalletConfigById(walletId)?.let { walletConfig ->
-                wallet = walletConfig
-
-                runOnMainThread {
-                    nameInputField.text = walletConfig.displayName
-                    addressLabel.text = walletConfig.firstAddress
-                    nameChangeApplyButton.isEnabled = false
-                    displaySecretsButton.isEnabled = walletConfig.secretStorage != null
-                }
-            }
+            uiLogic.initForWallet(walletId, getAppDelegate().database.walletDbProvider)
         }
     }
 
@@ -148,8 +151,22 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
         presentViewController(vc, true) {}
     }
 
+    private fun onDisplayXpubClicked() {
+        uiLogic.wallet?.secretStorage?.let {
+            startAuthFlow(uiLogic.wallet!!) { mnemonic ->
+                displayXpub(getSerializedXpubKeyFromMnemonic(mnemonic))
+            }
+        } ?: uiLogic.wallet?.extendedPublicKey?.let {
+            displayXpub(it)
+        }
+    }
+
+    private fun displayXpub(xpub: String) {
+        presentViewController(ShareWithQrCodeViewController(xpub), true) {}
+    }
+
     private fun onDisplaySecretsClicked() {
-        wallet?.let {
+        uiLogic.wallet?.let {
             startAuthFlow(it) { mnemonic ->
                 val texts = getAppDelegate().texts
                 val alert =
@@ -167,9 +184,9 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
     @OptIn(DelicateCoroutinesApi::class)
     private fun doDeleteWallet() {
         // we use GlobalScope here to not cancel the transaction when we leave this view
-        wallet?.let {
+        uiLogic.wallet?.let {
             GlobalScope.launch {
-                val database = getAppDelegate().database
+                val database = getAppDelegate().database.walletDbProvider
                 database.deleteAllWalletData(it)
 
                 // After we deleted a keychain encrypted wallet, we can prune the keychain data if it is not needed
@@ -186,13 +203,25 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
 
     private fun doSaveWalletName() {
         nameInputField.text?.let {
-            if (it.isNotBlank()) {
-                viewControllerScope.launch(Dispatchers.IO) {
-                    getAppDelegate().database.updateWalletDisplayName(it, walletId)
-                    runOnMainThread {
-                        nameChangeApplyButton.isEnabled = false
-                        nameInputField.resignFirstResponder()
-                    }
+            viewControllerScope.launch(Dispatchers.IO) {
+                uiLogic.saveChanges(getAppDelegate().database.walletDbProvider, it)
+                runOnMainThread {
+                    nameInputField.resignFirstResponder()
+                }
+            }
+        }
+    }
+
+    inner class IosWalletConfigUiLogic: WalletConfigUiLogic() {
+        override fun onConfigChanged(value: WalletConfig?) {
+            value?.let { walletConfig ->
+                runOnMainThread {
+                    nameInputField.text = walletConfig.displayName
+                    addressLabel.text = walletConfig.firstAddress
+                    nameChangeApplyButton.isEnabled = false
+                    displaySecretsButton.isEnabled = walletConfig.secretStorage != null
+                    displayXpubButton.isEnabled =
+                        walletConfig.extendedPublicKey != null || walletConfig.secretStorage != null
                 }
             }
         }
