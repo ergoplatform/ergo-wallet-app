@@ -145,7 +145,7 @@ class TokenInfoManager {
 
         val tokenInfo = boxInfo.assets.find { it.tokenId == tokenId }!!
 
-        val eip4Token = Eip4TokenBuilder.buildFromRegisters(
+        val eip4Token = Eip4TokenBuilder.buildFromAdditionalRegisters(
             tokenId,
             tokenInfo.amount,
             boxInfo.additionalRegisters

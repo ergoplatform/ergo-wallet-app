@@ -6,6 +6,7 @@ import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoId
 import org.ergoplatform.appkit.Iso
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
+import org.ergoplatform.appkit.impl.OutBoxImpl
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.InputInfo
 import org.ergoplatform.explorer.client.model.OutputInfo
@@ -93,7 +94,7 @@ fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String,
             } ?: if (it.tokenId.equals(inputsList[0].boxId)) {
                 // could be minted right here, check outbox info
                 val token = try {
-                    Eip4TokenBuilder.buildFromErgoBoxCandidate(it.tokenId, ergoBoxCandidate)
+                    Eip4TokenBuilder.buildFromErgoBox(it.tokenId, OutBoxImpl(null, ergoBoxCandidate))
                 } catch (t: Throwable) {
                     null
                 }

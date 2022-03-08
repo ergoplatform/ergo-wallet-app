@@ -150,12 +150,10 @@ fun sendErgoTx(
             }
             val prover = proverBuilder.build()
 
-            val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
-            val signed = BoxOperations.createForEip3Prover(prover).withAmountToSpend(amountToSend)
+            val contract: ErgoContract = recipient.toErgoContract()
+            val signed = BoxOperations.createForEip3Prover(prover, ctx).withAmountToSpend(amountToSend)
                 .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
-                .withTokensToSpend(tokensToSend).putToContractTx(
-                    ctx, contract
-            )
+                .withTokensToSpend(tokensToSend).putToContractTx(contract)
             ctx.sendTransaction(signed)
 
             val txId = signed.id
@@ -208,10 +206,10 @@ fun prepareSerializedErgoTx(
     try {
         val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
-            val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
-            val unsigned = BoxOperations.createForSenders(senderAddresses).withAmountToSpend(amountToSend)
+            val contract: ErgoContract = recipient.toErgoContract()
+            val unsigned = BoxOperations.createForSenders(senderAddresses, ctx).withAmountToSpend(amountToSend)
                 .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
-                .withTokensToSpend(tokensToSend).putToContractTxUnsigned(ctx, contract)
+                .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
 
             val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
                 val ergoBox = box.box()
