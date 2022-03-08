@@ -24,7 +24,9 @@ import org.ergoplatform.persistance.*
         WalletTokenDbEntity::class,
         TokenPriceDbEntity::class,
         TokenInformationDbEntity::class
-    ), version = 6
+    ),
+    version = 6,
+    exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase(), IAppDatabase {
     abstract fun walletDao(): WalletDbDao
