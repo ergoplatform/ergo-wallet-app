@@ -259,10 +259,14 @@ class TokenInformationLayoutView(private val vc: TokenInformationViewController)
             val hasError = content?.let {
                 try {
                     val image = UIImage(NSData(it))
-                    previewImg.image = image
-                    previewImg.tintColor = null
                     val sizeRatio = image.size.width / image.size.height
-                    previewImageHeight.constant = previewImg.frame.width / sizeRatio
+                    val frameWidth = previewImg.frame.width
+                    val frameHeight = frameWidth / sizeRatio
+                    previewImageHeight.constant = frameHeight
+
+                    previewImg.image = image.scaleToSize(frameWidth, frameHeight)
+                    previewImg.tintColor = null
+
                     false
                 } catch (t: Throwable) {
                     true
