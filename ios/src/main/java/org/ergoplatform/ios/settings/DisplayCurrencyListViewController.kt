@@ -38,13 +38,14 @@ class DisplayCurrencyListViewController(private val clickListener: (String) -> U
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-
-        activityView.startAnimating()
-        val nodeConnector = WalletStateSyncManager.getInstance()
-        nodeConnector.fetchCurrencies()
-        viewControllerScope.launch {
-            nodeConnector.currencies.collect {
-                runOnMainThread { showCurrencyList(it) }
+        if (!hasListLoaded) {
+            activityView.startAnimating()
+            val nodeConnector = WalletStateSyncManager.getInstance()
+            nodeConnector.fetchCurrencies()
+            viewControllerScope.launch {
+                nodeConnector.currencies.collect {
+                    runOnMainThread { showCurrencyList(it) }
+                }
             }
         }
     }

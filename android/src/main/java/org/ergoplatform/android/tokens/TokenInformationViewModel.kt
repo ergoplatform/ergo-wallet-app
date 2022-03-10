@@ -14,18 +14,12 @@ import org.ergoplatform.uilogic.tokens.TokenInformationModelLogic
 class TokenInformationViewModel : ViewModel() {
     val uiLogic = AndroidUiLogic()
 
-    private var tokenId: String? = null
     private val _tokenInfo = MutableLiveData<TokenInformation?>()
     val tokenInfo: LiveData<TokenInformation?> = _tokenInfo
     private val _downloadState = MutableLiveData<TokenInformationModelLogic.StateDownload>()
     val downloadState: LiveData<TokenInformationModelLogic.StateDownload> get() = _downloadState
 
     fun init(tokenId: String, ctx: Context) {
-        if (this.tokenId != null)
-            return
-
-        this.tokenId = tokenId
-
         uiLogic.init(tokenId, AppDatabase.getInstance(ctx), Preferences(ctx))
     }
 
