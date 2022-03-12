@@ -225,6 +225,7 @@ class TokenInformationLayoutView(private val vc: TokenInformationViewController)
         private val progressView = UIActivityIndicatorView(UIActivityIndicatorViewStyle.Large)
         private val previewImg = UIImageView(CGRect.Zero())
         private val previewImageHeight: NSLayoutConstraint
+        private var imageLoaded = false
 
         init {
             layoutMargins = UIEdgeInsets.Zero()
@@ -256,13 +257,21 @@ class TokenInformationLayoutView(private val vc: TokenInformationViewController)
         }
 
         fun showImage(content: ByteArray?, downloadError: Boolean) {
+            if (imageLoaded)
+                return
+
             val hasError = content?.let {
                 try {
+                    imageLoaded = true
                     val image = UIImage(NSData(it))
-                    previewImg.image = image
-                    previewImg.tintColor = null
                     val sizeRatio = image.size.width / image.size.height
-                    previewImageHeight.constant = previewImg.frame.width / sizeRatio
+                    val frameWidth = previewImg.frame.width
+                    val frameHeight = frameWidth / sizeRatio
+                    previewImageHeight.constant = frameHeight
+
+                    previewImg.image = image.scaleToSize(frameWidth, frameHeight)
+                    previewImg.tintColor = null
+
                     false
                 } catch (t: Throwable) {
                     true
