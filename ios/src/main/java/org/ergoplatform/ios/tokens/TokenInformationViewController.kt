@@ -36,9 +36,13 @@ class TokenInformationViewController(
     }
 
     override fun viewWillAppear(animated: Boolean) {
-        val appDelegate = getAppDelegate()
-        activityView.startAnimating()
-        uiLogic.init(tokenId, appDelegate.database, appDelegate.prefs)
+        // iOS behaviour: when view is dragged down not completely, it moves up again calling
+        // this callback. Check here to avoid unnecessary loading and layouting
+        if (!uiLogic.initialized) {
+            val appDelegate = getAppDelegate()
+            activityView.startAnimating()
+            uiLogic.init(tokenId, appDelegate.database, appDelegate.prefs)
+        }
     }
 
     inner class IosTokenInformationModelLogic : TokenInformationModelLogic() {

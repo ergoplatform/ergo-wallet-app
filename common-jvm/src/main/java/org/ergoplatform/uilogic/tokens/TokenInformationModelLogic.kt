@@ -19,6 +19,8 @@ import java.security.MessageDigest
 abstract class TokenInformationModelLogic {
     abstract val coroutineScope: CoroutineScope
 
+    var initialized = false
+        private set
     var eip4Token: Eip4Token? = null
         private set
     var tokenInformation: TokenInformation? = null
@@ -37,6 +39,12 @@ abstract class TokenInformationModelLogic {
         database: IAppDatabase,
         preferencesProvider: PreferencesProvider
     ) {
+        // Make sure this does not get called twice
+        if (initialized)
+            return
+
+        initialized = true
+
         coroutineScope.launch(Dispatchers.IO) {
             TokenInfoManager.getInstance().getTokenInformationFlow(
                 tokenId,

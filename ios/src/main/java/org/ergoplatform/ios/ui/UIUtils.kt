@@ -6,6 +6,7 @@ import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGAffineTransform
 import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.coregraphics.CGSize
 import org.robovm.apple.coreimage.CIFilter
 import org.robovm.apple.foundation.*
 import org.robovm.apple.uikit.*
@@ -315,4 +316,12 @@ fun UIScrollView.scrollToBottom(animated: Boolean = true) {
         CGPoint(0.0, contentSize.height - bounds.size.height + contentInset.bottom),
         animated
     )
+}
+
+fun UIImage.scaleToSize(scaleWidth: Double, scaleHeight: Double): UIImage? {
+    val scaledImageSize = CGSize(scaleWidth, scaleHeight)
+    val renderer = UIGraphicsImageRenderer(scaledImageSize)
+    return renderer.toImage {
+        this.draw(CGRect(CGPoint.Zero(), scaledImageSize))
+    }
 }
