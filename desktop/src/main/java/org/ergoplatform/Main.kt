@@ -7,8 +7,8 @@ import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.lifecycle.LifecycleController
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
-import com.theapache64.dde.navigation.NavHostComponent
-import com.theapache64.dde.theme.DecomposeDesktopExampleTheme
+import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.DecomposeDesktopExampleTheme
 
 
 @OptIn(ExperimentalDecomposeApi::class)

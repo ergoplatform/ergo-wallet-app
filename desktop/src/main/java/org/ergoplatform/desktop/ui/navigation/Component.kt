@@ -1,4 +1,4 @@
-package com.theapache64.dde.navigation
+package org.ergoplatform.desktop.ui.navigation
 
 import androidx.compose.runtime.Composable
 
