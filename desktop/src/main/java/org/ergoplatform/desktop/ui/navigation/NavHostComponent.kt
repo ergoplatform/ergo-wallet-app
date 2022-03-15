@@ -15,8 +15,11 @@ import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.slide
 import com.arkivanov.decompose.router.router
+import org.ergoplatform.Application
 import org.ergoplatform.desktop.transactions.SendFundsComponent
 import org.ergoplatform.desktop.wallet.WalletListComponent
+import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
+import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
 
 /**
  * Navigator
@@ -76,21 +79,21 @@ class NavHostComponent(
                         icon = {
                             Icon(
                                 Icons.Outlined.AccountBalanceWallet,
-                                contentDescription = "Wallets"
-                            ) // TODO Desktop i18n
+                                contentDescription = Application.texts.get(STRING_TITLE_WALLETS)
+                            )
                         },
                         selected = navItemState.value == NavItem.WALLETS,
                         onClick = {
                             navItemState.value = NavItem.WALLETS
                             router.navigate { mutableListOf(ScreenConfig.WalletList) }
                         },
-                        label = { Text(text = "Wallets") },
+                        label = { Text(text = Application.texts.get(STRING_TITLE_WALLETS)) },
                     )
                     BottomNavigationItem(
                         icon = {
                             Icon(
                                 Icons.Outlined.Settings,
-                                contentDescription = "Settings" // TODO Desktop i18n
+                                contentDescription = Application.texts.get(STRING_TITLE_SETTINGS)
                             )
                         },
                         selected = navItemState.value == NavItem.SETTINGS,
@@ -98,7 +101,7 @@ class NavHostComponent(
                             navItemState.value = NavItem.SETTINGS
                             router.navigate { listOf(ScreenConfig.WalletList) }
                         },
-                        label = { Text(text = "Settings") },
+                        label = { Text(text = Application.texts.get(STRING_TITLE_SETTINGS)) },
                     )
                 }
             }

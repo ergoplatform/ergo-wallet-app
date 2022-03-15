@@ -4,8 +4,10 @@ import androidx.compose.runtime.Composable
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
 import com.arkivanov.essenty.lifecycle.Lifecycle
+import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
+import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 
 class SendFundsComponent(
     private val componentContext: ComponentContext,
@@ -57,7 +59,7 @@ class SendFundsComponent(
     }
 
     override val appBarLabel: String
-        get() = "Greeting"
+        get() = Application.texts.get(STRING_BUTTON_SEND)
 
     @Composable
     override fun renderScreenContents() {

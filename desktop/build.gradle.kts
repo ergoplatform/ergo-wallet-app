@@ -23,8 +23,24 @@ compose.desktop {
     application {
         mainClass = "org.ergoplatform.MainKt"
         nativeDistributions {
-            targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg, org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi, org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb)
+            targetFormats(
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb
+            )
             packageName = "Ergo Wallet App"
+        }
+    }
+}
+
+tasks {
+    processResources {
+        doLast {
+            copy {
+                from("../ios/resources/i18n")
+                into("src/main/resources/i18n")
+                include("*.properties")
+            }
         }
     }
 }
