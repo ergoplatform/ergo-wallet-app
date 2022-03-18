@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS `wallet_addresses` (
     `label` TEXT
 );
 
+CREATE INDEX IF NOT EXISTS `index_wallet_addresses_wallet_first_address` ON `wallet_addresses` (`wallet_first_address`);
+
 loadWalletAddresses:
 SELECT * FROM wallet_addresses WHERE wallet_first_address = ?;
 

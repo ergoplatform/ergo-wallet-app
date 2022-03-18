@@ -5,4 +5,6 @@ class SqlDelightAppDb(private val appDatabase: AppDatabase): IAppDatabase {
         get() = SqlDelightWalletProvider(appDatabase)
     override val tokenDbProvider: TokenDbProvider
         get() = SqlDelightTokenDbProvider(appDatabase)
+    override val transactionDbProvider: TransactionDbProvider
+        get() = SqlDelightTransactionDbProvider(appDatabase)
 }

@@ -1,0 +1,19 @@
+CREATE TABLE IF NOT EXISTS `address_transaction_token` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `address` TEXT NOT NULL,
+    `tx_id` TEXT NOT NULL,
+    `token_id` TEXT NOT NULL,
+    `name` TEXT NOT NULL,
+    `amount` INTEGER NOT NULL,
+    `decimals` INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS `index_address_transaction_token_address_tx_id` ON `address_transaction_token` (`address`, `tx_id`);
+
+insertOrReplace:
+INSERT OR REPLACE INTO `address_transaction_token` (
+    `id`, `address`, `tx_id`, `token_id`, `name`, `amount`, `decimals`
+) VALUES ?;
+
+loadAddressTxTokens:
+SELECT * FROM `address_transaction_token` WHERE address = ? AND tx_id = ?;
