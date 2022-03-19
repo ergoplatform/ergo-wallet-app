@@ -322,8 +322,9 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             { ergoPayRequest ->
                 findNavController().navigateSafe(
                     WalletDetailsFragmentDirections.actionNavigationWalletDetailsToErgoPaySigningFragment(
-                        ergoPayRequest, walletDetailsViewModel.selectedIdx ?: -1,
+                        ergoPayRequest,
                         walletDetailsViewModel.wallet!!.walletConfig.id,
+                        walletDetailsViewModel.selectedIdx ?: -1
                     )
                 )
             },
