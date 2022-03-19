@@ -82,7 +82,10 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 nodeConnector.isRefreshing.collect { isRefreshing ->
                     if (!isRefreshing) {
+                        binding.progressBar.hide()
                         binding.swipeRefreshLayout.isRefreshing = false
+                    } else {
+                        binding.progressBar.show()
                     }
                 }
             }
@@ -280,6 +283,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             binding.layoutTokens.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
             binding.layoutOuter.layoutTransition = LayoutTransition()
             binding.layoutOuter.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+            binding.layoutTransactions.layoutTransition = LayoutTransition()
+            binding.layoutTransactions.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         }
     }
 
