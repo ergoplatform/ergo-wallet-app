@@ -110,7 +110,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_wallet_addresses_wallet_first_address` ON `wallet_addresses` (`wallet_first_address`)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_wallet_tokens_wallet_first_address` ON `wallet_tokens` (`wallet_first_address`)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_wallet_tokens_public_address` ON `wallet_tokens` (`public_address`)")
-                database.execSQL("CREATE TABLE IF NOT EXISTS `address_transaction` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `address` TEXT NOT NULL, `tx_id` TEXT NOT NULL, `inclusion_height` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `nanoerg` INTEGER NOT NULL, `state` INTEGER NOT NULL)")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `address_transaction` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `address` TEXT NOT NULL, `tx_id` TEXT NOT NULL, `inclusion_height` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `nanoerg` INTEGER NOT NULL, `message` TEXT, `state` INTEGER NOT NULL)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_address_transaction_address_inclusion_height` ON `address_transaction` (`address` ASC, `inclusion_height` DESC)")
                 database.execSQL("CREATE TABLE IF NOT EXISTS `address_transaction_token` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `address` TEXT NOT NULL, `tx_id` TEXT NOT NULL, `token_id` TEXT NOT NULL, `name` TEXT NOT NULL, `amount` INTEGER NOT NULL, `decimals` INTEGER NOT NULL)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_address_transaction_token_address_tx_id` ON `address_transaction_token` (`address`, `tx_id`)")

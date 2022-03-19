@@ -23,11 +23,12 @@ data class AddressTransactionDbEntity(
     @ColumnInfo(name = "inclusion_height") val inclusionHeight: Long,
     val timestamp: Long,
     @ColumnInfo(name = "nanoerg") val nanoErg: Long,
+    val message: String?,
     val state: Int,
 ) {
     fun toModel(): AddressTransaction {
         return AddressTransaction(
-            id, address, txId, inclusionHeight, timestamp, ErgoAmount(nanoErg), state
+            id, address, txId, inclusionHeight, timestamp, ErgoAmount(nanoErg), message, state
         )
     }
 }
@@ -40,6 +41,7 @@ fun AddressTransaction.toDbEntity() =
         inclusionHeight,
         timestamp,
         ergAmount.nanoErgs,
+        message,
         state
     )
 

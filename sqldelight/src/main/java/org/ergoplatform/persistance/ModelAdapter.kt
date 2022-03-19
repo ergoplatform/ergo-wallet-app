@@ -108,6 +108,7 @@ fun AddressTransaction.toDbEntity() =
         inclusionHeight,
         timestamp,
         ergAmount.nanoErgs,
+        message,
         state.toLong()
     )
 
@@ -119,6 +120,7 @@ fun Address_transaction.toModel() =
         inclusion_height,
         timestamp,
         ErgoAmount(nanoerg),
+        message,
         state.toInt()
     )
 

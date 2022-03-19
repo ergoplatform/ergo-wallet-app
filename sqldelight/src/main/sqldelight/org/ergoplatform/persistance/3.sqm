@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS `address_transaction` (
     `inclusion_height` INTEGER NOT NULL,
     `timestamp` INTEGER NOT NULL,
     `nanoerg` INTEGER NOT NULL,
+    `message` TEXT,
     `state` INTEGER NOT NULL
 );
 

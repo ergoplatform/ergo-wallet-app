@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS `address_transaction` (
     `inclusion_height` INTEGER NOT NULL,
     `timestamp` INTEGER NOT NULL,
     `nanoerg` INTEGER NOT NULL,
+    `message` TEXT,
     `state` INTEGER NOT NULL
 );
 
@@ -12,7 +13,7 @@ CREATE INDEX IF NOT EXISTS `index_address_transaction_address_inclusion_height` 
 
 insertOrReplace:
 INSERT OR REPLACE INTO `address_transaction` (
-    `id`, `address`, `tx_id`, `inclusion_height`, `timestamp`, `nanoerg`, `state`
+    `id`, `address`, `tx_id`, `inclusion_height`, `timestamp`, `nanoerg`, `message`, `state`
 ) VALUES ?;
 
 loadAddressTransactions:

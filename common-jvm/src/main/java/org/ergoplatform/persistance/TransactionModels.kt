@@ -16,6 +16,7 @@ data class AddressTransaction(
      * incoming erg amount, calculated by subtracting outboxes for the address from inboxes for the address
      */
     val ergAmount: ErgoAmount,
+    val message: String?,
     val state: Int,
 )
 
