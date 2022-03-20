@@ -6,6 +6,7 @@ class WalletAddressDialogUiLogic() {
     suspend fun deleteWalletAddress(database: WalletDbProvider, addrId: Long) {
         database.withTransaction {
             val walletAddress = database.loadWalletAddress(addrId)
+            // TODO transactionlist delete from db
             walletAddress?.publicAddress?.let {
                 database.deleteAddressState(it)
                 database.deleteTokensByAddress(it)

@@ -2,7 +2,6 @@ package org.ergoplatform.ios.wallet
 
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoApiService
 import org.ergoplatform.WalletStateSyncManager
@@ -84,7 +83,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             if (uiRefreshControl.isRefreshing) {
                 uiRefreshControl.endRefreshing()
                 val appDelegate = getAppDelegate()
-                WalletStateSyncManager.getInstance().refreshByUser(appDelegate.prefs, appDelegate.database)
+                uiLogic.refreshByUser(appDelegate.prefs, appDelegate.database)
             }
         }
 
@@ -113,10 +112,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
 
     override fun onResume() {
         val appDelegate = getAppDelegate()
-        WalletStateSyncManager.getInstance().refreshWhenNeeded(
-            appDelegate.prefs,
-            appDelegate.database
-        )
+        uiLogic.refreshWhenNeeded(appDelegate.prefs, appDelegate.database)
     }
 
     private fun refreshDataFromBackgroundThread() {
@@ -217,7 +213,8 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 addGestureRecognizer(UITapGestureRecognizer {
                     presentViewController(
                         ChooseAddressListDialogViewController(walletId, true) {
-                            uiLogic.newAddressIdxChosen(it)
+                            val appDelegate = getAppDelegate()
+                            uiLogic.newAddressIdxChosen(it, appDelegate.prefs, appDelegate.database)
                         }, true
                     ) {}
                 })

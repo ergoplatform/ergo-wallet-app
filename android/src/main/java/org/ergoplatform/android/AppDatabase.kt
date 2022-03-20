@@ -149,6 +149,7 @@ class RoomWalletDbProvider(private val database: AppDatabase) : WalletDbProvider
         database.walletDao().deleteWalletStates(firstAddress)
         database.walletDao().deleteTokensByWallet(firstAddress)
         database.walletDao().deleteWalletAddresses(firstAddress)
+        // TODO transactionlist delete from db
         (walletId ?: database.walletDao().loadWalletByFirstAddress(firstAddress)?.id)?.let { id ->
             database.walletDao().deleteWalletConfig(id)
         }
@@ -249,6 +250,11 @@ class RoomTransactionDbProvider(private val database: AppDatabase) : Transaction
     ): List<AddressTransaction> {
         return database.transactionDao().loadAddressTransactions(address, limit, page)
             .map { it.toModel() }
+    }
+
+    override suspend fun deleteAddressTransactions(address: String) {
+        database.transactionDao().deleteAddressTransactions(address)
+        database.transactionDao().deleteAddressTransactionTokens(address)
     }
 
     override suspend fun insertOrUpdateAddressTransactionToken(addressTxToken: AddressTransactionToken) {

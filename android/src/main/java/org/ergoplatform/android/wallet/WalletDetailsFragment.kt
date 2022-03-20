@@ -70,7 +70,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val nodeConnector = WalletStateSyncManager.getInstance()
         binding.swipeRefreshLayout.setOnRefreshListener {
-            if (!nodeConnector.refreshByUser(
+            if (!walletDetailsViewModel.uiLogic.refreshByUser(
                     Preferences(requireContext()),
                     AppDatabase.getInstance(requireContext())
                 )
@@ -162,7 +162,12 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
-        walletDetailsViewModel.selectedIdx = addressDerivationIdx
+        val context = requireContext()
+        walletDetailsViewModel.uiLogic.newAddressIdxChosen(
+            addressDerivationIdx,
+            Preferences(context),
+            AppDatabase.getInstance(context)
+        )
     }
 
     private fun onDataChanged() {
@@ -249,6 +254,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             updateWalletTokensUnfold(context, wallet)
             // we don't need to update UI here - the DB change will trigger rebinding of the card
         }
+
+        startRefreshWhenNeeded()
     }
 
     // list of token views currently in view
@@ -290,8 +297,12 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
     override fun onResume() {
         super.onResume()
+        startRefreshWhenNeeded()
+    }
+
+    private fun startRefreshWhenNeeded() {
         val context = requireContext()
-        WalletStateSyncManager.getInstance().refreshWhenNeeded(
+        walletDetailsViewModel.uiLogic.refreshWhenNeeded(
             Preferences(context),
             AppDatabase.getInstance(context)
         )

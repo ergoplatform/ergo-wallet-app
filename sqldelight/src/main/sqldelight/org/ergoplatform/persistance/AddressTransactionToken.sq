@@ -17,3 +17,6 @@ INSERT OR REPLACE INTO `address_transaction_token` (
 
 loadAddressTxTokens:
 SELECT * FROM `address_transaction_token` WHERE address = ? AND tx_id = ?;
+
+deleteByAddress:
+DELETE FROM address_transaction_token WHERE address = ?;

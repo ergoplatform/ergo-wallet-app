@@ -141,7 +141,8 @@ private fun getAssetInstanceInfosFromErgoBoxToken(tokensColl: Coll<Tuple2<ByteAr
 
 /**
  * combines inboxes and outboxes and reduces change amounts for user-friendly outputs
- * returns a new object with less information
+ * returns a new object with less information, only a single entry for each participating address
+ * either in inputs or in outputs
  */
 fun TransactionInfo.reduceBoxes(): TransactionInfo {
     // combine boxes to or from same addresses

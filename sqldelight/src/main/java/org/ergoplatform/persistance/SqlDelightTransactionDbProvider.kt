@@ -26,6 +26,13 @@ class SqlDelightTransactionDbProvider(private val appDatabase: AppDatabase) :
         }
     }
 
+    override suspend fun deleteAddressTransactions(address: String) {
+        withContext(Dispatchers.IO) {
+            appDatabase.addressTransactionQueries.deleteByAddress(address)
+            appDatabase.addressTransactionTokenQueries.deleteByAddress(address)
+        }
+    }
+
     override suspend fun insertOrUpdateAddressTransactionToken(addressTxToken: AddressTransactionToken) {
         withContext(Dispatchers.IO) {
             appDatabase.addressTransactionTokenQueries.insertOrReplace(addressTxToken.toDbEntity())

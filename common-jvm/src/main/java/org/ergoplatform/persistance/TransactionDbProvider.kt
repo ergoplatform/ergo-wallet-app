@@ -9,6 +9,11 @@ interface TransactionDbProvider {
      */
     suspend fun loadAddressTransactions(address: String, limit: Int, page: Int): List<AddressTransaction>
 
+    /**
+     * deletes all address transactions for a given address - should be called from within a db transaction
+     */
+    suspend fun deleteAddressTransactions(address: String)
+
     suspend fun insertOrUpdateAddressTransactionToken(addressTxToken: AddressTransactionToken)
 
     /**

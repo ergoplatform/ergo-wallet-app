@@ -1,9 +1,7 @@
 package org.ergoplatform
 
 import org.ergoplatform.explorer.client.DefaultApi
-import org.ergoplatform.explorer.client.model.OutputInfo
-import org.ergoplatform.explorer.client.model.TokenInfo
-import org.ergoplatform.explorer.client.model.TotalBalance
+import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.persistance.PreferencesProvider
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -13,6 +11,17 @@ interface ErgoApi {
     fun getTotalBalanceForAddress(publicAddress: String): Call<TotalBalance>
     fun getBoxInformation(boxId: String): Call<OutputInfo>
     fun getTokenInformation(tokenId: String): Call<TokenInfo>
+    fun getMempoolTransactionsForAddress(
+        publicAddress: String,
+        limit: Int,
+        offset: Int
+    ): Call<Items<TransactionInfo>>
+
+    fun getConfirmedTransactionsForAddress(
+        publicAddress: String,
+        limit: Int,
+        offset: Int
+    ): Call<Items<TransactionInfo>>
 }
 
 class ErgoApiService(val defaultApi: DefaultApi) : ErgoApi {
@@ -25,6 +34,20 @@ class ErgoApiService(val defaultApi: DefaultApi) : ErgoApi {
 
     override fun getTokenInformation(tokenId: String): Call<TokenInfo> =
         defaultApi.getApiV1TokensP1(tokenId)
+
+    override fun getMempoolTransactionsForAddress(
+        publicAddress: String,
+        limit: Int,
+        offset: Int
+    ): Call<Items<TransactionInfo>> =
+        defaultApi.getApiV1MempoolTransactionsByaddressP1(publicAddress, offset, limit)
+
+    override fun getConfirmedTransactionsForAddress(
+        publicAddress: String,
+        limit: Int,
+        offset: Int
+    ): Call<Items<TransactionInfo>> =
+        defaultApi.getApiV1AddressesP1Transactions(publicAddress, offset, limit)
 
     companion object {
         private var ergoApiService: ErgoApiService? = null

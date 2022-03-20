@@ -17,6 +17,12 @@ interface TransactionDbDao {
         page: Int
     ): List<AddressTransactionDbEntity>
 
+    @Query("DELETE FROM address_transaction WHERE address = :address")
+    suspend fun deleteAddressTransactions(address: String)
+
+    @Query("DELETE FROM address_transaction_token WHERE address = :address")
+    suspend fun deleteAddressTransactionTokens(address: String)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateAddressTransactionToken(vararg addressTxTokens: AddressTransactionTokenDbEntity)
 

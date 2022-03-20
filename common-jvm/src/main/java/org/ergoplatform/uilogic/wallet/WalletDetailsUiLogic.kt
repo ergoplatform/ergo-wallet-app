@@ -1,12 +1,15 @@
 package org.ergoplatform.uilogic.wallet
 
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.ErgoApiService
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.*
 import org.ergoplatform.tokens.TokenInfoManager
+import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
@@ -67,10 +70,11 @@ abstract class WalletDetailsUiLogic {
         refreshAddress()
     }
 
-    fun newAddressIdxChosen(newAddressIdx: Int?) {
+    fun newAddressIdxChosen(newAddressIdx: Int?, prefs: PreferencesProvider, db: IAppDatabase) {
         if (newAddressIdx != addressIdx) {
             addressIdx = newAddressIdx
             refreshAddress()
+            refreshAddressTransactionsWhenNeeded(prefs, db)
         }
     }
 
@@ -80,6 +84,36 @@ abstract class WalletDetailsUiLogic {
             ?: wallet?.getTokensForAllAddresses() ?: emptyList()).sortedBy { it.name?.lowercase() }
 
         onDataChanged()
+    }
+
+    private fun refreshAddressTransactionsWhenNeeded(prefs: PreferencesProvider, db: IAppDatabase) {
+        walletAddress?.let {
+            TransactionListManager.downloadTransactionListForAddress(
+                it.publicAddress,
+                ErgoApiService.getOrInit(prefs),
+                db
+            )
+        }
+    }
+
+    /**
+     * called from UI when it became visible first time or after being in background
+     */
+    fun refreshWhenNeeded(
+        prefs: PreferencesProvider,
+        database: IAppDatabase
+    ) {
+        WalletStateSyncManager.getInstance().refreshWhenNeeded(prefs, database)
+        refreshAddressTransactionsWhenNeeded(prefs, database)
+    }
+
+    fun refreshByUser(
+        prefs: PreferencesProvider,
+        database: IAppDatabase
+    ): Boolean {
+        // TODO transactionlist force refresh of unconfirmed?
+        refreshAddressTransactionsWhenNeeded(prefs, database)
+        return WalletStateSyncManager.getInstance().refreshByUser(prefs, database)
     }
 
     fun gatherTokenInformation(tokenDbProvider: TokenDbProvider, apiService: ErgoApiService) {

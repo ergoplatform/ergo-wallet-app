@@ -63,6 +63,7 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
         appDb.walletStateQueries.deleteByFirstAddress(firstAddress)
         appDb.walletTokenQueries.deleteTokensByFirstAddress(firstAddress)
         appDb.walletAddressQueries.deleteWalletAddressByFirstAddress(firstAddress)
+        // TODO transactionlist delete from db
 
         (walletId ?: loadWalletByFirstAddress(firstAddress)?.id)?.let { id ->
             appDb.walletConfigQueries.deleteWalletById(id.toLong())
