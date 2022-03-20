@@ -12,9 +12,7 @@ import org.ergoplatform.ErgoApi
 import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.TestPreferencesProvider
 import org.ergoplatform.TestStringProvider
-import org.ergoplatform.explorer.client.model.OutputInfo
-import org.ergoplatform.explorer.client.model.TokenInfo
-import org.ergoplatform.explorer.client.model.TotalBalance
+import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.transactions.STATIC_ERGO_PAY_URI
 import org.ergoplatform.transactions.TransactionResult
@@ -295,6 +293,21 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                     error("Not yet implemented")
                 }
 
+                override fun getMempoolTransactionsForAddress(
+                    publicAddress: String,
+                    limit: Int,
+                    offset: Int
+                ): Call<Items<TransactionInfo>> {
+                    error("Not implemented")
+                }
+
+                override fun getConfirmedTransactionsForAddress(
+                    publicAddress: String,
+                    limit: Int,
+                    offset: Int
+                ): Call<Items<TransactionInfo>> {
+                    error("Not implemented")
+                }
             }
         }
     }
