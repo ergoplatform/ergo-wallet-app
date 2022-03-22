@@ -14,8 +14,12 @@ interface TransactionDbProvider {
      */
     suspend fun deleteAddressTransactions(address: String)
 
-    suspend fun insertOrUpdateAddressTransactionToken(addressTxToken: AddressTransactionToken)
+    /**
+     * deletes transaction and dependant tokens
+     */
+    suspend fun deleteTransaction(id: Int)
 
+    suspend fun insertOrUpdateAddressTransactionToken(addressTxToken: AddressTransactionToken)
     /**
      * loads all tokens for a given transactions and address
      */

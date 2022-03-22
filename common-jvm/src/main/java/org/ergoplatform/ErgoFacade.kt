@@ -4,13 +4,14 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.*
-import org.ergoplatform.appkit.impl.*
+import org.ergoplatform.appkit.impl.ExplorerAndPoolUnspentBoxesLoader
+import org.ergoplatform.appkit.impl.InputBoxImpl
+import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.restapi.client.Parameters
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
-import org.ergoplatform.transactions.getInputBoxesIds
 import org.ergoplatform.uilogic.STRING_ERROR_BALANCE_ERG
 import org.ergoplatform.uilogic.STRING_ERROR_PROVER_CANT_SIGN
 import org.ergoplatform.uilogic.StringProvider
@@ -151,14 +152,15 @@ fun sendErgoTx(
             val prover = proverBuilder.build()
 
             val contract: ErgoContract = recipient.toErgoContract()
-            val signed = BoxOperations.createForEip3Prover(prover, ctx).withAmountToSpend(amountToSend)
+            val unsignedTx = BoxOperations.createForEip3Prover(prover, ctx).withAmountToSpend(amountToSend)
                 .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
-                .withTokensToSpend(tokensToSend).putToContractTx(contract)
+                .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
+            val signed = prover.sign(unsignedTx)
             ctx.sendTransaction(signed)
 
             val txId = signed.id
 
-            return@execute SendTransactionResult(txId.isNotEmpty(), txId)
+            SendTransactionResult(txId.isNotEmpty(), txId, unsignedTx)
         }
     } catch (t: Throwable) {
         LogUtils.logDebug("sendErgoTx", "Error caught", t)
@@ -177,7 +179,7 @@ fun buildPromptSigningResultFromErgoPayRequest(
         return getRestErgoClient(prefs).execute { ctx ->
             val reducedTx = ctx.parseReducedTransaction(serializedTx)
             val inputs =
-                ctx.getBoxesById(*reducedTx.tx.unsignedTx().getInputBoxesIds().toTypedArray())
+                ctx.getBoxesById(*reducedTx.inputBoxesIds.toTypedArray())
                     .map { inputBox ->
                         (inputBox as InputBoxImpl).ergoBox.bytes()
                     }
@@ -230,9 +232,9 @@ fun prepareSerializedErgoTx(
     }
 }
 
-fun deserializeUnsignedTxOffline(serializedTx: ByteArray): UnsignedErgoLikeTransaction {
+fun deserializeUnsignedTxOffline(serializedTx: ByteArray): ReducedTransaction {
     return getColdErgoClient().execute { ctx ->
-        return@execute ctx.parseReducedTransaction(serializedTx).tx.unsignedTx()
+        return@execute ctx.parseReducedTransaction(serializedTx)
     }
 }
 
@@ -292,12 +294,11 @@ fun sendSignedErgoTx(
 ): SendTransactionResult {
     try {
         val ergoClient = getRestErgoClient(prefs)
-        val txId = ergoClient.execute { ctx ->
+        return ergoClient.execute { ctx ->
             val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
-            ctx.sendTransaction(signedTx).trim('"')
+            val txId = ctx.sendTransaction(signedTx).trim('"')
+            SendTransactionResult(txId.isNotEmpty(), txId, signedTx)
         }
-
-        return SendTransactionResult(txId.isNotEmpty(), txId)
 
     } catch (t: Throwable) {
         return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
@@ -320,9 +321,9 @@ fun getErrorMessage(t: Throwable, texts: StringProvider): String? {
 
 fun getErgoNetworkType() = if (isErgoMainNet) NetworkType.MAINNET else NetworkType.TESTNET
 
-fun deserializeErgobox(input: ByteArray): ErgoBox? {
+fun deserializeErgobox(input: ByteArray): InputBox? {
     val r = `SigmaSerializer$`.`MODULE$`.startReader(input, 0)
     val ergoBox = `ErgoBoxSerializer$`.`MODULE$`.parse(r)
-    return ergoBox
+    return ergoBox?.let { InputBoxImpl(null, it) }
 }
 

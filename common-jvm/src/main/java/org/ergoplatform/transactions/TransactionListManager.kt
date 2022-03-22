@@ -156,9 +156,6 @@ object TransactionListManager {
         newTransactions: List<TransactionInfo>,
         newConfirmed: Boolean
     ) {
-        // TODO merge with notSecurelyConfirmedTransactions and save to db
-        // (mempool -> waiting, no mempool/confirmation and older five minutes -> cancelled).
-
         newTransactions.forEach { newTransaction ->
             val existingTransaction = existingTransactions[newTransaction.id]
 
@@ -167,17 +164,26 @@ object TransactionListManager {
             val newInclusionHeight =
                 if (newConfirmed) newTransaction.inclusionHeight.toLong() else INCLUSION_HEIGHT_NOT_INCLUDED
 
-            existingTransaction?.let {
-                existingTransactions.remove(existingTransaction.txId)
+            val transactionToMerge = if (existingTransaction?.state == TX_STATE_SUBMITTED) {
+                // if we found a transaction that was submitted, we don't merge the information as it
+                // could be incomplete (transactions in state submitted were built by the app itself)
+                // instead, we delete the records and build new ones from scratch
+                db.transactionDbProvider.deleteTransaction(existingTransaction.id)
+                null
+            } else existingTransaction
+
+            transactionToMerge?.let {
+                existingTransactions.remove(transactionToMerge.txId)
                 val mergedTransaction = if (newConfirmed) {
-                    existingTransaction.copy(
+                    // if the transaction is confirmed, use timestamp from its including block
+                    transactionToMerge.copy(
                         inclusionHeight = newInclusionHeight,
                         state = newState,
                         timestamp = newTransaction.timestamp,
                     )
                 } else {
-                    // unconfirmed -> waiting, no inclusion height. do not change timestamp as it may hold submission time
-                    existingTransaction.copy(
+                    // unconfirmed -> set state to waiting, no inclusion height. do not change timestamp as it may hold submission time
+                    transactionToMerge.copy(
                         inclusionHeight = newInclusionHeight,
                         state = newState,
                     )
@@ -193,45 +199,70 @@ object TransactionListManager {
                     newTransaction.outputs
                 ).reduceBoxes()
 
-                // we now have only relevant inputs and outputs and can filter for our address
-                val addressInput = reducedTxInfo.inputs.firstOrNull { it.address.equals(address) }
-                val addressOutput =
-                    reducedTxInfo.outputs.firstOrNull { it.address.equals(address) }
-
-                val newAddressTx = AddressTransaction(
-                    0,
+                convertAndSaveTransactionInfoToDb(
+                    reducedTxInfo,
                     address,
-                    newTransaction.id,
-                    newInclusionHeight,
                     if (newConfirmed) newTransaction.timestamp else 0,
-                    ErgoAmount((addressOutput?.value ?: 0) - (addressInput?.value ?: 0)),
-                    null, // TODO parse EIP-29 message
-                    newState
+                    newInclusionHeight,
+                    newState,
+                    db.transactionDbProvider
                 )
+            }
+        }
+    }
 
-                db.transactionDbProvider.insertOrUpdateAddressTransaction(newAddressTx)
+    suspend fun convertAndSaveTransactionInfoToDb(
+        reducedTxInfo: org.ergoplatform.transactions.TransactionInfo,
+        address: String,
+        timestamp: Long,
+        newInclusionHeight: Long,
+        newState: Int,
+        db: TransactionDbProvider
+    ) {
+        // we now have only relevant inputs and outputs and can filter for our address
+        val addressInput = reducedTxInfo.inputs.firstOrNull { it.address.equals(address) }
+        val addressOutput =
+            reducedTxInfo.outputs.firstOrNull { it.address.equals(address) }
 
-                suspend fun saveTokenToDb(tokenList: List<AssetInstanceInfo>, isInput: Boolean) {
-                    tokenList.forEach { token ->
-                        db.transactionDbProvider.insertOrUpdateAddressTransactionToken(
-                            AddressTransactionToken(
-                                0,
-                                address,
-                                newAddressTx.txId,
-                                token.tokenId,
-                                token.name ?: "",
-                                TokenAmount(
-                                    token.amount * (if (isInput) -1 else 1),
-                                    token.decimals ?: 0
-                                )
+        if (addressInput != null || addressOutput != null) {
+            val ergAmount = ErgoAmount((addressOutput?.value ?: 0) - (addressInput?.value ?: 0))
+            LogUtils.logDebug("TransactionListManager", "Saving $ergAmount ERG to $address")
+            val newAddressTx = AddressTransaction(
+                0,
+                address,
+                reducedTxInfo.id,
+                newInclusionHeight,
+                timestamp,
+                ergAmount,
+                null, // TODO parse EIP-29 message
+                newState
+            )
+
+            db.insertOrUpdateAddressTransaction(newAddressTx)
+
+            suspend fun saveTokenToDb(
+                tokenList: List<AssetInstanceInfo>,
+                isInput: Boolean
+            ) {
+                tokenList.forEach { token ->
+                    db.insertOrUpdateAddressTransactionToken(
+                        AddressTransactionToken(
+                            0,
+                            address,
+                            newAddressTx.txId,
+                            token.tokenId,
+                            token.name ?: "",
+                            TokenAmount(
+                                token.amount * (if (isInput) -1 else 1),
+                                token.decimals ?: 0
                             )
                         )
-                    }
+                    )
                 }
-
-                addressInput?.assets?.let { saveTokenToDb(it, true) }
-                addressOutput?.assets?.let { saveTokenToDb(it, false) }
             }
+
+            addressInput?.assets?.let { saveTokenToDb(it, true) }
+            addressOutput?.assets?.let { saveTokenToDb(it, false) }
         }
     }
 

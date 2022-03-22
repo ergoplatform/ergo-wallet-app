@@ -257,6 +257,15 @@ class RoomTransactionDbProvider(private val database: AppDatabase) : Transaction
         database.transactionDao().deleteAddressTransactionTokens(address)
     }
 
+    override suspend fun deleteTransaction(id: Int) {
+        database.transactionDao().apply {
+            loadAddressTransaction(id)?.let { addressTransaction ->
+                deleteAddressTransactionTokens(addressTransaction.address, addressTransaction.txId)
+                deleteAddressTransaction(addressTransaction.id)
+            }
+        }
+    }
+
     override suspend fun insertOrUpdateAddressTransactionToken(addressTxToken: AddressTransactionToken) {
         database.transactionDao().insertOrUpdateAddressTransactionToken(addressTxToken.toDbEntity())
     }

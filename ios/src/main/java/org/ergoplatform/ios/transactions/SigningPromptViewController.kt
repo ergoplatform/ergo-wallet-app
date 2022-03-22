@@ -77,7 +77,8 @@ class SigningPromptViewController(
                                 val delegate = getAppDelegate()
                                 uiLogic.sendColdWalletSignedTx(
                                     delegate.prefs,
-                                    IosStringProvider(delegate.texts)
+                                    IosStringProvider(delegate.texts),
+                                    delegate.database
                                 )
                             }
                         } else {

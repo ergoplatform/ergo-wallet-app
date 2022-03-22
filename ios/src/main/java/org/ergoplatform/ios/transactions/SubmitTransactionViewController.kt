@@ -38,7 +38,12 @@ abstract class SubmitTransactionViewController(private val walletId: Int) : View
         val stringProvider = IosStringProvider(appDelegate.texts)
         walletConfig.secretStorage?.let {
             startAuthFlow(walletConfig) { mnemonic ->
-                uiLogic.startPaymentWithMnemonicAsync(mnemonic, appDelegate.prefs, stringProvider)
+                uiLogic.startPaymentWithMnemonicAsync(
+                    mnemonic,
+                    appDelegate.prefs,
+                    stringProvider,
+                    appDelegate.database
+                )
             }
         } ?: uiLogic.startColdWalletPayment(appDelegate.prefs, stringProvider)
     }

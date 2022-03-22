@@ -17,11 +17,20 @@ interface TransactionDbDao {
         page: Int
     ): List<AddressTransactionDbEntity>
 
+    @Query("SELECT * FROM address_transaction WHERE id = :id")
+    suspend fun loadAddressTransaction(id: Int): AddressTransactionDbEntity?
+
+    @Query("DELETE FROM address_transaction WHERE id = :id")
+    suspend fun deleteAddressTransaction(id: Int)
+
     @Query("DELETE FROM address_transaction WHERE address = :address")
     suspend fun deleteAddressTransactions(address: String)
 
     @Query("DELETE FROM address_transaction_token WHERE address = :address")
     suspend fun deleteAddressTransactionTokens(address: String)
+
+    @Query("DELETE FROM address_transaction_token WHERE address = :address AND tx_id = :txId")
+    suspend fun deleteAddressTransactionTokens(address: String, txId: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateAddressTransactionToken(vararg addressTxTokens: AddressTransactionTokenDbEntity)

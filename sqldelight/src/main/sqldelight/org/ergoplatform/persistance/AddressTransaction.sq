@@ -19,5 +19,11 @@ INSERT OR REPLACE INTO `address_transaction` (
 loadAddressTransactions:
 SELECT * FROM `address_transaction` WHERE address = ? LIMIT :limit OFFSET :offset;
 
+loadAddressTransaction:
+SELECT * FROM `address_transaction` WHERE id = ?;
+
 deleteByAddress:
 DELETE FROM address_transaction WHERE address = ?;
+
+deleteById:
+DELETE FROM address_transaction WHERE id = ?;

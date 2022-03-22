@@ -20,3 +20,6 @@ SELECT * FROM `address_transaction_token` WHERE address = ? AND tx_id = ?;
 
 deleteByAddress:
 DELETE FROM address_transaction_token WHERE address = ?;
+
+deleteAddressTxTokens:
+DELETE FROM address_transaction_token WHERE address = ? AND tx_id = ?;

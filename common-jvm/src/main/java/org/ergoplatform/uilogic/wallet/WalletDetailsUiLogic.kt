@@ -87,7 +87,9 @@ abstract class WalletDetailsUiLogic {
     }
 
     private fun refreshAddressTransactionsWhenNeeded(prefs: PreferencesProvider, db: IAppDatabase) {
-        walletAddress?.let {
+        val addressesToRefresh =
+            walletAddress?.let { listOf(it) } ?: wallet?.getSortedDerivedAddressesList()
+        addressesToRefresh?.forEach {
             TransactionListManager.downloadTransactionListForAddress(
                 it.publicAddress,
                 ErgoApiService.getOrInit(prefs),

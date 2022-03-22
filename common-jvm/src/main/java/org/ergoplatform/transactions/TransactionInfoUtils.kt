@@ -1,19 +1,15 @@
 package org.ergoplatform.transactions
 
-import org.ergoplatform.ErgoBox
-import org.ergoplatform.UnsignedErgoLikeTransaction
-import org.ergoplatform.appkit.Address
-import org.ergoplatform.appkit.ErgoId
-import org.ergoplatform.appkit.Iso
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.ergoplatform.ErgoApi
+import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
-import org.ergoplatform.appkit.impl.OutBoxImpl
+import org.ergoplatform.appkit.impl.InputBoxImpl
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.InputInfo
 import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.getErgoNetworkType
-import scala.Tuple2
-import scala.collection.JavaConversions
-import special.collection.Coll
 import kotlin.math.min
 
 /**
@@ -28,7 +24,7 @@ data class TransactionInfo(
 
 /**
  * describes a box to spend or a box to issue with its box ID, address that secures the box,
- * value of nanoergs and list of tokens the box holds or will hold.
+ * value of nanoergs and list of tokens the box holds or will hold (with EIP4 information).
  */
 data class TransactionInfoBox(
     val boxId: String,
@@ -38,26 +34,60 @@ data class TransactionInfoBox(
 )
 
 /**
- * @return list of IDs of boxes to spend for this `UnsignedErgoLikeTransaction`
+ * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
+ * use within an applicable try/catch phrase
  */
-fun UnsignedErgoLikeTransaction.getInputBoxesIds(): List<String> {
-    return JavaConversions.seqAsJavaList(inputs())!!.map {
-        ErgoId(it.boxId()).toString()
+suspend fun Transaction.buildTransactionInfo(ergoApiService: ErgoApi): TransactionInfo {
+    return withContext(Dispatchers.IO) {
+        val inputsMap = HashMap<String, TransactionInfoBox>()
+        inputBoxesIds.forEach {
+            val boxInfo = ergoApiService.getBoxInformation(it).execute().body()!!
+            inputsMap[boxInfo.boxId] = boxInfo.toTransactionInfoBox()
+        }
+        buildTransactionInfo(inputsMap)
     }
 }
 
 /**
- * @return TransactionInfo data class for this UnsignedErgoLikeTransaction. The TransactionInfo
- *         is more Kotlin-friendly to work with and holds information for the boxes to spend
+ * @return TransactionInfo data class for this Transaction. The TransactionInfo
+ *         holds information for the boxes to spend
  *         and more information for tokens on the boxes to issue.
  */
-fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String, TransactionInfoBox>): TransactionInfo {
+fun Transaction.buildTransactionInfo(inputBoxes: HashMap<String, TransactionInfoBox>): TransactionInfo {
+    return buildTransactionInfo(
+        inputBoxes,
+        inputBoxesIds,
+        outputs,
+        id
+    )
+}
+
+fun UnsignedTransaction.buildTransactionInfo(): TransactionInfo {
+    val inputBoxes = HashMap<String, TransactionInfoBox>()
+    inputs.forEach { input ->
+        val inboxInfo = (input as InputBoxImpl).toTransactionInfoBox()
+        inputBoxes[inboxInfo.boxId] = inboxInfo
+    }
+    return buildTransactionInfo(
+        inputBoxes,
+        inputBoxesIds,
+        outputs,
+        id
+    )
+}
+
+private fun buildTransactionInfo(
+    inputBoxes: HashMap<String, TransactionInfoBox>,
+    inputBoxesIds: List<String>,
+    outboxes: List<TransactionBox>,
+    txId: String,
+): TransactionInfo {
     val inputsList = ArrayList<InputInfo>()
     val outputsList = ArrayList<OutputInfo>()
     val tokensMap = HashMap<String, AssetInstanceInfo>()
 
     // now add to TransactionInfo, if possible
-    getInputBoxesIds().forEach { boxid ->
+    inputBoxesIds.forEach { boxid ->
         val inputInfo = InputInfo()
         inputInfo.boxId = boxid
         inputBoxes.get(boxid)?.let { inboxInfo ->
@@ -75,16 +105,16 @@ fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String,
         inputsList.add(inputInfo)
     }
 
-    JavaConversions.seqAsJavaList(outputCandidates())!!.forEach { ergoBoxCandidate ->
+    outboxes.forEach { transactionBox ->
         val outputInfo = OutputInfo()
 
         outputInfo.address =
-            Address.fromErgoTree(ergoBoxCandidate.ergoTree(), getErgoNetworkType()).toString()
-        outputInfo.value = ergoBoxCandidate.value()
+            Address.fromErgoTree(transactionBox.ergoTree, getErgoNetworkType()).toString()
+        outputInfo.value = transactionBox.value
 
         outputsList.add(outputInfo)
 
-        getAssetInstanceInfosFromErgoBoxToken(ergoBoxCandidate.additionalTokens()).forEach {
+        getAssetInstanceInfosFromErgoBoxToken(transactionBox.tokens).forEach {
             outputInfo.addAssetsItem(it)
 
             // if we know about the token from the inboxes, add more information
@@ -94,7 +124,10 @@ fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String,
             } ?: if (it.tokenId.equals(inputsList[0].boxId)) {
                 // could be minted right here, check outbox info
                 val token = try {
-                    Eip4TokenBuilder.buildFromErgoBox(it.tokenId, OutBoxImpl(null, ergoBoxCandidate))
+                    Eip4TokenBuilder.buildFromErgoBox(
+                        it.tokenId,
+                        transactionBox
+                    )
                 } catch (t: Throwable) {
                     null
                 }
@@ -106,18 +139,18 @@ fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String,
         }
     }
 
-    return TransactionInfo(id(), inputsList, outputsList)
+    return TransactionInfo(txId, inputsList, outputsList)
 }
 
 /**
  * @return TransactionInfoBox, which is more Kotlin-friendly to work with
  */
-fun ErgoBox.toTransactionInfoBox(): TransactionInfoBox {
+fun InputBox.toTransactionInfoBox(): TransactionInfoBox {
     return TransactionInfoBox(
-        ErgoId(id()).toString(),
-        Address.fromErgoTree(ergoTree(), getErgoNetworkType()).toString(),
-        value(),
-        getAssetInstanceInfosFromErgoBoxToken(additionalTokens())
+        id.toString(),
+        Address.fromErgoTree(ergoTree, getErgoNetworkType()).toString(),
+        value,
+        getAssetInstanceInfosFromErgoBoxToken(tokens)
     )
 }
 
@@ -128,8 +161,7 @@ fun OutputInfo.toTransactionInfoBox(): TransactionInfoBox {
     return TransactionInfoBox(boxId, address, value, assets)
 }
 
-private fun getAssetInstanceInfosFromErgoBoxToken(tokensColl: Coll<Tuple2<ByteArray, Any>>): List<AssetInstanceInfo> {
-    val tokens = Iso.isoTokensListToPairsColl().from(tokensColl)
+private fun getAssetInstanceInfosFromErgoBoxToken(tokens: List<ErgoToken>): List<AssetInstanceInfo> {
     return tokens.map {
         val tokenInfo = AssetInstanceInfo()
         tokenInfo.amount = it.value
@@ -188,7 +220,7 @@ fun TransactionInfo.reduceBoxes(): TransactionInfo {
             // we can operate on the list entries safely because combineTokens() copied
             // all entries of the original TransactionInfo
             input.assets?.forEach { inputAssetInfo ->
-                output.assets?.filter { inputAssetInfo.tokenId.equals(it.tokenId) }?.firstOrNull()
+                output.assets?.firstOrNull { inputAssetInfo.tokenId.equals(it.tokenId) }
                     ?.let { outputAssetInfo ->
                         val tokenAmount = min(inputAssetInfo.amount, outputAssetInfo.amount)
                         inputAssetInfo.amount = inputAssetInfo.amount - tokenAmount
