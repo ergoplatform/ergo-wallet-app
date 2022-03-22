@@ -3,6 +3,7 @@ package org.ergoplatform.android.transactions
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.transition.TransitionManager
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TokenAmount
 import org.ergoplatform.android.R
@@ -14,6 +15,7 @@ import org.ergoplatform.transactions.TransactionInfo
 
 fun CardTransactionInfoBinding.bindTransactionInfo(
     ti: TransactionInfo,
+    tokenClickListener: ((String) -> Unit)?,
     layoutInflater: LayoutInflater
 ) {
     layoutInboxes.apply {
@@ -25,6 +27,7 @@ fun CardTransactionInfoBinding.bindTransactionInfo(
                 input.value,
                 input.address ?: input.boxId,
                 input.assets,
+                tokenClickListener,
                 layoutInflater
             )
         }
@@ -35,7 +38,12 @@ fun CardTransactionInfoBinding.bindTransactionInfo(
 
         ti.outputs.forEach { output ->
             bindBoxView(
-                this, output.value, output.address, output.assets, layoutInflater
+                this,
+                output.value,
+                output.address,
+                output.assets,
+                tokenClickListener,
+                layoutInflater
             )
         }
     }
@@ -46,6 +54,7 @@ private fun bindBoxView(
     value: Long?,
     address: String,
     assets: List<AssetInstanceInfo>?,
+    tokenClickListener: ((String) -> Unit)?,
     layoutInflater: LayoutInflater
 ) {
     val boxBinding = EntryTransactionBoxBinding.inflate(layoutInflater, container, true)
@@ -57,6 +66,7 @@ private fun bindBoxView(
         if (value == null || value == 0L) View.GONE else View.VISIBLE
     boxBinding.labelBoxAddress.text = address
     boxBinding.labelBoxAddress.setOnClickListener {
+        TransitionManager.beginDelayedTransition(container)
         boxBinding.labelBoxAddress.maxLines =
             if (boxBinding.labelBoxAddress.maxLines == 1) 10 else 1
     }
@@ -65,14 +75,17 @@ private fun bindBoxView(
         removeAllViews()
         visibility = View.GONE
 
-        assets?.forEach {
+        assets?.forEach { token ->
             visibility = View.VISIBLE
             val tokenBinding =
                 EntryWalletTokenBinding.inflate(layoutInflater, this, true)
             // we use the token id here, we don't have the name in the cold wallet context
-            tokenBinding.labelTokenName.text = it.name ?: it.tokenId
+            tokenBinding.labelTokenName.text = token.name ?: token.tokenId
             tokenBinding.labelTokenVal.text =
-                TokenAmount(it.amount, it.decimals ?: 0).toStringUsFormatted()
+                TokenAmount(token.amount, token.decimals ?: 0).toStringUsFormatted()
+            tokenClickListener?.let {
+                tokenBinding.root.setOnClickListener { tokenClickListener(token.tokenId) }
+            }
         }
     }
 }

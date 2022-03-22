@@ -62,7 +62,7 @@ open class TransactionContainer(private val texts: I18NBundle, private val click
         this.addArrangedSubview(buttonContainer)
     }
 
-    fun bindTransaction(transactionInfo: TransactionInfo) {
+    fun bindTransaction(transactionInfo: TransactionInfo, tokenClickListener: ((String) -> Unit)?) {
         inboxesList.clearArrangedSubviews()
         transactionInfo.inputs.forEach { input ->
             inboxesList.addArrangedSubview(
@@ -70,6 +70,7 @@ open class TransactionContainer(private val texts: I18NBundle, private val click
                     input.value,
                     input.address,
                     input.assets,
+                    tokenClickListener,
                     texts
                 )
             )
@@ -81,6 +82,7 @@ open class TransactionContainer(private val texts: I18NBundle, private val click
                     output.value,
                     output.address,
                     output.assets,
+                    tokenClickListener,
                     texts
                 )
             )

@@ -65,7 +65,7 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         scanningContainer.errorText.text = uiLogic.lastErrorMessage ?: ""
 
         uiLogic.transactionInfo?.reduceBoxes()?.let {
-            transactionContainer.bindTransaction(it)
+            transactionContainer.bindTransaction(it, null)
         }
 
         refreshUiState()

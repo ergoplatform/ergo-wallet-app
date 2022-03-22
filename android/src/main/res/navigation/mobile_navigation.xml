@@ -317,6 +317,9 @@
         <argument
             android:name="derivation_idx"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_ergoPaySigning_to_tokenInformation"
+            app:destination="@id/tokenInformationDialogFragment" />
     </fragment>
     <dialog
         android:id="@+id/shareWithQrDialogFragment"
