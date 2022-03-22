@@ -1,6 +1,7 @@
 package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.CoroutineScope
+import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.TransactionResult
@@ -202,7 +203,10 @@ class ErgoPaySigningViewController(
         }
 
         fun showTransactionInfo() {
-            bindTransaction(uiLogic.transactionInfo!!.reduceBoxes())
+            bindTransaction(uiLogic.transactionInfo!!.reduceBoxes(),
+                tokenClickListener = { tokenId ->
+                    presentViewController(TokenInformationViewController(tokenId, null), true) {}
+                })
 
             cardView.isHidden = uiLogic.epsr?.message?.let {
                 messageFromDApp.text = texts.format(STRING_LABEL_MESSAGE_FROM_DAPP, it)

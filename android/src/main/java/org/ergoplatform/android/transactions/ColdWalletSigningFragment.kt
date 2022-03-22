@@ -161,7 +161,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             binding.transactionInfo.root.visibility = View.VISIBLE
             binding.cardScanMore.visibility = View.GONE
 
-            binding.transactionInfo.bindTransactionInfo(it, layoutInflater)
+            binding.transactionInfo.bindTransactionInfo(it, null, layoutInflater)
         }
     }
 
