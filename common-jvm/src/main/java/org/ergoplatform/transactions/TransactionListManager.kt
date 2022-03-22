@@ -42,8 +42,8 @@ object TransactionListManager {
                     if (!addressRecentlyRefreshed(address)) {
                         doDownloadTransactionList(address, ergoApi, db)
                         lastAddressRefreshMs[address] = System.currentTimeMillis()
-                        addressesToDownload.remove(address)
                     }
+                    addressesToDownload.remove(address)
                 }
                 isDownloading.value = false
             }
@@ -132,12 +132,16 @@ object TransactionListManager {
 
             // items still in notSecurelyConfirmedTransactions: set cancelled when older than ten minutes and save to db
             notSecurelyConfirmedTransactions.values.forEach { unseenTransaction ->
-                if (unseenTransaction.timestamp < System.currentTimeMillis() - 10L * 60 * 1000L)
+                if (unseenTransaction.timestamp < System.currentTimeMillis() - 10L * 60 * 1000L) {
+                    val newInclusionHeight =
+                        if (unseenTransaction.inclusionHeight == INCLUSION_HEIGHT_NOT_INCLUDED) heightToLoadFrom else unseenTransaction.inclusionHeight
                     db.transactionDbProvider.insertOrUpdateAddressTransaction(
                         unseenTransaction.copy(
-                            state = TX_STATE_CANCELLED
+                            state = TX_STATE_CANCELLED,
+                            inclusionHeight = newInclusionHeight ?: 0
                         )
                     )
+                }
             }
 
         } catch (t: Throwable) {

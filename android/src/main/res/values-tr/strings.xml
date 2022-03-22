@@ -116,7 +116,6 @@
     <!-- Wallet details -->
     <string name="title_wallet_balance">Bakiye</string>
     <string name="label_all_addresses">Tüm adresler %1d</string>
-    <string name="exporer_view_transactions">Ergo Explorer\'da işlemleri görüntülemek için dokunun - uygulama içi işlem listesi yakında eklenecektir</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Adresler</string>

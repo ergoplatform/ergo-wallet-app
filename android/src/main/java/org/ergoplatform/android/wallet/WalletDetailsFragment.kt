@@ -16,7 +16,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoApiService
 import org.ergoplatform.WalletStateSyncManager
@@ -26,6 +25,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.EntryWalletTokenDetailsBinding
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.tokens.WalletDetailsTokenEntryView
+import org.ergoplatform.android.transactions.inflateAddressTransactionEntry
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.openUrlWithBrowser
@@ -35,6 +35,7 @@ import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.wallet.getDerivedAddress
 
 class WalletDetailsFragment : Fragment(), AddressChooserCallback {
@@ -80,12 +81,17 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                nodeConnector.isRefreshing.collect { isRefreshing ->
-                    if (!isRefreshing) {
-                        binding.progressBar.hide()
-                        binding.swipeRefreshLayout.isRefreshing = false
-                    } else {
-                        binding.progressBar.show()
+                launch {
+                    nodeConnector.isRefreshing.collect {
+                        updateRefreshState()
+                    }
+                }
+                launch {
+                    TransactionListManager.isDownloading.collect { isDownloading ->
+                        updateRefreshState()
+                        if (!isDownloading) {
+                            refreshShownTransactions()
+                        }
                     }
                 }
             }
@@ -141,6 +147,17 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
         // enable layout change animations after a short wait time
         postDelayed(500) { enableLayoutChangeAnimations() }
+    }
+
+    private fun updateRefreshState() {
+        val isRefreshing =
+            WalletStateSyncManager.getInstance().isRefreshing.value || TransactionListManager.isDownloading.value
+        if (!isRefreshing) {
+            binding.progressBar.hide()
+            binding.swipeRefreshLayout.isRefreshing = false
+        } else {
+            binding.progressBar.show()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -255,6 +272,9 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             // we don't need to update UI here - the DB change will trigger rebinding of the card
         }
 
+        // transactions
+        refreshShownTransactions()
+
         startRefreshWhenNeeded()
     }
 
@@ -267,6 +287,37 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             view.tokenId?.let { tokenId ->
                 val tokenInfo = tokenInfoHashMap.get(tokenId)
                 tokenInfo?.let { view.addTokenInfo(tokenInfo) }
+            }
+        }
+    }
+
+    private fun refreshShownTransactions() {
+        val context = requireContext()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val transactionList = walletDetailsViewModel.uiLogic.loadTransactionsToShow(
+                AppDatabase.getInstance(context).transactionDbProvider
+            )
+
+            binding.transactionList.apply {
+                removeAllViews()
+                visibility = View.GONE
+                transactionList.forEach { tx ->
+                    visibility = View.VISIBLE
+                    inflateAddressTransactionEntry(
+                        layoutInflater,
+                        this,
+                        tx,
+                        tokenClickListener = { tokenId ->
+                            findNavController().navigateSafe(
+                                WalletDetailsFragmentDirections.actionNavigationWalletDetailsToTokenInformationDialogFragment(
+                                    tokenId
+                                )
+                            )
+                        })
+                }
+
+                binding.transactionsEmpty.visibility = if (transactionList.isEmpty()) View.VISIBLE else View.GONE
+                binding.transactionsMoreButton.visibility = if (transactionList.size == 5) View.VISIBLE else View.GONE
             }
         }
     }

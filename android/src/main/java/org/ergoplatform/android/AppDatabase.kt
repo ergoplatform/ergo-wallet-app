@@ -238,7 +238,7 @@ class RoomTokenDbProvider(private val database: AppDatabase) : TokenDbProvider {
 
 }
 
-class RoomTransactionDbProvider(private val database: AppDatabase) : TransactionDbProvider {
+class RoomTransactionDbProvider(private val database: AppDatabase) : TransactionDbProvider() {
     override suspend fun insertOrUpdateAddressTransaction(addressTransaction: AddressTransaction) {
         database.transactionDao().insertOrUpdateAddressTransaction(addressTransaction.toDbEntity())
     }

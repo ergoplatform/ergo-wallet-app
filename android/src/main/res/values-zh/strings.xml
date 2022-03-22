@@ -105,7 +105,6 @@
     <!-- Wallet details -->
     <string name="title_wallet_balance">余额</string>
     <string name="label_all_addresses">所有 %1d 地址</string>
-    <string name="exporer_view_transactions">点击即可在 Ergo 浏览器中查看交易 — 即将添加应用内交易列表</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">地址</string>

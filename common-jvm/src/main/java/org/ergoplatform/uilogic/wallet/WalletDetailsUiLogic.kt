@@ -15,6 +15,7 @@ import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
 import org.ergoplatform.uilogic.STRING_LABEL_ALL_ADDRESSES
 import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 import org.ergoplatform.wallet.*
 import org.ergoplatform.wallet.addresses.getAddressLabel
 
@@ -87,8 +88,7 @@ abstract class WalletDetailsUiLogic {
     }
 
     private fun refreshAddressTransactionsWhenNeeded(prefs: PreferencesProvider, db: IAppDatabase) {
-        val addressesToRefresh =
-            walletAddress?.let { listOf(it) } ?: wallet?.getSortedDerivedAddressesList()
+        val addressesToRefresh = getSelectedAddresses()
         addressesToRefresh?.forEach {
             TransactionListManager.downloadTransactionListForAddress(
                 it.publicAddress,
@@ -182,6 +182,26 @@ abstract class WalletDetailsUiLogic {
                 )
             )
         }
+    }
+
+    suspend fun loadTransactionsToShow(transactionDbProvider: TransactionDbProvider): List<AddressTransactionWithTokens> {
+        val addresses = getSelectedAddresses()?.map { it.publicAddress }
+
+        return if (addresses?.size == 1) {
+            transactionDbProvider.loadAddressTransactionsWithTokens(addresses.first(), 5, 0)
+        } else {
+            val returnedTransactions = mutableListOf<AddressTransactionWithTokens>()
+            addresses?.forEach { address ->
+                returnedTransactions.addAll(
+                    transactionDbProvider.loadAddressTransactionsWithTokens(address, 5, 0)
+                )
+            }
+            returnedTransactions.sortedByDescending { it.addressTransaction.inclusionHeight }.take(5)
+        }
+    }
+
+    private fun getSelectedAddresses(): List<WalletAddress>? {
+        return walletAddress?.let { listOf(it) } ?: wallet?.getSortedDerivedAddressesList()
     }
 
     abstract fun onDataChanged()

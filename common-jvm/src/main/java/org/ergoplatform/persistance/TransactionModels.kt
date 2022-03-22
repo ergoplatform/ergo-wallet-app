@@ -38,18 +38,22 @@ const val CONFIRMATIONS_NUM_SECURE = 72
  * [AddressTransaction.state] - submitted but not seen in mempool
  */
 const val TX_STATE_SUBMITTED = 0
+
 /**
  * [AddressTransaction.state] - seen in mempool
  */
 const val TX_STATE_WAITING = 1
+
 /**
  * [AddressTransaction.state] - included in a valid block, but not [CONFIRMATIONS_NUM_SECURE] confirmations yet
  */
 const val TX_STATE_CONFIRMED_UNSECURE = 9
+
 /**
  * [AddressTransaction.state] - included in a valid block and at least [CONFIRMATIONS_NUM_SECURE] confirmations
  */
 const val TX_STATE_CONFIRMED_SECURE = 10
+
 /**
  * [AddressTransaction.state] - older five minutes, not confirmed and not in mempool
  */
