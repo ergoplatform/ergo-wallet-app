@@ -15,7 +15,7 @@ buildscript {
     }
     dependencies {
         // Android Gradle Plugin 4.2.0: problems minifying; 7.x: enableR8=false removed
-        classpath ("com.android.tools.build:gradle:4.1.3") {
+        classpath ("com.android.tools.build:gradle:7.1.0") {
             exclude group: "net.sf.proguard", module: "proguard-gradle"
         }
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
