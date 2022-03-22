@@ -23,6 +23,7 @@ android {
 
     buildTypes {
         release {
+            // Disable R8, ProGuard configuration is in the `proguard` block below
             minifyEnabled false
         }
         debug {
