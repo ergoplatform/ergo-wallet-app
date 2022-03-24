@@ -100,42 +100,47 @@ fun inflateAddressTransactionEntry(
     parent: ViewGroup,
     tx: AddressTransactionWithTokens,
     tokenClickListener: ((String) -> Unit)?
+) = EntryAddressTransactionBinding.inflate(layoutInflater, parent, true)
+    .bindData(layoutInflater, tx, tokenClickListener)
+
+fun EntryAddressTransactionBinding.bindData(
+    layoutInflater: LayoutInflater,
+    tx: AddressTransactionWithTokens,
+    tokenClickListener: ((String) -> Unit)?
 ) {
     val context = layoutInflater.context
+    val stringProvider = AndroidStringProvider(context)
     val txHeader = tx.addressTransaction
     val txTokens = tx.tokens
-    val entryBinding = EntryAddressTransactionBinding.inflate(layoutInflater, parent, true)
-    val stringProvider = AndroidStringProvider(context)
 
-    entryBinding.apply {
-        labelTransactionDate.text =
-            if (txHeader.timestamp > 0) {
-                millisecondsToLocalTime(txHeader.timestamp)
-            } else {
-                ""
-            }
 
-        boxErgAmount.text = context.getString(
-            R.string.label_erg_amount,
-            txHeader.ergAmount.toStringTrimTrailingZeros()
-        )
+    labelTransactionDate.text =
+        if (txHeader.timestamp > 0) {
+            millisecondsToLocalTime(txHeader.timestamp)
+        } else {
+            ""
+        }
 
-        labelTransactionState.text = txHeader.getTransactionStateString(stringProvider)
+    boxErgAmount.text = context.getString(
+        R.string.label_erg_amount,
+        txHeader.ergAmount.toStringTrimTrailingZeros()
+    )
 
-        transactionTokenEntries.apply {
-            removeAllViews()
-            visibility = View.GONE
+    labelTransactionState.text = txHeader.getTransactionStateString(stringProvider)
 
-            txTokens.forEach { token ->
-                visibility = View.VISIBLE
-                val tokenBinding =
-                    EntryWalletTokenBinding.inflate(layoutInflater, this, true)
-                // we use the token id here, we don't have the name in the cold wallet context
-                tokenBinding.labelTokenName.text = token.name.ifBlank { token.tokenId }
-                tokenBinding.labelTokenVal.text = token.tokenAmount.toStringUsFormatted()
-                tokenClickListener?.let {
-                    tokenBinding.root.setOnClickListener { tokenClickListener(token.tokenId) }
-                }
+    transactionTokenEntries.apply {
+        removeAllViews()
+        visibility = View.GONE
+
+        txTokens.forEach { token ->
+            visibility = View.VISIBLE
+            val tokenBinding =
+                EntryWalletTokenBinding.inflate(layoutInflater, this, true)
+            // we use the token id here, we don't have the name in the cold wallet context
+            tokenBinding.labelTokenName.text = token.name.ifBlank { token.tokenId }
+            tokenBinding.labelTokenVal.text = token.tokenAmount.toStringUsFormatted()
+            tokenClickListener?.let {
+                tokenBinding.root.setOnClickListener { tokenClickListener(token.tokenId) }
             }
         }
     }

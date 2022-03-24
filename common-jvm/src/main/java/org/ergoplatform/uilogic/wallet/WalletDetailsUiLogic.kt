@@ -20,6 +20,8 @@ import org.ergoplatform.wallet.*
 import org.ergoplatform.wallet.addresses.getAddressLabel
 
 abstract class WalletDetailsUiLogic {
+    val maxTransactionsToShow = 5
+
     var wallet: Wallet? = null
         private set
     var addressIdx: Int? = null
@@ -188,15 +190,15 @@ abstract class WalletDetailsUiLogic {
         val addresses = getSelectedAddresses()?.map { it.publicAddress }
 
         return if (addresses?.size == 1) {
-            transactionDbProvider.loadAddressTransactionsWithTokens(addresses.first(), 5, 0)
+            transactionDbProvider.loadAddressTransactionsWithTokens(addresses.first(), maxTransactionsToShow, 0)
         } else {
             val returnedTransactions = mutableListOf<AddressTransactionWithTokens>()
             addresses?.forEach { address ->
                 returnedTransactions.addAll(
-                    transactionDbProvider.loadAddressTransactionsWithTokens(address, 5, 0)
+                    transactionDbProvider.loadAddressTransactionsWithTokens(address, maxTransactionsToShow, 0)
                 )
             }
-            returnedTransactions.sortedByDescending { it.addressTransaction.inclusionHeight }.take(5)
+            returnedTransactions.sortedByDescending { it.addressTransaction.inclusionHeight }.take(maxTransactionsToShow)
         }
     }
 

@@ -28,15 +28,12 @@ import org.ergoplatform.android.tokens.WalletDetailsTokenEntryView
 import org.ergoplatform.android.transactions.inflateAddressTransactionEntry
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.android.ui.postDelayed
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
-import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.TransactionListManager
-import org.ergoplatform.wallet.getDerivedAddress
 
 class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
@@ -99,13 +96,13 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
         // Set button listeners
         binding.cardTransactions.setOnClickListener {
-            openUrlWithBrowser(
-                binding.root.context,
-                getExplorerWebUrl() + "en/addresses/" +
-                        walletDetailsViewModel.wallet!!.getDerivedAddress(
-                            walletDetailsViewModel.selectedIdx ?: 0
-                        )
-            )
+            walletDetailsViewModel.wallet?.walletConfig?.id?.let { walletId ->
+                findNavController().navigateSafe(
+                    WalletDetailsFragmentDirections.actionNavigationWalletDetailsToAddressTransactionsFragment(
+                        walletId, walletDetailsViewModel.selectedIdx ?: 0
+                    )
+                )
+            }
         }
 
         binding.buttonConfigAddresses.setOnClickListener {
@@ -316,8 +313,11 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                         })
                 }
 
-                binding.transactionsEmpty.visibility = if (transactionList.isEmpty()) View.VISIBLE else View.GONE
-                binding.transactionsMoreButton.visibility = if (transactionList.size == 5) View.VISIBLE else View.GONE
+                binding.transactionsEmpty.visibility =
+                    if (transactionList.isEmpty()) View.VISIBLE else View.GONE
+                binding.transactionsMoreButton.visibility =
+                    if (transactionList.size == walletDetailsViewModel.uiLogic.maxTransactionsToShow)
+                        View.VISIBLE else View.GONE
             }
         }
     }

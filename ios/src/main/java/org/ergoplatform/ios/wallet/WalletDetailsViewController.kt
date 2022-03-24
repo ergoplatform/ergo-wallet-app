@@ -450,7 +450,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             }
 
             val transactionsDesc = Body1Label().apply {
-                text = texts.get(STRING_EXPORER_VIEW_TRANSACTIONS)
+                text = texts.get(STRING_TRANSACTIONS_VIEW_MORE)
             }
 
             contentView.apply {
