@@ -129,7 +129,7 @@ abstract class SubmitTransactionUiLogic {
             try {
                 // save submitted transaction to every address
                 val txInfoToSave = (transactionInfo
-                    ?: (ergoTxResult.sentTransaction as? UnsignedTransaction)?.buildTransactionInfo()
+                    ?: (ergoTxResult.sentTransaction as? UnsignedTransaction)?.buildTransactionInfo(wallet?.tokens)
                     ?: ergoTxResult.sentTransaction?.buildTransactionInfo(
                         ErgoApiService.getOrInit(preferences)
                     ))

@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class SqlDelightTransactionDbProvider(private val appDatabase: AppDatabase) :
-    TransactionDbProvider {
+    TransactionDbProvider() {
 
     override suspend fun insertOrUpdateAddressTransaction(addressTransaction: AddressTransaction) {
         withContext(Dispatchers.IO) {

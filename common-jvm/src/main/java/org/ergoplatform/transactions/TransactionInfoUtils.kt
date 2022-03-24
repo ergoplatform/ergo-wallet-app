@@ -5,11 +5,11 @@ import kotlinx.coroutines.withContext
 import org.ergoplatform.ErgoApi
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
-import org.ergoplatform.appkit.impl.InputBoxImpl
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.InputInfo
 import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.getErgoNetworkType
+import org.ergoplatform.persistance.WalletToken
 import kotlin.math.min
 
 /**
@@ -62,10 +62,19 @@ fun Transaction.buildTransactionInfo(inputBoxes: HashMap<String, TransactionInfo
     )
 }
 
-fun UnsignedTransaction.buildTransactionInfo(): TransactionInfo {
+fun UnsignedTransaction.buildTransactionInfo(tokens: List<WalletToken>?): TransactionInfo {
     val inputBoxes = HashMap<String, TransactionInfoBox>()
     inputs.forEach { input ->
-        val inboxInfo = (input as InputBoxImpl).toTransactionInfoBox()
+        val inboxInfo = input.toTransactionInfoBox()
+        // use wallet tokens to set decimal and name information of tokens sent
+        tokens?.let {
+            inboxInfo.tokens.forEach { assetInfo ->
+                tokens.firstOrNull { it.tokenId == assetInfo.tokenId }?.let { walletToken ->
+                    assetInfo.name = walletToken.name
+                    assetInfo.decimals = walletToken.decimals
+                }
+            }
+        }
         inputBoxes[inboxInfo.boxId] = inboxInfo
     }
     return buildTransactionInfo(

@@ -206,7 +206,7 @@ object TransactionListManager {
                 convertAndSaveTransactionInfoToDb(
                     reducedTxInfo,
                     address,
-                    if (newConfirmed) newTransaction.timestamp else 0,
+                    if (newConfirmed) newTransaction.timestamp else (existingTransaction?.timestamp ?: 0),
                     newInclusionHeight,
                     newState,
                     db.transactionDbProvider
