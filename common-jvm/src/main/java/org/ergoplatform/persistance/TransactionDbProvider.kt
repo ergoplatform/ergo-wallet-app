@@ -16,7 +16,8 @@ abstract class TransactionDbProvider {
     ): List<AddressTransaction>
 
     /**
-     * deletes all address transactions for a given address - should be called from within a db transaction
+     * deletes all address transactions and tokens for a given address
+     * - should be called from within a db transaction
      */
     abstract suspend fun deleteAddressTransactions(address: String)
 

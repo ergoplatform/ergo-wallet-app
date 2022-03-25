@@ -2,7 +2,6 @@ package org.ergoplatform.ios.wallet.addresses
 
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.ios.ui.*

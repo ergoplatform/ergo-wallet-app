@@ -115,7 +115,6 @@ abstract class WalletDetailsUiLogic {
         prefs: PreferencesProvider,
         database: IAppDatabase
     ): Boolean {
-        // TODO transactionlist force refresh of unconfirmed?
         refreshAddressTransactionsWhenNeeded(prefs, database)
         return WalletStateSyncManager.getInstance().refreshByUser(prefs, database)
     }

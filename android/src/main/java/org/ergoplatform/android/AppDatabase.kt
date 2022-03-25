@@ -146,10 +146,13 @@ class RoomWalletDbProvider(private val database: AppDatabase) : WalletDbProvider
     }
 
     override suspend fun deleteWalletConfigAndStates(firstAddress: String, walletId: Int?) {
+        loadWalletAddresses(firstAddress).forEach {
+            database.transactionDbProvider.deleteAddressTransactions(it.publicAddress)
+        }
         database.walletDao().deleteWalletStates(firstAddress)
         database.walletDao().deleteTokensByWallet(firstAddress)
         database.walletDao().deleteWalletAddresses(firstAddress)
-        // TODO transactionlist delete from db
+        database.transactionDbProvider.deleteAddressTransactions(firstAddress)
         (walletId ?: database.walletDao().loadWalletByFirstAddress(firstAddress)?.id)?.let { id ->
             database.walletDao().deleteWalletConfig(id)
         }

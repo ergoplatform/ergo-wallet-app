@@ -35,7 +35,7 @@
         tools:text="Submitted" />
 
     <TextView
-        android:id="@+id/box_erg_amount"
+        android:id="@+id/tx_erg_amount"
         style="@style/TextAppearance.App.Body1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -45,7 +45,22 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@id/label_transaction_state"
         app:layout_constraintTop_toBottomOf="@id/label_transaction_date"
-        tools:text="1,223.004565 ERG" />
+        tools:text="1,223.0045 ERG" />
+
+    <TextView
+        android:id="@+id/tx_purpose"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/half_horizontal_margin"
+        android:ellipsize="end"
+        android:maxLines="3"
+        app:layout_constraintEnd_toEndOf="@id/label_transaction_date"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/tx_erg_amount"
+        app:layout_constraintTop_toBottomOf="@id/label_transaction_date"
+        tools:text="@tools:sample/lorem/random" />
 
     <LinearLayout
         android:id="@+id/transaction_token_entries"
@@ -56,7 +71,7 @@
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/box_erg_amount">
+        app:layout_constraintTop_toBottomOf="@id/tx_purpose">
 
         <include layout="@layout/entry_wallet_token" />
     </LinearLayout>

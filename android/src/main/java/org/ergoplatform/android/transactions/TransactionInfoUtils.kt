@@ -121,11 +121,11 @@ fun EntryAddressTransactionBinding.bindData(
             ""
         }
 
-    boxErgAmount.text = context.getString(
+    txErgAmount.text = context.getString(
         R.string.label_erg_amount,
         txHeader.ergAmount.toStringTrimTrailingZeros()
     )
-
+    txPurpose.text = txHeader.message
     labelTransactionState.text = txHeader.getTransactionStateString(stringProvider)
 
     transactionTokenEntries.apply {

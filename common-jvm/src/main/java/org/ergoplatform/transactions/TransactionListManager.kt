@@ -77,7 +77,7 @@ object TransactionListManager {
             val notSecurelyConfirmedTransactions = HashMap<String, AddressTransaction>()
 
             val heightToLoadFrom = if (loadAllTx) {
-                // load all: erase all information and load everything - TODO use it
+                // load all: erase all information and load everything
                 db.transactionDbProvider.deleteAddressTransactions(address)
                 0
             } else {
@@ -99,6 +99,10 @@ object TransactionListManager {
             while (heightToLoadFrom != null && heightSeen > heightToLoadFrom
                 || heightToLoadFrom == null && txLoaded < 500 && heightSeen > 0L
             ) {
+                LogUtils.logDebug(
+                    this.javaClass.simpleName,
+                    "Fetching address $address transactions page $page"
+                )
                 val transactionsCall = ergoApi.getConfirmedTransactionsForAddress(
                     address,
                     txPerPage,
@@ -163,7 +167,7 @@ object TransactionListManager {
         } catch (t: Throwable) {
             LogUtils.logDebug(
                 "TransactionListManager",
-                "Error downloading transaction list for $address",
+                "Error downloading transaction list for $address: ${t.message}",
                 t
             )
         }
@@ -247,7 +251,7 @@ object TransactionListManager {
 
         if (addressInput != null || addressOutput != null) {
             val ergAmount = ErgoAmount((addressOutput?.value ?: 0) - (addressInput?.value ?: 0))
-            LogUtils.logDebug("TransactionListManager", "Saving $ergAmount ERG to $address")
+            LogUtils.logDebug(this.javaClass.simpleName, "Saving ${reducedTxInfo.id} for $address")
             val newAddressTx = AddressTransaction(
                 0,
                 address,

@@ -39,6 +39,7 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
     private val args: AddressTransactionsFragmentArgs by navArgs()
     private val viewModel: AddressTransactionViewModel by viewModels()
     private var adapter = TransactionsAdapter()
+    private var adapterFinishedLoading = false
 
     private var wallet: Wallet? = null
 
@@ -116,16 +117,16 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.menu_open) {
+        return if (item.itemId == R.id.menu_open) {
 
             openUrlWithBrowser(
                 binding.root.context,
                 getExplorerWebUrl() + "en/addresses/" + viewModel.derivedAddress!!.publicAddress
             )
 
-            return true
+            true
         } else
-            return super.onOptionsItemSelected(item)
+            super.onOptionsItemSelected(item)
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
@@ -144,6 +145,7 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
         adapter = TransactionsAdapter()
         binding.recyclerview.adapter = adapter
         adapter.addLoadStateListener { loadState ->
+            adapterFinishedLoading = loadState.append.endOfPaginationReached
             val noItems = loadState.append.endOfPaginationReached && adapter.itemCount < 1
             binding.transactionsEmpty.visibility = if (noItems) View.VISIBLE else View.GONE
 
@@ -182,7 +184,7 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
             val item = getItem(position)
             // Note that item may be null. ViewHolder must support binding a
             // null item as a placeholder.
-            holder.bind(item, position == itemCount - 1)
+            holder.bind(item, position == itemCount - 1 && adapterFinishedLoading)
         }
     }
 
