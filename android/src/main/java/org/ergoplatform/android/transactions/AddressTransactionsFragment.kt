@@ -1,12 +1,12 @@
 package org.ergoplatform.android.transactions
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.PagingDataAdapter
@@ -15,12 +15,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.ergoplatform.ErgoApiService
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.Preferences
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentAddressTransactionsBinding
 import org.ergoplatform.android.databinding.FragmentAddressTransactionsItemBinding
+import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
+import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
+import org.ergoplatform.getExplorerWebUrl
+import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
+import org.ergoplatform.wallet.addresses.getAddressLabel
 
 class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
     private var _binding: FragmentAddressTransactionsBinding? = null
@@ -28,7 +38,14 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
 
     private val args: AddressTransactionsFragmentArgs by navArgs()
     private val viewModel: AddressTransactionViewModel by viewModels()
-    private val adapter = TransactionsAdapter()
+    private var adapter = TransactionsAdapter()
+
+    private var wallet: Wallet? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,11 +65,67 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel.init(args.walletId, args.derivationIdx, AppDatabase.getInstance(requireContext()))
 
-        // TODO refresh, change address
-
         viewModel.walletLiveData.observe(viewLifecycleOwner) {
+            wallet = it
             refreshShownData()
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                TransactionListManager.isDownloading.collect { isDownloading ->
+                    if (isDownloading) binding.progressBar.show() else binding.progressBar.hide()
+                    if (!isDownloading) {
+                        binding.swipeRefreshLayout.isRefreshing = false
+                        refreshShownData()
+                    }
+                }
+            }
+        }
+
+        // Click listener
+        binding.addressLabel.setOnClickListener {
+            wallet?.let { wallet ->
+                ChooseAddressListDialogFragment.newInstance(
+                    wallet.walletConfig.id,
+                    false
+                ).show(childFragmentManager, null)
+            }
+        }
+
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            startRefreshWhenNecessary()
+            if (!TransactionListManager.isDownloading.value)
+                binding.swipeRefreshLayout.isRefreshing = false
+        }
+    }
+
+    private fun startRefreshWhenNecessary() {
+        viewModel.derivedAddress?.let {
+            val context = requireContext()
+            TransactionListManager.downloadTransactionListForAddress(
+                it.publicAddress,
+                ErgoApiService.getOrInit(Preferences(context)),
+                AppDatabase.getInstance(context)
+            )
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_transactions, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_open) {
+
+            openUrlWithBrowser(
+                binding.root.context,
+                getExplorerWebUrl() + "en/addresses/" + viewModel.derivedAddress!!.publicAddress
+            )
+
+            return true
+        } else
+            return super.onOptionsItemSelected(item)
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
@@ -61,13 +134,32 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
     }
 
     private fun refreshShownData() {
-        adapter.refresh()
+        val wallet = viewModel.walletLiveData.value
+        binding.fragmentTitle.text =
+            getString(R.string.title_transactions) + " " + (wallet?.walletConfig?.displayName ?: "")
+        binding.addressLabel.text =
+            viewModel.derivedAddress?.getAddressLabel(AndroidStringProvider(requireContext()))
+
+        // recreate adapter, no other way found for paging library to refresh completely
+        adapter = TransactionsAdapter()
+        binding.recyclerview.adapter = adapter
+        adapter.addLoadStateListener { loadState ->
+            val noItems = loadState.append.endOfPaginationReached && adapter.itemCount < 1
+            binding.transactionsEmpty.visibility = if (noItems) View.VISIBLE else View.GONE
+
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.getDataFlow(AppDatabase.getInstance(requireContext()).transactionDbProvider)
                 .collectLatest {
                     adapter.submitData(it)
                 }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        startRefreshWhenNecessary()
     }
 
     override fun onDestroyView() {
@@ -90,14 +182,14 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
             val item = getItem(position)
             // Note that item may be null. ViewHolder must support binding a
             // null item as a placeholder.
-            holder.bind(item)
+            holder.bind(item, position == itemCount - 1)
         }
     }
 
     inner class TransactionViewHolder(private val binding: FragmentAddressTransactionsItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: AddressTransactionWithTokens?) {
+        fun bind(item: AddressTransactionWithTokens?, isLast: Boolean) {
             item?.let {
                 binding.entryAddress.bindData(
                     LayoutInflater.from(binding.root.context),
@@ -109,6 +201,17 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
                         )
                     )
                 }
+                binding.buttonLoadAll.visibility = if (isLast) View.VISIBLE else View.GONE
+                binding.descLoadAll.visibility = binding.buttonLoadAll.visibility
+                if (isLast)
+                    binding.buttonLoadAll.setOnClickListener {
+                        val context = requireContext()
+                        TransactionListManager.startDownloadAllAddressTransactions(
+                            viewModel.derivedAddress!!.publicAddress,
+                            ErgoApiService.getOrInit(Preferences(context)),
+                            AppDatabase.getInstance(context)
+                        )
+                    }
             }
         }
     }

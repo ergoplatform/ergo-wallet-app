@@ -14,17 +14,20 @@ import org.ergoplatform.persistance.TransactionDbProvider
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 import org.ergoplatform.wallet.getDerivedAddress
+import org.ergoplatform.wallet.getDerivedAddressEntity
 
 class AddressTransactionViewModel : ViewModel() {
 
     private var wallet: Wallet? = null
     private val _wallet = MutableLiveData<Wallet?>()
-    val walletLiveData: LiveData<Wallet?> = _wallet
+    val walletLiveData: LiveData<Wallet?> get() = _wallet
 
     var derivationIdx = 0
 
+    val derivedAddress get() = wallet?.getDerivedAddressEntity(derivationIdx)
+
     fun init(walletId: Int, derivationIdx: Int, db: IAppDatabase) {
-        if (_wallet.value == null) {
+        if (wallet == null) {
             this.derivationIdx = derivationIdx
             viewModelScope.launch {
                 wallet = db.walletDbProvider.loadWalletWithStateById(walletId)

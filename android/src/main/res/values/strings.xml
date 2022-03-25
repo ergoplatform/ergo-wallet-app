@@ -21,6 +21,7 @@
     <string name="label_amount">Amount</string>
     <string name="label_purpose">Purpose</string>
     <string name="label_share">Share</string>
+    <string name="label_open">Open</string>
     <string name="button_delete">Delete</string>
     <string name="button_yes">Yes</string>
     <string name="label_cancel">Cancel</string>
@@ -134,6 +135,8 @@
     <string name="tx_state_submitted">Submitted</string>
     <string name="tx_state_low_confirmations">Executed</string>
     <string name="tx_state_high_confirmations">Confirmed</string>
+    <string name="transactions_load_all_desc">End of loaded transactions. Wallet App can load all your transactions since the beginning. This might take a long time.</string>
+    <string name="transactions_load_all_button">Load all transactions</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Addresses</string>

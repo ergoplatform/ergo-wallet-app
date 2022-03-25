@@ -15,13 +15,13 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/wallet_name"
-            style="@style/TextAppearance.App.Headline1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:id="@+id/fragment_title"
+            style="@style/TextAppearance.App.TitleBar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
             android:layout_marginHorizontal="50dp"
             android:ellipsize="end"
+            android:gravity="center"
             android:maxLines="1"
             tools:text="Transactions Wallet name (might be very long)" />
 
@@ -57,11 +57,26 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerview"
-            style="@style/width_match_parent_max_500"
-            android:layout_height="wrap_content"
-            tools:listitem="@layout/fragment_address_transactions_item" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerview"
+                style="@style/width_match_parent_max_500"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/fragment_address_transactions_item" />
+
+            <TextView
+                android:id="@+id/transactions_empty"
+                style="@style/TextAppearance.App.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:gravity="center"
+                android:text="@string/transactions_none_yet"
+                android:visibility="gone" />
+        </FrameLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>
