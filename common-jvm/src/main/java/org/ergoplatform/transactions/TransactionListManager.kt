@@ -15,7 +15,9 @@ import org.ergoplatform.utils.LogUtils
 import java.util.concurrent.ConcurrentLinkedQueue
 
 object TransactionListManager {
-    val isDownloading: MutableStateFlow<Boolean> = MutableStateFlow(false) // TODO use it
+    val isDownloading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val downloadProgress: MutableStateFlow<Int> = MutableStateFlow(0)
+    val downloadAddress: MutableStateFlow<String?> = MutableStateFlow(null)
 
     private val addressesToDownload = ConcurrentLinkedQueue<String>()
     private val lastAddressRefreshMs = HashMap<String, Long>()
@@ -35,17 +37,16 @@ object TransactionListManager {
     @OptIn(DelicateCoroutinesApi::class)
     private fun startProcessQueueIfNecessary(ergoApi: ErgoApi, db: IAppDatabase) {
         if (!(isDownloading.value)) {
-            isDownloading.value = true
+            setDownloadState(true)
             GlobalScope.launch(Dispatchers.IO) {
                 while (!addressesToDownload.isEmpty()) {
                     val address = addressesToDownload.peek()
                     if (!addressRecentlyRefreshed(address)) {
                         doDownloadTransactionList(address, ergoApi, db)
-                        lastAddressRefreshMs[address] = System.currentTimeMillis()
                     }
                     addressesToDownload.remove(address)
                 }
-                isDownloading.value = false
+                setDownloadState(false)
             }
         }
     }
@@ -57,11 +58,10 @@ object TransactionListManager {
         db: IAppDatabase
     ) {
         if (!(isDownloading.value)) {
-            isDownloading.value = true
+            setDownloadState(true)
             GlobalScope.launch(Dispatchers.IO) {
                 doDownloadTransactionList(address, ergoApi, db, true)
-                lastAddressRefreshMs[address] = System.currentTimeMillis()
-                isDownloading.value = false
+                setDownloadState(false)
             }
         }
     }
@@ -94,6 +94,7 @@ object TransactionListManager {
             var txLoaded = 0
             var page = 0
             val txPerPage = 20
+            downloadAddress.value = address
 
             // we also cancel for 500 loaded transactions, when not set to forced download
             while (heightToLoadFrom != null && heightSeen > heightToLoadFrom
@@ -116,6 +117,7 @@ object TransactionListManager {
                 val transactions = transactionsCall.body()!!.items
                 page++
                 txLoaded += transactions.size
+                downloadProgress.value = txLoaded
                 heightSeen = transactions.lastOrNull()?.inclusionHeight?.toLong() ?: 0L
 
                 mergeTransactionsWithExistingAndSaveToDb(
@@ -164,6 +166,8 @@ object TransactionListManager {
                 }
             }
 
+            // mark as downloaded so on attempt to redownload it again within the next few seconds
+            lastAddressRefreshMs[address] = System.currentTimeMillis()
         } catch (t: Throwable) {
             LogUtils.logDebug(
                 "TransactionListManager",
@@ -322,6 +326,12 @@ object TransactionListManager {
         }
 
         return securelyConfirmedTx
+    }
+
+    private fun setDownloadState(isDownloading: Boolean) {
+        downloadProgress.value = 0
+        this.isDownloading.value = isDownloading
+        downloadAddress.value = null
     }
 
     private fun addressRecentlyRefreshed(address: String) =

@@ -73,11 +73,29 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                TransactionListManager.isDownloading.collect { isDownloading ->
-                    if (isDownloading) binding.progressBar.show() else binding.progressBar.hide()
-                    if (!isDownloading) {
-                        binding.swipeRefreshLayout.isRefreshing = false
-                        refreshShownData()
+                launch {
+                    TransactionListManager.isDownloading.collect { isDownloading ->
+                        if (isDownloading) binding.progressBar.show() else binding.progressBar.hide()
+                        if (!isDownloading) {
+                            binding.swipeRefreshLayout.isRefreshing = false
+                            refreshShownData()
+                        }
+                    }
+                }
+                launch {
+                    TransactionListManager.downloadProgress.collect { progress ->
+                        val address = TransactionListManager.downloadAddress.value
+                        if (progress > 0 && address == viewModel.derivedAddress?.publicAddress) {
+                            binding.downloadProgress.visibility = View.VISIBLE
+                            binding.downloadProgress.text =
+                                getString(R.string.tx_download_progress, progress.toString())
+                            if (adapterFinishedLoading)
+                                refreshShownData()
+                            else
+                                adapter.refresh()
+                        } else {
+                            binding.downloadProgress.visibility = View.GONE
+                        }
                     }
                 }
             }
