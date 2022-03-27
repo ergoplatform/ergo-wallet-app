@@ -13,7 +13,7 @@ import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.millisecondsToLocalTime
 
 abstract class TransactionInfoUiLogic {
-    private val maxAddressesToShow = 500 // Mi Goreng and other airdrop fun...
+    private val maxAddressesToShow = 200 // Mi Goreng and other airdrop fun...
 
     abstract val coroutineScope: CoroutineScope
 
