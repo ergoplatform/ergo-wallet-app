@@ -11,6 +11,7 @@ interface ErgoApi {
     fun getTotalBalanceForAddress(publicAddress: String): Call<TotalBalance>
     fun getBoxInformation(boxId: String): Call<OutputInfo>
     fun getTokenInformation(tokenId: String): Call<TokenInfo>
+    fun getTransactionInformation(txId: String): Call<TransactionInfo>
     fun getMempoolTransactionsForAddress(
         publicAddress: String,
         limit: Int,
@@ -34,6 +35,9 @@ class ErgoApiService(val defaultApi: DefaultApi) : ErgoApi {
 
     override fun getTokenInformation(tokenId: String): Call<TokenInfo> =
         defaultApi.getApiV1TokensP1(tokenId)
+
+    override fun getTransactionInformation(txId: String): Call<TransactionInfo> =
+        defaultApi.getApiV1TransactionsP1(txId)
 
     override fun getMempoolTransactionsForAddress(
         publicAddress: String,

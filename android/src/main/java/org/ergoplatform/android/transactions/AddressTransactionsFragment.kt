@@ -179,7 +179,12 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
 
     override fun onResume() {
         super.onResume()
-        startRefreshWhenNecessary()
+
+        // reload, but only when at top to prevent refresh and scroll to top when user inspects
+        // history
+        if ((binding.recyclerview.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0) {
+            startRefreshWhenNecessary()
+        }
     }
 
     override fun onDestroyView() {
@@ -232,6 +237,13 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
                             AppDatabase.getInstance(context)
                         )
                     }
+                binding.entryAddress.layoutTransactionInfo.setOnClickListener {
+                    findNavController().navigateSafe(
+                        AddressTransactionsFragmentDirections.actionAddressTransactionsFragmentToTransactionInfoFragment(
+                            item.addressTransaction.txId
+                        )
+                    )
+                }
             }
         }
     }

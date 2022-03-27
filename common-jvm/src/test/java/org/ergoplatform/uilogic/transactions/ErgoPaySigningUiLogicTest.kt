@@ -248,6 +248,10 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                     error("Not implemented")
                 }
 
+                override fun getTransactionInformation(txId: String): Call<TransactionInfo> {
+                    error("Not implemented")
+                }
+
                 override fun getBoxInformation(boxId: String): Call<OutputInfo> {
                     return object : Call<OutputInfo> {
                         override fun clone(): Call<OutputInfo> {

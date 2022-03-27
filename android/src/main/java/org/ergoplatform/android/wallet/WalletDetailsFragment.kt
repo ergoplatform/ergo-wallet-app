@@ -34,6 +34,7 @@ import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.TransactionListManager
+import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 
 class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
@@ -61,6 +62,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
         walletDetailsViewModel.address.observe(viewLifecycleOwner) { onDataChanged() }
         walletDetailsViewModel.tokenInfo.observe(viewLifecycleOwner) { onTokenInfoChanged(it) }
+        currentlyShownTransactionList = null
 
         return binding.root
     }
@@ -288,6 +290,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         }
     }
 
+    private var currentlyShownTransactionList: List<AddressTransactionWithTokens>? = null
+
     private fun refreshShownTransactions() {
         val context = requireContext()
         viewLifecycleOwner.lifecycleScope.launch {
@@ -295,12 +299,21 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                 AppDatabase.getInstance(context).transactionDbProvider
             )
 
-            binding.transactionList.apply {
+            val listContentsChanged = currentlyShownTransactionList == null ||
+                    transactionList.size != currentlyShownTransactionList?.size ||
+                    transactionList.isNotEmpty() && List(transactionList.size) {
+                val newTx = transactionList[it].addressTransaction
+                val shownTx = currentlyShownTransactionList?.get(it)?.addressTransaction
+                newTx.txId != shownTx?.txId || newTx.state != shownTx.state
+            }.reduceRight { a, b -> a || b }
+
+            if (listContentsChanged) binding.transactionList.apply {
+                currentlyShownTransactionList = transactionList
                 removeAllViews()
                 visibility = View.GONE
                 transactionList.forEach { tx ->
                     visibility = View.VISIBLE
-                    inflateAddressTransactionEntry(
+                    val binding = inflateAddressTransactionEntry(
                         layoutInflater,
                         this,
                         tx,
@@ -311,6 +324,13 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                                 )
                             )
                         })
+                    binding.layoutTransactionInfo.setOnClickListener {
+                        findNavController().navigateSafe(
+                            WalletDetailsFragmentDirections.actionNavigationWalletDetailsToTransactionInfoFragment(
+                                tx.addressTransaction.txId
+                            )
+                        )
+                    }
                 }
 
                 binding.transactionsEmpty.visibility =

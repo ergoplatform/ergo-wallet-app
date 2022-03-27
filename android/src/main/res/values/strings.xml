@@ -139,6 +139,14 @@
     <string name="transactions_load_all_desc">End of downloaded transactions. Wallet App can reload all your transactions. This may take a long time.</string>
     <string name="transactions_load_all_button">Load all transactions</string>
 
+    <!-- Transaction information -->
+    <string name="title_transaction">Transaction</string>
+    <string name="title_transaction_inboxes">Amounts spent</string>
+    <string name="desc_transaction_inboxes">These amounts were spent by this transaction.</string>
+    <string name="desc_transaction_outboxes">These amounts were sent by this transaction.</string>
+    <string name="desc_transaction_waiting">Waiting for execution</string>
+    <string name="desc_transaction_execution_time">Executed at %1s</string>
+
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Addresses</string>
     <string name="title_wallet_address">Show content for</string>

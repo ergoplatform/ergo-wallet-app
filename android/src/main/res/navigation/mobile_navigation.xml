@@ -103,6 +103,13 @@
             app:exitAnim="@anim/slide_out_to_left"
             app:popEnterAnim="@anim/slide_in_from_left"
             app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_navigation_wallet_details_to_transactionInfoFragment"
+            app:destination="@id/transactionInfoFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
 
     <fragment
@@ -367,5 +374,28 @@
             app:exitAnim="@anim/slide_out_to_left"
             app:popEnterAnim="@anim/slide_in_from_left"
             app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_addressTransactionsFragment_to_transactionInfoFragment"
+            app:destination="@id/transactionInfoFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/transactionInfoFragment"
+        android:name="org.ergoplatform.android.transactions.TransactionInfoFragment"
+        android:label="TransactionInfoFragment"
+        tools:layout="@layout/fragment_transaction_info">
+        <action
+            android:id="@+id/action_transactionInfoFragment_to_tokenInformationDialogFragment"
+            app:destination="@id/tokenInformationDialogFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
+        <argument
+            android:name="txId"
+            app:argType="string" />
     </fragment>
 </navigation>

@@ -22,6 +22,15 @@ fun CardTransactionInfoBinding.bindTransactionInfo(
     ti: TransactionInfo,
     tokenClickListener: ((String) -> Unit)?,
     layoutInflater: LayoutInflater
+) =
+    bindTransactionInfo(ti, layoutInboxes, layoutOutboxes, tokenClickListener, layoutInflater)
+
+fun bindTransactionInfo(
+    ti: TransactionInfo,
+    layoutInboxes: ViewGroup,
+    layoutOutboxes: ViewGroup,
+    tokenClickListener: ((String) -> Unit)?,
+    layoutInflater: LayoutInflater
 ) {
     layoutInboxes.apply {
         removeAllViews()
@@ -100,8 +109,9 @@ fun inflateAddressTransactionEntry(
     parent: ViewGroup,
     tx: AddressTransactionWithTokens,
     tokenClickListener: ((String) -> Unit)?
-) = EntryAddressTransactionBinding.inflate(layoutInflater, parent, true)
-    .bindData(layoutInflater, tx, tokenClickListener)
+) = EntryAddressTransactionBinding.inflate(layoutInflater, parent, true).apply {
+    bindData(layoutInflater, tx, tokenClickListener)
+}
 
 fun EntryAddressTransactionBinding.bindData(
     layoutInflater: LayoutInflater,

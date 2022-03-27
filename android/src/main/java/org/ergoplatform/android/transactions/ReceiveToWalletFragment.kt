@@ -16,6 +16,7 @@ import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.copyStringToClipboard
 import org.ergoplatform.android.ui.setQrCodeToImageView
+import org.ergoplatform.android.ui.shareText
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.uilogic.wallet.ReceiveToWalletUiLogic
@@ -103,16 +104,7 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_share) {
 
-            getTextToShare()?.let {
-                val sendIntent: Intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, it)
-                    type = "text/plain"
-                }
-
-                val shareIntent = Intent.createChooser(sendIntent, null)
-                startActivity(shareIntent)
-            }
+            getTextToShare()?.let { shareText(it) }
 
             return true
         } else
