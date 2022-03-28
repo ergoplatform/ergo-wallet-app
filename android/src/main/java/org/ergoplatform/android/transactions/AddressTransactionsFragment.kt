@@ -38,7 +38,7 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
 
     private val args: AddressTransactionsFragmentArgs by navArgs()
     private val viewModel: AddressTransactionViewModel by viewModels()
-    private var adapter = TransactionsAdapter()
+    private var adapter: TransactionsAdapter? = null
     private var adapterFinishedLoading = false
 
     private var wallet: Wallet? = null
@@ -89,10 +89,7 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
                             binding.downloadProgress.visibility = View.VISIBLE
                             binding.downloadProgress.text =
                                 getString(R.string.tx_download_progress, progress.toString())
-                            if (adapterFinishedLoading)
-                                refreshShownData()
-                            else
-                                adapter.refresh()
+                            refreshShownData()
                         } else {
                             binding.downloadProgress.visibility = View.GONE
                         }
@@ -149,31 +146,38 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
         viewModel.derivationIdx = addressDerivationIdx!!
-        refreshShownData()
+        startRefreshWhenNecessary()
+        refreshShownData(true)
     }
 
-    private fun refreshShownData() {
+    private fun refreshShownData(forceReload: Boolean = false) {
         val wallet = viewModel.walletLiveData.value
         binding.fragmentTitle.text =
             getString(R.string.title_transactions) + " " + (wallet?.walletConfig?.displayName ?: "")
         binding.addressLabel.text =
             viewModel.derivedAddress?.getAddressLabel(AndroidStringProvider(requireContext()))
 
-        // recreate adapter, no other way found for paging library to refresh completely
-        adapter = TransactionsAdapter()
-        binding.recyclerview.adapter = adapter
-        adapter.addLoadStateListener { loadState ->
-            adapterFinishedLoading = loadState.append.endOfPaginationReached
-            val noItems = loadState.append.endOfPaginationReached && adapter.itemCount < 1
-            binding.transactionsEmpty.visibility = if (noItems) View.VISIBLE else View.GONE
+        if (forceReload || adapter == null || isRecyclerViewAtTop()) {
+            // recreate adapter, no other way found for paging library to refresh completely
+            val adapter = TransactionsAdapter()
+            this.adapter = adapter
 
-        }
+            binding.recyclerview.adapter = adapter
+            adapter.addLoadStateListener { loadState ->
+                adapterFinishedLoading = loadState.append.endOfPaginationReached
+                val noItems = loadState.append.endOfPaginationReached && adapter.itemCount < 1
+                binding.transactionsEmpty.visibility = if (noItems) View.VISIBLE else View.GONE
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.getDataFlow(AppDatabase.getInstance(requireContext()).transactionDbProvider)
-                .collectLatest {
-                    adapter.submitData(it)
-                }
+            }
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.getDataFlow(AppDatabase.getInstance(requireContext()).transactionDbProvider)
+                    .collectLatest {
+                        adapter.submitData(it)
+                    }
+            }
+        } else {
+            adapter?.refresh()
         }
     }
 
@@ -182,10 +186,13 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
 
         // reload, but only when at top to prevent refresh and scroll to top when user inspects
         // history
-        if ((binding.recyclerview.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0) {
+        if (isRecyclerViewAtTop()) {
             startRefreshWhenNecessary()
         }
     }
+
+    private fun isRecyclerViewAtTop() =
+        (binding.recyclerview.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() <= 0
 
     override fun onDestroyView() {
         super.onDestroyView()

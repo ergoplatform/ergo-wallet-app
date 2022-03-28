@@ -17,7 +17,6 @@
         android:ellipsize="end"
         android:gravity="end"
         android:maxLines="1"
-        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/label_transaction_state"
         app:layout_constraintTop_toTopOf="parent"

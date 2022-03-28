@@ -13,6 +13,7 @@ import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.persistance.*
 import org.ergoplatform.utils.LogUtils
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.math.max
 
 object TransactionListManager {
     val isDownloading: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -90,7 +91,10 @@ object TransactionListManager {
                 latestSecurelyConfirmedTx?.inclusionHeight
             }
 
+            // lowest block height we've downloaded
             var heightSeen = Long.MAX_VALUE
+            // highest block height we've seen an executed tx
+            var highestExecuted = (heightToLoadFrom ?: 0)
             var txLoaded = 0
             var page = 0
             val txPerPage = 20
@@ -119,6 +123,11 @@ object TransactionListManager {
                 txLoaded += transactions.size
                 downloadProgress.value = txLoaded
                 heightSeen = transactions.lastOrNull()?.inclusionHeight?.toLong() ?: 0L
+                highestExecuted =
+                    max(
+                        highestExecuted,
+                        transactions.firstOrNull()?.inclusionHeight?.toLong() ?: 0L
+                    )
 
                 mergeTransactionsWithExistingAndSaveToDb(
                     address,
@@ -156,7 +165,8 @@ object TransactionListManager {
             notSecurelyConfirmedTransactions.values.forEach { unseenTransaction ->
                 if (unseenTransaction.timestamp < System.currentTimeMillis() - 10L * 60 * 1000L) {
                     val newInclusionHeight =
-                        if (unseenTransaction.inclusionHeight == INCLUSION_HEIGHT_NOT_INCLUDED) heightToLoadFrom else unseenTransaction.inclusionHeight
+                        if (unseenTransaction.inclusionHeight == INCLUSION_HEIGHT_NOT_INCLUDED) highestExecuted + 1
+                        else unseenTransaction.inclusionHeight
                     db.transactionDbProvider.insertOrUpdateAddressTransaction(
                         unseenTransaction.copy(
                             state = TX_STATE_CANCELLED,
