@@ -3,20 +3,19 @@ package org.ergoplatform.ios.wallet
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.ergoplatform.ErgoApiService
 import org.ergoplatform.WalletStateSyncManager
-import org.ergoplatform.getExplorerWebUrl
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.tokens.WalletDetailsTokenEntryView
-import org.ergoplatform.ios.transactions.ColdWalletSigningViewController
-import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
-import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
-import org.ergoplatform.ios.transactions.SendFundsViewController
+import org.ergoplatform.ios.transactions.*
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.ios.wallet.addresses.WalletAddressesViewController
 import org.ergoplatform.persistance.TokenInformation
+import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 import org.ergoplatform.uilogic.wallet.WalletDetailsUiLogic
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
@@ -32,7 +31,9 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     private lateinit var addressContainer: AddressContainer
     private lateinit var balanceContainer: ErgoBalanceContainer
     private lateinit var tokenContainer: TokenListContainer
+    private lateinit var transactionsContainer: TransactionsContainer
     private lateinit var tokenSeparator: UIView
+    private lateinit var progressIndicator: UIActivityIndicatorView
 
     private val uiLogic = IosDetailsUiLogic()
     private var newDataLoaded: Boolean = false
@@ -57,7 +58,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         balanceContainer = ErgoBalanceContainer()
         tokenContainer = TokenListContainer()
         tokenSeparator = createHorizontalSeparator()
-        val transactionsContainer = TransactionsContainer()
+        transactionsContainer = TransactionsContainer()
 
         val ownContainer = UIStackView(
             NSArray(
@@ -76,6 +77,9 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         val scrollView = ownContainer.wrapInVerticalScrollView()
         view.addSubview(scrollView)
         scrollView.edgesToSuperview(maxWidth = MAX_WIDTH)
+        progressIndicator = UIActivityIndicatorView(UIActivityIndicatorViewStyle.Medium)
+        view.addSubview(progressIndicator)
+        progressIndicator.topToSuperview().leftToSuperview(true)
 
         val uiRefreshControl = UIRefreshControl()
         scrollView.refreshControl = uiRefreshControl
@@ -104,18 +108,45 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                         getAppDelegate().database.tokenDbProvider
                     )
                 }
+                updateRefreshState()
+            }
+        }
+        viewControllerScope.launch {
+            TransactionListManager.isDownloading.collect { downloading ->
+                updateRefreshState()
+                if (!downloading)
+                    runOnMainThread {
+                        transactionsContainer.refresh()
+                    }
             }
         }
         uiLogic.setUpWalletStateFlowCollector(getAppDelegate().database, walletId)
-        onResume()
     }
 
-    override fun onResume() {
+    private fun startRefreshWhenNeeded() {
         val appDelegate = getAppDelegate()
         uiLogic.refreshWhenNeeded(appDelegate.prefs, appDelegate.database)
     }
 
+    private fun updateRefreshState() {
+        runOnMainThread {
+            val isRefreshing = WalletStateSyncManager.getInstance().isRefreshing.value
+                    || TransactionListManager.isDownloading.value
+            progressIndicator.isHidden = !isRefreshing
+            if (isRefreshing)
+                progressIndicator.startAnimating()
+            else
+                progressIndicator.stopAnimating()
+        }
+    }
+
+    override fun onResume() {
+        startRefreshWhenNeeded()
+    }
+
     private fun refreshDataFromBackgroundThread() {
+        startRefreshWhenNeeded() // calls first refresh when navigating to this screen
+
         newDataLoaded = true
         runOnMainThread {
             // usually, config changes are triggered by changes made on other screens (e.g. addresses list)
@@ -145,6 +176,8 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 tokenContainer.refresh()
                 tokenSeparator.isHidden = tokenContainer.isHidden
             }
+
+        transactionsContainer.refresh()
     }
 
     inner class AddressContainer : UIView(CGRect.Zero()) {
@@ -437,11 +470,15 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     }
 
     inner class TransactionsContainer : CardView() {
+        private var shownTransactions: List<AddressTransactionWithTokens>? = null
+
+        private val transactionStack = UIStackView(CGRect.Zero())
+
         init {
             val transactionsImage =
                 UIImageView(getIosSystemImage(IMAGE_TRANSACTIONS, UIImageSymbolScale.Medium)).apply {
                     tintColor = UIColor.secondaryLabel()
-                    contentMode = UIViewContentMode.Center
+                    contentMode = UIViewContentMode.ScaleAspectFit
                     fixedWidth(WIDTH_ICONS)
                 }
             val transactionsTitle = Body1BoldLabel().apply {
@@ -449,29 +486,60 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 textColor = uiColorErgo
             }
 
-            val transactionsDesc = Body1Label().apply {
-                text = texts.get(STRING_TRANSACTIONS_VIEW_MORE)
-            }
-
             contentView.apply {
                 addSubview(transactionsImage)
                 addSubview(transactionsTitle)
-                addSubview(transactionsDesc)
+                addSubview(transactionStack)
             }
 
             transactionsImage.leftToSuperview(inset = DEFAULT_MARGIN).topToSuperview(topInset = DEFAULT_MARGIN)
-            transactionsTitle.leftToRightOf(transactionsImage, DEFAULT_MARGIN * 2).topToTopOf(transactionsImage)
+            transactionsTitle.leftToRightOf(transactionsImage, DEFAULT_MARGIN * 2).centerVerticallyTo(transactionsImage)
                 .rightToSuperview(inset = DEFAULT_MARGIN)
-            transactionsDesc.leftToLeftOf(transactionsTitle).rightToSuperview(inset = DEFAULT_MARGIN)
-                .bottomToSuperview(bottomInset = DEFAULT_MARGIN).topToBottomOf(transactionsTitle, DEFAULT_MARGIN)
+            transactionStack.apply {
+                axis = UILayoutConstraintAxis.Vertical
+                leftToSuperview().rightToSuperview().topToBottomOf(transactionsImage, inset = DEFAULT_MARGIN)
+                    .bottomToSuperview()
+            }
 
             isUserInteractionEnabled = true
             addGestureRecognizer(UITapGestureRecognizer {
-                openUrlInBrowser(
-                    getExplorerWebUrl() + "en/addresses/" +
-                            (uiLogic.walletAddress?.publicAddress ?: uiLogic.wallet!!.walletConfig.firstAddress)
-                )
+                // TODO open transaction list
             })
+        }
+
+        fun refresh() {
+            val transactions = runBlocking {
+                uiLogic.loadTransactionsToShow(getAppDelegate().database.transactionDbProvider)
+            }
+            if (uiLogic.hasChangedNewTxList(transactions, shownTransactions)) {
+                shownTransactions = transactions
+
+                transactionStack.clearArrangedSubviews()
+                transactions.forEach { txInfo ->
+                    transactionStack.addArrangedSubview(createHorizontalSeparator())
+                    val txEntryView = TransactionEntryView()
+                    txEntryView.bind(txInfo, tokenClickListener = { tokenId ->
+                        presentViewController(TokenInformationViewController(tokenId, null), true) {}
+                    }, texts)
+                    transactionStack.addArrangedSubview(txEntryView)
+                }
+
+                // empty view
+                if (transactions.isEmpty()) {
+                    transactionStack.addArrangedSubview(Body1Label().apply {
+                        text = texts.get(STRING_TRANSACTIONS_NONE_YET)
+                        textAlignment = NSTextAlignment.Center
+                    })
+                }
+
+                // more view
+                if (transactions.size == uiLogic.maxTransactionsToShow) {
+                    val moreButton = TextButton(texts.get(STRING_TRANSACTIONS_VIEW_MORE))
+                    transactionStack.addArrangedSubview(createHorizontalSeparator())
+                    transactionStack.addArrangedSubview(moreButton)
+                    // TODO open transactions list
+                }
+            }
         }
     }
 

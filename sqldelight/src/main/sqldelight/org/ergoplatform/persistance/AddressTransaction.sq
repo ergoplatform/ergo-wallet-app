@@ -14,7 +14,7 @@ CREATE INDEX IF NOT EXISTS `index_address_transaction_address_inclusion_height` 
 insertOrReplace:
 INSERT OR REPLACE INTO `address_transaction` (
     `id`, `address`, `tx_id`, `inclusion_height`, `timestamp`, `nanoerg`, `message`, `state`
-) VALUES ?;
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 loadAddressTransactions:
 SELECT * FROM `address_transaction` WHERE address = ? LIMIT :limit OFFSET :offset;

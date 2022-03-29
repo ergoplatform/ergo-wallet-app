@@ -65,6 +65,7 @@ abstract class WalletAddressesUiLogic {
                 val indices = sortedAddresses.map { it.derivationIndex }.toMutableList()
 
                 notifyUiLocked(true)
+                // FIXME iOS Simulator gets stuck here, removing withTransaction helps
                 database.withTransaction {
                     for (i in 1..number) {
                         while (indices.contains(nextIdx)) {

@@ -8,7 +8,17 @@ class SqlDelightTransactionDbProvider(private val appDatabase: AppDatabase) :
 
     override suspend fun insertOrUpdateAddressTransaction(addressTransaction: AddressTransaction) {
         withContext(Dispatchers.IO) {
-            appDatabase.addressTransactionQueries.insertOrReplace(addressTransaction.toDbEntity())
+            val tx = addressTransaction.toDbEntity()
+            appDatabase.addressTransactionQueries.insertOrReplace(
+                if (tx.id > 0) tx.id else null,
+                tx.address,
+                tx.tx_id,
+                tx.inclusion_height,
+                tx.timestamp,
+                tx.nanoerg,
+                tx.message,
+                tx.state
+            )
         }
     }
 
@@ -48,7 +58,16 @@ class SqlDelightTransactionDbProvider(private val appDatabase: AppDatabase) :
 
     override suspend fun insertOrUpdateAddressTransactionToken(addressTxToken: AddressTransactionToken) {
         withContext(Dispatchers.IO) {
-            appDatabase.addressTransactionTokenQueries.insertOrReplace(addressTxToken.toDbEntity())
+            val txToken = addressTxToken.toDbEntity()
+            appDatabase.addressTransactionTokenQueries.insertOrReplace(
+                if (txToken.id > 0) txToken.id else null,
+                txToken.address,
+                txToken.tx_id,
+                txToken.token_id,
+                txToken.name,
+                txToken.amount,
+                txToken.decimals
+            )
         }
     }
 

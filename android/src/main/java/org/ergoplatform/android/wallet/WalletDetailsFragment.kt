@@ -295,17 +295,12 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     private fun refreshShownTransactions() {
         val context = requireContext()
         viewLifecycleOwner.lifecycleScope.launch {
-            val transactionList = walletDetailsViewModel.uiLogic.loadTransactionsToShow(
+            val uiLogic = walletDetailsViewModel.uiLogic
+            val transactionList = uiLogic.loadTransactionsToShow(
                 AppDatabase.getInstance(context).transactionDbProvider
             )
 
-            val listContentsChanged = currentlyShownTransactionList == null ||
-                    transactionList.size != currentlyShownTransactionList?.size ||
-                    transactionList.isNotEmpty() && List(transactionList.size) {
-                val newTx = transactionList[it].addressTransaction
-                val shownTx = currentlyShownTransactionList?.get(it)?.addressTransaction
-                newTx.txId != shownTx?.txId || newTx.state != shownTx.state
-            }.reduceRight { a, b -> a || b }
+            val listContentsChanged = uiLogic.hasChangedNewTxList(transactionList, currentlyShownTransactionList)
 
             if (listContentsChanged) binding.transactionList.apply {
                 currentlyShownTransactionList = transactionList

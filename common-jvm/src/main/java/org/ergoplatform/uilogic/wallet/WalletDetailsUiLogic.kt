@@ -197,9 +197,21 @@ abstract class WalletDetailsUiLogic {
                     transactionDbProvider.loadAddressTransactionsWithTokens(address, maxTransactionsToShow, 0)
                 )
             }
-            returnedTransactions.sortedByDescending { it.addressTransaction.inclusionHeight }.take(maxTransactionsToShow)
+            returnedTransactions.sortedByDescending { it.addressTransaction.inclusionHeight }
+                .take(maxTransactionsToShow)
         }
     }
+
+    fun hasChangedNewTxList(
+        newTransactionList: List<AddressTransactionWithTokens>,
+        otherTxList: List<AddressTransactionWithTokens>?
+    ) = otherTxList == null ||
+            newTransactionList.size != otherTxList.size ||
+            newTransactionList.isNotEmpty() && List(newTransactionList.size) {
+        val newTx = newTransactionList[it].addressTransaction
+        val shownTx = otherTxList[it].addressTransaction
+        newTx.txId != shownTx.txId || newTx.state != shownTx.state
+    }.reduceRight { a, b -> a || b }
 
     private fun getSelectedAddresses(): List<WalletAddress>? {
         return walletAddress?.let { listOf(it) } ?: wallet?.getSortedDerivedAddressesList()
