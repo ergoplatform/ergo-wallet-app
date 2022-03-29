@@ -220,7 +220,7 @@
     <string name="about_year" translatable="false">2022</string>
     <string name="desc_about_moreinfo">Licensed under <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Apache 2 License</a>\n
         This project is <a href="https://github.com/ergoplatform/ergo-wallet-app">open source software</a>\n
-    Find help on <a href="https://discord.gg/kj7s7nb">Discord</a> or <a href="https://t.me/ergosupport">Telegram</a></string>
+    Find help on <a href="https://discord.gg/kj7s7nb">Discord</a> or <a href="https://t.me/ErgoWalletApp">Telegram</a></string>
     <string name="desc_coingecko">Ergo price powered by <a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a></string>
     <string name="label_cg_conn_error">Error connecting to CoinGecko, please try again later.</string>
     <string name="desc_dark_mode">Dark or light mode?</string>
