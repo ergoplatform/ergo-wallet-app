@@ -137,7 +137,7 @@ abstract class SubmitTransactionUiLogic {
                 txInfoToSave?.let {
                     getSigningDerivedAddresses().forEach { address ->
                         TransactionListManager.convertAndSaveTransactionInfoToDb(
-                            txInfoToSave.reduceBoxes(),
+                            txInfoToSave,
                             address,
                             System.currentTimeMillis(),
                             INCLUSION_HEIGHT_NOT_INCLUDED,

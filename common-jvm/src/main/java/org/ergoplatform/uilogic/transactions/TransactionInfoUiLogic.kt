@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoApi
 import org.ergoplatform.transactions.TransactionInfo
+import org.ergoplatform.transactions.getAttachmentText
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.STRING_DESC_TRANSACTION_EXECUTION_TIME
 import org.ergoplatform.uilogic.STRING_DESC_TRANSACTION_WAITING
@@ -60,7 +61,10 @@ abstract class TransactionInfoUiLogic {
         }
     }
 
-    val transactionPurpose: String? get() = null // TODO parse EIP-29
+    /**
+     * get transaction purpose by extracting attachment of first output
+     */
+    val transactionPurpose: String? get() = explorerTxInfo?.outputs?.firstOrNull()?.getAttachmentText()
 
     fun getTransactionExecutionState(stringProvider: StringProvider): String =
         if (explorerTxInfo?.inclusionHeight != null)

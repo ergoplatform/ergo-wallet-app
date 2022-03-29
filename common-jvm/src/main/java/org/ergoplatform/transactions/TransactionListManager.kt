@@ -232,15 +232,14 @@ object TransactionListManager {
             } ?: run {
                 // convert new transaction into db entities and save
 
-                // first reduce the input and out information for the new transaction and hide the utxo complexities
-                val reducedTxInfo = TransactionInfo(
+                val txInfo = TransactionInfo(
                     newTransaction.id,
                     newTransaction.inputs,
                     newTransaction.outputs
-                ).reduceBoxes()
+                )
 
                 convertAndSaveTransactionInfoToDb(
-                    reducedTxInfo,
+                    txInfo,
                     address,
                     if (newConfirmed) newTransaction.timestamp else (existingTransaction?.timestamp
                         ?: System.currentTimeMillis()),
@@ -253,13 +252,15 @@ object TransactionListManager {
     }
 
     suspend fun convertAndSaveTransactionInfoToDb(
-        reducedTxInfo: org.ergoplatform.transactions.TransactionInfo,
+        txInfo: org.ergoplatform.transactions.TransactionInfo,
         address: String,
         timestamp: Long,
         newInclusionHeight: Long,
         newState: Int,
         db: TransactionDbProvider
     ) {
+        val reducedTxInfo = txInfo.reduceBoxes()
+
         // we now have only relevant inputs and outputs and can filter for our address
         val addressInput = reducedTxInfo.inputs.firstOrNull { it.address.equals(address) }
         val addressOutput =
@@ -267,6 +268,8 @@ object TransactionListManager {
 
         if (addressInput != null || addressOutput != null) {
             val ergAmount = ErgoAmount((addressOutput?.value ?: 0) - (addressInput?.value ?: 0))
+            val firstTextAttachmentToAddress = txInfo.outputs.firstOrNull { it.address.equals(address) }?.getAttachmentText()
+                ?: txInfo.outputs.firstOrNull()?.getAttachmentText()
             LogUtils.logDebug(this.javaClass.simpleName, "Saving ${reducedTxInfo.id} for $address")
             val newAddressTx = AddressTransaction(
                 0,
@@ -275,7 +278,7 @@ object TransactionListManager {
                 newInclusionHeight,
                 timestamp,
                 ergAmount,
-                null, // TODO parse EIP-29 message
+                firstTextAttachmentToAddress,
                 newState
             )
 

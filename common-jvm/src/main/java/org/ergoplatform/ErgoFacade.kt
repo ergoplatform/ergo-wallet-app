@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.*
-import org.ergoplatform.appkit.impl.ExplorerAndPoolUnspentBoxesLoader
+import org.ergoplatform.appkit.ExplorerAndPoolUnspentBoxesLoader
 import org.ergoplatform.appkit.impl.InputBoxImpl
 import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.persistance.PreferencesProvider
@@ -324,6 +324,6 @@ fun getErgoNetworkType() = if (isErgoMainNet) NetworkType.MAINNET else NetworkTy
 fun deserializeErgobox(input: ByteArray): InputBox? {
     val r = `SigmaSerializer$`.`MODULE$`.startReader(input, 0)
     val ergoBox = `ErgoBoxSerializer$`.`MODULE$`.parse(r)
-    return ergoBox?.let { InputBoxImpl(null, it) }
+    return ergoBox?.let { InputBoxImpl(it) }
 }
 
