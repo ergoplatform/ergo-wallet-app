@@ -170,7 +170,7 @@ object TransactionListManager {
                     db.transactionDbProvider.insertOrUpdateAddressTransaction(
                         unseenTransaction.copy(
                             state = TX_STATE_CANCELLED,
-                            inclusionHeight = newInclusionHeight ?: 0
+                            inclusionHeight = newInclusionHeight
                         )
                     )
                 }
@@ -195,14 +195,17 @@ object TransactionListManager {
         newConfirmed: Boolean
     ) {
         newTransactions.forEach { newTransaction ->
-            val existingTransaction = existingTransactions[newTransaction.id]
+            val existingTransaction = existingTransactions.remove(newTransaction.id)
 
             val newState =
                 if (!newConfirmed) TX_STATE_WAITING else if (newTransaction.numConfirmations < CONFIRMATIONS_NUM_SECURE) TX_STATE_CONFIRMED_UNSECURE else TX_STATE_CONFIRMED_SECURE
             val newInclusionHeight =
                 if (newConfirmed) newTransaction.inclusionHeight.toLong() else INCLUSION_HEIGHT_NOT_INCLUDED
 
-            val transactionToMerge = if (existingTransaction?.state == TX_STATE_SUBMITTED) {
+            val transactionToMerge = if (
+                existingTransaction?.state == TX_STATE_SUBMITTED ||
+                existingTransaction?.state == TX_STATE_CANCELLED
+            ) {
                 // if we found a transaction that was submitted, we don't merge the information as it
                 // could be incomplete (transactions in state submitted were built by the app itself)
                 // instead, we delete the records and build new ones from scratch
@@ -211,7 +214,6 @@ object TransactionListManager {
             } else existingTransaction
 
             transactionToMerge?.let {
-                existingTransactions.remove(transactionToMerge.txId)
                 val mergedTransaction = if (newConfirmed) {
                     // if the transaction is confirmed, use timestamp from its including block
                     transactionToMerge.copy(
@@ -241,7 +243,7 @@ object TransactionListManager {
                     reducedTxInfo,
                     address,
                     if (newConfirmed) newTransaction.timestamp else (existingTransaction?.timestamp
-                        ?: 0),
+                        ?: System.currentTimeMillis()),
                     newInclusionHeight,
                     newState,
                     db.transactionDbProvider

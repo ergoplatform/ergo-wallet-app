@@ -130,7 +130,7 @@
     <string name="transactions_none_yet">There are no transactions made for this address yet.</string>
 
     <!-- Transaction list -->
-    <string name="tx_state_waiting">Waiting</string>
+    <string name="tx_state_waiting">Pending</string>
     <string name="tx_state_cancelled">Cancelled</string>
     <string name="tx_state_submitted">Submitted</string>
     <string name="tx_state_low_confirmations">Executed</string>
