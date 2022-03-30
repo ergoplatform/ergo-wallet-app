@@ -486,7 +486,10 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
 
             isUserInteractionEnabled = true
             addGestureRecognizer(UITapGestureRecognizer {
-                // TODO open transaction list
+                navigationController.pushViewController(
+                    AddressTransactionsViewController(walletId, uiLogic.addressIdx ?: 0),
+                    true
+                )
             })
         }
 
@@ -517,10 +520,18 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
 
                 // more view
                 if (transactions.size == uiLogic.maxTransactionsToShow) {
-                    val moreButton = TextButton(texts.get(STRING_TRANSACTIONS_VIEW_MORE))
-                    transactionStack.addArrangedSubview(createHorizontalSeparator())
+                    val moreButton = object : ThemedLabel() {
+                        override fun getFontSize() = FONT_SIZE_TEXTBUTTON
+                        override fun isBold() = true
+                    }.apply {
+                        text = texts.get(STRING_TRANSACTIONS_VIEW_MORE)
+                        textAlignment = NSTextAlignment.Center
+                        textColor = uiColorErgo
+                    }
+                    val lastSeperator = createHorizontalSeparator()
+                    transactionStack.addArrangedSubview(lastSeperator)
                     transactionStack.addArrangedSubview(moreButton)
-                    // TODO open transactions list
+                    transactionStack.setCustomSpacing(DEFAULT_MARGIN, lastSeperator)
                 }
             }
         }

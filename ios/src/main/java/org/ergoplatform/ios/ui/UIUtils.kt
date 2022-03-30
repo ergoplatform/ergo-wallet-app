@@ -74,6 +74,10 @@ fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(
 @Suppress("DEPRECATION")
 fun openUrlInBrowser(url: String) = UIApplication.getSharedApplication().openURL(NSURL(url))
 
+fun UIViewController.shareText(text: String, uiBarButtonItem: UIBarButtonItem) {
+    shareText(text, uiBarButtonItem.keyValueCoder.getValue("view") as UIView)
+}
+
 fun UIViewController.shareText(text: String, sourceView: UIView) {
     val textShare = NSString(text)
     val texttoshare = NSArray(textShare)
@@ -163,6 +167,7 @@ fun buildAddressSelectorView(
     vc: UIViewController,
     walletId: Int,
     showAllAddresses: Boolean,
+    keepWidth: Boolean = false,
     addressChosen: (Int?) -> Unit
 ): TrailingImageView<UILabel> {
     val addressNameLabel = Body1BoldLabel().apply {
@@ -171,7 +176,8 @@ fun buildAddressSelectorView(
     }
     @Suppress("UNCHECKED_CAST")
     return addressNameLabel.wrapWithTrailingImage(
-        getIosSystemImage(IMAGE_OPEN_LIST, UIImageSymbolScale.Small, 20.0)!!
+        getIosSystemImage(IMAGE_OPEN_LIST, UIImageSymbolScale.Small, 20.0)!!,
+        keepWidth = keepWidth
     ).apply {
         isUserInteractionEnabled = true
         addGestureRecognizer(UITapGestureRecognizer {

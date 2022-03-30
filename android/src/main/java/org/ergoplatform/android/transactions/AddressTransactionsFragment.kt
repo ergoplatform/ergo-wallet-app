@@ -26,7 +26,7 @@ import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
-import org.ergoplatform.getExplorerWebUrl
+import org.ergoplatform.getExplorerAddressUrl
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
@@ -136,7 +136,7 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
 
             openUrlWithBrowser(
                 binding.root.context,
-                getExplorerWebUrl() + "en/addresses/" + viewModel.derivedAddress!!.publicAddress
+                getExplorerAddressUrl(viewModel.derivedAddress!!.publicAddress)
             )
 
             true

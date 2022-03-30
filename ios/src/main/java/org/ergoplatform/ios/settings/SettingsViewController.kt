@@ -191,7 +191,7 @@ class SettingsViewController : CoroutineViewController() {
                 uiBarButtonItem.setOnClickListener {
                     shareText(
                         lastCrashInformation,
-                        uiBarButtonItem.keyValueCoder.getValue("view") as UIView
+                        uiBarButtonItem
                     )
                 }
                 navigationItem.rightBarButtonItem = uiBarButtonItem

@@ -43,7 +43,7 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
             uiLogic.getTextToShare(getInputAmount(), getInputPurpose())?.let {
                 this@ReceiveToWalletViewController.shareText(
                     it,
-                    uiBarButtonItem.keyValueCoder.getValue("view") as UIView
+                    uiBarButtonItem
                 )
             }
         }
