@@ -10,7 +10,6 @@ import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.tokens.WalletDetailsTokenEntryView
 import org.ergoplatform.ios.transactions.*
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.ios.wallet.addresses.WalletAddressesViewController
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.transactions.TransactionListManager
@@ -181,7 +180,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
     }
 
     inner class AddressContainer : UIView(CGRect.Zero()) {
-        private val addressNameLabel = Body1BoldLabel()
+        private val addressNameLabel: UILabel
 
         init {
             val addressImage = UIImageView(getIosSystemImage(IMAGE_ADDRESS, UIImageSymbolScale.Medium)).apply {
@@ -231,27 +230,11 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                     })
                 }
 
-            addressNameLabel.apply {
-                numberOfLines = 1
-                textColor = uiColorErgo
+            val addressNameContainer = buildAddressSelectorView(this@WalletDetailsViewController, walletId, true) {
+                val appDelegate = getAppDelegate()
+                uiLogic.newAddressIdxChosen(it, appDelegate.prefs, appDelegate.database)
             }
-            val addressNameContainer = addressNameLabel.wrapWithTrailingImage(
-                getIosSystemImage(
-                    IMAGE_OPEN_LIST,
-                    UIImageSymbolScale.Small,
-                    20.0
-                )!!
-            ).apply {
-                isUserInteractionEnabled = true
-                addGestureRecognizer(UITapGestureRecognizer {
-                    presentViewController(
-                        ChooseAddressListDialogViewController(walletId, true) {
-                            val appDelegate = getAppDelegate()
-                            uiLogic.newAddressIdxChosen(it, appDelegate.prefs, appDelegate.database)
-                        }, true
-                    ) {}
-                })
-            }
+            addressNameLabel = addressNameContainer.content
 
             val sendButton = UIImageView(getIosSystemImage(IMAGE_SEND, UIImageSymbolScale.Small)).apply {
                 contentMode = UIViewContentMode.ScaleAspectFit

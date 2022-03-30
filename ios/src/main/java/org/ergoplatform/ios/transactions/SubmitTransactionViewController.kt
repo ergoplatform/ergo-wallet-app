@@ -5,7 +5,6 @@ import org.ergoplatform.ios.ui.IosStringProvider
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.ios.ui.getAppDelegate
 import org.ergoplatform.ios.ui.startAuthFlow
-import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 import org.ergoplatform.uilogic.STRING_ERROR_SEND_TRANSACTION
@@ -16,17 +15,9 @@ import org.robovm.apple.uikit.UIAlertActionStyle
 import org.robovm.apple.uikit.UIAlertController
 import org.robovm.apple.uikit.UIAlertControllerStyle
 
-abstract class SubmitTransactionViewController(private val walletId: Int) : ViewControllerWithKeyboardLayoutGuide() {
+abstract class SubmitTransactionViewController : ViewControllerWithKeyboardLayoutGuide() {
     protected lateinit var texts: I18NBundle
     protected abstract val uiLogic: SubmitTransactionUiLogic
-
-    protected fun showChooseAddressList(showAllAddresses: Boolean) {
-        presentViewController(
-            ChooseAddressListDialogViewController(walletId, showAllAddresses) {
-                onAddressChosen(it)
-            }, true
-        ) {}
-    }
 
     protected open fun onAddressChosen(it: Int?) {
         uiLogic.derivedAddressIdx = it

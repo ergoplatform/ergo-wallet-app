@@ -19,7 +19,7 @@ class SendFundsViewController(
     private val walletId: Int,
     private val derivationIdx: Int = -1,
     private val paymentRequest: String? = null
-) : SubmitTransactionViewController(walletId) {
+) : SubmitTransactionViewController() {
 
     override val uiLogic = IosSendFundsUiLogic()
     private lateinit var scrollView: UIView
@@ -78,19 +78,8 @@ class SendFundsViewController(
 
         walletTitle = Body1Label()
         walletTitle.numberOfLines = 1
-        addressNameLabel = Body1BoldLabel().apply {
-            numberOfLines = 1
-            textColor = uiColorErgo
-        }
-        val addressNameContainer =
-            addressNameLabel.wrapWithTrailingImage(
-                getIosSystemImage(IMAGE_OPEN_LIST, UIImageSymbolScale.Small, 20.0)!!
-            ).apply {
-                isUserInteractionEnabled = true
-                addGestureRecognizer(UITapGestureRecognizer {
-                    showChooseAddressList(true)
-                })
-            }
+        val addressNameContainer = buildAddressSelectorView(this, walletId, true) { onAddressChosen(it) }
+        addressNameLabel = addressNameContainer.content
         balanceLabel = Body1Label()
         balanceLabel.numberOfLines = 1
 

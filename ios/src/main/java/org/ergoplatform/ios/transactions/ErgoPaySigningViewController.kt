@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
@@ -18,7 +19,7 @@ class ErgoPaySigningViewController(
     private val request: String,
     private val walletId: Int,
     private val derivationIndex: Int = -1
-) : SubmitTransactionViewController(walletId) {
+) : SubmitTransactionViewController() {
 
     override val uiLogic = IosErgoPaySigningUiLogic()
 
@@ -120,7 +121,13 @@ class ErgoPaySigningViewController(
             }
 
             val button = PrimaryButton(texts.get(STRING_TITLE_CHOOSE_ADDRESS)).apply {
-                addOnTouchUpInsideListener { _, _ -> showChooseAddressList(false) }
+                addOnTouchUpInsideListener { _, _ ->
+                    presentViewController(
+                        ChooseAddressListDialogViewController(walletId, false) {
+                            onAddressChosen(it)
+                        }, true
+                    ) {}
+                }
             }
 
             addressChooserContainer.contentView.apply {
