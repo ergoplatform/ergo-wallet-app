@@ -13,6 +13,7 @@ import org.ergoplatform.uilogic.STRING_TRANSACTIONS_NONE_YET
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getDerivedAddressEntity
+import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSIndexPath
 import org.robovm.apple.uikit.*
@@ -31,7 +32,8 @@ class AddressTransactionsViewController(
     private val tableView = UITableView(CGRect.Zero())
 
     private val shownData = ArrayList<AddressTransactionWithTokens>()
-    private var pagesLoaded = 0
+    private var nextPageToLoad = 0
+    private var finishedLoading = false
 
     private var wallet: Wallet? = null
     private var shownAddress: WalletAddress? = null
@@ -85,7 +87,6 @@ class AddressTransactionsViewController(
             appDelegate.database.walletDbProvider.loadWalletWithStateById(walletId)?.let { wallet ->
                 this@AddressTransactionsViewController.wallet = wallet
                 shownAddress = wallet.getDerivedAddressEntity(derivationIdx)
-                println("Address for $derivationIdx: ${shownAddress?.publicAddress}")
                 onResume()
                 runOnMainThread { newAddressChosen() }
             }
@@ -94,12 +95,16 @@ class AddressTransactionsViewController(
             TransactionListManager.isDownloading.collect { refreshing ->
                 runOnMainThread {
                     header.isRefreshing = refreshing
-                }
-                if (!refreshing) {
-                    runOnMainThread { refreshListShownData() }
+                    if (!refreshing) {
+                        runOnMainThread {
+                            // TODO only do when at top of list to avoid user getting interrupted
+                            refreshListShownData()
+                        }
+                    }
                 }
             }
         }
+        // TODO observe TransactionListManager.downloadProgress and refresh list
     }
 
     private fun newAddressChosen() {
@@ -109,18 +114,38 @@ class AddressTransactionsViewController(
 
     private fun refreshListShownData() {
         // complete refresh
+        nextPageToLoad = 0
+        finishedLoading = false
+        shownData.clear()
+        fetchNextChunkFromDb()
+    }
+
+    private fun fetchNextChunkFromDb() {
+        if (finishedLoading)
+            return
+
+        val pageToLoad = nextPageToLoad
         shownAddress?.let { address ->
             viewControllerScope.launch {
                 val txLoaded = getAppDelegate().database.transactionDbProvider.loadAddressTransactionsWithTokens(
                     address.publicAddress,
-                    pageLimit, 0
+                    pageLimit, pageToLoad
                 )
                 runOnMainThread {
-                    shownData.clear()
                     shownData.addAll(txLoaded)
+                    if (pageToLoad == 0) {
+                        // yes, this is needed
+                        // https://stackoverflow.com/a/50606137/7487013
+                        tableView.setContentOffset(CGPoint.Zero(), false)
+                    }
                     tableView.reloadData()
+                    if (pageToLoad == 0) {
+                        tableView.layoutIfNeeded()
+                        tableView.setContentOffset(CGPoint.Zero(), false)
+                    }
                 }
-                pagesLoaded = 1
+                nextPageToLoad = pageToLoad + 1
+                finishedLoading = txLoaded.isEmpty()
             }
         }
     }
@@ -145,7 +170,12 @@ class AddressTransactionsViewController(
                 return p0.dequeueReusableCell(emptyCellId)
             } else {
                 val cell = p0.dequeueReusableCell(transactionCellId)
-                (cell as? AddressTransactionCell)?.bind(shownData.get(p1.row), this@AddressTransactionsViewController)
+                val itemIndex = p1.row
+                (cell as? AddressTransactionCell)?.bind(shownData[itemIndex], this@AddressTransactionsViewController)
+                if (itemIndex == shownData.size - 1) {
+                    fetchNextChunkFromDb()
+                    // TODO show item for last element
+                }
                 return cell
             }
         }
