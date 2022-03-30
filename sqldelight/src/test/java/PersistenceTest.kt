@@ -35,25 +35,26 @@ class PersistenceTest {
         val entities = database.getAllWalletConfigsSynchronous()
         println(entities.toString())
 
-        runBlocking {
-            try {
-                database.withTransaction {
-                    database.insertWalletConfig(WalletConfig(0, "Test2", "x9x", 0, null, false, null))
-
-                    val entities = database.getAllWalletConfigsSynchronous()
-                    println(entities.toString())
-
-                    throw RuntimeException()
-                }
-            } catch (T: Throwable) {
-
-            }
-        }
-
-        val entities2 = database.getAllWalletConfigsSynchronous()
-        println(entities2.toString())
-
-        assertEquals(entities.size, entities2.size)
+        // transactions deactivated
+//        runBlocking {
+//            try {
+//                database.withTransaction {
+//                    database.insertWalletConfig(WalletConfig(0, "Test2", "x9x", 0, null, false, null))
+//
+//                    val entities = database.getAllWalletConfigsSynchronous()
+//                    println(entities.toString())
+//
+//                    throw RuntimeException()
+//                }
+//            } catch (T: Throwable) {
+//
+//            }
+//        }
+//
+//        val entities2 = database.getAllWalletConfigsSynchronous()
+//        println(entities2.toString())
+//
+//        assertEquals(entities.size, entities2.size)
     }
 
     @Test
@@ -83,36 +84,37 @@ class PersistenceTest {
             )
             delay(500)
 
-            database.withTransaction {
-                database.insertWalletConfig(
-                    WalletConfig(
-                        0,
-                        "Observertest",
-                        firstAddress + "2",
-                        0,
-                        null,
-                        false,
-                        null
-                    )
-                )
-                database.insertWalletConfig(
-                    WalletConfig(
-                        0,
-                        "Observertest",
-                        firstAddress + "3",
-                        0,
-                        null,
-                        false,
-                        null
-                    )
-                )
-
-
-            }
-            delay(3000)
-
-            // two changes: insertWalletConfig and transaction
-            assertEquals(2, changes)
+            // transactions deactivated
+//            database.withTransaction {
+//                database.insertWalletConfig(
+//                    WalletConfig(
+//                        0,
+//                        "Observertest",
+//                        firstAddress + "2",
+//                        0,
+//                        null,
+//                        false,
+//                        null
+//                    )
+//                )
+//                database.insertWalletConfig(
+//                    WalletConfig(
+//                        0,
+//                        "Observertest",
+//                        firstAddress + "3",
+//                        0,
+//                        null,
+//                        false,
+//                        null
+//                    )
+//                )
+//
+//
+//            }
+//            delay(3000)
+//
+//            // two changes: insertWalletConfig and transaction
+//            assertEquals(2, changes)
             val changeBeforeCancel = changes
             coroutineScope.cancel()
             database.insertWalletConfig(
