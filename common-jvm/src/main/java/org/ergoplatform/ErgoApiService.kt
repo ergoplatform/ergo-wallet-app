@@ -1,5 +1,6 @@
 package org.ergoplatform
 
+import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.explorer.client.DefaultApi
 import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.explorer.client.model.TokenInfo
@@ -35,6 +36,7 @@ class ErgoApiService(val defaultApi: DefaultApi) : ErgoApi {
                 val retrofit = Retrofit.Builder()
                     .baseUrl(preferences.prefExplorerApiUrl)
                     .addConverterFactory(GsonConverterFactory.create())
+                    .client(OkHttpSingleton.getInstance())
                     .build()
 
                 val defaultApi = retrofit.create(DefaultApi::class.java)

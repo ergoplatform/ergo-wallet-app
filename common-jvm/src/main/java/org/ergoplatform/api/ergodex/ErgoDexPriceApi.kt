@@ -1,5 +1,6 @@
 package org.ergoplatform.api.ergodex
 
+import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.api.TokenPriceApi
 import org.ergoplatform.persistance.TokenPrice
 import retrofit2.Retrofit
@@ -14,6 +15,7 @@ class ErgoDexPriceApi : TokenPriceApi {
     init {
         val retrofit = Retrofit.Builder().baseUrl("https://api.ergodex.io/")
             .addConverterFactory(GsonConverterFactory.create())
+            .client(OkHttpSingleton.getInstance())
             .build()
         ergoDexApi = retrofit.create(ErgoDexApi::class.java)
     }
