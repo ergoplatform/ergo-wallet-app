@@ -187,7 +187,7 @@
     <!-- Settings -->
     <string name="desc_about">Benjamin Schulte tarafından getirildi, %1s</string>
     <string name="desc_about_moreinfo">Bu proje <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Apache 2 License</a> altında lisanslanmıştır. <a href="https://github.com/ergoplatform/ergo-wallet-app">Açık kaynak yazılım</a>\n
-    Yardım için <a href="https://discord.gg/kj7s7nb">Discord</a> veya <a href="https://t.me/ergosupport">Telegram</a></string>
+    Yardım için <a href="https://discord.gg/kj7s7nb">Discord</a> veya <a href="https://t.me/ErgoWalletApp">Telegram</a></string>
     <string name="desc_coingecko">Ergo fiyatı <a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a> tarafından desteklenmektedir.</string>
     <string name="label_cg_conn_error">Coingecko\'ya bağlanırken hata oluştu, lütfen daha sonra tekrar deneyin.</string>
     <string name="desc_dark_mode">Karanlık veya aydınlık mod?</string>

@@ -2,6 +2,7 @@ package org.ergoplatform.utils
 
 import okhttp3.*
 import okio.*
+import org.ergoplatform.api.OkHttpSingleton
 import java.io.IOException
 
 private const val IPV4_PATTERN =
@@ -18,7 +19,7 @@ fun getHostname(url: String): String {
 
 fun fetchHttpGetStringSync(httpUrl: String): String {
     val request = Request.Builder().url(httpUrl).build()
-    val stringResponse = OkHttpClient().newCall(request).execute().use { response ->
+    val stringResponse = OkHttpSingleton.getInstance().newCall(request).execute().use { response ->
         if (!response.isSuccessful) {
             throw IOException("Unexpected response code $response")
         }
@@ -35,7 +36,7 @@ fun httpPostStringSync(httpUrl: String, body: String, mediaType: String) {
         .post(RequestBody.create(MediaType.parse(mediaType), body))
         .build()
 
-    OkHttpClient().newCall(request).execute().use { response ->
+    OkHttpSingleton.getInstance().newCall(request).execute().use { response ->
         if (!response.isSuccessful) throw IOException("Unexpected code $response")
     }
 }
@@ -44,7 +45,7 @@ fun fetchHttpGetWithListener(url: String, progressListener: ProgressListener): B
     val request = Request.Builder()
         .url(url)
         .build()
-    val client = OkHttpClient.Builder()
+    val client = OkHttpSingleton.getInstance().newBuilder()
         .addNetworkInterceptor { chain ->
             val originalResponse = chain.proceed(chain.request())
             originalResponse.newBuilder()

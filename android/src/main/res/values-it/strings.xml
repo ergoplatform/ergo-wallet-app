@@ -173,7 +173,7 @@
     <string name="desc_about">Presentato da Benjamin Schulte, %1s</string>
     <string name="desc_about_moreinfo">Concesso in licenza sotto <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Apache 2 License</a>\n
         Questo progetto è <a href="https://github.com/ergoplatform/ergo-wallet-app">open source software</a>\n
-   Trova aiuto su <a href="https://discord.gg/kj7s7nb">Discord</a> or <a href="https://t.me/ergosupport">Telegram</a></string>
+   Trova aiuto su <a href="https://discord.gg/kj7s7nb">Discord</a> or <a href="https://t.me/ErgoWalletApp">Telegram</a></string>
     <string name="desc_coingecko">Prezzo Ergo fornito da <a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a></string>
     <string name="label_cg_conn_error">Errore durante la connessione a CoinGecko, riprova più tardi.</string>
     <string name="desc_dark_mode">Modalità scura o chiara?</string>

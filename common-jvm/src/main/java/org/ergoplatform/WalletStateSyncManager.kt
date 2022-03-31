@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.api.TokenPriceApi
 import org.ergoplatform.api.coingecko.CoinGeckoApi
 import org.ergoplatform.api.ergodex.ErgoDexPriceApi
@@ -38,6 +39,7 @@ class WalletStateSyncManager {
     init {
         val retrofitCoinGecko = Retrofit.Builder().baseUrl("https://api.coingecko.com/")
             .addConverterFactory(GsonConverterFactory.create())
+            .client(OkHttpSingleton.getInstance())
             .build()
         coinGeckoApi = retrofitCoinGecko.create(CoinGeckoApi::class.java)
     }

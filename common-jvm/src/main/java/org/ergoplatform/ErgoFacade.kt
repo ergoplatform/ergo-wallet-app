@@ -13,6 +13,7 @@ import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
 import org.ergoplatform.uilogic.STRING_ERROR_BALANCE_ERG
+import org.ergoplatform.uilogic.STRING_ERROR_CHANGEBOX_AMOUNT
 import org.ergoplatform.uilogic.STRING_ERROR_PROVER_CANT_SIGN
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
@@ -312,6 +313,10 @@ fun getErrorMessage(t: Throwable, texts: StringProvider): String? {
         texts.getString(
             STRING_ERROR_BALANCE_ERG,
             ErgoAmount(t.balanceFound).toStringTrimTrailingZeros()
+        )
+    } else if (t is InputBoxesSelectionException.NotEnoughCoinsForChangeException) {
+        texts.getString(
+            STRING_ERROR_CHANGEBOX_AMOUNT
         )
     } else if (t is AssertionError && t.message?.contains("Tree root should be real") == true) {
         // ProverInterpreter.scala

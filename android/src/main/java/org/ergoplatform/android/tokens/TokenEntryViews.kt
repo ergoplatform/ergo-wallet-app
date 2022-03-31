@@ -33,6 +33,7 @@ fun inflateAndBindTokenView(
             walletToken.amount ?: 0,
             walletToken.decimals,
         ).toStringPrettified()
+    itemBinding.root.background = null // no selectable item background
 }
 
 class WalletDetailsTokenEntryView(val binding: EntryWalletTokenDetailsBinding, walletToken: WalletToken) :

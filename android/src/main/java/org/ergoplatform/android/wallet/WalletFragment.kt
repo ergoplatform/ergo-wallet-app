@@ -345,6 +345,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
                     itemBinding.labelTokenName.setText(R.string.label_more_tokens)
                     itemBinding.labelTokenVal.text =
                         "+" + moreToShowNum.toString()
+                    itemBinding.root.background = null // no selectable item background
                 })
             }
         }
