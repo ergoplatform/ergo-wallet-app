@@ -3,6 +3,7 @@ package org.ergoplatform
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.*
 import org.ergoplatform.persistance.PreferencesProvider
@@ -271,11 +272,12 @@ fun signSerializedErgoTx(
 }
 
 private fun getRestErgoClient(prefs: PreferencesProvider) =
-    RestApiErgoClient.create(
+    RestApiErgoClient.createWithHttpClientBuilder(
         prefs.prefNodeUrl,
         getErgoNetworkType(),
         "",
-        prefs.prefExplorerApiUrl
+        prefs.prefExplorerApiUrl,
+        OkHttpSingleton.getInstance().newBuilder()
     )
 
 private fun getColdErgoClient() = ColdErgoClient(

@@ -94,7 +94,7 @@ fun UnsignedErgoLikeTransaction.buildTransactionInfo(inputBoxes: HashMap<String,
             } ?: if (it.tokenId.equals(inputsList[0].boxId)) {
                 // could be minted right here, check outbox info
                 val token = try {
-                    Eip4TokenBuilder.buildFromErgoBox(it.tokenId, OutBoxImpl(null, ergoBoxCandidate))
+                    Eip4TokenBuilder.buildFromErgoBox(it.tokenId, OutBoxImpl(ergoBoxCandidate))
                 } catch (t: Throwable) {
                     null
                 }
