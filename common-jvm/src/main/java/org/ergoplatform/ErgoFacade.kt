@@ -72,7 +72,7 @@ fun getPublicErgoAddressFromMnemonic(secrets: SigningSecrets, index: Int = 0): S
         getErgoNetworkType(),
         secrets.mnemonic,
         secrets.password,
-        // TODO BIP-32 fix secrets.deprecatedDerivation
+        secrets.deprecatedDerivation
     ).ergoAddress.toString()
 }
 
@@ -95,7 +95,7 @@ fun getSerializedXpubKeyFromMnemonic(signingSecrets: SigningSecrets) =
         JavaHelpers.seedToMasterKey(
             signingSecrets.mnemonic,
             signingSecrets.password,
-            // TODO BIP-32 fix signingSecrets.deprecatedDerivation
+            signingSecrets.deprecatedDerivation
         ), getErgoNetworkType()
     )
 
@@ -127,7 +127,7 @@ fun sendErgoTx(
                 .withMnemonic(
                     signingSecrets.mnemonic,
                     signingSecrets.password,
-                    // TODO BIP-32 fix signingSecrets.deprecatedDerivation
+                    signingSecrets.deprecatedDerivation
                 )
             derivedKeyIndices.forEach {
                 proverBuilder.withEip3Secret(it)
@@ -236,7 +236,7 @@ fun signSerializedErgoTx(
                 .withMnemonic(
                     signingSecrets.mnemonic,
                     signingSecrets.password,
-                    // TODO BIP-32 fix signingSecrets.deprecatedDerivation
+                    signingSecrets.deprecatedDerivation
                 )
 
             derivedKeyIndices.forEach {
