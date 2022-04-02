@@ -57,14 +57,15 @@ object TransactionListManager {
         address: String,
         ergoApi: ErgoApi,
         db: IAppDatabase
-    ) {
-        if (!(isDownloading.value)) {
+    ): Boolean {
+        return if (!(isDownloading.value)) {
             setDownloadState(true)
             GlobalScope.launch(Dispatchers.IO) {
                 doDownloadTransactionList(address, ergoApi, db, true)
                 setDownloadState(false)
             }
-        }
+            true
+        } else false
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")

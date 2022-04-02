@@ -9,6 +9,8 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.transactions.TransactionListManager
+import org.ergoplatform.uilogic.STRING_TRANSACTIONS_LOAD_ALL_BUTTON
+import org.ergoplatform.uilogic.STRING_TRANSACTIONS_LOAD_ALL_DESC
 import org.ergoplatform.uilogic.STRING_TRANSACTIONS_NONE_YET
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 import org.ergoplatform.utils.LogUtils
@@ -16,6 +18,7 @@ import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getDerivedAddressEntity
 import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSIndexPath
 import org.robovm.apple.uikit.*
 import kotlin.math.max
@@ -63,6 +66,7 @@ class AddressTransactionsViewController(
         uiRefreshControl.addOnValueChangedListener {
             if (uiRefreshControl.isRefreshing) {
                 uiRefreshControl.endRefreshing()
+                refreshListWhenAtTop()
                 refreshAddress()
             }
         }
@@ -99,14 +103,25 @@ class AddressTransactionsViewController(
                     if (!refreshing) {
                         runOnMainThread {
                             // refresh view, but only when at top of the list
-                            if (tableView.contentOffset.y <= 0.0)
-                                refreshListShownData()
+                            refreshListWhenAtTop()
                         }
                     }
                 }
             }
         }
-        // TODO observe TransactionListManager.downloadProgress and refresh list
+        viewControllerScope.launch {
+            TransactionListManager.downloadProgress.collect {
+                if (TransactionListManager.downloadAddress.value == shownAddress?.publicAddress) {
+                    finishedLoading = false
+                    refreshListWhenAtTop()
+                }
+            }
+        }
+    }
+
+    private fun refreshListWhenAtTop() {
+        if (tableView.contentOffset.y <= 0.0 || nextPageToLoad == 0)
+            refreshListShownData()
     }
 
     private fun newAddressChosen() {
@@ -117,10 +132,14 @@ class AddressTransactionsViewController(
     private fun refreshListShownData() {
         LogUtils.logDebug(this.javaClass.simpleName, "Refreshing shown list completely")
         // complete refresh
+        resetShownData()
+        fetchNextChunkFromDb()
+    }
+
+    private fun resetShownData() {
         nextPageToLoad = 0
         finishedLoading = false
         shownData.clear()
-        fetchNextChunkFromDb()
     }
 
     private fun fetchNextChunkFromDb() {
@@ -146,7 +165,7 @@ class AddressTransactionsViewController(
 
                     shownData.addAll(txLoaded)
 
-                    // if we have a reload from the beginning, set table view to the top position
+                    // if we reload from the beginning, set table view to the top position
                     if (pageToLoad == 0) {
                         // yes, this is needed
                         // https://stackoverflow.com/a/50606137/7487013
@@ -187,10 +206,13 @@ class AddressTransactionsViewController(
             } else {
                 val cell = p0.dequeueReusableCell(transactionCellId)
                 val itemIndex = p1.row
-                (cell as? AddressTransactionCell)?.bind(shownData[itemIndex], this@AddressTransactionsViewController)
-                if (itemIndex == shownData.size - 1) {
+                val isLastItem = itemIndex == shownData.size - 1
+                (cell as? AddressTransactionCell)?.bind(
+                    shownData[itemIndex], this@AddressTransactionsViewController,
+                    isLastItem && finishedLoading
+                )
+                if (isLastItem) {
                     fetchNextChunkFromDb()
-                    // TODO show item for last element
                 }
                 return cell
             }
@@ -256,14 +278,44 @@ class AddressTransactionsViewController(
 
     class AddressTransactionCell : AbstractTableViewCell(transactionCellId) {
         private lateinit var txView: AddressTransactionEntryView
+        private lateinit var lastItemLabel: UIView
+        private lateinit var lastItemButton: TextButton
+        private var vc: AddressTransactionsViewController? = null
 
         override fun setupView() {
             val cardView = CardView()
             txView = AddressTransactionEntryView()
 
-            contentView.addSubview(cardView)
+            val texts = getAppDelegate().texts
 
-            cardView.widthMatchesSuperview(true, DEFAULT_MARGIN, MAX_WIDTH)
+            val innerLabel = Body1Label().apply {
+                textAlignment = NSTextAlignment.Center
+                text = texts.get(STRING_TRANSACTIONS_LOAD_ALL_DESC)
+            }
+            lastItemLabel = UIView(CGRect.Zero()).apply {
+                addSubview(innerLabel)
+                innerLabel.edgesToSuperview(inset = DEFAULT_MARGIN)
+            }
+
+            lastItemButton = TextButton(texts.get(STRING_TRANSACTIONS_LOAD_ALL_BUTTON))
+            lastItemButton.addOnTouchUpInsideListener { _, _ ->
+                val appDelegate = getAppDelegate()
+                if (TransactionListManager.startDownloadAllAddressTransactions(
+                        vc!!.shownAddress!!.publicAddress,
+                        ErgoApiService.getOrInit(appDelegate.prefs), appDelegate.database
+                    )
+                ) {
+                    vc!!.resetShownData()
+                }
+            }
+
+            val stackView = UIStackView(NSArray(cardView, lastItemLabel, lastItemButton)).apply {
+                axis = UILayoutConstraintAxis.Vertical
+            }
+
+            contentView.addSubview(stackView)
+
+            stackView.widthMatchesSuperview(true, DEFAULT_MARGIN, MAX_WIDTH)
                 .superViewWrapsHeight(true, 0.0)
 
             cardView.contentView.addSubview(txView)
@@ -271,10 +323,13 @@ class AddressTransactionsViewController(
             txView.edgesToSuperview(inset = DEFAULT_MARGIN)
         }
 
-        fun bind(tx: AddressTransactionWithTokens, vc: UIViewController) {
+        fun bind(tx: AddressTransactionWithTokens, vc: AddressTransactionsViewController, isLastElement: Boolean) {
+            this.vc = vc
             txView.bind(tx, tokenClickListener = { tokenId ->
                 vc.presentViewController(TokenInformationViewController(tokenId, null), true) {}
             }, getAppDelegate().texts)
+            lastItemButton.isHidden = !isLastElement
+            lastItemLabel.isHidden = !isLastElement
         }
 
     }
