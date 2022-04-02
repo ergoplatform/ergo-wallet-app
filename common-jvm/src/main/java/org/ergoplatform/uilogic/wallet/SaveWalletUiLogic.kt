@@ -13,17 +13,18 @@ class SaveWalletUiLogic(val mnemonic: SecretString, fromRestore: Boolean) {
 
     // Constructor
 
-    private var useDeprecatedDerivation: Boolean = false
+    // TODO BIP-32 fix private var useDeprecatedDerivation: Boolean = false
+    private val useDeprecatedDerivation: Boolean = true
 
     var publicAddress: String = getPublicErgoAddressFromMnemonic(signingSecrets)
         private set
 
-    val hasAlternativeAddress = fromRestore &&
-            (!publicAddress.equals(
-                getPublicErgoAddressFromMnemonic(
-                    SigningSecrets(mnemonic, true)
-                )
-            ))
+    val hasAlternativeAddress = false // TODO BIP-32 fix  fromRestore &&
+//            (!publicAddress.equals(
+//                getPublicErgoAddressFromMnemonic(
+//                    SigningSecrets(mnemonic, true)
+//                )
+//            ))
 
     // methods
 
@@ -31,7 +32,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString, fromRestore: Boolean) {
 
     fun switchAddress() {
         if (hasAlternativeAddress) {
-            useDeprecatedDerivation = !useDeprecatedDerivation
+            // TODO BIP-32 fix useDeprecatedDerivation = !useDeprecatedDerivation
             publicAddress = getPublicErgoAddressFromMnemonic(signingSecrets)
         }
     }

@@ -23,7 +23,7 @@ data class SigningSecrets(
         val gson = Gson()
         val root = JsonObject()
         root.addProperty(KEY_MNEMONIC, mnemonic.toStringUnsecure())
-        root.addProperty(KEY_DEPRECATED_DERIVATION, deprecatedDerivation)
+        // TODO BIP-32 fix root.addProperty(KEY_DEPRECATED_DERIVATION, deprecatedDerivation)
         return gson.toJson(root)
     }
 
