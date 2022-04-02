@@ -503,7 +503,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 transactionStack.clearArrangedSubviews()
                 transactions.forEach { txInfo ->
                     transactionStack.addArrangedSubview(createHorizontalSeparator())
-                    val txEntryView = TransactionEntryView()
+                    val txEntryView = AddressTransactionEntryView()
                     txEntryView.bind(txInfo, tokenClickListener = { tokenId ->
                         presentViewController(TokenInformationViewController(tokenId, null), true) {}
                     }, texts)

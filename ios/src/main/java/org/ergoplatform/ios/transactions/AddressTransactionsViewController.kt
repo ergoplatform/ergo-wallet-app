@@ -11,6 +11,7 @@ import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.uilogic.STRING_TRANSACTIONS_NONE_YET
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getDerivedAddressEntity
 import org.robovm.apple.coregraphics.CGPoint
@@ -97,8 +98,9 @@ class AddressTransactionsViewController(
                     header.isRefreshing = refreshing
                     if (!refreshing) {
                         runOnMainThread {
-                            // TODO only do when at top of list to avoid user getting interrupted
-                            refreshListShownData()
+                            // refresh view, but only when at top of the list
+                            if (tableView.contentOffset.y <= 0.0)
+                                refreshListShownData()
                         }
                     }
                 }
@@ -113,6 +115,7 @@ class AddressTransactionsViewController(
     }
 
     private fun refreshListShownData() {
+        LogUtils.logDebug(this.javaClass.simpleName, "Refreshing shown list completely")
         // complete refresh
         nextPageToLoad = 0
         finishedLoading = false
@@ -132,7 +135,18 @@ class AddressTransactionsViewController(
                     pageLimit, pageToLoad
                 )
                 runOnMainThread {
+                    if (txLoaded.isNotEmpty()) {
+                        // search if first element is already in shown list
+                        val idxInList =
+                            shownData.indexOfFirst { it.addressTransaction.txId == txLoaded.first().addressTransaction.txId }
+                        // if it is, remove the last elements so that we don't have them in list multiple times
+                        if (idxInList >= 0) while (shownData.size > idxInList)
+                            shownData.removeLast()
+                    }
+
                     shownData.addAll(txLoaded)
+
+                    // if we have a reload from the beginning, set table view to the top position
                     if (pageToLoad == 0) {
                         // yes, this is needed
                         // https://stackoverflow.com/a/50606137/7487013
@@ -144,8 +158,10 @@ class AddressTransactionsViewController(
                         tableView.setContentOffset(CGPoint.Zero(), false)
                     }
                 }
-                nextPageToLoad = pageToLoad + 1
-                finishedLoading = txLoaded.isEmpty()
+
+                finishedLoading = txLoaded.size < pageLimit
+                if (!finishedLoading)
+                    nextPageToLoad = pageToLoad + 1
             }
         }
     }
@@ -239,11 +255,11 @@ class AddressTransactionsViewController(
     }
 
     class AddressTransactionCell : AbstractTableViewCell(transactionCellId) {
-        private lateinit var txView: TransactionEntryView
+        private lateinit var txView: AddressTransactionEntryView
 
         override fun setupView() {
             val cardView = CardView()
-            txView = TransactionEntryView()
+            txView = AddressTransactionEntryView()
 
             contentView.addSubview(cardView)
 
