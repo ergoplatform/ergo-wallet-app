@@ -131,20 +131,12 @@ private fun parseErgoPaySigningRequestFromUri(uri: String): ErgoPaySigningReques
 
 /**
  * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
- * call this only from non-UI thread and within an applicable try/catch phrase
+ * switches to non-UI thread, use within an applicable try/catch phrase
  */
-fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApi): TransactionInfo? {
+suspend fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApi): TransactionInfo? {
     if (reducedTx == null) return null
-
-    val unsignedTx = deserializeUnsignedTxOffline(reducedTx)
-
-    val inputsMap = HashMap<String, TransactionInfoBox>()
-    unsignedTx.getInputBoxesIds().forEach {
-        val boxInfo = ergoApiService.getBoxInformation(it).execute().body()!!
-        inputsMap.put(boxInfo.boxId, boxInfo.toTransactionInfoBox())
-    }
-
-    return unsignedTx.buildTransactionInfo(inputsMap)
+    val reducedTransaction = deserializeUnsignedTxOffline(reducedTx)
+    return reducedTransaction.buildTransactionInfo(ergoApiService)
 }
 
 private const val JSON_FIELD_TX_ID = "txId"

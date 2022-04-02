@@ -1,16 +1,19 @@
 package org.ergoplatform.uilogic.wallet.addresses
 
+import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.WalletDbProvider
 
-class WalletAddressDialogUiLogic() {
-    suspend fun deleteWalletAddress(database: WalletDbProvider, addrId: Long) {
-        database.withTransaction {
-            val walletAddress = database.loadWalletAddress(addrId)
-            walletAddress?.publicAddress?.let {
-                database.deleteAddressState(it)
-                database.deleteTokensByAddress(it)
+class WalletAddressDialogUiLogic {
+    suspend fun deleteWalletAddress(database: IAppDatabase, addrId: Long) {
+        val walletDbProvider = database.walletDbProvider
+        walletDbProvider.withTransaction {
+            val walletAddress = walletDbProvider.loadWalletAddress(addrId)
+            walletAddress?.publicAddress?.let { publicAddress ->
+                walletDbProvider.deleteAddressState(publicAddress)
+                walletDbProvider.deleteTokensByAddress(publicAddress)
+                database.transactionDbProvider.deleteAddressTransactions(publicAddress)
             }
-            database.deleteWalletAddress(addrId)
+            walletDbProvider.deleteWalletAddress(addrId)
         }
     }
 

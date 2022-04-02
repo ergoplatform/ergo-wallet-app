@@ -1,0 +1,29 @@
+CREATE TABLE IF NOT EXISTS `address_transaction` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `address` TEXT NOT NULL,
+    `tx_id` TEXT NOT NULL,
+    `inclusion_height` INTEGER NOT NULL,
+    `timestamp` INTEGER NOT NULL,
+    `nanoerg` INTEGER NOT NULL,
+    `message` TEXT,
+    `state` INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS `index_address_transaction_address_inclusion_height` ON `address_transaction` (`address` ASC, `inclusion_height` DESC);
+
+insertOrReplace:
+INSERT OR REPLACE INTO `address_transaction` (
+    `id`, `address`, `tx_id`, `inclusion_height`, `timestamp`, `nanoerg`, `message`, `state`
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+loadAddressTransactions:
+SELECT * FROM `address_transaction` WHERE address = ? LIMIT :limit OFFSET :offset;
+
+loadAddressTransaction:
+SELECT * FROM `address_transaction` WHERE id = ?;
+
+deleteByAddress:
+DELETE FROM address_transaction WHERE address = ?;
+
+deleteById:
+DELETE FROM address_transaction WHERE id = ?;

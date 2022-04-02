@@ -18,11 +18,7 @@ class WalletDetailsViewModel : ViewModel() {
     val wallet: Wallet? get() = uiLogic.wallet
 
     // the selected index is null for "all addresses"
-    var selectedIdx: Int?
-        get() = uiLogic.addressIdx
-        set(value) {
-            uiLogic.newAddressIdxChosen(value)
-        }
+    val selectedIdx get() = uiLogic.addressIdx
 
     private val _address = MutableLiveData<String?>()
     val address: LiveData<String?> = _address

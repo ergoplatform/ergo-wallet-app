@@ -5,22 +5,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.zxing.integration.android.IntentIntegrator
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPromptSigningDialogBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.QrPagerAdapter
+import org.ergoplatform.android.ui.expandBottomSheetOnShow
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
 import org.ergoplatform.transactions.QrCodePagesCollector
 import org.ergoplatform.transactions.coldSigningRequestToQrChunks
-
-import org.ergoplatform.android.ui.expandBottomSheetOnShow
 
 
 /**
@@ -116,7 +114,8 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
                     val context = requireContext()
                     uiLogic.sendColdWalletSignedTx(
                         Preferences(context),
-                        AndroidStringProvider(context)
+                        AndroidStringProvider(context),
+                        AppDatabase.getInstance(context)
                     )
                     dismiss()
                 } else {

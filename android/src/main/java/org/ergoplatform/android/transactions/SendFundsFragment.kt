@@ -130,14 +130,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
         }
         binding.buttonShareTx.setOnClickListener {
             val txUrl = getExplorerTxUrl(binding.labelTxId.text.toString())
-            val sendIntent: Intent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, txUrl)
-                type = "text/plain"
-            }
-
-            val shareIntent = Intent.createChooser(sendIntent, null)
-            startActivity(shareIntent)
+            shareText(txUrl)
         }
         binding.buttonDismiss.setOnClickListener {
             val succeeded = findNavController().popBackStack()

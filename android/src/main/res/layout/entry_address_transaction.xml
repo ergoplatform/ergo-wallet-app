@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_transaction_info"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:selectableItemBackground"
+    android:padding="@dimen/activity_horizontal_margin">
+
+    <TextView
+        android:id="@+id/label_transaction_date"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:ellipsize="end"
+        android:gravity="end"
+        android:maxLines="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/label_transaction_state"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="tx date" />
+
+    <TextView
+        android:id="@+id/label_transaction_state"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="?attr/colorSecondary"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Submitted" />
+
+    <TextView
+        android:id="@+id/tx_erg_amount"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/half_horizontal_margin"
+        android:maxLines="1"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@id/label_transaction_state"
+        app:layout_constraintTop_toBottomOf="@id/label_transaction_date"
+        tools:text="1,223.0045 ERG" />
+
+    <TextView
+        android:id="@+id/tx_purpose"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/half_horizontal_margin"
+        android:ellipsize="end"
+        android:maxLines="3"
+        app:layout_constraintEnd_toEndOf="@id/label_transaction_date"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/tx_erg_amount"
+        app:layout_constraintTop_toBottomOf="@id/label_transaction_date"
+        tools:text="@tools:sample/lorem/random" />
+
+    <LinearLayout
+        android:id="@+id/transaction_token_entries"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/half_horizontal_margin"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tx_purpose">
+
+        <include layout="@layout/entry_wallet_token" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

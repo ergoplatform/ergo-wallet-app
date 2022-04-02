@@ -108,7 +108,7 @@ class WalletAddressDialogViewController(val address: WalletAddress) : ViewContro
     @OptIn(DelicateCoroutinesApi::class)
     private fun doRemoveAddress() {
         GlobalScope.launch {
-            uiLogic.deleteWalletAddress(getAppDelegate().database.walletDbProvider, address.id)
+            uiLogic.deleteWalletAddress(getAppDelegate().database, address.id)
         }
         dismissViewController(true) {}
     }

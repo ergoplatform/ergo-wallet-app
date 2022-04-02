@@ -105,7 +105,6 @@
     <!-- Wallet details -->
     <string name="title_wallet_balance">Saldo</string>
     <string name="label_all_addresses">Tutti gli indirizzi %1d</string>
-    <string name="exporer_view_transactions">Tocca per visualizzare le transazioni in Ergo Explorer: l\'elenco delle transazioni in-app verrà aggiunto a breve</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Indirizzi</string>

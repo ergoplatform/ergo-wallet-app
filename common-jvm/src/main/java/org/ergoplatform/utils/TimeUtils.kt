@@ -1,6 +1,8 @@
 package org.ergoplatform.utils
 
 import org.ergoplatform.uilogic.*
+import java.text.DateFormat
+import java.util.*
 
 private const val MAX_SECONDS_JUST_NOW = 30
 private const val MAX_SECONDS_MOMENTS_AGO = 120
@@ -38,4 +40,10 @@ fun getTimeSpanString(
         }
     }
     return timeSpanString
+}
+
+fun millisecondsToLocalTime(milliseconds: Long): String {
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = milliseconds
+    return DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault()).format(calendar.time)
 }

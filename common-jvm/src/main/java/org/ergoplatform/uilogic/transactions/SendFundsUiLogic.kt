@@ -165,7 +165,8 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     override fun startPaymentWithMnemonicAsync(
         mnemonic: String,
         preferences: PreferencesProvider,
-        texts: StringProvider
+        texts: StringProvider,
+        db: IAppDatabase,
     ) {
         val derivedAddresses = getSigningDerivedAddressesIndices()
 
@@ -178,13 +179,9 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                     mnemonic, "", derivedAddresses,
                     preferences, texts
                 )
+                notifyUiLocked(false)
+                transactionSubmitted(ergoTxResult, db.transactionDbProvider, preferences)
             }
-            notifyUiLocked(false)
-            if (ergoTxResult.success) {
-                WalletStateSyncManager.getInstance().invalidateCache()
-                notifyHasTxId(ergoTxResult.txId!!)
-            }
-            notifyHasErgoTxResult(ergoTxResult)
         }
 
         notifyUiLocked(true)

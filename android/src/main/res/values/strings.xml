@@ -21,6 +21,7 @@
     <string name="label_amount">Amount</string>
     <string name="label_purpose">Purpose</string>
     <string name="label_share">Share</string>
+    <string name="label_open">Open</string>
     <string name="button_delete">Delete</string>
     <string name="button_yes">Yes</string>
     <string name="label_cancel">Cancel</string>
@@ -125,7 +126,26 @@
     <!-- Wallet details -->
     <string name="title_wallet_balance">Balance</string>
     <string name="label_all_addresses">All %1d addresses</string>
-    <string name="exporer_view_transactions">Tap to view transactions in Ergo Explorer — in-app transaction list will be added soon</string>
+    <string name="transactions_view_more">View more</string>
+    <string name="transactions_none_yet">There are no transactions made for this address yet.</string>
+
+    <!-- Transaction list -->
+    <string name="tx_state_waiting">Pending</string>
+    <string name="tx_state_cancelled">Cancelled</string>
+    <string name="tx_state_submitted">Submitted</string>
+    <string name="tx_state_low_confirmations">Executed</string>
+    <string name="tx_state_high_confirmations">Confirmed</string>
+    <string name="tx_download_progress">%1s transactions downloaded</string>
+    <string name="transactions_load_all_desc">End of downloaded transactions. Wallet App can reload all your transactions. This may take a long time.</string>
+    <string name="transactions_load_all_button">Load all transactions</string>
+
+    <!-- Transaction information -->
+    <string name="title_transaction">Transaction</string>
+    <string name="title_transaction_inboxes">Amounts spent</string>
+    <string name="desc_transaction_inboxes">These amounts were spent by this transaction.</string>
+    <string name="desc_transaction_outboxes">These amounts were sent by this transaction.</string>
+    <string name="desc_transaction_waiting">Waiting for execution</string>
+    <string name="desc_transaction_execution_time">Executed at %1s</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Addresses</string>
