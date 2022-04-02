@@ -15,7 +15,7 @@ class SaveWalletUiLogicTest {
     val fixedAddress = "9eYMpbGgBf42bCcnB2nG3wQdqPzpCCw5eB1YaWUUen9uCaW3wwm"
     val deprAddress = "9ewv8sxJ1jfr6j3WUSbGPMTVx3TZgcJKdnjKCbJWhiJp5U62uhP"
 
-    // TODO BIP-32 fix @Test
+    @Test
     fun checkAlternativeAddress() {
         isErgoMainNet = true
         val safeFromCreate = SaveWalletUiLogic(safeMnemonic, false)
