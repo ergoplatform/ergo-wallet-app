@@ -52,7 +52,7 @@ class ErgoApiService(val defaultApi: DefaultApi) : ErgoApi {
         limit: Int,
         offset: Int
     ): Call<Items<TransactionInfo>> =
-        defaultApi.getApiV1AddressesP1Transactions(publicAddress, offset, limit)
+        defaultApi.getApiV1AddressesP1Transactions(publicAddress, offset, limit, true)
 
     companion object {
         private var ergoApiService: ErgoApiService? = null
