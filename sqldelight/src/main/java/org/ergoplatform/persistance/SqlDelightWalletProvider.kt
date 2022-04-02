@@ -11,8 +11,16 @@ class SqlDelightWalletProvider(private val sqlDelightAppDb: SqlDelightAppDb) : W
     private val appDb = sqlDelightAppDb.appDatabase
 
     override suspend fun <R> withTransaction(block: suspend () -> R): R {
-        // no transactions used due to freezes on iOS
-        return block.invoke()
+        return if (sqlDelightAppDb.useTransactions)
+            withContext(Dispatchers.IO) {
+                appDb.transactionWithResult {
+                    runBlocking {
+                        block.invoke()
+                    }
+                }
+            }
+        else
+            block.invoke()
     }
 
     override suspend fun loadWalletByFirstAddress(firstAddress: String): WalletConfig? {
