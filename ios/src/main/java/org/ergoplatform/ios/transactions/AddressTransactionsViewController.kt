@@ -88,14 +88,19 @@ class AddressTransactionsViewController(
     override fun viewWillAppear(p0: Boolean) {
         super.viewWillAppear(p0)
         val appDelegate = getAppDelegate()
-        viewControllerScope.launch(Dispatchers.IO) {
-            appDelegate.database.walletDbProvider.loadWalletWithStateById(walletId)?.let { wallet ->
-                this@AddressTransactionsViewController.wallet = wallet
-                shownAddress = wallet.getDerivedAddressEntity(derivationIdx)
-                onResume()
-                runOnMainThread { newAddressChosen() }
+        if (wallet == null) {
+            viewControllerScope.launch(Dispatchers.IO) {
+                appDelegate.database.walletDbProvider.loadWalletWithStateById(walletId)?.let { wallet ->
+                    this@AddressTransactionsViewController.wallet = wallet
+                    shownAddress = wallet.getDerivedAddressEntity(derivationIdx)
+                    onResume()
+                    runOnMainThread { newAddressChosen() }
+                }
             }
+        } else {
+            onResume()
         }
+
         viewControllerScope.launch {
             TransactionListManager.isDownloading.collect { refreshing ->
                 runOnMainThread {
@@ -120,7 +125,7 @@ class AddressTransactionsViewController(
     }
 
     private fun refreshListWhenAtTop() {
-        if (tableView.contentOffset.y <= 0.0 || nextPageToLoad == 0)
+        if (tableView.contentOffset.y <= 0.0 || nextPageToLoad == 0 && !finishedLoading)
             refreshListShownData()
     }
 
@@ -281,6 +286,7 @@ class AddressTransactionsViewController(
         private lateinit var lastItemLabel: UIView
         private lateinit var lastItemButton: TextButton
         private var vc: AddressTransactionsViewController? = null
+        private var tx: AddressTransactionWithTokens? = null
 
         override fun setupView() {
             val cardView = CardView()
@@ -320,11 +326,22 @@ class AddressTransactionsViewController(
 
             cardView.contentView.addSubview(txView)
             cardView.contentView.layoutMargins = UIEdgeInsets.Zero()
-            txView.edgesToSuperview(inset = DEFAULT_MARGIN)
+            txView.apply {
+                edgesToSuperview(inset = DEFAULT_MARGIN)
+                isUserInteractionEnabled = true
+                isUserInteractionEnabled = true
+                addGestureRecognizer(UITapGestureRecognizer {
+                    vc!!.navigationController.pushViewController(
+                        TransactionInfoViewController(tx!!.addressTransaction.txId), true
+                    )
+                })
+
+            }
         }
 
         fun bind(tx: AddressTransactionWithTokens, vc: AddressTransactionsViewController, isLastElement: Boolean) {
             this.vc = vc
+            this.tx = tx
             txView.bind(tx, tokenClickListener = { tokenId ->
                 vc.presentViewController(TokenInformationViewController(tokenId, null), true) {}
             }, getAppDelegate().texts)

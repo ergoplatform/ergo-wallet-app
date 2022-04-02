@@ -186,7 +186,7 @@ class ErgoPaySigningViewController(
         }
     }
 
-    inner class TransactionWithHeaderContainer : TransactionContainer(texts, { startPayment() }) {
+    inner class TransactionWithHeaderContainer : SigningTransactionContainer(texts, { startPayment() }) {
         private val messageFromDApp = Body1Label()
         private val messageIcon = UIImageView().apply {
             tintColor = UIColor.secondaryLabel()

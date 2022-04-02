@@ -507,6 +507,14 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                     txEntryView.bind(txInfo, tokenClickListener = { tokenId ->
                         presentViewController(TokenInformationViewController(tokenId, null), true) {}
                     }, texts)
+                    txEntryView.apply {
+                        isUserInteractionEnabled = true
+                        addGestureRecognizer(UITapGestureRecognizer {
+                            navigationController.pushViewController(
+                                TransactionInfoViewController(txInfo.addressTransaction.txId), true
+                            )
+                        })
+                    }
                     transactionStack.addArrangedSubview(txEntryView)
                 }
 
