@@ -2,10 +2,12 @@ package org.ergoplatform.ios.ui
 
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.Main
+import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGAffineTransform
 import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.coregraphics.CGSize
 import org.robovm.apple.coreimage.CIFilter
 import org.robovm.apple.foundation.*
 import org.robovm.apple.uikit.*
@@ -32,7 +34,7 @@ const val IMAGE_QR_SCAN = "qrcode.viewfinder"
 const val IMAGE_PLUS_CIRCLE = "plus.circle.fill"
 const val IMAGE_PLUS = "plus"
 const val IMAGE_MINUS_CIRCLE = "minus.circle.fill"
-const val IMAGE_CROSS_CIRCLE = "xmark.circle"
+const val IMAGE_REMOVE_TOKEN = "xmark"
 const val IMAGE_FULL_AMOUNT = "arrow.down.circle"
 const val IMAGE_MORE_ACTION = "ellipsis"
 const val IMAGE_OPEN_LIST = "arrowtriangle.down.circle.fill"
@@ -46,6 +48,13 @@ val IMAGE_SWITCH_RESOLUTION = if (Foundation.getMajorSystemVersion() >= 14)
 const val IMAGE_WARNING = "exclamationmark.circle"
 const val IMAGE_INFORMATION = "info.circle"
 const val IMAGE_ERROR = "xmark.circle"
+const val IMAGE_VERIFIED = "checkmark.seal.fill"
+const val IMAGE_SUSPICIOUS = "exclamationmark.octagon.fill"
+const val IMAGE_PHOTO_CAMERA = "camera.fill"
+const val IMAGE_VIDEO_PLAY = "play.fill"
+const val IMAGE_MUSIC_NOTE = "music.note"
+const val IMAGE_OPEN_BROWSER = "arrow.up.right.square"
+
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
@@ -57,12 +66,17 @@ val uiColorErgo get() = UIColor.systemRed()
 val ergoLogoImage get() = UIImage.getImage("ergologo")
 val ergoLogoFilledImage get() = UIImage.getImage("ergologofilled")
 val tokenLogoImage get() = UIImage.getImage("tokenlogo")
+val octagonImage get() = UIImage.getImage("octagon")
 
 fun getAppDelegate() = UIApplication.getSharedApplication().delegate as Main
 fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(r)
 
 @Suppress("DEPRECATION")
 fun openUrlInBrowser(url: String) = UIApplication.getSharedApplication().openURL(NSURL(url))
+
+fun UIViewController.shareText(text: String, uiBarButtonItem: UIBarButtonItem) {
+    shareText(text, uiBarButtonItem.keyValueCoder.getValue("view") as UIView)
+}
 
 fun UIViewController.shareText(text: String, sourceView: UIView) {
     val textShare = NSString(text)
@@ -117,14 +131,17 @@ fun UILabel.insertTrailingImage(image: UIImage) {
     attributedText = string
 }
 
-fun UIView.wrapWithTrailingImage(image: UIImage, fixedWith: Double = 0.0, fixedHeight: Double = 0.0): UIView {
+fun UIView.wrapWithTrailingImage(
+    image: UIImage,
+    fixedWith: Double = 0.0,
+    fixedHeight: Double = 0.0,
+    keepWidth: Boolean = false
+): TrailingImageView<UIView> {
     val imageView = UIImageView(image)
     imageView.tintColor = (this as? UILabel)?.textColor ?: this.tintColor
 
-    val container = UIView(CGRect.Zero())
+    val container = TrailingImageView(this, imageView)
     container.layoutMargins = UIEdgeInsets.Zero()
-    container.addSubview(this)
-    container.addSubview(imageView)
     if (fixedWith == 0.0) {
         imageView.enforceKeepIntrinsicWidth()
     } else {
@@ -134,9 +151,42 @@ fun UIView.wrapWithTrailingImage(image: UIImage, fixedWith: Double = 0.0, fixedH
         imageView.fixedHeight(fixedHeight)
     }
     imageView.contentMode = UIViewContentMode.ScaleAspectFit
-    imageView.centerVerticallyTo(this).leftToRightOf(this, DEFAULT_MARGIN * .7).rightToSuperview(canBeLess = true)
+    imageView.centerVerticallyTo(this).leftToRightOf(this, DEFAULT_MARGIN * .7).rightToSuperview(canBeLess = !keepWidth)
     this.leftToSuperview().topToSuperview().bottomToSuperview()
     return container
+}
+
+class TrailingImageView<T : UIView>(val content: T, val trailingImage: UIImageView) : UIView(CGRect.Zero()) {
+    init {
+        addSubview(content)
+        addSubview(trailingImage)
+    }
+}
+
+fun buildAddressSelectorView(
+    vc: UIViewController,
+    walletId: Int,
+    showAllAddresses: Boolean,
+    keepWidth: Boolean = false,
+    addressChosen: (Int?) -> Unit
+): TrailingImageView<UILabel> {
+    val addressNameLabel = Body1BoldLabel().apply {
+        numberOfLines = 1
+        textColor = uiColorErgo
+    }
+    @Suppress("UNCHECKED_CAST")
+    return addressNameLabel.wrapWithTrailingImage(
+        getIosSystemImage(IMAGE_OPEN_LIST, UIImageSymbolScale.Small, 20.0)!!,
+        keepWidth = keepWidth
+    ).apply {
+        isUserInteractionEnabled = true
+        addGestureRecognizer(UITapGestureRecognizer {
+            vc.presentViewController(
+                ChooseAddressListDialogViewController(walletId, showAllAddresses, addressChosen),
+                true
+            ) {}
+        })
+    } as TrailingImageView<UILabel>
 }
 
 fun createTextview(): UITextView {
@@ -297,4 +347,12 @@ fun UIScrollView.scrollToBottom(animated: Boolean = true) {
         CGPoint(0.0, contentSize.height - bounds.size.height + contentInset.bottom),
         animated
     )
+}
+
+fun UIImage.scaleToSize(scaleWidth: Double, scaleHeight: Double): UIImage? {
+    val scaledImageSize = CGSize(scaleWidth, scaleHeight)
+    val renderer = UIGraphicsImageRenderer(scaledImageSize)
+    return renderer.toImage {
+        this.draw(CGRect(CGPoint.Zero(), scaledImageSize))
+    }
 }

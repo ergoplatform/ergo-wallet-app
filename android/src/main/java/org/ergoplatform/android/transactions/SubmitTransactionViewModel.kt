@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.ui.AndroidStringProvider
@@ -45,7 +46,8 @@ abstract class SubmitTransactionViewModel : ViewModel() {
             uiLogic.startPaymentWithMnemonicAsync(
                 mnemonic,
                 Preferences(context),
-                AndroidStringProvider(context)
+                AndroidStringProvider(context),
+                AppDatabase.getInstance(context)
             )
 
             return true
@@ -65,7 +67,8 @@ abstract class SubmitTransactionViewModel : ViewModel() {
             uiLogic.startPaymentWithMnemonicAsync(
                 mnemonic!!,
                 Preferences(context),
-                AndroidStringProvider(context)
+                AndroidStringProvider(context),
+                AppDatabase.getInstance(context)
             )
 
         }

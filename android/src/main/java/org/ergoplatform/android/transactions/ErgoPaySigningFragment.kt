@@ -14,6 +14,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentErgoPaySigningBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
 import org.ergoplatform.wallet.addresses.getAddressLabel
@@ -51,7 +52,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
             AndroidStringProvider(context)
         )
 
-        viewModel.uiStateRefresh.observe(viewLifecycleOwner, { state ->
+        viewModel.uiStateRefresh.observe(viewLifecycleOwner) { state ->
             binding.layoutTransactionInfo.visibility =
                 visibleWhen(state, ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION)
             binding.layoutProgress.visibility =
@@ -68,10 +69,11 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
                 ErgoPaySigningUiLogic.State.FETCH_DATA -> showFetchData()
                 ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION -> showTransactionInfo()
                 ErgoPaySigningUiLogic.State.DONE -> showDoneInfo()
+                null -> {} // impossible
             }
-        })
+        }
 
-        viewModel.addressChosen.observe(viewLifecycleOwner, {
+        viewModel.addressChosen.observe(viewLifecycleOwner) {
             val walletLabel = viewModel.uiLogic.wallet?.walletConfig?.displayName ?: ""
             val addressLabel =
                 it?.getAddressLabel(AndroidStringProvider(requireContext()))
@@ -81,7 +83,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
                     )
             binding.addressLabel.text =
                 getString(R.string.label_sign_with, addressLabel, walletLabel)
-        })
+        }
 
         // Click listeners
         binding.transactionInfo.buttonSignTx.setOnClickListener {
@@ -142,6 +144,11 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
         val uiLogic = viewModel.uiLogic
         binding.transactionInfo.bindTransactionInfo(
             uiLogic.transactionInfo!!.reduceBoxes(),
+            { tokenId ->
+                findNavController().navigateSafe(
+                    ErgoPaySigningFragmentDirections.actionErgoPaySigningToTokenInformation(tokenId)
+                )
+            },
             layoutInflater
         )
         binding.layoutTiMessage.visibility = uiLogic.epsr?.message?.let {

@@ -51,7 +51,7 @@ class ChooseAddressListDialogViewController(
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         viewControllerScope.launch {
-            getAppDelegate().database.loadWalletWithStateById(walletId)?.let {
+            getAppDelegate().database.walletDbProvider.loadWalletWithStateById(walletId)?.let {
                 adapterLogic = ChooseAddressListAdapterLogic(it, showAllAddresses)
                 runOnMainThread {
                     tableView.reloadData()

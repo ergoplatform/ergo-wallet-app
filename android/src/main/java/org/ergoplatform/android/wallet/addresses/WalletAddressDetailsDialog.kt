@@ -14,8 +14,8 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentWalletAddressDetailsDialogBinding
-import org.ergoplatform.getAddressDerivationPath
 import org.ergoplatform.android.ui.copyStringToClipboard
+import org.ergoplatform.getAddressDerivationPath
 import org.ergoplatform.uilogic.wallet.addresses.WalletAddressDialogUiLogic
 
 /**
@@ -72,7 +72,7 @@ class WalletAddressDetailsDialog : BottomSheetDialogFragment() {
     @OptIn(DelicateCoroutinesApi::class)
     private fun deleteAddress(addrId: Long) {
         GlobalScope.launch(Dispatchers.IO) {
-            uiLogic.deleteWalletAddress(RoomWalletDbProvider(AppDatabase.getInstance(requireContext())), addrId)
+            uiLogic.deleteWalletAddress(AppDatabase.getInstance(requireContext()), addrId)
         }
         dismiss()
     }

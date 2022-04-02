@@ -1,8 +1,11 @@
 package org.ergoplatform.utils
 
 import org.ergoplatform.TokenAmount
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.uilogic.STRING_FORMAT_FIAT
+import org.ergoplatform.uilogic.STRING_LABEL_ERG_AMOUNT
 import org.ergoplatform.uilogic.StringProvider
+import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -18,30 +21,30 @@ fun inputTextToDouble(amountStr: String?): Double {
     }
 }
 
+fun formatTokenPriceToString(
+    balanceAmount: TokenAmount,
+    pricePerErg: BigDecimal,
+    walletSyncManager: WalletStateSyncManager,
+    text: StringProvider
+): String {
+    val ergValue = balanceAmount.toErgoValue(pricePerErg)
+
+    return if (walletSyncManager.fiatCurrency.isNotEmpty()) {
+        formatFiatToString(
+            ergValue.toDouble() * walletSyncManager.fiatValue.value,
+            walletSyncManager.fiatCurrency, text
+        )
+    } else {
+        text.getString(STRING_LABEL_ERG_AMOUNT, ergValue.toStringRoundToDecimals())
+    }
+}
+
 /**
  * fiat is formatted according to users locale, because it is his local currency
  */
 fun formatFiatToString(amount: Double, currency: String, text: StringProvider): String {
     return DecimalFormat(text.getString(STRING_FORMAT_FIAT)).format(amount) +
             " " + currency.uppercase(Locale.getDefault())
-}
-
-/**
- * Formats token (asset) amounts, always formatted US-style.
- * For larger amounts, 1,120.00 becomes 1.1K, useful for displaying with less space
- */
-fun formatTokenAmounts(
-    amount: Long,
-    decimals: Int,
-): String {
-    val tokenAmount = TokenAmount(amount, decimals)
-    val doubleValue: Double = tokenAmount.toDouble()
-    val preciseString = tokenAmount.toString()
-    return if (doubleValue < 1000 && preciseString.length < 8 || doubleValue < 1) {
-        preciseString
-    } else {
-        formatDoubleWithPrettyReduction(doubleValue)
-    }
 }
 
 fun formatDoubleWithPrettyReduction(amount: Double): String {
@@ -55,5 +58,7 @@ fun formatDoubleWithPrettyReduction(amount: Double): String {
         formatter.format(amount / 1000.0.pow(exp.toDouble())) + suffixChars[exp - 1]
     }
 }
+
+fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
 
 fun Throwable.getMessageOrName(): String = message ?: javaClass.name

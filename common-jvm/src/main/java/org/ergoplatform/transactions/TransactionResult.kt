@@ -1,5 +1,7 @@
 package org.ergoplatform.transactions
 
+import org.ergoplatform.appkit.Transaction
+
 interface TransactionResult {
     val success: Boolean
     val errorMsg: String?
@@ -8,6 +10,7 @@ interface TransactionResult {
 data class SendTransactionResult(
     override val success: Boolean,
     val txId: String? = null,
+    val sentTransaction: Transaction? = null,
     override val errorMsg: String? = null
 ) : TransactionResult
 

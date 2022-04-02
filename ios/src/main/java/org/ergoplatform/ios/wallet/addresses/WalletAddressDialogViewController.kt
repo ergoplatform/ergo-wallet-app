@@ -116,7 +116,7 @@ class WalletAddressDialogViewController(val address: WalletAddress) : ViewContro
     @OptIn(DelicateCoroutinesApi::class)
     private fun doSaveAddressLabel() {
         GlobalScope.launch {
-            uiLogic.saveWalletAddressLabel(getAppDelegate().database, address.id, nameInputField.text)
+            uiLogic.saveWalletAddressLabel(getAppDelegate().database.walletDbProvider, address.id, nameInputField.text)
         }
         dismissViewController(true) {}
     }

@@ -1,4 +1,4 @@
-package org.ergoplatform.api;
+package org.ergoplatform.api.coingecko;
 
 import com.google.gson.annotations.SerializedName;
 

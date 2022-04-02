@@ -2,7 +2,6 @@ package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
 import org.ergoplatform.uilogic.STRING_LABEL_AMOUNT
 import org.ergoplatform.uilogic.wallet.ReceiveToWalletUiLogic
@@ -33,31 +32,18 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
         walletTitle = Headline2Label()
         walletTitle.numberOfLines = 1
         walletTitle.textColor = uiColorErgo
-        addressNameLabel = Body1BoldLabel().apply {
-            numberOfLines = 1
-            textColor = uiColorErgo
+        val addressNameContainer = buildAddressSelectorView(this, walletId, false) {
+            uiLogic.derivationIdx = it ?: 0
+            addressChanged()
         }
-        val addressNameContainer =
-            addressNameLabel.wrapWithTrailingImage(
-                getIosSystemImage(IMAGE_OPEN_LIST, UIImageSymbolScale.Small, 20.0)!!
-            ).apply {
-                isUserInteractionEnabled = true
-                addGestureRecognizer(UITapGestureRecognizer {
-                    presentViewController(
-                        ChooseAddressListDialogViewController(walletId, false) {
-                            uiLogic.derivationIdx = it ?: 0
-                            addressChanged()
-                        }, true
-                    ) {}
-                })
-            }
+        addressNameLabel = addressNameContainer.content
 
         val uiBarButtonItem = UIBarButtonItem(UIBarButtonSystemItem.Action)
         uiBarButtonItem.setOnClickListener {
             uiLogic.getTextToShare(getInputAmount(), getInputPurpose())?.let {
                 this@ReceiveToWalletViewController.shareText(
                     it,
-                    uiBarButtonItem.keyValueCoder.getValue("view") as UIView
+                    uiBarButtonItem
                 )
             }
         }
@@ -118,7 +104,7 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         viewControllerScope.launch {
-            uiLogic.loadWallet(walletId, getAppDelegate().database)
+            uiLogic.loadWallet(walletId, getAppDelegate().database.walletDbProvider)
             uiLogic.wallet?.let {
                 runOnMainThread {
                     walletTitle.text = it.walletConfig.displayName

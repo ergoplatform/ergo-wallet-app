@@ -4,14 +4,16 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.*
-import org.ergoplatform.appkit.impl.*
+import org.ergoplatform.appkit.ExplorerAndPoolUnspentBoxesLoader
+import org.ergoplatform.appkit.impl.InputBoxImpl
+import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.restapi.client.Parameters
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
-import org.ergoplatform.transactions.getInputBoxesIds
 import org.ergoplatform.uilogic.STRING_ERROR_BALANCE_ERG
+import org.ergoplatform.uilogic.STRING_ERROR_CHANGEBOX_AMOUNT
 import org.ergoplatform.uilogic.STRING_ERROR_PROVER_CANT_SIGN
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
@@ -55,6 +57,10 @@ fun getExplorerWebUrl() =
     else "https://testnet.ergoplatform.com/"
 
 fun getExplorerTxUrl(txId: String) = getExplorerWebUrl() + "en/transactions/" + txId
+
+fun getExplorerAddressUrl(address: String) = getExplorerWebUrl() + "en/addresses/" + address
+
+fun getExplorerTokenUrl(tokenId: String) = getExplorerWebUrl() + "en/token/" + tokenId
 
 fun getAddressDerivationPath(index: Int): String {
     return "m/44'/429'/0'/0/$index"
@@ -128,17 +134,16 @@ fun sendErgoTx(
             }
             val prover = proverBuilder.build()
 
-            val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
-            val signed = BoxOperations.createForEip3Prover(prover).withAmountToSpend(amountToSend)
+            val contract: ErgoContract = recipient.toErgoContract()
+            val unsignedTx = BoxOperations.createForEip3Prover(prover, ctx).withAmountToSpend(amountToSend)
                 .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
-                .withTokensToSpend(tokensToSend).putToContractTx(
-                    ctx, contract
-            )
+                .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
+            val signed = prover.sign(unsignedTx)
             ctx.sendTransaction(signed)
 
             val txId = signed.id
 
-            return@execute SendTransactionResult(txId.isNotEmpty(), txId)
+            SendTransactionResult(txId.isNotEmpty(), txId, unsignedTx)
         }
     } catch (t: Throwable) {
         LogUtils.logDebug("sendErgoTx", "Error caught", t)
@@ -157,7 +162,7 @@ fun buildPromptSigningResultFromErgoPayRequest(
         return getRestErgoClient(prefs).execute { ctx ->
             val reducedTx = ctx.parseReducedTransaction(serializedTx)
             val inputs =
-                ctx.getBoxesById(*reducedTx.tx.unsignedTx().getInputBoxesIds().toTypedArray())
+                ctx.getBoxesById(*reducedTx.inputBoxesIds.toTypedArray())
                     .map { inputBox ->
                         (inputBox as InputBoxImpl).ergoBox.bytes()
                     }
@@ -186,10 +191,10 @@ fun prepareSerializedErgoTx(
     try {
         val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
-            val contract: ErgoContract = ErgoTreeContract(recipient.ergoAddress.script())
-            val unsigned = BoxOperations.createForSenders(senderAddresses).withAmountToSpend(amountToSend)
+            val contract: ErgoContract = recipient.toErgoContract()
+            val unsigned = BoxOperations.createForSenders(senderAddresses, ctx).withAmountToSpend(amountToSend)
                 .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
-                .withTokensToSpend(tokensToSend).putToContractTxUnsigned(ctx, contract)
+                .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
 
             val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
                 val ergoBox = box.box()
@@ -210,9 +215,9 @@ fun prepareSerializedErgoTx(
     }
 }
 
-fun deserializeUnsignedTxOffline(serializedTx: ByteArray): UnsignedErgoLikeTransaction {
+fun deserializeUnsignedTxOffline(serializedTx: ByteArray): ReducedTransaction {
     return getColdErgoClient().execute { ctx ->
-        return@execute ctx.parseReducedTransaction(serializedTx).tx.unsignedTx()
+        return@execute ctx.parseReducedTransaction(serializedTx)
     }
 }
 
@@ -272,12 +277,11 @@ fun sendSignedErgoTx(
 ): SendTransactionResult {
     try {
         val ergoClient = getRestErgoClient(prefs)
-        val txId = ergoClient.execute { ctx ->
+        return ergoClient.execute { ctx ->
             val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
-            ctx.sendTransaction(signedTx).trim('"')
+            val txId = ctx.sendTransaction(signedTx).trim('"')
+            SendTransactionResult(txId.isNotEmpty(), txId, signedTx)
         }
-
-        return SendTransactionResult(txId.isNotEmpty(), txId)
 
     } catch (t: Throwable) {
         return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
@@ -290,6 +294,10 @@ fun getErrorMessage(t: Throwable, texts: StringProvider): String? {
             STRING_ERROR_BALANCE_ERG,
             ErgoAmount(t.balanceFound).toStringTrimTrailingZeros()
         )
+    } else if (t is InputBoxesSelectionException.NotEnoughCoinsForChangeException) {
+        texts.getString(
+            STRING_ERROR_CHANGEBOX_AMOUNT
+        )
     } else if (t is AssertionError && t.message?.contains("Tree root should be real") == true) {
         // ProverInterpreter.scala
         texts.getString(STRING_ERROR_PROVER_CANT_SIGN)
@@ -300,9 +308,9 @@ fun getErrorMessage(t: Throwable, texts: StringProvider): String? {
 
 fun getErgoNetworkType() = if (isErgoMainNet) NetworkType.MAINNET else NetworkType.TESTNET
 
-fun deserializeErgobox(input: ByteArray): ErgoBox? {
+fun deserializeErgobox(input: ByteArray): InputBox? {
     val r = `SigmaSerializer$`.`MODULE$`.startReader(input, 0)
     val ergoBox = `ErgoBoxSerializer$`.`MODULE$`.parse(r)
-    return ergoBox
+    return ergoBox?.let { InputBoxImpl(it) }
 }
 

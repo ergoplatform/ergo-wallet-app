@@ -21,9 +21,11 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
 import org.ergoplatform.android.ui.*
+import org.ergoplatform.persistance.TokenPrice
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.utils.formatFiatToString
+import org.ergoplatform.utils.formatTokenPriceToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
 
@@ -92,7 +94,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
                 viewModel.uiLogic.feeAmount.toStringRoundToDecimals()
             )
             binding.grossAmount.setAmount(it.toBigDecimal())
-            val nodeConnector = NodeConnector.getInstance()
+            val nodeConnector = WalletStateSyncManager.getInstance()
             binding.tvFiat.visibility =
                 if (nodeConnector.fiatCurrency.isNotEmpty()) View.VISIBLE else View.GONE
             binding.tvFiat.setText(
@@ -128,14 +130,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
         }
         binding.buttonShareTx.setOnClickListener {
             val txUrl = getExplorerTxUrl(binding.labelTxId.text.toString())
-            val sendIntent: Intent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, txUrl)
-                type = "text/plain"
-            }
-
-            val shareIntent = Intent.createChooser(sendIntent, null)
-            startActivity(shareIntent)
+            shareText(txUrl)
         }
         binding.buttonDismiss.setOnClickListener {
             val succeeded = findNavController().popBackStack()
@@ -225,40 +220,52 @@ class SendFundsFragment : SubmitTransactionFragment() {
             this.visibility =
                 if (tokensChosen.isNotEmpty()) View.VISIBLE else View.GONE
             this.removeAllViews()
+            val walletStateSyncManager = WalletStateSyncManager.getInstance()
             tokensChosen.forEach {
                 val ergoId = it.key
                 tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenDbEntity ->
                     val itemBinding =
                         FragmentSendFundsTokenItemBinding.inflate(layoutInflater, this, true)
-                    itemBinding.tvTokenName.text = tokenDbEntity.name ?: getString(R.string.label_unnamed_token)
+                    itemBinding.tvTokenName.text =
+                        tokenDbEntity.name ?: getString(R.string.label_unnamed_token)
 
                     val amountChosen = it.value.value
-                    val isSingular = tokenDbEntity.isSingularToken() && amountChosen == 1L
+                    val tokenPrice = walletStateSyncManager.tokenPrices[tokenDbEntity.tokenId!!]
+                    val isSingular = tokenDbEntity.isSingularToken() && amountChosen == 1L && tokenPrice == null
 
                     if (isSingular) {
                         itemBinding.inputTokenAmount.visibility = View.GONE
-                        itemBinding.buttonTokenAll.visibility = View.INVISIBLE
+                        itemBinding.labelTokenBalance.visibility = View.GONE
+                        itemBinding.labelBalanceValue.visibility = View.GONE
+                        itemBinding.labelTokenBalance.visibility = View.GONE
                     } else {
+                        itemBinding.labelTokenBalance.text =
+                            tokenDbEntity.toTokenAmount().toStringPrettified()
                         itemBinding.inputTokenAmount.inputType =
                             if (tokenDbEntity.decimals > 0) InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
                             else InputType.TYPE_CLASS_NUMBER
                         itemBinding.inputTokenAmount.addTextChangedListener(
-                            TokenAmountWatcher(tokenDbEntity, itemBinding)
+                            TokenAmountWatcher(
+                                tokenDbEntity,
+                                tokenPrice,
+                                itemBinding
+                            )
                         )
+                        itemBinding.labelBalanceValue.visibility =
+                            if (tokenPrice == null) View.GONE else View.VISIBLE
                         itemBinding.inputTokenAmount.setText(
                             viewModel.uiLogic.tokenAmountToText(
                                 amountChosen,
                                 tokenDbEntity.decimals
                             )
                         )
-                        itemBinding.buttonTokenAll.setOnClickListener {
+                        itemBinding.labelTokenBalance.setOnClickListener {
                             itemBinding.inputTokenAmount.setText(
                                 viewModel.uiLogic.tokenAmountToText(
                                     tokenDbEntity.amount!!,
                                     tokenDbEntity.decimals
                                 )
                             )
-                            itemBinding.buttonTokenAll.visibility = View.INVISIBLE
                         }
                     }
 
@@ -394,6 +401,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
 
     inner class TokenAmountWatcher(
         private val token: WalletToken,
+        private val tokenPrice: TokenPrice?,
         private val itemBinding: FragmentSendFundsTokenItemBinding
     ) : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -405,12 +413,21 @@ class SendFundsFragment : SubmitTransactionFragment() {
         }
 
         override fun afterTextChanged(s: Editable?) {
-            viewModel.uiLogic.setTokenAmount(
-                token.tokenId!!,
+            val tokenId = token.tokenId!!
+            val amount =
                 s?.toString()?.toTokenAmount(token.decimals) ?: TokenAmount(0, token.decimals)
-            )
+            viewModel.uiLogic.setTokenAmount(tokenId, amount)
+            tokenPrice?.let {
+                itemBinding.labelBalanceValue.text = getString(
+                    R.string.label_fiat_amount, formatTokenPriceToString(
+                        amount,
+                        it.ergValue,
+                        WalletStateSyncManager.getInstance(),
+                        AndroidStringProvider(requireContext())
+                    )
+                )
+            }
             binding.labelTokenAmountError.visibility = View.GONE
-            itemBinding.buttonTokenAll.visibility = View.VISIBLE
         }
 
     }

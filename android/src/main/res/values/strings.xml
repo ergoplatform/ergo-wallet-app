@@ -21,6 +21,7 @@
     <string name="label_amount">Amount</string>
     <string name="label_purpose">Purpose</string>
     <string name="label_share">Share</string>
+    <string name="label_open">Open</string>
     <string name="button_delete">Delete</string>
     <string name="button_yes">Yes</string>
     <string name="label_cancel">Cancel</string>
@@ -126,7 +127,26 @@
     <!-- Wallet details -->
     <string name="title_wallet_balance">Balance</string>
     <string name="label_all_addresses">All %1d addresses</string>
-    <string name="exporer_view_transactions">Tap to view transactions in Ergo Explorer — in-app transaction list will be added soon</string>
+    <string name="transactions_view_more">View more</string>
+    <string name="transactions_none_yet">There are no transactions made for this address yet.</string>
+
+    <!-- Transaction list -->
+    <string name="tx_state_waiting">Pending</string>
+    <string name="tx_state_cancelled">Cancelled</string>
+    <string name="tx_state_submitted">Submitted</string>
+    <string name="tx_state_low_confirmations">Executed</string>
+    <string name="tx_state_high_confirmations">Confirmed</string>
+    <string name="tx_download_progress">%1s transactions downloaded</string>
+    <string name="transactions_load_all_desc">End of downloaded transactions. Wallet App can reload all your transactions. This may take a long time.</string>
+    <string name="transactions_load_all_button">Load all transactions</string>
+
+    <!-- Transaction information -->
+    <string name="title_transaction">Transaction</string>
+    <string name="title_transaction_inboxes">Amounts spent</string>
+    <string name="desc_transaction_inboxes">These amounts were spent by this transaction.</string>
+    <string name="desc_transaction_outboxes">These amounts were sent by this transaction.</string>
+    <string name="desc_transaction_waiting">Waiting for execution</string>
+    <string name="desc_transaction_execution_time">Executed at %1s</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Addresses</string>
@@ -174,6 +194,7 @@
     <string name="title_add_token">Choose token to send</string>
     <string name="error_token_amount">Please enter valid token amounts or remove the invalid token entries</string>
     <string name="error_balance_erg">There is not enough balance to send the specified amount: only %1s ERG available.</string>
+    <string name="error_changebox_amount">You need to withhold a small amount of ERG to store your tokens remaining.</string>
     <string name="error_request_token_not_found">Could not add token \'%1s\'</string>
     <string name="error_request_token_amount">Could not set requested amount for token \'%1s\'</string>
     <string name="error_request_token_but_no_erg">Tokens requested, but no ERG amount. A default amount will be sent.</string>
@@ -201,12 +222,26 @@
     <string name="label_ergo_pay_choose_address">Please choose an address to process the Ergo Pay Request.</string>
     <string name="error_prover_cant_sign">The transaction could not be signed with this wallet\'s keys.</string>
 
+    <!-- Token information dialog -->
+    <string name="label_minting_tx">Minting transaction</string>
+    <string name="label_token_description">Token description</string>
+    <string name="label_no_description">None</string>
+    <string name="label_token_supply">Full supply amount</string>
+    <string name="label_error_fetching">Could not fetch requested information</string>
+    <string name="label_content_link">Content link</string>
+    <string name="label_content_hash">Content Hash</string>
+    <string name="button_validate">Validate</string>
+    <string name="desc_download_content">Ergo Wallet can show a preview of content linked to NFT tokens.
+        Please be aware that this content is created by third parties and might be unwanted.</string>
+    <string name="button_download_content_on">Activate</string>
+    <string name="button_download_content_off">Deactivate</string>
+
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1s</string>
     <string name="about_year" translatable="false">2022</string>
     <string name="desc_about_moreinfo">Licensed under <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Apache 2 License</a>\n
         This project is <a href="https://github.com/ergoplatform/ergo-wallet-app">open source software</a>\n
-    Find help on <a href="https://discord.gg/kj7s7nb">Discord</a> or <a href="https://t.me/ergosupport">Telegram</a></string>
+    Find help on <a href="https://discord.gg/kj7s7nb">Discord</a> or <a href="https://t.me/ErgoWalletApp">Telegram</a></string>
     <string name="desc_coingecko">Ergo price powered by <a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a></string>
     <string name="label_cg_conn_error">Error connecting to CoinGecko, please try again later.</string>
     <string name="desc_dark_mode">Dark or light mode?</string>
@@ -219,4 +254,5 @@
     <string name="label_explorer_api_url">Explorer API URL</string>
     <string name="label_node_url">Node URL</string>
     <string name="button_show_debug_info">Show debug information</string>
+    <string name="label_ipfs_http_gateway">IPFS HTTP gateway</string>
 </resources>

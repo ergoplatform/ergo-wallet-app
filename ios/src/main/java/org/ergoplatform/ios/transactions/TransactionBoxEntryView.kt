@@ -43,6 +43,7 @@ class TransactionBoxEntryView : UIView(CGRect.Zero()) {
         value: Long?,
         address: String,
         assets: List<AssetInstanceInfo>?,
+        tokenClickListener: ((String) -> Unit)?,
         texts: I18NBundle
     ): TransactionBoxEntryView {
         labelErgAmount.text = value?.let {
@@ -56,13 +57,16 @@ class TransactionBoxEntryView : UIView(CGRect.Zero()) {
         tokensList.apply {
             clearArrangedSubviews()
 
-            assets?.forEach {
+            assets?.forEach { token ->
                 addArrangedSubview(TokenEntryView().apply {
                     // we use the token id here, we don't have the name in the cold wallet context
                     bindWalletToken(
-                        it.name ?: it.tokenId,
-                        TokenAmount(it.amount, it.decimals ?: 0).toStringTrimTrailingZeros()
+                        token.name ?: token.tokenId,
+                        TokenAmount(token.amount, token.decimals ?: 0).toStringUsFormatted()
                     )
+                    tokenClickListener?.let {
+                        addGestureRecognizer(UITapGestureRecognizer { tokenClickListener(token.tokenId) })
+                    }
                 })
             }
         }

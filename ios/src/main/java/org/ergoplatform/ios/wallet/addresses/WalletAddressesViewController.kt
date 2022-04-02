@@ -2,9 +2,8 @@ package org.ergoplatform.ios.wallet.addresses
 
 import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_BUTTON_ADD_ADDRESS
@@ -61,9 +60,9 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
         // observing NodeConnector refresh. Since the singleAddressRefresh will
         // always return its last saved value, initializing can be done here, too
         viewControllerScope.launch {
-            val nodeConnector = NodeConnector.getInstance()
+            val nodeConnector = WalletStateSyncManager.getInstance()
             nodeConnector.singleAddressRefresh.collect {
-                uiLogic.init(getAppDelegate().database, walletId)
+                uiLogic.init(getAppDelegate().database.walletDbProvider, walletId)
             }
         }
     }
@@ -189,7 +188,7 @@ class WalletAddressesViewController(private val walletId: Int) : CoroutineViewCo
             LogUtils.logDebug("WalletAddressesVc", "Adding $addrCount addresses")
             val appDelegate = getAppDelegate()
             parentVc!!.uiLogic.addNextAddresses(
-                appDelegate.database,
+                appDelegate.database.walletDbProvider,
                 appDelegate.prefs, addrCount, mnemonic
             )
         }

@@ -5,6 +5,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.*
+import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.transactions.*
@@ -136,7 +137,8 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     override fun startPaymentWithMnemonicAsync(
         signingSecrets: SigningSecrets,
         preferences: PreferencesProvider,
-        texts: StringProvider
+        texts: StringProvider,
+        db: IAppDatabase,
     ) {
         resetLastMessage()
         notifyUiLocked(true)
@@ -160,14 +162,9 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                             SendTransactionResult(false, errorMsg = signingResult.errorMsg)
                     }
 
+                    notifyUiLocked(false)
+                    transactionSubmitted(ergoTxResult, db.transactionDbProvider, preferences, transactionInfo)
                 }
-                notifyUiLocked(false)
-
-                if (ergoTxResult.success) {
-                    NodeConnector.getInstance().invalidateCache()
-                    notifyHasTxId(ergoTxResult.txId!!)
-                }
-                notifyHasErgoTxResult(ergoTxResult)
             }
 
             notifyUiLocked(true)

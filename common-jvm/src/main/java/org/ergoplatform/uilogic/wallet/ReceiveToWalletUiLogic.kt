@@ -1,6 +1,6 @@
 package org.ergoplatform.uilogic.wallet
 
-import org.ergoplatform.NodeConnector
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.getExplorerPaymentRequestAddress
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
@@ -43,7 +43,7 @@ class ReceiveToWalletUiLogic {
     }
 
     fun getFiatAmount(ergAmount: Double, textProvider: StringProvider): String? {
-        val nodeConnector = NodeConnector.getInstance()
+        val nodeConnector = WalletStateSyncManager.getInstance()
         return if (nodeConnector.fiatCurrency.isNotEmpty()) {
             textProvider.getString(
                 STRING_LABEL_FIAT_AMOUNT,

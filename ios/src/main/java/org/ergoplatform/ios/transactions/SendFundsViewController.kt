@@ -19,7 +19,7 @@ class SendFundsViewController(
     private val walletId: Int,
     private val derivationIdx: Int = -1,
     private val paymentRequest: String? = null
-) : SubmitTransactionViewController(walletId) {
+) : SubmitTransactionViewController() {
 
     override val uiLogic = IosSendFundsUiLogic()
     private lateinit var scrollView: UIView
@@ -78,19 +78,8 @@ class SendFundsViewController(
 
         walletTitle = Body1Label()
         walletTitle.numberOfLines = 1
-        addressNameLabel = Body1BoldLabel().apply {
-            numberOfLines = 1
-            textColor = uiColorErgo
-        }
-        val addressNameContainer =
-            addressNameLabel.wrapWithTrailingImage(
-                getIosSystemImage(IMAGE_OPEN_LIST, UIImageSymbolScale.Small, 20.0)!!
-            ).apply {
-                isUserInteractionEnabled = true
-                addGestureRecognizer(UITapGestureRecognizer {
-                    showChooseAddressList(true)
-                })
-            }
+        val addressNameContainer = buildAddressSelectorView(this, walletId, true) { onAddressChosen(it) }
+        addressNameLabel = addressNameContainer.content
         balanceLabel = Body1Label()
         balanceLabel.numberOfLines = 1
 
@@ -152,9 +141,8 @@ class SendFundsViewController(
 
         tokensUiList = UIStackView(CGRect.Zero()).apply {
             axis = UILayoutConstraintAxis.Vertical
+            spacing = DEFAULT_MARGIN
             isHidden = true
-            layoutMargins = UIEdgeInsets(0.0, DEFAULT_MARGIN, 0.0, DEFAULT_MARGIN)
-            isLayoutMarginsRelativeArrangement = true
         }
         tokensError = Body1Label().apply {
             text = texts.get(STRING_ERROR_TOKEN_AMOUNT)
@@ -178,7 +166,7 @@ class SendFundsViewController(
         addTokenButton.addOnTouchUpInsideListener { _, _ ->
             presentViewController(
                 ChooseTokenListViewController(
-                    uiLogic.getTokensToChooseFrom()
+                    uiLogic.getTokensToChooseFrom(), uiLogic.tokensInfo
                 ) { tokenToAdd ->
                     tokensUiList.superview.animateLayoutChanges {
                         uiLogic.newTokenChosen(tokenToAdd)
@@ -256,7 +244,8 @@ class SendFundsViewController(
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        uiLogic.initWallet(getAppDelegate().database, walletId, derivationIdx, paymentRequest)
+        val appDelegate = getAppDelegate()
+        uiLogic.initWallet(appDelegate.database, ErgoApiService.getOrInit(appDelegate.prefs), walletId, derivationIdx, paymentRequest)
 
         inputReceiver.text = uiLogic.receiverAddress
         if (uiLogic.amountToSend.nanoErgs > 0) setInputAmount(uiLogic.amountToSend)
@@ -317,11 +306,19 @@ class SendFundsViewController(
                 addTokenButton.isHidden = (uiLogic.tokensChosen.size >= uiLogic.tokensAvail.size)
                 tokensUiList.clearArrangedSubviews()
                 tokensError.isHidden = true
+                val walletStateSyncManager = WalletStateSyncManager.getInstance()
                 uiLogic.tokensChosen.forEach {
                     val ergoId = it.key
                     tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
                         val tokenEntry =
-                            SendTokenEntryView(uiLogic, tokensError, tokenEntity, it.value, texts)
+                            SendTokenEntryView(
+                                uiLogic,
+                                tokensError,
+                                tokenEntity,
+                                it.value,
+                                texts,
+                                walletStateSyncManager.tokenPrices[tokenEntity.tokenId!!]
+                            )
                         tokensUiList.addArrangedSubview(tokenEntry)
                     }
                 }
@@ -340,7 +337,7 @@ class SendFundsViewController(
             runOnMainThread {
                 feeLabel.text = texts.format(STRING_DESC_FEE, feeAmount.toStringRoundToDecimals())
                 grossAmountLabel.setErgoAmount(grossAmount)
-                val nodeConnector = NodeConnector.getInstance()
+                val nodeConnector = WalletStateSyncManager.getInstance()
                 fiatLabel.isHidden = (nodeConnector.fiatCurrency.isEmpty())
                 fiatLabel.text = texts.format(
                     STRING_LABEL_FIAT_AMOUNT,

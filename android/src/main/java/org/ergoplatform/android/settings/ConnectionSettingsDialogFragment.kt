@@ -38,14 +38,16 @@ class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
         val preferences = Preferences(requireContext())
         binding.editNodeUrl.editText?.setText(preferences.prefNodeUrl)
         binding.editExplorerApiUrl.editText?.setText(preferences.prefExplorerApiUrl)
+        binding.inputIpfsGateway.setText(preferences.prefIpfsGatewayUrl)
         binding.buttonApply.setOnClickListener { buttonApply() }
-        binding.editNodeUrl.editText?.setOnEditorActionListener { _, _, _ ->
+        binding.inputIpfsGateway.setOnEditorActionListener { _, _, _ ->
             buttonApply()
             true
         }
         binding.buttonDefaults.setOnClickListener {
             binding.editNodeUrl.editText?.setText(preferences.getDefaultNodeApiUrl())
             binding.editExplorerApiUrl.editText?.setText(getDefaultExplorerApiUrl())
+            binding.inputIpfsGateway.setText(preferences.defaultIpfsGatewayUrl)
         }
     }
 
@@ -56,6 +58,7 @@ class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
         val preferences = Preferences(requireContext())
         preferences.prefExplorerApiUrl = explorerApiUrl
         preferences.prefNodeUrl = nodeUrl
+        preferences.prefIpfsGatewayUrl = binding.inputIpfsGateway.text?.toString() ?: ""
 
         // reset api service of NodeConnector to load new settings
         ErgoApiService.resetApiService()

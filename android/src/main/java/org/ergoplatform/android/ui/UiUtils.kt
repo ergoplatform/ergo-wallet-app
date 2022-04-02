@@ -17,6 +17,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.IdRes
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
@@ -48,12 +49,17 @@ fun TextView.enableLinks() {
     movementMethod = LinkMovementMethod.getInstance()
 }
 
-fun openUrlWithBrowser(context: Context, url: String) {
-    val browserIntent = Intent(
-        Intent.ACTION_VIEW,
-        Uri.parse(url)
-    )
-    context.startActivity(browserIntent)
+fun openUrlWithBrowser(context: Context, url: String): Boolean {
+    return try {
+        val browserIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse(url)
+        )
+        context.startActivity(browserIntent)
+        true
+    } catch (t: Throwable) {
+        false
+    }
 }
 
 /**
@@ -154,4 +160,22 @@ fun BottomSheetDialogFragment.expandBottomSheetOnShow() {
 
 fun postDelayed(delayMs: Long, r: Runnable) {
     Handler(Looper.getMainLooper()).postDelayed(r, delayMs)
+}
+
+fun TextView.setTextAndVisibility(newText: String?) {
+    newText?.let {
+        visibility = View.VISIBLE
+        text = it
+    } ?: run { visibility = View.GONE }
+}
+
+fun Fragment.shareText(textToShare: String) {
+    val sendIntent: Intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, textToShare)
+        type = "text/plain"
+    }
+
+    val shareIntent = Intent.createChooser(sendIntent, null)
+    startActivity(shareIntent)
 }

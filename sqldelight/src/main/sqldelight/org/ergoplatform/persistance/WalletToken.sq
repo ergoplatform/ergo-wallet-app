@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS `wallet_tokens` (
     `name` TEXT
 );
 
+CREATE INDEX IF NOT EXISTS `index_wallet_tokens_wallet_first_address` ON `wallet_tokens` (`wallet_first_address`);
+CREATE INDEX IF NOT EXISTS `index_wallet_tokens_public_address` ON `wallet_tokens` (`public_address`);
+
 deleteTokensByAddress:
 DELETE FROM wallet_tokens WHERE public_address = ?;
 

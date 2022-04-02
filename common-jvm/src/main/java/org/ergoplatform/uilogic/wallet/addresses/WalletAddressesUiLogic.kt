@@ -95,7 +95,7 @@ abstract class WalletAddressesUiLogic {
                 notifyUiLocked(false)
                 // make NodeConnector fetch the balances of the added addresses, in case they
                 // were used before
-                NodeConnector.getInstance().refreshSingleAddresses(prefs, database, addedAddresses)
+                WalletStateSyncManager.getInstance().refreshSingleAddresses(prefs, database, addedAddresses)
             }
         }
     }

@@ -93,6 +93,23 @@
         <action
             android:id="@+id/action_navigation_wallet_details_to_coldWalletSigningFragment"
             app:destination="@id/coldWalletSigningFragment" />
+        <action
+            android:id="@+id/action_navigation_wallet_details_to_tokenInformationDialogFragment"
+            app:destination="@id/tokenInformationDialogFragment" />
+        <action
+            android:id="@+id/action_navigation_wallet_details_to_addressTransactionsFragment"
+            app:destination="@id/addressTransactionsFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_navigation_wallet_details_to_transactionInfoFragment"
+            app:destination="@id/transactionInfoFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
 
     <fragment
@@ -317,6 +334,9 @@
         <argument
             android:name="derivation_idx"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_ergoPaySigning_to_tokenInformation"
+            app:destination="@id/tokenInformationDialogFragment" />
     </fragment>
     <dialog
         android:id="@+id/shareWithQrDialogFragment"
@@ -327,4 +347,58 @@
             android:name="dateToShare"
             app:argType="string" />
     </dialog>
+    <dialog
+        android:id="@+id/tokenInformationDialogFragment"
+        android:name="org.ergoplatform.android.tokens.TokenInformationDialogFragment"
+        tools:layout="@layout/fragment_token_information">
+        <argument
+            android:name="tokenId"
+            app:argType="string" />
+        <argument
+            android:name="amount"
+            android:defaultValue="-1L"
+            app:argType="long" />
+    </dialog>
+    <fragment
+        android:id="@+id/addressTransactionsFragment"
+        android:name="org.ergoplatform.android.transactions.AddressTransactionsFragment"
+        android:label="AddressTransactionsFragment"
+        tools:layout="@layout/fragment_address_transactions">
+        <argument
+            android:name="wallet_id"
+            app:argType="integer" />
+        <argument
+            android:name="derivation_idx"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_addressTransactionsFragment_to_tokenInformationDialogFragment"
+            app:destination="@id/tokenInformationDialogFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_addressTransactionsFragment_to_transactionInfoFragment"
+            app:destination="@id/transactionInfoFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/transactionInfoFragment"
+        android:name="org.ergoplatform.android.transactions.TransactionInfoFragment"
+        android:label="TransactionInfoFragment"
+        tools:layout="@layout/fragment_transaction_info">
+        <action
+            android:id="@+id/action_transactionInfoFragment_to_tokenInformationDialogFragment"
+            app:destination="@id/tokenInformationDialogFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
+        <argument
+            android:name="txId"
+            app:argType="string" />
+    </fragment>
 </navigation>
