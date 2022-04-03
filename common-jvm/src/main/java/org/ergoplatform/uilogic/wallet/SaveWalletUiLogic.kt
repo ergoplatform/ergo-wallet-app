@@ -1,15 +1,22 @@
 package org.ergoplatform.uilogic.wallet
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import org.ergoplatform.ErgoApiService
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
+import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.uilogic.STRING_LABEL_WALLET_DEFAULT
 import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.utils.LogUtils
 
-class SaveWalletUiLogic(val mnemonic: SecretString, fromRestore: Boolean) {
+class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boolean) {
 
     // Constructor
 
@@ -26,6 +33,9 @@ class SaveWalletUiLogic(val mnemonic: SecretString, fromRestore: Boolean) {
 //                )
 //            ))
 
+    private var derivedAddressesFound: Int = 0
+    private var derivedAddressesSearchJob: Job? = null
+
     // methods
 
     val signingSecrets get() = SigningSecrets(mnemonic, useDeprecatedDerivation)
@@ -33,8 +43,51 @@ class SaveWalletUiLogic(val mnemonic: SecretString, fromRestore: Boolean) {
     fun switchAddress() {
         if (hasAlternativeAddress) {
             // TODO BIP-32 fix useDeprecatedDerivation = !useDeprecatedDerivation
+            derivedAddressesSearchJob?.cancel()
+            derivedAddressesFound = 0
+            derivedAddressesSearchJob = null
             publicAddress = getPublicErgoAddressFromMnemonic(signingSecrets)
         }
+    }
+
+    suspend fun startDerivedAddressesSearch(
+        ergoApiService: ErgoApiService,
+        walletDbProvider: WalletDbProvider,
+        callback: (Int) -> Unit
+    ) {
+        // derived addresses search only done
+        // - when restoring an existing wallet
+        // - and it is not already in db
+        if (!fromRestore || getExistingWallet(walletDbProvider) != null) {
+            return
+        }
+
+        derivedAddressesSearchJob?.cancel()
+        coroutineScope {
+            derivedAddressesSearchJob = launch(Dispatchers.IO) {
+                var derivedAddressIdx = 1
+                var histFound = true
+                try {
+                    while (histFound) {
+                        val derivedAddress =
+                            getPublicErgoAddressFromMnemonic(signingSecrets, derivedAddressIdx)
+                        histFound =
+                            ergoApiService.getConfirmedTransactionsForAddress(derivedAddress, 1, 0)
+                                .execute().body()!!.items.isNotEmpty()
+
+                        if (histFound) {
+                            derivedAddressesFound = derivedAddressIdx
+                            callback(derivedAddressIdx)
+                        }
+
+                        derivedAddressIdx++
+                    }
+                } catch (t: Throwable) {
+                    LogUtils.logDebug(this.javaClass.simpleName, "Error searching derived addresses: ${t.message}", t)
+                }
+            }
+        }
+
     }
 
     suspend fun getSuggestedDisplayName(
@@ -88,6 +141,21 @@ class SaveWalletUiLogic(val mnemonic: SecretString, fromRestore: Boolean) {
                     extendedPublicKey = null
                 )
             walletDbProvider.insertWalletConfig(walletConfig)
+
+            // add derived addresses, if we've found some
+            val lastDerivedAddressIdx = derivedAddressesFound
+            for (derivedAddressIdx in 1..lastDerivedAddressIdx) {
+                val nextAddress = getPublicErgoAddressFromMnemonic(signingSecrets, derivedAddressIdx)
+                // this address could be already added as a read only address - delete it
+                walletDbProvider.deleteWalletConfigAndStates(nextAddress)
+                walletDbProvider.insertWalletAddress(
+                    WalletAddress(
+                        0, publicAddress, derivedAddressIdx,
+                        nextAddress, null
+                    )
+                )
+            }
+
             WalletStateSyncManager.getInstance().invalidateCache()
         }
     }

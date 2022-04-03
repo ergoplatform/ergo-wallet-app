@@ -101,6 +101,7 @@
     <!-- Save wallet -->
     <string name="intro_save_wallet">Your wallet\'s main public address is:</string>
     <string name="intro_save_wallet2">You can add additional addresses later.</string>
+    <string name="intro_save_wallet_derived_addresses_num">Found %1s used addresses in total.</string>
     <string name="intro_save_wallet3">Choose how the wallet and keys should be saved on this device.</string>
     <string name="button_alt_address">This is not my address</string>
     <string name="button_save_password_encrypted">Save password-encrypted</string>
