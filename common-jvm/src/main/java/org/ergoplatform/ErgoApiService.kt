@@ -52,7 +52,8 @@ class ErgoApiService(val defaultApi: DefaultApi) : ErgoApi {
         limit: Int,
         offset: Int
     ): Call<Items<TransactionInfo>> =
-        defaultApi.getApiV1AddressesP1Transactions(publicAddress, offset, limit, true)
+        // TODO concise should be true when https://github.com/ergoplatform/explorer-backend/issues/193 is fixed
+        defaultApi.getApiV1AddressesP1Transactions(publicAddress, offset, limit, false)
 
     companion object {
         private var ergoApiService: ErgoApiService? = null
