@@ -11,12 +11,14 @@ java {
 dependencies {
     implementation(project(":common-jvm"))
     implementation(project(":sqldelight"))
+    implementation("com.squareup.sqldelight:sqlite-driver:1.5.3")
 
     implementation(compose.desktop.currentOs)
     implementation(compose.materialIconsExtended)
 
     implementation("com.arkivanov.decompose:decompose:0.5.2")
     implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.5.2")
+    implementation("net.harawata:appdirs:1.2.1") // https://github.com/harawata/appdirs
 }
 
 compose.desktop {
