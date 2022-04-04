@@ -57,7 +57,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
 
     fun initWallet(
         database: IAppDatabase,
-        ergoApiService: ErgoExplorerApi,
+        ergoApiService: ApiServiceManager,
         walletId: Int,
         derivationIdx: Int,
         paymentRequest: String?
