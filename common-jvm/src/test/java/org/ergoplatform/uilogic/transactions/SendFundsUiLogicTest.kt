@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.ErgoApi
+import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.appkit.Parameters
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.TestUiWallet
@@ -76,7 +76,7 @@ class SendFundsUiLogicTest {
         val uiLogic = TestSendFundsUiLogic()
 
         val walletId = 1
-        uiLogic.initWallet(TestUiWallet.getSingleWalletSingleAddressDbProvider(walletId), mock<ErgoApi> {}, walletId, 0, null)
+        uiLogic.initWallet(TestUiWallet.getSingleWalletSingleAddressDbProvider(walletId), mock<ErgoExplorerApi> {}, walletId, 0, null)
 
         delay(100)
         return uiLogic

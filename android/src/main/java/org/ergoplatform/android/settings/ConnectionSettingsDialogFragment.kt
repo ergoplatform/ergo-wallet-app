@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.databinding.FragmentConnectionSettingsBinding
 import org.ergoplatform.getDefaultExplorerApiUrl
@@ -61,7 +61,7 @@ class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
         preferences.prefIpfsGatewayUrl = binding.inputIpfsGateway.text?.toString() ?: ""
 
         // reset api service of NodeConnector to load new settings
-        ErgoApiService.resetApiService()
+        ApiServiceManager.resetApiService()
 
         dismiss()
     }

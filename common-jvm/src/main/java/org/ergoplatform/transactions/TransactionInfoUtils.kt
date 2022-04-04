@@ -2,7 +2,7 @@ package org.ergoplatform.transactions
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.ergoplatform.ErgoApi
+import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
@@ -37,7 +37,7 @@ data class TransactionInfoBox(
  * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
  * use within an applicable try/catch phrase
  */
-suspend fun Transaction.buildTransactionInfo(ergoApiService: ErgoApi): TransactionInfo {
+suspend fun Transaction.buildTransactionInfo(ergoApiService: ErgoExplorerApi): TransactionInfo {
     return withContext(Dispatchers.IO) {
         val inputsMap = HashMap<String, TransactionInfoBox>()
         inputBoxesIds.forEach {

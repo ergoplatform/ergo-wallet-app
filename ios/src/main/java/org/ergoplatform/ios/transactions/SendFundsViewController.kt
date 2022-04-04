@@ -245,7 +245,7 @@ class SendFundsViewController(
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         val appDelegate = getAppDelegate()
-        uiLogic.initWallet(appDelegate.database, ErgoApiService.getOrInit(appDelegate.prefs), walletId, derivationIdx, paymentRequest)
+        uiLogic.initWallet(appDelegate.database, ApiServiceManager.getOrInit(appDelegate.prefs), walletId, derivationIdx, paymentRequest)
 
         inputReceiver.text = uiLogic.receiverAddress
         if (uiLogic.amountToSend.nanoErgs > 0) setInputAmount(uiLogic.amountToSend)

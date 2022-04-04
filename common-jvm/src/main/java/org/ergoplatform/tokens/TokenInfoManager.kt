@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.ergoplatform.ErgoApi
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.explorer.client.model.OutputInfo
@@ -22,7 +22,7 @@ class TokenInfoManager {
     fun getTokenInformationFlow(
         tokenId: String,
         tokenDbProvider: TokenDbProvider,
-        apiService: ErgoApiService
+        apiService: ApiServiceManager
     ): Flow<TokenInformation?> {
         return flow {
             val emittedToken = withContext(Dispatchers.IO) {
@@ -47,7 +47,7 @@ class TokenInfoManager {
     suspend fun getTokenInformation(
         tokenId: String,
         tokenDbProvider: TokenDbProvider,
-        apiService: ErgoApi
+        apiService: ErgoExplorerApi
     ): TokenInformation? {
         return withContext(Dispatchers.IO) {
             val fromDB = loadTokenFromDbOrApi(tokenDbProvider, tokenId, apiService)
@@ -63,7 +63,7 @@ class TokenInfoManager {
     private suspend fun loadTokenFromDbOrApi(
         tokenDbProvider: TokenDbProvider,
         tokenId: String,
-        apiService: ErgoApi
+        apiService: ErgoExplorerApi
     ) = tokenDbProvider.loadTokenInformation(tokenId) ?: try {
         val tokenFromApi = fetchTokenInformationFromApi(apiService, tokenId)
         tokenDbProvider.insertOrReplaceTokenInformation(tokenFromApi)
@@ -130,7 +130,7 @@ class TokenInfoManager {
     }
 
     private fun fetchTokenInformationFromApi(
-        apiService: ErgoApi,
+        apiService: ErgoExplorerApi,
         tokenId: String
     ): TokenInformation {
         val tokenApiResponse = apiService.getTokenInformation(tokenId).execute()

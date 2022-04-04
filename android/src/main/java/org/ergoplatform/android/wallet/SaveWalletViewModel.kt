@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.appkit.SecretString
@@ -45,7 +45,7 @@ class SaveWalletViewModel : ViewModel() {
 
     private suspend fun startDerivedAddressesSearch(context: Context) {
         uiLogic!!.startDerivedAddressesSearch(
-            ErgoApiService.getOrInit(Preferences(context)),
+            ApiServiceManager.getOrInit(Preferences(context)),
             AppDatabase.getInstance(context).walletDbProvider
         ) { _derivedAddressNum.postValue(it) }
     }

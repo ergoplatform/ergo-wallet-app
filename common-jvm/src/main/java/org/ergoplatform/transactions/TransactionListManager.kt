@@ -6,8 +6,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.ErgoApi
 import org.ergoplatform.TokenAmount
+import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.persistance.*
@@ -27,7 +27,7 @@ object TransactionListManager {
      * enqueues address for downloading its transaction list and starts processing queue if not
      * already in operation
      */
-    fun downloadTransactionListForAddress(address: String, ergoApi: ErgoApi, db: IAppDatabase) {
+    fun downloadTransactionListForAddress(address: String, ergoApi: ErgoExplorerApi, db: IAppDatabase) {
         if (!addressRecentlyRefreshed(address)) {
             addressesToDownload.add(address)
 
@@ -36,7 +36,7 @@ object TransactionListManager {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun startProcessQueueIfNecessary(ergoApi: ErgoApi, db: IAppDatabase) {
+    private fun startProcessQueueIfNecessary(ergoApi: ErgoExplorerApi, db: IAppDatabase) {
         if (!(isDownloading.value)) {
             setDownloadState(true)
             GlobalScope.launch(Dispatchers.IO) {
@@ -55,7 +55,7 @@ object TransactionListManager {
     @OptIn(DelicateCoroutinesApi::class)
     fun startDownloadAllAddressTransactions(
         address: String,
-        ergoApi: ErgoApi,
+        ergoApi: ErgoExplorerApi,
         db: IAppDatabase
     ): Boolean {
         return if (!(isDownloading.value)) {
@@ -71,7 +71,7 @@ object TransactionListManager {
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun doDownloadTransactionList(
         address: String,
-        ergoApi: ErgoApi,
+        ergoApi: ErgoExplorerApi,
         db: IAppDatabase,
         loadAllTx: Boolean = false
     ) {

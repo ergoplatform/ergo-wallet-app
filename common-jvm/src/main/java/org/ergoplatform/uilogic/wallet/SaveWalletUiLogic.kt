@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.SecretString
@@ -51,7 +51,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
     }
 
     suspend fun startDerivedAddressesSearch(
-        ergoApiService: ErgoApiService,
+        ergoApiService: ApiServiceManager,
         walletDbProvider: WalletDbProvider,
         callback: (Int) -> Unit
     ) {

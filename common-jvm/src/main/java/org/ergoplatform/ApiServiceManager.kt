@@ -1,5 +1,6 @@
 package org.ergoplatform
 
+import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.explorer.client.DefaultApi
 import org.ergoplatform.explorer.client.model.*
@@ -8,25 +9,7 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-interface ErgoApi {
-    fun getTotalBalanceForAddress(publicAddress: String): Call<TotalBalance>
-    fun getBoxInformation(boxId: String): Call<OutputInfo>
-    fun getTokenInformation(tokenId: String): Call<TokenInfo>
-    fun getTransactionInformation(txId: String): Call<TransactionInfo>
-    fun getMempoolTransactionsForAddress(
-        publicAddress: String,
-        limit: Int,
-        offset: Int
-    ): Call<Items<TransactionInfo>>
-
-    fun getConfirmedTransactionsForAddress(
-        publicAddress: String,
-        limit: Int,
-        offset: Int
-    ): Call<Items<TransactionInfo>>
-}
-
-class ErgoApiService(val defaultApi: DefaultApi) : ErgoApi {
+class ApiServiceManager(val defaultApi: DefaultApi) : ErgoExplorerApi {
 
     override fun getTotalBalanceForAddress(publicAddress: String): Call<TotalBalance> =
         defaultApi.getApiV1AddressesP1BalanceTotal(publicAddress)
@@ -56,9 +39,9 @@ class ErgoApiService(val defaultApi: DefaultApi) : ErgoApi {
         defaultApi.getApiV1AddressesP1Transactions(publicAddress, offset, limit, false)
 
     companion object {
-        private var ergoApiService: ErgoApiService? = null
+        private var ergoApiService: ApiServiceManager? = null
 
-        fun getOrInit(preferences: PreferencesProvider): ErgoApiService {
+        fun getOrInit(preferences: PreferencesProvider): ApiServiceManager {
             if (ergoApiService == null) {
 
                 val retrofit = Retrofit.Builder()
@@ -68,7 +51,7 @@ class ErgoApiService(val defaultApi: DefaultApi) : ErgoApi {
                     .build()
 
                 val defaultApi = retrofit.create(DefaultApi::class.java)
-                ergoApiService = ErgoApiService(defaultApi)
+                ergoApiService = ApiServiceManager(defaultApi)
             }
             return ergoApiService!!
         }

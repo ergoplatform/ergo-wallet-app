@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.*
+import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
@@ -56,7 +57,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
 
     fun initWallet(
         database: IAppDatabase,
-        ergoApiService: ErgoApi,
+        ergoApiService: ErgoExplorerApi,
         walletId: Int,
         derivationIdx: Int,
         paymentRequest: String?

@@ -1,7 +1,7 @@
 package org.ergoplatform.ios.transactions
 
 import com.badlogic.gdx.utils.I18NBundle
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.getExplorerTxUrl
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.ui.*
@@ -48,7 +48,7 @@ class TransactionInfoViewController(private val txId: String) : CoroutineViewCon
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        uiLogic.init(txId, ErgoApiService.getOrInit(getAppDelegate().prefs))
+        uiLogic.init(txId, ApiServiceManager.getOrInit(getAppDelegate().prefs))
         activityView.startAnimating()
     }
 
