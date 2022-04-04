@@ -35,7 +35,7 @@ compose.desktop {
 
 tasks {
     processResources {
-        doLast {
+        doFirst {
             copy {
                 from("../ios/resources/i18n")
                 into("src/main/resources/i18n")
