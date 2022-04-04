@@ -94,7 +94,10 @@ class ConfirmCreateWalletViewController(val mnemonic: SecretString) : ViewContro
             textField2.setHasError(!uiLogic.secondWordCorrect)
 
             if (!hasErrors) {
-                navigationController.pushViewController(SaveWalletViewController(mnemonic), true)
+                navigationController.pushViewController(
+                    SaveWalletViewController(mnemonic, false),
+                    true
+                )
             }
         }
 

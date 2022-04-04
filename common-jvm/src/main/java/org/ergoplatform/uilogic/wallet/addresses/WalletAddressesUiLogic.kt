@@ -5,10 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.WalletStateSyncManager
-import org.ergoplatform.deserializeExtendedPublicKeySafe
-import org.ergoplatform.getPublicErgoAddressFromMnemonic
-import org.ergoplatform.getPublicErgoAddressFromXPubKey
+import org.ergoplatform.*
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
@@ -46,7 +43,7 @@ abstract class WalletAddressesUiLogic {
         database: WalletDbProvider,
         prefs: PreferencesProvider,
         number: Int,
-        mnemonic: String?
+        signingSecrets: SigningSecrets?
     ) {
         // firing up appkit for the first time needs some time on medium end devices, so do this on
         // background thread while showing infinite progress bar
@@ -73,9 +70,9 @@ abstract class WalletAddressesUiLogic {
 
                         // okay, we have the next address idx - now get the address
                         // we either have the mnemonic or the xpubkey (-> canDeriveAddresses() )
-                        val nextAddress = mnemonic?.let {
+                        val nextAddress = signingSecrets?.let {
                             getPublicErgoAddressFromMnemonic(
-                                mnemonic,
+                                signingSecrets,
                                 nextIdx
                             )
                         } ?: xpubkey?.let {

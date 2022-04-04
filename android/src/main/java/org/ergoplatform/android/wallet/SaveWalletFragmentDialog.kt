@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.PromptInfo
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
@@ -24,8 +25,6 @@ import org.ergoplatform.api.AndroidEncryptionManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
-import org.ergoplatform.serializeSecrets
-import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
 
 /**
  * Dialog to save a created or restored wallet
@@ -35,7 +34,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     private val binding get() = _binding!!
 
     private val args: SaveWalletFragmentDialogArgs by navArgs()
-    private lateinit var uiLogic: SaveWalletUiLogic
+    private lateinit var viewModel: SaveWalletViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,6 +49,8 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel = ViewModelProvider(this).get(SaveWalletViewModel::class.java)
+
         // TODO avoid using mnemonic here, store and use publicAddress directly
         // Reason why this is not done: mnemonic is stored in arguments to allow Android to
         // destroy and recreate this dialog without the loss of the mnemonic. Possible
@@ -60,34 +61,48 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         // - Use a static variable to store the mnemonic in a SecretString
         //   Drawback: It is completely out of control when static variables get reset and the
         //             variable might leak into a process reusing the JVM
-        uiLogic = SaveWalletUiLogic(SecretString.create(args.mnemonic))
-        val db = RoomWalletDbProvider(AppDatabase.getInstance(requireContext()))
-        val texts = AndroidStringProvider(requireContext())
+        viewModel.init(SecretString.create(args.mnemonic), args.fromRestore, requireContext())
 
-        // firing up appkit for the first time needs some time on medium end devices, so do this on
-        // background thread while showing infinite progress bar
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            val publicErgoAddressFromMnemonic = uiLogic.publicAddress
-            val walletDisplayName = uiLogic.getSuggestedDisplayName(db, texts)
-            val showDisplayName = uiLogic.showSuggestedDisplayName(db)
+        viewModel.publicAddress.observe(viewLifecycleOwner) {
+            val context = requireContext()
+            val db = RoomWalletDbProvider(AppDatabase.getInstance(context))
+            val texts = AndroidStringProvider(context)
 
-            withContext(Dispatchers.Main) {
-                binding.publicAddress.text = publicErgoAddressFromMnemonic
-                binding.cardViewContainer.visibility = View.VISIBLE
-                binding.progressBar.visibility = View.GONE
-                binding.inputWalletName.editText?.setText(walletDisplayName)
-                binding.inputWalletName.visibility =
-                    if (showDisplayName) View.VISIBLE else View.GONE
+            val uiLogic = viewModel.uiLogic!!
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                val publicErgoAddressFromMnemonic = uiLogic.publicAddress
+                val walletDisplayName = uiLogic.getSuggestedDisplayName(db, texts)
+                val showDisplayName = uiLogic.showSuggestedDisplayName(db)
+
+                withContext(Dispatchers.Main) {
+                    binding.publicAddress.text = publicErgoAddressFromMnemonic
+                    binding.cardViewContainer.visibility = View.VISIBLE
+                    binding.progressBar.visibility = View.GONE
+                    binding.inputWalletName.editText?.setText(walletDisplayName)
+                    binding.inputWalletName.visibility =
+                        if (showDisplayName) View.VISIBLE else View.GONE
+                    binding.buttonAltAddress.visibility =
+                        if (uiLogic.hasAlternativeAddress) View.VISIBLE else View.GONE
+                }
+            }
+
+            viewModel.derivedAddressNum.observe(viewLifecycleOwner) { addrNum ->
+                binding.introAdditionalAddresses.text =
+                    if (addrNum == 0) getString(R.string.intro_save_wallet2) else getString(
+                        R.string.intro_save_wallet_derived_addresses_num,
+                        (addrNum + 1).toString()
+                    )
             }
         }
 
-        val bmm = BiometricManager.from(requireContext())
+        val context = requireContext()
+        val bmm = BiometricManager.from(context)
         val methodDesc =
             if (bmm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS)
                 R.string.device_enc_security_biometric_strong
             else if (bmm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS)
                 R.string.device_enc_security_biometric_weak
-            else if ((requireContext().getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).isDeviceSecure)
+            else if ((context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).isDeviceSecure)
                 R.string.device_enc_security_pass
             else R.string.device_enc_security_none
 
@@ -111,6 +126,9 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         binding.buttonSaveDeviceenc.setOnClickListener {
             showBiometricPrompt()
         }
+        binding.buttonAltAddress.setOnClickListener {
+            viewModel.switchAddress(requireContext())
+        }
     }
 
     private fun showBiometricPrompt() {
@@ -126,7 +144,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 try {
                     val secretStorage = AndroidEncryptionManager.encryptDataOnDevice(
-                        serializeSecrets(args.mnemonic).toByteArray()
+                        viewModel.uiLogic!!.signingSecrets.toJson().toByteArray()
                     )
                     saveToDbAndNavigateToWallet(
                         ENC_TYPE_DEVICE, secretStorage
@@ -159,7 +177,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         val context = requireContext()
         GlobalScope.launch(Dispatchers.IO) {
             // make sure not to use dialog context within this block
-            uiLogic.suspendSaveToDb(
+            viewModel.uiLogic!!.suspendSaveToDb(
                 RoomWalletDbProvider(AppDatabase.getInstance(context)),
                 binding.inputWalletName.editText!!.text.toString(),
                 encType,
@@ -171,17 +189,17 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     }
 
     override fun onPasswordEntered(password: String?): String? {
-        if (uiLogic.isPasswordWeak(password)) {
-            return getString(R.string.err_password)
+        return if (viewModel.uiLogic!!.isPasswordWeak(password)) {
+            getString(R.string.err_password)
         } else {
             saveToDbAndNavigateToWallet(
                 ENC_TYPE_PASSWORD,
                 AesEncryptionManager.encryptData(
                     password,
-                    serializeSecrets(args.mnemonic).toByteArray()
+                    viewModel.uiLogic!!.signingSecrets.toJson().toByteArray()
                 )
             )
-            return null
+            null
         }
     }
 

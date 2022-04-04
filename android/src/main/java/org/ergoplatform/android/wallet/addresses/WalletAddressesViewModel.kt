@@ -6,12 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.api.AndroidEncryptionManager
-import org.ergoplatform.deserializeSecrets
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.uilogic.wallet.addresses.WalletAddressesUiLogic
@@ -33,7 +33,7 @@ class WalletAddressesViewModel : ViewModel() {
     }
 
 
-    fun addNextAddresses(ctx: Context, mnemonic: String?) {
+    fun addNextAddresses(ctx: Context, mnemonic: SigningSecrets?) {
         uiLogic.addNextAddresses(
             RoomWalletDbProvider(AppDatabase.getInstance(ctx)),
             Preferences(ctx), numAddressesToAdd, mnemonic
@@ -43,7 +43,7 @@ class WalletAddressesViewModel : ViewModel() {
     fun addAddressWithBiometricAuth(ctx: Context) {
         wallet?.walletConfig?.secretStorage?.let {
             val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
-            deserializeSecrets(String(decryptData!!))?.let { mnemonic ->
+            SigningSecrets.fromJson(String(decryptData!!))?.let { mnemonic ->
                 addNextAddresses(ctx, mnemonic)
             }
         }
@@ -53,7 +53,7 @@ class WalletAddressesViewModel : ViewModel() {
         wallet?.walletConfig?.secretStorage?.let {
             try {
                 val decryptData = AesEncryptionManager.decryptData(password, it)
-                deserializeSecrets(String(decryptData!!))?.let { mnemonic ->
+                SigningSecrets.fromJson(String(decryptData!!))?.let { mnemonic ->
                     addNextAddresses(ctx, mnemonic)
                     return true
                 }

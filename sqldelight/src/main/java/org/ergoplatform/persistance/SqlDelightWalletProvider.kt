@@ -3,20 +3,24 @@ package org.ergoplatform.persistance
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
-class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvider {
+class SqlDelightWalletProvider(private val sqlDelightAppDb: SqlDelightAppDb) : WalletDbProvider {
+    private val appDb = sqlDelightAppDb.appDatabase
+
     override suspend fun <R> withTransaction(block: suspend () -> R): R {
-        return withContext(Dispatchers.IO) {
-            appDb.transactionWithResult {
-                runBlocking {
-                    block.invoke()
+        return if (sqlDelightAppDb.useTransactions)
+            withContext(Dispatchers.IO) {
+                appDb.transactionWithResult {
+                    runBlocking {
+                        block.invoke()
+                    }
                 }
             }
-        }
+        else
+            block.invoke()
     }
 
     override suspend fun loadWalletByFirstAddress(firstAddress: String): WalletConfig? {
@@ -60,10 +64,14 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
     }
 
     override suspend fun deleteWalletConfigAndStates(firstAddress: String, walletId: Int?) {
+        loadWalletAddresses(firstAddress).forEach {
+            sqlDelightAppDb.transactionDbProvider.deleteAddressTransactions(it.publicAddress)
+        }
+
         appDb.walletStateQueries.deleteByFirstAddress(firstAddress)
         appDb.walletTokenQueries.deleteTokensByFirstAddress(firstAddress)
         appDb.walletAddressQueries.deleteWalletAddressByFirstAddress(firstAddress)
-
+        sqlDelightAppDb.transactionDbProvider.deleteAddressTransactions(firstAddress)
         (walletId ?: loadWalletByFirstAddress(firstAddress)?.id)?.let { id ->
             appDb.walletConfigQueries.deleteWalletById(id.toLong())
         }

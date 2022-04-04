@@ -1,5 +1,7 @@
 package org.ergoplatform.persistance
 
+import org.ergoplatform.ErgoAmount
+import org.ergoplatform.TokenAmount
 import java.math.BigDecimal
 
 fun Wallet_configs.toModel(): WalletConfig {
@@ -97,3 +99,48 @@ fun TokenInformation.toDbEntity(): Token_info {
         updatedMs
     )
 }
+
+fun AddressTransaction.toDbEntity() =
+    Address_transaction(
+        id.toLong(),
+        address,
+        txId,
+        inclusionHeight,
+        timestamp,
+        ergAmount.nanoErgs,
+        message,
+        state.toLong()
+    )
+
+fun Address_transaction.toModel() =
+    AddressTransaction(
+        id.toInt(),
+        address,
+        tx_id,
+        inclusion_height,
+        timestamp,
+        ErgoAmount(nanoerg),
+        message,
+        state.toInt()
+    )
+
+fun AddressTransactionToken.toDbEntity() =
+    Address_transaction_token(
+        id.toLong(),
+        address,
+        txId,
+        tokenId,
+        name,
+        tokenAmount.rawValue,
+        tokenAmount.decimals.toLong()
+    )
+
+fun Address_transaction_token.toModel() =
+    AddressTransactionToken(
+        id.toInt(),
+        address,
+        tx_id,
+        token_id,
+        name,
+        TokenAmount(amount, decimals.toInt())
+    )

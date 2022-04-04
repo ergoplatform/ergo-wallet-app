@@ -116,6 +116,11 @@
         <item name="android:textSize">@dimen/headline1_textsize</item>
     </style>
 
+    <style name="TextAppearance.App.TitleBar" parent="">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/titlebar_textsize</item>
+    </style>
+
     <style name="TextAppearance.App.Headline2" parent="">
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">@dimen/headline2_textsize</item>

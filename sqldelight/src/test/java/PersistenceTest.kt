@@ -56,7 +56,6 @@ class PersistenceTest {
         assertEquals(entities.size, entities2.size)
     }
 
-    @Test
     fun testObserving() {
         val database = setupDb().walletDbProvider
         var changes = 0
