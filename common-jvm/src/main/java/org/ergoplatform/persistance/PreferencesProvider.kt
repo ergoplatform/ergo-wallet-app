@@ -87,8 +87,6 @@ abstract class PreferencesProvider {
             saveLong(KEY_DOWNLOAD_NFT_CONTENT, if (value) 1L else 0L)
         }
 
-    // TODO token verification add to settings when other services are available
-    // TODO token verification add TokenJay to about screen
     val defaultTokenVerificationUrl = DEFAULT_TOKEN_VERIFY_URL
 
     var prefTokenVerificationUrl: String

@@ -38,6 +38,7 @@ class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
         val preferences = Preferences(requireContext())
         binding.editNodeUrl.editText?.setText(preferences.prefNodeUrl)
         binding.editExplorerApiUrl.editText?.setText(preferences.prefExplorerApiUrl)
+        binding.inputTokenVerificationUrl.setText(preferences.prefTokenVerificationUrl)
         binding.inputIpfsGateway.setText(preferences.prefIpfsGatewayUrl)
         binding.buttonApply.setOnClickListener { buttonApply() }
         binding.inputIpfsGateway.setOnEditorActionListener { _, _, _ ->
@@ -48,6 +49,7 @@ class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
             binding.editNodeUrl.editText?.setText(preferences.getDefaultNodeApiUrl())
             binding.editExplorerApiUrl.editText?.setText(getDefaultExplorerApiUrl())
             binding.inputIpfsGateway.setText(preferences.defaultIpfsGatewayUrl)
+            binding.inputTokenVerificationUrl.setText(preferences.defaultTokenVerificationUrl)
         }
     }
 
@@ -59,6 +61,8 @@ class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
         preferences.prefExplorerApiUrl = explorerApiUrl
         preferences.prefNodeUrl = nodeUrl
         preferences.prefIpfsGatewayUrl = binding.inputIpfsGateway.text?.toString() ?: ""
+        preferences.prefTokenVerificationUrl =
+            binding.inputTokenVerificationUrl.text?.toString() ?: ""
 
         // reset api service of NodeConnector to load new settings
         ApiServiceManager.resetApiService()
