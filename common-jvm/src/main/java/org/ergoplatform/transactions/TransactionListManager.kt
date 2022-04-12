@@ -15,6 +15,26 @@ import org.ergoplatform.utils.LogUtils
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.math.max
 
+/**
+ * This singleton manages the in app transaction history lists by ensuring that only one download
+ * is launched at a time and automatic downloads aren't launched too frequently. It holds the logic
+ * for updating transaction lists.
+ *
+ * Transaction history lists are updated as follows per address:
+ * - the most recent securely confirmed history list entry is loaded from the DB. Securely confirmed
+ *   means no orphaning or other changes are expected any more
+ * - transaction history for this address is fetched from Ergo Explorer in chunks until the block
+ *   height of the most recent securely confirmed history list entry is reached
+ * - mempool is also fetched
+ * - the fetched tx history list from Explorer is merged with the not securely confirmed history
+ *   list from our DB: transactions are added or updated or, if not known in the blockchain any more,
+ *   set to cancelled
+ *
+ * The algorithm is more meant to be fast and to save bandwidth than to be 100% accurate. For
+ * addresses with a high throughput rate, transactions might get lost when loading chunks from
+ * Explorer is cancelled midway. However, the saved data can always be fixed by starting a
+ * complete download which wipes all address data before starting to download the complete history.
+ */
 object TransactionListManager {
     val isDownloading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val downloadProgress: MutableStateFlow<Int> = MutableStateFlow(0)
@@ -52,6 +72,10 @@ object TransactionListManager {
         }
     }
 
+    /**
+     * When no download is in progress, this will wipe all data saved for this address and attempt
+     * to download tx history list until block height 0
+     */
     @OptIn(DelicateCoroutinesApi::class)
     fun startDownloadAllAddressTransactions(
         address: String,
@@ -68,6 +92,10 @@ object TransactionListManager {
         } else false
     }
 
+    /**
+     * determines how many transactions must be fetched from Explorer, fetches it and calls
+     * helper methods to merge the downloaded and current data
+     */
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun doDownloadTransactionList(
         address: String,
@@ -166,7 +194,7 @@ object TransactionListManager {
             notSecurelyConfirmedTransactions.values.forEach { unseenTransaction ->
                 if (unseenTransaction.timestamp < System.currentTimeMillis() - 10L * 60 * 1000L) {
                     val newInclusionHeight =
-                        if (unseenTransaction.inclusionHeight == INCLUSION_HEIGHT_NOT_INCLUDED) highestExecuted + 1
+                        if (unseenTransaction.inclusionHeight == INCLUSION_HEIGHT_UNCONFIRMED) highestExecuted + 1
                         else unseenTransaction.inclusionHeight
                     db.transactionDbProvider.insertOrUpdateAddressTransaction(
                         unseenTransaction.copy(
@@ -188,6 +216,10 @@ object TransactionListManager {
         }
     }
 
+    /**
+     * merges existing data with downloaded data, updates transaction state and (in case
+     * transaction was not completely known before) the transaction data as well
+     */
     private suspend fun mergeTransactionsWithExistingAndSaveToDb(
         address: String,
         db: IAppDatabase,
@@ -201,7 +233,7 @@ object TransactionListManager {
             val newState =
                 if (!newConfirmed) TX_STATE_WAITING else if (newTransaction.numConfirmations < CONFIRMATIONS_NUM_SECURE) TX_STATE_CONFIRMED_UNSECURE else TX_STATE_CONFIRMED_SECURE
             val newInclusionHeight =
-                if (newConfirmed) newTransaction.inclusionHeight.toLong() else INCLUSION_HEIGHT_NOT_INCLUDED
+                if (newConfirmed) newTransaction.inclusionHeight.toLong() else INCLUSION_HEIGHT_UNCONFIRMED
 
             val transactionToMerge = if (
                 existingTransaction?.state == TX_STATE_SUBMITTED ||
@@ -252,6 +284,10 @@ object TransactionListManager {
         }
     }
 
+    /**
+     * converts given transaction data into address transaction data by reducing inputs and outputs
+     * into a single amount per token
+     */
     suspend fun convertAndSaveTransactionInfoToDb(
         txInfo: org.ergoplatform.transactions.TransactionInfo,
         address: String,
@@ -351,5 +387,5 @@ object TransactionListManager {
     }
 
     private fun addressRecentlyRefreshed(address: String) =
-        System.currentTimeMillis() - (lastAddressRefreshMs[address] ?: 0) <= 1000L * 30
+        System.currentTimeMillis() - (lastAddressRefreshMs[address] ?: 0) <= 1000L * 30 // 30 seconds
 }

@@ -265,6 +265,8 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
             oldItem: AddressTransactionWithTokens,
             newItem: AddressTransactionWithTokens
         ) = (oldItem.addressTransaction.state == newItem.addressTransaction.state)
+        // every time the address transaction's contents change, a state change is also made -
+        // so it is enough to check this field to know if the item changed
 
     }
 }

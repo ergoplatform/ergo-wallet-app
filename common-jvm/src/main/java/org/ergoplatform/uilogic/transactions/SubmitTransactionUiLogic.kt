@@ -141,7 +141,7 @@ abstract class SubmitTransactionUiLogic {
                             txInfoToSave,
                             address,
                             System.currentTimeMillis(),
-                            INCLUSION_HEIGHT_NOT_INCLUDED,
+                            INCLUSION_HEIGHT_UNCONFIRMED,
                             TX_STATE_SUBMITTED,
                             db
                         )
