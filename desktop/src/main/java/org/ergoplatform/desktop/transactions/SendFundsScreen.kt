@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun GreetingScreen(
+fun SendFundsScreen(
     greeting: String,
     onGoBackClicked: () -> Unit
 ) {

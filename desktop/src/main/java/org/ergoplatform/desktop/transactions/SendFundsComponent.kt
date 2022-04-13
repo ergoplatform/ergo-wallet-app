@@ -63,7 +63,7 @@ class SendFundsComponent(
 
     @Composable
     override fun renderScreenContents() {
-        GreetingScreen(
+        SendFundsScreen(
             greeting = "$greeting, $name",
             onGoBackClicked = { navHost.router.pop() }
         )

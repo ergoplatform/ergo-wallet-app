@@ -1,48 +1,28 @@
 package org.ergoplatform.desktop.wallet
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import org.ergoplatform.persistance.Wallet
 
 @Composable
-fun InputScreen(
-    name: String,
+fun WalletListScreen(
+    walletList: List<Wallet>,
     onGoClicked: (String) -> Unit,
-    onTextChanged: (String) -> Unit
 ) {
 
-    Column(
+    LazyColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        items(walletList.size) { index ->
 
-        Text(
-            text = "Greet Me!",
-            fontSize = 30.sp
-        )
+            WalletCard(walletList[index], onGoClicked)
 
-        Spacer(modifier = Modifier.height(30.dp))
-        TextField(
-            value = name,
-            maxLines = 1,
-            label = { Text(text = "Enter your name") },
-
-            onValueChange = onTextChanged
-        )
-        Spacer(modifier = Modifier.height(30.dp))
-        Button(
-            onClick = {
-                onGoClicked(name)
-            }
-        ) {
-            Text(text = "GO!")
         }
     }
 

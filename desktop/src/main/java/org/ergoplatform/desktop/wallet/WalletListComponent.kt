@@ -1,11 +1,10 @@
 package org.ergoplatform.desktop.wallet
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.push
+import kotlinx.coroutines.Dispatchers
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
@@ -17,25 +16,21 @@ class WalletListComponent(
     navHost: NavHostComponent
 ) : NavClientScreenComponent(navHost), ComponentContext by componentContext {
 
-    private var state by mutableStateOf(Model())
-
     override val appBarLabel: String
         get() = Application.texts.get(STRING_TITLE_WALLETS)
 
     @Composable
     override fun renderScreenContents() {
-        InputScreen(
-            name = state.name,
-            onGoClicked = { router.push(ScreenConfig.SendFunds(state.name)) },
-            onTextChanged = {
-                state = state.copy(name = it)
-            }
+        val state = Application.database.walletDbProvider.getWalletsWithStatesFlow()
+            .collectAsState(
+                emptyList(), Dispatchers.IO
+            )
+
+        WalletListScreen(
+            state.value,
+            onGoClicked = { router.push(ScreenConfig.SendFunds(it)) }
         )
     }
-
-    private data class Model(
-        val name: String = ""
-    )
 }
 
 
