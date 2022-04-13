@@ -4,11 +4,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ergoplatform.SigningSecrets
+import org.ergoplatform.ErgoApiService
 import org.ergoplatform.WalletStateSyncManager
-import org.ergoplatform.persistance.PreferencesProvider
-import org.ergoplatform.persistance.Wallet
-import org.ergoplatform.persistance.WalletAddress
-import org.ergoplatform.persistance.WalletDbProvider
+import org.ergoplatform.appkit.UnsignedTransaction
+import org.ergoplatform.persistance.*
 import org.ergoplatform.sendSignedErgoTx
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.StringProvider
@@ -61,9 +61,10 @@ abstract class SubmitTransactionUiLogic {
     }
 
     abstract fun startPaymentWithMnemonicAsync(
-        mnemonic: String,
+        signingSecrets: SigningSecrets,
         preferences: PreferencesProvider,
-        texts: StringProvider
+        texts: StringProvider,
+        db: IAppDatabase,
     )
 
     abstract fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider)
@@ -91,7 +92,8 @@ abstract class SubmitTransactionUiLogic {
 
     fun sendColdWalletSignedTx(
         preferences: PreferencesProvider,
-        texts: StringProvider
+        texts: StringProvider,
+        db: IAppDatabase,
     ) {
         val qrCodes = signedTxQrCodePagesCollector?.getAllPages()
         signedTxQrCodePagesCollector = null
@@ -111,15 +113,48 @@ abstract class SubmitTransactionUiLogic {
                 } else {
                     ergoTxResult = SendTransactionResult(false, errorMsg = signingResult.errorMsg)
                 }
+                notifyUiLocked(false)
+                transactionSubmitted(ergoTxResult, db.transactionDbProvider, preferences)
             }
-            notifyUiLocked(false)
-            if (ergoTxResult.success) {
-                WalletStateSyncManager.getInstance().invalidateCache()
-                notifyHasTxId(ergoTxResult.txId!!)
-            }
-            notifyHasErgoTxResult(ergoTxResult)
         }
 
+    }
+
+    protected suspend fun transactionSubmitted(
+        ergoTxResult: SendTransactionResult,
+        db: TransactionDbProvider,
+        preferences: PreferencesProvider,
+        transactionInfo: TransactionInfo? = null
+    ) {
+        if (ergoTxResult.success) {
+            try {
+                // save submitted transaction to every address
+                val txInfoToSave = (transactionInfo
+                    ?: (ergoTxResult.sentTransaction as? UnsignedTransaction)?.buildTransactionInfo(wallet?.tokens)
+                    ?: ergoTxResult.sentTransaction?.buildTransactionInfo(
+                        ErgoApiService.getOrInit(preferences)
+                    ))
+
+                txInfoToSave?.let {
+                    getSigningDerivedAddresses().forEach { address ->
+                        TransactionListManager.convertAndSaveTransactionInfoToDb(
+                            txInfoToSave,
+                            address,
+                            System.currentTimeMillis(),
+                            INCLUSION_HEIGHT_UNCONFIRMED,
+                            TX_STATE_SUBMITTED,
+                            db
+                        )
+                    }
+                }
+
+            } catch (t: Throwable) {
+                // ignore, don't save submitted tx
+            }
+            WalletStateSyncManager.getInstance().invalidateCache()
+            notifyHasTxId(ergoTxResult.txId!!)
+        }
+        notifyHasErgoTxResult(ergoTxResult)
     }
 
     abstract fun notifyWalletStateLoaded()

@@ -4,6 +4,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.ergoplatform.ErgoApiService
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.api.IosAuthentication
@@ -11,7 +12,6 @@ import org.ergoplatform.ios.api.IosEncryptionManager
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
-import org.ergoplatform.serializeSecrets
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
 import org.ergoplatform.utils.LogUtils
@@ -19,14 +19,18 @@ import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.localauthentication.LAContext
 import org.robovm.apple.uikit.*
 
-class SaveWalletViewController(private val mnemonic: SecretString) :
-    ViewControllerWithKeyboardLayoutGuide() {
+class SaveWalletViewController(
+    private val mnemonic: SecretString,
+    private val fromRestore: Boolean
+) : ViewControllerWithKeyboardLayoutGuide() {
     private lateinit var progressIndicator: UIActivityIndicatorView
     private lateinit var scrollView: UIScrollView
     private lateinit var addressLabel: UILabel
     private lateinit var nameInputField: UITextField
     private lateinit var labelDisplayName: Body1BoldLabel
-    private val uiLogic = SaveWalletUiLogic(mnemonic)
+    private lateinit var buttonAltAddress: UIButton
+    private lateinit var uiLogic: SaveWalletUiLogic
+    private lateinit var addressInfoLabel: UILabel
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -47,7 +51,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
 
         addressLabel = Headline2Label()
 
-        val addressInfoLabel = Body1Label()
+        addressInfoLabel = Body1Label()
         addressInfoLabel.text = texts.get(STRING_INTRO_SAVE_WALLET2)
         val saveInfoLabel = Body1Label().apply {
             text = texts.get(STRING_INTRO_SAVE_WALLET3)
@@ -68,6 +72,14 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
             }
         }
 
+        buttonAltAddress = TextButton(texts.get(STRING_BUTTON_ALT_ADDRESS))
+        buttonAltAddress.addOnTouchUpInsideListener { _, _ ->
+            uiLogic.switchAddress()
+            viewControllerScope.launch(Dispatchers.IO) {
+                refreshAddressInfo()
+            }
+        }
+
         val buttonSavePassword = TextButton(texts.get(STRING_BUTTON_SAVE_PASSWORD_ENCRYPTED))
         buttonSavePassword.addOnTouchUpInsideListener { _, _ ->
             PasswordViewController.showDialog(
@@ -79,7 +91,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
 
                     val encrypted = AesEncryptionManager.encryptData(
                         password,
-                        serializeSecrets(mnemonic.toStringUnsecure()).toByteArray()
+                        uiLogic.signingSecrets.toJson().toByteArray()
                     )
 
                     saveToDbAndDismissController(ENC_TYPE_PASSWORD, encrypted)
@@ -100,7 +112,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
                     override fun onAuthenticationSucceeded(context: LAContext) {
                         try {
                             val encrypted = IosEncryptionManager.encryptDataWithKeychain(
-                                serializeSecrets(mnemonic.toStringUnsecure()).toByteArray(),
+                                uiLogic.signingSecrets.toJson().toByteArray(),
                                 context
                             )
 
@@ -152,6 +164,7 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
             NSArray(
                 introLabel,
                 addressLabel,
+                buttonAltAddress,
                 addressInfoLabel,
                 saveInfoLabel,
                 labelDisplayName,
@@ -204,20 +217,37 @@ class SaveWalletViewController(private val mnemonic: SecretString) :
         scrollView.isHidden = true
         progressIndicator.startAnimating()
 
-        viewControllerScope.launch {
-            val publicErgoAddressFromMnemonic = uiLogic.publicAddress
-            val db = getAppDelegate().database.walletDbProvider
-            val walletDisplayName =
-                uiLogic.getSuggestedDisplayName(db, IosStringProvider(getAppDelegate().texts))
-            val showDisplayName = uiLogic.showSuggestedDisplayName(db)
+        viewControllerScope.launch(Dispatchers.IO) {
+            uiLogic = SaveWalletUiLogic(mnemonic, fromRestore)
+            refreshAddressInfo()
+        }
+    }
 
+    private suspend fun refreshAddressInfo() {
+        val publicErgoAddressFromMnemonic = uiLogic.publicAddress
+        val appDelegate = getAppDelegate()
+        val db = appDelegate.database.walletDbProvider
+        val walletDisplayName =
+            uiLogic.getSuggestedDisplayName(db, IosStringProvider(appDelegate.texts))
+        val showDisplayName = uiLogic.showSuggestedDisplayName(db)
+
+        runOnMainThread {
+            addressLabel.text = publicErgoAddressFromMnemonic
+            nameInputField.text = walletDisplayName
+            nameInputField.isHidden = !showDisplayName
+            labelDisplayName.isHidden = !showDisplayName
+            progressIndicator.isHidden = true
+            scrollView.isHidden = false
+            buttonAltAddress.isHidden = !uiLogic.hasAlternativeAddress
+        }
+
+        uiLogic.startDerivedAddressesSearch(
+            ErgoApiService.getOrInit(appDelegate.prefs),
+            db
+        ) { num ->
             runOnMainThread {
-                addressLabel.text = publicErgoAddressFromMnemonic
-                nameInputField.text = walletDisplayName
-                nameInputField.isHidden = !showDisplayName
-                labelDisplayName.isHidden = !showDisplayName
-                progressIndicator.isHidden = true
-                scrollView.isHidden = false
+                addressInfoLabel.text = if (num == 0) appDelegate.texts.get(STRING_INTRO_SAVE_WALLET2)
+                else appDelegate.texts.format(STRING_INTRO_SAVE_WALLET_DERIVED_ADDRESSES_NUM, (num + 1).toString())
             }
         }
     }

@@ -5,13 +5,14 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.appkit.*
-import org.ergoplatform.appkit.impl.*
+import org.ergoplatform.appkit.ExplorerAndPoolUnspentBoxesLoader
+import org.ergoplatform.appkit.impl.InputBoxImpl
+import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.restapi.client.Parameters
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
-import org.ergoplatform.transactions.getInputBoxesIds
 import org.ergoplatform.uilogic.STRING_ERROR_BALANCE_ERG
 import org.ergoplatform.uilogic.STRING_ERROR_CHANGEBOX_AMOUNT
 import org.ergoplatform.uilogic.STRING_ERROR_PROVER_CANT_SIGN
@@ -34,24 +35,6 @@ const val ERG_BASE_COST = 0
 const val ERG_MAX_BLOCK_COST = 1000000
 
 var isErgoMainNet: Boolean = true
-
-fun serializeSecrets(mnemonic: String): String {
-    val gson = Gson()
-    val root = JsonObject()
-    root.addProperty("mnemonic", mnemonic)
-    return gson.toJson(root)
-}
-
-fun deserializeSecrets(json: String): String? {
-
-    try {
-        val jsonTree = JsonParser().parse(json)
-
-        return (jsonTree as? JsonObject)?.get("mnemonic")?.asString
-    } catch (t: Throwable) {
-        return null
-    }
-}
 
 fun isValidErgoAddress(addressString: String): Boolean {
     if (addressString.isEmpty())
@@ -76,22 +59,21 @@ fun getExplorerWebUrl() =
 
 fun getExplorerTxUrl(txId: String) = getExplorerWebUrl() + "en/transactions/" + txId
 
+fun getExplorerAddressUrl(address: String) = getExplorerWebUrl() + "en/addresses/" + address
+
 fun getExplorerTokenUrl(tokenId: String) = getExplorerWebUrl() + "en/token/" + tokenId
 
 fun getAddressDerivationPath(index: Int): String {
     return "m/44'/429'/0'/0/$index"
 }
 
-fun getPublicErgoAddressFromMnemonic(mnemonic: String, index: Int = 0): String {
-    return getPublicErgoAddressFromMnemonic(SecretString.create(mnemonic), index)
-}
-
-fun getPublicErgoAddressFromMnemonic(mnemonic: SecretString, index: Int = 0): String {
+fun getPublicErgoAddressFromMnemonic(secrets: SigningSecrets, index: Int = 0): String {
     return Address.createEip3Address(
         index,
         getErgoNetworkType(),
-        mnemonic,
-        SecretString.create("")
+        secrets.mnemonic,
+        secrets.password,
+        // TODO BIP-32 fix secrets.deprecatedDerivation
     ).ergoAddress.toString()
 }
 
@@ -109,11 +91,12 @@ fun deserializeExtendedPublicKeySafe(serializedKey: String) = try {
     null
 }
 
-fun getSerializedXpubKeyFromMnemonic(mnemonic: String) =
+fun getSerializedXpubKeyFromMnemonic(signingSecrets: SigningSecrets) =
     Bip32Serialization.serializeExtendedPublicKeyToHex(
         JavaHelpers.seedToMasterKey(
-            SecretString.create(mnemonic),
-            SecretString.empty()
+            signingSecrets.mnemonic,
+            signingSecrets.password,
+            // TODO BIP-32 fix signingSecrets.deprecatedDerivation
         ), getErgoNetworkType()
     )
 
@@ -133,8 +116,7 @@ fun sendErgoTx(
     recipient: Address,
     amountToSend: Long,
     tokensToSend: List<ErgoToken>,
-    mnemonic: String,
-    mnemonicPass: String,
+    signingSecrets: SigningSecrets,
     derivedKeyIndices: List<Int>,
     prefs: PreferencesProvider,
     texts: StringProvider
@@ -144,8 +126,9 @@ fun sendErgoTx(
         return ergoClient.execute { ctx: BlockchainContext ->
             val proverBuilder = ctx.newProverBuilder()
                 .withMnemonic(
-                    SecretString.create(mnemonic),
-                    SecretString.create(mnemonicPass)
+                    signingSecrets.mnemonic,
+                    signingSecrets.password,
+                    // TODO BIP-32 fix signingSecrets.deprecatedDerivation
                 )
             derivedKeyIndices.forEach {
                 proverBuilder.withEip3Secret(it)
@@ -153,14 +136,15 @@ fun sendErgoTx(
             val prover = proverBuilder.build()
 
             val contract: ErgoContract = recipient.toErgoContract()
-            val signed = BoxOperations.createForEip3Prover(prover, ctx).withAmountToSpend(amountToSend)
+            val unsignedTx = BoxOperations.createForEip3Prover(prover, ctx).withAmountToSpend(amountToSend)
                 .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
-                .withTokensToSpend(tokensToSend).putToContractTx(contract)
+                .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
+            val signed = prover.sign(unsignedTx)
             ctx.sendTransaction(signed)
 
             val txId = signed.id
 
-            return@execute SendTransactionResult(txId.isNotEmpty(), txId)
+            SendTransactionResult(txId.isNotEmpty(), txId, unsignedTx)
         }
     } catch (t: Throwable) {
         LogUtils.logDebug("sendErgoTx", "Error caught", t)
@@ -179,7 +163,7 @@ fun buildPromptSigningResultFromErgoPayRequest(
         return getRestErgoClient(prefs).execute { ctx ->
             val reducedTx = ctx.parseReducedTransaction(serializedTx)
             val inputs =
-                ctx.getBoxesById(*reducedTx.tx.unsignedTx().getInputBoxesIds().toTypedArray())
+                ctx.getBoxesById(*reducedTx.inputBoxesIds.toTypedArray())
                     .map { inputBox ->
                         (inputBox as InputBoxImpl).ergoBox.bytes()
                     }
@@ -232,9 +216,9 @@ fun prepareSerializedErgoTx(
     }
 }
 
-fun deserializeUnsignedTxOffline(serializedTx: ByteArray): UnsignedErgoLikeTransaction {
+fun deserializeUnsignedTxOffline(serializedTx: ByteArray): ReducedTransaction {
     return getColdErgoClient().execute { ctx ->
-        return@execute ctx.parseReducedTransaction(serializedTx).tx.unsignedTx()
+        return@execute ctx.parseReducedTransaction(serializedTx)
     }
 }
 
@@ -243,8 +227,7 @@ fun deserializeUnsignedTxOffline(serializedTx: ByteArray): UnsignedErgoLikeTrans
  */
 fun signSerializedErgoTx(
     serializedTx: ByteArray,
-    mnemonic: String,
-    mnemonicPass: String,
+    signingSecrets: SigningSecrets,
     derivedKeyIndices: List<Int>,
     texts: StringProvider
 ): SigningResult {
@@ -252,8 +235,9 @@ fun signSerializedErgoTx(
         val signedTxSerialized = getColdErgoClient().execute { ctx ->
             val proverBuilder = ctx.newProverBuilder()
                 .withMnemonic(
-                    SecretString.create(mnemonic),
-                    SecretString.create(mnemonicPass)
+                    signingSecrets.mnemonic,
+                    signingSecrets.password,
+                    // TODO BIP-32 fix signingSecrets.deprecatedDerivation
                 )
 
             derivedKeyIndices.forEach {
@@ -295,12 +279,11 @@ fun sendSignedErgoTx(
 ): SendTransactionResult {
     try {
         val ergoClient = getRestErgoClient(prefs)
-        val txId = ergoClient.execute { ctx ->
+        return ergoClient.execute { ctx ->
             val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
-            ctx.sendTransaction(signedTx).trim('"')
+            val txId = ctx.sendTransaction(signedTx).trim('"')
+            SendTransactionResult(txId.isNotEmpty(), txId, signedTx)
         }
-
-        return SendTransactionResult(txId.isNotEmpty(), txId)
 
     } catch (t: Throwable) {
         return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
@@ -327,9 +310,9 @@ fun getErrorMessage(t: Throwable, texts: StringProvider): String? {
 
 fun getErgoNetworkType() = if (isErgoMainNet) NetworkType.MAINNET else NetworkType.TESTNET
 
-fun deserializeErgobox(input: ByteArray): ErgoBox? {
+fun deserializeErgobox(input: ByteArray): InputBox? {
     val r = `SigmaSerializer$`.`MODULE$`.startReader(input, 0)
     val ergoBox = `ErgoBoxSerializer$`.`MODULE$`.parse(r)
-    return ergoBox
+    return ergoBox?.let { InputBoxImpl(it) }
 }
 

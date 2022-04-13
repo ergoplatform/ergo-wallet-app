@@ -62,7 +62,7 @@ class ConfirmCreateWalletFragment : FullScreenFragmentDialog() {
             NavHostFragment.findNavController(requireParentFragment())
                 .navigateSafe(
                     ConfirmCreateWalletFragmentDirections.actionConfirmCreateWalletFragmentToSaveWalletFragmentDialog(
-                        args.mnemonic
+                        args.mnemonic, false
                     )
                 )
         }

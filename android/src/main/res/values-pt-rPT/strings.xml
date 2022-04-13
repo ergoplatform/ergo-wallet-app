@@ -25,12 +25,12 @@
     <string name="label_dismiss">Dispensar</string>
     <string name="label_remove">Remover</string>
     <string name="label_confirm">Confirmar</string>
-    <string name="label_erg_amount">%1s ERG</string>
+    <string name="label_erg_amount">%1$s ERG</string>
     <string name="label_time_span_just_now">agora mesmo</string>
     <string name="label_time_span_moments_ago">um momento atrás</string>
-    <string name="label_time_span_minutes_ago">%1s minutos atrás</string>
-    <string name="label_time_span_hours_ago">%1s horas atrás</string>
-    <string name="label_time_span_days_ago">%1s dias atrás</string>
+    <string name="label_time_span_minutes_ago">%1$s minutos atrás</string>
+    <string name="label_time_span_hours_ago">%1$s horas atrás</string>
+    <string name="label_time_span_days_ago">%1$s dias atrás</string>
     <string name="error_camera">Erro ao iniciar a câmera. Por favor verifique as suas definições de privacidade.</string>
 
     <!-- Wallet -->
@@ -39,10 +39,10 @@
     <string name="label_unconfirmed">não confirmado</string>
     <string name="button_receive">Receber</string>
     <string name="button_send">Enviar</string>
-    <string name="button_display_currency">Visualizar moeda: %1s</string>
-    <string name="label_last_sync">sincronizado %1s</string>
+    <string name="button_display_currency">Visualizar moeda: %1$s</string>
+    <string name="label_last_sync">sincronizado %1$s</string>
     <string name="label_erg_price">1 ERG ≈</string>
-    <string name="label_fiat_amount">≈ %1s</string>
+    <string name="label_fiat_amount">≈ %1$s</string>
     <string name="label_wallet_default">A minha carteira</string>
     <string name="label_readonly_wallet_default">A minha carteira (modo leitura)</string>
     <string name="hint_signing_request">Por favor realize o scan do pedido de assinatura 
@@ -70,7 +70,7 @@
     <string name="intro_confirm_create_wallet">Para confirmar que a sua frase mnemónica está correcta, introduza duas palavras da frase agora:</string>
     <string name="check_confirm_create_wallet">Eu compreendo que sou responsável por salvaguardar a minha frase mnemónica num lugar seguro.
     Esta é a única forma de restaurar a sua carteira, caso as chaves no dispositivo actual sejam perdidas ou inacessíveis.</string>
-    <string name="label_word_confirm_create_wallet">Palavra %1s</string>
+    <string name="label_word_confirm_create_wallet">Palavra %1$s</string>
     <string name="error_word_confirm_create_wallet">Palavra incorrecta</string>
 
     <!-- Restore wallet -->
@@ -79,7 +79,7 @@
         <a href="https://github.com/ergoplatform/ergo/blob/master/ergo-wallet/src/main/resources/wordlist/english.txt">Verifique a lista de palavras</a>
             e compare.</string>
     <string name="button_restore">Recuperar carteira</string>
-    <string name="mnemonic_length_not_enough">Algumas palavras estão em falta na sua frase mnemónica. Adicione no mínimo %1s.</string>
+    <string name="mnemonic_length_not_enough">Algumas palavras estão em falta na sua frase mnemónica. Adicione no mínimo %1$s.</string>
     <string name="mnemonic_unknown_words">A frase mnemónica contém palavras inválidas. Verifique erros ortográficos.</string>
     <string name="mnemonic_invalid">A validação da frase mnemónica falhou. Caso tenha a certeza que introduziu a chave correcta, pode clicar novamente para avançar.</string>
 
@@ -90,7 +90,7 @@
     <string name="button_save_password_encrypted">Guardar palavra-passe encriptada</string>
     <string name="desc_save_password_encrypted">Introduzir a palavra-passe que irá utilizar cada vez que queira enviar fundos.</string>
     <string name="button_save_device_encrypted">Guardar dispositivo encriptado</string>
-    <string name="desc_save_device_encrypted">Realize a autenticação no seu dispositivo para guardar a sua carteira e para enviar fundos.\nMétodo de autenticação actual: %1s</string>
+    <string name="desc_save_device_encrypted">Realize a autenticação no seu dispositivo para guardar a sua carteira e para enviar fundos.\nMétodo de autenticação actual: %1$s</string>
     <string name="button_save_keychain">Guardar no  porta-chaves</string>
     <string name="desc_save_keychain">Realize a autenticação no seu dispositivo para enviar fundos.</string>
     <string name="device_enc_security_none">Vazio</string>
@@ -108,18 +108,17 @@
 
     <!-- Wallet details -->
     <string name="title_wallet_balance">Saldo</string>
-    <string name="label_all_addresses">Todos os endereços %1d</string>
-    <string name="exporer_view_transactions">Clique para visualizar a transações no Ergo Explorer — a lista de transações realizadas na aplicação irá ser adicionada brevemente</string>
+    <string name="label_all_addresses">Todos os endereços %1$d</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Endereços</string>
     <string name="title_wallet_address">Visualizar conteúdo para</string>
     <string name="label_wallet_main_address">Endereço principal</string>
-    <string name="label_wallet_address_derived">Endereço de origem %1s</string>
-    <string name="label_wallet_token_balance">%1s tokens</string>
+    <string name="label_wallet_address_derived">Endereço de origem %1$s</string>
+    <string name="label_wallet_token_balance">%1$s tokens</string>
     <string name="desc_wallet_addresses">Uma carteira pode conter múltiplos endereços públicos com origem no endereço principal.</string>
     <string name="button_add_address">Um endereço</string>
-    <string name="button_add_addresses">Adicionar %1d endereço</string>
+    <string name="button_add_addresses">Adicionar %1$d endereço</string>
     <string name="desc_wallet_addr_label">Configurar uma descrição (visível só para si) para este endereço:</string>
     <string name="hint_wallet_addr_label">Descrição (opcional)</string>
     <string name="desc_wallet_addr_remove">Poderá remover este endereço da vista desta aplicação. Continuará a estar disponível 
@@ -131,11 +130,11 @@
     <string name="label_to">para</string>
     <string name="hint_read_only">Esta é uma carteira de modo de leitura. Para enviar fundos, necessita de um dispositivo para assinar a sua transacção. <a href="">Aprenda mais.</a></string>
     <string name="desc_send_funds">Introduza o endereço de destino e a quantia a enviar ou realize o scan de um código QR.</string>
-    <string name="label_send_from">De: %1s</string>
-    <string name="label_wallet_balance">Saldo: %1s ERG</string>
+    <string name="label_send_from">De: %1$s</string>
+    <string name="label_wallet_balance">Saldo: %1$s ERG</string>
     <string name="label_receiver_address">Endereço destino</string>
     <string name="label_scan_qr">Scan código QR</string>
-    <string name="desc_fee">Taxa: %1s ERG</string>
+    <string name="desc_fee">Taxa: %1$s ERG</string>
     <string name="error_receiver_address">Por favor introduza um endereço ERG válido</string>
     <string name="error_amount">Por favor introduza uma quantia válida</string>
     <string name="error_send_transaction">Não foi possível realizar a transacção</string>
@@ -151,14 +150,14 @@
     <string name="button_scan_signed_tx">Realize o scan da transicção assinada</string>
     <string name="button_next">Próximo</string>
     <string name="title_authenticate">autenticação necessária</string>
-    <string name="error_device_security">Erro de segurança: %1s</string>
+    <string name="error_device_security">Erro de segurança: %1$s</string>
     <string name="label_add_token">Token</string>
     <string name="label_send_all">Enviar tudo</string>
     <string name="title_add_token">Escolha o token a enviar</string>
     <string name="error_token_amount">Por favor introduza uma quantia válida de tokens ou remova as entradas de tokens inválidos</string>
-    <string name="error_balance_erg">Não existe saldo suficiente para enviar a quantia especificada: só %1s ERG disponível.</string>
-    <string name="error_request_token_not_found">Não foi possível adicionar o token \'%1s\'</string>
-    <string name="error_request_token_amount">Não foi possível definir a quantia pedida pelo token \'%1s\'</string>
+    <string name="error_balance_erg">Não existe saldo suficiente para enviar a quantia especificada: só %1$s ERG disponível.</string>
+    <string name="error_request_token_not_found">Não foi possível adicionar o token \'%1$s\'</string>
+    <string name="error_request_token_amount">Não foi possível definir a quantia pedida pelo token \'%1$s\'</string>
     <string name="error_request_token_but_no_erg">Tokens pedidos mas sem nenhuma quantia ERG. A quantia padrão irá ser enviada.</string>
 
     <!-- Cold wallet signing request screen -->
@@ -167,7 +166,7 @@
     <string name="title_inboxes">Quantia disponível</string>
     <string name="desc_inboxes">Estas quantias vão ser gastas quando a transacção for processada.</string>
     <string name="title_outboxes">Quantia em saída</string>
-    <string name="label_qr_pages_info">%1s de %2s</string>
+    <string name="label_qr_pages_info">%1$s de %2$s</string>
     <string name="desc_outboxes">Estas quantias vão ser enviadas quanda a transacção for processada.</string>
     <string name="desc_show_signed">A sua transacção foi assinada e necessita de ser enviada para a rede.
         Realize o scan do código QR para avançar.</string>
@@ -176,16 +175,16 @@
 
     <!-- Ergo Pay Signing -->
     <string name="title_ergo_pay_request">Pedido Ergo Pay</string>
-    <string name="label_sign_with">Assinar com: %1s (%2s)</string>
+    <string name="label_sign_with">Assinar com: %1$s (%2$s)</string>
     <string name="label_fetching_data">A pedir dados da dApp…</string>
-    <string name="label_message_from_dapp">Mensagem da dApp:\n%1s</string>
-    <string name="label_error_occured">Ocorreu um erro:\n%1s</string>
-    <string name="label_ergo_pay_wrong_address">Pedido de assinatura recebido para o endereço %1s, que não pertence a esta carteira.</string>
+    <string name="label_message_from_dapp">Mensagem da dApp:\n%1$s</string>
+    <string name="label_error_occured">Ocorreu um erro:\n%1$s</string>
+    <string name="label_ergo_pay_wrong_address">Pedido de assinatura recebido para o endereço %1$s, que não pertence a esta carteira.</string>
     <string name="label_ergo_pay_choose_address">Por favor escolha um endereço para avançar no pedido Ergo Pay.</string>
     <string name="error_prover_cant_sign">A transacção não pode ser assinada com as chaves desta carteira.</string>
 
     <!-- Settings -->
-    <string name="desc_about">Desenvolvido por Benjamin Schulte, %1s</string>
+    <string name="desc_about">Desenvolvido por Benjamin Schulte, %1$s</string>
     <string name="desc_about_moreinfo">Licenciado sob <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Licença Apache 2</a>\n
         Este projecto é <a href="https://github.com/ergoplatform/ergo-wallet-app">software de código aberto </a>\n
     Para mais informações <a href="https://discord.gg/kj7s7nb">Discord</a> ou <a href="https://t.me/ErgoWalletApp">Telegram</a></string>

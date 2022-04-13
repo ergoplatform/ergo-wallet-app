@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS `wallet_states` (
     PRIMARY KEY(`public_address`)
 );
 
+CREATE INDEX IF NOT EXISTS `index_wallet_states_wallet_first_address` ON `wallet_states` (`wallet_first_address`);
+
 insertOrReplace:
 INSERT OR REPLACE INTO `wallet_states` (
     `public_address`,`wallet_first_address`,`balance`,`unconfirmed_balance`

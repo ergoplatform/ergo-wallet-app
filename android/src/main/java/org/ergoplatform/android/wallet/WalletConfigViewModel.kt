@@ -8,10 +8,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.withTransaction
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.RoomWalletDbProvider
-import org.ergoplatform.deserializeSecrets
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.api.AndroidEncryptionManager
@@ -69,11 +69,11 @@ class WalletConfigViewModel : ViewModel() {
         }
     }
 
-    fun decryptMnemonicWithPass(password: String): String? {
+    fun decryptMnemonicWithPass(password: String): SigningSecrets? {
         uiLogic.wallet?.secretStorage?.let {
             try {
                 val decryptData = AesEncryptionManager.decryptData(password, it)
-                return deserializeSecrets(String(decryptData!!))
+                return SigningSecrets.fromJson(String(decryptData!!))
             } catch (t: Throwable) {
                 // Password wrong
                 return null
@@ -83,10 +83,10 @@ class WalletConfigViewModel : ViewModel() {
         return null
     }
 
-    fun decryptMnemonicWithUserAuth(): String? {
+    fun decryptMnemonicWithUserAuth(): SigningSecrets? {
         uiLogic.wallet?.secretStorage?.let {
             val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
-            return deserializeSecrets(String(decryptData!!))
+            return SigningSecrets.fromJson(String(decryptData!!))
         }
         return null
     }

@@ -2,6 +2,7 @@ package org.ergoplatform.ios.ui
 
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.Main
+import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGAffineTransform
 import org.robovm.apple.coregraphics.CGPoint
@@ -72,6 +73,10 @@ fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(
 
 @Suppress("DEPRECATION")
 fun openUrlInBrowser(url: String) = UIApplication.getSharedApplication().openURL(NSURL(url))
+
+fun UIViewController.shareText(text: String, uiBarButtonItem: UIBarButtonItem) {
+    shareText(text, uiBarButtonItem.keyValueCoder.getValue("view") as UIView)
+}
 
 fun UIViewController.shareText(text: String, sourceView: UIView) {
     val textShare = NSString(text)
@@ -156,6 +161,32 @@ class TrailingImageView<T : UIView>(val content: T, val trailingImage: UIImageVi
         addSubview(content)
         addSubview(trailingImage)
     }
+}
+
+fun buildAddressSelectorView(
+    vc: UIViewController,
+    walletId: Int,
+    showAllAddresses: Boolean,
+    keepWidth: Boolean = false,
+    addressChosen: (Int?) -> Unit
+): TrailingImageView<UILabel> {
+    val addressNameLabel = Body1BoldLabel().apply {
+        numberOfLines = 1
+        textColor = uiColorErgo
+    }
+    @Suppress("UNCHECKED_CAST")
+    return addressNameLabel.wrapWithTrailingImage(
+        getIosSystemImage(IMAGE_OPEN_LIST, UIImageSymbolScale.Small, 20.0)!!,
+        keepWidth = keepWidth
+    ).apply {
+        isUserInteractionEnabled = true
+        addGestureRecognizer(UITapGestureRecognizer {
+            vc.presentViewController(
+                ChooseAddressListDialogViewController(walletId, showAllAddresses, addressChosen),
+                true
+            ) {}
+        })
+    } as TrailingImageView<UILabel>
 }
 
 fun createTextview(): UITextView {

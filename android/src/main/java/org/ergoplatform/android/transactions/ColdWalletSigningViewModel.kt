@@ -6,11 +6,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.api.AndroidEncryptionManager
-import org.ergoplatform.deserializeSecrets
 import org.ergoplatform.transactions.SigningResult
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.uilogic.transactions.ColdWalletSigningUiLogic
@@ -32,10 +32,10 @@ class ColdWalletSigningViewModel : ViewModel() {
 
     fun signTxWithPassword(password: String, texts: StringProvider): Boolean {
         wallet?.walletConfig?.secretStorage?.let {
-            val mnemonic: String?
+            val mnemonic: SigningSecrets?
             try {
                 val decryptData = AesEncryptionManager.decryptData(password, it)
-                mnemonic = deserializeSecrets(String(decryptData!!))
+                mnemonic = SigningSecrets.fromJson(String(decryptData!!))
             } catch (t: Throwable) {
                 // Password wrong
                 return false
@@ -58,10 +58,10 @@ class ColdWalletSigningViewModel : ViewModel() {
         // we don't handle exceptions here by intention: we throw them back to the caller which
         // will show a snackbar to give the user a hint what went wrong
         wallet?.walletConfig?.secretStorage?.let {
-            val mnemonic: String?
+            val mnemonic: SigningSecrets?
 
             val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
-            mnemonic = deserializeSecrets(String(decryptData!!))
+            mnemonic = SigningSecrets.fromJson(String(decryptData!!))
 
             uiLogic.signTxWithMnemonicAsync(mnemonic!!, texts)
 
