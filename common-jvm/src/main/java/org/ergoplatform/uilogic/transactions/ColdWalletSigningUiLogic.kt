@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.signSerializedErgoTx
@@ -75,7 +76,7 @@ abstract class ColdWalletSigningUiLogic {
         }
     }
 
-    fun signTxWithMnemonicAsync(mnemonic: String, texts: StringProvider) {
+    fun signTxWithMnemonicAsync(signingSecrets: SigningSecrets, texts: StringProvider) {
         signingRequest?.let { signingRequest ->
             val derivedAddresses =
                 wallet!!.getSortedDerivedAddressesList().map { it.derivationIndex }
@@ -84,7 +85,7 @@ abstract class ColdWalletSigningUiLogic {
                 val ergoTxResult: SigningResult
                 withContext(Dispatchers.IO) {
                     ergoTxResult = signSerializedErgoTx(
-                        signingRequest.serializedTx!!, mnemonic, "",
+                        signingRequest.serializedTx!!, signingSecrets,
                         derivedAddresses, texts
                     )
                     signedQrCode = buildColdSigningResponse(ergoTxResult)

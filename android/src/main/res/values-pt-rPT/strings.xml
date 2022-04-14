@@ -109,7 +109,6 @@
     <!-- Wallet details -->
     <string name="title_wallet_balance">Saldo</string>
     <string name="label_all_addresses">Todos os endereços %1d</string>
-    <string name="exporer_view_transactions">Clique para visualizar a transações no Ergo Explorer — a lista de transações realizadas na aplicação irá ser adicionada brevemente</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Endereços</string>
@@ -188,7 +187,7 @@
     <string name="desc_about">Desenvolvido por Benjamin Schulte, %1s</string>
     <string name="desc_about_moreinfo">Licenciado sob <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Licença Apache 2</a>\n
         Este projecto é <a href="https://github.com/ergoplatform/ergo-wallet-app">software de código aberto </a>\n
-    Para mais informações <a href="https://discord.gg/kj7s7nb">Discord</a> ou <a href="https://t.me/ergosupport">Telegram</a></string>
+    Para mais informações <a href="https://discord.gg/kj7s7nb">Discord</a> ou <a href="https://t.me/ErgoWalletApp">Telegram</a></string>
     <string name="desc_coingecko">O preço da Ergo é proveniente do <a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a></string>
     <string name="label_cg_conn_error">Erro ao contactar com CoinGecko, por favor tente novamente mais tarde.</string>
     <string name="desc_dark_mode">Modo Noite ou modo Dia?</string>

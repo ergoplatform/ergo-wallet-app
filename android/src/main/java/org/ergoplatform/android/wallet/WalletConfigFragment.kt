@@ -7,6 +7,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentWalletConfigBinding
 import org.ergoplatform.android.ui.*
@@ -153,7 +154,7 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
         }
     }
 
-    private fun displayXpubKeyFromMnemonic(mnemonic: String) {
+    private fun displayXpubKeyFromMnemonic(mnemonic: SigningSecrets) {
         displayXpubKey(getSerializedXpubKeyFromMnemonic(mnemonic))
     }
 
@@ -165,7 +166,9 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
         )
     }
 
-    private fun displayMnemonic(mnemonic: String) {
+    private fun displayMnemonic(signingSecrets: SigningSecrets) {
+        val mnemonic = signingSecrets.mnemonic.toStringUnsecure()
+
         MaterialAlertDialogBuilder(requireContext())
             .setMessage(mnemonic)
             .setPositiveButton(R.string.button_copy) { _, _ ->

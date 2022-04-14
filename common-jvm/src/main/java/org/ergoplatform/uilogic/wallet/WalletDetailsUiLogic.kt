@@ -1,21 +1,27 @@
 package org.ergoplatform.uilogic.wallet
 
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.ErgoApiService
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.*
 import org.ergoplatform.tokens.TokenInfoManager
+import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
 import org.ergoplatform.uilogic.STRING_LABEL_ALL_ADDRESSES
 import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 import org.ergoplatform.wallet.*
 import org.ergoplatform.wallet.addresses.getAddressLabel
 
 abstract class WalletDetailsUiLogic {
+    val maxTransactionsToShow = 5
+
     var wallet: Wallet? = null
         private set
     var addressIdx: Int? = null
@@ -67,10 +73,11 @@ abstract class WalletDetailsUiLogic {
         refreshAddress()
     }
 
-    fun newAddressIdxChosen(newAddressIdx: Int?) {
+    fun newAddressIdxChosen(newAddressIdx: Int?, prefs: PreferencesProvider, db: IAppDatabase) {
         if (newAddressIdx != addressIdx) {
             addressIdx = newAddressIdx
             refreshAddress()
+            refreshAddressTransactionsWhenNeeded(prefs, db)
         }
     }
 
@@ -80,6 +87,36 @@ abstract class WalletDetailsUiLogic {
             ?: wallet?.getTokensForAllAddresses() ?: emptyList()).sortedBy { it.name?.lowercase() }
 
         onDataChanged()
+    }
+
+    private fun refreshAddressTransactionsWhenNeeded(prefs: PreferencesProvider, db: IAppDatabase) {
+        val addressesToRefresh = getSelectedAddresses()
+        addressesToRefresh?.forEach {
+            TransactionListManager.downloadTransactionListForAddress(
+                it.publicAddress,
+                ErgoApiService.getOrInit(prefs),
+                db
+            )
+        }
+    }
+
+    /**
+     * called from UI when it became visible first time or after being in background
+     */
+    fun refreshWhenNeeded(
+        prefs: PreferencesProvider,
+        database: IAppDatabase
+    ) {
+        WalletStateSyncManager.getInstance().refreshWhenNeeded(prefs, database)
+        refreshAddressTransactionsWhenNeeded(prefs, database)
+    }
+
+    fun refreshByUser(
+        prefs: PreferencesProvider,
+        database: IAppDatabase
+    ): Boolean {
+        refreshAddressTransactionsWhenNeeded(prefs, database)
+        return WalletStateSyncManager.getInstance().refreshByUser(prefs, database)
     }
 
     fun gatherTokenInformation(tokenDbProvider: TokenDbProvider, apiService: ErgoApiService) {
@@ -146,6 +183,38 @@ abstract class WalletDetailsUiLogic {
                 )
             )
         }
+    }
+
+    suspend fun loadTransactionsToShow(transactionDbProvider: TransactionDbProvider): List<AddressTransactionWithTokens> {
+        val addresses = getSelectedAddresses()?.map { it.publicAddress }
+
+        return if (addresses?.size == 1) {
+            transactionDbProvider.loadAddressTransactionsWithTokens(addresses.first(), maxTransactionsToShow, 0)
+        } else {
+            val returnedTransactions = mutableListOf<AddressTransactionWithTokens>()
+            addresses?.forEach { address ->
+                returnedTransactions.addAll(
+                    transactionDbProvider.loadAddressTransactionsWithTokens(address, maxTransactionsToShow, 0)
+                )
+            }
+            returnedTransactions.sortedByDescending { it.addressTransaction.inclusionHeight }
+                .take(maxTransactionsToShow)
+        }
+    }
+
+    fun hasChangedNewTxList(
+        newTransactionList: List<AddressTransactionWithTokens>,
+        otherTxList: List<AddressTransactionWithTokens>?
+    ) = otherTxList == null ||
+            newTransactionList.size != otherTxList.size ||
+            newTransactionList.isNotEmpty() && List(newTransactionList.size) {
+        val newTx = newTransactionList[it].addressTransaction
+        val shownTx = otherTxList[it].addressTransaction
+        newTx.txId != shownTx.txId || newTx.state != shownTx.state
+    }.reduceRight { a, b -> a || b }
+
+    private fun getSelectedAddresses(): List<WalletAddress>? {
+        return walletAddress?.let { listOf(it) } ?: wallet?.getSortedDerivedAddressesList()
     }
 
     abstract fun onDataChanged()

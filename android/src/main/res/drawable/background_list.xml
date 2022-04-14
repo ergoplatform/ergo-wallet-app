@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item>
+        <shape
+            android:shape="rectangle">
+            <solid android:color="@color/cardview_background" />
+
+        </shape>
+    </item>
+
+    <!-- this mess is what we have to do to get a bottom border only. -->
+    <item android:top="1px"
+        android:left="-2dp"
+        android:right="-2dp"
+        android:bottom="1px">
+        <shape
+            android:shape="rectangle">
+            <stroke android:width="1px" android:color="@color/lightgrey" />
+            <solid android:color="@null" />
+        </shape>
+    </item>
+
+</layer-list>

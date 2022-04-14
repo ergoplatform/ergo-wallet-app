@@ -43,7 +43,7 @@ fun WalletConfig.toDbEntity(): WalletConfigDbEntity {
 }
 
 
-@Entity(tableName = "wallet_states")
+@Entity(tableName = "wallet_states", indices = [Index("wallet_first_address")])
 data class WalletStateDbEntity(
     @PrimaryKey @ColumnInfo(name = "public_address") val publicAddress: String,
     @ColumnInfo(name = "wallet_first_address") val walletFirstAddress: String,
@@ -59,7 +59,7 @@ fun WalletState.toDbEntity(): WalletStateDbEntity {
     return WalletStateDbEntity(publicAddress, walletFirstAddress, balance, unconfirmedBalance)
 }
 
-@Entity(tableName = "wallet_tokens")
+@Entity(tableName = "wallet_tokens", indices = [Index("wallet_first_address"), Index("public_address")])
 data class WalletTokenDbEntity(
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo(name = "public_address") val publicAddress: String,
@@ -94,7 +94,7 @@ fun WalletToken.toDbEntity(): WalletTokenDbEntity {
     )
 }
 
-@Entity(tableName = "wallet_addresses")
+@Entity(tableName = "wallet_addresses", indices = [Index("wallet_first_address")])
 data class WalletAddressDbEntity(
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo(name = "wallet_first_address") val walletFirstAddress: String,

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:orientation="vertical">
 
     <FrameLayout
@@ -14,7 +15,7 @@
 
         <TextView
             android:id="@+id/wallet_name"
-            style="@style/TextAppearance.App.Headline1"
+            style="@style/TextAppearance.App.TitleBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -25,6 +26,16 @@
 
     </FrameLayout>
 
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:indeterminate="true"
+        android:scaleY="4"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
@@ -32,6 +43,7 @@
         android:layout_weight="1">
 
         <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -342,19 +354,22 @@
                     android:foreground="?android:attr/selectableItemBackground">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_transactions"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/activity_horizontal_margin"
-                        android:animateLayoutChanges="true">
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+                        android:layout_marginBottom="@dimen/half_horizontal_margin">
 
                         <ImageView
                             android:id="@+id/transactions_logo"
                             android:layout_width="@dimen/medium_icon_size"
                             android:layout_height="@dimen/medium_icon_size"
+                            android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_transactions"
+                            app:layout_constraintBottom_toBottomOf="@id/title_transactions"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toTopOf="@id/title_transactions" />
 
                         <TextView
                             android:id="@+id/title_transactions"
@@ -371,14 +386,47 @@
                             app:layout_constraintStart_toEndOf="@id/transactions_logo"
                             app:layout_constraintTop_toTopOf="parent" />
 
-                        <TextView
-                            style="@style/TextAppearance.App.Body1"
-                            android:layout_width="0dp"
+                        <LinearLayout
+                            android:id="@+id/transaction_list"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/exporer_view_transactions"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="@id/title_transactions"
-                            app:layout_constraintTop_toBottomOf="@id/title_transactions" />
+                            android:layout_marginTop="@dimen/half_horizontal_margin"
+                            android:background="@drawable/background_list"
+                            android:divider="@color/lightgrey"
+                            android:orientation="vertical"
+                            android:showDividers="middle"
+                            android:visibility="visible"
+                            app:layout_constraintTop_toBottomOf="@id/transactions_logo">
+
+                            <include layout="@layout/entry_address_transaction" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/transactions_empty"
+                            style="@style/TextAppearance.App.Body1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:paddingVertical="@dimen/half_horizontal_margin"
+                            android:text="@string/transactions_none_yet"
+                            android:visibility="gone"
+                            app:layout_constraintTop_toBottomOf="@id/transactions_logo" />
+
+                        <TextView
+                            android:id="@+id/transactions_more_button"
+                            style="@style/TextAppearance.App.Body1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:paddingTop="@dimen/half_horizontal_margin"
+                            android:paddingBottom="4dp"
+                            android:text="@string/transactions_view_more"
+                            android:textColor="@color/primary"
+                            android:textStyle="bold"
+                            android:visibility="gone"
+                            app:layout_constraintTop_toBottomOf="@id/transaction_list"
+                            tools:visibility="visible" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>

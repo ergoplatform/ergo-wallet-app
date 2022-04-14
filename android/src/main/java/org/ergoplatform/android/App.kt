@@ -22,5 +22,6 @@ class App : Application() {
         WalletStateSyncManager.getInstance().loadPreferenceValues(preferences, AppDatabase.getInstance(applicationContext))
 
         LogUtils.stackTraceLogger = { lastStackTrace = it }
+        LogUtils.logDebug = BuildConfig.DEBUG
     }
 }

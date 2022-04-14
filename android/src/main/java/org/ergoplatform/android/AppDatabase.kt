@@ -13,22 +13,31 @@ import org.ergoplatform.android.tokens.TokenDbDao
 import org.ergoplatform.android.tokens.TokenInformationDbEntity
 import org.ergoplatform.android.tokens.TokenPriceDbEntity
 import org.ergoplatform.android.tokens.toDbEntity
+import org.ergoplatform.android.transactions.AddressTransactionDbEntity
+import org.ergoplatform.android.transactions.AddressTransactionTokenDbEntity
+import org.ergoplatform.android.transactions.TransactionDbDao
+import org.ergoplatform.android.transactions.toDbEntity
 import org.ergoplatform.android.wallet.*
 import org.ergoplatform.persistance.*
 
 @Database(
-    entities = arrayOf(
+    entities = [
         WalletConfigDbEntity::class,
         WalletStateDbEntity::class,
         WalletAddressDbEntity::class,
         WalletTokenDbEntity::class,
+        AddressTransactionDbEntity::class,
+        AddressTransactionTokenDbEntity::class,
         TokenPriceDbEntity::class,
         TokenInformationDbEntity::class
-    ), version = 6
+    ],
+    version = 7,
+    exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase(), IAppDatabase {
     abstract fun walletDao(): WalletDbDao
     abstract fun tokenDao(): TokenDbDao
+    abstract fun transactionDao(): TransactionDbDao
 
     companion object {
 
@@ -49,6 +58,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 .addMigrations(MIGRATION_3_4)
                 .addMigrations(MIGRATION_4_5)
                 .addMigrations(MIGRATION_5_6)
+                .addMigrations(MIGRATION_6_7)
                 .build()
         }
 
@@ -93,10 +103,25 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `token_info` (`tokenId` TEXT NOT NULL, `issuing_box` TEXT NOT NULL, `minting_tx` TEXT NOT NULL, `display_name` TEXT NOT NULL, `description` TEXT NOT NULL, `decimals` INTEGER NOT NULL, `full_supply` INTEGER NOT NULL, `reg7` TEXT, `reg8` TEXT, `reg9` TEXT, `genuine_flag` INTEGER NOT NULL, `issuer_link` TEXT, `thumbnail_bytes` BLOB, `thunbnail_type` INTEGER NOT NULL, `updated_ms` INTEGER NOT NULL, PRIMARY KEY(`tokenId`))")
             }
         }
+
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_wallet_states_wallet_first_address` ON `wallet_states` (`wallet_first_address`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_wallet_addresses_wallet_first_address` ON `wallet_addresses` (`wallet_first_address`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_wallet_tokens_wallet_first_address` ON `wallet_tokens` (`wallet_first_address`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_wallet_tokens_public_address` ON `wallet_tokens` (`public_address`)")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `address_transaction` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `address` TEXT NOT NULL, `tx_id` TEXT NOT NULL, `inclusion_height` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `nanoerg` INTEGER NOT NULL, `message` TEXT, `state` INTEGER NOT NULL)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_address_transaction_address_inclusion_height` ON `address_transaction` (`address` ASC, `inclusion_height` DESC)")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `address_transaction_token` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `address` TEXT NOT NULL, `tx_id` TEXT NOT NULL, `token_id` TEXT NOT NULL, `name` TEXT NOT NULL, `amount` INTEGER NOT NULL, `decimals` INTEGER NOT NULL)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_address_transaction_token_address_tx_id` ON `address_transaction_token` (`address`, `tx_id`)")
+            }
+        }
     }
 
     override val tokenDbProvider get() = RoomTokenDbProvider(this)
     override val walletDbProvider get() = RoomWalletDbProvider(this)
+    override val transactionDbProvider: TransactionDbProvider
+        get() = RoomTransactionDbProvider(this)
 }
 
 class RoomWalletDbProvider(private val database: AppDatabase) : WalletDbProvider {
@@ -121,9 +146,13 @@ class RoomWalletDbProvider(private val database: AppDatabase) : WalletDbProvider
     }
 
     override suspend fun deleteWalletConfigAndStates(firstAddress: String, walletId: Int?) {
+        loadWalletAddresses(firstAddress).forEach {
+            database.transactionDbProvider.deleteAddressTransactions(it.publicAddress)
+        }
         database.walletDao().deleteWalletStates(firstAddress)
         database.walletDao().deleteTokensByWallet(firstAddress)
         database.walletDao().deleteWalletAddresses(firstAddress)
+        database.transactionDbProvider.deleteAddressTransactions(firstAddress)
         (walletId ?: database.walletDao().loadWalletByFirstAddress(firstAddress)?.id)?.let { id ->
             database.walletDao().deleteWalletConfig(id)
         }
@@ -208,6 +237,48 @@ class RoomTokenDbProvider(private val database: AppDatabase) : TokenDbProvider {
     override suspend fun pruneUnusedTokenInformation() {
         database.tokenDao()
             .deleteOutdatedTokenInformation(System.currentTimeMillis() - TOKEN_INFO_MS_OUTDATED)
+    }
+
+}
+
+class RoomTransactionDbProvider(private val database: AppDatabase) : TransactionDbProvider() {
+    override suspend fun insertOrUpdateAddressTransaction(addressTransaction: AddressTransaction) {
+        database.transactionDao().insertOrUpdateAddressTransaction(addressTransaction.toDbEntity())
+    }
+
+    override suspend fun loadAddressTransactions(
+        address: String,
+        limit: Int,
+        page: Int
+    ): List<AddressTransaction> {
+        return database.transactionDao().loadAddressTransactions(address, limit, page)
+            .map { it.toModel() }
+    }
+
+    override suspend fun deleteAddressTransactions(address: String) {
+        database.transactionDao().deleteAddressTransactions(address)
+        database.transactionDao().deleteAddressTransactionTokens(address)
+    }
+
+    override suspend fun deleteTransaction(id: Int) {
+        database.transactionDao().apply {
+            loadAddressTransaction(id)?.let { addressTransaction ->
+                deleteAddressTransactionTokens(addressTransaction.address, addressTransaction.txId)
+                deleteAddressTransaction(addressTransaction.id)
+            }
+        }
+    }
+
+    override suspend fun insertOrUpdateAddressTransactionToken(addressTxToken: AddressTransactionToken) {
+        database.transactionDao().insertOrUpdateAddressTransactionToken(addressTxToken.toDbEntity())
+    }
+
+    override suspend fun loadAddressTransactionTokens(
+        address: String,
+        txId: String
+    ): List<AddressTransactionToken> {
+        return database.transactionDao().loadAddressTransactionTokens(address, txId)
+            .map { it.toModel() }
     }
 
 }

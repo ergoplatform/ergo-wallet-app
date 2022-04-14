@@ -49,7 +49,8 @@ object TestUiWallet {
                 get() = walletDbProvider
             override val tokenDbProvider: TokenDbProvider
                 get() = mock<TokenDbProvider> {}
-
+            override val transactionDbProvider: TransactionDbProvider
+                get() = mock<TransactionDbProvider> {}
         }
     }
 

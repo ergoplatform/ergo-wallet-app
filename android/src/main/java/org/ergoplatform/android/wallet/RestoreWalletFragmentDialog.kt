@@ -75,7 +75,7 @@ class RestoreWalletFragmentDialog : FullScreenFragmentDialog() {
             NavHostFragment.findNavController(requireParentFragment())
                 .navigateSafe(
                     RestoreWalletFragmentDialogDirections.actionRestoreWalletFragmentDialogToSaveWalletFragmentDialog(
-                        mnemonic
+                        mnemonic, true
                     )
                 )
         }

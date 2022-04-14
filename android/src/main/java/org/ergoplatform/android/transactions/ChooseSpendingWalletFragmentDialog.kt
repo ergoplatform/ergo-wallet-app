@@ -69,7 +69,7 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
                     // immediately switch to send funds screen
                     navigateToNextScreen(wallets.first().walletConfig.id, query)
                 }
-                wallets.sortedBy { it.walletConfig.displayName }.forEach { wallet ->
+                wallets.sortedBy { it.walletConfig.displayName?.lowercase() }.forEach { wallet ->
                     val itemBinding = FragmentSendFundsWalletChooserItemBinding.inflate(
                         layoutInflater, binding.listWallets, true
                     )

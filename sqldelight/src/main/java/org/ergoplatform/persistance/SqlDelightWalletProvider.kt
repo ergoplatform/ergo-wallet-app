@@ -3,37 +3,45 @@ package org.ergoplatform.persistance
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
-class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvider {
+class SqlDelightWalletProvider(private val sqlDelightAppDb: SqlDelightAppDb) : WalletDbProvider {
+    private val appDb = sqlDelightAppDb.appDatabase
+
     override suspend fun <R> withTransaction(block: suspend () -> R): R {
-        return withContext(Dispatchers.IO) {
-            appDb.transactionWithResult {
-                runBlocking {
-                    block.invoke()
+        // if we already are in a transaction, do not open a subtransaction
+        return if (!sqlDelightAppDb.inTransaction)
+            withContext(Dispatchers.IO) {
+                sqlDelightAppDb.inTransaction = true
+                val result: R = appDb.transactionWithResult {
+                    runBlocking {
+                        block.invoke()
+                    }
                 }
+                sqlDelightAppDb.inTransaction = false
+                result
             }
-        }
+        else
+            block.invoke()
     }
 
     override suspend fun loadWalletByFirstAddress(firstAddress: String): WalletConfig? {
-        return withContext(Dispatchers.IO) {
+        return sqlDelightAppDb.useIoContext {
             appDb.walletConfigQueries.loadWalletByFirstAddress(firstAddress)
                 .executeAsOneOrNull()?.toModel()
         }
     }
 
     override suspend fun loadWalletConfigById(id: Int): WalletConfig? {
-        return withContext(Dispatchers.IO) {
+        return sqlDelightAppDb.useIoContext {
             appDb.walletConfigQueries.loadWalletById(id.toLong()).executeAsOneOrNull()?.toModel()
         }
     }
 
     override suspend fun updateWalletConfig(walletConfig: WalletConfig) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             appDb.walletConfigQueries.insertOrReplace(
                 if (walletConfig.id > 0) walletConfig.id.toLong() else null,
                 walletConfig.displayName,
@@ -60,10 +68,14 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
     }
 
     override suspend fun deleteWalletConfigAndStates(firstAddress: String, walletId: Int?) {
+        loadWalletAddresses(firstAddress).forEach {
+            sqlDelightAppDb.transactionDbProvider.deleteAddressTransactions(it.publicAddress)
+        }
+
         appDb.walletStateQueries.deleteByFirstAddress(firstAddress)
         appDb.walletTokenQueries.deleteTokensByFirstAddress(firstAddress)
         appDb.walletAddressQueries.deleteWalletAddressByFirstAddress(firstAddress)
-
+        sqlDelightAppDb.transactionDbProvider.deleteAddressTransactions(firstAddress)
         (walletId ?: loadWalletByFirstAddress(firstAddress)?.id)?.let { id ->
             appDb.walletConfigQueries.deleteWalletById(id.toLong())
         }
@@ -83,7 +95,7 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
 
 
     override suspend fun insertWalletStates(walletStates: List<WalletState>) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             walletStates.forEach {
                 appDb.walletStateQueries.insertOrReplace(it.toDbEntity())
             }
@@ -91,7 +103,7 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
     }
 
     override suspend fun deleteAddressState(publicAddress: String) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             appDb.walletStateQueries.deleteAddressState(publicAddress)
         }
     }
@@ -123,7 +135,7 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
     }
 
     override suspend fun loadWalletWithStateById(id: Int): Wallet? {
-        return withContext(Dispatchers.IO) {
+        return sqlDelightAppDb.useIoContext {
             val walletConfig =
                 appDb.walletConfigQueries.loadWalletById(id.toLong()).executeAsOneOrNull()
                     ?.toModel()
@@ -141,26 +153,26 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
     }
 
     override suspend fun loadWalletAddresses(firstAddress: String): List<WalletAddress> {
-        return withContext(Dispatchers.IO) {
+        return sqlDelightAppDb.useIoContext {
             appDb.walletAddressQueries.loadWalletAddresses(firstAddress).executeAsList()
                 .map { it.toModel() }
         }
     }
 
     override suspend fun loadWalletAddress(id: Long): WalletAddress? {
-        return withContext(Dispatchers.IO) {
+        return sqlDelightAppDb.useIoContext {
             appDb.walletAddressQueries.loadWalletAddress(id).executeAsOneOrNull()?.toModel()
         }
     }
 
     override suspend fun loadWalletAddress(publicAddress: String): WalletAddress? {
-        return withContext(Dispatchers.IO) {
+        return sqlDelightAppDb.useIoContext {
             appDb.walletAddressQueries.loadWalletAddressByPk(publicAddress).executeAsOneOrNull()?.toModel()
         }
     }
 
     override suspend fun insertWalletAddress(walletAddress: WalletAddress) {
-        // do not use withContext(Dispatchers.IO) here. Caused freeze on iOS and the only caller
+        // do not use withContext(sqlDelightAppDb.dispatcher) here. Caused freeze on iOS and the only caller
         // WalletAddressesUiLogic calls in IO context anyway.
             appDb.walletAddressQueries.insertOrReplace(
                 if (walletAddress.id > 0) walletAddress.id else null,
@@ -172,25 +184,25 @@ class SqlDelightWalletProvider(private val appDb: AppDatabase) : WalletDbProvide
     }
 
     override suspend fun updateWalletAddressLabel(addrId: Long, newLabel: String?) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             appDb.walletAddressQueries.updateLabel(newLabel, addrId)
         }
     }
 
     override suspend fun deleteWalletAddress(addrId: Long) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             appDb.walletAddressQueries.deleteWalletAddress(addrId)
         }
     }
 
     override suspend fun deleteTokensByAddress(publicAddress: String) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             appDb.walletTokenQueries.deleteTokensByAddress(publicAddress)
         }
     }
 
     override suspend fun insertWalletTokens(walletTokens: List<WalletToken>) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             walletTokens.forEach {
                 appDb.walletTokenQueries.insertOrReplace(
                     if (it.id > 0) it.id else null,

@@ -97,7 +97,7 @@ class ChooseSpendingWalletViewController(
 
             runOnMainThread {
                 walletsStackView.clearArrangedSubviews()
-                wallets.sortedBy { it.walletConfig.displayName }.forEach { wallet ->
+                wallets.sortedBy { it.walletConfig.displayName?.lowercase() }.forEach { wallet ->
                     walletsStackView.addArrangedSubview(WalletItem(wallet))
                 }
             }

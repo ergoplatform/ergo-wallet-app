@@ -11,5 +11,6 @@
     <dimen name="body1_textsize">18sp</dimen>
     <dimen name="body2_textsize">16sp</dimen>
     <dimen name="headline1_textsize">28sp</dimen>
+    <dimen name="titlebar_textsize">26sp</dimen>
     <dimen name="headline2_textsize">24sp</dimen>
 </resources>

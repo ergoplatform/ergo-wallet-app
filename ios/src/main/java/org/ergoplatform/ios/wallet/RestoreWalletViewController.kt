@@ -100,7 +100,13 @@ class RestoreWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
         }
 
         override fun navigateToSaveWalletDialog(mnemonic: String) {
-            navigationController.pushViewController(SaveWalletViewController(SecretString.create(mnemonic)), true)
+            navigationController.pushViewController(
+                SaveWalletViewController(
+                    SecretString.create(
+                        mnemonic
+                    ), true
+                ), true
+            )
         }
 
         override fun hideForcedSoftKeyboard() {

@@ -17,7 +17,7 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
     val texts = getAppDelegate().texts
 
     private val scanningContainer = ScanningContainer()
-    private val transactionContainer = TransactionContainer(texts) {
+    private val transactionContainer = SigningTransactionContainer(texts) {
         startAuthFlow(uiLogic.wallet!!.walletConfig) { mnemonic ->
             uiLogic.signTxWithMnemonicAsync(mnemonic, IosStringProvider(texts))
         }
@@ -65,7 +65,7 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         scanningContainer.errorText.text = uiLogic.lastErrorMessage ?: ""
 
         uiLogic.transactionInfo?.reduceBoxes()?.let {
-            transactionContainer.bindTransaction(it)
+            transactionContainer.bindTransaction(it, null)
         }
 
         refreshUiState()
