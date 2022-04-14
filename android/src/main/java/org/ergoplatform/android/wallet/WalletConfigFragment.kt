@@ -154,8 +154,10 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
         }
     }
 
-    private fun displayXpubKeyFromMnemonic(mnemonic: SigningSecrets) {
-        displayXpubKey(getSerializedXpubKeyFromMnemonic(mnemonic))
+    private fun displayXpubKeyFromMnemonic(signingSecrets: SigningSecrets) {
+        val xpubkey = getSerializedXpubKeyFromMnemonic(signingSecrets)
+        signingSecrets.clearMemory()
+        displayXpubKey(xpubkey)
     }
 
     private fun displayXpubKey(xpubkey: String) {
@@ -168,6 +170,7 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
 
     private fun displayMnemonic(signingSecrets: SigningSecrets) {
         val mnemonic = signingSecrets.mnemonic.toStringUnsecure()
+        signingSecrets.clearMemory()
 
         MaterialAlertDialogBuilder(requireContext())
             .setMessage(mnemonic)

@@ -91,7 +91,7 @@ class SaveWalletViewController(
 
                     val encrypted = AesEncryptionManager.encryptData(
                         password,
-                        uiLogic.signingSecrets.toJson().toByteArray()
+                        uiLogic.signingSecrets.toBytes()
                     )
 
                     saveToDbAndDismissController(ENC_TYPE_PASSWORD, encrypted)
@@ -112,7 +112,7 @@ class SaveWalletViewController(
                     override fun onAuthenticationSucceeded(context: LAContext) {
                         try {
                             val encrypted = IosEncryptionManager.encryptDataWithKeychain(
-                                uiLogic.signingSecrets.toJson().toByteArray(),
+                                uiLogic.signingSecrets.toBytes(),
                                 context
                             )
 

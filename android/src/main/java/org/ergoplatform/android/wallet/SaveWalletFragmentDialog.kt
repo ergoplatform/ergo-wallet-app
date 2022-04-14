@@ -144,7 +144,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 try {
                     val secretStorage = AndroidEncryptionManager.encryptDataOnDevice(
-                        viewModel.uiLogic!!.signingSecrets.toJson().toByteArray()
+                        viewModel.uiLogic!!.signingSecrets.toBytes()
                     )
                     saveToDbAndNavigateToWallet(
                         ENC_TYPE_DEVICE, secretStorage
@@ -196,7 +196,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
                 ENC_TYPE_PASSWORD,
                 AesEncryptionManager.encryptData(
                     password,
-                    viewModel.uiLogic!!.signingSecrets.toJson().toByteArray()
+                    viewModel.uiLogic!!.signingSecrets.toBytes()
                 )
             )
             null

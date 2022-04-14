@@ -16,6 +16,7 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 
 /**
  * Encryption / Decryption service using the AES algorithm
@@ -79,6 +80,9 @@ public class AesEncryptionManager {
     static byte[] encryptWithCipher(byte[] data, byte[] iv, Cipher cipher) throws BadPaddingException, IllegalBlockSizeException {
         //Encrypt the data
         byte[] encryptedData = cipher.doFinal(data);
+
+        // wipe data
+        Arrays.fill(data, (byte) 0);
 
         //Concatenate everything and return the final data
         ByteBuffer byteBuffer = ByteBuffer.allocate(4 + iv.length + encryptedData.length);

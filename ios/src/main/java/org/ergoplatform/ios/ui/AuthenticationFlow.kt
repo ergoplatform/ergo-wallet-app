@@ -34,7 +34,7 @@ fun UIViewController.startAuthFlow(wallet: WalletConfig, callback: (mnemonic: Si
                             wallet.secretStorage!!, context
                         )
 
-                        val mnemonic = SigningSecrets.fromJson(String(decrypted))!!
+                        val mnemonic = SigningSecrets.fromBytes(decrypted)!!
 
                         runOnMainThread { callback.invoke(mnemonic) }
                     } catch (t: Throwable) {
@@ -77,7 +77,7 @@ private fun proceedAuthFlowWithPassword(
         val mnemonic: SigningSecrets?
         try {
             val decryptData = AesEncryptionManager.decryptData(password, it)
-            mnemonic = SigningSecrets.fromJson(String(decryptData!!))
+            mnemonic = SigningSecrets.fromBytes(decryptData!!)
         } catch (t: Throwable) {
             // Password wrong
             return false

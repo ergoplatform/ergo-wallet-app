@@ -19,11 +19,11 @@ class AesEncryptionManagerTest {
             String(AesEncryptionManager.decryptData("passwort", ByteArray(list.size, { list[it].toByte() })))
         )
 
-        val secretData = "SecretData".encodeToByteArray()
+        val secretData = "SecretData"
         val password = "password"
-        val encryptedData = AesEncryptionManager.encryptData(password, secretData)
+        val encryptedData = AesEncryptionManager.encryptData(password, secretData.toByteArray())
 
-        Assert.assertEquals(String(secretData), String(AesEncryptionManager.decryptData(password, encryptedData)))
+        Assert.assertEquals(secretData, String(AesEncryptionManager.decryptData(password, encryptedData)))
 
         Assert.assertThrows(
             Throwable::class.java

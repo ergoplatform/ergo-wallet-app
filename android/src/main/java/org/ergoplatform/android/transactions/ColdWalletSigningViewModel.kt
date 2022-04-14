@@ -35,7 +35,7 @@ class ColdWalletSigningViewModel : ViewModel() {
             val mnemonic: SigningSecrets?
             try {
                 val decryptData = AesEncryptionManager.decryptData(password, it)
-                mnemonic = SigningSecrets.fromJson(String(decryptData!!))
+                mnemonic = SigningSecrets.fromBytes(decryptData!!)
             } catch (t: Throwable) {
                 // Password wrong
                 return false
@@ -61,7 +61,7 @@ class ColdWalletSigningViewModel : ViewModel() {
             val mnemonic: SigningSecrets?
 
             val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
-            mnemonic = SigningSecrets.fromJson(String(decryptData!!))
+            mnemonic = SigningSecrets.fromBytes(decryptData!!)
 
             uiLogic.signTxWithMnemonicAsync(mnemonic!!, texts)
 

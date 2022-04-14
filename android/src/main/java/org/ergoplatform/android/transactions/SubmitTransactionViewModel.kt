@@ -32,7 +32,7 @@ abstract class SubmitTransactionViewModel : ViewModel() {
             val mnemonic: SigningSecrets?
             try {
                 val decryptData = AesEncryptionManager.decryptData(password, it)
-                mnemonic = SigningSecrets.fromJson(String(decryptData!!))
+                mnemonic = SigningSecrets.fromBytes(decryptData!!)
             } catch (t: Throwable) {
                 // Password wrong
                 return false
@@ -62,7 +62,7 @@ abstract class SubmitTransactionViewModel : ViewModel() {
         uiLogic.wallet?.walletConfig?.secretStorage?.let {
 
             val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
-            val mnemonic = SigningSecrets.fromJson(String(decryptData!!))
+            val mnemonic = SigningSecrets.fromBytes(decryptData!!)
 
             uiLogic.startPaymentWithMnemonicAsync(
                 mnemonic!!,
