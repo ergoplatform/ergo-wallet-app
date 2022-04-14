@@ -43,7 +43,7 @@ class Main : UIApplicationDelegateAdapter() {
 
         CrashHandler.registerUncaughtExceptionHandler()
         LogUtils.stackTraceLogger = { CrashHandler.writeToDebugFile(it) }
-        database = SqlDelightAppDb(setupDatabase(), useTransactions = false)
+        database = SqlDelightAppDb(setupDatabase())
         texts = I18NBundle.createBundle(File(internalPath, "i18n/strings"))
         prefs = Preferences()
         WalletStateSyncManager.getInstance().loadPreferenceValues(prefs, database)
