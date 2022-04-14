@@ -179,6 +179,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                     signingSecrets, derivedAddresses,
                     preferences, texts
                 )
+                signingSecrets.clearMemory()
                 notifyUiLocked(false)
                 transactionSubmitted(ergoTxResult, db.transactionDbProvider, preferences)
             }

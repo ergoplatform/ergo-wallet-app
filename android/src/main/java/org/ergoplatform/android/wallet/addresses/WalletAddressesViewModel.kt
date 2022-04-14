@@ -43,7 +43,7 @@ class WalletAddressesViewModel : ViewModel() {
     fun addAddressWithBiometricAuth(ctx: Context) {
         wallet?.walletConfig?.secretStorage?.let {
             val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
-            SigningSecrets.fromJson(String(decryptData!!))?.let { mnemonic ->
+            SigningSecrets.fromBytes(decryptData!!)?.let { mnemonic ->
                 addNextAddresses(ctx, mnemonic)
             }
         }
@@ -53,7 +53,7 @@ class WalletAddressesViewModel : ViewModel() {
         wallet?.walletConfig?.secretStorage?.let {
             try {
                 val decryptData = AesEncryptionManager.decryptData(password, it)
-                SigningSecrets.fromJson(String(decryptData!!))?.let { mnemonic ->
+                SigningSecrets.fromBytes(decryptData!!)?.let { mnemonic ->
                     addNextAddresses(ctx, mnemonic)
                     return true
                 }

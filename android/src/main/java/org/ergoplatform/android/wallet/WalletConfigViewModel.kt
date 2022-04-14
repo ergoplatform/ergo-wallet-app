@@ -73,7 +73,7 @@ class WalletConfigViewModel : ViewModel() {
         uiLogic.wallet?.secretStorage?.let {
             try {
                 val decryptData = AesEncryptionManager.decryptData(password, it)
-                return SigningSecrets.fromJson(String(decryptData!!))
+                return SigningSecrets.fromBytes(decryptData!!)
             } catch (t: Throwable) {
                 // Password wrong
                 return null
@@ -86,7 +86,7 @@ class WalletConfigViewModel : ViewModel() {
     fun decryptMnemonicWithUserAuth(): SigningSecrets? {
         uiLogic.wallet?.secretStorage?.let {
             val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
-            return SigningSecrets.fromJson(String(decryptData!!))
+            return SigningSecrets.fromBytes(decryptData!!)
         }
         return null
     }

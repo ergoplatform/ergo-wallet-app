@@ -152,6 +152,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                         signingRequest, signingSecrets,
                         derivedAddresses, texts
                     )
+                    signingSecrets.clearMemory()
                     if (signingResult.success) {
                         ergoTxResult = sendSignedErgoTx(
                             signingResult.serializedTx!!,
