@@ -17,7 +17,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
@@ -256,7 +256,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                 val ctx = requireContext()
                 walletDetailsViewModel.uiLogic.gatherTokenInformation(
                     AppDatabase.getInstance(ctx).tokenDbProvider,
-                    ErgoApiService.getOrInit(Preferences(ctx))
+                    ApiServiceManager.getOrInit(Preferences(ctx))
                 )
             }
         }

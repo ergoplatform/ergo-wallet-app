@@ -98,7 +98,7 @@ class SettingsViewController : CoroutineViewController() {
             .bottomToSuperview(bottomInset = DEFAULT_MARGIN)
 
         view.addSubview(scrollView)
-        scrollView.edgesToSuperview()
+        scrollView.edgesToSuperview(true)
         scrollView.setDelaysContentTouches(false)
     }
 
@@ -134,7 +134,16 @@ class SettingsViewController : CoroutineViewController() {
 
     private fun buildNftSettings(texts: I18NBundle, preferences: Preferences): UIView {
         val container = UIView(CGRect.Zero())
-        val desc = Body1Label().apply {
+        val titleNftSettings = Body1BoldLabel().apply {
+            text = texts.get(STRING_DESC_TOKEN_SETTINGS)
+            textAlignment = NSTextAlignment.Center
+        }
+        val descTokenVerification = UITextView(CGRect.Zero()).apply {
+            setHtmlText(texts.get(STRING_DESC_TOKEN_VERIFICATION))
+            textAlignment = NSTextAlignment.Center
+            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+        }
+        val descNftDownload = Body1Label().apply {
             text = texts.get(STRING_DESC_DOWNLOAD_CONTENT)
             textAlignment = NSTextAlignment.Center
         }
@@ -150,10 +159,16 @@ class SettingsViewController : CoroutineViewController() {
             button.setTitle(getButtonLabel(), UIControlState.Normal)
         }
 
-        container.addSubview(desc)
+        container.addSubview(titleNftSettings)
+        container.addSubview(descTokenVerification)
+        container.addSubview(descNftDownload)
         container.addSubview(button)
-        desc.topToSuperview(topInset = DEFAULT_MARGIN).widthMatchesSuperview()
-        button.bottomToSuperview().topToBottomOf(desc, inset = DEFAULT_MARGIN).widthMatchesSuperview()
+        titleNftSettings.topToSuperview(topInset = DEFAULT_MARGIN).widthMatchesSuperview()
+        descTokenVerification.topToBottomOf(titleNftSettings, DEFAULT_MARGIN)
+            .widthMatchesSuperview()
+        descNftDownload.topToBottomOf(descTokenVerification, DEFAULT_MARGIN * 2.5).widthMatchesSuperview()
+        button.bottomToSuperview().topToBottomOf(descNftDownload, inset = DEFAULT_MARGIN)
+            .widthMatchesSuperview()
         return container
     }
 
@@ -168,12 +183,16 @@ class SettingsViewController : CoroutineViewController() {
 
         val button = TextButton(texts.get(STRING_BUTTON_CONNECTION_SETTINGS))
         button.addOnTouchUpInsideListener { _, _ ->
-            presentViewController(UINavigationController(ConnectionSettingsViewController()), true) {}
+            presentViewController(
+                UINavigationController(ConnectionSettingsViewController()),
+                true
+            ) {}
         }
 
         expertSettingsContainer.addSubviews(listOf(title, button))
         title.topToSuperview(topInset = DEFAULT_MARGIN).widthMatchesSuperview()
-        button.bottomToSuperview().topToBottomOf(title, inset = DEFAULT_MARGIN).widthMatchesSuperview()
+        button.bottomToSuperview().topToBottomOf(title, inset = DEFAULT_MARGIN)
+            .widthMatchesSuperview()
 
         return expertSettingsContainer
     }

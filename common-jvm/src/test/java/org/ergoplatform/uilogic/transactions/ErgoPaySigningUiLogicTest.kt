@@ -8,10 +8,10 @@ import okhttp3.Request
 import okhttp3.ResponseBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.ergoplatform.ErgoApi
 import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.TestPreferencesProvider
 import org.ergoplatform.TestStringProvider
+import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.transactions.STATIC_ERGO_PAY_URI
@@ -242,8 +242,8 @@ class ErgoPaySigningUiLogicTest : TestCase() {
 
         }
 
-        override fun getErgoApiService(prefs: PreferencesProvider): ErgoApi {
-            return object : ErgoApi {
+        override fun getErgoApiService(prefs: PreferencesProvider): ErgoExplorerApi {
+            return object : ErgoExplorerApi {
                 override fun getTotalBalanceForAddress(publicAddress: String): Call<TotalBalance> {
                     error("Not implemented")
                 }

@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.ui.SingleLiveEvent
@@ -40,7 +40,7 @@ class SendFundsViewModel : SubmitTransactionViewModel() {
     fun initWallet(ctx: Context, walletId: Int, derivationIdx: Int, paymentRequest: String?) {
         uiLogic.initWallet(
             AppDatabase.getInstance(ctx),
-            ErgoApiService.getOrInit(Preferences(ctx)),
+            ApiServiceManager.getOrInit(Preferences(ctx)),
             walletId,
             derivationIdx,
             paymentRequest

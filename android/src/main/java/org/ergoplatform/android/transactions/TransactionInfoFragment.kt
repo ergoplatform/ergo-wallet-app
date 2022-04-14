@@ -7,7 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentTransactionInfoBinding
@@ -44,7 +44,7 @@ class TransactionInfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.uiLogic.init(args.txId, ErgoApiService.getOrInit(Preferences(requireContext())))
+        viewModel.uiLogic.init(args.txId, ApiServiceManager.getOrInit(Preferences(requireContext())))
 
         viewModel.txInfo.observe(viewLifecycleOwner) { txInfo ->
             binding.progressCircular.visibility = View.GONE

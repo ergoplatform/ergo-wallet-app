@@ -3,7 +3,7 @@ package org.ergoplatform.uilogic.transactions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApi
+import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.getAttachmentText
 import org.ergoplatform.transactions.reduceBoxes
@@ -22,7 +22,7 @@ abstract class TransactionInfoUiLogic {
         private set
     private var explorerTxInfo: org.ergoplatform.explorer.client.model.TransactionInfo? = null
 
-    fun init(txId: String, ergoApi: ErgoApi) {
+    fun init(txId: String, ergoApi: ErgoExplorerApi) {
         if (this.txId != null)
             return
 

@@ -4,7 +4,7 @@ import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.tokens.WalletDetailsTokenEntryView
@@ -436,7 +436,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 }
                 val appDelegate = getAppDelegate()
                 uiLogic.gatherTokenInformation(
-                    appDelegate.database.tokenDbProvider, ErgoApiService.getOrInit(appDelegate.prefs)
+                    appDelegate.database.tokenDbProvider, ApiServiceManager.getOrInit(appDelegate.prefs)
                 )
             }
 

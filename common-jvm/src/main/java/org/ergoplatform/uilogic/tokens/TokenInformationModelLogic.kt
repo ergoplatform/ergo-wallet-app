@@ -2,9 +2,8 @@ package org.ergoplatform.uilogic.tokens
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.PreferencesProvider
@@ -49,7 +48,7 @@ abstract class TokenInformationModelLogic {
             TokenInfoManager.getInstance().getTokenInformationFlow(
                 tokenId,
                 database.tokenDbProvider,
-                ErgoApiService.getOrInit(preferencesProvider)
+                ApiServiceManager.getOrInit(preferencesProvider)
             ).collect {
                 tokenInformation = it
                 eip4Token = try {

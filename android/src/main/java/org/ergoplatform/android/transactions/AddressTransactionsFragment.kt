@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -120,7 +120,7 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
             val context = requireContext()
             TransactionListManager.downloadTransactionListForAddress(
                 it.publicAddress,
-                ErgoApiService.getOrInit(Preferences(context)),
+                ApiServiceManager.getOrInit(Preferences(context)),
                 AppDatabase.getInstance(context)
             )
         }
@@ -240,7 +240,7 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
                         val context = requireContext()
                         TransactionListManager.startDownloadAllAddressTransactions(
                             viewModel.derivedAddress!!.publicAddress,
-                            ErgoApiService.getOrInit(Preferences(context)),
+                            ApiServiceManager.getOrInit(Preferences(context)),
                             AppDatabase.getInstance(context)
                         )
                     }

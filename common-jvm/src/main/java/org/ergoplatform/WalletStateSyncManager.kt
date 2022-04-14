@@ -189,7 +189,7 @@ class WalletStateSyncManager {
 
                 refreshAddresses.forEach { address ->
                     val balanceInfoCall =
-                        ErgoApiService.getOrInit(preferences).getTotalBalanceForAddress(
+                        ApiServiceManager.getOrInit(preferences).getTotalBalanceForAddress(
                             address.publicAddress
                         ).execute()
 

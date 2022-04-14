@@ -5,6 +5,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.*
+import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletDbProvider
@@ -126,8 +127,8 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     }
 
     // override in unit tests
-    protected open fun getErgoApiService(prefs: PreferencesProvider): ErgoApi =
-        ErgoApiService.getOrInit(prefs)
+    protected open fun getErgoApiService(prefs: PreferencesProvider): ErgoExplorerApi =
+        ApiServiceManager.getOrInit(prefs)
 
     private fun resetLastMessage() {
         lastMessage = null
