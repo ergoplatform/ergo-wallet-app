@@ -249,11 +249,15 @@
     <string name="button_dark_mode_system">System default</string>
     <string name="button_dark_mode_day">Light</string>
     <string name="button_dark_mode_night">Dark</string>
+    <string name="desc_token_settings">Token and NFT settings</string>
+    <string name="desc_token_verification">Ergo Wallet verifies token authenticity by using <a href="https://www.tokenjay.app">TokenJay</a>\'s services.
+      You can set to use another service in\n\'Node and API connections\'.</string>
     <string name="desc_expert_settings">Expert settings</string>
     <string name="button_connection_settings">Node and API connections</string>
     <string name="button_reset_defaults">Defaults</string>
     <string name="label_explorer_api_url">Explorer API URL</string>
     <string name="label_node_url">Node URL</string>
+    <string name="label_token_verification_url">Token verification service URL</string>
     <string name="button_show_debug_info">Show debug information</string>
     <string name="label_ipfs_http_gateway">IPFS HTTP gateway</string>
 </resources>

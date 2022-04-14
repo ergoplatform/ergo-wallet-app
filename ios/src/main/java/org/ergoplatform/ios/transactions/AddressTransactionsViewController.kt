@@ -2,7 +2,7 @@ package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.getExplorerAddressUrl
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.ui.*
@@ -80,7 +80,7 @@ class AddressTransactionsViewController(
         val appDelegate = getAppDelegate()
         TransactionListManager.downloadTransactionListForAddress(
             shownAddress!!.publicAddress,
-            ErgoApiService.getOrInit(appDelegate.prefs),
+            ApiServiceManager.getOrInit(appDelegate.prefs),
             appDelegate.database
         )
     }
@@ -308,7 +308,7 @@ class AddressTransactionsViewController(
                 val appDelegate = getAppDelegate()
                 if (TransactionListManager.startDownloadAllAddressTransactions(
                         vc!!.shownAddress!!.publicAddress,
-                        ErgoApiService.getOrInit(appDelegate.prefs), appDelegate.database
+                        ApiServiceManager.getOrInit(appDelegate.prefs), appDelegate.database
                     )
                 ) {
                     vc!!.resetShownData()

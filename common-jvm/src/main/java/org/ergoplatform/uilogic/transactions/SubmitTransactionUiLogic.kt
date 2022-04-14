@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.SigningSecrets
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.UnsignedTransaction
 import org.ergoplatform.persistance.*
@@ -132,7 +132,7 @@ abstract class SubmitTransactionUiLogic {
                 val txInfoToSave = (transactionInfo
                     ?: (ergoTxResult.sentTransaction as? UnsignedTransaction)?.buildTransactionInfo(wallet?.tokens)
                     ?: ergoTxResult.sentTransaction?.buildTransactionInfo(
-                        ErgoApiService.getOrInit(preferences)
+                        ApiServiceManager.getOrInit(preferences)
                     ))
 
                 txInfoToSave?.let {

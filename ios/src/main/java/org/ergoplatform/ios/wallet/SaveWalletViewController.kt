@@ -4,7 +4,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.api.IosAuthentication
@@ -242,7 +242,7 @@ class SaveWalletViewController(
         }
 
         uiLogic.startDerivedAddressesSearch(
-            ErgoApiService.getOrInit(appDelegate.prefs),
+            ApiServiceManager.getOrInit(appDelegate.prefs),
             db
         ) { num ->
             runOnMainThread {

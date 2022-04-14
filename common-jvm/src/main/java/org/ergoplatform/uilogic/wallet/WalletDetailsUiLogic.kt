@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.*
@@ -94,7 +94,7 @@ abstract class WalletDetailsUiLogic {
         addressesToRefresh?.forEach {
             TransactionListManager.downloadTransactionListForAddress(
                 it.publicAddress,
-                ErgoApiService.getOrInit(prefs),
+                ApiServiceManager.getOrInit(prefs),
                 db
             )
         }
@@ -119,7 +119,7 @@ abstract class WalletDetailsUiLogic {
         return WalletStateSyncManager.getInstance().refreshByUser(prefs, database)
     }
 
-    fun gatherTokenInformation(tokenDbProvider: TokenDbProvider, apiService: ErgoApiService) {
+    fun gatherTokenInformation(tokenDbProvider: TokenDbProvider, apiService: ApiServiceManager) {
 
         // cancel former Jobs, if any
         tokenInformationJob?.cancel()

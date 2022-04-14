@@ -9,11 +9,13 @@ const val KEY_FIAT_VALUE = "fiatValue"
 const val KEY_NODE_URL = "nodeUrl"
 const val KEY_EXPLORER_API_URL = "explorerApiUrl"
 const val KEY_IPFS_GATEWAY_URL = "ipfsGatewayUrl"
+const val KEY_TOKEN_VERIFY_URL = "tokenVerificationUrl"
 const val KEY_DOWNLOAD_NFT_CONTENT = "downloadNftContent"
 const val KEY_LASTREFRESH = "lastRefreshMs"
 const val FIAT_CURRENCY_DEFAULT = "usd"
 
 private const val DEFAULT_IPFS_GATEWAY = "https://cloudflare-ipfs.com/"
+private const val DEFAULT_TOKEN_VERIFY_URL = "https://api.tokenjay.app/"
 
 abstract class PreferencesProvider {
 
@@ -83,6 +85,21 @@ abstract class PreferencesProvider {
         get() = getLong(KEY_DOWNLOAD_NFT_CONTENT, 0) != 0L
         set(value) {
             saveLong(KEY_DOWNLOAD_NFT_CONTENT, if (value) 1L else 0L)
+        }
+
+    val defaultTokenVerificationUrl = DEFAULT_TOKEN_VERIFY_URL
+
+    var prefTokenVerificationUrl: String
+        get() = getString(KEY_TOKEN_VERIFY_URL, DEFAULT_TOKEN_VERIFY_URL)
+        set(value) {
+            var ipfsGatewayUrl = value
+            if (ipfsGatewayUrl.isEmpty()) {
+                ipfsGatewayUrl = DEFAULT_TOKEN_VERIFY_URL
+            } else if (!ipfsGatewayUrl.endsWith("/")) {
+                ipfsGatewayUrl += "/"
+            }
+
+            saveString(KEY_TOKEN_VERIFY_URL, ipfsGatewayUrl)
         }
 
     var lastRefreshMs: Long
