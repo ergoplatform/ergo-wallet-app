@@ -143,6 +143,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         }
     }
 
+    // called when needed (user goes into fee choose dialog)
     fun fetchSuggestedFeeData(ergoApiService: ApiServiceManager) {
         if (suggestedFeeJob?.isActive != true && suggestedFeeItems.isEmpty()) {
             suggestedFeeJob = coroutineScope.launch(Dispatchers.IO) {
@@ -171,7 +172,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                             SuggestedFee(
                                 speedPair.first,
                                 speedPair.second,
-                                it.toLong()
+                                max(it.toLong(), Parameters.MinFee)
                             )
                         )
                     }
