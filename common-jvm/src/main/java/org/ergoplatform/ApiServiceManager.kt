@@ -43,6 +43,9 @@ open class ApiServiceManager(
     override fun getExpectedWaitTime(fee: Long, txSize: Int): Call<Int> =
         nodeTransactionsApi.getExpectedWaitTime(fee.toInt(), txSize)
 
+    override fun getSuggestedFee(waitTime: Int, txSize: Int): Call<Int> =
+        nodeTransactionsApi.getRecommendedFee(waitTime, txSize)
+
     override fun getConfirmedTransactionsForAddress(
         publicAddress: String,
         limit: Int,

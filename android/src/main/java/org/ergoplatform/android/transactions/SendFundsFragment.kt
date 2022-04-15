@@ -150,6 +150,9 @@ class SendFundsFragment : SubmitTransactionFragment() {
         binding.hintReadonly.setOnClickListener {
             openUrlWithBrowser(requireContext(), URL_COLD_WALLET_HELP)
         }
+        binding.tvFee.setOnClickListener {
+            ChooseFeeDialogFragment().show(childFragmentManager, null)
+        }
 
         // Init other stuff
         binding.tvReceiver.editText?.setText(viewModel.uiLogic.receiverAddress)

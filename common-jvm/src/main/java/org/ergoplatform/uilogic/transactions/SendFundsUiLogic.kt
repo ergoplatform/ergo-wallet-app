@@ -43,11 +43,17 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             calcGrossAmount()
         }
 
+    private val feeTxSize =
+        1000 // we use constant size of 1000 here, our user-made transactions are small
     var feeAmount: ErgoAmount = ErgoAmount(Parameters.MinFee)
         private set
     var feeMinutesToWait: Int? = null
         private set
     private var minutesToWaitFetchJob: Job? = null
+
+    var suggestedFeeItems: List<SuggestedFee> = emptyList()
+        private set
+    private var suggestedFeeJob: Job? = null
 
     var grossAmount: ErgoAmount = ErgoAmount.ZERO
         private set
@@ -112,7 +118,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             feeMinutesToWait = try {
                 ergoApiService.getExpectedWaitTime(
                     feeAmount.nanoErgs,
-                    1000 // we use constant size of 1000 here, our user-made transactions are small
+                    feeTxSize
                 ).execute().body()
             } catch (t: Throwable) {
                 LogUtils.logDebug(
@@ -123,6 +129,48 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 null
             }
             notifyAmountsChanged()
+        }
+    }
+
+    fun fetchSuggestedFeeData(ergoApiService: ApiServiceManager) {
+        if (suggestedFeeJob?.isActive != true && suggestedFeeItems.isEmpty()) {
+            suggestedFeeJob = coroutineScope.launch(Dispatchers.IO) {
+                suggestedFeeItems = emptyList()
+                val fetchedItems = ArrayList<SuggestedFee>()
+                val listSpeedPairs: List<Pair<ExecutionSpeed, Int>> = listOf(
+                    Pair(ExecutionSpeed.Fast, 5),
+                    Pair(ExecutionSpeed.Medium, 30),
+                    Pair(ExecutionSpeed.Slow, 240),
+                )
+
+                listSpeedPairs.takeWhile { speedPair ->
+                    val suggestedFee = try {
+                        ergoApiService.getSuggestedFee(speedPair.second, feeTxSize).execute().body()
+                    } catch (t: Throwable) {
+                        LogUtils.logDebug(
+                            this.javaClass.simpleName,
+                            "Error requesting suggested fees",
+                            t
+                        )
+                        null
+                    }
+
+                    suggestedFee?.let {
+                        fetchedItems.add(
+                            SuggestedFee(
+                                speedPair.first,
+                                speedPair.second,
+                                it.toLong()
+                            )
+                        )
+                    }
+
+                    suggestedFee != null && suggestedFee > Parameters.MinFee
+                }
+                suggestedFeeItems = fetchedItems
+
+                onNotifySuggestedFees()
+            }
         }
     }
 
@@ -384,6 +432,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     abstract fun notifyAmountsChanged()
     abstract fun notifyBalanceChanged()
     abstract fun showErrorMessage(message: String)
+    abstract fun onNotifySuggestedFees()
 
     data class CheckCanPayResponse(
         val canPay: Boolean,
