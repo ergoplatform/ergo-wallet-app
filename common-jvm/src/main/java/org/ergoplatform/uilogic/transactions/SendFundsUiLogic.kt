@@ -114,6 +114,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
 
     private fun fetchFeeWaitTime(ergoApiService: ApiServiceManager) {
         minutesToWaitFetchJob?.cancel()
+        feeMinutesToWait = null
         minutesToWaitFetchJob = coroutineScope.launch(Dispatchers.IO) {
             feeMinutesToWait = try {
                 ergoApiService.getExpectedWaitTime(
@@ -129,6 +130,16 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 null
             }
             notifyAmountsChanged()
+        }
+    }
+
+    fun setNewFeeAmount(feeAmount: ErgoAmount, ergoApiService: ApiServiceManager) {
+        val newFeeAmount = ErgoAmount(max(feeAmount.nanoErgs, Parameters.MinFee))
+        if (newFeeAmount.nanoErgs != this.feeAmount.nanoErgs) {
+            this.feeAmount = newFeeAmount
+            feeMinutesToWait = null
+            calcGrossAmount()
+            fetchFeeWaitTime(ergoApiService)
         }
     }
 
@@ -264,8 +275,10 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             val ergoTxResult: SendTransactionResult
             withContext(Dispatchers.IO) {
                 ergoTxResult = sendErgoTx(
-                    Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
+                    Address.create(receiverAddress),
+                    getActualAmountToSendNanoErgs(),
                     tokensChosen.values.toList(),
+                    feeAmount.nanoErgs,
                     signingSecrets, derivedAddresses,
                     preferences, texts
                 )
@@ -287,8 +300,10 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 val serializedTx: PromptSigningResult
                 withContext(Dispatchers.IO) {
                     serializedTx = prepareSerializedErgoTx(
-                        Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
+                        Address.create(receiverAddress),
+                        getActualAmountToSendNanoErgs(),
                         tokensChosen.values.toList(),
+                        feeAmount.nanoErgs,
                         derivedAddresses.map { Address.create(it) },
                         preferences, texts
                     )

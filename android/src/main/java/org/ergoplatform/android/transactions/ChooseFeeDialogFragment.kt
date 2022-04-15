@@ -8,10 +8,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.databinding.FragmentChooseFeeDialogBinding
 import org.ergoplatform.android.databinding.FragmentChooseFeeDialogItemBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.toErgoAmount
 
 /**
  * Let the user choose or edit the fee amount
@@ -45,6 +47,11 @@ class ChooseFeeDialogFragment : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.inputFeeAmount.setText(viewModel.uiLogic.feeAmount.toStringTrimTrailingZeros())
+        binding.inputFeeAmount.setOnEditorActionListener { _, _, _ ->
+            buttonApply()
+            true
+        }
+        binding.buttonApply.setOnClickListener { buttonApply() }
 
         viewModel.suggestedFees.observe(viewLifecycleOwner) {
             binding.layoutFeeItems.apply {
@@ -59,10 +66,27 @@ class ChooseFeeDialogFragment : BottomSheetDialogFragment() {
                     itemBinding.labelFeeAmount.text =
                         suggestedFee.getFeeAmountText(stringProvider)
                     itemBinding.labelFeeExecutionTime.text = suggestedFee.getFeeExecutionTimeText(stringProvider)
+                    itemBinding.root.setOnClickListener {
+                        setNewFeeAmountAndDismiss(ErgoAmount(suggestedFee.feeAmount))
+                    }
                 }
             }
 
         }
+    }
+
+    private fun buttonApply() {
+        binding.inputFeeAmount.text.toString().toErgoAmount()?.let {
+            setNewFeeAmountAndDismiss(it)
+        }
+    }
+
+    private fun setNewFeeAmountAndDismiss(newFeeAmount: ErgoAmount) {
+        viewModel.uiLogic.setNewFeeAmount(
+            newFeeAmount,
+            ApiServiceManager.getOrInit(Preferences(requireContext()))
+        )
+        dismiss()
     }
 
     override fun onDestroyView() {

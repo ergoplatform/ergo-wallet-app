@@ -1,8 +1,5 @@
 package org.ergoplatform
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.ExplorerAndPoolUnspentBoxesLoader
@@ -116,6 +113,7 @@ fun sendErgoTx(
     recipient: Address,
     amountToSend: Long,
     tokensToSend: List<ErgoToken>,
+    feeAmount: Long,
     signingSecrets: SigningSecrets,
     derivedKeyIndices: List<Int>,
     prefs: PreferencesProvider,
@@ -137,6 +135,7 @@ fun sendErgoTx(
 
             val contract: ErgoContract = recipient.toErgoContract()
             val unsignedTx = BoxOperations.createForEip3Prover(prover, ctx).withAmountToSpend(amountToSend)
+                .withFeeAmount(feeAmount)
                 .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
                 .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
             val signed = prover.sign(unsignedTx)
@@ -185,6 +184,7 @@ fun prepareSerializedErgoTx(
     recipient: Address,
     amountToSend: Long,
     tokensToSend: List<ErgoToken>,
+    feeAmount: Long,
     senderAddresses: List<Address>,
     prefs: PreferencesProvider,
     texts: StringProvider
@@ -194,6 +194,7 @@ fun prepareSerializedErgoTx(
         return ergoClient.execute { ctx: BlockchainContext ->
             val contract: ErgoContract = recipient.toErgoContract()
             val unsigned = BoxOperations.createForSenders(senderAddresses, ctx).withAmountToSpend(amountToSend)
+                .withFeeAmount(feeAmount)
                 .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
                 .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
 
