@@ -335,7 +335,8 @@ class SendFundsViewController(
 
         override fun notifyAmountsChanged() {
             runOnMainThread {
-                feeLabel.text = texts.format(STRING_DESC_FEE, feeAmount.toStringRoundToDecimals())
+                val text = IosStringProvider(texts)
+                feeLabel.text = getFeeDescriptionLabel(text)
                 grossAmountLabel.setErgoAmount(grossAmount)
                 val nodeConnector = WalletStateSyncManager.getInstance()
                 fiatLabel.isHidden = (nodeConnector.fiatCurrency.isEmpty())
@@ -343,7 +344,7 @@ class SendFundsViewController(
                     STRING_LABEL_FIAT_AMOUNT,
                     formatFiatToString(
                         amountToSend.toDouble() * nodeConnector.fiatValue.value.toDouble(),
-                        nodeConnector.fiatCurrency, IosStringProvider(texts)
+                        nodeConnector.fiatCurrency, text
                     )
                 )
             }

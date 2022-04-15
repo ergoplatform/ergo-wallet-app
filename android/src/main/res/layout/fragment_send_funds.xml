@@ -167,9 +167,10 @@
                     <TextView
                         android:id="@+id/tv_fee"
                         style="@style/TextAppearance.App.Body1"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginVertical="@dimen/half_horizontal_margin"
+                        app:layout_constraintEnd_toEndOf="@id/amount"
                         app:layout_constraintStart_toStartOf="@id/amount"
                         app:layout_constraintTop_toBottomOf="@id/tv_fiat"
                         tools:text="@string/desc_fee" />

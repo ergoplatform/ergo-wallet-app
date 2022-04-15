@@ -1,10 +1,10 @@
 package org.ergoplatform.uilogic.transactions
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.*
-import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
@@ -19,6 +19,7 @@ import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getStateForAddress
 import org.ergoplatform.wallet.getTokensForAddress
@@ -44,6 +45,10 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
 
     var feeAmount: ErgoAmount = ErgoAmount(Parameters.MinFee)
         private set
+    var feeMinutesToWait: Int? = null
+        private set
+    private var minutesToWaitFetchJob: Job? = null
+
     var grossAmount: ErgoAmount = ErgoAmount.ZERO
         private set
     var balance: ErgoAmount = ErgoAmount.ZERO
@@ -87,16 +92,52 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 wallet?.getTokensForAllAddresses()?.forEach {
                     it.tokenId?.let {
                         TokenInfoManager.getInstance()
-                            .getTokenInformation(it, database.tokenDbProvider, ergoApiService)?.let {
+                            .getTokenInformation(it, database.tokenDbProvider, ergoApiService)
+                            ?.let {
                                 synchronized(tokensInfo) {
                                     tokensInfo.put(it.tokenId, it)
                                 }
                             }
                     }
                 }
+                fetchFeeWaitTime(ergoApiService)
             }
         }
         calcGrossAmount()
+    }
+
+    private fun fetchFeeWaitTime(ergoApiService: ApiServiceManager) {
+        minutesToWaitFetchJob?.cancel()
+        minutesToWaitFetchJob = coroutineScope.launch(Dispatchers.IO) {
+            feeMinutesToWait = try {
+                ergoApiService.getExpectedWaitTime(
+                    feeAmount.nanoErgs,
+                    1000 // we use constant size of 1000 here, our user-made transactions are small
+                ).execute().body()
+            } catch (t: Throwable) {
+                LogUtils.logDebug(
+                    this.javaClass.simpleName,
+                    "Error requesting wait time for fee",
+                    t
+                )
+                null
+            }
+            notifyAmountsChanged()
+        }
+    }
+
+    fun getFeeDescriptionLabel(stringProvider: StringProvider): String {
+        val feeText = stringProvider.getString(
+            STRING_DESC_FEE,
+            feeAmount.toStringRoundToDecimals()
+        )
+
+        return feeMinutesToWait?.let { feeMinutesToWait ->
+            "$feeText " + stringProvider.getString(
+                STRING_DESC_FEE_EXECUTION_TIME,
+                feeMinutesToWait.coerceAtLeast(2)
+            )
+        } ?: feeText
     }
 
     override fun derivedAddressChanged() {

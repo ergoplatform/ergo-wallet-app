@@ -5,4 +5,6 @@ import retrofit2.Call
 
 interface ErgoNodeApi {
     fun getUnconfirmedTransactions(limit: Int): Call<Transactions>
+
+    fun getExpectedWaitTime(fee: Long, txSize: Int): Call<Int>
 }

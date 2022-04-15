@@ -40,6 +40,9 @@ open class ApiServiceManager(
     override fun getUnconfirmedTransactions(limit: Int): Call<Transactions> =
         nodeTransactionsApi.getUnconfirmedTransactions(limit, 0)
 
+    override fun getExpectedWaitTime(fee: Long, txSize: Int): Call<Int> =
+        nodeTransactionsApi.getExpectedWaitTime(fee.toInt(), txSize)
+
     override fun getConfirmedTransactionsForAddress(
         publicAddress: String,
         limit: Int,
