@@ -13,6 +13,7 @@ import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.MainAppUiLogic
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
+import org.robovm.apple.foundation.Foundation
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
@@ -56,10 +57,24 @@ class BottomNavigationBar : UITabBarController() {
     }
 
     override fun viewDidLoad() {
+        if (Foundation.getMajorSystemVersion() >= 15) {
+            val appearance = UITabBarAppearance()
+            appearance.backgroundColor = uiColorErgo
+            setItemAppearance(appearance.compactInlineLayoutAppearance)
+            setItemAppearance(appearance.inlineLayoutAppearance)
+            setItemAppearance(appearance.stackedLayoutAppearance)
+            tabBar.standardAppearance = appearance
+            tabBar.scrollEdgeAppearance = appearance
+        }
         tabBar.barTintColor = uiColorErgo
         tabBar.tintColor = UIColor.label()
         tabBar.unselectedItemTintColor = UIColor.label()
         setupVcs()
+    }
+
+    private fun setItemAppearance(itemAppearance: UITabBarItemAppearance) {
+        itemAppearance.normal.iconColor = UIColor.label()
+        itemAppearance.selected.iconColor = UIColor.label()
     }
 
     fun handlePaymentRequest(paymentRequest: String, fromQr: Boolean) {
