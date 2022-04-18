@@ -4,6 +4,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 const val nanoPowerOfTen = 9
+const val ergoCurrencyText = "ERG"
 
 class ErgoAmount(val nanoErgs: Long) {
 

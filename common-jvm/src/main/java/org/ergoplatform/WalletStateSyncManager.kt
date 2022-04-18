@@ -86,7 +86,7 @@ class WalletStateSyncManager {
                     val statesSaved = refreshWalletStates(preferences, database.walletDbProvider)
                     didSync = statesSaved.isNotEmpty()
                 } catch (t: Throwable) {
-                    LogUtils.logDebug("NodeConnector", "Error: " + t.message, t)
+                    LogUtils.logDebug(this.javaClass.simpleName, "refreshWalletStates error: " + t.message, t)
                     t.printStackTrace()
                     // TODO report to user
                     hadError = true
@@ -99,7 +99,7 @@ class WalletStateSyncManager {
                     lastRefreshMs = System.currentTimeMillis()
                     preferences.lastRefreshMs = lastRefreshMs
                 }
-                LogUtils.logDebug("NodeConnector", "Refresh done, errors: $hadError")
+                LogUtils.logDebug(this.javaClass.simpleName, "Refresh done, errors: $hadError")
                 lastHadError = hadError
                 isRefreshing.value = false
             }
@@ -116,7 +116,7 @@ class WalletStateSyncManager {
                 tokenDbProvider.updateTokenPrices(it)
             }
         } catch (t: Throwable) {
-            LogUtils.logDebug("TokenPrices", "Error: " + t.message, t)
+            LogUtils.logDebug(this.javaClass.simpleName, "refreshTokenPrices error: " + t.message, t)
         }
     }
 
@@ -134,13 +134,13 @@ class WalletStateSyncManager {
 
         var fFiatValue = fiatValue.value
         if (fiatCurrency.isNotEmpty()) {
-            LogUtils.logDebug("NodeConnector", "Refresh fiat value")
+            LogUtils.logDebug(this.javaClass.simpleName, "Refresh fiat value")
             try {
                 val currencyGetPrice =
                     coinGeckoApi.currencyGetPrice(fiatCurrency).execute().body()
                 fFiatValue = currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f
             } catch (t: Throwable) {
-                LogUtils.logDebug("NodeConnector", "Error: " + t.message, t)
+                LogUtils.logDebug(this.javaClass.simpleName, "refreshErgFiatValue error: " + t.message, t)
                 // don't set to zero here, keep last value in case of connection error
             }
         } else {
@@ -225,7 +225,7 @@ class WalletStateSyncManager {
 
         database.withTransaction {
             LogUtils.logDebug(
-                "NodeConnector",
+                this.javaClass.simpleName,
                 "Persisting ${statesToSave.size} wallet states to db"
             )
             database.insertWalletStates(statesToSave)
@@ -254,7 +254,7 @@ class WalletStateSyncManager {
         lastRefreshMs = preferences.lastRefreshMs
         fiatCurrency = preferences.prefDisplayCurrency
         fiatValue.value = preferences.lastFiatValue
-        LogUtils.logDebug("NodeConnector", "Initialized preferences.")
+        LogUtils.logDebug(this.javaClass.simpleName, "Initialized preferences.")
 
         GlobalScope.launch {
             fillTokenPriceHashMap(appDatabase.tokenDbProvider.loadTokenPrices())

@@ -174,6 +174,7 @@
     <string name="label_receiver_address">Receiver address</string>
     <string name="label_scan_qr">Scan QR code</string>
     <string name="desc_fee">Fee: %1$s ERG</string>
+    <string name="desc_fee_execution_time">(≈%1$sm)</string>
     <string name="error_receiver_address">Please enter a valid ERG address</string>
     <string name="error_amount">Please enter a valid amount</string>
     <string name="error_send_transaction">Could not send transaction</string>
@@ -199,6 +200,13 @@
     <string name="error_request_token_not_found">Could not add token \'%1$s\'</string>
     <string name="error_request_token_amount">Could not set requested amount for token \'%1$s\'</string>
     <string name="error_request_token_but_no_erg">Tokens requested, but no ERG amount. A default amount will be sent.</string>
+
+    <!-- Send funds fee chooser -->
+    <string name="label_fee_custom">Fee amount</string>
+    <string name="label_fee_fast">Fast</string>
+    <string name="label_fee_medium">Medium</string>
+    <string name="label_fee_slow">Slow</string>
+    <string name="label_fee_execution_time">Execution time ≈ %1$s min</string>
 
     <!-- Cold wallet signing request screen -->
     <string name="title_signing_request">Sign</string>

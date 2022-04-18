@@ -1,10 +1,10 @@
 package org.ergoplatform.uilogic.transactions
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.*
-import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
@@ -19,6 +19,7 @@ import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getStateForAddress
 import org.ergoplatform.wallet.getTokensForAddress
@@ -42,8 +43,18 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             calcGrossAmount()
         }
 
+    private val feeTxSize =
+        1000 // we use constant size of 1000 here, our user-made transactions are small
     var feeAmount: ErgoAmount = ErgoAmount(Parameters.MinFee)
         private set
+    var feeMinutesToWait: Int? = null
+        private set
+    private var minutesToWaitFetchJob: Job? = null
+
+    var suggestedFeeItems: List<SuggestedFee> = emptyList()
+        private set
+    private var suggestedFeeJob: Job? = null
+
     var grossAmount: ErgoAmount = ErgoAmount.ZERO
         private set
     var balance: ErgoAmount = ErgoAmount.ZERO
@@ -87,16 +98,106 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 wallet?.getTokensForAllAddresses()?.forEach {
                     it.tokenId?.let {
                         TokenInfoManager.getInstance()
-                            .getTokenInformation(it, database.tokenDbProvider, ergoApiService)?.let {
+                            .getTokenInformation(it, database.tokenDbProvider, ergoApiService)
+                            ?.let {
                                 synchronized(tokensInfo) {
                                     tokensInfo.put(it.tokenId, it)
                                 }
                             }
                     }
                 }
+                fetchFeeWaitTime(ergoApiService)
             }
         }
         calcGrossAmount()
+    }
+
+    private fun fetchFeeWaitTime(ergoApiService: ApiServiceManager) {
+        minutesToWaitFetchJob?.cancel()
+        feeMinutesToWait = null
+        minutesToWaitFetchJob = coroutineScope.launch(Dispatchers.IO) {
+            feeMinutesToWait = try {
+                ergoApiService.getExpectedWaitTime(
+                    feeAmount.nanoErgs,
+                    feeTxSize
+                ).execute().body()
+            } catch (t: Throwable) {
+                LogUtils.logDebug(
+                    this.javaClass.simpleName,
+                    "Error requesting wait time for fee",
+                    t
+                )
+                null
+            }
+            notifyAmountsChanged()
+        }
+    }
+
+    fun setNewFeeAmount(feeAmount: ErgoAmount, ergoApiService: ApiServiceManager) {
+        val newFeeAmount = ErgoAmount(max(feeAmount.nanoErgs, Parameters.MinFee))
+        if (newFeeAmount.nanoErgs != this.feeAmount.nanoErgs) {
+            this.feeAmount = newFeeAmount
+            feeMinutesToWait = null
+            calcGrossAmount()
+            fetchFeeWaitTime(ergoApiService)
+        }
+    }
+
+    // called when needed (user goes into fee choose dialog)
+    fun fetchSuggestedFeeData(ergoApiService: ApiServiceManager) {
+        if (suggestedFeeJob?.isActive != true && suggestedFeeItems.isEmpty()) {
+            suggestedFeeJob = coroutineScope.launch(Dispatchers.IO) {
+                suggestedFeeItems = emptyList()
+                val fetchedItems = ArrayList<SuggestedFee>()
+                val listSpeedPairs: List<Pair<ExecutionSpeed, Int>> = listOf(
+                    Pair(ExecutionSpeed.Fast, 5),
+                    Pair(ExecutionSpeed.Medium, 30),
+                    Pair(ExecutionSpeed.Slow, 240),
+                )
+
+                listSpeedPairs.takeWhile { speedPair ->
+                    val suggestedFee = try {
+                        ergoApiService.getSuggestedFee(speedPair.second, feeTxSize).execute().body()
+                    } catch (t: Throwable) {
+                        LogUtils.logDebug(
+                            this.javaClass.simpleName,
+                            "Error requesting suggested fees",
+                            t
+                        )
+                        null
+                    }
+
+                    suggestedFee?.let {
+                        fetchedItems.add(
+                            SuggestedFee(
+                                speedPair.first,
+                                speedPair.second,
+                                max(it.toLong(), Parameters.MinFee)
+                            )
+                        )
+                    }
+
+                    suggestedFee != null && suggestedFee > Parameters.MinFee
+                }
+                suggestedFeeItems = fetchedItems
+
+                onNotifySuggestedFees()
+            }
+        }
+    }
+
+    fun getFeeDescriptionLabel(stringProvider: StringProvider): String {
+        val feeText = stringProvider.getString(
+            STRING_DESC_FEE,
+            feeAmount.toStringRoundToDecimals()
+        )
+
+        return feeMinutesToWait?.let { feeMinutesToWait ->
+            "$feeText " + stringProvider.getString(
+                STRING_DESC_FEE_EXECUTION_TIME,
+                feeMinutesToWait.coerceAtLeast(2)
+            )
+        } ?: feeText
     }
 
     override fun derivedAddressChanged() {
@@ -175,8 +276,10 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             val ergoTxResult: SendTransactionResult
             withContext(Dispatchers.IO) {
                 ergoTxResult = sendErgoTx(
-                    Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
+                    Address.create(receiverAddress),
+                    getActualAmountToSendNanoErgs(),
                     tokensChosen.values.toList(),
+                    feeAmount.nanoErgs,
                     signingSecrets, derivedAddresses,
                     preferences, texts
                 )
@@ -198,8 +301,10 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 val serializedTx: PromptSigningResult
                 withContext(Dispatchers.IO) {
                     serializedTx = prepareSerializedErgoTx(
-                        Address.create(receiverAddress), getActualAmountToSendNanoErgs(),
+                        Address.create(receiverAddress),
+                        getActualAmountToSendNanoErgs(),
                         tokensChosen.values.toList(),
+                        feeAmount.nanoErgs,
                         derivedAddresses.map { Address.create(it) },
                         preferences, texts
                     )
@@ -343,6 +448,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     abstract fun notifyAmountsChanged()
     abstract fun notifyBalanceChanged()
     abstract fun showErrorMessage(message: String)
+    abstract fun onNotifySuggestedFees()
 
     data class CheckCanPayResponse(
         val canPay: Boolean,

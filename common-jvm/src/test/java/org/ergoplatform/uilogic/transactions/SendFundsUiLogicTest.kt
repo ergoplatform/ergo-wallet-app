@@ -98,6 +98,10 @@ class SendFundsUiLogicTest {
 
         }
 
+        override fun onNotifySuggestedFees() {
+
+        }
+
         override fun notifyAmountsChanged() {
 
         }
