@@ -7,14 +7,18 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentErgoAuthenticationBinding
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.getSeverityDrawableResId
+import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
+import org.ergoplatform.android.wallet.WalletChooserCallback
+import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.MessageSeverity
 
-class ErgoAuthenticationFragment : AbstractAuthenticationFragment() {
+class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChooserCallback {
     private var _binding: FragmentErgoAuthenticationBinding? = null
     private val binding: FragmentErgoAuthenticationBinding get() = _binding!!
 
@@ -33,7 +37,13 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.uiLogic.init(args.ergoAuthUrl, AndroidStringProvider(requireContext()))
+        val context = requireContext()
+        viewModel.uiLogic.init(
+            args.ergoAuthUrl,
+            args.walletId,
+            AndroidStringProvider(context),
+            AppDatabase.getInstance(context)
+        )
 
         viewModel.authRequest.observe(viewLifecycleOwner) { authRequest ->
             binding.layoutProgress.visibility = View.GONE
@@ -50,9 +60,18 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment() {
         binding.buttonDismiss.setOnClickListener {
             findNavController().popBackStack()
         }
+        binding.walletLabel.setOnClickListener {
+            ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
+        }
+    }
+
+    override fun onWalletChosen(walletConfig: WalletConfig) {
+        viewModel.uiLogic.walletConfig = walletConfig
+        refreshWalletLabel()
     }
 
     private fun refreshAuthPrompt() {
+        refreshWalletLabel()
         val uiLogic = viewModel.uiLogic
         binding.layoutAuthMessage.visibility = uiLogic.ergAuthRequest?.userMessage?.let {
             binding.tvAuthMessage.text = getString(R.string.label_message_from_dapp, it)
@@ -75,6 +94,10 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment() {
             uiLogic.getDoneSeverity().getSeverityDrawableResId(),
             0, 0
         )
+    }
+
+    private fun refreshWalletLabel() {
+        binding.walletLabel.text = viewModel.uiLogic.walletConfig?.displayName
     }
 
     override fun proceedAuthFlowFromBiometrics() {

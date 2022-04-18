@@ -41,6 +41,7 @@
         clipboard, every app running on this device can access it as long as you do not overwrite
         the clipboard data. You do this at your own risk.</string>
     <string name="button_copy_sensitive_data">Copy and accept risks</string>
+    <string name="error_no_wallet">No wallet added to this app yet.</string>
 
     <!-- Wallet -->
     <string name="label_tokens">tokens</string>

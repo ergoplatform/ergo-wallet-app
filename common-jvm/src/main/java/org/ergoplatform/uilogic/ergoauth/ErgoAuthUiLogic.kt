@@ -6,10 +6,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.ergoplatform.ergoauth.ErgoAuthRequest
 import org.ergoplatform.ergoauth.getErgoAuthRequest
+import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
+import java.lang.IllegalStateException
 
 abstract class ErgoAuthUiLogic {
     abstract val coroutineScope: CoroutineScope
@@ -21,12 +24,25 @@ abstract class ErgoAuthUiLogic {
         private set
     var ergAuthRequest: ErgoAuthRequest? = null
         private set
+    var walletConfig: WalletConfig? = null
     private var responseJob: Job? = null
 
-    fun init(ergoAuthUrl: String, texts: StringProvider) {
+    fun init(ergoAuthUrl: String, walletId: Int, texts: StringProvider, db: IAppDatabase) {
         if (requestJob == null) {
             requestJob = coroutineScope.launch(Dispatchers.IO) {
                 try {
+                    if (walletId >= 0) {
+                        walletConfig = db.walletDbProvider.loadWalletConfigById(walletId)
+                    } else {
+                        walletConfig = db.walletDbProvider.getAllWalletConfigsSynchronous().sortedBy {
+                            it.displayName?.lowercase()
+                        }.firstOrNull()
+                    }
+
+                    if (walletConfig == null) {
+                        throw IllegalStateException(texts.getString(STRING_ERROR_NO_WALLET))
+                    }
+
                     val ergoAuthRequest = getErgoAuthRequest(ergoAuthUrl)
 
                     if (ergoAuthRequest.sigmaBoolean == null || ergoAuthRequest.signingMessage == null

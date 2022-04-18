@@ -429,5 +429,9 @@
         <argument
             android:name="ergoAuthUrl"
             app:argType="string" />
+        <argument
+            android:name="walletId"
+            app:argType="integer"
+            android:defaultValue="-1" />
     </fragment>
 </navigation>

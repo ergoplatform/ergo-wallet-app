@@ -11,15 +11,15 @@ import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 class ErgoAuthenticationViewModel: ViewModel() {
     val uiLogic = AndroidUiLogic()
 
-    private val _signingRequest = MutableLiveData<ErgoAuthRequest?>()
-    val authRequest: LiveData<ErgoAuthRequest?> get() = _signingRequest
+    private val _authRequest = MutableLiveData<ErgoAuthRequest?>()
+    val authRequest: LiveData<ErgoAuthRequest?> get() = _authRequest
 
     inner class AndroidUiLogic: ErgoAuthUiLogic() {
         override val coroutineScope: CoroutineScope
             get() = viewModelScope
 
         override fun notifyAuthRequestFetched() {
-            _signingRequest.postValue(ergAuthRequest)
+            _authRequest.postValue(ergAuthRequest)
         }
 
     }

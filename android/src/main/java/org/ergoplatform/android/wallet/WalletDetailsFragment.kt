@@ -424,7 +424,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                 findNavController().navigate(
                     WalletDetailsFragmentDirections.actionNavigationWalletDetailsToErgoAuthFragment(
                         it
-                    )
+                    ).setWalletId(walletDetailsViewModel.wallet!!.walletConfig.id)
                 )
             }, showErrorMessage = {
                 MaterialAlertDialogBuilder(requireContext()).setMessage(it)

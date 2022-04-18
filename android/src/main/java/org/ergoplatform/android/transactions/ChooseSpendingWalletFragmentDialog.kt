@@ -10,12 +10,11 @@ import org.ergoplatform.ErgoAmount
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserBinding
-import org.ergoplatform.android.databinding.FragmentSendFundsWalletChooserItemBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.transactions.isErgoPaySigningRequest
+import org.ergoplatform.android.wallet.addWalletChooserItemBindings
 import org.ergoplatform.parsePaymentRequest
-import org.ergoplatform.wallet.getBalanceForAllAddresses
+import org.ergoplatform.transactions.isErgoPaySigningRequest
 
 
 /**
@@ -61,29 +60,23 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
         }
 
         AppDatabase.getInstance(requireContext()).walletDao().getWalletsWithStates()
-            .observe(viewLifecycleOwner, {
-                val wallets = it.map { it.toModel() }
+            .observe(viewLifecycleOwner) { walletList ->
+                val wallets = walletList.map { it.toModel() }
                 binding.listWallets.removeAllViews()
 
                 if (wallets.size == 1) {
                     // immediately switch to send funds screen
                     navigateToNextScreen(wallets.first().walletConfig.id, query)
                 }
-                wallets.sortedBy { it.walletConfig.displayName?.lowercase() }.forEach { wallet ->
-                    val itemBinding = FragmentSendFundsWalletChooserItemBinding.inflate(
-                        layoutInflater, binding.listWallets, true
-                    )
-
-                    itemBinding.walletBalance.setAmount(
-                        ErgoAmount(wallet.getBalanceForAllAddresses()).toBigDecimal()
-                    )
-                    itemBinding.walletName.text = wallet.walletConfig.displayName
-
-                    itemBinding.root.setOnClickListener {
-                        navigateToNextScreen(wallet.walletConfig.id, query)
-                    }
+                addWalletChooserItemBindings(
+                    layoutInflater,
+                    binding.listWallets,
+                    wallets,
+                    false
+                ) { walletConfig ->
+                    navigateToNextScreen(walletConfig.id, query)
                 }
-            })
+            }
     }
 
     private fun navigateToNextScreen(walletId: Int, request: String) {
