@@ -267,7 +267,7 @@ private fun getRestErgoClient(prefs: PreferencesProvider) =
 
 private fun getColdErgoClient() = ColdErgoClient(
     getErgoNetworkType(),
-    Parameters().maxBlockCost(ERG_MAX_BLOCK_COST)
+    ERG_MAX_BLOCK_COST
 )
 
 /**

@@ -30,6 +30,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import org.ergoplatform.android.R
+import org.ergoplatform.transactions.MessageSeverity
 
 fun forceShowSoftKeyboard(context: Context) {
     ContextCompat.getSystemService(
@@ -179,3 +180,11 @@ fun Fragment.shareText(textToShare: String) {
     val shareIntent = Intent.createChooser(sendIntent, null)
     startActivity(shareIntent)
 }
+
+fun MessageSeverity.getSeverityDrawableResId() =
+    when (this) {
+        MessageSeverity.NONE -> 0
+        MessageSeverity.INFORMATION -> R.drawable.ic_info_24
+        MessageSeverity.WARNING -> R.drawable.ic_warning_amber_24
+        MessageSeverity.ERROR -> R.drawable.ic_error_outline_24
+    }

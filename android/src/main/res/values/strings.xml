@@ -231,6 +231,12 @@
     <string name="label_ergo_pay_choose_address">Please choose an address to process the Ergo Pay Request.</string>
     <string name="error_prover_cant_sign">The transaction could not be signed with this wallet\'s keys.</string>
 
+    <!-- Ergo Auth Signing -->
+    <string name="title_ergo_auth_request">Authentication Request</string>
+    <string name="button_authenticate">Authenticate</string>
+    <string name="desc_authentication_wallet">Wallet used for authentication:</string>
+    <string name="desc_auth_response_send">Authentication was sent to dApp successfully.</string>
+
     <!-- Token information dialog -->
     <string name="label_minting_tx">Minting transaction</string>
     <string name="label_token_description">Token description</string>

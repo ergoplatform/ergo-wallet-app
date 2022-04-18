@@ -90,9 +90,10 @@ class BottomNavigationBar : UITabBarController() {
         MainAppUiLogic.handleRequests(paymentRequest,
             fromQr,
             IosStringProvider(texts),
-            {
+            navigateToChooseWalletDialog = {
                 CoroutineScope(Dispatchers.Default).launch {
-                    val wallets = getAppDelegate().database.walletDbProvider.getAllWalletConfigsSynchronous()
+                    val wallets =
+                        getAppDelegate().database.walletDbProvider.getAllWalletConfigsSynchronous()
 
                     runOnMainThread {
                         if (wallets.size == 1) {
@@ -106,8 +107,9 @@ class BottomNavigationBar : UITabBarController() {
                         }
                     }
                 }
-
-            }, { message ->
+            }, navigateToAuthentication = {
+                // TODO ErgoAuth
+            }, presentUserMessage = { message ->
                 presentViewController(buildSimpleAlertController("", message, texts), true) {}
             })
     }
@@ -123,7 +125,10 @@ class BottomNavigationBar : UITabBarController() {
         (selectedViewController as? UINavigationController)?.apply {
             popToRootViewController(false)
             pushViewController(
-                if (isErgoPaySigningRequest(paymentRequest)) ErgoPaySigningViewController(paymentRequest, walletId)
+                if (isErgoPaySigningRequest(paymentRequest)) ErgoPaySigningViewController(
+                    paymentRequest,
+                    walletId
+                )
                 else SendFundsViewController(walletId, paymentRequest = paymentRequest),
                 !fromChooseScreen
             )

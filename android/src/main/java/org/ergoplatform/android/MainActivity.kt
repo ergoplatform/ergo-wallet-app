@@ -16,6 +16,7 @@ import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.android.transactions.ChooseSpendingWalletFragmentDialog
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.postDelayed
+import org.ergoplatform.android.wallet.WalletFragmentDirections
 import org.ergoplatform.uilogic.MainAppUiLogic
 
 class MainActivity : AppCompatActivity() {
@@ -69,17 +70,24 @@ class MainActivity : AppCompatActivity() {
     ) {
         val navController = optNavController ?: findNavController(R.id.nav_host_fragment)
 
-        MainAppUiLogic.handleRequests(data, fromQrCode, AndroidStringProvider(this), {
-            navController.navigate(
-                R.id.chooseSpendingWalletFragmentDialog,
-                ChooseSpendingWalletFragmentDialog.buildArgs(it)
-            )
-        }, {
-            MaterialAlertDialogBuilder(this)
-                .setMessage(it)
-                .setPositiveButton(R.string.zxing_button_ok, null)
-                .show()
-        })
+        MainAppUiLogic.handleRequests(data, fromQrCode, AndroidStringProvider(this),
+            navigateToChooseWalletDialog = {
+                navController.navigate(
+                    R.id.chooseSpendingWalletFragmentDialog,
+                    ChooseSpendingWalletFragmentDialog.buildArgs(it)
+                )
+            }, navigateToAuthentication = {
+                navController.navigate(
+                    WalletFragmentDirections.actionNavigationWalletToErgoAuthFragment(
+                        it
+                    )
+                )
+            }, presentUserMessage = {
+                MaterialAlertDialogBuilder(this)
+                    .setMessage(it)
+                    .setPositiveButton(R.string.zxing_button_ok, null)
+                    .show()
+            })
     }
 
     private fun handleIntent(navController: NavController? = null) {
