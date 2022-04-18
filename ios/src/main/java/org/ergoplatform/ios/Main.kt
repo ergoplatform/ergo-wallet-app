@@ -8,7 +8,9 @@ import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.ios.ui.CoroutineViewController
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.isErgoMainNet
-import org.ergoplatform.persistance.*
+import org.ergoplatform.persistance.AppDatabase
+import org.ergoplatform.persistance.DbInitializer
+import org.ergoplatform.persistance.SqlDelightAppDb
 import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.foundation.NSAutoreleasePool
 import org.robovm.apple.foundation.NSBundle
@@ -17,7 +19,10 @@ import org.robovm.apple.uikit.*
 import java.io.File
 import java.sql.DriverManager
 
+
 class Main : UIApplicationDelegateAdapter() {
+    private lateinit var uiWindow: UIWindow
+
     lateinit var database: SqlDelightAppDb
         private set
     lateinit var texts: I18NBundle
@@ -51,8 +56,9 @@ class Main : UIApplicationDelegateAdapter() {
         // Set up the view controller.
         val rootViewController = BottomNavigationBar()
 
-        // Create a new window at screen size.
-        window = UIWindow(UIScreen.getMainScreen().bounds)
+        // Create a new window at screen size and retain it (https://github.com/MobiVM/robovm/issues/621)
+        uiWindow = UIWindow(UIScreen.getMainScreen().bounds)
+        window = uiWindow
         // Set the view controller as the root controller for the window.
         window.rootViewController = rootViewController
         // Make the window visible.
