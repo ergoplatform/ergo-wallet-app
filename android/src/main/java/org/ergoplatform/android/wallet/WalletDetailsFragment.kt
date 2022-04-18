@@ -300,7 +300,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                 AppDatabase.getInstance(context).transactionDbProvider
             )
 
-            val listContentsChanged = uiLogic.hasChangedNewTxList(transactionList, currentlyShownTransactionList)
+            val listContentsChanged =
+                uiLogic.hasChangedNewTxList(transactionList, currentlyShownTransactionList)
 
             if (listContentsChanged) binding.transactionList.apply {
                 currentlyShownTransactionList = transactionList
@@ -322,7 +323,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                     binding.layoutTransactionInfo.setOnClickListener {
                         findNavController().navigateSafe(
                             WalletDetailsFragmentDirections.actionNavigationWalletDetailsToTransactionInfoFragment(
-                                tx.addressTransaction.txId
+                                tx.addressTransaction.txId,
+                                tx.addressTransaction.address
                             )
                         )
                     }

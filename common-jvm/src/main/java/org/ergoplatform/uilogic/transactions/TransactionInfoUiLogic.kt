@@ -22,7 +22,11 @@ abstract class TransactionInfoUiLogic {
         private set
     private var explorerTxInfo: org.ergoplatform.explorer.client.model.TransactionInfo? = null
 
-    fun init(txId: String, ergoApi: ErgoExplorerApi) {
+    fun init(
+        txId: String,
+        address: String?, // the address is used to fetch unconfirmed transactions, see below
+        ergoApi: ErgoExplorerApi
+    ) {
         if (this.txId != null)
             return
 
@@ -32,8 +36,21 @@ abstract class TransactionInfoUiLogic {
 
                 val txCall = ergoApi.getTransactionInformation(txId).execute()
 
-                if (txCall.isSuccessful) {
-                    explorerTxInfo = txCall.body()
+                val txInfo = if (txCall.isSuccessful)
+                    txCall.body()
+                else if (!txCall.isSuccessful && txCall.code() == 404 && address != null) {
+                    // tx might still be unconfirmed, but Explorer API has no documented endpoint to
+                    // fetch unconfirmed tx by id. The undocumented API the frontend is calling
+                    // does not return assets for inboxes and has a different formatting in nuances,
+                    // so we trick here by fetching all unconfirmed transactions for an address
+                    // and filter the result
+                    val mempoolCall =
+                        ergoApi.getMempoolTransactionsForAddress(address, 5, 0).execute()
+                    mempoolCall.body()?.items?.firstOrNull { it.id == txId }
+                } else null
+
+                if (txInfo != null) {
+                    explorerTxInfo = txInfo
                     onTransactionInformationFetched(
                         TransactionInfo(
                             txId,
@@ -64,7 +81,8 @@ abstract class TransactionInfoUiLogic {
     /**
      * get transaction purpose by extracting attachment of first output
      */
-    val transactionPurpose: String? get() = explorerTxInfo?.outputs?.firstOrNull()?.getAttachmentText()
+    val transactionPurpose: String?
+        get() = explorerTxInfo?.outputs?.firstOrNull()?.getAttachmentText()
 
     fun getTransactionExecutionState(stringProvider: StringProvider): String =
         if (explorerTxInfo?.inclusionHeight != null)

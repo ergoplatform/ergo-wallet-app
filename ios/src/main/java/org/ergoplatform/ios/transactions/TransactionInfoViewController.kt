@@ -11,7 +11,10 @@ import org.ergoplatform.uilogic.transactions.TransactionInfoUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
-class TransactionInfoViewController(private val txId: String) : CoroutineViewController() {
+class TransactionInfoViewController(
+    private val txId: String,
+    private val address: String?,
+) : CoroutineViewController() {
     private val uiLogic = IosTransactionInfoUiLogic()
     private lateinit var infoContainer: TransactionInfoContainer
     private lateinit var activityView: UIActivityIndicatorView
@@ -48,7 +51,7 @@ class TransactionInfoViewController(private val txId: String) : CoroutineViewCon
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        uiLogic.init(txId, ApiServiceManager.getOrInit(getAppDelegate().prefs))
+        uiLogic.init(txId, address, ApiServiceManager.getOrInit(getAppDelegate().prefs))
         activityView.startAnimating()
     }
 

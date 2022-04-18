@@ -400,5 +400,9 @@
         <argument
             android:name="txId"
             app:argType="string" />
+        <argument
+            android:name="address"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 </navigation>

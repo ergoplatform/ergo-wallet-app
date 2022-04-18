@@ -44,7 +44,11 @@ class TransactionInfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.uiLogic.init(args.txId, ApiServiceManager.getOrInit(Preferences(requireContext())))
+        viewModel.uiLogic.init(
+            args.txId,
+            args.address,
+            ApiServiceManager.getOrInit(Preferences(requireContext()))
+        )
 
         viewModel.txInfo.observe(viewLifecycleOwner) { txInfo ->
             binding.progressCircular.visibility = View.GONE

@@ -247,7 +247,8 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
                 binding.entryAddress.layoutTransactionInfo.setOnClickListener {
                     findNavController().navigateSafe(
                         AddressTransactionsFragmentDirections.actionAddressTransactionsFragmentToTransactionInfoFragment(
-                            item.addressTransaction.txId
+                            item.addressTransaction.txId,
+                            item.addressTransaction.address
                         )
                     )
                 }

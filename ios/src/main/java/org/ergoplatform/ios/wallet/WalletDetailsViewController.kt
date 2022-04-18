@@ -511,7 +511,10 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                         isUserInteractionEnabled = true
                         addGestureRecognizer(UITapGestureRecognizer {
                             navigationController.pushViewController(
-                                TransactionInfoViewController(txInfo.addressTransaction.txId), true
+                                TransactionInfoViewController(
+                                    txInfo.addressTransaction.txId,
+                                    txInfo.addressTransaction.address
+                                ), true
                             )
                         })
                     }

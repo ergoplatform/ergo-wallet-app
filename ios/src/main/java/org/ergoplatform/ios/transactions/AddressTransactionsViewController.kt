@@ -332,7 +332,10 @@ class AddressTransactionsViewController(
                 isUserInteractionEnabled = true
                 addGestureRecognizer(UITapGestureRecognizer {
                     vc!!.navigationController.pushViewController(
-                        TransactionInfoViewController(tx!!.addressTransaction.txId), true
+                        TransactionInfoViewController(
+                            tx!!.addressTransaction.txId,
+                            tx!!.addressTransaction.address
+                        ), true
                     )
                 })
 
