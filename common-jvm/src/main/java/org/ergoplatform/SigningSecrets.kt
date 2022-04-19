@@ -36,9 +36,13 @@ data class SigningSecrets(
                 // backwards compatibility: old, unsecure json call
                 fromJson(String(bytes))
             } else {
-                val mnemonic = bytes.toSecretStringSecure()
-                Arrays.fill(bytes, 0)
-                SigningSecrets(mnemonic, true)
+                try {
+                    val mnemonic = bytes.toSecretStringSecure()
+                    Arrays.fill(bytes, 0)
+                    SigningSecrets(mnemonic, true)
+                } catch (t: Throwable) {
+                    null
+                }
             }
         }
 

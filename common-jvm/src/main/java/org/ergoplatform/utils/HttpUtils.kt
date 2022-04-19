@@ -37,7 +37,7 @@ fun httpPostStringSync(httpUrl: String, body: String, mediaType: String) {
         .build()
 
     OkHttpSingleton.getInstance().newCall(request).execute().use { response ->
-        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+        if (!response.isSuccessful) throw IOException("$httpUrl returned $response")
     }
 }
 

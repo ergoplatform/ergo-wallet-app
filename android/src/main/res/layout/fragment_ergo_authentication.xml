@@ -175,7 +175,7 @@
                             tools:text="Wallet label" />
 
                         <Button
-                            android:id="@+id/button_sign_tx"
+                            android:id="@+id/button_authenticate"
                             style="?attr/materialButtonStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

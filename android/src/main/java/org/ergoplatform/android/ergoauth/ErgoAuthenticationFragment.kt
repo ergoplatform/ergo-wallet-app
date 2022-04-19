@@ -17,6 +17,7 @@ import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
 import org.ergoplatform.android.wallet.WalletChooserCallback
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 
 class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChooserCallback {
     private var _binding: FragmentErgoAuthenticationBinding? = null
@@ -45,15 +46,17 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
             AppDatabase.getInstance(context)
         )
 
-        viewModel.authRequest.observe(viewLifecycleOwner) { authRequest ->
-            binding.layoutProgress.visibility = View.GONE
-            binding.layoutDoneInfo.visibility = if (authRequest == null) View.VISIBLE else View.GONE
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            binding.layoutProgress.visibility =
+                if (state == ErgoAuthUiLogic.State.FETCHING_DATA) View.VISIBLE else View.GONE
+            binding.layoutDoneInfo.visibility =
+                if (state == ErgoAuthUiLogic.State.DONE) View.VISIBLE else View.GONE
             binding.layoutAuthenticate.visibility =
-                if (authRequest != null) View.VISIBLE else View.GONE
+                if (state == ErgoAuthUiLogic.State.WAIT_FOR_AUTH) View.VISIBLE else View.GONE
 
-            if (authRequest == null)
+            if (state == ErgoAuthUiLogic.State.DONE)
                 refreshDoneScreen()
-            else
+            else if (state == ErgoAuthUiLogic.State.WAIT_FOR_AUTH)
                 refreshAuthPrompt()
         }
 
@@ -62,6 +65,9 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
         }
         binding.walletLabel.setOnClickListener {
             ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
+        }
+        binding.buttonAuthenticate.setOnClickListener {
+            startAuthFlow(viewModel.uiLogic.walletConfig!!)
         }
     }
 
@@ -101,11 +107,14 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
     }
 
     override fun proceedAuthFlowFromBiometrics() {
-        TODO("Not yet implemented")
+        viewModel.startAuthenticationFromBiometrics(requireContext())
     }
 
     override fun proceedAuthFlowWithPassword(password: String): Boolean {
-        TODO("Not yet implemented")
+        return viewModel.startAuthenticationFromPassword(
+            password,
+            AndroidStringProvider(requireContext())
+        )
     }
 
     override fun onDestroyView() {

@@ -1,11 +1,11 @@
 package org.ergoplatform.ergoauth
 
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.SigmaProp
 import org.ergoplatform.transactions.*
-import org.ergoplatform.utils.Base64Coder
-import org.ergoplatform.utils.fetchHttpGetStringSync
-import org.ergoplatform.utils.isLocalOrIpAddress
+import org.ergoplatform.utils.*
 
 private const val uriSchemePrefix = "ergoauth://"
 
@@ -17,6 +17,10 @@ fun getErgoAuthRequest(ergoAuthUrl: String): ErgoAuthRequest {
 
     val jsonResponse = fetchHttpGetStringSync(httpUrl)
     return parseErgoAuthRequestFromJson(jsonResponse)
+}
+
+fun postErgoAuthResponse(replyUrl: String, authResponse: ErgoAuthResponse) {
+    httpPostStringSync(replyUrl, authResponse.toJson(), MEDIA_TYPE_JSON)
 }
 
 private const val JSON_KEY_SIGMABOOLEAN = "sigmaBoolean"
@@ -48,3 +52,19 @@ data class ErgoAuthRequest(
     val messageSeverity: MessageSeverity = MessageSeverity.NONE,
     val replyToUrl: String? = null
 )
+
+private const val JSON_KEY_PROOF= "proof"
+private const val JSON_KEY_SIGNEDMESSAGE = "signedMessage"
+
+data class ErgoAuthResponse(
+    val signedMessage: String,
+    val proof: ByteArray
+) {
+    fun toJson(): String {
+        val gson = GsonBuilder().disableHtmlEscaping().create()
+        val root = JsonObject()
+        root.addProperty(JSON_KEY_SIGNEDMESSAGE, signedMessage)
+        root.addProperty(JSON_KEY_PROOF, String(Base64Coder.encode(proof)))
+        return gson.toJson(root)
+    }
+}
