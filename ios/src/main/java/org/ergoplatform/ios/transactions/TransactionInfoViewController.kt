@@ -51,7 +51,13 @@ class TransactionInfoViewController(
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        uiLogic.init(txId, address, ApiServiceManager.getOrInit(getAppDelegate().prefs))
+        val appDelegate = getAppDelegate()
+        uiLogic.init(
+            txId,
+            address,
+            ApiServiceManager.getOrInit(appDelegate.prefs),
+            appDelegate.database
+        )
         activityView.startAnimating()
     }
 
