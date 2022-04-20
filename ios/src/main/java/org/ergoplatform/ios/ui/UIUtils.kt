@@ -3,6 +3,7 @@ package org.ergoplatform.ios.ui
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.Main
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGAffineTransform
 import org.robovm.apple.coregraphics.CGPoint
@@ -135,7 +136,7 @@ fun UIView.wrapWithTrailingImage(
     image: UIImage,
     fixedWith: Double = 0.0,
     fixedHeight: Double = 0.0,
-    keepWidth: Boolean = false
+    keepWidth: Boolean = false // determines if the right boundary is fixed or flexible
 ): TrailingImageView<UIView> {
     val imageView = UIImageView(image)
     imageView.tintColor = (this as? UILabel)?.textColor ?: this.tintColor
@@ -354,5 +355,14 @@ fun UIImage.scaleToSize(scaleWidth: Double, scaleHeight: Double): UIImage? {
     val renderer = UIGraphicsImageRenderer(scaledImageSize)
     return renderer.toImage {
         this.draw(CGRect(CGPoint.Zero(), scaledImageSize))
+    }
+}
+
+fun MessageSeverity.getImage(): String? {
+    return when (this) {
+        MessageSeverity.NONE -> null
+        MessageSeverity.INFORMATION -> IMAGE_INFORMATION
+        MessageSeverity.WARNING -> IMAGE_WARNING
+        MessageSeverity.ERROR -> IMAGE_ERROR
     }
 }

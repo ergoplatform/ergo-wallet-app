@@ -3,6 +3,7 @@ package org.ergoplatform.ios
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
 import org.ergoplatform.ios.settings.SettingsViewController
 import org.ergoplatform.ios.transactions.ChooseSpendingWalletViewController
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
@@ -107,8 +108,12 @@ class BottomNavigationBar : UITabBarController() {
                         }
                     }
                 }
-            }, navigateToAuthentication = {
-                // TODO ErgoAuth
+            }, navigateToAuthentication = { request ->
+                selectedViewController = viewControllers.first()
+                (selectedViewController as? UINavigationController)?.apply {
+                    popToRootViewController(false)
+                    pushViewController(ErgoAuthenticationViewController(request, null), true)
+                }
             }, presentUserMessage = { message ->
                 presentViewController(buildSimpleAlertController("", message, texts), true) {}
             })

@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.tokens.WalletDetailsTokenEntryView
 import org.ergoplatform.ios.transactions.*
@@ -226,8 +227,10 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                                         true
                                     )
                                 },
-                                navigateToAuthentication = {
-                                    // TODO ErgoAuth
+                                navigateToAuthentication = { request ->
+                                    navigationController.pushViewController(
+                                        ErgoAuthenticationViewController(request, walletId), true
+                                    )
                                 },
                                 showErrorMessage = { errorMessage ->
                                     presentViewController(
