@@ -6,6 +6,10 @@ abstract class TransactionDbProvider {
 
     abstract suspend fun insertOrUpdateAddressTransaction(addressTransaction: AddressTransaction)
 
+    abstract suspend fun loadAddressTransaction(
+        address: String, txId: String
+    ): AddressTransaction?
+
     /**
      * loads all transactions for a given address, in descending order by inclusion height
      */

@@ -8,6 +8,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentTransactionInfoBinding
@@ -44,10 +45,12 @@ class TransactionInfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val context = requireContext()
         viewModel.uiLogic.init(
             args.txId,
             args.address,
-            ApiServiceManager.getOrInit(Preferences(requireContext()))
+            ApiServiceManager.getOrInit(Preferences(context)),
+            AppDatabase.getInstance(context)
         )
 
         viewModel.txInfo.observe(viewLifecycleOwner) { txInfo ->
