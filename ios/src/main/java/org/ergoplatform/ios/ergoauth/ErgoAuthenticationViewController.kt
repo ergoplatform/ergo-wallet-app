@@ -3,6 +3,7 @@ package org.ergoplatform.ios.ergoauth
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.wallet.ChooseWalletViewController
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 import org.robovm.apple.coregraphics.CGRect
@@ -126,11 +127,7 @@ class ErgoAuthenticationViewController(
                 } ?: true
                 false
             } ?: true
-            refreshAddressInfo()
-        }
-
-        fun refreshAddressInfo() {
-            mainRequestContainer.walletChooser.text = uiLogic.walletConfig?.displayName
+            mainRequestContainer.refreshAddressInfo()
         }
     }
 
@@ -139,8 +136,10 @@ class ErgoAuthenticationViewController(
             text = texts.getString(STRING_DESC_AUTHENTICATION_WALLET)
             textAlignment = NSTextAlignment.Center
         }
-        val walletChooser = Headline2Label().apply {
+
+        private val walletNameLabel = Headline2Label().apply {
             numberOfLines = 1
+            textColor = uiColorErgo
         }
         private val authButton = PrimaryButton(texts.getString(STRING_BUTTON_AUTHENTICATE)).apply {
             addOnTouchUpInsideListener { _, _ ->
@@ -153,14 +152,17 @@ class ErgoAuthenticationViewController(
         }
 
         init {
-            val walletChooseButton = walletChooser.wrapWithTrailingImage(
+            val walletChooseButton = walletNameLabel.wrapWithTrailingImage(
                 getIosSystemImage(IMAGE_OPEN_LIST, UIImageSymbolScale.Small, 20.0)!!,
                 keepWidth = true
             ).apply {
                 isUserInteractionEnabled = true
                 addGestureRecognizer(UITapGestureRecognizer {
                     presentViewController(
-                        null, // TODO
+                        ChooseWalletViewController {
+                            uiLogic.walletConfig = it
+                            refreshAddressInfo()
+                        },
                         true
                     ) {}
                 })
@@ -172,7 +174,12 @@ class ErgoAuthenticationViewController(
 
             descLabel.topToSuperview().widthMatchesSuperview()
             walletChooseButton.topToBottomOf(descLabel).centerHorizontal(true)
-            authButton.topToBottomOf(walletChooser, inset = DEFAULT_MARGIN * 2).bottomToSuperview().centerHorizontal()
+            authButton.topToBottomOf(walletNameLabel, inset = DEFAULT_MARGIN * 2).bottomToSuperview()
+                .centerHorizontal().fixedWidth(200.0)
+        }
+
+        fun refreshAddressInfo() {
+            walletNameLabel.text = uiLogic.walletConfig?.displayName
         }
     }
 
@@ -184,6 +191,7 @@ class ErgoAuthenticationViewController(
             runOnMainThread {
                 stateDoneContainer.isHidden = newState != State.DONE
                 fetchingContainer.isHidden = newState != State.FETCHING_DATA
+                authRequestContainer.isHidden = newState != State.WAIT_FOR_AUTH
 
                 if (newState == State.DONE) {
                     showDoneInfo()
