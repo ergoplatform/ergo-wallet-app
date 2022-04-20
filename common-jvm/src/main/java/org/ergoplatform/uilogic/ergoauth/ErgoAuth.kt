@@ -15,7 +15,7 @@ fun getErgoAuthRequest(ergoAuthUrl: String): ErgoAuthRequest {
     val httpUrl = (if (isLocalOrIpAddress(ergoAuthUrl)) "http://" else "https://") +
             ergoAuthUrl.substringAfter(uriSchemePrefix)
 
-    val jsonResponse = fetchHttpGetStringSync(httpUrl)
+    val jsonResponse = fetchHttpGetStringSync(httpUrl, 30)
     return parseErgoAuthRequestFromJson(jsonResponse)
 }
 
