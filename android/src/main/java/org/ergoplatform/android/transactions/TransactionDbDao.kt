@@ -20,6 +20,9 @@ interface TransactionDbDao {
     @Query("SELECT * FROM address_transaction WHERE id = :id")
     suspend fun loadAddressTransaction(id: Int): AddressTransactionDbEntity?
 
+    @Query("SELECT * FROM address_transaction WHERE address = :address AND tx_id = :txId")
+    suspend fun loadAddressTransaction(address: String, txId: String): AddressTransactionDbEntity?
+
     @Query("DELETE FROM address_transaction WHERE id = :id")
     suspend fun deleteAddressTransaction(id: Int)
 

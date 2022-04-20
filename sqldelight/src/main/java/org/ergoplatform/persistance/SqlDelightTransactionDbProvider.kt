@@ -34,6 +34,18 @@ class SqlDelightTransactionDbProvider(private val sqlDelightAppDb: SqlDelightApp
         }
     }
 
+    override suspend fun loadAddressTransaction(
+        address: String,
+        txId: String
+    ): AddressTransaction? {
+        return sqlDelightAppDb.useIoContext {
+            appDatabase.addressTransactionQueries.loadAddressTransactionByAddressAndTxId(
+                address,
+                txId
+            ).executeAsOneOrNull()?.toModel()
+        }
+    }
+
     override suspend fun deleteAddressTransactions(address: String) {
         sqlDelightAppDb.useIoContext {
             appDatabase.addressTransactionQueries.deleteByAddress(address)
