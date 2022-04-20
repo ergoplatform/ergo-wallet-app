@@ -69,7 +69,7 @@ fun getErgoPaySigningRequest(
         val httpUrl = (if (isLocalOrIpAddress(requestData)) "http:" else "https:") +
                 ergopayUrl.substringAfter(uriSchemePrefix)
 
-        val jsonResponse = fetchHttpGetStringSync(httpUrl)
+        val jsonResponse = fetchHttpGetStringSync(httpUrl, 30)
         parseErgoPaySigningRequestFromJson(jsonResponse)
     }
 

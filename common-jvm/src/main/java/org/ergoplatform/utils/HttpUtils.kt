@@ -4,6 +4,7 @@ import okhttp3.*
 import okio.*
 import org.ergoplatform.api.OkHttpSingleton
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 private const val IPV4_PATTERN =
     "^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\\.(?!$)|$)){4}$"
@@ -17,16 +18,21 @@ fun getHostname(url: String): String {
     return url.substringAfter("://").substringBefore('/').substringBefore(':')
 }
 
-fun fetchHttpGetStringSync(httpUrl: String): String {
+fun fetchHttpGetStringSync(httpUrl: String, timeout: Long = 10): String {
     val request = Request.Builder().url(httpUrl).build()
-    val stringResponse = OkHttpSingleton.getInstance().newCall(request).execute().use { response ->
-        if (!response.isSuccessful) {
-            throw IOException("Unexpected response code $response")
-        }
+    val stringResponse =
+        OkHttpSingleton.getInstance().newBuilder()
+            .connectTimeout(timeout, TimeUnit.SECONDS)
+            .readTimeout(timeout, TimeUnit.SECONDS)
+            .writeTimeout(timeout, TimeUnit.SECONDS).build().newCall(request).execute()
+            .use { response ->
+                if (!response.isSuccessful) {
+                    throw IOException("Unexpected response code $response")
+                }
 
-        response.body()!!.string()
+                response.body()!!.string()
 
-    }
+            }
     return stringResponse
 }
 
