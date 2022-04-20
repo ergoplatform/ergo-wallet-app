@@ -12,6 +12,7 @@ import org.ergoplatform.android.databinding.EntryAddressTransactionBinding
 import org.ergoplatform.android.databinding.EntryTransactionBoxBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.copyStringToClipboard
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
@@ -83,6 +84,10 @@ private fun bindBoxView(
         TransitionManager.beginDelayedTransition(container)
         boxBinding.labelBoxAddress.maxLines =
             if (boxBinding.labelBoxAddress.maxLines == 1) 10 else 1
+    }
+    boxBinding.labelBoxAddress.setOnLongClickListener {
+        copyStringToClipboard(address, it.context, it)
+        true
     }
 
     boxBinding.boxTokenEntries.apply {
