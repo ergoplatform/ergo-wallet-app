@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="wrap_content"
+    tools:background="?attr/colorSurface">
+
+    <LinearLayout
+        android:id="@+id/list_wallets"
+        style="@style/width_match_parent_max_500"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/margin_and_half"
+        android:orientation="vertical" />
+</LinearLayout>

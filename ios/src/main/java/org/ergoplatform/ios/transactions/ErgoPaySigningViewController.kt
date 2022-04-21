@@ -2,7 +2,6 @@ package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ios.tokens.TokenInformationViewController
-import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.transactions.TransactionResult
@@ -38,7 +37,7 @@ class ErgoPaySigningViewController(
 
         val appDelegate = getAppDelegate()
         texts = appDelegate.texts
-        fetchingContainer = FetchDataContainer()
+        fetchingContainer = FetchDataContainer(IosStringProvider(texts))
         transactionContainer = TransactionWithHeaderContainer()
 
         title = texts.get(STRING_TITLE_ERGO_PAY_REQUEST)
@@ -143,18 +142,9 @@ class ErgoPaySigningViewController(
         }
     }
 
-    private fun getImageFromSeverity(severity: MessageSeverity): String? {
-        return when (severity) {
-            MessageSeverity.NONE -> null
-            MessageSeverity.INFORMATION -> IMAGE_INFORMATION
-            MessageSeverity.WARNING -> IMAGE_WARNING
-            MessageSeverity.ERROR -> IMAGE_ERROR
-        }
-    }
-
     private fun showDoneInfo() {
         if (stateDoneContainer.contentView.subviews.isEmpty()) {
-            val image = getImageFromSeverity(uiLogic.getDoneSeverity())?.let {
+            val image = uiLogic.getDoneSeverity().getImage()?.let {
                 UIImageView(getIosSystemImage(it, UIImageSymbolScale.Large)).apply {
                     contentMode = UIViewContentMode.ScaleAspectFit
                     tintColor = uiColorErgo
@@ -219,7 +209,7 @@ class ErgoPaySigningViewController(
                 messageFromDApp.text = texts.format(STRING_LABEL_MESSAGE_FROM_DAPP, it)
 
 
-                messageIcon.isHidden = getImageFromSeverity(uiLogic.epsr!!.messageSeverity)?.let {
+                messageIcon.isHidden = uiLogic.epsr!!.messageSeverity.getImage()?.let {
                     messageIcon.image = getIosSystemImage(it, UIImageSymbolScale.Medium)
                     false
                 } ?: true
@@ -228,12 +218,12 @@ class ErgoPaySigningViewController(
         }
     }
 
-    inner class FetchDataContainer : UIView(CGRect.Zero()) {
+    class FetchDataContainer(private val texts: StringProvider) : UIView(CGRect.Zero()) {
         private val progressIndicator = UIActivityIndicatorView().apply {
             activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Large
         }
         private val fetchDataLabel = Headline2Label().apply {
-            text = texts.get(STRING_LABEL_FETCHING_DATA)
+            text = texts.getString(STRING_LABEL_FETCHING_DATA)
             textAlignment = NSTextAlignment.Center
         }
 

@@ -3,6 +3,7 @@ package org.ergoplatform.ios
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
 import org.ergoplatform.ios.settings.SettingsViewController
 import org.ergoplatform.ios.transactions.ChooseSpendingWalletViewController
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
@@ -90,9 +91,10 @@ class BottomNavigationBar : UITabBarController() {
         MainAppUiLogic.handleRequests(paymentRequest,
             fromQr,
             IosStringProvider(texts),
-            {
+            navigateToChooseWalletDialog = {
                 CoroutineScope(Dispatchers.Default).launch {
-                    val wallets = getAppDelegate().database.walletDbProvider.getAllWalletConfigsSynchronous()
+                    val wallets =
+                        getAppDelegate().database.walletDbProvider.getAllWalletConfigsSynchronous()
 
                     runOnMainThread {
                         if (wallets.size == 1) {
@@ -106,8 +108,13 @@ class BottomNavigationBar : UITabBarController() {
                         }
                     }
                 }
-
-            }, { message ->
+            }, navigateToAuthentication = { request ->
+                selectedViewController = viewControllers.first()
+                (selectedViewController as? UINavigationController)?.apply {
+                    popToRootViewController(false)
+                    pushViewController(ErgoAuthenticationViewController(request, null), true)
+                }
+            }, presentUserMessage = { message ->
                 presentViewController(buildSimpleAlertController("", message, texts), true) {}
             })
     }
@@ -123,7 +130,10 @@ class BottomNavigationBar : UITabBarController() {
         (selectedViewController as? UINavigationController)?.apply {
             popToRootViewController(false)
             pushViewController(
-                if (isErgoPaySigningRequest(paymentRequest)) ErgoPaySigningViewController(paymentRequest, walletId)
+                if (isErgoPaySigningRequest(paymentRequest)) ErgoPaySigningViewController(
+                    paymentRequest,
+                    walletId
+                )
                 else SendFundsViewController(walletId, paymentRequest = paymentRequest),
                 !fromChooseScreen
             )

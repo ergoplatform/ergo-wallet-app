@@ -394,7 +394,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         walletDetailsViewModel.uiLogic.qrCodeScanned(
             qrCode,
             AndroidStringProvider(requireContext()),
-            { data ->
+            navigateToColdWalletSigning = { data ->
                 findNavController().navigate(
                     WalletDetailsFragmentDirections
                         .actionNavigationWalletDetailsToColdWalletSigningFragment(
@@ -403,7 +403,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                         )
                 )
             },
-            { ergoPayRequest ->
+            navigateToErgoPaySigning = { ergoPayRequest ->
                 findNavController().navigateSafe(
                     WalletDetailsFragmentDirections.actionNavigationWalletDetailsToErgoPaySigningFragment(
                         ergoPayRequest,
@@ -412,7 +412,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                     )
                 )
             },
-            { data ->
+            navigateToSendFundsScreen = { data ->
                 findNavController().navigate(
                     WalletDetailsFragmentDirections
                         .actionNavigationWalletDetailsToSendFundsFragment(
@@ -420,7 +420,13 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                             walletDetailsViewModel.selectedIdx ?: -1
                         ).setPaymentRequest(data)
                 )
-            }, {
+            }, navigateToAuthentication = {
+                findNavController().navigate(
+                    WalletDetailsFragmentDirections.actionNavigationWalletDetailsToErgoAuthFragment(
+                        it
+                    ).setWalletId(walletDetailsViewModel.wallet!!.walletConfig.id)
+                )
+            }, showErrorMessage = {
                 MaterialAlertDialogBuilder(requireContext()).setMessage(it)
                     .setPositiveButton(R.string.zxing_button_ok, null)
                     .show()

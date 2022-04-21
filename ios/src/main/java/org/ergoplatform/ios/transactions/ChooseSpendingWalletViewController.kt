@@ -6,11 +6,9 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.Wallet
-import org.ergoplatform.uilogic.STRING_BUTTON_SEND
-import org.ergoplatform.uilogic.STRING_DESC_CHOOSE_WALLET
-import org.ergoplatform.uilogic.STRING_LABEL_TO
-import org.ergoplatform.uilogic.STRING_TITLE_ERGO_PAY_REQUEST
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.wallet.getBalanceForAllAddresses
+import org.ergoplatform.wallet.getTokensForAllAddresses
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
@@ -23,10 +21,11 @@ class ChooseSpendingWalletViewController(
 ) : CoroutineViewController() {
 
     private lateinit var walletsStackView: UIStackView
+    private lateinit var texts: StringProvider
 
     override fun viewDidLoad() {
         super.viewDidLoad()
-        val texts = getAppDelegate().texts
+        texts = IosStringProvider(getAppDelegate().texts)
 
         view.backgroundColor = UIColor.systemBackground()
         addCloseButton()
@@ -36,7 +35,7 @@ class ChooseSpendingWalletViewController(
         }
 
         val toLabel = Body1Label().apply {
-            text = texts.get(STRING_LABEL_TO)
+            text = texts.getString(STRING_LABEL_TO)
             textAlignment = NSTextAlignment.Center
         }
 
@@ -49,7 +48,7 @@ class ChooseSpendingWalletViewController(
         }
 
         val descLabel = Body1Label().apply {
-            text = texts.get(STRING_DESC_CHOOSE_WALLET)
+            text = texts.getString(STRING_DESC_CHOOSE_WALLET)
             textAlignment = NSTextAlignment.Center
         }
 
@@ -81,12 +80,12 @@ class ChooseSpendingWalletViewController(
             amountLabel.isHidden = true
             recipientLabel.text = ""
             toLabel.text = ""
-            titleLabel.text = texts.get(STRING_TITLE_ERGO_PAY_REQUEST)
+            titleLabel.text = texts.getString(STRING_TITLE_ERGO_PAY_REQUEST)
         } else parsePaymentRequest(paymentRequest)?.let {
             amountLabel.setErgoAmount(it.amount)
             amountLabel.isHidden = it.amount.isZero()
             recipientLabel.text = it.address
-            titleLabel.text = texts.get(STRING_BUTTON_SEND)
+            titleLabel.text = texts.getString(STRING_BUTTON_SEND)
         }
     }
 
@@ -98,19 +97,27 @@ class ChooseSpendingWalletViewController(
             runOnMainThread {
                 walletsStackView.clearArrangedSubviews()
                 wallets.sortedBy { it.walletConfig.displayName?.lowercase() }.forEach { wallet ->
-                    walletsStackView.addArrangedSubview(WalletItem(wallet))
+                    walletsStackView.addArrangedSubview(ChooseWalletItem(wallet, texts).apply {
+                        isUserInteractionEnabled = true
+                        addGestureRecognizer(UITapGestureRecognizer {
+                            navigateToSendFundsScreen(wallet.walletConfig.id)
+                        })
+                    })
                 }
             }
         }
     }
 
-    fun navigateToSendFundsScreen(walletId: Int) {
+    private fun navigateToSendFundsScreen(walletId: Int) {
         callback.invoke(walletId)
-        dismissViewController(true) {
-        }
+        dismissViewController(true) {}
     }
 
-    private inner class WalletItem(wallet: Wallet) : UIView(CGRect.Zero()) {
+    class ChooseWalletItem(
+        wallet: Wallet,
+        texts: StringProvider,
+        showTokenNum: Boolean = false
+    ) : UIView(CGRect.Zero()) {
         init {
             val name = Body1BoldLabel().apply {
                 textColor = uiColorErgo
@@ -120,9 +127,14 @@ class ChooseSpendingWalletViewController(
             val balance = ErgoAmountView(true).apply {
                 setErgoAmount(ErgoAmount(wallet.getBalanceForAllAddresses()))
             }
+            val tokenNumLabel = Body1BoldLabel()
+            val tokenNum = if (!showTokenNum) 0 else wallet.getTokensForAllAddresses().size
+            tokenNumLabel.text = if (tokenNum > 0)
+                texts.getString(STRING_LABEL_WALLET_TOKEN_BALANCE, tokenNum) else ""
 
             addSubview(name)
             addSubview(balance)
+            addSubview(tokenNumLabel)
 
             name.topToSuperview().bottomToSuperview().leftToSuperview()
             // lower hugging and compression resistance so that balance will keep its intrinsic
@@ -130,12 +142,8 @@ class ChooseSpendingWalletViewController(
             // ErgoAmountViews inner structure already using it
             name.setContentCompressionResistancePriority(500f, UILayoutConstraintAxis.Horizontal)
             name.setContentHuggingPriority(100f, UILayoutConstraintAxis.Horizontal)
-            balance.rightToSuperview().topToSuperview().bottomToSuperview().leftToRightOf(name)
-
-            isUserInteractionEnabled = true
-            addGestureRecognizer(UITapGestureRecognizer {
-                navigateToSendFundsScreen(wallet.walletConfig.id)
-            })
+            balance.rightToSuperview().topToSuperview().leftToRightOf(name)
+            tokenNumLabel.rightToRightOf(balance).topToBottomOf(balance).bottomToSuperview()
         }
     }
 }

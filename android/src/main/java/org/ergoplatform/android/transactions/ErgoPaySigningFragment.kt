@@ -14,6 +14,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentErgoPaySigningBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.getSeverityDrawableResId
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
@@ -127,18 +128,10 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
         binding.tvMessage.text = uiLogic.getDoneMessage(AndroidStringProvider(requireContext()))
         binding.tvMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(
             0,
-            getSeverityDrawableResId(uiLogic.getDoneSeverity()),
+            uiLogic.getDoneSeverity().getSeverityDrawableResId(),
             0, 0
         )
     }
-
-    private fun getSeverityDrawableResId(severity: MessageSeverity) =
-        when (severity) {
-            MessageSeverity.NONE -> 0
-            MessageSeverity.INFORMATION -> R.drawable.ic_info_24
-            MessageSeverity.WARNING -> R.drawable.ic_warning_amber_24
-            MessageSeverity.ERROR -> R.drawable.ic_error_outline_24
-        }
 
     private fun showTransactionInfo() {
         val uiLogic = viewModel.uiLogic
@@ -153,9 +146,8 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
         )
         binding.layoutTiMessage.visibility = uiLogic.epsr?.message?.let {
             binding.tvTiMessage.text = getString(R.string.label_message_from_dapp, it)
-            val severityResId = getSeverityDrawableResId(
-                uiLogic.epsr?.messageSeverity ?: MessageSeverity.NONE
-            )
+            val severityResId =
+                (uiLogic.epsr?.messageSeverity ?: MessageSeverity.NONE).getSeverityDrawableResId()
             binding.imageTiMessage.setImageResource(severityResId)
             binding.imageTiMessage.visibility = if (severityResId == 0) View.GONE else View.VISIBLE
             View.VISIBLE
