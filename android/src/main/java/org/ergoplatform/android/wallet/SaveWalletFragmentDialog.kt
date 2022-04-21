@@ -188,7 +188,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
             .navigateSafe(SaveWalletFragmentDialogDirections.actionSaveWalletFragmentDialogToNavigationWallet())
     }
 
-    override fun onPasswordEntered(password: String?): String? {
+    override fun onPasswordEntered(password: SecretString?): String? {
         return if (viewModel.uiLogic!!.isPasswordWeak(password)) {
             getString(R.string.err_password)
         } else {

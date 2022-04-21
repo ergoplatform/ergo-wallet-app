@@ -88,7 +88,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
 
         // Click listeners
         binding.transactionInfo.buttonSignTx.setOnClickListener {
-            startAuthFlow(viewModel.uiLogic.wallet!!.walletConfig)
+            startAuthFlow()
         }
         binding.buttonDismiss.setOnClickListener {
             findNavController().popBackStack()

@@ -3,6 +3,8 @@ package org.ergoplatform.android.transactions
 import android.os.Bundle
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
+import org.ergoplatform.SigningSecrets
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
@@ -66,8 +68,11 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
         viewModel.uiLogic.derivedAddressIdx = addressDerivationIdx
     }
 
-    override fun startAuthFlow(walletConfig: WalletConfig) {
-        if (walletConfig.secretStorage == null) {
+    override val authenticationWalletConfig: WalletConfig?
+        get() = viewModel.uiLogic.wallet?.walletConfig
+
+    override fun startAuthFlow() {
+        if (authenticationWalletConfig?.secretStorage == null) {
             // we have a read only wallet here, let's go to cold wallet support mode
             val context = requireContext()
             viewModel.uiLogic.startColdWalletPayment(
@@ -75,15 +80,17 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
                 AndroidStringProvider(context)
             )
         } else {
-            super.startAuthFlow(walletConfig)
+            super.startAuthFlow()
         }
     }
 
-    override fun proceedAuthFlowWithPassword(password: String): Boolean {
-        return viewModel.startPaymentWithPassword(password, requireContext())
-    }
-
-    override fun proceedAuthFlowFromBiometrics() {
-        context?.let { viewModel.startPaymentUserAuth(it) }
+    override fun proceedFromAuthFlow(secrets: SigningSecrets) {
+        val context = requireContext()
+        viewModel.uiLogic.startPaymentWithMnemonicAsync(
+            secrets,
+            Preferences(context),
+            AndroidStringProvider(context),
+            AppDatabase.getInstance(context)
+        )
     }
 }

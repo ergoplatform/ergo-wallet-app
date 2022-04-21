@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentErgoAuthenticationBinding
@@ -67,9 +68,12 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
             ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
         }
         binding.buttonAuthenticate.setOnClickListener {
-            startAuthFlow(viewModel.uiLogic.walletConfig!!)
+            startAuthFlow()
         }
     }
+
+    override val authenticationWalletConfig: WalletConfig?
+        get() = viewModel.uiLogic.walletConfig
 
     override fun onWalletChosen(walletConfig: WalletConfig) {
         viewModel.uiLogic.walletConfig = walletConfig
@@ -106,15 +110,8 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
         binding.walletLabel.text = viewModel.uiLogic.walletConfig?.displayName
     }
 
-    override fun proceedAuthFlowFromBiometrics() {
-        viewModel.startAuthenticationFromBiometrics(requireContext())
-    }
-
-    override fun proceedAuthFlowWithPassword(password: String): Boolean {
-        return viewModel.startAuthenticationFromPassword(
-            password,
-            AndroidStringProvider(requireContext())
-        )
+    override fun proceedFromAuthFlow(secrets: SigningSecrets) {
+        viewModel.uiLogic.startResponse(secrets, AndroidStringProvider(requireContext()))
     }
 
     override fun onDestroyView() {
