@@ -97,7 +97,7 @@ class TokenInformationLayoutView(private val binding: FragmentTokenInformationBi
         } ?: false
 
         if (hasError || downloadState == TokenInformationModelLogic.StateDownload.ERROR) {
-            binding.imgPreview.setImageResource(R.drawable.ic_warning_amber_24)
+            binding.imgPreview.setImageResource(R.drawable.ic_warning_amber_100)
         }
 
     }

@@ -67,10 +67,11 @@ class SendFundsViewController(
                             ergoPayRequest, walletId, uiLogic.derivedAddressIdx ?: -1
                         ), true
                     )
-                }, { address, amount ->
+                }, { address, amount, message ->
                     inputReceiver.text = address
                     inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
                     amount?.let { setInputAmount(amount) }
+                    message?.let {  } // TODO EIP-29
                 })
             }, true) {}
         }
@@ -267,7 +268,7 @@ class SendFundsViewController(
     }
 
     private fun checkAndStartPayment() {
-        val checkResponse = uiLogic.checkCanMakePayment()
+        val checkResponse = uiLogic.checkCanMakePayment(getAppDelegate().prefs)
 
         inputReceiver.setHasError(checkResponse.receiverError)
         hasAmountError = checkResponse.amountError

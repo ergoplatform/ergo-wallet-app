@@ -33,6 +33,8 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             field = value
             calcGrossAmount()
         }
+    var message: String = ""
+    val maxMessageLength = 1000 // we allow only 1k characters to be sent - no pollution wanted
 
     /**
      * amount to send, entered by user
@@ -83,6 +85,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             content?.let {
                 receiverAddress = content.address
                 amountToSend = content.amount
+                message = content.description
             }
         } else content = null
 
@@ -251,16 +254,22 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             amountToSend.nanoErgs
     }
 
-    fun checkCanMakePayment(): CheckCanPayResponse {
+    private fun getActualMessageToSend(): String? {
+        return if (message.isBlank()) null else message.take(maxMessageLength)
+    }
+
+    fun checkCanMakePayment(preferences: PreferencesProvider): CheckCanPayResponse {
         val receiverOk = isValidErgoAddress(receiverAddress)
         val amountOk = getActualAmountToSendNanoErgs() >= Parameters.MinChangeValue
         val tokensOk = tokensChosen.values.none { it.value <= 0 }
+        val messageOk = getActualMessageToSend() == null || preferences.sendTxMessages
 
         return CheckCanPayResponse(
-            receiverOk && amountOk && tokensOk,
-            !receiverOk,
-            !amountOk,
-            !tokensOk
+            canPay = receiverOk && amountOk && tokensOk && messageOk,
+            receiverError = !receiverOk,
+            messageError = !messageOk,
+            amountError = !amountOk,
+            tokenError = !tokensOk
         )
     }
 
@@ -277,6 +286,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             withContext(Dispatchers.IO) {
                 ergoTxResult = sendErgoTx(
                     Address.create(receiverAddress),
+                    getActualMessageToSend(),
                     getActualAmountToSendNanoErgs(),
                     tokensChosen.values.toList(),
                     feeAmount.nanoErgs,
@@ -302,6 +312,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 withContext(Dispatchers.IO) {
                     serializedTx = prepareSerializedErgoTx(
                         Address.create(receiverAddress),
+                        getActualMessageToSend(),
                         getActualAmountToSendNanoErgs(),
                         tokensChosen.values.toList(),
                         feeAmount.nanoErgs,
@@ -420,7 +431,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         stringProvider: StringProvider,
         navigateToColdWalletSigning: ((signingData: String, walletId: Int) -> Unit),
         navigateToErgoPaySigning: ((ergoPayRequest: String) -> Unit),
-        setPaymentRequestDataToUi: ((receiverAddress: String, amount: ErgoAmount?) -> Unit),
+        setPaymentRequestDataToUi: ((receiverAddress: String, amount: ErgoAmount?, message: String?) -> Unit),
     ) {
         if (wallet?.walletConfig?.secretStorage != null && isColdSigningRequestChunk(qrCodeData)) {
             navigateToColdWalletSigning.invoke(qrCodeData, wallet!!.walletConfig.id)
@@ -433,7 +444,8 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             content?.let {
                 setPaymentRequestDataToUi.invoke(
                     content.address,
-                    content.amount.let { amount -> if (amount.nanoErgs > 0) amount else null }
+                    content.amount.let { amount -> if (amount.nanoErgs > 0) amount else null },
+                    if (content.description.isNotBlank()) content.description else null
                 )
                 addTokensFromPaymentRequest(content.tokens)
             } ?: showErrorMessage(
@@ -453,6 +465,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     data class CheckCanPayResponse(
         val canPay: Boolean,
         val receiverError: Boolean,
+        val messageError: Boolean,
         val amountError: Boolean,
         val tokenError: Boolean
     )

@@ -135,9 +135,9 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
     private fun getSeverityDrawableResId(severity: MessageSeverity) =
         when (severity) {
             MessageSeverity.NONE -> 0
-            MessageSeverity.INFORMATION -> R.drawable.ic_info_24
-            MessageSeverity.WARNING -> R.drawable.ic_warning_amber_24
-            MessageSeverity.ERROR -> R.drawable.ic_error_outline_24
+            MessageSeverity.INFORMATION -> R.drawable.ic_info_100
+            MessageSeverity.WARNING -> R.drawable.ic_warning_amber_100
+            MessageSeverity.ERROR -> R.drawable.ic_error_outline_100
         }
 
     private fun showTransactionInfo() {

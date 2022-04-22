@@ -111,6 +111,7 @@ fun loadAppKitMnemonicWordList(): List<String> {
  */
 fun sendErgoTx(
     recipient: Address,
+    message: String?,
     amountToSend: Long,
     tokensToSend: List<ErgoToken>,
     feeAmount: Long,
@@ -136,6 +137,7 @@ fun sendErgoTx(
             val contract: ErgoContract = recipient.toErgoContract()
             val unsignedTx = BoxOperations.createForEip3Prover(prover, ctx).withAmountToSpend(amountToSend)
                 .withFeeAmount(feeAmount)
+                .withMessage(message)
                 .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
                 .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
             val signed = prover.sign(unsignedTx)
@@ -182,6 +184,7 @@ fun buildPromptSigningResultFromErgoPayRequest(
  */
 fun prepareSerializedErgoTx(
     recipient: Address,
+    message: String?,
     amountToSend: Long,
     tokensToSend: List<ErgoToken>,
     feeAmount: Long,
@@ -195,6 +198,7 @@ fun prepareSerializedErgoTx(
             val contract: ErgoContract = recipient.toErgoContract()
             val unsigned = BoxOperations.createForSenders(senderAddresses, ctx).withAmountToSpend(amountToSend)
                 .withFeeAmount(feeAmount)
+                .withMessage(message)
                 .withInputBoxesLoader(ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true))
                 .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
 
