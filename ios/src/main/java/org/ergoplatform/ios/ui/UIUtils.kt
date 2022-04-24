@@ -25,6 +25,7 @@ val IMAGE_SETTINGS = if (Foundation.getMajorSystemVersion() >= 14) "gearshape" e
 val IMAGE_TX_DONE = if (Foundation.getMajorSystemVersion() >= 15) "clock.badge.checkmark" else "checkmark.seal"
 const val IMAGE_CREATE_WALLET = "folder.badge.plus"
 const val IMAGE_RESTORE_WALLET = "arrow.clockwise"
+const val IMAGE_RELOAD = "arrow.clockwise"
 const val IMAGE_READONLY_WALLET = "magnifyingglass"
 const val IMAGE_EXCLAMATION_MARK_FILLED = "exclamationmark.circle.fill"
 const val IMAGE_NO_CONNECTION = "icloud.slash"

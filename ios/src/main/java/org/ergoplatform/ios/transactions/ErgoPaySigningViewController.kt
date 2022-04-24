@@ -6,6 +6,7 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.ChooseWalletViewController
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
@@ -27,7 +28,8 @@ class ErgoPaySigningViewController(
     private val addressChooserContainer = AddressChooserContainer()
     private lateinit var fetchingContainer: FetchDataContainer
     private lateinit var transactionContainer: TransactionWithHeaderContainer
-    private val stateDoneContainer = CardView()
+    private lateinit var reloadNavBarItem: UIBarButtonItem
+    private val stateDoneContainer = StateDoneContainer()
     private val walletAddressLabel = Body2BoldLabel().apply {
         numberOfLines = 1
         textColor = uiColorErgo
@@ -45,6 +47,15 @@ class ErgoPaySigningViewController(
         title = texts.get(STRING_TITLE_ERGO_PAY_REQUEST)
         view.backgroundColor = UIColor.systemBackground()
         navigationController.navigationBar?.tintColor = UIColor.label()
+
+        reloadNavBarItem =
+            UIBarButtonItem(getIosSystemImage(IMAGE_RELOAD, UIImageSymbolScale.Small, 20.0), UIBarButtonItemStyle.Plain)
+        navigationItem.rightBarButtonItem = reloadNavBarItem
+        reloadNavBarItem.tintColor = UIColor.label()
+        reloadNavBarItem.setOnClickListener {
+            startReloadFromDapp()
+        }
+        reloadNavBarItem.isEnabled = false
 
         view.layoutMargins = UIEdgeInsets.Zero()
         view.addSubview(walletAddressLabel)
@@ -77,6 +88,15 @@ class ErgoPaySigningViewController(
         )
     }
 
+    private fun startReloadFromDapp() {
+        val appDelegate = getAppDelegate()
+        uiLogic.reloadFromDapp(
+            appDelegate.prefs,
+            IosStringProvider(appDelegate.texts),
+            appDelegate.database.walletDbProvider
+        )
+    }
+
     private fun onWalletChosen(wallet: WalletConfig) {
         val appDelegate = getAppDelegate()
         uiLogic.setWalletId(
@@ -99,6 +119,7 @@ class ErgoPaySigningViewController(
     }
 
     private fun refreshUserInterface(state: ErgoPaySigningUiLogic.State) {
+        reloadNavBarItem.isEnabled = uiLogic.canReloadFromDapp()
         addressChooserContainer.isHidden = state != ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS &&
                 state != ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET
         fetchingContainer.isHidden = state != ErgoPaySigningUiLogic.State.FETCH_DATA
@@ -116,11 +137,11 @@ class ErgoPaySigningViewController(
                 // nothing to do
             }
             ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION -> transactionContainer.showTransactionInfo()
-            ErgoPaySigningUiLogic.State.DONE -> showDoneInfo()
+            ErgoPaySigningUiLogic.State.DONE -> stateDoneContainer.showDoneInfo()
         }
     }
 
-    inner class AddressChooserContainer: CardView() {
+    inner class AddressChooserContainer : CardView() {
         private var label: Body1Label? = null
         private var button: PrimaryButton? = null
 
@@ -174,7 +195,7 @@ class ErgoPaySigningViewController(
     private fun showAddressOrWalletChooser() {
         presentViewController(
             if (uiLogic.wallet != null) {
-                ChooseAddressListDialogViewController(walletId, false) {
+                ChooseAddressListDialogViewController(uiLogic.wallet!!.walletConfig.id, false) {
                     onAddressChosen(it)
                 }
             } else {
@@ -183,37 +204,63 @@ class ErgoPaySigningViewController(
         ) {}
     }
 
-    private fun showDoneInfo() {
-        if (stateDoneContainer.contentView.subviews.isEmpty()) {
-            val image = uiLogic.getDoneSeverity().getImage()?.let {
-                UIImageView(getIosSystemImage(it, UIImageSymbolScale.Large)).apply {
+    private inner class StateDoneContainer : CardView() {
+        private var descLabel: Body1Label? = null
+        private var image: UIImageView? = null
+        private var dismissButton: PrimaryButton? = null
+        private var dismissShouldRetry = false
+
+        fun showDoneInfo() {
+            if (contentView.subviews.isEmpty()) {
+                val image = UIImageView().apply {
                     contentMode = UIViewContentMode.ScaleAspectFit
                     tintColor = uiColorErgo
                     fixedHeight(100.0)
                 }
+
+                val descLabel = Body1Label()
+                descLabel.textAlignment = NSTextAlignment.Center
+
+                val dismissButton = PrimaryButton(texts.get(STRING_LABEL_DISMISS))
+                dismissButton.addOnTouchUpInsideListener { _, _ ->
+                    if (dismissShouldRetry) {
+                        startReloadFromDapp()
+                    } else {
+                        navigationController.popViewController(true)
+                    }
+                }
+                val doneButtonContainer = UIView()
+                doneButtonContainer.addSubview(dismissButton)
+                dismissButton.centerHorizontal().topToSuperview().bottomToSuperview().fixedWidth(150.0)
+
+                val txDoneStack = UIStackView().apply {
+                    axis = UILayoutConstraintAxis.Vertical
+                    spacing = DEFAULT_MARGIN * 3
+
+                    addArrangedSubview(image)
+                    addArrangedSubview(descLabel)
+                    addArrangedSubview(doneButtonContainer)
+                }
+
+                contentView.addSubview(txDoneStack)
+                txDoneStack.edgesToSuperview(inset = DEFAULT_MARGIN * 2)
+
+                this.descLabel = descLabel
+                this.dismissButton = dismissButton
+                this.image = image
             }
 
-            val descLabel = Body1Label()
-            descLabel.text = uiLogic.getDoneMessage(IosStringProvider(texts))
-            descLabel.textAlignment = NSTextAlignment.Center
-
-            val dismissButton = PrimaryButton(texts.get(STRING_LABEL_DISMISS))
-            dismissButton.addOnTouchUpInsideListener { _, _ -> navigationController.popViewController(true) }
-            val doneButtonContainer = UIView()
-            doneButtonContainer.addSubview(dismissButton)
-            dismissButton.centerHorizontal().topToSuperview().bottomToSuperview().fixedWidth(150.0)
-
-            val txDoneStack = UIStackView().apply {
-                axis = UILayoutConstraintAxis.Vertical
-                spacing = DEFAULT_MARGIN * 3
-
-                image?.let { addArrangedSubview(image) }
-                addArrangedSubview(descLabel)
-                addArrangedSubview(doneButtonContainer)
+            dismissShouldRetry = uiLogic.getDoneSeverity() == MessageSeverity.ERROR && uiLogic.canReloadFromDapp()
+            val imageToShow = uiLogic.getDoneSeverity().getImage()
+            image?.isHidden = imageToShow == null
+            imageToShow?.let {
+                image?.image = getIosSystemImage(it, UIImageSymbolScale.Large)
             }
-
-            stateDoneContainer.contentView.addSubview(txDoneStack)
-            txDoneStack.edgesToSuperview(inset = DEFAULT_MARGIN * 2)
+            descLabel?.text = uiLogic.getDoneMessage(IosStringProvider(texts))
+            dismissButton?.setTitle(
+                texts.get(if (dismissShouldRetry) STRING_BUTTON_RETRY else STRING_LABEL_DISMISS),
+                UIControlState.Normal
+            )
         }
     }
 
