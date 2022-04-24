@@ -29,6 +29,11 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         private set
     var lastRequest: String? = null
         private set
+    var state = State.FETCH_DATA
+        private set(value) {
+            field = value
+            notifyStateChanged(state)
+        }
 
     fun init(
         request: String,
@@ -43,7 +48,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
             return
         isInitialized = true
 
-        notifyStateChanged(State.FETCH_DATA)
+        state = State.FETCH_DATA
 
         coroutineScope.launch {
             if (walletId >= 0) {
@@ -85,6 +90,20 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         }
     }
 
+    fun canReloadFromDapp() = (state == State.WAIT_FOR_CONFIRMATION || state == State.DONE) &&
+            lastRequest != null && !isErgoPayStaticRequest(lastRequest!!)
+
+    fun reloadFromDapp(
+        prefs: PreferencesProvider,
+        texts: StringProvider,
+        database: WalletDbProvider
+    ) {
+        if (!canReloadFromDapp())
+            return
+
+        fetchErgoPaySigningRequest(lastRequest!!, prefs, texts, database)
+    }
+
     /**
      * called when wallet id is set in state WAIT_FOR_ADDRESS
      * @return true if a derived address is needed
@@ -105,7 +124,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
             else if (derivedAddress != null) {
                 derivedAddressIdChanged(prefs, texts, database)
             } else {
-                notifyStateChanged(State.WAIT_FOR_ADDRESS)
+                state = State.WAIT_FOR_ADDRESS
             }
         }
     }
@@ -125,7 +144,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         }
     }
 
-    fun fetchErgoPaySigningRequest(
+    private fun fetchErgoPaySigningRequest(
         request: String,
         prefs: PreferencesProvider,
         texts: StringProvider,
@@ -133,16 +152,18 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     ) {
         // reset if we already have a request
         txId = null
+        epsr = null
+        transactionInfo = null
         resetLastMessage()
         lastRequest = request
 
         if (wallet == null && isErgoPayDynamicWithAddressRequest(request)) {
-            notifyStateChanged(State.WAIT_FOR_WALLET)
+            state = State.WAIT_FOR_WALLET
         } else if (derivedAddress == null && isErgoPayDynamicWithAddressRequest(request)) {
             // if we have a address request but no address set, ask user to choose an address
-            notifyStateChanged(State.WAIT_FOR_ADDRESS)
+            state = State.WAIT_FOR_ADDRESS
         } else {
-            notifyStateChanged(State.FETCH_DATA)
+            state = State.FETCH_DATA
             coroutineScope.launch(Dispatchers.IO) {
                 try {
                     epsr = getErgoPaySigningRequest(request, derivedAddress?.publicAddress)
@@ -150,11 +171,10 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
 
                     transitionToNextStep(texts, database)
                 } catch (t: Throwable) {
-                    // TODO Ergo Pay show a Repeat button for user convenience when it is an IOException
                     LogUtils.logDebug("ErgoPay", "Error getting signing request", t)
                     lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, t.getMessageOrName())
                     lastMessageSeverity = MessageSeverity.ERROR
-                    notifyStateChanged(State.DONE)
+                    state = State.DONE
                 }
             }
         }
@@ -170,7 +190,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                 lastMessageSeverity = epsr?.messageSeverity ?: MessageSeverity.NONE
             }
 
-            notifyStateChanged(State.DONE)
+            state = State.DONE
         } else {
             epsr?.p2pkAddress?.let { p2pkAddress ->
                 // dApp sent info regarding address to use, lets see if we have this address
@@ -207,9 +227,9 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
             }
 
             if (wallet != null)
-                notifyStateChanged(State.WAIT_FOR_CONFIRMATION)
+                state = State.WAIT_FOR_CONFIRMATION
             else
-                notifyStateChanged(State.WAIT_FOR_WALLET)
+                state = State.WAIT_FOR_WALLET
         }
     }
 
@@ -284,7 +304,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
 
     override fun notifyHasTxId(txId: String) {
         this.txId = txId
-        notifyStateChanged(State.DONE)
+        state = State.DONE
         sendReplyToDapp(txId)
     }
 

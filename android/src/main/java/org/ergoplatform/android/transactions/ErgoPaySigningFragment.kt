@@ -1,9 +1,7 @@
 package org.ergoplatform.android.transactions
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.activity.addCallback
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -33,6 +31,11 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
 
     override val viewModel: ErgoPaySigningViewModel
         get() = ViewModelProvider(this).get(ErgoPaySigningViewModel::class.java)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -108,6 +111,9 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
                 findNavController().popBackStack()
             }
         }
+        binding.buttonRetry.setOnClickListener {
+            startReloadFromDapp()
+        }
         binding.buttonChooseAddress.setOnClickListener {
             showAddressOrWalletChooser()
         }
@@ -118,6 +124,35 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
             }
         }
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_ergopay, menu)
+    }
+
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        menu.findItem(R.id.menu_reload).isEnabled = viewModel.uiLogic.canReloadFromDapp()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_reload) {
+            startReloadFromDapp()
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun startReloadFromDapp() {
+        val context = requireContext()
+        viewModel.uiLogic.reloadFromDapp(
+            Preferences(context),
+            AndroidStringProvider(context),
+            AppDatabase.getInstance(context).walletDbProvider
+        )
     }
 
     private fun showAddressOrWalletChooser() {
@@ -170,6 +205,9 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
             uiLogic.getDoneSeverity().getSeverityDrawableResId(),
             0, 0
         )
+        val shouldReload = (uiLogic.getDoneSeverity() == MessageSeverity.ERROR && uiLogic.canReloadFromDapp())
+        binding.buttonDismiss.visibility = if (!shouldReload) View.VISIBLE else View.GONE
+        binding.buttonRetry.visibility = if (shouldReload) View.VISIBLE else View.GONE
     }
 
     private fun showTransactionInfo() {

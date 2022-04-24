@@ -24,6 +24,8 @@
     <string name="label_open">Open</string>
     <string name="button_delete">Delete</string>
     <string name="button_yes">Yes</string>
+    <string name="button_reload">Reload</string>
+    <string name="button_retry">Retry</string>
     <string name="label_cancel">Cancel</string>
     <string name="label_none">None</string>
     <string name="label_details">Details</string>

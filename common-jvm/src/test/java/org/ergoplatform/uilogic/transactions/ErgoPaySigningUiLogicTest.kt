@@ -174,7 +174,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 assertNull(epsr)
                 assertNull(transactionInfo)
                 derivedAddressIdx = 0
-                fetchErgoPaySigningRequest(lastRequest!!, TestPreferencesProvider(), TestStringProvider(), db)
+                derivedAddressIdChanged(TestPreferencesProvider(), TestStringProvider(), db)
                 assertEquals(ErgoPaySigningUiLogic.State.FETCH_DATA, state)
                 waitWhileFetching(this)
                 assertEquals(ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION, state)
@@ -282,7 +282,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 delay(100) // give some time to make the "db" access
                 assertEquals(ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS, state)
                 derivedAddressIdx = 0
-                fetchErgoPaySigningRequest(lastRequest!!, TestPreferencesProvider(), TestStringProvider(), db)
+                derivedAddressIdChanged(TestPreferencesProvider(), TestStringProvider(), db)
                 assertEquals(ErgoPaySigningUiLogic.State.FETCH_DATA, state)
                 waitWhileFetching(this)
                 assertEquals(ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION, state)
@@ -328,16 +328,13 @@ class ErgoPaySigningUiLogicTest : TestCase() {
     }
 
     class TestErgoPaySigningUiLogic(val db: WalletDbProvider) : ErgoPaySigningUiLogic() {
-        var state: State? = null
-            private set
-
         var ergoApiFailure = false
 
         override val coroutineScope: CoroutineScope
             get() = CoroutineScope(EmptyCoroutineContext)
 
         override fun notifyStateChanged(newState: State) {
-            state = newState
+
         }
 
         override fun notifyWalletStateLoaded() {
