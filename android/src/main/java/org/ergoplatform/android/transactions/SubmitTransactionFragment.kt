@@ -25,34 +25,35 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
         super.onViewCreated(view, savedInstanceState)
 
         val viewModel = this.viewModel
-        viewModel.lockInterface.observe(viewLifecycleOwner, {
-            if (it)
+        viewModel.lockInterface.observe(viewLifecycleOwner) { locked ->
+            if (locked)
                 ProgressBottomSheetDialogFragment.showProgressDialog(childFragmentManager)
             else
                 ProgressBottomSheetDialogFragment.dismissProgressDialog(childFragmentManager)
-        })
-        viewModel.txWorkDoneLiveData.observe(viewLifecycleOwner, {
-            if (!it.success) {
-                val snackbar = Snackbar.make(
-                    requireView(),
-                    if (it is PromptSigningResult)
-                        R.string.error_prepare_transaction
-                    else R.string.error_send_transaction,
-                    Snackbar.LENGTH_LONG
-                )
-                it.errorMsg?.let { errorMsg ->
-                    snackbar.setAction(
-                        R.string.label_details
-                    ) {
-                        showDialogWithCopyOption(requireContext(), errorMsg)
-                    }
+        }
+        viewModel.txWorkDoneLiveData.observe(viewLifecycleOwner) { result ->
+            if (!result.success) {
+                val errorMsgPrefix = if (result is PromptSigningResult)
+                    R.string.error_prepare_transaction
+                else R.string.error_send_transaction
+
+                if (result.errorMsg != null) {
+                    showDialogWithCopyOption(
+                        requireContext(),
+                        getString(errorMsgPrefix) + "\n\n" + result.errorMsg
+                    )
+                } else {
+                    Snackbar.make(
+                        requireView(),
+                        errorMsgPrefix,
+                        Snackbar.LENGTH_LONG
+                    ).setAnchorView(R.id.nav_view).show()
                 }
-                snackbar.setAnchorView(R.id.nav_view).show()
-            } else if (it is PromptSigningResult) {
+            } else if (result is PromptSigningResult) {
                 // if this is a prompt signing result, switch to prompt signing dialog
                 SigningPromptDialogFragment().show(childFragmentManager, null)
             }
-        })
+        }
 
     }
 
