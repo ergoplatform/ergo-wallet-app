@@ -228,8 +228,10 @@
     <string name="label_fetching_data">Requesting data from dApp…</string>
     <string name="label_message_from_dapp">Message from dApp:\n%1$s</string>
     <string name="label_error_occured">An error occurred:\n%1$s</string>
-    <string name="label_ergo_pay_wrong_address">Signing Request received for address %1$s, which does not belong to this wallet.</string>
+    <string name="label_ergo_pay_wrong_address">Signing Request received for address %1$s, which does not belong to the current selection.</string>
     <string name="label_ergo_pay_choose_address">Please choose an address to process the Ergo Pay Request.</string>
+    <string name="label_ergo_pay_choose_wallet">Please choose a wallet to process the Ergo Pay Request.</string>
+    <string name="title_choose_wallet">Choose a wallet</string>
     <string name="error_prover_cant_sign">The transaction could not be signed with this wallet\'s keys.</string>
 
     <!-- Ergo Auth Signing -->

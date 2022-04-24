@@ -4,10 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -16,12 +16,16 @@ import org.ergoplatform.android.databinding.FragmentErgoPaySigningBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.getSeverityDrawableResId
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
+import org.ergoplatform.android.wallet.WalletChooserCallback
+import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
 
-class ErgoPaySigningFragment : SubmitTransactionFragment() {
+class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallback {
     private var _binding: FragmentErgoPaySigningBinding? = null
     private val binding get() = _binding!!
 
@@ -61,11 +65,18 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
             binding.layoutDoneInfo.visibility =
                 visibleWhen(state, ErgoPaySigningUiLogic.State.DONE)
             binding.layoutChooseAddress.visibility =
-                visibleWhen(state, ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS)
+                if (state == ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS ||
+                    state == ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET
+                ) View.VISIBLE else View.GONE
 
             when (state) {
                 ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> {
-                    // nothing to do
+                    binding.labelChooseWalletOrAddress.setText(R.string.label_ergo_pay_choose_address)
+                    binding.buttonChooseAddress.setText(R.string.title_choose_address)
+                }
+                ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET -> {
+                    binding.labelChooseWalletOrAddress.setText(R.string.label_ergo_pay_choose_wallet)
+                    binding.buttonChooseAddress.setText(R.string.title_choose_wallet)
                 }
                 ErgoPaySigningUiLogic.State.FETCH_DATA -> showFetchData()
                 ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION -> showTransactionInfo()
@@ -91,25 +102,53 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
             startAuthFlow()
         }
         binding.buttonDismiss.setOnClickListener {
-            findNavController().popBackStack()
+            if (args.closeApp) {
+                requireActivity().finish()
+            } else {
+                findNavController().popBackStack()
+            }
         }
         binding.buttonChooseAddress.setOnClickListener {
-            showChooseAddressList(false)
+            showAddressOrWalletChooser()
         }
+
+        if (args.closeApp) {
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+                requireActivity().finish()
+            }
+        }
+
+    }
+
+    private fun showAddressOrWalletChooser() {
+        val uiLogic = viewModel.uiLogic
+        if (uiLogic.wallet != null) {
+            showChooseAddressList(false)
+        } else {
+            ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
+        }
+    }
+
+    override fun onWalletChosen(walletConfig: WalletConfig) {
+        val context = requireContext()
+        viewModel.uiLogic.setWalletId(
+            walletConfig.id,
+            Preferences(context),
+            AndroidStringProvider(context),
+            AppDatabase.getInstance(context).walletDbProvider
+        )
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
         super.onAddressChosen(addressDerivationIdx)
-        // redo the request - can't be done within uilogic because the context is needed
         val uiLogic = viewModel.uiLogic
-        uiLogic.lastRequest?.let {
-            val context = requireContext()
-            uiLogic.hasNewRequest(
-                it,
-                Preferences(context),
-                AndroidStringProvider(context)
-            )
-        }
+        // retry the request - can't be called within uiLogic because the context is needed
+        val context = requireContext()
+        uiLogic.derivedAddressIdChanged(
+            Preferences(context),
+            AndroidStringProvider(context),
+            AppDatabase.getInstance(context).walletDbProvider,
+        )
     }
 
     private fun visibleWhen(

@@ -3,7 +3,9 @@ package org.ergoplatform.ios.transactions
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.wallet.ChooseWalletViewController
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
+import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
@@ -16,13 +18,13 @@ import org.robovm.apple.uikit.*
 
 class ErgoPaySigningViewController(
     private val request: String,
-    private val walletId: Int,
+    private val walletId: Int = -1,
     private val derivationIndex: Int = -1
 ) : SubmitTransactionViewController() {
 
     override val uiLogic = IosErgoPaySigningUiLogic()
 
-    private val addressChooserContainer = CardView()
+    private val addressChooserContainer = AddressChooserContainer()
     private lateinit var fetchingContainer: FetchDataContainer
     private lateinit var transactionContainer: TransactionWithHeaderContainer
     private val stateDoneContainer = CardView()
@@ -75,29 +77,40 @@ class ErgoPaySigningViewController(
         )
     }
 
+    private fun onWalletChosen(wallet: WalletConfig) {
+        val appDelegate = getAppDelegate()
+        uiLogic.setWalletId(
+            wallet.id,
+            appDelegate.prefs,
+            IosStringProvider(appDelegate.texts),
+            appDelegate.database.walletDbProvider
+        )
+    }
+
     override fun onAddressChosen(it: Int?) {
         super.onAddressChosen(it)
         // redo the request - can't be done within uilogic because context is needed on Android
-        uiLogic.lastRequest?.let {
-            val appDelegate = getAppDelegate()
-            uiLogic.hasNewRequest(
-                it,
-                appDelegate.prefs,
-                IosStringProvider(appDelegate.texts)
-            )
-        }
-
+        val appDelegate = getAppDelegate()
+        uiLogic.derivedAddressIdChanged(
+            appDelegate.prefs,
+            IosStringProvider(appDelegate.texts),
+            appDelegate.database.walletDbProvider
+        )
     }
 
     private fun refreshUserInterface(state: ErgoPaySigningUiLogic.State) {
-        addressChooserContainer.isHidden = state != ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS
+        addressChooserContainer.isHidden = state != ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS &&
+                state != ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET
         fetchingContainer.isHidden = state != ErgoPaySigningUiLogic.State.FETCH_DATA
         transactionContainer.isHidden = state != ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION
         stateDoneContainer.isHidden = state != ErgoPaySigningUiLogic.State.DONE
 
         when (state) {
             ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> {
-                populateWaitForAddressView()
+                addressChooserContainer.populateWaitForAddressView(state)
+            }
+            ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET -> {
+                addressChooserContainer.populateWaitForAddressView(state)
             }
             ErgoPaySigningUiLogic.State.FETCH_DATA -> {
                 // nothing to do
@@ -107,39 +120,67 @@ class ErgoPaySigningViewController(
         }
     }
 
-    private fun populateWaitForAddressView() {
-        if (addressChooserContainer.contentView.subviews.isEmpty()) {
-            val image = UIImageView(ergoLogoImage.imageWithTintColor(UIColor.label())).apply {
-                fixedHeight(100.0)
-                contentMode = UIViewContentMode.ScaleAspectFit
-            }
+    inner class AddressChooserContainer: CardView() {
+        private var label: Body1Label? = null
+        private var button: PrimaryButton? = null
 
-            val label = Body1Label().apply {
-                text = texts.get(STRING_LABEL_ERGO_PAY_CHOOSE_ADDRESS)
-                textAlignment = NSTextAlignment.Center
-            }
-
-            val button = PrimaryButton(texts.get(STRING_TITLE_CHOOSE_ADDRESS)).apply {
-                addOnTouchUpInsideListener { _, _ ->
-                    presentViewController(
-                        ChooseAddressListDialogViewController(walletId, false) {
-                            onAddressChosen(it)
-                        }, true
-                    ) {}
+        fun populateWaitForAddressView(state: ErgoPaySigningUiLogic.State) {
+            if (contentView.subviews.isEmpty()) {
+                val image = UIImageView(ergoLogoImage.imageWithTintColor(UIColor.label())).apply {
+                    fixedHeight(100.0)
+                    contentMode = UIViewContentMode.ScaleAspectFit
                 }
+
+                val label = Body1Label().apply {
+                    textAlignment = NSTextAlignment.Center
+                }
+
+                val button = PrimaryButton(texts.get(STRING_TITLE_CHOOSE_ADDRESS)).apply {
+                    addOnTouchUpInsideListener { _, _ ->
+                        showAddressOrWalletChooser()
+                    }
+                }
+
+                contentView.apply {
+                    addSubview(image)
+                    addSubview(label)
+                    addSubview(button)
+
+                    image.topToSuperview(topInset = DEFAULT_MARGIN * 2).centerHorizontal()
+                    label.topToBottomOf(image, DEFAULT_MARGIN * 3)
+                        .widthMatchesSuperview(inset = DEFAULT_MARGIN)
+                    button.topToBottomOf(label, DEFAULT_MARGIN * 2).centerHorizontal()
+                        .bottomToSuperview(bottomInset = DEFAULT_MARGIN * 2)
+                }
+
+                this.button = button
+                this.label = label
             }
 
-            addressChooserContainer.contentView.apply {
-                addSubview(image)
-                addSubview(label)
-                addSubview(button)
-
-                image.topToSuperview(topInset = DEFAULT_MARGIN * 2).centerHorizontal()
-                label.topToBottomOf(image, DEFAULT_MARGIN * 3).widthMatchesSuperview(inset = DEFAULT_MARGIN)
-                button.topToBottomOf(label, DEFAULT_MARGIN * 2).centerHorizontal()
-                    .bottomToSuperview(bottomInset = DEFAULT_MARGIN * 2)
+            when (state) {
+                ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET -> {
+                    label?.text = texts.get(STRING_LABEL_ERGO_PAY_CHOOSE_WALLET)
+                    button?.setTitle(texts.get(STRING_TITLE_CHOOSE_WALLET), UIControlState.Normal)
+                }
+                ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> {
+                    label?.text = texts.get(STRING_LABEL_ERGO_PAY_CHOOSE_ADDRESS)
+                    button?.setTitle(texts.get(STRING_TITLE_CHOOSE_ADDRESS), UIControlState.Normal)
+                }
+                else -> {}
             }
         }
+    }
+
+    private fun showAddressOrWalletChooser() {
+        presentViewController(
+            if (uiLogic.wallet != null) {
+                ChooseAddressListDialogViewController(walletId, false) {
+                    onAddressChosen(it)
+                }
+            } else {
+                ChooseWalletViewController { onWalletChosen(it) }
+            }, true
+        ) {}
     }
 
     private fun showDoneInfo() {

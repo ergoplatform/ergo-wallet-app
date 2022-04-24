@@ -13,11 +13,14 @@ object MainAppUiLogic {
         fromQrCode: Boolean,
         stringProvider: StringProvider,
         navigateToChooseWalletDialog: (String) -> Unit,
+        navigateToErgoPay: (String) -> Unit,
         navigateToAuthentication: (String) -> Unit,
         presentUserMessage: (String) -> Unit
     ) {
-        if (isPaymentRequestUrl(data) || isErgoPaySigningRequest(data)) {
+        if (isPaymentRequestUrl(data)) {
             navigateToChooseWalletDialog.invoke(data)
+        } else if (isErgoPaySigningRequest(data)) {
+            navigateToErgoPay(data)
         } else if (fromQrCode && (isColdSigningRequestChunk(data) || getColdSignedTxChunk(data) != null)) {
             // present a hint to the user to go to send funds
             presentUserMessage.invoke(stringProvider.getString(STRING_HINT_SIGNING_REQUEST))
