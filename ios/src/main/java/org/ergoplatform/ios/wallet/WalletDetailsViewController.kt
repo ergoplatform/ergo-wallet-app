@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.tokens.WalletDetailsTokenEntryView
 import org.ergoplatform.ios.transactions.*
@@ -198,33 +199,48 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                     isUserInteractionEnabled = true
                     addGestureRecognizer(UITapGestureRecognizer {
                         presentViewController(QrScannerViewController(false) {
-                            uiLogic.qrCodeScanned(it, IosStringProvider(texts), { data ->
-                                navigationController.pushViewController(
-                                    ColdWalletSigningViewController(
-                                        data,
-                                        walletId
-                                    ), true
-                                )
-                            }, { ergoPayRequest ->
-                                navigationController.pushViewController(
-                                    ErgoPaySigningViewController(
-                                        ergoPayRequest, walletId, uiLogic.addressIdx ?: -1
-                                    ), true
-                                )
-                            }, { requestData ->
-                                navigationController.pushViewController(
-                                    SendFundsViewController(walletId, uiLogic.addressIdx ?: -1, requestData),
-                                    true
-                                )
-                            }, { errorMessage ->
-                                presentViewController(
-                                    buildSimpleAlertController(
-                                        "",
-                                        errorMessage,
-                                        texts
-                                    ), true
-                                ) {}
-                            }
+                            uiLogic.qrCodeScanned(
+                                it,
+                                IosStringProvider(texts),
+                                navigateToColdWalletSigning = { data ->
+                                    navigationController.pushViewController(
+                                        ColdWalletSigningViewController(
+                                            data,
+                                            walletId
+                                        ), true
+                                    )
+                                },
+                                navigateToErgoPaySigning = { ergoPayRequest ->
+                                    navigationController.pushViewController(
+                                        ErgoPaySigningViewController(
+                                            ergoPayRequest, walletId, uiLogic.addressIdx ?: -1
+                                        ), true
+                                    )
+                                },
+                                navigateToSendFundsScreen = { requestData ->
+                                    navigationController.pushViewController(
+                                        SendFundsViewController(
+                                            walletId,
+                                            uiLogic.addressIdx ?: -1,
+                                            requestData
+                                        ),
+                                        true
+                                    )
+                                },
+                                navigateToAuthentication = { request ->
+                                    navigationController.pushViewController(
+                                        ErgoAuthenticationViewController(request, walletId), true
+                                    )
+                                },
+                                showErrorMessage = { errorMessage ->
+                                    presentViewController(
+                                        buildSimpleAlertController(
+                                            "",
+                                            errorMessage,
+                                            texts
+                                        ), true
+                                    ) {}
+                                }
                             )
                         }, true) {}
                     })

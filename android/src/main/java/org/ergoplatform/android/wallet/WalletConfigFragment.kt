@@ -12,6 +12,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentWalletConfigBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.getSerializedXpubKeyFromMnemonic
+import org.ergoplatform.persistance.WalletConfig
 
 /**
  * Shows settings and details for a wallet
@@ -86,14 +87,14 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
             viewModel.uiLogic.wallet?.let {
                 viewModel.mnemonicNeededFor =
                     WalletConfigViewModel.MnemonicNeededFor.DISPLAY_MNEMONIC
-                startAuthFlow(it)
+                startAuthFlow()
             }
         }
 
         binding.buttonDisplayXpubkey.setOnClickListener {
             viewModel.uiLogic.wallet?.secretStorage?.let {
                 viewModel.mnemonicNeededFor = WalletConfigViewModel.MnemonicNeededFor.SHOW_XPUB
-                startAuthFlow(viewModel.uiLogic.wallet!!)
+                startAuthFlow()
             } ?: viewModel.uiLogic.wallet?.extendedPublicKey?.let {
                 displayXpubKey(it)
             }
@@ -133,24 +134,14 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
         findNavController().navigateUp()
     }
 
-    override fun proceedAuthFlowWithPassword(password: String): Boolean {
-        val mnemonic = viewModel.decryptMnemonicWithPass(password)
-        if (mnemonic == null) {
-            return false
-        } else if (viewModel.mnemonicNeededFor == WalletConfigViewModel.MnemonicNeededFor.DISPLAY_MNEMONIC) {
-            displayMnemonic(mnemonic)
-        } else {
-            displayXpubKeyFromMnemonic(mnemonic)
-        }
-        return true
-    }
+    override val authenticationWalletConfig: WalletConfig?
+        get() = viewModel.uiLogic.wallet
 
-    override fun proceedAuthFlowFromBiometrics() {
-        val mnemonic = viewModel.decryptMnemonicWithUserAuth()!!
+    override fun proceedFromAuthFlow(secrets: SigningSecrets) {
         if (viewModel.mnemonicNeededFor == WalletConfigViewModel.MnemonicNeededFor.DISPLAY_MNEMONIC) {
-            displayMnemonic(mnemonic)
+            displayMnemonic(secrets)
         } else {
-            displayXpubKeyFromMnemonic(mnemonic)
+            displayXpubKeyFromMnemonic(secrets)
         }
     }
 

@@ -313,7 +313,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
         }
 
         if (checkResponse.canPay) {
-            startAuthFlow(viewModel.uiLogic.wallet!!.walletConfig)
+            startAuthFlow()
         }
     }
 

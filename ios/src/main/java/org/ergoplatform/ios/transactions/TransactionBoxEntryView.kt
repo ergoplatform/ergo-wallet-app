@@ -10,7 +10,7 @@ import org.ergoplatform.uilogic.STRING_LABEL_ERG_AMOUNT
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
-class TransactionBoxEntryView : UIView(CGRect.Zero()) {
+class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.Zero()) {
     private val labelBoxAddress = Body1BoldLabel().apply {
         numberOfLines = 1
         textColor = uiColorErgo
@@ -18,6 +18,9 @@ class TransactionBoxEntryView : UIView(CGRect.Zero()) {
         isUserInteractionEnabled = true
         addGestureRecognizer(UITapGestureRecognizer {
             numberOfLines = if (numberOfLines == 1L) 10 else 1
+        })
+        addGestureRecognizer(UILongPressGestureRecognizer {
+            vc.shareText(text, this)
         })
     }
     private val labelErgAmount = Body1BoldLabel().apply {

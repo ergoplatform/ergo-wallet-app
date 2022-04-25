@@ -24,6 +24,8 @@
     <string name="label_open">Open</string>
     <string name="button_delete">Delete</string>
     <string name="button_yes">Yes</string>
+    <string name="button_reload">Reload</string>
+    <string name="button_retry">Retry</string>
     <string name="label_cancel">Cancel</string>
     <string name="label_none">None</string>
     <string name="label_details">Details</string>
@@ -41,6 +43,7 @@
         clipboard, every app running on this device can access it as long as you do not overwrite
         the clipboard data. You do this at your own risk.</string>
     <string name="button_copy_sensitive_data">Copy and accept risks</string>
+    <string name="error_no_wallet">No wallet added to this app yet.</string>
 
     <!-- Wallet -->
     <string name="label_tokens">tokens</string>
@@ -227,9 +230,17 @@
     <string name="label_fetching_data">Requesting data from dApp…</string>
     <string name="label_message_from_dapp">Message from dApp:\n%1$s</string>
     <string name="label_error_occured">An error occurred:\n%1$s</string>
-    <string name="label_ergo_pay_wrong_address">Signing Request received for address %1$s, which does not belong to this wallet.</string>
+    <string name="label_ergo_pay_wrong_address">Signing Request received for address %1$s, which does not belong to the current selection.</string>
     <string name="label_ergo_pay_choose_address">Please choose an address to process the Ergo Pay Request.</string>
+    <string name="label_ergo_pay_choose_wallet">Please choose a wallet to process the Ergo Pay Request.</string>
+    <string name="title_choose_wallet">Choose a wallet</string>
     <string name="error_prover_cant_sign">The transaction could not be signed with this wallet\'s keys.</string>
+
+    <!-- Ergo Auth Signing -->
+    <string name="title_ergo_auth_request">Authentication Request</string>
+    <string name="button_authenticate">Authenticate</string>
+    <string name="desc_authentication_wallet">Wallet used for authentication:</string>
+    <string name="desc_auth_response_send">Authentication was sent to dApp successfully.</string>
 
     <!-- Token information dialog -->
     <string name="label_minting_tx">Minting transaction</string>

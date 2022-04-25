@@ -179,7 +179,6 @@
     <string name="label_fetching_data">A pedir dados da dApp…</string>
     <string name="label_message_from_dapp">Mensagem da dApp:\n%1$s</string>
     <string name="label_error_occured">Ocorreu um erro:\n%1$s</string>
-    <string name="label_ergo_pay_wrong_address">Pedido de assinatura recebido para o endereço %1$s, que não pertence a esta carteira.</string>
     <string name="label_ergo_pay_choose_address">Por favor escolha um endereço para avançar no pedido Ergo Pay.</string>
     <string name="error_prover_cant_sign">A transacção não pode ser assinada com as chaves desta carteira.</string>
 

@@ -39,6 +39,7 @@
                 <array>
                     <string>ergo</string>
                     <string>ergopay</string>
+                    <string>ergoauth</string>
                 </array>
             </dict>
         </array>

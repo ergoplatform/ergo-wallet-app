@@ -144,7 +144,7 @@ class AddressTransactionsViewController(
     private fun resetShownData() {
         nextPageToLoad = 0
         finishedLoading = false
-        shownData.clear()
+        synchronized(shownData) { shownData.clear() }
     }
 
     private fun fetchNextChunkFromDb() {
@@ -206,20 +206,22 @@ class AddressTransactionsViewController(
         }
 
         override fun getCellForRow(p0: UITableView, p1: NSIndexPath): UITableViewCell {
-            if (shownData.isEmpty()) {
-                return p0.dequeueReusableCell(emptyCellId)
-            } else {
-                val cell = p0.dequeueReusableCell(transactionCellId)
-                val itemIndex = p1.row
-                val isLastItem = itemIndex == shownData.size - 1
-                (cell as? AddressTransactionCell)?.bind(
-                    shownData[itemIndex], this@AddressTransactionsViewController,
-                    isLastItem && finishedLoading
-                )
-                if (isLastItem) {
-                    fetchNextChunkFromDb()
+            synchronized(shownData) {
+                if (shownData.isEmpty()) {
+                    return p0.dequeueReusableCell(emptyCellId)
+                } else {
+                    val cell = p0.dequeueReusableCell(transactionCellId)
+                    val itemIndex = p1.row
+                    val isLastItem = itemIndex == shownData.size - 1
+                    (cell as? AddressTransactionCell)?.bind(
+                        shownData[itemIndex], this@AddressTransactionsViewController,
+                        isLastItem && finishedLoading
+                    )
+                    if (isLastItem) {
+                        fetchNextChunkFromDb()
+                    }
+                    return cell
                 }
-                return cell
             }
         }
 
