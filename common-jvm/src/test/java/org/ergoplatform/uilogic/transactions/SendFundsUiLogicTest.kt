@@ -5,6 +5,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.ErgoAmount
+import org.ergoplatform.TestPreferencesProvider
 import org.ergoplatform.appkit.Parameters
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.TestUiWallet
@@ -19,8 +20,9 @@ class SendFundsUiLogicTest {
     fun checkCanMakePayment() {
         runBlocking {
             val uiLogic = buildUiLogicWithWallet()
+            val preferences = TestPreferencesProvider()
 
-            var checkResponse = uiLogic.checkCanMakePayment()
+            var checkResponse = uiLogic.checkCanMakePayment(preferences)
             assertFalse(checkResponse.canPay)
             assertTrue(checkResponse.receiverError)
             assertTrue(checkResponse.amountError)
@@ -29,13 +31,13 @@ class SendFundsUiLogicTest {
             uiLogic.newTokenChosen(TestUiWallet.token.tokenId!!)
 
             // when a token is chosen there's no amount error any more
-            checkResponse = uiLogic.checkCanMakePayment()
+            checkResponse = uiLogic.checkCanMakePayment(preferences)
             assertFalse(checkResponse.amountError)
             assertTrue(checkResponse.tokenError)
 
             // only if we've set an amount that is not possible
             uiLogic.amountToSend = ErgoAmount(Parameters.MinChangeValue - 1)
-            checkResponse = uiLogic.checkCanMakePayment()
+            checkResponse = uiLogic.checkCanMakePayment(preferences)
             assertTrue(checkResponse.amountError)
         }
     }

@@ -36,6 +36,7 @@ class SendFundsViewController(
     private lateinit var addTokenButton: UIButton
 
     private lateinit var inputReceiver: UITextField
+    private lateinit var inputMessage: UITextField
     private lateinit var inputErgoAmount: UITextField
 
     private var txDoneView: UIView? = null
@@ -67,10 +68,14 @@ class SendFundsViewController(
                             ergoPayRequest, walletId, uiLogic.derivedAddressIdx ?: -1
                         ), true
                     )
-                }, { address, amount ->
+                }, { address, amount, message ->
                     inputReceiver.text = address
                     inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
                     amount?.let { setInputAmount(amount) }
+                    message?.let {
+                        inputMessage.text = message
+                        inputMessage.sendControlEventsActions(UIControlEvents.EditingChanged)
+                    }
                 })
             }, true) {}
         }
@@ -101,7 +106,7 @@ class SendFundsViewController(
             returnKeyType = UIReturnKeyType.Next
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
-                    inputErgoAmount.becomeFirstResponder()
+                    inputMessage.becomeFirstResponder()
                     return true
                 }
             }
@@ -111,6 +116,22 @@ class SendFundsViewController(
                 uiLogic.receiverAddress = text
             }
         }
+
+        inputMessage = createTextField().apply {
+            placeholder = texts.get(STRING_LABEL_PURPOSE)
+            delegate = object : UITextFieldDelegateAdapter() {
+                override fun shouldReturn(textField: UITextField?): Boolean {
+                    inputErgoAmount.becomeFirstResponder()
+                    return true
+                }
+            }
+            addOnEditingChangedListener {
+                hasMessageError = false
+                uiLogic.message = text
+            }
+        }
+        addMessageInfoActionToTextField()
+
         inputErgoAmount = createTextField().apply {
             placeholder = texts.get(STRING_LABEL_AMOUNT)
             keyboardType = UIKeyboardType.NumbersAndPunctuation
@@ -199,6 +220,7 @@ class SendFundsViewController(
                 readOnlyHint,
                 introLabel,
                 inputReceiver,
+                inputMessage,
                 inputErgoAmount,
                 fiatLabel,
                 feeLabel,
@@ -236,6 +258,18 @@ class SendFundsViewController(
                 }
             }
         }
+    private var hasMessageError = false
+        set(hasError) {
+            if (field != hasError) {
+                field = hasError
+                inputMessage.setHasError(hasError)
+
+                // restore the info action button when error state is reset
+                if (!hasError) {
+                    addMessageInfoActionToTextField()
+                }
+            }
+        }
 
     private fun addMaxAmountActionToTextField() {
         inputErgoAmount.setCustomActionField(
@@ -244,6 +278,36 @@ class SendFundsViewController(
                 UIImageSymbolScale.Small
             )!!
         ) { setInputAmount(uiLogic.getMaxPossibleAmountToSend()) }
+    }
+
+    private fun addMessageInfoActionToTextField() {
+        inputMessage.setCustomActionField(
+            getIosSystemImage(
+                IMAGE_INFORMATION,
+                UIImageSymbolScale.Small
+            )!!
+        ) { showPurposeMessageInfoDialog() }
+    }
+
+    private fun showPurposeMessageInfoDialog(startPayment: Boolean = false) {
+        val uac = UIAlertController("", texts.get(STRING_INFO_PURPOSE_MESSAGE), UIAlertControllerStyle.Alert)
+        val prefs = getAppDelegate().prefs
+        uac.addAction(
+            UIAlertAction(
+                texts.get(STRING_INFO_PURPOSE_MESSAGE_ACCEPT),
+                UIAlertActionStyle.Default
+            ) {
+                prefs.sendTxMessages = true
+                if (startPayment) checkAndStartPayment()
+            })
+        uac.addAction(
+            UIAlertAction(
+                texts.get(STRING_INFO_PURPOSE_MESSAGE_DECLINE),
+                UIAlertActionStyle.Default
+            ) {
+                prefs.sendTxMessages = false
+            })
+        presentViewController(uac, true) {}
     }
 
     private fun setInputAmount(amountToSend: ErgoAmount) {
@@ -263,14 +327,16 @@ class SendFundsViewController(
         )
 
         inputReceiver.text = uiLogic.receiverAddress
+        inputMessage.text = uiLogic.message
         if (uiLogic.amountToSend.nanoErgs > 0) setInputAmount(uiLogic.amountToSend)
     }
 
     private fun checkAndStartPayment() {
-        val checkResponse = uiLogic.checkCanMakePayment()
+        val checkResponse = uiLogic.checkCanMakePayment(getAppDelegate().prefs)
 
         inputReceiver.setHasError(checkResponse.receiverError)
         hasAmountError = checkResponse.amountError
+        hasMessageError = checkResponse.messageError
         if (checkResponse.receiverError) {
             inputReceiver.becomeFirstResponder()
         } else if (checkResponse.amountError) {
@@ -279,6 +345,9 @@ class SendFundsViewController(
         if (checkResponse.tokenError) {
             tokensError.setHiddenAnimated(false)
             setFocusToEmptyTokenAmountInput()
+        }
+        if (checkResponse.messageError) {
+            showPurposeMessageInfoDialog(true)
         }
 
         if (checkResponse.canPay) {

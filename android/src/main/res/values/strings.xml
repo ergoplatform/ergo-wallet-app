@@ -178,6 +178,12 @@
     <string name="label_scan_qr">Scan QR code</string>
     <string name="desc_fee">Fee: %1$s ERG</string>
     <string name="desc_fee_execution_time">(≈%1$sm)</string>
+    <string name="info_purpose_message">Please be aware that the purpose message entered is attached
+        to the outgoing transaction and is public on the blockchain.\nDo
+        not enter confidential or private information.</string>
+    <string name="info_purpose_message_accept">Accept</string>
+    <string name="info_purpose_message_decline">Decline</string>
+    <string name="error_purpose_message">Accept the terms before sending the transaction.</string>
     <string name="error_receiver_address">Please enter a valid ERG address</string>
     <string name="error_amount">Please enter a valid amount</string>
     <string name="error_send_transaction">Could not send transaction</string>

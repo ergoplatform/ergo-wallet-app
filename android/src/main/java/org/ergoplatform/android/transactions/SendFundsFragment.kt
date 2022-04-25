@@ -17,6 +17,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.*
+import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
@@ -89,7 +90,8 @@ class SendFundsFragment : SubmitTransactionFragment() {
             )
         })
         viewModel.grossAmount.observe(viewLifecycleOwner) { grossAmount ->
-            binding.tvFee.text = viewModel.uiLogic.getFeeDescriptionLabel(AndroidStringProvider(requireContext()))
+            binding.tvFee.text =
+                viewModel.uiLogic.getFeeDescriptionLabel(AndroidStringProvider(requireContext()))
             binding.grossAmount.setAmount(grossAmount.toBigDecimal())
             val nodeConnector = WalletStateSyncManager.getInstance()
             binding.tvFiat.visibility =
@@ -147,6 +149,9 @@ class SendFundsFragment : SubmitTransactionFragment() {
         binding.amount.setEndIconOnClickListener {
             setAmountEdittext(viewModel.uiLogic.getMaxPossibleAmountToSend())
         }
+        binding.tiMessage.setEndIconOnClickListener {
+            showPurposeMessageInformation()
+        }
         binding.hintReadonly.setOnClickListener {
             openUrlWithBrowser(requireContext(), URL_COLD_WALLET_HELP)
         }
@@ -156,12 +161,14 @@ class SendFundsFragment : SubmitTransactionFragment() {
 
         // Init other stuff
         binding.tvReceiver.editText?.setText(viewModel.uiLogic.receiverAddress)
+        binding.tiMessage.editText?.setText(viewModel.uiLogic.message)
         if (viewModel.uiLogic.amountToSend.nanoErgs > 0) {
             setAmountEdittext(viewModel.uiLogic.amountToSend)
         }
 
         binding.amount.editText?.addTextChangedListener(MyTextWatcher(binding.amount))
         binding.tvReceiver.editText?.addTextChangedListener(MyTextWatcher(binding.tvReceiver))
+        binding.tiMessage.editText?.addTextChangedListener(MyTextWatcher(binding.tiMessage))
 
         // this triggers an automatic scroll so the amount field is visible when soft keyboard is
         // opened or when amount edittext gets focus
@@ -231,7 +238,8 @@ class SendFundsFragment : SubmitTransactionFragment() {
 
                     val amountChosen = it.value.value
                     val tokenPrice = walletStateSyncManager.tokenPrices[tokenDbEntity.tokenId!!]
-                    val isSingular = tokenDbEntity.isSingularToken() && amountChosen == 1L && tokenPrice == null
+                    val isSingular =
+                        tokenDbEntity.isSingularToken() && amountChosen == 1L && tokenPrice == null
 
                     if (isSingular) {
                         itemBinding.inputTokenAmount.visibility = View.GONE
@@ -297,11 +305,17 @@ class SendFundsFragment : SubmitTransactionFragment() {
     }
 
     private fun startPayment() {
-        val checkResponse = viewModel.uiLogic.checkCanMakePayment()
+        val checkResponse = viewModel.uiLogic.checkCanMakePayment(Preferences(requireContext()))
 
         if (checkResponse.receiverError) {
             binding.tvReceiver.error = getString(R.string.error_receiver_address)
             binding.tvReceiver.editText?.requestFocus()
+        }
+        if (checkResponse.messageError) {
+            binding.tiMessage.error = getString(R.string.error_purpose_message)
+            showPurposeMessageInformation(true)
+        } else {
+            binding.tiMessage.error = null
         }
         if (checkResponse.amountError) {
             binding.amount.error = getString(R.string.error_amount)
@@ -317,17 +331,34 @@ class SendFundsFragment : SubmitTransactionFragment() {
         }
     }
 
+    private fun showPurposeMessageInformation(startPayment: Boolean = false) {
+        val context = requireContext()
+        val prefs = Preferences(context)
+        MaterialAlertDialogBuilder(context)
+            .setMessage(R.string.info_purpose_message)
+            .setPositiveButton(R.string.info_purpose_message_accept) { _, _ ->
+                prefs.sendTxMessages = true
+                if (startPayment) startPayment()
+            }
+            .setNegativeButton(R.string.info_purpose_message_decline) { _, _ ->
+                prefs.sendTxMessages = false
+            }
+            .show()
+    }
+
     override fun showBiometricPrompt() {
         hideForcedSoftKeyboard(requireContext(), binding.amount.editText!!)
         super.showBiometricPrompt()
     }
 
     private fun inputChangesToViewModel() {
-        viewModel.uiLogic.receiverAddress = binding.tvReceiver.editText?.text?.toString() ?: ""
+        val uiLogic = viewModel.uiLogic
+        uiLogic.receiverAddress = binding.tvReceiver.editText?.text?.toString() ?: ""
+        uiLogic.message = binding.tiMessage.editText?.text?.toString() ?: ""
 
         val amountStr = binding.amount.editText?.text.toString()
         val ergoAmount = amountStr.toErgoAmount()
-        viewModel.uiLogic.amountToSend = ergoAmount ?: ErgoAmount.ZERO
+        uiLogic.amountToSend = ergoAmount ?: ErgoAmount.ZERO
         if (ergoAmount == null) {
             // conversion error, too many decimals or too big for long
             binding.amount.error = getString(R.string.error_amount)
@@ -363,9 +394,10 @@ class SendFundsFragment : SubmitTransactionFragment() {
                     )
                 )
             },
-            { address, amount ->
+            setPaymentRequestDataToUi = { address, amount, message ->
                 binding.tvReceiver.editText?.setText(address)
                 amount?.let { setAmountEdittext(amount) }
+                message?.let { binding.tiMessage.editText?.setText(message) }
             })
     }
 
