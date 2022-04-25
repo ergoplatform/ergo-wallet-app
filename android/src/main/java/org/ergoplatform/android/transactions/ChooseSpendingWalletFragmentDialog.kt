@@ -14,7 +14,6 @@ import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.wallet.addWalletChooserItemBindings
 import org.ergoplatform.parsePaymentRequest
-import org.ergoplatform.transactions.isErgoPaySigningRequest
 
 
 /**
@@ -46,18 +45,11 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
             return
         }
 
-        if (isErgoPaySigningRequest(query)) {
-            binding.grossAmount.visibility = View.GONE
-            binding.textviewTo.visibility = View.GONE
-            binding.receiverAddress.visibility = View.GONE
-            binding.labelTitle.setText(R.string.title_ergo_pay_request)
-        } else {
-            val content = parsePaymentRequest(query)
-            binding.receiverAddress.text = content?.address
-            val amount = content?.amount ?: ErgoAmount.ZERO
-            binding.grossAmount.setAmount(amount.toBigDecimal())
-            binding.grossAmount.visibility = if (amount.nanoErgs > 0) View.VISIBLE else View.GONE
-        }
+        val content = parsePaymentRequest(query)
+        binding.receiverAddress.text = content?.address
+        val amount = content?.amount ?: ErgoAmount.ZERO
+        binding.grossAmount.setAmount(amount.toBigDecimal())
+        binding.grossAmount.visibility = if (amount.nanoErgs > 0) View.VISIBLE else View.GONE
 
         AppDatabase.getInstance(requireContext()).walletDao().getWalletsWithStates()
             .observe(viewLifecycleOwner) { walletList ->
@@ -86,14 +78,9 @@ class ChooseSpendingWalletFragmentDialog : FullScreenFragmentDialog() {
 
         NavHostFragment.findNavController(requireParentFragment())
             .navigateSafe(
-                if (isErgoPaySigningRequest(request))
-                    ChooseSpendingWalletFragmentDialogDirections.actionChooseSpendingWalletFragmentDialogToErgoPaySigningFragment(
-                        request, walletId
-                    )
-                else
-                    ChooseSpendingWalletFragmentDialogDirections.actionChooseSpendingWalletFragmentDialogToSendFundsFragment(
-                        request, walletId
-                    ),
+                ChooseSpendingWalletFragmentDialogDirections.actionChooseSpendingWalletFragmentDialogToSendFundsFragment(
+                    request, walletId
+                ),
                 navOptions
             )
     }

@@ -110,15 +110,23 @@ class BottomNavigationBar : UITabBarController() {
                         }
                     }
                 }
+            }, navigateToErgoPay = { request ->
+                navigateToWalletListAndPushVc(ErgoPaySigningViewController(request), true)
             }, navigateToAuthentication = { request ->
-                selectedViewController = viewControllers.first()
-                (selectedViewController as? UINavigationController)?.apply {
-                    popToRootViewController(false)
-                    pushViewController(ErgoAuthenticationViewController(request, null), true)
-                }
+                navigateToWalletListAndPushVc(ErgoAuthenticationViewController(request, null), true)
             }, presentUserMessage = { message ->
                 presentViewController(buildSimpleAlertController("", message, texts), true) {}
             })
+    }
+
+    private fun navigateToWalletListAndPushVc(vc: UIViewController, animated: Boolean) {
+        // set view to first controller (wallet list), go back to its root and switch to the
+        // wallet's send funds screen
+        selectedViewController = viewControllers.first()
+        (selectedViewController as? UINavigationController)?.apply {
+            popToRootViewController(false)
+            pushViewController(vc, animated)
+        }
     }
 
     private fun navigateToNextScreen(
@@ -126,20 +134,13 @@ class BottomNavigationBar : UITabBarController() {
         paymentRequest: String,
         fromChooseScreen: Boolean
     ) {
-        // set view to first controller (wallet list), go back to its root and switch to the
-        // wallet's send funds screen
-        selectedViewController = viewControllers.first()
-        (selectedViewController as? UINavigationController)?.apply {
-            popToRootViewController(false)
-            pushViewController(
-                if (isErgoPaySigningRequest(paymentRequest)) ErgoPaySigningViewController(
-                    paymentRequest,
-                    walletId
-                )
-                else SendFundsViewController(walletId, paymentRequest = paymentRequest),
-                !fromChooseScreen
+        navigateToWalletListAndPushVc(
+            if (isErgoPaySigningRequest(paymentRequest)) ErgoPaySigningViewController(
+                paymentRequest,
+                walletId
             )
-        }
-
+            else SendFundsViewController(walletId, paymentRequest = paymentRequest),
+            !fromChooseScreen
+        )
     }
 }

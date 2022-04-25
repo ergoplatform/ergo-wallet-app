@@ -2,6 +2,7 @@ package org.ergoplatform.android
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
@@ -76,6 +77,12 @@ class MainActivity : AppCompatActivity() {
                     R.id.chooseSpendingWalletFragmentDialog,
                     ChooseSpendingWalletFragmentDialog.buildArgs(it)
                 )
+            }, navigateToErgoPay = {
+                navController.navigate(
+                    WalletFragmentDirections.actionNavigationWalletToErgoPaySigningFragment(
+                        it
+                    ).setCloseApp(!fromQrCode)
+                )
             }, navigateToAuthentication = {
                 navController.navigate(
                     WalletFragmentDirections.actionNavigationWalletToErgoAuthFragment(
@@ -96,8 +103,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        return findNavController(R.id.nav_host_fragment).navigateUp() || super.onSupportNavigateUp()
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            onBackPressed()
+            return true
+        }
+        return false
     }
 
     override fun onNewIntent(intent: Intent?) {

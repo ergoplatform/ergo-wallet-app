@@ -3,7 +3,10 @@ package org.ergoplatform.ios.transactions
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.wallet.ChooseWalletViewController
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
+import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
@@ -16,16 +19,17 @@ import org.robovm.apple.uikit.*
 
 class ErgoPaySigningViewController(
     private val request: String,
-    private val walletId: Int,
+    private val walletId: Int = -1,
     private val derivationIndex: Int = -1
 ) : SubmitTransactionViewController() {
 
     override val uiLogic = IosErgoPaySigningUiLogic()
 
-    private val addressChooserContainer = CardView()
+    private val addressChooserContainer = AddressChooserContainer()
     private lateinit var fetchingContainer: FetchDataContainer
     private lateinit var transactionContainer: TransactionWithHeaderContainer
-    private val stateDoneContainer = CardView()
+    private lateinit var reloadNavBarItem: UIBarButtonItem
+    private val stateDoneContainer = StateDoneContainer()
     private val walletAddressLabel = Body2BoldLabel().apply {
         numberOfLines = 1
         textColor = uiColorErgo
@@ -43,6 +47,15 @@ class ErgoPaySigningViewController(
         title = texts.get(STRING_TITLE_ERGO_PAY_REQUEST)
         view.backgroundColor = UIColor.systemBackground()
         navigationController.navigationBar?.tintColor = UIColor.label()
+
+        reloadNavBarItem =
+            UIBarButtonItem(getIosSystemImage(IMAGE_RELOAD, UIImageSymbolScale.Small, 20.0), UIBarButtonItemStyle.Plain)
+        navigationItem.rightBarButtonItem = reloadNavBarItem
+        reloadNavBarItem.tintColor = UIColor.label()
+        reloadNavBarItem.setOnClickListener {
+            startReloadFromDapp()
+        }
+        reloadNavBarItem.isEnabled = false
 
         view.layoutMargins = UIEdgeInsets.Zero()
         view.addSubview(walletAddressLabel)
@@ -75,104 +88,179 @@ class ErgoPaySigningViewController(
         )
     }
 
+    private fun startReloadFromDapp() {
+        val appDelegate = getAppDelegate()
+        uiLogic.reloadFromDapp(
+            appDelegate.prefs,
+            IosStringProvider(appDelegate.texts),
+            appDelegate.database.walletDbProvider
+        )
+    }
+
+    private fun onWalletChosen(wallet: WalletConfig) {
+        val appDelegate = getAppDelegate()
+        uiLogic.setWalletId(
+            wallet.id,
+            appDelegate.prefs,
+            IosStringProvider(appDelegate.texts),
+            appDelegate.database.walletDbProvider
+        )
+    }
+
     override fun onAddressChosen(it: Int?) {
         super.onAddressChosen(it)
         // redo the request - can't be done within uilogic because context is needed on Android
-        uiLogic.lastRequest?.let {
-            val appDelegate = getAppDelegate()
-            uiLogic.hasNewRequest(
-                it,
-                appDelegate.prefs,
-                IosStringProvider(appDelegate.texts)
-            )
-        }
-
+        val appDelegate = getAppDelegate()
+        uiLogic.derivedAddressIdChanged(
+            appDelegate.prefs,
+            IosStringProvider(appDelegate.texts),
+            appDelegate.database.walletDbProvider
+        )
     }
 
     private fun refreshUserInterface(state: ErgoPaySigningUiLogic.State) {
-        addressChooserContainer.isHidden = state != ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS
+        reloadNavBarItem.isEnabled = uiLogic.canReloadFromDapp()
+        addressChooserContainer.isHidden = state != ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS &&
+                state != ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET
         fetchingContainer.isHidden = state != ErgoPaySigningUiLogic.State.FETCH_DATA
         transactionContainer.isHidden = state != ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION
         stateDoneContainer.isHidden = state != ErgoPaySigningUiLogic.State.DONE
 
         when (state) {
             ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> {
-                populateWaitForAddressView()
+                addressChooserContainer.populateWaitForAddressView(state)
+            }
+            ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET -> {
+                addressChooserContainer.populateWaitForAddressView(state)
             }
             ErgoPaySigningUiLogic.State.FETCH_DATA -> {
                 // nothing to do
             }
             ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION -> transactionContainer.showTransactionInfo()
-            ErgoPaySigningUiLogic.State.DONE -> showDoneInfo()
+            ErgoPaySigningUiLogic.State.DONE -> stateDoneContainer.showDoneInfo()
         }
     }
 
-    private fun populateWaitForAddressView() {
-        if (addressChooserContainer.contentView.subviews.isEmpty()) {
-            val image = UIImageView(ergoLogoImage.imageWithTintColor(UIColor.label())).apply {
-                fixedHeight(100.0)
-                contentMode = UIViewContentMode.ScaleAspectFit
-            }
+    inner class AddressChooserContainer : CardView() {
+        private var label: Body1Label? = null
+        private var button: PrimaryButton? = null
 
-            val label = Body1Label().apply {
-                text = texts.get(STRING_LABEL_ERGO_PAY_CHOOSE_ADDRESS)
-                textAlignment = NSTextAlignment.Center
-            }
-
-            val button = PrimaryButton(texts.get(STRING_TITLE_CHOOSE_ADDRESS)).apply {
-                addOnTouchUpInsideListener { _, _ ->
-                    presentViewController(
-                        ChooseAddressListDialogViewController(walletId, false) {
-                            onAddressChosen(it)
-                        }, true
-                    ) {}
+        fun populateWaitForAddressView(state: ErgoPaySigningUiLogic.State) {
+            if (contentView.subviews.isEmpty()) {
+                val image = UIImageView(ergoLogoImage.imageWithTintColor(UIColor.label())).apply {
+                    fixedHeight(100.0)
+                    contentMode = UIViewContentMode.ScaleAspectFit
                 }
+
+                val label = Body1Label().apply {
+                    textAlignment = NSTextAlignment.Center
+                }
+
+                val button = PrimaryButton(texts.get(STRING_TITLE_CHOOSE_ADDRESS)).apply {
+                    addOnTouchUpInsideListener { _, _ ->
+                        showAddressOrWalletChooser()
+                    }
+                }
+
+                contentView.apply {
+                    addSubview(image)
+                    addSubview(label)
+                    addSubview(button)
+
+                    image.topToSuperview(topInset = DEFAULT_MARGIN * 2).centerHorizontal()
+                    label.topToBottomOf(image, DEFAULT_MARGIN * 3)
+                        .widthMatchesSuperview(inset = DEFAULT_MARGIN)
+                    button.topToBottomOf(label, DEFAULT_MARGIN * 2).centerHorizontal()
+                        .bottomToSuperview(bottomInset = DEFAULT_MARGIN * 2)
+                }
+
+                this.button = button
+                this.label = label
             }
 
-            addressChooserContainer.contentView.apply {
-                addSubview(image)
-                addSubview(label)
-                addSubview(button)
-
-                image.topToSuperview(topInset = DEFAULT_MARGIN * 2).centerHorizontal()
-                label.topToBottomOf(image, DEFAULT_MARGIN * 3).widthMatchesSuperview(inset = DEFAULT_MARGIN)
-                button.topToBottomOf(label, DEFAULT_MARGIN * 2).centerHorizontal()
-                    .bottomToSuperview(bottomInset = DEFAULT_MARGIN * 2)
+            when (state) {
+                ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET -> {
+                    label?.text = texts.get(STRING_LABEL_ERGO_PAY_CHOOSE_WALLET)
+                    button?.setTitle(texts.get(STRING_TITLE_CHOOSE_WALLET), UIControlState.Normal)
+                }
+                ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> {
+                    label?.text = texts.get(STRING_LABEL_ERGO_PAY_CHOOSE_ADDRESS)
+                    button?.setTitle(texts.get(STRING_TITLE_CHOOSE_ADDRESS), UIControlState.Normal)
+                }
+                else -> {}
             }
         }
     }
 
-    private fun showDoneInfo() {
-        if (stateDoneContainer.contentView.subviews.isEmpty()) {
-            val image = uiLogic.getDoneSeverity().getImage()?.let {
-                UIImageView(getIosSystemImage(it, UIImageSymbolScale.Large)).apply {
+    private fun showAddressOrWalletChooser() {
+        presentViewController(
+            if (uiLogic.wallet != null) {
+                ChooseAddressListDialogViewController(uiLogic.wallet!!.walletConfig.id, false) {
+                    onAddressChosen(it)
+                }
+            } else {
+                ChooseWalletViewController { onWalletChosen(it) }
+            }, true
+        ) {}
+    }
+
+    private inner class StateDoneContainer : CardView() {
+        private var descLabel: Body1Label? = null
+        private var image: UIImageView? = null
+        private var dismissButton: PrimaryButton? = null
+        private var dismissShouldRetry = false
+
+        fun showDoneInfo() {
+            if (contentView.subviews.isEmpty()) {
+                val image = UIImageView().apply {
                     contentMode = UIViewContentMode.ScaleAspectFit
                     tintColor = uiColorErgo
                     fixedHeight(100.0)
                 }
+
+                val descLabel = Body1Label()
+                descLabel.textAlignment = NSTextAlignment.Center
+
+                val dismissButton = PrimaryButton(texts.get(STRING_LABEL_DISMISS))
+                dismissButton.addOnTouchUpInsideListener { _, _ ->
+                    if (dismissShouldRetry) {
+                        startReloadFromDapp()
+                    } else {
+                        navigationController.popViewController(true)
+                    }
+                }
+                val doneButtonContainer = UIView()
+                doneButtonContainer.addSubview(dismissButton)
+                dismissButton.centerHorizontal().topToSuperview().bottomToSuperview().fixedWidth(150.0)
+
+                val txDoneStack = UIStackView().apply {
+                    axis = UILayoutConstraintAxis.Vertical
+                    spacing = DEFAULT_MARGIN * 3
+
+                    addArrangedSubview(image)
+                    addArrangedSubview(descLabel)
+                    addArrangedSubview(doneButtonContainer)
+                }
+
+                contentView.addSubview(txDoneStack)
+                txDoneStack.edgesToSuperview(inset = DEFAULT_MARGIN * 2)
+
+                this.descLabel = descLabel
+                this.dismissButton = dismissButton
+                this.image = image
             }
 
-            val descLabel = Body1Label()
-            descLabel.text = uiLogic.getDoneMessage(IosStringProvider(texts))
-            descLabel.textAlignment = NSTextAlignment.Center
-
-            val dismissButton = PrimaryButton(texts.get(STRING_LABEL_DISMISS))
-            dismissButton.addOnTouchUpInsideListener { _, _ -> navigationController.popViewController(true) }
-            val doneButtonContainer = UIView()
-            doneButtonContainer.addSubview(dismissButton)
-            dismissButton.centerHorizontal().topToSuperview().bottomToSuperview().fixedWidth(150.0)
-
-            val txDoneStack = UIStackView().apply {
-                axis = UILayoutConstraintAxis.Vertical
-                spacing = DEFAULT_MARGIN * 3
-
-                image?.let { addArrangedSubview(image) }
-                addArrangedSubview(descLabel)
-                addArrangedSubview(doneButtonContainer)
+            dismissShouldRetry = uiLogic.getDoneSeverity() == MessageSeverity.ERROR && uiLogic.canReloadFromDapp()
+            val imageToShow = uiLogic.getDoneSeverity().getImage()
+            image?.isHidden = imageToShow == null
+            imageToShow?.let {
+                image?.image = getIosSystemImage(it, UIImageSymbolScale.Large)
             }
-
-            stateDoneContainer.contentView.addSubview(txDoneStack)
-            txDoneStack.edgesToSuperview(inset = DEFAULT_MARGIN * 2)
+            descLabel?.text = uiLogic.getDoneMessage(IosStringProvider(texts))
+            dismissButton?.setTitle(
+                texts.get(if (dismissShouldRetry) STRING_BUTTON_RETRY else STRING_LABEL_DISMISS),
+                UIControlState.Normal
+            )
         }
     }
 

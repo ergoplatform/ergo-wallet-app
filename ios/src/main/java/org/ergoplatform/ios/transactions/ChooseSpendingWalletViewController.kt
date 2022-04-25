@@ -3,7 +3,6 @@ package org.ergoplatform.ios.transactions
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.*
@@ -76,12 +75,7 @@ class ChooseSpendingWalletViewController(
             .widthMatchesSuperview(inset = DEFAULT_MARGIN * 2, maxWidth = MAX_WIDTH)
             .bottomToSuperview(bottomInset = DEFAULT_MARGIN)
 
-        if (isErgoPaySigningRequest(paymentRequest)) {
-            amountLabel.isHidden = true
-            recipientLabel.text = ""
-            toLabel.text = ""
-            titleLabel.text = texts.getString(STRING_TITLE_ERGO_PAY_REQUEST)
-        } else parsePaymentRequest(paymentRequest)?.let {
+        parsePaymentRequest(paymentRequest)?.let {
             amountLabel.setErgoAmount(it.amount)
             amountLabel.isHidden = it.amount.isZero()
             recipientLabel.text = it.address
