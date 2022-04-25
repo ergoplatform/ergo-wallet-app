@@ -35,9 +35,9 @@ class SendFundsViewController(
     private lateinit var sendButton: UIButton
     private lateinit var addTokenButton: UIButton
 
-    private lateinit var inputReceiver: UITextField
-    private lateinit var inputMessage: UITextField
-    private lateinit var inputErgoAmount: UITextField
+    private lateinit var inputReceiver: EndIconTextField
+    private lateinit var inputMessage: EndIconTextField
+    private lateinit var inputErgoAmount: EndIconTextField
 
     private var txDoneView: UIView? = null
 
@@ -101,7 +101,7 @@ class SendFundsViewController(
 
         }
 
-        inputReceiver = createTextField().apply {
+        inputReceiver = EndIconTextField().apply {
             placeholder = texts.get(STRING_LABEL_RECEIVER_ADDRESS)
             returnKeyType = UIReturnKeyType.Next
             delegate = object : UITextFieldDelegateAdapter() {
@@ -117,7 +117,7 @@ class SendFundsViewController(
             }
         }
 
-        inputMessage = createTextField().apply {
+        inputMessage = EndIconTextField().apply {
             placeholder = texts.get(STRING_LABEL_PURPOSE)
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
@@ -126,13 +126,18 @@ class SendFundsViewController(
                 }
             }
             addOnEditingChangedListener {
-                hasMessageError = false
+                setHasError(false)
                 uiLogic.message = text
             }
+            setCustomActionField(
+                getIosSystemImage(
+                    IMAGE_INFORMATION,
+                    UIImageSymbolScale.Small
+                )!!
+            ) { showPurposeMessageInfoDialog() }
         }
-        addMessageInfoActionToTextField()
 
-        inputErgoAmount = createTextField().apply {
+        inputErgoAmount = EndIconTextField().apply {
             placeholder = texts.get(STRING_LABEL_AMOUNT)
             keyboardType = UIKeyboardType.NumbersAndPunctuation
             returnKeyType = UIReturnKeyType.Next
@@ -143,11 +148,17 @@ class SendFundsViewController(
                 }
             }
             addOnEditingChangedListener {
-                hasAmountError = false
+                setHasError(false)
                 uiLogic.amountToSend = text.toErgoAmount() ?: ErgoAmount.ZERO
             }
+            setCustomActionField(
+                getIosSystemImage(
+                    IMAGE_FULL_AMOUNT,
+                    UIImageSymbolScale.Small
+                )!!
+            ) { setInputAmount(uiLogic.getMaxPossibleAmountToSend()) }
+
         }
-        addMaxAmountActionToTextField()
 
         fiatLabel = Body1Label()
         fiatLabel.textAlignment = NSTextAlignment.Right
@@ -246,49 +257,6 @@ class SendFundsViewController(
         scrollView.isHidden = true
     }
 
-    private var hasAmountError = false
-        set(hasError) {
-            if (field != hasError) {
-                field = hasError
-                inputErgoAmount.setHasError(hasError)
-
-                // restore the max amount action button when error state is reset
-                if (!hasError) {
-                    addMaxAmountActionToTextField()
-                }
-            }
-        }
-    private var hasMessageError = false
-        set(hasError) {
-            if (field != hasError) {
-                field = hasError
-                inputMessage.setHasError(hasError)
-
-                // restore the info action button when error state is reset
-                if (!hasError) {
-                    addMessageInfoActionToTextField()
-                }
-            }
-        }
-
-    private fun addMaxAmountActionToTextField() {
-        inputErgoAmount.setCustomActionField(
-            getIosSystemImage(
-                IMAGE_FULL_AMOUNT,
-                UIImageSymbolScale.Small
-            )!!
-        ) { setInputAmount(uiLogic.getMaxPossibleAmountToSend()) }
-    }
-
-    private fun addMessageInfoActionToTextField() {
-        inputMessage.setCustomActionField(
-            getIosSystemImage(
-                IMAGE_INFORMATION,
-                UIImageSymbolScale.Small
-            )!!
-        ) { showPurposeMessageInfoDialog() }
-    }
-
     private fun showPurposeMessageInfoDialog(startPayment: Boolean = false) {
         val uac = UIAlertController("", texts.get(STRING_INFO_PURPOSE_MESSAGE), UIAlertControllerStyle.Alert)
         val prefs = getAppDelegate().prefs
@@ -335,8 +303,8 @@ class SendFundsViewController(
         val checkResponse = uiLogic.checkCanMakePayment(getAppDelegate().prefs)
 
         inputReceiver.setHasError(checkResponse.receiverError)
-        hasAmountError = checkResponse.amountError
-        hasMessageError = checkResponse.messageError
+        inputErgoAmount.setHasError(checkResponse.amountError)
+        inputMessage.setHasError(checkResponse.messageError)
         if (checkResponse.receiverError) {
             inputReceiver.becomeFirstResponder()
         } else if (checkResponse.amountError) {

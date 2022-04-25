@@ -39,8 +39,8 @@ class ConfirmCreateWalletViewController(val mnemonic: SecretString) : ViewContro
         val introLabel = Body1Label()
         introLabel.text = texts.get(STRING_INTRO_CONFIRM_CREATE_WALLET)
 
-        val textField1 = createTextField()
-        val textField2 = createTextField()
+        val textField1 = EndIconTextField()
+        val textField2 = EndIconTextField()
         textField1.placeholder = texts.format(STRING_LABEL_WORD_CONFIRM_CREATE_WALLET, uiLogic.firstWord.toString())
         textField1.autocapitalizationType = UITextAutocapitalizationType.None
         textField1.returnKeyType = UIReturnKeyType.Next

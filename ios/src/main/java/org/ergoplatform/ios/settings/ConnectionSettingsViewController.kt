@@ -41,7 +41,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
         val explorerApiLabel = Body1Label().apply {
             text = texts.get(STRING_LABEL_EXPLORER_API_URL)
         }
-        explorerApiInput = createTextField().apply {
+        explorerApiInput = EndIconTextField().apply {
             returnKeyType = UIReturnKeyType.Next
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
@@ -57,7 +57,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
             text = texts.get(STRING_LABEL_NODE_URL)
         }
 
-        nodeApiInput = createTextField().apply {
+        nodeApiInput = EndIconTextField().apply {
             returnKeyType = UIReturnKeyType.Next
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
@@ -73,7 +73,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
             text = texts.get(STRING_LABEL_TOKEN_VERIFICATION_URL)
         }
 
-        tokenVerificationInput = createTextField().apply {
+        tokenVerificationInput = EndIconTextField().apply {
             returnKeyType = UIReturnKeyType.Next
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
@@ -88,7 +88,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
         val ipfsGatewayTitle = Body1Label().apply {
             text = texts.get(STRING_LABEL_IPFS_HTTP_GATEWAY)
         }
-        ipfsGatewayInput = createTextField().apply {
+        ipfsGatewayInput = EndIconTextField().apply {
             returnKeyType = UIReturnKeyType.Done
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {

@@ -60,7 +60,7 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
             shareText(addressLabel.text, addressLabel)
         })
 
-        inputErgoAmount = createTextField().apply {
+        inputErgoAmount = EndIconTextField().apply {
             placeholder = texts.get(STRING_LABEL_AMOUNT)
             keyboardType = UIKeyboardType.NumbersAndPunctuation
             returnKeyType = UIReturnKeyType.Next
