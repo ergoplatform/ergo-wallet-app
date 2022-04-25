@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.appkit.*
+import org.ergoplatform.appkit.impl.BoxAttachmentBuilder
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.InputInfo
@@ -280,5 +281,5 @@ fun combineTokens(tokens: List<AssetInstanceInfo>): List<AssetInstanceInfo> {
 }
 
 fun OutputInfo.getAttachmentText(): String? = additionalRegisters?.let { registers ->
-    null // TODO EIP-29 purpose text (Eip29AttachmentBuilder.buildFromAdditionalRegisters(registers) as? Eip29Attachment.PlainTextAttachment)?.text
+    (BoxAttachmentBuilder.buildFromAdditionalRegisters(registers) as? BoxAttachmentPlainText)?.text
 }
