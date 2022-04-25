@@ -160,7 +160,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
         }
     }
 
-    fun isPasswordWeak(password: String?): Boolean {
-        return password == null || password.length < 8
+    fun isPasswordWeak(password: SecretString?): Boolean {
+        return password == null || password.data.size < 8
     }
 }

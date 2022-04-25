@@ -5,15 +5,15 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGRect
-import org.robovm.apple.uikit.UIEdgeInsets
-import org.robovm.apple.uikit.UILayoutConstraintAxis
-import org.robovm.apple.uikit.UIStackView
-import org.robovm.apple.uikit.UIView
+import org.robovm.apple.uikit.*
 
 /**
  * Shows transaction info with boxes and tokens to spend and boxes and tokens to issue
  */
-abstract class TransactionContainer(private val texts: I18NBundle) : UIStackView() {
+abstract class TransactionContainer(
+    private val texts: I18NBundle,
+    private val vc: UIViewController
+) : UIStackView() {
     private val inboxesList = UIStackView().apply {
         axis = UILayoutConstraintAxis.Vertical
     }
@@ -60,7 +60,7 @@ abstract class TransactionContainer(private val texts: I18NBundle) : UIStackView
         inboxesList.clearArrangedSubviews()
         transactionInfo.inputs.forEach { input ->
             inboxesList.addArrangedSubview(
-                TransactionBoxEntryView().bindBoxView(
+                TransactionBoxEntryView(vc).bindBoxView(
                     input.value,
                     input.address,
                     input.assets,
@@ -72,7 +72,7 @@ abstract class TransactionContainer(private val texts: I18NBundle) : UIStackView
         outBoxesList.clearArrangedSubviews()
         transactionInfo.outputs.forEach { output ->
             outBoxesList.addArrangedSubview(
-                TransactionBoxEntryView().bindBoxView(
+                TransactionBoxEntryView(vc).bindBoxView(
                     output.value,
                     output.address,
                     output.assets,
@@ -86,8 +86,9 @@ abstract class TransactionContainer(private val texts: I18NBundle) : UIStackView
 
 open class SigningTransactionContainer(
     private val texts: I18NBundle,
+    vc: UIViewController,
     private val clickListener: Runnable
-) : TransactionContainer(texts) {
+) : TransactionContainer(texts, vc) {
 
     override val titleInboxes get() = STRING_TITLE_INBOXES
     override val descInboxes get() = STRING_DESC_INBOXES

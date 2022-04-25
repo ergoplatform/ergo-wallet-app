@@ -2,6 +2,7 @@ package org.ergoplatform.ios.ui
 
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.api.IosAuthentication
 import org.ergoplatform.ios.api.IosEncryptionManager
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
@@ -70,7 +71,7 @@ fun UIViewController.startAuthFlow(wallet: WalletConfig, callback: (mnemonic: Si
 
 private fun proceedAuthFlowWithPassword(
     wallet: WalletConfig,
-    password: String,
+    password: SecretString,
     callback: (mnemonic: SigningSecrets) -> Unit
 ): Boolean {
     wallet.secretStorage?.let {

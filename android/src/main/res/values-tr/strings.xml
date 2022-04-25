@@ -180,7 +180,6 @@
     <string name="label_fetching_data">dApp\'den veri isteme…</string>
     <string name="label_message_from_dapp">dApp\'den mesaj:\n%1$s</string>
     <string name="label_error_occured">Bir hata oluştu:\n%1$s</string>
-    <string name="label_ergo_pay_wrong_address">Bu cüzdana ait olmayan %1$s adresi için imza talebi alındı.</string>
     <string name="label_ergo_pay_choose_address">Lütfen Ergo Ödeme Talebini işlemek için bir adres seçin.</string>
     <string name="error_prover_cant_sign">İşlem bu cüzdanın anahtarlarıyla imzalanamadı.</string>
 

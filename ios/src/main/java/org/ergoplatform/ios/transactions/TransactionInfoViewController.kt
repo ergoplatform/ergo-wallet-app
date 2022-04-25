@@ -51,7 +51,13 @@ class TransactionInfoViewController(
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        uiLogic.init(txId, address, ApiServiceManager.getOrInit(getAppDelegate().prefs))
+        val appDelegate = getAppDelegate()
+        uiLogic.init(
+            txId,
+            address,
+            ApiServiceManager.getOrInit(appDelegate.prefs),
+            appDelegate.database
+        )
         activityView.startAnimating()
     }
 
@@ -81,7 +87,8 @@ class TransactionInfoViewController(
 
     }
 
-    inner class TransactionInfoContainer(private val texts: I18NBundle) : TransactionContainer(texts) {
+    inner class TransactionInfoContainer(private val texts: I18NBundle) :
+        TransactionContainer(texts, this@TransactionInfoViewController) {
         override val titleInboxes get() = STRING_TITLE_TRANSACTION_INBOXES
         override val descInboxes get() = STRING_DESC_TRANSACTION_INBOXES
         override val titleOutboxes get() = STRING_TITLE_OUTBOXES
@@ -92,6 +99,10 @@ class TransactionInfoViewController(
             numberOfLines = 1
             lineBreakMode = NSLineBreakMode.TruncatingMiddle
             textAlignment = NSTextAlignment.Center
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UILongPressGestureRecognizer {
+                this@TransactionInfoViewController.shareText(text, this)
+            })
         }
 
         private val purposeLabel = Body2Label().apply {

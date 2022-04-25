@@ -3,7 +3,11 @@ package org.ergoplatform.android.ui
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.R
+import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.api.AndroidEncryptionManager
+import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
 import org.ergoplatform.persistance.WalletConfig
@@ -12,17 +16,18 @@ import org.ergoplatform.persistance.WalletConfig
  * Class to use when authentication with Biometrics and password to access mnemonic is needed
  */
 abstract class AbstractAuthenticationFragment : Fragment(), PasswordDialogCallback {
+    abstract val authenticationWalletConfig: WalletConfig?
 
     /**
      * Start the authentication flow, biometric prompt or password input depending on wallet
      */
-    internal open fun startAuthFlow(walletConfig: WalletConfig) {
-        if (walletConfig.encryptionType == ENC_TYPE_PASSWORD) {
+    internal open fun startAuthFlow() {
+        if (authenticationWalletConfig?.encryptionType == ENC_TYPE_PASSWORD) {
             PasswordDialogFragment().show(
                 this.childFragmentManager,
                 null
             )
-        } else if (walletConfig.encryptionType == ENC_TYPE_DEVICE) {
+        } else if (authenticationWalletConfig?.encryptionType == ENC_TYPE_DEVICE) {
             showBiometricPrompt()
         }
     }
@@ -68,9 +73,18 @@ abstract class AbstractAuthenticationFragment : Fragment(), PasswordDialogCallba
      * Called after a successful biometric authentication. This method may throw errors which
      * are shown to the user as a security error
      */
-    abstract fun proceedAuthFlowFromBiometrics()
+    private fun proceedAuthFlowFromBiometrics() {
+        // we don't handle exceptions here by intention: we throw them back to the caller which
+        // will show a snackbar to give the user a hint what went wrong
+        authenticationWalletConfig?.secretStorage?.let {
+            val decryptData = AndroidEncryptionManager.decryptDataWithDeviceKey(it)
+            val signingSecrets = SigningSecrets.fromBytes(decryptData!!)
+            proceedFromAuthFlow(signingSecrets!!)
+            // do not erase secrets here: we have async operations
+        }
+    }
 
-    override fun onPasswordEntered(password: String?): String? {
+    override fun onPasswordEntered(password: SecretString?): String? {
         password?.let {
             if (!proceedAuthFlowWithPassword(password)) {
                 return getString(R.string.error_password_wrong)
@@ -85,5 +99,29 @@ abstract class AbstractAuthenticationFragment : Fragment(), PasswordDialogCallba
      * Called after password is entered. Password may be wrong, so
      * @return false to show a warning about a wrong password
      */
-    abstract fun proceedAuthFlowWithPassword(password: String): Boolean
+    private fun proceedAuthFlowWithPassword(password: SecretString): Boolean {
+        authenticationWalletConfig?.secretStorage?.let {
+            val secrets: SigningSecrets?
+            try {
+                val decryptData = AesEncryptionManager.decryptData(password, it)
+                secrets = SigningSecrets.fromBytes(decryptData!!)
+            } catch (t: Throwable) {
+                // Password wrong
+                return false
+            }
+
+            if (secrets == null) {
+                // deserialization error, corrupted db data
+                return false
+            }
+
+            proceedFromAuthFlow(secrets)
+
+            return true
+        }
+
+        return false
+    }
+
+    abstract fun proceedFromAuthFlow(secrets: SigningSecrets)
 }

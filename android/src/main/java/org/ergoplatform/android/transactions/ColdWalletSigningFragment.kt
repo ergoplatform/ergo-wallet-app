@@ -11,9 +11,11 @@ import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
 import org.ergoplatform.android.ui.*
+import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
 import org.ergoplatform.transactions.coldSigningResponseToQrChunks
@@ -92,7 +94,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
         // Button click listeners
         binding.transactionInfo.buttonSignTx.setOnClickListener {
             viewModel.wallet?.let {
-                startAuthFlow(it.walletConfig)
+                startAuthFlow()
             }
         }
 
@@ -176,12 +178,11 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
         )
     }
 
-    override fun proceedAuthFlowWithPassword(password: String): Boolean {
-        return viewModel.signTxWithPassword(password, AndroidStringProvider(requireContext()))
-    }
+    override val authenticationWalletConfig: WalletConfig?
+        get() = viewModel.wallet?.walletConfig
 
-    override fun proceedAuthFlowFromBiometrics() {
-        viewModel.signTxUserAuth(AndroidStringProvider(requireContext()))
+    override fun proceedFromAuthFlow(secrets: SigningSecrets) {
+        viewModel.uiLogic.signTxWithMnemonicAsync(secrets, AndroidStringProvider(requireContext()))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
