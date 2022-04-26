@@ -31,7 +31,7 @@ class WalletStateSyncManager {
         private set
     private val coinGeckoApi: CoinGeckoApi
 
-    val tokenPrices: HashMap<String, TokenPrice> = HashMap()
+    private val tokenPrices: HashMap<String, TokenPrice> = HashMap()
     private val TOKEN_PRICE_REFRESH_DURATION_MS = 1000L * 60
     private var lastTokenPriceRefreshMs: Long = 0
     private val tokenPriceApi: TokenPriceApi = ErgoDexPriceApi()
@@ -49,6 +49,13 @@ class WalletStateSyncManager {
         if (resetFiatValue) fiatValue.value = 0.0f
     }
 
+    fun getTokenPrice(tokenId: String?): TokenPrice? {
+        return tokenId?.let {
+            synchronized(tokenPrices) {
+                tokenPrices[tokenId]
+            }
+        }
+    }
 
     fun refreshByUser(preferences: PreferencesProvider, database: IAppDatabase): Boolean {
         if (System.currentTimeMillis() - lastRefreshMs > 1000L * 10) {
@@ -86,7 +93,11 @@ class WalletStateSyncManager {
                     val statesSaved = refreshWalletStates(preferences, database.walletDbProvider)
                     didSync = statesSaved.isNotEmpty()
                 } catch (t: Throwable) {
-                    LogUtils.logDebug(this.javaClass.simpleName, "refreshWalletStates error: " + t.message, t)
+                    LogUtils.logDebug(
+                        this.javaClass.simpleName,
+                        "refreshWalletStates error: " + t.message,
+                        t
+                    )
                     t.printStackTrace()
                     // TODO report to user
                     hadError = true
@@ -116,7 +127,11 @@ class WalletStateSyncManager {
                 tokenDbProvider.updateTokenPrices(it)
             }
         } catch (t: Throwable) {
-            LogUtils.logDebug(this.javaClass.simpleName, "refreshTokenPrices error: " + t.message, t)
+            LogUtils.logDebug(
+                this.javaClass.simpleName,
+                "refreshTokenPrices error: " + t.message,
+                t
+            )
         }
     }
 
@@ -140,7 +155,11 @@ class WalletStateSyncManager {
                     coinGeckoApi.currencyGetPrice(fiatCurrency).execute().body()
                 fFiatValue = currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f
             } catch (t: Throwable) {
-                LogUtils.logDebug(this.javaClass.simpleName, "refreshErgFiatValue error: " + t.message, t)
+                LogUtils.logDebug(
+                    this.javaClass.simpleName,
+                    "refreshErgFiatValue error: " + t.message,
+                    t
+                )
                 // don't set to zero here, keep last value in case of connection error
             }
         } else {

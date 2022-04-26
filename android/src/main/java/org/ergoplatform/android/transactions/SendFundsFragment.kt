@@ -237,7 +237,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
                         tokenDbEntity.name ?: getString(R.string.label_unnamed_token)
 
                     val amountChosen = it.value.value
-                    val tokenPrice = walletStateSyncManager.tokenPrices[tokenDbEntity.tokenId!!]
+                    val tokenPrice = walletStateSyncManager.getTokenPrice(tokenDbEntity.tokenId)
                     val isSingular =
                         tokenDbEntity.isSingularToken() && amountChosen == 1L && tokenPrice == null
 

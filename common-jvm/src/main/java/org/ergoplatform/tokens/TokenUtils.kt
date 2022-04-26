@@ -1,5 +1,8 @@
 package org.ergoplatform.tokens
 
+import org.ergoplatform.ErgoAmount
+import org.ergoplatform.TokenAmount
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.TokenInformation
@@ -61,4 +64,13 @@ fun Eip4Token.getHttpContentLink(preferencesProvider: PreferencesProvider): Stri
         else
             null
     }
+}
+
+fun getTokenErgoValueSum(tokenList: List<WalletToken>, walletSyncManager: WalletStateSyncManager): ErgoAmount {
+    return if (walletSyncManager.fiatCurrency.isNotEmpty()) {
+        ErgoAmount(tokenList.map { token ->
+            val tokenPrice = walletSyncManager.getTokenPrice(token.tokenId)
+            tokenPrice?.let { TokenAmount(token.amount ?: 0, token.decimals).toErgoValue(it.ergValue).nanoErgs } ?: 0
+        }.sum())
+    } else ErgoAmount.ZERO
 }

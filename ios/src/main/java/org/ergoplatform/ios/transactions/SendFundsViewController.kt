@@ -371,7 +371,7 @@ class SendFundsViewController(
                                 tokenEntity,
                                 it.value,
                                 texts,
-                                walletStateSyncManager.tokenPrices[tokenEntity.tokenId!!]
+                                walletStateSyncManager.getTokenPrice(tokenEntity.tokenId)
                             )
                         tokensUiList.addArrangedSubview(tokenEntry)
                     }

@@ -341,6 +341,19 @@
                             <include layout="@layout/entry_wallet_token_details" />
                         </LinearLayout>
 
+                        <org.fabiomsr.moneytextview.MoneyTextView
+                            android:id="@+id/wallet_token_fiat"
+                            style="@style/MoneyTextViewFiatStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:textColor="@color/lightgrey"
+                            app:baseTextColor="@color/lightgrey"
+                            app:layout_constraintStart_toStartOf="@id/wallet_token_num"
+                            app:layout_constraintTop_toBottomOf="@id/tokens_logo"
+                            tools:amount="1912332564.531"
+                            tools:symbol="EUR" />
+
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>
 
