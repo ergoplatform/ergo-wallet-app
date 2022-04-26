@@ -1,6 +1,5 @@
 package org.ergoplatform.android.transactions
 
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,8 +7,11 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentReceiveToWalletBinding
@@ -20,7 +22,6 @@ import org.ergoplatform.android.ui.shareText
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.uilogic.wallet.ReceiveToWalletUiLogic
-import org.ergoplatform.utils.inputTextToDouble
 import org.ergoplatform.wallet.addresses.getAddressLabel
 
 
@@ -47,14 +48,23 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
         // Inflate the layout for this fragment
         _binding = FragmentReceiveToWalletBinding.inflate(inflater, container, false)
 
-        binding.amount.editText?.addTextChangedListener(MyTextWatcher())
-        binding.purpose.editText?.addTextChangedListener(MyTextWatcher())
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val amountToReceive = uiLogic.amountToReceive
+
+        if (Preferences(requireContext()).isSendInputFiatAmount != amountToReceive.inputIsFiat) {
+            amountToReceive.switchInputAmountMode()
+        }
+        setInputAmountLabel()
+
+        val myTextWatcher = MyTextWatcher()
+        binding.amount.editText?.addTextChangedListener(myTextWatcher)
+        binding.purpose.editText?.addTextChangedListener(myTextWatcher)
+        myTextWatcher.afterTextChanged(null) // makes fiat label visible before first editing
 
         uiLogic.derivationIdx = args.derivationIdx
         viewLifecycleOwner.lifecycleScope.launch {
@@ -80,6 +90,35 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
                 ).show(childFragmentManager, null)
             }
         }
+        binding.tvFiat.setOnClickListener {
+            val modeChanged = amountToReceive.switchInputAmountMode()
+            if (modeChanged) {
+                Preferences(requireContext()).isSendInputFiatAmount = amountToReceive.inputIsFiat
+                binding.amount.editText?.setText(
+                    amountToReceive.getInputAmountString()
+                )
+                setInputAmountLabel()
+                val snackbar = Snackbar.make(
+                    view,
+                    if (amountToReceive.inputIsFiat) R.string.message_switched_input_mode_fiat
+                    else R.string.message_switched_input_mode_erg,
+                    Snackbar.LENGTH_SHORT
+                )
+                if (requireActivity().findViewById<View?>(R.id.nav_view)?.visibility == View.VISIBLE)
+                    snackbar.setAnchorView(R.id.nav_view)
+
+                snackbar.show()
+            }
+        }
+    }
+
+    private fun setInputAmountLabel() {
+        binding.amount.hint = if (uiLogic.amountToReceive.inputIsFiat)
+            getString(
+                R.string.hint_amount_currency,
+                WalletStateSyncManager.getInstance().fiatCurrency.uppercase()
+            )
+        else getString(R.string.label_amount)
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
@@ -123,13 +162,7 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
     }
 
     private fun getTextToShare() =
-        uiLogic.getTextToShare(getInputAmount(), binding.purpose.editText?.text.toString())
-
-    private fun getInputAmount(): Double {
-        val amountStr = binding.amount.editText?.text.toString()
-        val amountVal = inputTextToDouble(amountStr)
-        return amountVal
-    }
+        uiLogic.getTextToShare(binding.purpose.editText?.text.toString())
 
     inner class MyTextWatcher : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -141,9 +174,10 @@ class ReceiveToWalletFragment : Fragment(), AddressChooserCallback {
         }
 
         override fun afterTextChanged(s: Editable?) {
+            uiLogic.amountToReceive.inputAmountChanged(binding.amount.editText?.text.toString())
             refreshQrCode()
-            val fiatString = uiLogic.getFiatAmount(
-                getInputAmount(), AndroidStringProvider(requireContext())
+            val fiatString = uiLogic.getOtherCurrencyLabel(
+                AndroidStringProvider(requireContext())
             )
 
             binding.tvFiat.visibility = if (!fiatString.isNullOrEmpty()) View.VISIBLE else View.GONE

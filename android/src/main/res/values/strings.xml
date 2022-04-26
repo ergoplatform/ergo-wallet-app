@@ -19,6 +19,7 @@
     <string name="label_copied">Copied!</string>
     <string name="label_qr_code">QR Code</string>
     <string name="label_amount">Amount</string>
+    <string name="hint_amount_currency">Amount (%1$s)</string>
     <string name="label_purpose">Purpose</string>
     <string name="label_share">Share</string>
     <string name="label_open">Open</string>
@@ -168,6 +169,8 @@
     <string name="title_choose_address">Choose an address</string>
 
     <!-- Send funds -->
+    <string name="message_switched_input_mode_fiat">Switched input mode to: Fiat amount</string>
+    <string name="message_switched_input_mode_erg">Switched input mode to: ERG amount</string>
     <string name="desc_choose_wallet">Please choose the wallet to send from:</string>
     <string name="label_to">to</string>
     <string name="hint_read_only">This is a read only wallet. For sending funds, you need a device to sign your transaction. <a href="">Learn more.</a></string>

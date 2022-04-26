@@ -5,7 +5,6 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
 import org.ergoplatform.uilogic.STRING_LABEL_AMOUNT
 import org.ergoplatform.uilogic.wallet.ReceiveToWalletUiLogic
-import org.ergoplatform.utils.inputTextToDouble
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
@@ -40,7 +39,7 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
 
         val uiBarButtonItem = UIBarButtonItem(UIBarButtonSystemItem.Action)
         uiBarButtonItem.setOnClickListener {
-            uiLogic.getTextToShare(getInputAmount(), getInputPurpose())?.let {
+            uiLogic.getTextToShare(getInputPurpose())?.let {
                 this@ReceiveToWalletViewController.shareText(
                     it,
                     uiBarButtonItem
@@ -124,11 +123,10 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
     }
 
     private fun refreshQrCode() {
-        uiLogic.getTextToShare(getInputAmount(), getInputPurpose())?.let {
+        uiLogic.getTextToShare(getInputPurpose())?.let {
             qrCode.setQrCode(it, DEFAULT_QR_CODE_SIZE)
         }
     }
 
     private fun getInputPurpose() = ""
-    private fun getInputAmount() = inputTextToDouble(inputErgoAmount.text)
 }

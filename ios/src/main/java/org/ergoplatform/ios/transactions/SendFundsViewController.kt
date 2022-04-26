@@ -149,7 +149,7 @@ class SendFundsViewController(
             }
             addOnEditingChangedListener {
                 setHasError(false)
-                uiLogic.amountToSend = text.toErgoAmount() ?: ErgoAmount.ZERO
+                uiLogic.inputAmountChanged(text)
             }
             setCustomActionField(
                 getIosSystemImage(

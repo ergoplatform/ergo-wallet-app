@@ -20,6 +20,7 @@ import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
+import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getStateForAddress
 import org.ergoplatform.wallet.getTokensForAddress
@@ -39,11 +40,10 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     /**
      * amount to send, entered by user
      */
-    var amountToSend: ErgoAmount = ErgoAmount.ZERO
-        set(value) {
-            field = value
-            calcGrossAmount()
-        }
+    val amountToSend: ErgoAmount get() = _amountToSend.ergAmount
+    private val _amountToSend = ErgoOrFiatAmount()
+    val inputIsFiat: Boolean get() = _amountToSend.inputIsFiat
+    val inputAmountString get() = _amountToSend.getInputAmountString()
 
     private val feeTxSize =
         1000 // we use constant size of 1000 here, our user-made transactions are small
@@ -84,7 +84,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             content = paymentRequest?.let { parsePaymentRequest(paymentRequest) }
             content?.let {
                 receiverAddress = content.address
-                amountToSend = content.amount
+                setAmountToSendErg(content.amount)
                 message = content.description
             }
         } else content = null
@@ -227,6 +227,44 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         }
 
         notifyTokensChosenChanged()
+    }
+
+    fun switchInputAmountMode(): Boolean {
+        return _amountToSend.switchInputAmountMode()
+    }
+
+    fun inputAmountChanged(input: String) {
+        _amountToSend.inputAmountChanged(input)
+        calcGrossAmount()
+    }
+
+    fun setAmountToSendErg(erg: ErgoAmount) {
+        _amountToSend.setErgAmount(erg)
+        calcGrossAmount()
+    }
+
+    fun getOtherCurrencyLabel(textProvider: StringProvider): String? {
+        val nodeConnector = WalletStateSyncManager.getInstance()
+        return if (nodeConnector.fiatCurrency.isNotEmpty()) {
+            if (!_amountToSend.inputIsFiat) {
+                textProvider.getString(
+                    STRING_LABEL_FIAT_AMOUNT,
+                    formatFiatToString(
+                        amountToSend.toDouble() * nodeConnector.fiatValue.value.toDouble(),
+                        nodeConnector.fiatCurrency, textProvider
+                    )
+                )
+            } else {
+                textProvider.getString(
+                    STRING_LABEL_FIAT_AMOUNT,
+                    textProvider.getString(
+                        STRING_LABEL_ERG_AMOUNT,
+                        amountToSend.toStringRoundToDecimals()
+                    )
+                )
+            }
+        } else
+            null
     }
 
     private fun calcGrossAmount() {
