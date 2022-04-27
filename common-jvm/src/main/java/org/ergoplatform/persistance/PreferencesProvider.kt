@@ -92,14 +92,14 @@ abstract class PreferencesProvider {
     var prefTokenVerificationUrl: String
         get() = getString(KEY_TOKEN_VERIFY_URL, DEFAULT_TOKEN_VERIFY_URL)
         set(value) {
-            var ipfsGatewayUrl = value
-            if (ipfsGatewayUrl.isEmpty()) {
-                ipfsGatewayUrl = DEFAULT_TOKEN_VERIFY_URL
-            } else if (!ipfsGatewayUrl.endsWith("/")) {
-                ipfsGatewayUrl += "/"
+            var tokenVerificationUrl = value
+            if (tokenVerificationUrl.isEmpty()) {
+                tokenVerificationUrl = DEFAULT_TOKEN_VERIFY_URL
+            } else if (!tokenVerificationUrl.endsWith("/")) {
+                tokenVerificationUrl += "/"
             }
 
-            saveString(KEY_TOKEN_VERIFY_URL, ipfsGatewayUrl)
+            saveString(KEY_TOKEN_VERIFY_URL, tokenVerificationUrl)
         }
 
     var lastRefreshMs: Long

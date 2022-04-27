@@ -163,4 +163,9 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
     fun isPasswordWeak(password: SecretString?): Boolean {
         return password == null || password.data.size < 8
     }
+
+    fun eraseSecrets() {
+        // it is enough to erase mnemonic: all SigningSecrets contain them
+        mnemonic.erase()
+    }
 }

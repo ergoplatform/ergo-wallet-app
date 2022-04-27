@@ -41,6 +41,7 @@ data class SigningSecrets(
                     Arrays.fill(bytes, 0)
                     SigningSecrets(mnemonic, true)
                 } catch (t: Throwable) {
+                    Arrays.fill(bytes, 0)
                     null
                 }
             }

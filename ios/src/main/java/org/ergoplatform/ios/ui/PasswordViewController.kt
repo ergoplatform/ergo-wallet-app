@@ -83,9 +83,9 @@ object PasswordViewController {
                 val enteredConfirmation = if (showConfirmation) alertController.textFields.get(1).text else null
                 val newErrorMessage =
                     if (showConfirmation && !enteredPassword.equals(enteredConfirmation))
-                        textProvider.get(STRING_ERR_PASSWORD_CONFIRM) else onPasswordEntered.invoke(
-                        SecretString.create(enteredPassword)
-                    )
+                        textProvider.get(STRING_ERR_PASSWORD_CONFIRM)
+                    else
+                        onPasswordEntered.invoke(SecretString.create(enteredPassword))
                 if (newErrorMessage != null) {
                     showDialog(
                         parentViewController,

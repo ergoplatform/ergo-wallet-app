@@ -420,13 +420,15 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                             walletDetailsViewModel.selectedIdx ?: -1
                         ).setPaymentRequest(data)
                 )
-            }, navigateToAuthentication = {
+            },
+            navigateToAuthentication = {
                 findNavController().navigate(
                     WalletDetailsFragmentDirections.actionNavigationWalletDetailsToErgoAuthFragment(
                         it
                     ).setWalletId(walletDetailsViewModel.wallet!!.walletConfig.id)
                 )
-            }, showErrorMessage = {
+            },
+            showErrorMessage = {
                 MaterialAlertDialogBuilder(requireContext()).setMessage(it)
                     .setPositiveButton(R.string.zxing_button_ok, null)
                     .show()

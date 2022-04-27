@@ -49,4 +49,9 @@ class SaveWalletViewModel : ViewModel() {
             AppDatabase.getInstance(context).walletDbProvider
         ) { _derivedAddressNum.postValue(it) }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        uiLogic?.eraseSecrets()
+    }
 }

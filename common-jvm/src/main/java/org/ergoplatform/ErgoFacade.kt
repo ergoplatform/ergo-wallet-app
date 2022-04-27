@@ -132,9 +132,7 @@ fun sendErgoTx(
                 BoxOperations.createForEip3Prover(prover, ctx).withAmountToSpend(amountToSend)
                     .withFeeAmount(feeAmount)
                     .withInputBoxesLoader(
-                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(
-                            true
-                        )
+                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
                     )
                     .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
             val signed = prover.sign(unsignedTx)
@@ -196,9 +194,7 @@ fun prepareSerializedErgoTx(
                 BoxOperations.createForSenders(senderAddresses, ctx).withAmountToSpend(amountToSend)
                     .withFeeAmount(feeAmount)
                     .withInputBoxesLoader(
-                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(
-                            true
-                        )
+                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
                     )
                     .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
 

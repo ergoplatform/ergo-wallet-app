@@ -76,7 +76,9 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
         if (binding.editPasswordConfirm.visibility == View.VISIBLE) {
             val confirmPassword = binding.editPasswordConfirm.editText?.getSecretString()
 
-            if (password == null || !password.equals(confirmPassword)) {
+            if (password == null || password != confirmPassword) {
+                confirmPassword?.erase()
+                password?.erase()
                 binding.editPassword.error = getString(R.string.err_password_confirm)
                 return
             }

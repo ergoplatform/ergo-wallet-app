@@ -11,6 +11,7 @@ import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
 import org.ergoplatform.persistance.WalletConfig
+import java.util.*
 
 /**
  * Class to use when authentication with Biometrics and password to access mnemonic is needed
@@ -102,11 +103,15 @@ abstract class AbstractAuthenticationFragment : Fragment(), PasswordDialogCallba
     private fun proceedAuthFlowWithPassword(password: SecretString): Boolean {
         authenticationWalletConfig?.secretStorage?.let {
             val secrets: SigningSecrets?
+            var decryptData: ByteArray? = null
             try {
-                val decryptData = AesEncryptionManager.decryptData(password, it)
+                decryptData = AesEncryptionManager.decryptData(password, it)
                 secrets = SigningSecrets.fromBytes(decryptData!!)
             } catch (t: Throwable) {
                 // Password wrong
+                decryptData?.let {
+                    Arrays.fill(decryptData, 0)
+                }
                 return false
             }
 

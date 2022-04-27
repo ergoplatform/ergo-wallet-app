@@ -110,11 +110,14 @@ class BottomNavigationBar : UITabBarController() {
                         }
                     }
                 }
-            }, navigateToErgoPay = { request ->
+            },
+            navigateToErgoPay = { request ->
                 navigateToWalletListAndPushVc(ErgoPaySigningViewController(request), true)
-            }, navigateToAuthentication = { request ->
+            },
+            navigateToAuthentication = { request ->
                 navigateToWalletListAndPushVc(ErgoAuthenticationViewController(request, null), true)
-            }, presentUserMessage = { message ->
+            },
+            presentUserMessage = { message ->
                 presentViewController(buildSimpleAlertController("", message, texts), true) {}
             })
     }
