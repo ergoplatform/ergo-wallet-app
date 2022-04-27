@@ -77,19 +77,22 @@ class MainActivity : AppCompatActivity() {
                     R.id.chooseSpendingWalletFragmentDialog,
                     ChooseSpendingWalletFragmentDialog.buildArgs(it)
                 )
-            }, navigateToErgoPay = {
+            },
+            navigateToErgoPay = {
                 navController.navigate(
                     WalletFragmentDirections.actionNavigationWalletToErgoPaySigningFragment(
                         it
                     ).setCloseApp(!fromQrCode)
                 )
-            }, navigateToAuthentication = {
+            },
+            navigateToAuthentication = {
                 navController.navigate(
                     WalletFragmentDirections.actionNavigationWalletToErgoAuthFragment(
                         it
                     )
                 )
-            }, presentUserMessage = {
+            },
+            presentUserMessage = {
                 MaterialAlertDialogBuilder(this)
                     .setMessage(it)
                     .setPositiveButton(R.string.zxing_button_ok, null)

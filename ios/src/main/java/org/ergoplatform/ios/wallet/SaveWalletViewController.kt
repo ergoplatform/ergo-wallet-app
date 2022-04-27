@@ -205,7 +205,9 @@ class SaveWalletViewController(
                 encType, secretStorage
             )
         }
-        navigationController.dismissViewController(true) {}
+        navigationController.dismissViewController(true) {
+            uiLogic.eraseSecrets()
+        }
     }
 
     override fun viewWillAppear(animated: Boolean) {

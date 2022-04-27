@@ -134,9 +134,7 @@ fun sendErgoTx(
                     .withFeeAmount(feeAmount)
                     .withMessage(message)
                     .withInputBoxesLoader(
-                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(
-                            true
-                        )
+                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
                     )
                     .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
             val signed = prover.sign(unsignedTx)
@@ -200,9 +198,7 @@ fun prepareSerializedErgoTx(
                     .withFeeAmount(feeAmount)
                     .withMessage(message)
                     .withInputBoxesLoader(
-                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(
-                            true
-                        )
+                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
                     )
                     .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
 

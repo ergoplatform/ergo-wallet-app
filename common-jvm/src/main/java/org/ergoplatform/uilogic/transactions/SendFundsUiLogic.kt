@@ -153,9 +153,9 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 suggestedFeeItems = emptyList()
                 val fetchedItems = ArrayList<SuggestedFee>()
                 val listSpeedPairs: List<Pair<ExecutionSpeed, Int>> = listOf(
-                    Pair(ExecutionSpeed.Fast, 5),
-                    Pair(ExecutionSpeed.Medium, 30),
-                    Pair(ExecutionSpeed.Slow, 240),
+                    Pair(ExecutionSpeed.Fast, 5), // five minutes: fast
+                    Pair(ExecutionSpeed.Medium, 30), // 30 minutes: medium speed
+                    Pair(ExecutionSpeed.Slow, 240), // 240 minutes: slow execution
                 )
 
                 listSpeedPairs.takeWhile { speedPair ->
