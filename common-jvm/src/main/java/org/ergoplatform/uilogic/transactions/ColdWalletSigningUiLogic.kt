@@ -89,6 +89,7 @@ abstract class ColdWalletSigningUiLogic {
                         derivedAddresses, texts
                     )
                     signedQrCode = buildColdSigningResponse(ergoTxResult)
+                    signingSecrets.clearMemory()
                 }
                 notifyUiLocked(false)
 

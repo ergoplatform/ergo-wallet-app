@@ -33,6 +33,7 @@ class ErgoDexPriceApi : TokenPriceApi {
             ergBasePrices.forEach {
                 val otherEntry = hashMap.get(it.tokenId)
 
+                // prefer pools without more trading volume
                 if (otherEntry == null || otherEntry.baseVolume.value < it.baseVolume.value)
                     hashMap.put(it.tokenId, it)
             }

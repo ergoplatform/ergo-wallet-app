@@ -26,12 +26,12 @@
     <string name="label_dismiss">摒弃</string>
     <string name="label_remove">移除</string>
     <string name="label_confirm">确认</string>
-    <string name="label_erg_amount">%1s ERG</string>
+    <string name="label_erg_amount">%1$s ERG</string>
     <string name="label_time_span_just_now">刚刚</string>
     <string name="label_time_span_moments_ago">几分钟前</string>
-    <string name="label_time_span_minutes_ago">%1s 分钟前</string>
-    <string name="label_time_span_hours_ago">%1s 小时前</string>
-    <string name="label_time_span_days_ago">%1s 天前</string>
+    <string name="label_time_span_minutes_ago">%1$s 分钟前</string>
+    <string name="label_time_span_hours_ago">%1$s 小时前</string>
+    <string name="label_time_span_days_ago">%1$s 天前</string>
     <string name="error_camera">初始化相机时出错。请检查您的隐私设置。</string>
 
     <!-- Wallet -->
@@ -40,10 +40,10 @@
     <string name="label_unconfirmed">未确认</string>
     <string name="button_receive">接收</string>
     <string name="button_send">发送</string>
-    <string name="button_display_currency">显示币种：%1s</string>
-    <string name="label_last_sync">已同步 %1s</string>
+    <string name="button_display_currency">显示币种：%1$s</string>
+    <string name="label_last_sync">已同步 %1$s</string>
     <string name="label_erg_price">1 ERG ≈</string>
-    <string name="label_fiat_amount">≈ %1s</string>
+    <string name="label_fiat_amount">≈ %1$s</string>
     <string name="label_wallet_default">我的钱包</string>
 
     <!-- add wallet -->
@@ -66,7 +66,7 @@
     <string name="intro_confirm_create_wallet">为了确认您抄写的助记词正确无误，请立即输入这些助记词中的两个单词：</string>
     <string name="check_confirm_create_wallet">我明白我有责任将我的助记词存放在安全的地方。
    如果存储在此设备上的密钥丢失或无法访问，则助记词是访问我的钱包的唯一方式。</string>
-    <string name="label_word_confirm_create_wallet">单词 %1s</string>
+    <string name="label_word_confirm_create_wallet">单词 %1$s</string>
     <string name="error_word_confirm_create_wallet">单词错误</string>
 
     <!-- Restore wallet -->
@@ -75,7 +75,7 @@
         <a href="https://github.com/ergoplatform/ergo/blob/master/ergo-wallet/src/main/resources/wordlist/english.txt">查看单词列表</a>
             并进行比较。</string>
     <string name="button_restore">恢复钱包</string>
-    <string name="mnemonic_length_not_enough">单词数不够，请至少再添加 %1s</string>
+    <string name="mnemonic_length_not_enough">单词数不够，请至少再添加 %1$s</string>
     <string name="mnemonic_unknown_words">助记词包含未知单词，请检查拼写错误</string>
     <string name="mnemonic_invalid">助记词验证失败。如果您确定助记词输入正确，您可以再次点击以继续。</string>
 
@@ -86,7 +86,7 @@
     <string name="button_save_password_encrypted">保存已加密密码</string>
     <string name="desc_save_password_encrypted">您须输入每次您打算发送资金时都需要重新输入的密码短语。</string>
     <string name="button_save_device_encrypted">保存已加密设备</string>
-    <string name="desc_save_device_encrypted">您需要在您的设备上进行验证以保存钱包并发送资金。\n当前验证方法：%1s</string>
+    <string name="desc_save_device_encrypted">您需要在您的设备上进行验证以保存钱包并发送资金。\n当前验证方法：%1$s</string>
     <string name="button_save_keychain">保存在密钥串中</string>
     <string name="desc_save_keychain">您需要在您的设备上进行验证才能发送资金。</string>
     <string name="device_enc_security_none">无</string>
@@ -104,17 +104,17 @@
 
     <!-- Wallet details -->
     <string name="title_wallet_balance">余额</string>
-    <string name="label_all_addresses">所有 %1d 地址</string>
+    <string name="label_all_addresses">所有 %1$d 地址</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">地址</string>
     <string name="title_wallet_address">显示以下内容</string>
     <string name="label_wallet_main_address">主地址</string>
-    <string name="label_wallet_address_derived">派生地址 %1s</string>
-    <string name="label_wallet_token_balance">%1s 代币</string>
+    <string name="label_wallet_address_derived">派生地址 %1$s</string>
+    <string name="label_wallet_token_balance">%1$s 代币</string>
     <string name="desc_wallet_addresses">一个钱包可以有多个从主地址派生的公共地址。</string>
     <string name="button_add_address">添加地址</string>
-    <string name="button_add_addresses">添加 %1d 地址</string>
+    <string name="button_add_addresses">添加 %1$d 地址</string>
     <string name="desc_wallet_addr_label">为此地址设置一个描述性标签（只有您可见）：</string>
     <string name="hint_wallet_addr_label">描述标签（可选）</string>
     <string name="desc_wallet_addr_remove">您可以从此应用的查看中删除此地址。它仍然可以
@@ -126,11 +126,11 @@
     <string name="label_to">发送至</string>
     <string name="hint_read_only">>这是一个只读钱包。如要发送资金，您需要一台设备来签署您的交易。 <a href="">了解详情。</a></string>
     <string name="desc_send_funds">输入接收方地址和发送金额，或扫描二维码。</string>
-    <string name="label_send_from">从：%1s</string>
-    <string name="label_wallet_balance">余额：%1s ERG</string>
+    <string name="label_send_from">从：%1$s</string>
+    <string name="label_wallet_balance">余额：%1$s ERG</string>
     <string name="label_receiver_address">接收方地址</string>
     <string name="label_scan_qr">扫描二维码</string>
-    <string name="desc_fee">手续费：%1s ERG</string>
+    <string name="desc_fee">手续费：%1$s ERG</string>
     <string name="error_receiver_address">请输入有效 ERG 地址</string>
     <string name="error_amount">请输入有效金额</string>
     <string name="error_send_transaction">无法发送交易</string>
@@ -146,7 +146,7 @@
     <string name="button_scan_signed_tx">扫描已签名交易</string>
     <string name="button_next">下一步</string>
     <string name="title_authenticate">需要验证</string>
-    <string name="error_device_security">安全错误：%1s</string>
+    <string name="error_device_security">安全错误：%1$s</string>
     <string name="label_add_token">代币</string>
     <string name="label_send_all">全部发送</string>
     <string name="title_add_token">选择要发送的代币</string>
@@ -158,7 +158,7 @@
     <string name="title_inboxes">支出金额</string>
     <string name="desc_inboxes">在处理交易时将支出这些金额。</string>
     <string name="title_outboxes">支出金额</string>
-    <string name="label_qr_pages_info"> %2s中的 %1s </string>
+    <string name="label_qr_pages_info"> %2$s中的 %1$s </string>
     <string name="desc_outboxes">这些金额将在处理交易时发送。</string>
     <string name="desc_show_signed">您的交易已签名，需要发送到网络。
          扫描此二维码以继续。</string>
@@ -166,7 +166,7 @@
         扫描这些二维码以继续。</string>
 
     <!-- Settings -->
-    <string name="desc_about"> Benjamin Schulte于 %1s 年为您带来 </string>
+    <string name="desc_about"> Benjamin Schulte于 %1$s 年为您带来 </string>
     <string name="desc_about_moreinfo">许可依据<a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Apache 2 License</a>\n
         本项目是一个<a href="https://github.com/ergoplatform/ergo-wallet-app">开源软件</a>\n
     请到<a href="https://discord.gg/kj7s7nb">Discord</a> 或 <a href="https://t.me/ErgoWalletApp">电报</a></string>寻求帮助

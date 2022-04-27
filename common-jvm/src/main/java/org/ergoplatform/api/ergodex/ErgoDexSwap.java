@@ -23,7 +23,11 @@ public class ErgoDexSwap {
     @SerializedName("lastPrice")
     public BigDecimal lastPrice;
 
+    // traded volume for a given period of time - base symbol
     public ErgoDexSwapVolume baseVolume;
+
+    // traded volume for a given period of time - quote symbol
+    public ErgoDexSwapVolume quoteVolume;
 
     public static class ErgoDexSwapVolume {
         long value;

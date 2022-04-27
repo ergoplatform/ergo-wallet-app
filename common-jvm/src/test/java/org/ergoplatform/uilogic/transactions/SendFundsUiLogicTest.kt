@@ -3,13 +3,12 @@ package org.ergoplatform.uilogic.transactions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.ErgoApi
 import org.ergoplatform.appkit.Parameters
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.TestUiWallet
 import org.junit.Assert.*
-
 import org.junit.Test
 import org.mockito.kotlin.mock
 import kotlin.coroutines.EmptyCoroutineContext
@@ -76,7 +75,7 @@ class SendFundsUiLogicTest {
         val uiLogic = TestSendFundsUiLogic()
 
         val walletId = 1
-        uiLogic.initWallet(TestUiWallet.getSingleWalletSingleAddressDbProvider(walletId), mock<ErgoApi> {}, walletId, 0, null)
+        uiLogic.initWallet(TestUiWallet.getSingleWalletSingleAddressDbProvider(walletId), mock<ApiServiceManager> {}, walletId, 0, null)
 
         delay(100)
         return uiLogic
@@ -96,6 +95,10 @@ class SendFundsUiLogicTest {
         }
 
         override fun notifyTokensChosenChanged() {
+
+        }
+
+        override fun onNotifySuggestedFees() {
 
         }
 

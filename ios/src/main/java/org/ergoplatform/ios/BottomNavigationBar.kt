@@ -3,6 +3,7 @@ package org.ergoplatform.ios
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
 import org.ergoplatform.ios.settings.SettingsViewController
 import org.ergoplatform.ios.transactions.ChooseSpendingWalletViewController
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
@@ -78,7 +79,9 @@ class BottomNavigationBar : UITabBarController() {
         itemAppearance.normal.iconColor = UIColor.label()
         val textAttributes = NSDictionary(
             NSAttributedStringAttribute.Values.ForegroundColor(),
-            UIColor.label()
+            UIColor.label(),
+            NSAttributedStringAttribute.Values.ParagraphStyle(),
+            NSParagraphStyle.getDefaultParagraphStyle()
         )
         itemAppearance.normal.titleTextAttributes = textAttributes
         itemAppearance.selected.iconColor = UIColor.label()
@@ -90,9 +93,10 @@ class BottomNavigationBar : UITabBarController() {
         MainAppUiLogic.handleRequests(paymentRequest,
             fromQr,
             IosStringProvider(texts),
-            {
+            navigateToChooseWalletDialog = {
                 CoroutineScope(Dispatchers.Default).launch {
-                    val wallets = getAppDelegate().database.walletDbProvider.getAllWalletConfigsSynchronous()
+                    val wallets =
+                        getAppDelegate().database.walletDbProvider.getAllWalletConfigsSynchronous()
 
                     runOnMainThread {
                         if (wallets.size == 1) {
@@ -106,10 +110,26 @@ class BottomNavigationBar : UITabBarController() {
                         }
                     }
                 }
-
-            }, { message ->
+            },
+            navigateToErgoPay = { request ->
+                navigateToWalletListAndPushVc(ErgoPaySigningViewController(request), true)
+            },
+            navigateToAuthentication = { request ->
+                navigateToWalletListAndPushVc(ErgoAuthenticationViewController(request, null), true)
+            },
+            presentUserMessage = { message ->
                 presentViewController(buildSimpleAlertController("", message, texts), true) {}
             })
+    }
+
+    private fun navigateToWalletListAndPushVc(vc: UIViewController, animated: Boolean) {
+        // set view to first controller (wallet list), go back to its root and switch to the
+        // wallet's send funds screen
+        selectedViewController = viewControllers.first()
+        (selectedViewController as? UINavigationController)?.apply {
+            popToRootViewController(false)
+            pushViewController(vc, animated)
+        }
     }
 
     private fun navigateToNextScreen(
@@ -117,17 +137,13 @@ class BottomNavigationBar : UITabBarController() {
         paymentRequest: String,
         fromChooseScreen: Boolean
     ) {
-        // set view to first controller (wallet list), go back to its root and switch to the
-        // wallet's send funds screen
-        selectedViewController = viewControllers.first()
-        (selectedViewController as? UINavigationController)?.apply {
-            popToRootViewController(false)
-            pushViewController(
-                if (isErgoPaySigningRequest(paymentRequest)) ErgoPaySigningViewController(paymentRequest, walletId)
-                else SendFundsViewController(walletId, paymentRequest = paymentRequest),
-                !fromChooseScreen
+        navigateToWalletListAndPushVc(
+            if (isErgoPaySigningRequest(paymentRequest)) ErgoPaySigningViewController(
+                paymentRequest,
+                walletId
             )
-        }
-
+            else SendFundsViewController(walletId, paymentRequest = paymentRequest),
+            !fromChooseScreen
+        )
     }
 }

@@ -4,8 +4,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.ergoauth.isErgoAuthRequest
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.*
 import org.ergoplatform.tokens.TokenInfoManager
@@ -94,7 +95,7 @@ abstract class WalletDetailsUiLogic {
         addressesToRefresh?.forEach {
             TransactionListManager.downloadTransactionListForAddress(
                 it.publicAddress,
-                ErgoApiService.getOrInit(prefs),
+                ApiServiceManager.getOrInit(prefs),
                 db
             )
         }
@@ -119,7 +120,7 @@ abstract class WalletDetailsUiLogic {
         return WalletStateSyncManager.getInstance().refreshByUser(prefs, database)
     }
 
-    fun gatherTokenInformation(tokenDbProvider: TokenDbProvider, apiService: ErgoApiService) {
+    fun gatherTokenInformation(tokenDbProvider: TokenDbProvider, apiService: ApiServiceManager) {
 
         // cancel former Jobs, if any
         tokenInformationJob?.cancel()
@@ -167,12 +168,15 @@ abstract class WalletDetailsUiLogic {
         navigateToColdWalletSigning: ((signingData: String) -> Unit),
         navigateToErgoPaySigning: ((ergoPayRequest: String) -> Unit),
         navigateToSendFundsScreen: ((requestData: String) -> Unit),
+        navigateToAuthentication: (String) -> Unit,
         showErrorMessage: ((errorMessage: String) -> Unit)
     ) {
         if (wallet?.walletConfig?.secretStorage != null && isColdSigningRequestChunk(qrCodeData)) {
             navigateToColdWalletSigning.invoke(qrCodeData)
         } else if (isErgoPaySigningRequest(qrCodeData)) {
             navigateToErgoPaySigning.invoke(qrCodeData)
+        } else if (isErgoAuthRequest(qrCodeData)) {
+            navigateToAuthentication(qrCodeData)
         } else {
             val content = parsePaymentRequest(qrCodeData)
             content?.let {

@@ -153,8 +153,10 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
 
     private fun onDisplayXpubClicked() {
         uiLogic.wallet?.secretStorage?.let {
-            startAuthFlow(uiLogic.wallet!!) { mnemonic ->
-                displayXpub(getSerializedXpubKeyFromMnemonic(mnemonic))
+            startAuthFlow(uiLogic.wallet!!) { signingSecrets ->
+                val xpubkey = getSerializedXpubKeyFromMnemonic(signingSecrets)
+                signingSecrets.clearMemory()
+                displayXpub(xpubkey)
             }
         } ?: uiLogic.wallet?.extendedPublicKey?.let {
             displayXpub(it)

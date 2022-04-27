@@ -88,12 +88,9 @@ class SendFundsFragment : SubmitTransactionFragment() {
                 it.toStringRoundToDecimals()
             )
         })
-        viewModel.grossAmount.observe(viewLifecycleOwner, {
-            binding.tvFee.text = getString(
-                R.string.desc_fee,
-                viewModel.uiLogic.feeAmount.toStringRoundToDecimals()
-            )
-            binding.grossAmount.setAmount(it.toBigDecimal())
+        viewModel.grossAmount.observe(viewLifecycleOwner) { grossAmount ->
+            binding.tvFee.text = viewModel.uiLogic.getFeeDescriptionLabel(AndroidStringProvider(requireContext()))
+            binding.grossAmount.setAmount(grossAmount.toBigDecimal())
             val nodeConnector = WalletStateSyncManager.getInstance()
             binding.tvFiat.visibility =
                 if (nodeConnector.fiatCurrency.isNotEmpty()) View.VISIBLE else View.GONE
@@ -106,7 +103,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
                     ),
                 )
             )
-        })
+        }
         viewModel.tokensChosenLiveData.observe(viewLifecycleOwner, {
             refreshTokensList()
         })
@@ -152,6 +149,9 @@ class SendFundsFragment : SubmitTransactionFragment() {
         }
         binding.hintReadonly.setOnClickListener {
             openUrlWithBrowser(requireContext(), URL_COLD_WALLET_HELP)
+        }
+        binding.tvFee.setOnClickListener {
+            ChooseFeeDialogFragment().show(childFragmentManager, null)
         }
 
         // Init other stuff
@@ -313,7 +313,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
         }
 
         if (checkResponse.canPay) {
-            startAuthFlow(viewModel.uiLogic.wallet!!.walletConfig)
+            startAuthFlow()
         }
     }
 

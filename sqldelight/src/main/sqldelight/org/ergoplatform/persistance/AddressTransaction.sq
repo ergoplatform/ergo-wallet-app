@@ -22,6 +22,9 @@ SELECT * FROM `address_transaction` WHERE address = ? LIMIT :limit OFFSET :offse
 loadAddressTransaction:
 SELECT * FROM `address_transaction` WHERE id = ?;
 
+loadAddressTransactionByAddressAndTxId:
+SELECT * FROM `address_transaction` WHERE address = ? AND tx_id = ?;
+
 deleteByAddress:
 DELETE FROM address_transaction WHERE address = ?;
 

@@ -246,6 +246,13 @@ class RoomTransactionDbProvider(private val database: AppDatabase) : Transaction
         database.transactionDao().insertOrUpdateAddressTransaction(addressTransaction.toDbEntity())
     }
 
+    override suspend fun loadAddressTransaction(
+        address: String,
+        txId: String
+    ): AddressTransaction? {
+        return database.transactionDao().loadAddressTransaction(address, txId)?.toModel()
+    }
+
     override suspend fun loadAddressTransactions(
         address: String,
         limit: Int,

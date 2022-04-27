@@ -49,6 +49,7 @@ class SettingsFragment : Fragment() {
         // makes the links clickable
         binding.labelMoreInfo.enableLinks()
         binding.labelCoingecko.enableLinks()
+        binding.labelTokenVerification.enableLinks()
 
         showDisplayCurrency()
 

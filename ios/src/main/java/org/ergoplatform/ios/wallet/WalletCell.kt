@@ -162,7 +162,10 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
 
     private fun toggleTokenUnfold() {
         wallet?.walletConfig?.let { config ->
-            getAppDelegate().database.walletDbProvider.updateWalletDisplayTokens(!config.unfoldTokens, config.id)
+            getAppDelegate().database.walletDbProvider.updateWalletDisplayTokens(
+                !config.unfoldTokens,
+                config.id
+            )
         }
     }
 
@@ -204,11 +207,14 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
 
         tokenStack.clearArrangedSubviews()
         if (wallet.walletConfig.unfoldTokens) {
-            fillTokenOverview(tokens, {
-                tokenStack.addArrangedSubview(TokenEntryView().bindWalletToken(it, textBundle))
-            }, {
-                tokenStack.addArrangedSubview(TokenEntryView().bindHasMoreTokenHint(it))
-            })
+            fillTokenOverview(
+                tokens,
+                addToken = {
+                    tokenStack.addArrangedSubview(TokenEntryView().bindWalletToken(it, textBundle))
+                },
+                addMoreTokenHint = {
+                    tokenStack.addArrangedSubview(TokenEntryView().bindHasMoreTokenHint(it))
+                })
         }
     }
 

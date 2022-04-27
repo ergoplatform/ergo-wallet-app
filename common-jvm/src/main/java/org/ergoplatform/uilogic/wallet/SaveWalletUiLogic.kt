@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.SecretString
@@ -51,7 +51,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
     }
 
     suspend fun startDerivedAddressesSearch(
-        ergoApiService: ErgoApiService,
+        ergoApiService: ApiServiceManager,
         walletDbProvider: WalletDbProvider,
         callback: (Int) -> Unit
     ) {
@@ -160,7 +160,12 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
         }
     }
 
-    fun isPasswordWeak(password: String?): Boolean {
-        return password == null || password.length < 8
+    fun isPasswordWeak(password: SecretString?): Boolean {
+        return password == null || password.data.size < 8
+    }
+
+    fun eraseSecrets() {
+        // it is enough to erase mnemonic: all SigningSecrets contain them
+        mnemonic.erase()
     }
 }

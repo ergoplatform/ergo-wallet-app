@@ -1,5 +1,6 @@
 package org.ergoplatform.api;
 
+import org.ergoplatform.appkit.SecretString;
 import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.*;
@@ -16,6 +17,7 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 
 /**
  * Encryption / Decryption service using the AES algorithm
@@ -34,7 +36,7 @@ public class AesEncryptionManager {
      * @param data     the data that will be encrypted
      * @return Encrypted data in a byte array
      */
-    public static byte[] encryptData(String password, byte[] data) throws NoSuchPaddingException,
+    public static byte[] encryptData(SecretString password, byte[] data) throws NoSuchPaddingException,
             NoSuchAlgorithmException,
             InvalidAlgorithmParameterException,
             InvalidKeyException,
@@ -80,6 +82,9 @@ public class AesEncryptionManager {
         //Encrypt the data
         byte[] encryptedData = cipher.doFinal(data);
 
+        // wipe data
+        Arrays.fill(data, (byte) 0);
+
         //Concatenate everything and return the final data
         ByteBuffer byteBuffer = ByteBuffer.allocate(4 + iv.length + encryptedData.length);
         byteBuffer.putInt(iv.length);
@@ -89,7 +94,7 @@ public class AesEncryptionManager {
     }
 
 
-    public static byte[] decryptData(String password, byte[] encryptedData)
+    public static byte[] decryptData(SecretString password, byte[] encryptedData)
             throws NoSuchPaddingException,
             NoSuchAlgorithmException,
             InvalidAlgorithmParameterException,
@@ -126,8 +131,8 @@ public class AesEncryptionManager {
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
      */
-    private static SecretKey generateSecretKey(String password, byte[] iv) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), iv, 65536, 128); // AES-128
+    private static SecretKey generateSecretKey(SecretString password, byte[] iv) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        KeySpec spec = new PBEKeySpec(password.getData(), iv, 65536, 128); // AES-128
         SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         byte[] key = secretKeyFactory.generateSecret(spec).getEncoded();
         return new SecretKeySpec(key, "AES");

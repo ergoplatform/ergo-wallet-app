@@ -132,7 +132,16 @@ class SendFundsViewController(
         fiatLabel.textAlignment = NSTextAlignment.Right
         fiatLabel.isHidden = true
 
-        feeLabel = Body1Label()
+        feeLabel = Body1Label().apply {
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UITapGestureRecognizer {
+                presentViewController(
+                    ChooseFeeAmountViewController(
+                        uiLogic
+                    ), true
+                ) {}
+            })
+        }
         grossAmountLabel = ErgoAmountView(true, FONT_SIZE_HEADLINE1)
         val grossAmountContainer = UIView()
         grossAmountContainer.layoutMargins = UIEdgeInsets.Zero()
@@ -245,7 +254,13 @@ class SendFundsViewController(
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         val appDelegate = getAppDelegate()
-        uiLogic.initWallet(appDelegate.database, ErgoApiService.getOrInit(appDelegate.prefs), walletId, derivationIdx, paymentRequest)
+        uiLogic.initWallet(
+            appDelegate.database,
+            ApiServiceManager.getOrInit(appDelegate.prefs),
+            walletId,
+            derivationIdx,
+            paymentRequest
+        )
 
         inputReceiver.text = uiLogic.receiverAddress
         if (uiLogic.amountToSend.nanoErgs > 0) setInputAmount(uiLogic.amountToSend)
@@ -277,6 +292,8 @@ class SendFundsViewController(
     }
 
     inner class IosSendFundsUiLogic : SendFundsUiLogic() {
+        var feeSuggestionObserver: (() -> Unit)? = null
+
         private val progressViewController =
             ProgressViewController.ProgressViewControllerPresenter(this@SendFundsViewController)
 
@@ -333,9 +350,14 @@ class SendFundsViewController(
             }
         }
 
+        override fun onNotifySuggestedFees() {
+            feeSuggestionObserver?.invoke()
+        }
+
         override fun notifyAmountsChanged() {
             runOnMainThread {
-                feeLabel.text = texts.format(STRING_DESC_FEE, feeAmount.toStringRoundToDecimals())
+                val text = IosStringProvider(texts)
+                feeLabel.text = getFeeDescriptionLabel(text)
                 grossAmountLabel.setErgoAmount(grossAmount)
                 val nodeConnector = WalletStateSyncManager.getInstance()
                 fiatLabel.isHidden = (nodeConnector.fiatCurrency.isEmpty())
@@ -343,7 +365,7 @@ class SendFundsViewController(
                     STRING_LABEL_FIAT_AMOUNT,
                     formatFiatToString(
                         amountToSend.toDouble() * nodeConnector.fiatValue.value.toDouble(),
-                        nodeConnector.fiatCurrency, IosStringProvider(texts)
+                        nodeConnector.fiatCurrency, text
                     )
                 )
             }

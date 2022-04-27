@@ -15,10 +15,10 @@ task convertStrings {
     def dest2 = '../common-jvm/src/main/java/org/ergoplatform/uilogic/StringResources.kt'
 
     ext.changePlaceHolders = { stringText ->
-        return stringText.replace("%1d", "{0}").replace("%1s", "{0}")
-                .replace("%2d", "{1}").replace("%2s", "{1}")
-                .replace("%3d", "{2}").replace("%3s", "{2}")
-                .replace("%4d", "{3}").replace("%4s", "{3}")
+        return stringText.replace("%1\$d", "{0}").replace("%1\$s", "{0}")
+                .replace("%2\$d", "{1}").replace("%2\$s", "{1}")
+                .replace("%3\$d", "{2}").replace("%3\$s", "{2}")
+                .replace("%4\$d", "{3}").replace("%4\$s", "{3}")
     }
 
     ext.addEndLineChar = { line ->
