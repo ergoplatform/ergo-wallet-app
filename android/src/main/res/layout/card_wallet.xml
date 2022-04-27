@@ -130,7 +130,7 @@
                 app:layout_constraintTop_toTopOf="@id/wallet_token_num" />
 
             <org.fabiomsr.moneytextview.MoneyTextView
-                android:id="@+id/wallet_token_fiat"
+                android:id="@+id/wallet_token_value"
                 style="@style/MoneyTextViewFiatStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

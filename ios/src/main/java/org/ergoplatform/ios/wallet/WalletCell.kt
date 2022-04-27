@@ -13,6 +13,7 @@ import org.ergoplatform.tokens.getTokenErgoValueSum
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
+import org.ergoplatform.utils.formatTokenPriceToString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
 import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
@@ -29,7 +30,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
     private lateinit var nameLabel: Body1Label
     private lateinit var balanceLabel: ErgoAmountView
     private lateinit var fiatBalance: Body1Label
-    private lateinit var tokenFiatBalance: Body1Label
+    private lateinit var tokenValueBalance: Body1Label
     private lateinit var unconfirmedBalance: Body1BoldLabel
     private lateinit var tokenCount: Headline2Label
     private lateinit var unfoldTokensButton: UIImageView
@@ -72,16 +73,16 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
             layoutMargins = UIEdgeInsets(DEFAULT_MARGIN * .5, DEFAULT_MARGIN * 2, 0.0, 0.0)
             isLayoutMarginsRelativeArrangement = true
         }
-        tokenFiatBalance = Body1Label().apply {
+        tokenValueBalance = Body1Label().apply {
             textColor = UIColor.secondaryLabel()
             numberOfLines = 1
         }
         val tokenTitles = UIView(CGRect.Zero()).apply {
             layoutMargins = UIEdgeInsets.Zero()
             addSubview(tokenCount)
-            addSubview(tokenFiatBalance)
+            addSubview(tokenValueBalance)
             tokenCount.leftToSuperview().topToSuperview().bottomToSuperview().enforceKeepIntrinsicWidth()
-            tokenFiatBalance.centerVerticallyTo(tokenCount).leftToRightOf(tokenCount, DEFAULT_MARGIN * 1.5f)
+            tokenValueBalance.centerVerticallyTo(tokenCount).leftToRightOf(tokenCount, DEFAULT_MARGIN * 1.5f)
                 .rightToSuperview()
         }
 
@@ -215,12 +216,10 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         tokenCount.text = tokens.size.toString() + " tokens"
         tokenCount.isHidden = tokens.isEmpty()
         val tokenErgAmount = getTokenErgoValueSum(tokens, nodeConnector)
-        tokenFiatBalance.isHidden = fiatBalance.isHidden || tokenCount.isHidden || tokenErgAmount.isZero()
-        if (!tokenFiatBalance.isHidden) {
-            tokenFiatBalance.text = formatFiatToString(
-                tokenErgAmount.toDouble() * ergoPrice.toDouble(),
-                nodeConnector.fiatCurrency, stringProvider
-            )
+        tokenValueBalance.isHidden = tokenCount.isHidden || tokenErgAmount.isZero()
+        if (!tokenValueBalance.isHidden) {
+            tokenValueBalance.text =
+                formatTokenPriceToString(tokenErgAmount, nodeConnector, stringProvider)
         }
 
         unfoldTokensButton.isHidden = tokens.isEmpty()

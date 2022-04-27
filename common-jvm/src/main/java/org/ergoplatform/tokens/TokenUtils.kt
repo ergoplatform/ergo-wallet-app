@@ -66,11 +66,16 @@ fun Eip4Token.getHttpContentLink(preferencesProvider: PreferencesProvider): Stri
     }
 }
 
-fun getTokenErgoValueSum(tokenList: List<WalletToken>, walletSyncManager: WalletStateSyncManager): ErgoAmount {
-    return if (walletSyncManager.fiatCurrency.isNotEmpty()) {
-        ErgoAmount(tokenList.map { token ->
+fun getTokenErgoValueSum(
+    tokenList: List<WalletToken>,
+    walletSyncManager: WalletStateSyncManager
+): ErgoAmount {
+    return ErgoAmount(
+        tokenList.map { token ->
             val tokenPrice = walletSyncManager.getTokenPrice(token.tokenId)
-            tokenPrice?.let { TokenAmount(token.amount ?: 0, token.decimals).toErgoValue(it.ergValue).nanoErgs } ?: 0
-        }.sum())
-    } else ErgoAmount.ZERO
+            tokenPrice?.let {
+                TokenAmount(token.amount ?: 0, token.decimals).toErgoValue(it.ergValue).nanoErgs
+            } ?: 0
+        }.sum()
+    )
 }

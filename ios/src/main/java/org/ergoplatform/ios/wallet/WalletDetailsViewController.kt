@@ -20,6 +20,7 @@ import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 import org.ergoplatform.uilogic.wallet.WalletDetailsUiLogic
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
+import org.ergoplatform.utils.formatTokenPriceToString
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -381,7 +382,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         private val expandButton = UIImageView().apply {
             tintColor = UIColor.label()
         }
-        private val tokenFiatValueLabel = Body1Label().apply {
+        private val tokenValueLabel = Body1Label().apply {
             textColor = UIColor.secondaryLabel()
             numberOfLines = 1
         }
@@ -401,7 +402,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             addSubview(tokenImage)
             addSubview(tokensTitle)
             addSubview(tokensNumLabel)
-            addSubview(tokenFiatValueLabel)
+            addSubview(tokenValueLabel)
             addSubview(tokensListStack)
             addSubview(expandButton)
 
@@ -418,7 +419,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 .centerVerticallyTo(tokensTitle).enforceKeepIntrinsicWidth()
             tokensListStack.topToBottomOf(tokenImage).bottomToSuperview()
                 .widthMatchesSuperview(inset = DEFAULT_MARGIN * 2)
-            tokenFiatValueLabel.topToBottomOf(tokenImage).leftToLeftOf(tokensNumLabel).rightToSuperview()
+            tokenValueLabel.topToBottomOf(tokenImage).leftToLeftOf(tokensNumLabel).rightToSuperview()
                 .bottomToSuperview(canBeLess = true)
         }
 
@@ -443,7 +444,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             tokensListStack.clearArrangedSubviews()
             tokensDetailViewMap.clear()
             val listExpanded = uiLogic.wallet?.walletConfig?.unfoldTokens == true
-            tokenFiatValueLabel.text = ""
+            tokenValueLabel.text = ""
             if (listExpanded) {
                 tokensList.forEach {
                     val tokenId = it.tokenId!!
@@ -467,10 +468,10 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 // add fiat value sum if we have it
                 val walletSyncManager = WalletStateSyncManager.getInstance()
                 val tokenErgAmount = getTokenErgoValueSum(tokensList, walletSyncManager)
-                if (!tokenErgAmount.isZero() && walletSyncManager.fiatCurrency.isNotEmpty()) {
-                    tokenFiatValueLabel.text = formatFiatToString(
-                        tokenErgAmount.toDouble() * walletSyncManager.fiatValue.value,
-                        walletSyncManager.fiatCurrency,
+                if (!tokenErgAmount.isZero()) {
+                    tokenValueLabel.text = formatTokenPriceToString(
+                        tokenErgAmount,
+                        walletSyncManager,
                         IosStringProvider(texts)
                     )
                 }

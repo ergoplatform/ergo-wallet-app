@@ -26,6 +26,7 @@ import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
+import org.ergoplatform.android.tokens.setTokenPrice
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.persistance.Wallet
@@ -320,21 +321,19 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         val ergoPrice = nodeConnector.fiatValue.value
         if (ergoPrice == 0f) {
             binding.walletFiat.visibility = View.GONE
-            binding.walletTokenFiat.visibility = View.GONE
         } else {
             binding.walletFiat.visibility = View.VISIBLE
             binding.walletFiat.amount = ergoPrice * walletBalance.toDouble()
             val fiatSymbol = nodeConnector.fiatCurrency.uppercase()
             binding.walletFiat.setSymbol(fiatSymbol)
-            val tokenValueToShow = if (binding.walletTokenNum.visibility == View.VISIBLE)
-                getTokenErgoValueSum(tokens, nodeConnector) else ErgoAmount.ZERO
-            binding.walletTokenFiat.visibility =
-                if (tokenValueToShow.nanoErgs > 0) View.VISIBLE else View.GONE
-            binding.walletTokenFiat.amount = tokenValueToShow.toDouble() * ergoPrice
-            binding.walletTokenFiat.setSymbol(fiatSymbol)
         }
 
         // Fill token entries
+        val tokenValueToShow = if (binding.walletTokenNum.visibility == View.VISIBLE)
+            getTokenErgoValueSum(tokens, nodeConnector) else ErgoAmount.ZERO
+        binding.walletTokenValue.visibility =
+            if (tokenValueToShow.nanoErgs > 0) View.VISIBLE else View.GONE
+        binding.walletTokenValue.setTokenPrice(tokenValueToShow, nodeConnector)
         binding.walletTokenEntries.apply {
             removeAllViews()
 
