@@ -8,7 +8,6 @@ import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.utils.LogUtils
-import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
 import org.robovm.apple.coregraphics.CGRect
@@ -26,7 +25,8 @@ class SendFundsViewController(
     private lateinit var walletTitle: UILabel
     private lateinit var addressNameLabel: UILabel
     private lateinit var balanceLabel: UILabel
-    private lateinit var fiatLabel: UILabel
+    private lateinit var otherCurrencyLabel: UILabel
+    private lateinit var otherCurrencyContainer: UIView
     private lateinit var readOnlyHint: UITextView
     private lateinit var feeLabel: UILabel
     private lateinit var grossAmountLabel: ErgoAmountView
@@ -37,7 +37,7 @@ class SendFundsViewController(
 
     private lateinit var inputReceiver: EndIconTextField
     private lateinit var inputMessage: EndIconTextField
-    private lateinit var inputErgoAmount: EndIconTextField
+    private lateinit var inputAmount: EndIconTextField
 
     private var txDoneView: UIView? = null
 
@@ -121,7 +121,7 @@ class SendFundsViewController(
             placeholder = texts.get(STRING_LABEL_PURPOSE)
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
-                    inputErgoAmount.becomeFirstResponder()
+                    inputAmount.becomeFirstResponder()
                     return true
                 }
             }
@@ -137,19 +137,18 @@ class SendFundsViewController(
             ) { showPurposeMessageInfoDialog() }
         }
 
-        inputErgoAmount = EndIconTextField().apply {
-            placeholder = texts.get(STRING_LABEL_AMOUNT)
+        inputAmount = EndIconTextField().apply {
             keyboardType = UIKeyboardType.NumbersAndPunctuation
             returnKeyType = UIReturnKeyType.Next
             delegate = object : OnlyNumericInputTextFieldDelegate() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
-                    inputErgoAmount.resignFirstResponder()
+                    inputAmount.resignFirstResponder()
                     return true
                 }
             }
             addOnEditingChangedListener {
                 setHasError(false)
-                uiLogic.amountToSend = text.toErgoAmount() ?: ErgoAmount.ZERO
+                uiLogic.inputAmountChanged(text)
             }
             setCustomActionField(
                 getIosSystemImage(
@@ -160,9 +159,26 @@ class SendFundsViewController(
 
         }
 
-        fiatLabel = Body1Label()
-        fiatLabel.textAlignment = NSTextAlignment.Right
-        fiatLabel.isHidden = true
+        otherCurrencyLabel = Body1Label().apply {
+            textAlignment = NSTextAlignment.Right
+        }
+        otherCurrencyContainer = otherCurrencyLabel
+            .wrapWithTrailingImage(
+                getIosSystemImage(IMAGE_EDIT_CIRCLE, UIImageSymbolScale.Small, 20.0)!!,
+                keepWidth = true
+            ).apply {
+                isUserInteractionEnabled = true
+                addGestureRecognizer(UITapGestureRecognizer {
+                    val changed = uiLogic.switchInputAmountMode()
+                    if (changed) {
+                        getAppDelegate().prefs.isSendInputFiatAmount = uiLogic.inputIsFiat
+                        inputAmount.text = uiLogic.inputAmountString
+                        setInputAmountLabel()
+                        uiLogic.notifyAmountsChanged()
+                    }
+                })
+                isHidden = true
+            }
 
         feeLabel = Body1Label().apply {
             isUserInteractionEnabled = true
@@ -232,8 +248,8 @@ class SendFundsViewController(
                 introLabel,
                 inputReceiver,
                 inputMessage,
-                inputErgoAmount,
-                fiatLabel,
+                inputAmount,
+                otherCurrencyContainer,
                 feeLabel,
                 grossAmountContainer,
                 tokensUiList,
@@ -245,7 +261,7 @@ class SendFundsViewController(
         stackView.spacing = 2 * DEFAULT_MARGIN
         stackView.setCustomSpacing(0.0, walletTitle)
         stackView.setCustomSpacing(0.0, addressNameContainer)
-        stackView.setCustomSpacing(0.0, inputErgoAmount)
+        stackView.setCustomSpacing(0.0, inputAmount)
         scrollView = container.wrapInVerticalScrollView()
         container.addSubview(stackView)
         stackView.topToSuperview(topInset = DEFAULT_MARGIN)
@@ -255,6 +271,11 @@ class SendFundsViewController(
         view.addSubview(scrollView)
         scrollView.topToSuperview().widthMatchesSuperview().bottomToKeyboard(this)
         scrollView.isHidden = true
+
+        if (getAppDelegate().prefs.isSendInputFiatAmount != uiLogic.inputIsFiat) {
+            uiLogic.switchInputAmountMode()
+        }
+        setInputAmountLabel()
     }
 
     private fun showPurposeMessageInfoDialog(startPayment: Boolean = false) {
@@ -279,9 +300,20 @@ class SendFundsViewController(
     }
 
     private fun setInputAmount(amountToSend: ErgoAmount) {
-        inputErgoAmount.text = amountToSend.toStringTrimTrailingZeros()
-        inputErgoAmount.sendControlEventsActions(UIControlEvents.EditingChanged)
+        uiLogic.setAmountToSendErg(amountToSend)
+        inputAmount.text = uiLogic.inputAmountString
     }
+
+    private fun setInputAmountLabel() {
+        inputAmount.placeholder =
+            if (uiLogic.inputIsFiat)
+                texts.format(
+                    STRING_HINT_AMOUNT_CURRENCY,
+                    WalletStateSyncManager.getInstance().fiatCurrency.uppercase()
+                )
+            else texts.get(STRING_LABEL_AMOUNT)
+    }
+
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
@@ -303,12 +335,12 @@ class SendFundsViewController(
         val checkResponse = uiLogic.checkCanMakePayment(getAppDelegate().prefs)
 
         inputReceiver.setHasError(checkResponse.receiverError)
-        inputErgoAmount.setHasError(checkResponse.amountError)
+        inputAmount.setHasError(checkResponse.amountError)
         inputMessage.setHasError(checkResponse.messageError)
         if (checkResponse.receiverError) {
             inputReceiver.becomeFirstResponder()
         } else if (checkResponse.amountError) {
-            inputErgoAmount.becomeFirstResponder()
+            inputAmount.becomeFirstResponder()
         }
         if (checkResponse.tokenError) {
             tokensError.setHiddenAnimated(false)
@@ -396,15 +428,9 @@ class SendFundsViewController(
                 val text = IosStringProvider(texts)
                 feeLabel.text = getFeeDescriptionLabel(text)
                 grossAmountLabel.setErgoAmount(grossAmount)
-                val nodeConnector = WalletStateSyncManager.getInstance()
-                fiatLabel.isHidden = (nodeConnector.fiatCurrency.isEmpty())
-                fiatLabel.text = texts.format(
-                    STRING_LABEL_FIAT_AMOUNT,
-                    formatFiatToString(
-                        amountToSend.toDouble() * nodeConnector.fiatValue.value.toDouble(),
-                        nodeConnector.fiatCurrency, text
-                    )
-                )
+                val otherCurrency = uiLogic.getOtherCurrencyLabel(text)
+                otherCurrencyContainer.isHidden = (otherCurrency == null)
+                otherCurrencyLabel.text = otherCurrency
             }
         }
 

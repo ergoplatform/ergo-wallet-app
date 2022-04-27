@@ -56,6 +56,7 @@ const val IMAGE_PHOTO_CAMERA = "camera.fill"
 const val IMAGE_VIDEO_PLAY = "play.fill"
 const val IMAGE_MUSIC_NOTE = "music.note"
 const val IMAGE_OPEN_BROWSER = "arrow.up.right.square"
+const val IMAGE_EDIT_CIRCLE = "pencil.circle"
 
 
 const val FONT_SIZE_BODY1 = 18.0

@@ -36,7 +36,7 @@ class SendFundsUiLogicTest {
             assertTrue(checkResponse.tokenError)
 
             // only if we've set an amount that is not possible
-            uiLogic.amountToSend = ErgoAmount(Parameters.MinChangeValue - 1)
+            uiLogic.setAmountToSendErg(ErgoAmount(Parameters.MinChangeValue - 1))
             checkResponse = uiLogic.checkCanMakePayment(preferences)
             assertTrue(checkResponse.amountError)
         }

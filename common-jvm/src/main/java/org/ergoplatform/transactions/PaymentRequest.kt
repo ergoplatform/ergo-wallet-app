@@ -29,12 +29,12 @@ private val PAYMENT_URI_SCHEME = "ergo:"
 
 fun getExplorerPaymentRequestAddress(
     address: String,
-    amount: Double = 0.0,
+    amount: ErgoAmount = ErgoAmount.ZERO,
     description: String = ""
 ): String {
     return explorerPaymentUrlPrefix + RECIPIENT_PARAM_PREFIX +
             URLEncoder.encode(address, URI_ENCODING) +
-            (if (amount > 0) PARAM_DELIMITER + AMOUNT_PARAM_PREFIX +
+            (if (amount.nanoErgs > 0) PARAM_DELIMITER + AMOUNT_PARAM_PREFIX +
                     URLEncoder.encode(amount.toString(), URI_ENCODING) else "") +
             PARAM_DELIMITER + DESCRIPTION_PARAM_PREFIX +
             URLEncoder.encode(description, URI_ENCODING)
