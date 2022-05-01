@@ -1,6 +1,7 @@
 package org.ergoplatform.api.ergodex
 
 import org.ergoplatform.api.OkHttpSingleton
+import org.ergoplatform.api.PriceImportance
 import org.ergoplatform.api.TokenPriceApi
 import org.ergoplatform.persistance.TokenPrice
 import retrofit2.Retrofit
@@ -10,7 +11,7 @@ class ErgoDexPriceApi : TokenPriceApi {
     private val priceSource = "ergodex.io"
     private val baseIdErg = "0000000000000000000000000000000000000000000000000000000000000000"
 
-    val ergoDexApi: ErgoDexApi
+    private val ergoDexApi: ErgoDexApi
 
     init {
         val retrofit = Retrofit.Builder().baseUrl("https://api.ergodex.io/")
@@ -21,7 +22,7 @@ class ErgoDexPriceApi : TokenPriceApi {
     }
 
 
-    override fun getTokenPrices(): List<TokenPrice>? {
+    override fun getTokenPrices(): List<Pair<TokenPrice, PriceImportance>>? {
         val swapList = ergoDexApi.swaps.execute()
 
         val ergBasePrices = swapList.body()
@@ -40,7 +41,7 @@ class ErgoDexPriceApi : TokenPriceApi {
 
             hashMap.values.map {
                 TokenPrice(it.tokenId, it.displayName, priceSource, it.lastPrice)
-            }
+            }.map { Pair(it, PriceImportance.Low) }
         }
     }
 }
