@@ -40,13 +40,12 @@ abstract class ErgoAuthUiLogic {
             requestJob = coroutineScope.launch(Dispatchers.IO) {
                 try {
                     notifyStateChanged(State.FETCHING_DATA)
-                    if (walletId >= 0) {
-                        walletConfig = db.walletDbProvider.loadWalletConfigById(walletId)
+                    walletConfig = if (walletId >= 0) {
+                        db.walletDbProvider.loadWalletConfigById(walletId)
                     } else {
-                        walletConfig =
-                            db.walletDbProvider.getAllWalletConfigsSynchronous().sortedBy {
-                                it.displayName?.lowercase()
-                            }.firstOrNull()
+                        db.walletDbProvider.getAllWalletConfigsSynchronous().minByOrNull {
+                            it.displayName?.lowercase() ?: ""
+                        }
                     }
 
                     if (walletConfig == null) {

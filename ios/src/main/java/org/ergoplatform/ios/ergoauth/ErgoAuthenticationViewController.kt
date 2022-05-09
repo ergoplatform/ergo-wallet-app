@@ -144,8 +144,18 @@ class ErgoAuthenticationViewController(
         private val authButton = PrimaryButton(texts.getString(STRING_BUTTON_AUTHENTICATE)).apply {
             addOnTouchUpInsideListener { _, _ ->
                 uiLogic.walletConfig?.let { walletConfig ->
-                    startAuthFlow(walletConfig) { secrets ->
-                        uiLogic.startResponse(secrets, texts)
+                    if (walletConfig.secretStorage != null) {
+                        startAuthFlow(walletConfig) { secrets ->
+                            uiLogic.startResponse(secrets, texts)
+                        }
+                    } else {
+                        presentViewController(
+                            buildSimpleAlertController(
+                                "",
+                                texts.getString(STRING_ERROR_WALLET_TYPE_ERGOAUTH_NOT_AVAIL),
+                                texts.i18NBundle
+                            ), true
+                        ) {}
                     }
                 }
             }

@@ -250,6 +250,8 @@
     <string name="button_authenticate">Authenticate</string>
     <string name="desc_authentication_wallet">Wallet used for authentication:</string>
     <string name="desc_auth_response_send">Authentication was sent to dApp successfully.</string>
+    <string name="error_wallet_type_ergoauth_not_avail">ErgoAuth is not available for read-only wallets.
+        Please restore from mnemonic or use another wallet.</string>
 
     <!-- Token information dialog -->
     <string name="label_minting_tx">Minting transaction</string>
