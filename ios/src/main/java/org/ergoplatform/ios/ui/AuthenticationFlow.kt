@@ -43,7 +43,7 @@ fun UIViewController.startAuthFlow(wallet: WalletConfig, callback: (mnemonic: Si
                         runOnMainThread {
                             val uac = buildSimpleAlertController(
                                 texts.format(STRING_ERROR_DEVICE_SECURITY, ""),
-                                t.message ?: "", texts
+                                texts.get(STRING_ERROR_DEVICE_SECURITY_CLOUD_HINT), texts
                             )
                             presentViewController(uac, true) {}
                         }
