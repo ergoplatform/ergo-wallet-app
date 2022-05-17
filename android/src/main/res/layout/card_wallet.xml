@@ -121,10 +121,12 @@
 
             <TextView
                 android:id="@+id/label_token_num"
+                style="@style/TextAppearance.App.Body1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/half_horizontal_margin"
                 android:text="@string/label_tokens"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/wallet_token_num"
                 app:layout_constraintStart_toEndOf="@id/wallet_token_num"
                 app:layout_constraintTop_toTopOf="@id/wallet_token_num" />
