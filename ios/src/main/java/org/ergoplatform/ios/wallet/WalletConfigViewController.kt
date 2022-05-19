@@ -45,7 +45,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
         val nameInputLabel = Body1Label()
         nameInputLabel.text = texts.get(STRING_LABEL_WALLET_NAME)
 
-        nameInputField = createTextField()
+        nameInputField = EndIconTextField()
         nameInputField.returnKeyType = UIReturnKeyType.Done
         nameInputField.clearButtonMode = UITextFieldViewMode.Always
         nameInputField.delegate = object : UITextFieldDelegateAdapter() {

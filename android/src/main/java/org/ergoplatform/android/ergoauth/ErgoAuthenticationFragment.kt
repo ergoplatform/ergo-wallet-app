@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
@@ -69,6 +70,18 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
         }
         binding.buttonAuthenticate.setOnClickListener {
             startAuthFlow()
+        }
+    }
+
+    override fun startAuthFlow() {
+        if (authenticationWalletConfig?.secretStorage == null) {
+            // read only wallet not supported (yet)
+            MaterialAlertDialogBuilder(requireContext())
+                .setMessage(R.string.error_wallet_type_ergoauth_not_avail)
+                .setPositiveButton(R.string.zxing_button_ok, null)
+                .show()
+        } else {
+            super.startAuthFlow()
         }
     }
 

@@ -61,7 +61,7 @@ class SaveWalletViewController(
             textColor = uiColorErgo
             text = texts.get(STRING_LABEL_WALLET_NAME)
         }
-        nameInputField = createTextField().apply {
+        nameInputField = EndIconTextField().apply {
             clearButtonMode = UITextFieldViewMode.Always
             returnKeyType = UIReturnKeyType.Done
             delegate = object : UITextFieldDelegateAdapter() {

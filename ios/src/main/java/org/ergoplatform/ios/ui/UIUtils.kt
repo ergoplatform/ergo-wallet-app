@@ -56,6 +56,7 @@ const val IMAGE_PHOTO_CAMERA = "camera.fill"
 const val IMAGE_VIDEO_PLAY = "play.fill"
 const val IMAGE_MUSIC_NOTE = "music.note"
 const val IMAGE_OPEN_BROWSER = "arrow.up.right.square"
+const val IMAGE_EDIT_CIRCLE = "pencil.circle"
 
 
 const val FONT_SIZE_BODY1 = 18.0
@@ -202,52 +203,6 @@ fun createTextview(): UITextView {
 
 fun UITextView.setHasError(hasError: Boolean) {
     layer.borderColor = (if (hasError) UIColor.systemRed() else UIColor.systemGray()).cgColor
-}
-
-fun createTextField(): UITextField {
-    val textField = UITextField(CGRect.Zero())
-    textField.font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
-    textField.layer.borderWidth = 1.0
-    textField.layer.cornerRadius = 4.0
-    textField.layer.borderColor = UIColor.systemGray().cgColor
-    val padding = UIView(CGRect(0.0, 0.0, 5.0, 10.0))
-    textField.leftView = padding
-    textField.leftViewMode = UITextFieldViewMode.Always
-    textField.fixedHeight(DEFAULT_TEXT_FIELD_HEIGHT)
-    return textField
-}
-
-fun UITextField.setHasError(hasError: Boolean) {
-    layer.borderColor = (if (hasError) UIColor.systemRed() else UIColor.systemGray()).cgColor
-    if (hasError) {
-        val errorView = prepareTextFieldImageContainer(
-            getIosSystemImage(IMAGE_EXCLAMATION_MARK_FILLED, UIImageSymbolScale.Small)!!,
-            UIColor.systemRed()
-        )
-        rightView = errorView
-        rightViewMode = UITextFieldViewMode.Always
-    } else {
-        rightView = null
-    }
-}
-
-private fun prepareTextFieldImageContainer(image: UIImage, tintColor: UIColor = UIColor.label()): UIView {
-    val customIcon = UIImageView(image)
-    customIcon.tintColor = tintColor
-    customIcon.contentMode = UIViewContentMode.Center
-    val iconContainer = UIView(CGRect(0.0, 0.0, 35.0, 30.0))
-    iconContainer.addSubview(customIcon)
-    return iconContainer
-}
-
-fun UITextField.setCustomActionField(image: UIImage, action: Runnable) {
-    val iconContainer = prepareTextFieldImageContainer(image)
-    rightView = iconContainer
-    rightViewMode = UITextFieldViewMode.Always
-    iconContainer.isUserInteractionEnabled = true
-    iconContainer.addGestureRecognizer(UITapGestureRecognizer {
-        action.run()
-    })
 }
 
 fun getIosSystemImage(name: String, scale: UIImageSymbolScale, pointSize: Double = 30.0): UIImage? {

@@ -1,5 +1,6 @@
 package org.ergoplatform.utils
 
+import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TokenAmount
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.uilogic.STRING_FORMAT_FIAT
@@ -13,14 +14,6 @@ import java.util.*
 import kotlin.math.ln
 import kotlin.math.pow
 
-fun inputTextToDouble(amountStr: String?): Double {
-    try {
-        return if (amountStr.isNullOrEmpty()) 0.0 else amountStr.toDouble()
-    } catch (t: Throwable) {
-        return 0.0
-    }
-}
-
 fun formatTokenPriceToString(
     balanceAmount: TokenAmount,
     pricePerErg: BigDecimal,
@@ -28,7 +21,14 @@ fun formatTokenPriceToString(
     text: StringProvider
 ): String {
     val ergValue = balanceAmount.toErgoValue(pricePerErg)
+    return formatTokenPriceToString(ergValue, walletSyncManager, text)
+}
 
+fun formatTokenPriceToString(
+    ergValue: ErgoAmount,
+    walletSyncManager: WalletStateSyncManager,
+    text: StringProvider
+): String {
     return if (walletSyncManager.fiatCurrency.isNotEmpty()) {
         formatFiatToString(
             ergValue.toDouble() * walletSyncManager.fiatValue.value,

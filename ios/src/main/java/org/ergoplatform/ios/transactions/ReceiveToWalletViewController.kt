@@ -1,11 +1,13 @@
 package org.ergoplatform.ios.transactions
 
+import com.badlogic.gdx.utils.I18NBundle
 import kotlinx.coroutines.launch
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
+import org.ergoplatform.uilogic.STRING_HINT_AMOUNT_CURRENCY
 import org.ergoplatform.uilogic.STRING_LABEL_AMOUNT
 import org.ergoplatform.uilogic.wallet.ReceiveToWalletUiLogic
-import org.ergoplatform.utils.inputTextToDouble
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
@@ -19,12 +21,16 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
     private lateinit var addressLabel: UILabel
     private lateinit var qrCode: UIImageView
     private lateinit var addressNameLabel: UILabel
-    private lateinit var inputErgoAmount: UITextField
+    private lateinit var inputAmount: UITextField
+    private lateinit var otherCurrencyAmount: Body1Label
+    private lateinit var otherCurrencyContainer: UIView
+
+    private lateinit var texts: I18NBundle
 
     override fun viewDidLoad() {
         super.viewDidLoad()
 
-        val texts = getAppDelegate().texts
+        texts = getAppDelegate().texts
         title = texts.get(STRING_BUTTON_RECEIVE)
         view.backgroundColor = UIColor.systemBackground()
         navigationController.navigationBar?.tintColor = UIColor.label()
@@ -40,7 +46,7 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
 
         val uiBarButtonItem = UIBarButtonItem(UIBarButtonSystemItem.Action)
         uiBarButtonItem.setOnClickListener {
-            uiLogic.getTextToShare(getInputAmount(), getInputPurpose())?.let {
+            uiLogic.getTextToShare(getInputPurpose())?.let {
                 this@ReceiveToWalletViewController.shareText(
                     it,
                     uiBarButtonItem
@@ -60,8 +66,7 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
             shareText(addressLabel.text, addressLabel)
         })
 
-        inputErgoAmount = createTextField().apply {
-            placeholder = texts.get(STRING_LABEL_AMOUNT)
+        inputAmount = EndIconTextField().apply {
             keyboardType = UIKeyboardType.NumbersAndPunctuation
             returnKeyType = UIReturnKeyType.Next
             delegate = object : OnlyNumericInputTextFieldDelegate() {
@@ -71,9 +76,30 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
                 }
             }
             addOnEditingChangedListener {
+                uiLogic.amountToReceive.inputAmountChanged(text)
                 refreshQrCode()
+                setInputAmountLabels()
             }
         }
+        otherCurrencyAmount = Body1Label().apply {
+            textColor = UIColor.secondaryLabel()
+            textAlignment = NSTextAlignment.Right
+        }
+        otherCurrencyContainer = otherCurrencyAmount
+            .wrapWithTrailingImage(
+                getIosSystemImage(IMAGE_EDIT_CIRCLE, UIImageSymbolScale.Small, 20.0)!!,
+                keepWidth = true
+            ).apply {
+                isUserInteractionEnabled = true
+                addGestureRecognizer(UITapGestureRecognizer {
+                    val changed = uiLogic.amountToReceive.switchInputAmountMode()
+                    if (changed) {
+                        getAppDelegate().prefs.isSendInputFiatAmount = uiLogic.amountToReceive.inputIsFiat
+                        setInputAmountLabels()
+                        inputAmount.text = uiLogic.amountToReceive.getInputAmountString()
+                    }
+                })
+            }
 
         val container = UIView()
         val stackView = UIStackView(
@@ -82,7 +108,8 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
                 addressNameContainer,
                 qrCodeContainer,
                 addressLabel,
-                inputErgoAmount
+                inputAmount,
+                otherCurrencyContainer
             )
         )
         stackView.axis = UILayoutConstraintAxis.Vertical
@@ -99,6 +126,24 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
 
         view.addSubview(scrollView)
         scrollView.topToSuperview().widthMatchesSuperview().bottomToKeyboard(this)
+
+        if (getAppDelegate().prefs.isSendInputFiatAmount != uiLogic.amountToReceive.inputIsFiat) {
+            uiLogic.amountToReceive.switchInputAmountMode()
+        }
+        setInputAmountLabels()
+    }
+
+    private fun setInputAmountLabels() {
+        inputAmount.placeholder =
+            if (uiLogic.amountToReceive.inputIsFiat)
+                texts.format(
+                    STRING_HINT_AMOUNT_CURRENCY,
+                    WalletStateSyncManager.getInstance().fiatCurrency.uppercase()
+                )
+            else texts.get(STRING_LABEL_AMOUNT)
+        val otherCurrencyText = uiLogic.getOtherCurrencyLabel(IosStringProvider(texts))
+        otherCurrencyContainer.isHidden = otherCurrencyText == null
+        otherCurrencyAmount.text = otherCurrencyText
     }
 
     override fun viewWillAppear(animated: Boolean) {
@@ -124,11 +169,10 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
     }
 
     private fun refreshQrCode() {
-        uiLogic.getTextToShare(getInputAmount(), getInputPurpose())?.let {
+        uiLogic.getTextToShare(getInputPurpose())?.let {
             qrCode.setQrCode(it, DEFAULT_QR_CODE_SIZE)
         }
     }
 
     private fun getInputPurpose() = ""
-    private fun getInputAmount() = inputTextToDouble(inputErgoAmount.text)
 }

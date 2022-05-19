@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.WalletStateSyncManager
@@ -27,10 +26,12 @@ import org.ergoplatform.android.databinding.CardWalletBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.databinding.FragmentWalletBinding
 import org.ergoplatform.android.tokens.inflateAndBindTokenView
+import org.ergoplatform.android.tokens.setTokenPrice
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.tokens.fillTokenOverview
+import org.ergoplatform.tokens.getTokenErgoValueSum
 import org.ergoplatform.utils.getTimeSpanString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
@@ -323,10 +324,16 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         } else {
             binding.walletFiat.visibility = View.VISIBLE
             binding.walletFiat.amount = ergoPrice * walletBalance.toDouble()
-            binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.uppercase())
+            val fiatSymbol = nodeConnector.fiatCurrency.uppercase()
+            binding.walletFiat.setSymbol(fiatSymbol)
         }
 
         // Fill token entries
+        val tokenValueToShow = if (binding.walletTokenNum.visibility == View.VISIBLE)
+            getTokenErgoValueSum(tokens, nodeConnector) else ErgoAmount.ZERO
+        binding.walletTokenValue.visibility =
+            if (tokenValueToShow.nanoErgs > 0) View.VISIBLE else View.GONE
+        binding.walletTokenValue.setTokenPrice(tokenValueToShow, nodeConnector)
         binding.walletTokenEntries.apply {
             removeAllViews()
 

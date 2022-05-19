@@ -31,7 +31,7 @@ abstract class TokenInformationLayoutLogic {
 
             val showBalance = balanceAmount.rawValue > 0 && !isSingularToken()
             val walletSyncManager = WalletStateSyncManager.getInstance()
-            val tokenPrice = walletSyncManager.tokenPrices[tokenId]
+            val tokenPrice = walletSyncManager.getTokenPrice(tokenId)
 
             setLabelSupplyAmountText(
                 if (!isSingularToken()) TokenAmount(fullSupply, decimals).toStringUsFormatted(false)

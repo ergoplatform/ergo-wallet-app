@@ -87,7 +87,7 @@
             <TextView
                 android:id="@+id/wallet_token_num"
                 style="@style/TextAppearance.App.Headline2"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 app:layout_constraintStart_toStartOf="@id/wallet_name"
@@ -121,13 +121,32 @@
 
             <TextView
                 android:id="@+id/label_token_num"
+                style="@style/TextAppearance.App.Body1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/half_horizontal_margin"
                 android:text="@string/label_tokens"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/wallet_token_num"
                 app:layout_constraintStart_toEndOf="@id/wallet_token_num"
                 app:layout_constraintTop_toTopOf="@id/wallet_token_num" />
+
+            <org.fabiomsr.moneytextview.MoneyTextView
+                android:id="@+id/wallet_token_value"
+                style="@style/MoneyTextViewFiatStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/half_horizontal_margin"
+                android:ellipsize="end"
+                android:textColor="@color/lightgrey"
+                app:baseTextColor="@color/lightgrey"
+                app:layout_constraintBottom_toBottomOf="@id/wallet_token_num"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@id/label_token_num"
+                app:layout_constraintTop_toTopOf="@id/wallet_token_num"
+                tools:amount="1912332564.531"
+                tools:symbol="EUR" />
 
             <org.fabiomsr.moneytextview.MoneyTextView
                 android:id="@+id/wallet_unconfirmed"

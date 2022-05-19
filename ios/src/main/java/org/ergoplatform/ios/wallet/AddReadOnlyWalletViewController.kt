@@ -11,7 +11,7 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
 class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() {
-    lateinit var tvAddress: UITextField
+    lateinit var tvAddress: EndIconTextField
     lateinit var errorLabel: Body1Label
     lateinit var tvDisplayName: UITextField
 
@@ -39,7 +39,7 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
 
         val descLabel = Body1Label()
         descLabel.text = texts.get(STRING_INTRO_ADD_READONLY)
-        tvAddress = createTextField().apply {
+        tvAddress = EndIconTextField().apply {
             returnKeyType = UIReturnKeyType.Next
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
@@ -47,7 +47,9 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
                     return super.shouldReturn(textField)
                 }
             }
-
+            addOnEditingChangedListener {
+                setHasError(false)
+            }
             setCustomActionField(getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small)!!) {
                 presentViewController(QrScannerViewController(invokeAfterDismissal = false) {
                     text = uiLogic.getInputFromQrCode(it)
@@ -64,7 +66,7 @@ class AddReadOnlyWalletViewController : ViewControllerWithKeyboardLayoutGuide() 
             text = texts.get(STRING_LABEL_WALLET_NAME)
         }
 
-        tvDisplayName = createTextField().apply {
+        tvDisplayName = EndIconTextField().apply {
             clearButtonMode = UITextFieldViewMode.Always
             text = texts.get(STRING_LABEL_READONLY_WALLET_DEFAULT)
             returnKeyType = UIReturnKeyType.Done

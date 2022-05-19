@@ -25,6 +25,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.EntryWalletTokenDetailsBinding
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.tokens.WalletDetailsTokenEntryView
+import org.ergoplatform.android.tokens.setTokenPrice
 import org.ergoplatform.android.transactions.inflateAddressTransactionEntry
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
@@ -33,6 +34,7 @@ import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.tokens.getTokenErgoValueSum
 import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 
@@ -259,6 +261,14 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                     ApiServiceManager.getOrInit(Preferences(ctx))
                 )
             }
+        }
+        if (!wallet.walletConfig.unfoldTokens) {
+            val tokenErgoValueSum = getTokenErgoValueSum(tokensList, nodeConnector)
+            binding.walletTokenValue.visibility =
+                if (tokenErgoValueSum.nanoErgs > 0) View.VISIBLE else View.GONE
+            binding.walletTokenValue.setTokenPrice(tokenErgoValueSum, nodeConnector)
+        } else {
+            binding.walletTokenValue.visibility = View.GONE
         }
 
         binding.unfoldTokens.setImageResource(

@@ -100,7 +100,7 @@
                             android:layout_gravity="center_vertical"
                             android:layout_marginEnd="@dimen/half_horizontal_margin"
                             android:contentDescription="@null"
-                            tools:src="@drawable/ic_warning_amber_24" />
+                            tools:src="@drawable/ic_warning_amber_100" />
 
                         <TextView
                             android:id="@+id/tv_ti_message"
@@ -141,7 +141,7 @@
                         android:layout_height="wrap_content"
                         android:drawablePadding="@dimen/activity_vertical_margin"
                         android:gravity="center"
-                        tools:drawableTop="@drawable/ic_error_outline_24"
+                        tools:drawableTop="@drawable/ic_error_outline_100"
                         tools:text="@string/desc_transaction_send" />
 
                     <Button

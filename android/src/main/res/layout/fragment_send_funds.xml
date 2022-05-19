@@ -112,6 +112,26 @@
                         app:layout_constraintTop_toBottomOf="@id/hint_readonly" />
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/ti_message"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_purpose"
+                        app:endIconDrawable="@drawable/ic_info_24"
+                        app:endIconMode="custom"
+                        app:layout_constraintEnd_toEndOf="@id/tv_receiver"
+                        app:layout_constraintStart_toStartOf="@id/tv_receiver"
+                        app:layout_constraintTop_toBottomOf="@id/tv_receiver">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:imeOptions="actionNext"
+                            android:inputType="text"
+                            android:maxLength="1000" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/amount"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -119,9 +139,9 @@
                         android:hint="@string/label_amount"
                         app:endIconDrawable="@drawable/ic_use_all_24"
                         app:endIconMode="custom"
-                        app:layout_constraintEnd_toEndOf="@id/tv_receiver"
-                        app:layout_constraintStart_toStartOf="@id/tv_receiver"
-                        app:layout_constraintTop_toBottomOf="@id/tv_receiver">
+                        app:layout_constraintEnd_toEndOf="@id/ti_message"
+                        app:layout_constraintStart_toStartOf="@id/ti_message"
+                        app:layout_constraintTop_toBottomOf="@id/ti_message">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:layout_width="match_parent"
@@ -155,8 +175,10 @@
                         style="@style/TextAppearance.App.Fiat"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:drawablePadding="4dp"
                         android:gravity="end"
                         android:visibility="gone"
+                        app:drawableEndCompat="@drawable/ic_edit_note_24"
                         app:layout_constraintEnd_toEndOf="@id/amount"
                         app:layout_constraintTop_toBottomOf="@id/amount"
                         tools:text="@string/label_fiat_amount"

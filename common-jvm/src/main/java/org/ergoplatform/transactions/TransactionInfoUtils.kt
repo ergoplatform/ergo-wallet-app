@@ -41,9 +41,14 @@ data class TransactionInfoBox(
 suspend fun Transaction.buildTransactionInfo(ergoApiService: ErgoExplorerApi): TransactionInfo {
     return withContext(Dispatchers.IO) {
         val inputsMap = HashMap<String, TransactionInfoBox>()
-        inputBoxesIds.forEach {
-            val boxInfo = ergoApiService.getBoxInformation(it).execute().body()!!
-            inputsMap[boxInfo.boxId] = boxInfo.toTransactionInfoBox()
+        inputBoxesIds.forEach { boxId ->
+            val boxInfo = ergoApiService.getBoxInformation(boxId).execute().body()
+            // TODO explorer does not return information for unconfirmed boxes
+            if (boxInfo == null)
+                throw IllegalStateException("Could not retrieve information for box $boxId.\n" +
+                        "If you have unconfirmed transactions, try again after confirmation.")
+            else
+                inputsMap[boxInfo.boxId] = boxInfo.toTransactionInfoBox()
         }
         buildTransactionInfo(inputsMap)
     }

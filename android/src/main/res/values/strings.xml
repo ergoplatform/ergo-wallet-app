@@ -19,6 +19,7 @@
     <string name="label_copied">Copied!</string>
     <string name="label_qr_code">QR Code</string>
     <string name="label_amount">Amount</string>
+    <string name="hint_amount_currency">Amount (%1$s)</string>
     <string name="label_purpose">Purpose</string>
     <string name="label_share">Share</string>
     <string name="label_open">Open</string>
@@ -168,6 +169,8 @@
     <string name="title_choose_address">Choose an address</string>
 
     <!-- Send funds -->
+    <string name="message_switched_input_mode_fiat">Switched input mode to: Fiat amount</string>
+    <string name="message_switched_input_mode_erg">Switched input mode to: ERG amount</string>
     <string name="desc_choose_wallet">Please choose the wallet to send from:</string>
     <string name="label_to">to</string>
     <string name="hint_read_only">This is a read only wallet. For sending funds, you need a device to sign your transaction. <a href="">Learn more.</a></string>
@@ -178,6 +181,12 @@
     <string name="label_scan_qr">Scan QR code</string>
     <string name="desc_fee">Fee: %1$s ERG</string>
     <string name="desc_fee_execution_time">(≈%1$sm)</string>
+    <string name="info_purpose_message">Please be aware that the purpose message entered is attached
+        to the outgoing transaction and is public on the blockchain.\nDo
+        not enter confidential or private information.</string>
+    <string name="info_purpose_message_accept">Accept</string>
+    <string name="info_purpose_message_decline">Decline</string>
+    <string name="error_purpose_message">Accept the terms before sending the transaction.</string>
     <string name="error_receiver_address">Please enter a valid ERG address</string>
     <string name="error_amount">Please enter a valid amount</string>
     <string name="error_send_transaction">Could not send transaction</string>
@@ -194,6 +203,9 @@
     <string name="button_next">Next</string>
     <string name="title_authenticate">Authentication required</string>
     <string name="error_device_security">Security error: %1$s</string>
+    <string name="error_device_security_cloud_hint">The information to decrypt your secrets could not be read. Please note
+        that this information is not synced with cloud backup. If this error persists, please restore this wallet with the
+        mnemonic you have noted.</string>
     <string name="label_add_token">Token</string>
     <string name="label_send_all">Send all</string>
     <string name="title_add_token">Choose token to send</string>
@@ -241,6 +253,8 @@
     <string name="button_authenticate">Authenticate</string>
     <string name="desc_authentication_wallet">Wallet used for authentication:</string>
     <string name="desc_auth_response_send">Authentication was sent to dApp successfully.</string>
+    <string name="error_wallet_type_ergoauth_not_avail">ErgoAuth is not available for read-only wallets.
+        Please restore from mnemonic or use another wallet.</string>
 
     <!-- Token information dialog -->
     <string name="label_minting_tx">Minting transaction</string>

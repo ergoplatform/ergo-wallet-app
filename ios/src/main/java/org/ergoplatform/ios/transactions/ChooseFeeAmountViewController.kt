@@ -35,7 +35,7 @@ class ChooseFeeAmountViewController(
         val feeInputLabel = Body1Label()
         feeInputLabel.text = texts.get(STRING_LABEL_FEE_CUSTOM)
 
-        feeInputField = createTextField().apply {
+        feeInputField = EndIconTextField().apply {
             returnKeyType = UIReturnKeyType.Done
             clearButtonMode = UITextFieldViewMode.Always
             keyboardType = UIKeyboardType.NumbersAndPunctuation
