@@ -32,7 +32,7 @@ fun MoneyTextView.setTokenPrice(
     tokenErgoValueSum: ErgoAmount,
     stateSyncManager: WalletStateSyncManager
 ) {
-    if (stateSyncManager.fiatCurrency.isNotEmpty()) {
+    if (stateSyncManager.hasFiatValue) {
         val tokenValueToShow =
             tokenErgoValueSum.toDouble() * stateSyncManager.fiatValue.value
         amount = tokenValueToShow

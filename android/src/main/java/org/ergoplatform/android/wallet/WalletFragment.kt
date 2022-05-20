@@ -318,10 +318,10 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
 
         // Fill fiat value
         val nodeConnector = WalletStateSyncManager.getInstance()
-        val ergoPrice = nodeConnector.fiatValue.value
-        if (ergoPrice == 0f) {
+        if (!nodeConnector.hasFiatValue) {
             binding.walletFiat.visibility = View.GONE
         } else {
+            val ergoPrice = nodeConnector.fiatValue.value
             binding.walletFiat.visibility = View.VISIBLE
             binding.walletFiat.amount = ergoPrice * walletBalance.toDouble()
             val fiatSymbol = nodeConnector.fiatCurrency.uppercase()

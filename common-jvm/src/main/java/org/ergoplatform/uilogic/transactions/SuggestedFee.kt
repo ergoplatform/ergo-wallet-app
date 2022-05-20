@@ -22,7 +22,7 @@ data class SuggestedFee(
         val ergoAmount = ErgoAmount(feeAmount).toStringRoundToDecimals() + " " + ergoCurrencyText
 
         val walletSyncManager = WalletStateSyncManager.getInstance()
-        return if (walletSyncManager.fiatCurrency.isNotEmpty()) {
+        return if (walletSyncManager.hasFiatValue) {
             "$ergoAmount ≈ " +
                     formatFiatToString(
                         ErgoAmount(feeAmount).toDouble() * walletSyncManager.fiatValue.value,

@@ -245,7 +245,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
 
     fun getOtherCurrencyLabel(textProvider: StringProvider): String? {
         val nodeConnector = WalletStateSyncManager.getInstance()
-        return if (nodeConnector.fiatCurrency.isNotEmpty()) {
+        return if (nodeConnector.hasFiatValue) {
             if (!_amountToSend.inputIsFiat) {
                 textProvider.getString(
                     STRING_LABEL_FIAT_AMOUNT,

@@ -29,7 +29,7 @@ fun formatTokenPriceToString(
     walletSyncManager: WalletStateSyncManager,
     text: StringProvider
 ): String {
-    return if (walletSyncManager.fiatCurrency.isNotEmpty()) {
+    return if (walletSyncManager.hasFiatValue) {
         formatFiatToString(
             ergValue.toDouble() * walletSyncManager.fiatValue.value,
             walletSyncManager.fiatCurrency, text

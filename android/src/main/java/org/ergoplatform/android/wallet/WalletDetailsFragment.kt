@@ -217,10 +217,10 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
         // Fill fiat value
         val nodeConnector = WalletStateSyncManager.getInstance()
-        val ergoPrice = nodeConnector.fiatValue.value
-        if (ergoPrice == 0f) {
+        if (!nodeConnector.hasFiatValue) {
             binding.walletFiat.visibility = View.GONE
         } else {
+            val ergoPrice = nodeConnector.fiatValue.value
             binding.walletFiat.visibility = View.VISIBLE
             binding.walletFiat.amount = ergoPrice * ergoAmount.toDouble()
             binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.uppercase())

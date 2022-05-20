@@ -54,7 +54,7 @@ class ErgoOrFiatAmount {
     }
 
     fun switchInputAmountMode(): Boolean {
-        val canChangeMode = WalletStateSyncManager.getInstance().fiatCurrency.isNotEmpty()
+        val canChangeMode = WalletStateSyncManager.getInstance().hasFiatValue
         inputIsFiat = if (canChangeMode)
             !inputIsFiat
         else
