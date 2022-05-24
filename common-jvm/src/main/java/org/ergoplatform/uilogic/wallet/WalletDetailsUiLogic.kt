@@ -2,6 +2,7 @@ package org.ergoplatform.uilogic.wallet
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.ApiServiceManager
@@ -132,15 +133,16 @@ abstract class WalletDetailsUiLogic {
         if (tokensList.isNotEmpty()) {
             tokenInformationJob = coroutineScope.launch {
                 tokensList.forEach {
-                    TokenInfoManager.getInstance()
-                        .getTokenInformation(it.tokenId!!, tokenDbProvider, apiService)
-                        ?.let {
-                            synchronized(tokenInformation) {
-                                tokenInformation[it.tokenId] = it
-                                onNewTokenInfoGathered(it)
+                    if (isActive) {
+                        TokenInfoManager.getInstance()
+                            .getTokenInformation(it.tokenId!!, tokenDbProvider, apiService)
+                            ?.let {
+                                synchronized(tokenInformation) {
+                                    tokenInformation[it.tokenId] = it
+                                    onNewTokenInfoGathered(it)
+                                }
                             }
-                        }
-
+                    }
                 }
             }
         }

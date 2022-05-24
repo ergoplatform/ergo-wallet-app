@@ -1,9 +1,6 @@
 package org.ergoplatform.uilogic.wallet
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.WalletStateSyncManager
@@ -73,7 +70,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
                             getPublicErgoAddressFromMnemonic(signingSecrets, derivedAddressIdx)
                         histFound =
                             ergoApiService.getConfirmedTransactionsForAddress(derivedAddress, 1, 0)
-                                .execute().body()!!.items.isNotEmpty()
+                                .execute().body()!!.items.isNotEmpty() && isActive
 
                         if (histFound) {
                             derivedAddressesFound = derivedAddressIdx
