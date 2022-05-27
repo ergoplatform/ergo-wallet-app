@@ -27,6 +27,10 @@ dependencies {
 
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$coroutines_version"
 
+    // Mosaik runtime
+    api "com.github.MrStahlfelge.mosaik:common-runtime:$mosaik_version"
+    api "com.github.MrStahlfelge.mosaik:clientconnector-okhttp:$mosaik_version"
+
     testImplementation "junit:junit:$junit_version"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_version"
     testImplementation "com.squareup.okhttp3:mockwebserver:3.12.0"

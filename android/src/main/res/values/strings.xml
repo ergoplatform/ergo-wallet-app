@@ -270,6 +270,9 @@
     <string name="button_download_content_on">Activate</string>
     <string name="button_download_content_off">Deactivate</string>
 
+    <!-- Mosaik view -->
+    <string name="title_mosaik">dApps</string>
+
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>
     <string name="about_year" translatable="false">2022</string>

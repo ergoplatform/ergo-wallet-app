@@ -4,6 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -188,3 +190,55 @@ fun MessageSeverity.getSeverityDrawableResId() =
         MessageSeverity.WARNING -> R.drawable.ic_warning_amber_100
         MessageSeverity.ERROR -> R.drawable.ic_error_outline_100
     }
+
+fun decodeSampledBitmapFromByteArray(
+    bitmapBytes: ByteArray,
+    minPixelWidth: Int,
+    minPixelHeight: Int
+): Bitmap {
+    // see https://developer.android.com/topic/performance/graphics/load-bitmap.html#read-bitmap
+
+    // First decode with inJustDecodeBounds=true to check dimensions
+    return BitmapFactory.Options().run {
+        inJustDecodeBounds = true
+        BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.size, this)
+
+        // Crashes when displaying images that are too big - calculate inSampleSize
+
+        inSampleSize = calculateInSampleSize(
+            this,
+            minPixelWidth,
+            minPixelHeight
+        )
+
+        // Decode bitmap with inSampleSize set
+        inJustDecodeBounds = false
+
+        BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.size, this)
+    }
+}
+
+private fun calculateInSampleSize(
+    options: BitmapFactory.Options,
+    reqWidth: Int,
+    reqHeight: Int
+): Int {
+    // Raw height and width of image
+    val height = options.outHeight
+    val width = options.outWidth
+    var inSampleSize = 1
+
+    if (height > reqHeight || width > reqWidth) {
+
+        val halfHeight: Int = height / 2
+        val halfWidth: Int = width / 2
+
+        // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+        // height and width larger than the requested height and width.
+        while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+            inSampleSize *= 2
+        }
+    }
+
+    return inSampleSize
+}

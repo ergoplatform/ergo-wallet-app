@@ -1,15 +1,13 @@
 package org.ergoplatform.android.tokens
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.view.View
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentTokenInformationBinding
+import org.ergoplatform.android.ui.decodeSampledBitmapFromByteArray
 import org.ergoplatform.uilogic.tokens.TokenInformationLayoutLogic
 import org.ergoplatform.uilogic.tokens.TokenInformationModelLogic
-import kotlin.math.max
 
 
 class TokenInformationLayoutView(private val binding: FragmentTokenInformationBinding) :
@@ -82,12 +80,14 @@ class TokenInformationLayoutView(private val binding: FragmentTokenInformationBi
         binding.previewProgress.visibility =
             if (downloadState == TokenInformationModelLogic.StateDownload.RUNNING) View.VISIBLE else View.GONE
 
-        val hasError = content?.let {
+        val hasError = content?.let { byteArray ->
             try {
+                val minPixelSize = (300 * binding.root.resources.displayMetrics.density).toInt()
+                val minPixelWidth = kotlin.math.max(binding.layoutNft.width, minPixelSize)
                 val image: Drawable =
                     BitmapDrawable(
                         binding.root.resources,
-                        decodeSampledBitmapFromByteArray(it)
+                        decodeSampledBitmapFromByteArray(byteArray, minPixelWidth, minPixelSize)
                     )
                 binding.imgPreview.setImageDrawable(image)
                 false
@@ -100,56 +100,6 @@ class TokenInformationLayoutView(private val binding: FragmentTokenInformationBi
             binding.imgPreview.setImageResource(R.drawable.ic_warning_amber_100)
         }
 
-    }
-
-    private fun decodeSampledBitmapFromByteArray(
-        bitmapBytes: ByteArray
-    ): Bitmap {
-        // see https://developer.android.com/topic/performance/graphics/load-bitmap.html#read-bitmap
-
-        // First decode with inJustDecodeBounds=true to check dimensions
-        return BitmapFactory.Options().run {
-            inJustDecodeBounds = true
-            BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.size, this)
-
-            // Crashes when displaying images that are too big - calculate inSampleSize
-            val minPixelSize = (300 * binding.root.resources.displayMetrics.density).toInt()
-            inSampleSize = calculateInSampleSize(
-                this,
-                max(binding.layoutNft.width, minPixelSize),
-                minPixelSize
-            )
-
-            // Decode bitmap with inSampleSize set
-            inJustDecodeBounds = false
-
-            BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.size, this)
-        }
-    }
-
-    private fun calculateInSampleSize(
-        options: BitmapFactory.Options,
-        reqWidth: Int,
-        reqHeight: Int
-    ): Int {
-        // Raw height and width of image
-        val height = options.outHeight
-        val width = options.outWidth
-        var inSampleSize = 1
-
-        if (height > reqHeight || width > reqWidth) {
-
-            val halfHeight: Int = height / 2
-            val halfWidth: Int = width / 2
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
-                inSampleSize *= 2
-            }
-        }
-
-        return inSampleSize
     }
 
     override fun showNftHashValidation(hashValid: Boolean?) {
