@@ -25,7 +25,7 @@ class MosaikViewModel : ViewModel() {
     val mosaikRuntime = object : AppMosaikRuntime(
         "Ergo Wallet App (Android)",
         BuildConfig.VERSION_NAME,
-        MosaikContext.Platform.PHONE, // FIXME tablet/desktop when applicable
+        { platformType!! },
         MosaikGuidManager(),
     ) {
         override val coroutineScope: CoroutineScope
@@ -49,7 +49,10 @@ class MosaikViewModel : ViewModel() {
         }
     }
 
-    fun initialize(appUrl: String, appDb: AppDatabase) {
+    var platformType: MosaikContext.Platform? = null
+
+    fun initialize(appUrl: String, appDb: AppDatabase, platformType: MosaikContext.Platform) {
+        this.platformType = platformType
         mosaikRuntime.appDatabase = appDb
         mosaikRuntime.guidManager.appDatabase = appDb
         if (!initialized) {

@@ -7,6 +7,9 @@ import androidx.room.Query
 
 @Dao
 interface MosaikDbDao {
+    @Query("SELECT * FROM mosaik_app WHERE url == :url")
+    suspend fun loadAppEntry(url: String): MosaikAppDbEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateAppEntry(vararg mosaikApp: MosaikAppDbEntity)
 

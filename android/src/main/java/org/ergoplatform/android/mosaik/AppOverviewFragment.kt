@@ -48,10 +48,15 @@ class AppOverviewFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val db = AppDatabase.getInstance(requireContext())
             val lastVisited = withContext(Dispatchers.IO) {
-                db.mosaikDbProvider.getAllAppsByLastVisited(5)
+                val lastVisited = db.mosaikDbProvider.getAllAppsByLastVisited(5)
+                lastVisited.lastOrNull()?.lastVisited?.let { oldestShownEntry ->
+                    db.mosaikDbProvider.deleteAppsNotFavoriteVisitedBefore(oldestShownEntry)
+                }
+
+                lastVisited
             }
             val favorites = withContext(Dispatchers.IO) {
-                db.mosaikDbProvider.getAllAppFavorites()
+                db.mosaikDbProvider.getAllAppFavorites().sortedBy { it.name.lowercase() }
             }
 
             binding.descEmpty.visibility =

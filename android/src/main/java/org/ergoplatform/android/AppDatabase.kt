@@ -313,6 +313,9 @@ class RoomTransactionDbProvider(private val database: AppDatabase) : Transaction
 }
 
 class RoomMosaikDbProvider(private val database: AppDatabase) : MosaikDbProvider {
+    override suspend fun loadAppEntry(url: String): MosaikAppEntry? =
+        database.mosaikDao().loadAppEntry(url)?.toModel()
+
     override suspend fun insertOrUpdateAppEntry(mosaikApp: MosaikAppEntry) =
         database.mosaikDao().insertOrUpdateAppEntry(mosaikApp.toDbEntity())
 

@@ -277,6 +277,7 @@
     <string name="title_last_visited">Last visited</string>
     <string name="title_favorites">Favorites</string>
     <string name="desc_none">None yet</string>
+    <string name="menu_favorite">Favorite</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>

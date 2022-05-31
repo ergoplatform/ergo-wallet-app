@@ -5,6 +5,10 @@ import org.ergoplatform.mosaik.MosaikAppHost
 import org.ergoplatform.mosaik.MosaikDbProvider
 
 class SqlDelightMosaikDbProvider(sqlDelightAppDb: SqlDelightAppDb) : MosaikDbProvider {
+    override suspend fun loadAppEntry(url: String): MosaikAppEntry? {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun insertOrUpdateAppEntry(mosaikApp: MosaikAppEntry) {
         TODO("Not yet implemented")
     }

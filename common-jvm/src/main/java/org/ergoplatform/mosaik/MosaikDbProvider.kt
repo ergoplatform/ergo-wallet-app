@@ -1,6 +1,8 @@
 package org.ergoplatform.mosaik
 
 interface MosaikDbProvider {
+    suspend fun loadAppEntry(url: String): MosaikAppEntry?
+
     suspend fun insertOrUpdateAppEntry(mosaikApp: MosaikAppEntry)
 
     suspend fun getAllAppFavorites(): List<MosaikAppEntry>

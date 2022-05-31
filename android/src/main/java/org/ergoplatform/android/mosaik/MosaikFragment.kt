@@ -1,9 +1,7 @@
 package org.ergoplatform.android.mosaik
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.asImageBitmap
@@ -21,6 +19,7 @@ import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.MosaikViewTree
 import org.ergoplatform.mosaik.convertByteArrayToImageBitmap
+import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.scrollMinAlpha
 
 class MosaikFragment : Fragment() {
@@ -29,6 +28,11 @@ class MosaikFragment : Fragment() {
 
     private val viewModel: MosaikViewModel by viewModels()
     private val args by navArgs<MosaikFragmentArgs>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,6 +72,7 @@ class MosaikFragment : Fragment() {
         }
         viewModel.manifestLiveData.observe(viewLifecycleOwner) { manifest ->
             binding.fragmentTitle.text = manifest?.appName
+            requireActivity().invalidateOptionsMenu()
 
             // TODO Mosaik 0.1.1 enable navigate back
         }
@@ -104,9 +109,43 @@ class MosaikFragment : Fragment() {
                 MosaikViewTree(viewModel.mosaikRuntime.viewTree)
             }
         }
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, backPressedHandler)
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            backPressedHandler
+        )
 
-        viewModel.initialize(args.url, AppDatabase.getInstance(requireContext()))
+        viewModel.initialize(args.url, AppDatabase.getInstance(requireContext()), getPlatformType())
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_mosaik_app, menu)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        menu.findItem(R.id.menu_switch_favorite).setIcon(
+            if (viewModel.mosaikRuntime.isFavoriteApp) R.drawable.ic_favorite_24
+            else R.drawable.ic_favorite_no_24
+        )
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_switch_favorite) {
+            viewModel.mosaikRuntime.switchFavorite()
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun getPlatformType(): MosaikContext.Platform {
+        // Chrome OS
+        return if (requireContext().packageManager.hasSystemFeature("org.chromium.arc.device_management"))
+            MosaikContext.Platform.DESKTOP
+        else if (resources.getBoolean(R.bool.isTablet))
+            MosaikContext.Platform.TABLET
+        else
+            MosaikContext.Platform.PHONE
     }
 
     override fun onDestroyView() {

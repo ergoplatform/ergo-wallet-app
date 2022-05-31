@@ -14,7 +14,7 @@ import kotlin.collections.HashMap
 abstract class AppMosaikRuntime(
     val appName: String,
     val appVersionName: String,
-    val platformType: MosaikContext.Platform,
+    val platformType: () -> MosaikContext.Platform,
     val guidManager: MosaikGuidManager,
 ) :
     MosaikRuntime(
@@ -27,7 +27,7 @@ abstract class AppMosaikRuntime(
                     Locale.getDefault().language,
                     appName,
                     appVersionName,
-                    platformType
+                    platformType()
                 )
             }
         )
@@ -37,32 +37,39 @@ abstract class AppMosaikRuntime(
 
     init {
         appLoaded = { manifest ->
-            saveVisitToDb(manifest)
-            onAppNavigated(manifest)
+            coroutineScope.launch {
+                saveVisitToDb(manifest)
+                onAppNavigated(manifest)
+            }
         }
     }
 
-    private fun saveVisitToDb(manifest: MosaikManifest) {
-        coroutineScope.launch {
-            appDatabase.mosaikDbProvider.insertOrUpdateAppEntry(
-                MosaikAppEntry(
-                    normalizeUrl(appUrl!!),
-                    manifest.appName,
-                    manifest.appDescription,
-                    icon = null, // TODO load and save when loaded, do not overwrite
-                    System.currentTimeMillis(),
-                    favorite = false, // TODO do not overwrite
-                )
+    private suspend fun saveVisitToDb(manifest: MosaikManifest) {
+        val normalizedUrl = normalizedAppUrl!!
+
+        val formerAppEntry = appDatabase.mosaikDbProvider.loadAppEntry(normalizedUrl)
+        val newAppEntry = MosaikAppEntry(
+            normalizedUrl,
+            manifest.appName,
+            manifest.appDescription,
+            icon = formerAppEntry?.icon, // TODO if not present, load and save when loaded, do not overwrite
+            System.currentTimeMillis(),
+            favorite = formerAppEntry?.favorite ?: false,
+        )
+
+        isFavoriteApp = newAppEntry.favorite
+
+        appDatabase.mosaikDbProvider.insertOrUpdateAppEntry(newAppEntry)
+        val hostName = getHostname(appUrl!!)
+        appDatabase.mosaikDbProvider.insertOrUpdateAppHost(
+            MosaikAppHost(
+                hostName,
+                guidManager.getGuidForHost(hostName)
             )
-            val hostName = getHostname(appUrl!!)
-            appDatabase.mosaikDbProvider.insertOrUpdateAppHost(
-                MosaikAppHost(
-                    hostName,
-                    guidManager.getGuidForHost(hostName)
-                )
-            )
-        }
+        )
     }
+
+    var isFavoriteApp = false
 
     abstract fun onAppNavigated(manifest: MosaikManifest)
 
@@ -75,6 +82,22 @@ abstract class AppMosaikRuntime(
 
         loadMosaikApp(loadUrl)
     }
+
+    fun switchFavorite() {
+        normalizedAppUrl?.let { appUrl ->
+            coroutineScope.launch {
+                appDatabase.mosaikDbProvider.loadAppEntry(appUrl)?.let { appEntry ->
+                    val newEntry = appEntry.copy(favorite = !appEntry.favorite)
+                    appDatabase.mosaikDbProvider.insertOrUpdateAppEntry(newEntry)
+                    isFavoriteApp = newEntry.favorite
+                    onAppNavigated(appManifest!!)
+                }
+
+            }
+        }
+    }
+
+    private val normalizedAppUrl get() = appUrl?.let { normalizeUrl(it) }
 }
 
 class MosaikGuidManager {
