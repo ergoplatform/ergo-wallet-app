@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 import org.ergoplatform.mosaik.MosaikAppEntry
 import org.ergoplatform.mosaik.MosaikAppHost
 
-@Entity(tableName = "mosaik_app", indices = [Index("favorite", "name"), Index("last_visited")])
+@Entity(tableName = "mosaik_app", indices = [Index("favorite", "name")])
 data class MosaikAppDbEntity(
     @PrimaryKey val url: String,
     val name: String,

@@ -13,12 +13,17 @@ interface MosaikDbDao {
     @Query("SELECT * FROM mosaik_app WHERE favorite != 0")
     suspend fun getAllAppFavorites(): List<MosaikAppDbEntity>
 
-    @Query("SELECT * FROM mosaik_app WHERE favorite == 0 ORDER BY last_visited")
-    suspend fun getAllAppsByLastVisited(): List<MosaikAppDbEntity>
+    @Query("SELECT * FROM mosaik_app WHERE favorite == 0 ORDER BY last_visited DESC LIMIT :limit")
+    suspend fun getAllAppsByLastVisited(limit: Int): List<MosaikAppDbEntity>
+
+    @Query("DELETE FROM mosaik_app WHERE favorite == 0 AND last_visited < :timestamp")
+    suspend fun deleteAppsNotFavoriteVisitedBefore(timestamp: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateAppHost(vararg mosaikApp: MosaikHostDbEntity)
 
     @Query("SELECT * FROM mosaik_host WHERE hostName = :hostname")
     suspend fun getMosaikHostInfo(hostname: String): MosaikHostDbEntity?
+
+    // TODO Mosaik delete host info
 }

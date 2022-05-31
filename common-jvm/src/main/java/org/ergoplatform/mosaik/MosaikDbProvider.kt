@@ -5,7 +5,9 @@ interface MosaikDbProvider {
 
     suspend fun getAllAppFavorites(): List<MosaikAppEntry>
 
-    suspend fun getAllAppsByLastVisited(): List<MosaikAppEntry>
+    suspend fun getAllAppsByLastVisited(limit: Int): List<MosaikAppEntry>
+
+    suspend fun deleteAppsNotFavoriteVisitedBefore(timestamp: Long)
 
     suspend fun insertOrUpdateAppHost(mosaikApp: MosaikAppHost)
 

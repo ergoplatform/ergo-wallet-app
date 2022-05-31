@@ -273,6 +273,10 @@
     <!-- Mosaik view -->
     <string name="title_mosaik">dApps</string>
     <string name="hint_app_url">App URL</string>
+    <string name="desc_mosaik">You can use and add dApps that support wallet integration here.</string>
+    <string name="title_last_visited">Last visited</string>
+    <string name="title_favorites">Favorites</string>
+    <string name="desc_none">None yet</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>

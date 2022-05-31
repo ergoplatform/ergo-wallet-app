@@ -13,7 +13,11 @@ class SqlDelightMosaikDbProvider(sqlDelightAppDb: SqlDelightAppDb) : MosaikDbPro
         TODO("Not yet implemented")
     }
 
-    override suspend fun getAllAppsByLastVisited(): List<MosaikAppEntry> {
+    override suspend fun getAllAppsByLastVisited(limit: Int): List<MosaikAppEntry> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteAppsNotFavoriteVisitedBefore(timestamp: Long) {
         TODO("Not yet implemented")
     }
 

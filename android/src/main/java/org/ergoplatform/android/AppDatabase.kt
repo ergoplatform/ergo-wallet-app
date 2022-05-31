@@ -132,7 +132,6 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `mosaik_app` (`url` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT, `icon` BLOB, `last_visited` INTEGER NOT NULL, `favorite` INTEGER NOT NULL, PRIMARY KEY(`url`))")
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_mosaik_app_favorite_name` ON `mosaik_app` (`favorite`, `name`)")
-                database.execSQL("CREATE INDEX IF NOT EXISTS `index_mosaik_app_last_visited` ON `mosaik_app` (`last_visited`)")
                 database.execSQL("CREATE TABLE IF NOT EXISTS `mosaik_host` (`hostName` TEXT NOT NULL, `guid` TEXT NOT NULL, PRIMARY KEY(`hostName`))")
             }
         }
@@ -320,8 +319,11 @@ class RoomMosaikDbProvider(private val database: AppDatabase) : MosaikDbProvider
     override suspend fun getAllAppFavorites(): List<MosaikAppEntry> =
         database.mosaikDao().getAllAppFavorites().map { it.toModel() }
 
-    override suspend fun getAllAppsByLastVisited(): List<MosaikAppEntry> =
-        database.mosaikDao().getAllAppsByLastVisited().map { it.toModel() }
+    override suspend fun getAllAppsByLastVisited(limit: Int): List<MosaikAppEntry> =
+        database.mosaikDao().getAllAppsByLastVisited(limit).map { it.toModel() }
+
+    override suspend fun deleteAppsNotFavoriteVisitedBefore(timestamp: Long) =
+        database.mosaikDao().deleteAppsNotFavoriteVisitedBefore(timestamp)
 
     override suspend fun insertOrUpdateAppHost(mosaikApp: MosaikAppHost) =
         database.mosaikDao().insertOrUpdateAppHost(mosaikApp.toDbEntity())
