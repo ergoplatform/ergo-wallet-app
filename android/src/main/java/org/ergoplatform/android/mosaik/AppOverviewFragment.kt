@@ -14,6 +14,8 @@ class AppOverviewFragment : Fragment() {
     private var _binding: FragmentAppOverviewBinding? = null
     private val binding get() = _binding!!
 
+    // TODO Mosaik way to delete mosaik_host entries and non-favorite apps
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

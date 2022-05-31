@@ -1,5 +1,6 @@
 package org.ergoplatform.uilogic
 
+import org.ergoplatform.mosaik.MosaikDbProvider
 import org.ergoplatform.persistance.*
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -54,9 +55,11 @@ object TestUiWallet {
             override val walletDbProvider: WalletDbProvider
                 get() = walletDbProvider
             override val tokenDbProvider: TokenDbProvider
-                get() = mock<TokenDbProvider> {}
+                get() = mock {}
             override val transactionDbProvider: TransactionDbProvider
-                get() = mock<TransactionDbProvider> {}
+                get() = mock {}
+            override val mosaikDbProvider: MosaikDbProvider
+                get() = mock {}
         }
     }
 

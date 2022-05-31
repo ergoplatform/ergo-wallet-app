@@ -2,6 +2,7 @@ package org.ergoplatform.persistance
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.ergoplatform.mosaik.MosaikDbProvider
 
 class SqlDelightAppDb(
     val appDatabase: AppDatabase,
@@ -29,5 +30,6 @@ class SqlDelightAppDb(
         get() = SqlDelightTokenDbProvider(this)
     override val transactionDbProvider: TransactionDbProvider
         get() = SqlDelightTransactionDbProvider(this)
-
+    override val mosaikDbProvider: MosaikDbProvider
+        get() = SqlDelightMosaikDbProvider(this)
 }

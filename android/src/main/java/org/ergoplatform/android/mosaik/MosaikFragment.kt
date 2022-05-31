@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentMosaikBinding
 import org.ergoplatform.android.ui.copyStringToClipboard
@@ -105,7 +106,7 @@ class MosaikFragment : Fragment() {
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, backPressedHandler)
 
-        viewModel.initialize(args.url)
+        viewModel.initialize(args.url, AppDatabase.getInstance(requireContext()))
     }
 
     override fun onDestroyView() {

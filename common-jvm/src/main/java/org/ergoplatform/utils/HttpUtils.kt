@@ -18,6 +18,22 @@ fun getHostname(url: String): String {
     return url.substringAfter("://").substringBefore('/').substringBefore(':')
 }
 
+/**
+ * returns lower case host and protocol name, as it is case insensitive
+ * removes trailing slash if no uri is set
+ */
+fun normalizeUrl(url: String): String {
+    val hostNameStarts = url.indexOf("://") + 3
+    val hostNameEnds = url.indexOf('/', hostNameStarts)
+
+    val lcHostname = if (hostNameEnds < 0)
+        url.lowercase()
+    else url.substring(0, hostNameEnds).lowercase() + url.substring(hostNameEnds)
+
+    return if (hostNameEnds < 0 || hostNameEnds == url.length - 1)
+        lcHostname.trimEnd('/') else lcHostname
+}
+
 fun fetchHttpGetStringSync(httpUrl: String, timeout: Long = 10): String {
     val request = Request.Builder().url(httpUrl).build()
     val stringResponse =
