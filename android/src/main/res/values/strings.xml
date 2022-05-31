@@ -272,6 +272,7 @@
 
     <!-- Mosaik view -->
     <string name="title_mosaik">dApps</string>
+    <string name="hint_app_url">App URL</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>

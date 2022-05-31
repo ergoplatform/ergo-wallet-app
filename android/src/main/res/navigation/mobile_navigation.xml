@@ -429,7 +429,23 @@
             app:argType="integer" />
     </fragment>
     <fragment
-        android:id="@+id/navigation_mosaik"
+        android:id="@+id/mosaikFragment"
         android:name="org.ergoplatform.android.mosaik.MosaikFragment"
-        tools:layout="@layout/fragment_mosaik" />
+        tools:layout="@layout/fragment_mosaik">
+        <argument
+            android:name="url"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_mosaik"
+        android:name="org.ergoplatform.android.mosaik.AppOverviewFragment"
+        tools:layout="@layout/fragment_app_overview">
+        <action
+            android:id="@+id/action_appOverviewFragment_to_mosaik"
+            app:destination="@id/mosaikFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
+    </fragment>
 </navigation>

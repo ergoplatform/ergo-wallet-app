@@ -4,11 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.colorResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentMosaikBinding
@@ -25,6 +27,7 @@ class MosaikFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: MosaikViewModel by viewModels()
+    private val args by navArgs<MosaikFragmentArgs>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,6 +65,11 @@ class MosaikFragment : Fragment() {
 
             }
         }
+        viewModel.manifestLiveData.observe(viewLifecycleOwner) { manifest ->
+            binding.fragmentTitle.text = manifest?.appName
+
+            // TODO Mosaik 0.1.1 enable navigate back
+        }
 
         // set some custom vars for Compose environment
         val minPixelSize = (300 * binding.root.resources.displayMetrics.density).toInt()
@@ -95,10 +103,20 @@ class MosaikFragment : Fragment() {
                 MosaikViewTree(viewModel.mosaikRuntime.viewTree)
             }
         }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, backPressedHandler)
+
+        viewModel.initialize(args.url)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private val backPressedHandler = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            // TODO Mosaik 0.1.1 navigate back
+        }
+
     }
 }

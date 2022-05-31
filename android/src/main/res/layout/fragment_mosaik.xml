@@ -13,11 +13,11 @@
         android:elevation="2dp">
 
         <TextView
+            android:id="@+id/fragment_title"
             style="@style/TextAppearance.App.TitleBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/title_mosaik" />
+            android:layout_gravity="center" />
 
     </FrameLayout>
 
