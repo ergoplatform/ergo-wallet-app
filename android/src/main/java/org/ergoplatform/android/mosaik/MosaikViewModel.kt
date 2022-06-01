@@ -19,6 +19,7 @@ class MosaikViewModel : ViewModel() {
     val pasteToClipboardEvent = SingleLiveEvent<String?>()
     val showDialogEvent = SingleLiveEvent<MosaikDialog?>()
     val manifestLiveData = MutableLiveData<MosaikManifest?>()
+    val noAppLiveData = MutableLiveData<Throwable?>()
 
     private var initialized = false
 
@@ -47,6 +48,10 @@ class MosaikViewModel : ViewModel() {
         override fun onAppNavigated(manifest: MosaikManifest) {
             manifestLiveData.postValue(manifest)
         }
+
+        override fun noAppLoaded(cause: Throwable) {
+            noAppLiveData.postValue(cause)
+        }
     }
 
     var platformType: MosaikContext.Platform? = null
@@ -59,5 +64,10 @@ class MosaikViewModel : ViewModel() {
             initialized = true
             mosaikRuntime.loadUrlEnteredByUser(appUrl)
         }
+    }
+
+    fun retryLoading(appUrl: String) {
+        noAppLiveData.postValue(null)
+        mosaikRuntime.loadUrlEnteredByUser(appUrl)
     }
 }

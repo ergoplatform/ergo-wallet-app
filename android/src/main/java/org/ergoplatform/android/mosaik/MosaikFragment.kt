@@ -8,13 +8,16 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.colorResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentMosaikBinding
 import org.ergoplatform.android.ui.copyStringToClipboard
 import org.ergoplatform.android.ui.decodeSampledBitmapFromByteArray
+import org.ergoplatform.android.ui.hideForcedSoftKeyboard
 import org.ergoplatform.android.ui.openUrlWithBrowser
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.MosaikViewTree
@@ -46,6 +49,8 @@ class MosaikFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.fragmentTitle.text = args.title ?: args.url
+
         viewModel.browserEvent.observe(viewLifecycleOwner) { url ->
             url?.let { openUrlWithBrowser(requireContext(), url) }
         }
@@ -53,6 +58,7 @@ class MosaikFragment : Fragment() {
             text?.let { copyStringToClipboard(text, requireContext(), binding.root) }
         }
         viewModel.showDialogEvent.observe(viewLifecycleOwner) { dialog ->
+            hideForcedSoftKeyboard(requireContext(), binding.composeView)
             dialog?.let {
                 val builder = MaterialAlertDialogBuilder(requireContext())
                     .setMessage(dialog.message)
@@ -73,8 +79,28 @@ class MosaikFragment : Fragment() {
         viewModel.manifestLiveData.observe(viewLifecycleOwner) { manifest ->
             binding.fragmentTitle.text = manifest?.appName
             requireActivity().invalidateOptionsMenu()
+            hideForcedSoftKeyboard(requireContext(), binding.composeView)
 
             // TODO Mosaik 0.1.1 enable navigate back
+        }
+        viewModel.noAppLiveData.observe(viewLifecycleOwner) { errorCause ->
+            binding.layoutNoApp.visibility = if (errorCause == null) View.GONE else View.VISIBLE
+            errorCause?.let {
+                binding.textNoApp.text =
+                    getString(
+                        R.string.error_no_mosaik_app,
+                        errorCause.javaClass.simpleName + " " + errorCause.message
+                    )
+            }
+        }
+        binding.buttonNoApp.setOnClickListener {
+            viewModel.retryLoading(args.url)
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.mosaikRuntime.viewTree.uiLockedState.collect { locked ->
+                if (locked && _binding != null)
+                    hideForcedSoftKeyboard(requireContext(), binding.composeView)
+            }
         }
 
         // set some custom vars for Compose environment
@@ -124,10 +150,13 @@ class MosaikFragment : Fragment() {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        menu.findItem(R.id.menu_switch_favorite).setIcon(
-            if (viewModel.mosaikRuntime.isFavoriteApp) R.drawable.ic_favorite_24
-            else R.drawable.ic_favorite_no_24
-        )
+        menu.findItem(R.id.menu_switch_favorite).apply {
+            setIcon(
+                if (viewModel.mosaikRuntime.isFavoriteApp) R.drawable.ic_favorite_24
+                else R.drawable.ic_favorite_no_24
+            )
+            isEnabled = viewModel.mosaikRuntime.appUrl != null
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

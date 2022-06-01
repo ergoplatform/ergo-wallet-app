@@ -41,11 +41,11 @@ fun forceShowSoftKeyboard(context: Context) {
     )?.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
 }
 
-fun hideForcedSoftKeyboard(context: Context, editText: EditText) {
+fun hideForcedSoftKeyboard(context: Context, view: View) {
     ContextCompat.getSystemService(
         context,
         InputMethodManager::class.java
-    )?.hideSoftInputFromWindow(editText.windowToken, 0)
+    )?.hideSoftInputFromWindow(view.windowToken, 0)
 }
 
 fun TextView.enableLinks() {

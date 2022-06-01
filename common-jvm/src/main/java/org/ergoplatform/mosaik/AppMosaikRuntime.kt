@@ -73,6 +73,8 @@ abstract class AppMosaikRuntime(
 
     abstract fun onAppNavigated(manifest: MosaikManifest)
 
+    abstract fun noAppLoaded(cause: Throwable)
+
     fun loadUrlEnteredByUser(appUrl: String) {
         val loadUrl =
             if (!appUrl.contains(' ') && !appUrl.contains("://"))
@@ -94,6 +96,15 @@ abstract class AppMosaikRuntime(
                 }
 
             }
+        }
+    }
+
+    override fun showError(error: Throwable) {
+        // check if this error is on first app load, we show a retry button in this case
+        if (viewTree.content == null) {
+            noAppLoaded(error)
+        } else {
+            super.showError(error)
         }
     }
 

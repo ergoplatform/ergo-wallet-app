@@ -96,22 +96,22 @@ class AppOverviewFragment : Fragment() {
         binding.labelAppDesc.text =
             if (mosaikApp.description.isNullOrBlank()) mosaikApp.url else mosaikApp.description
         binding.labelAppDesc.maxLines = if (mosaikApp.description.isNullOrBlank()) 1 else 3
-        binding.root.setOnClickListener { navigateToApp(mosaikApp.url) }
+        binding.root.setOnClickListener { navigateToApp(mosaikApp.url, mosaikApp.name) }
     }
 
     private fun navigateToApp() {
         val url = binding.inputAppUrl.editText?.text.toString()
 
         if (url.isNotBlank()) {
-            navigateToApp(url)
+            navigateToApp(url, null)
         }
     }
 
-    private fun navigateToApp(url: String) {
+    private fun navigateToApp(url: String, title: String?) {
         hideForcedSoftKeyboard(requireContext(), binding.inputAppUrl.editText!!)
         findNavController().navigateSafe(
             AppOverviewFragmentDirections.actionAppOverviewFragmentToMosaik(
-                url
+                url, title
             )
         )
     }
