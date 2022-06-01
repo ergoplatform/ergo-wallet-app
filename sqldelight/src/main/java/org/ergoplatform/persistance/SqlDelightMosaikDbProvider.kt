@@ -1,5 +1,6 @@
 package org.ergoplatform.persistance
 
+import kotlinx.coroutines.flow.Flow
 import org.ergoplatform.mosaik.MosaikAppEntry
 import org.ergoplatform.mosaik.MosaikAppHost
 import org.ergoplatform.mosaik.MosaikDbProvider
@@ -13,11 +14,11 @@ class SqlDelightMosaikDbProvider(sqlDelightAppDb: SqlDelightAppDb) : MosaikDbPro
         TODO("Not yet implemented")
     }
 
-    override suspend fun getAllAppFavorites(): List<MosaikAppEntry> {
+    override fun getAllAppFavorites(): Flow<List<MosaikAppEntry>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getAllAppsByLastVisited(limit: Int): List<MosaikAppEntry> {
+    override fun getAllAppsByLastVisited(limit: Int): Flow<List<MosaikAppEntry>> {
         TODO("Not yet implemented")
     }
 

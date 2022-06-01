@@ -1,13 +1,15 @@
 package org.ergoplatform.mosaik
 
+import kotlinx.coroutines.flow.Flow
+
 interface MosaikDbProvider {
     suspend fun loadAppEntry(url: String): MosaikAppEntry?
 
     suspend fun insertOrUpdateAppEntry(mosaikApp: MosaikAppEntry)
 
-    suspend fun getAllAppFavorites(): List<MosaikAppEntry>
+    fun getAllAppFavorites(): Flow<List<MosaikAppEntry>>
 
-    suspend fun getAllAppsByLastVisited(limit: Int): List<MosaikAppEntry>
+    fun getAllAppsByLastVisited(limit: Int): Flow<List<MosaikAppEntry>>
 
     suspend fun deleteAppsNotFavoriteVisitedBefore(timestamp: Long)
 

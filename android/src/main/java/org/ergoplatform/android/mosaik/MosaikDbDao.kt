@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MosaikDbDao {
@@ -14,10 +15,10 @@ interface MosaikDbDao {
     suspend fun insertOrUpdateAppEntry(vararg mosaikApp: MosaikAppDbEntity)
 
     @Query("SELECT * FROM mosaik_app WHERE favorite != 0")
-    suspend fun getAllAppFavorites(): List<MosaikAppDbEntity>
+    fun getAllAppFavorites(): Flow<List<MosaikAppDbEntity>>
 
     @Query("SELECT * FROM mosaik_app WHERE favorite == 0 ORDER BY last_visited DESC LIMIT :limit")
-    suspend fun getAllAppsByLastVisited(limit: Int): List<MosaikAppDbEntity>
+    fun getAllAppsByLastVisited(limit: Int): Flow<List<MosaikAppDbEntity>>
 
     @Query("DELETE FROM mosaik_app WHERE favorite == 0 AND last_visited < :timestamp")
     suspend fun deleteAppsNotFavoriteVisitedBefore(timestamp: Long)

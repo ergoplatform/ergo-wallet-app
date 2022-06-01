@@ -6,11 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.databinding.FragmentAppOverviewBinding
 import org.ergoplatform.android.databinding.FragmentAppOverviewItemBinding
@@ -45,38 +45,49 @@ class AppOverviewFragment : Fragment() {
     }
 
     private fun fillAppLists() {
+        val db = AppDatabase.getInstance(requireContext())
         viewLifecycleOwner.lifecycleScope.launch {
-            val db = AppDatabase.getInstance(requireContext())
-            val lastVisited = withContext(Dispatchers.IO) {
-                val lastVisited = db.mosaikDbProvider.getAllAppsByLastVisited(5)
-                lastVisited.lastOrNull()?.lastVisited?.let { oldestShownEntry ->
-                    db.mosaikDbProvider.deleteAppsNotFavoriteVisitedBefore(oldestShownEntry)
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    db.mosaikDbProvider.getAllAppsByLastVisited(5).collect { lastVisited ->
+                        lastVisited.lastOrNull()?.lastVisited?.let { oldestShownEntry ->
+                            db.mosaikDbProvider.deleteAppsNotFavoriteVisitedBefore(oldestShownEntry)
+                        }
+
+                        refreshLastVisited(lastVisited)
+                    }
                 }
-
-                lastVisited
-            }
-            val favorites = withContext(Dispatchers.IO) {
-                db.mosaikDbProvider.getAllAppFavorites().sortedBy { it.name.lowercase() }
-            }
-
-            binding.descEmpty.visibility =
-                if (lastVisited.isEmpty() && favorites.isEmpty()) View.VISIBLE else View.GONE
-            binding.descFavoritesEmpty.visibility =
-                if (favorites.isEmpty()) View.VISIBLE else View.GONE
-            binding.descLastVisitedEmpty.visibility =
-                if (lastVisited.isEmpty()) View.VISIBLE else View.GONE
-
-            binding.layoutFavorites.apply {
-                removeAllViews()
-                favorites.forEach { addAppEntry(this, it) }
-            }
-
-            binding.layoutLastVisited.apply {
-                removeAllViews()
-                lastVisited.forEach { addAppEntry(this, it) }
+                launch {
+                    db.mosaikDbProvider.getAllAppFavorites().collect { favorites ->
+                        refreshFavorites(favorites.sortedBy { it.name.lowercase() })
+                    }
+                }
             }
         }
+    }
 
+    private fun refreshFavorites(favorites: List<MosaikAppEntry>) {
+        if (favorites.isNotEmpty())
+            binding.descEmpty.visibility = View.GONE
+        binding.descFavoritesEmpty.visibility =
+            if (favorites.isEmpty()) View.VISIBLE else View.GONE
+
+        binding.layoutFavorites.apply {
+            removeAllViews()
+            favorites.forEach { addAppEntry(this, it) }
+        }
+    }
+
+    private fun refreshLastVisited(lastVisited: List<MosaikAppEntry>) {
+        if (lastVisited.isNotEmpty())
+            binding.descEmpty.visibility = View.GONE
+        binding.descLastVisitedEmpty.visibility =
+            if (lastVisited.isEmpty()) View.VISIBLE else View.GONE
+
+        binding.layoutLastVisited.apply {
+            removeAllViews()
+            lastVisited.forEach { addAppEntry(this, it) }
+        }
     }
 
     private fun addAppEntry(linearLayout: LinearLayout, mosaikApp: MosaikAppEntry) {

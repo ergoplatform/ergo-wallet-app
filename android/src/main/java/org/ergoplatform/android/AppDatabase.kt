@@ -319,11 +319,11 @@ class RoomMosaikDbProvider(private val database: AppDatabase) : MosaikDbProvider
     override suspend fun insertOrUpdateAppEntry(mosaikApp: MosaikAppEntry) =
         database.mosaikDao().insertOrUpdateAppEntry(mosaikApp.toDbEntity())
 
-    override suspend fun getAllAppFavorites(): List<MosaikAppEntry> =
-        database.mosaikDao().getAllAppFavorites().map { it.toModel() }
+    override fun getAllAppFavorites(): Flow<List<MosaikAppEntry>> =
+        database.mosaikDao().getAllAppFavorites().map { it.map { it.toModel() } }
 
-    override suspend fun getAllAppsByLastVisited(limit: Int): List<MosaikAppEntry> =
-        database.mosaikDao().getAllAppsByLastVisited(limit).map { it.toModel() }
+    override fun getAllAppsByLastVisited(limit: Int): Flow<List<MosaikAppEntry>> =
+        database.mosaikDao().getAllAppsByLastVisited(limit).map { it.map { it.toModel() } }
 
     override suspend fun deleteAppsNotFavoriteVisitedBefore(timestamp: Long) =
         database.mosaikDao().deleteAppsNotFavoriteVisitedBefore(timestamp)
