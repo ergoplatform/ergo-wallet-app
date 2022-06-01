@@ -130,7 +130,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
 
         private val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("CREATE TABLE IF NOT EXISTS `mosaik_app` (`url` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT, `icon` BLOB, `last_visited` INTEGER NOT NULL, `favorite` INTEGER NOT NULL, PRIMARY KEY(`url`))")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `mosaik_app` (`url` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT, `iconFile` TEXT, `last_visited` INTEGER NOT NULL, `favorite` INTEGER NOT NULL, PRIMARY KEY(`url`))")
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_mosaik_app_favorite_name` ON `mosaik_app` (`favorite`, `name`)")
                 database.execSQL("CREATE TABLE IF NOT EXISTS `mosaik_host` (`hostName` TEXT NOT NULL, `guid` TEXT NOT NULL, PRIMARY KEY(`hostName`))")
             }

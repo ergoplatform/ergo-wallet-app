@@ -23,6 +23,7 @@ class AppOverviewFragment : Fragment() {
     private val binding get() = _binding!!
 
     // TODO Mosaik way to delete mosaik_host entries and non-favorite apps
+    //  TODO delete cached icon files not linked any more
 
     override fun onCreateView(
         inflater: LayoutInflater,

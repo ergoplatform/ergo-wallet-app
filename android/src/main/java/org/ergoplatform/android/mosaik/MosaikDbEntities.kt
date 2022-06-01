@@ -12,7 +12,7 @@ data class MosaikAppDbEntity(
     @PrimaryKey val url: String,
     val name: String,
     val description: String?,
-    val icon: ByteArray?,
+    val iconFile: String?,
     @ColumnInfo(name = "last_visited") val lastVisited: Long,
     val favorite: Boolean,
 ) {
@@ -21,7 +21,7 @@ data class MosaikAppDbEntity(
             url,
             name,
             description = description,
-            icon = icon,
+            iconFile = iconFile,
             lastVisited = lastVisited,
             favorite,
         )
@@ -32,7 +32,7 @@ fun MosaikAppEntry.toDbEntity() = MosaikAppDbEntity(
     url,
     name,
     description = description,
-    icon = icon,
+    iconFile = iconFile,
     lastVisited = lastVisited,
     favorite,
 )

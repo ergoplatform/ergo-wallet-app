@@ -5,11 +5,11 @@ import kotlinx.coroutines.runBlocking
 import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
+import org.ergoplatform.persistance.CacheFileManager
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.utils.getHostname
 import org.ergoplatform.utils.normalizeUrl
 import java.util.*
-import kotlin.collections.HashMap
 
 abstract class AppMosaikRuntime(
     val appName: String,
@@ -34,6 +34,7 @@ abstract class AppMosaikRuntime(
     ) {
 
     lateinit var appDatabase: IAppDatabase
+    var cacheFileManager: CacheFileManager? = null
 
     init {
         appLoaded = { manifest ->
@@ -48,12 +49,37 @@ abstract class AppMosaikRuntime(
         val normalizedUrl = normalizedAppUrl!!
 
         val formerAppEntry = appDatabase.mosaikDbProvider.loadAppEntry(normalizedUrl)
+
+        val lastVisit = formerAppEntry?.lastVisited ?: 0
+        val timeStampNow = System.currentTimeMillis()
+        val fileName = formerAppEntry?.iconFile ?: UUID.randomUUID().toString()
+
+        if (manifest.iconUrl != null &&
+            (timeStampNow - lastVisit > 1000L * 60 || cacheFileManager?.fileExists(fileName) == false)
+        ) {
+            cacheFileManager?.let { cacheFileManager ->
+                coroutineScope.launch {
+                    try {
+                        val image =
+                            backendConnector.fetchImage(manifest.iconUrl!!, appUrl!!, appUrl)
+                        if (image.size <= 250000)
+                            cacheFileManager.saveFile(fileName, image)
+                    } catch (t: Throwable) {
+                        // Image could not be loaded
+                    }
+                }
+            }
+        } else if (manifest.iconUrl == null) {
+            // delete icon file
+            cacheFileManager?.deleteFile(fileName)
+        }
+
         val newAppEntry = MosaikAppEntry(
             normalizedUrl,
             manifest.appName,
             manifest.appDescription,
-            icon = formerAppEntry?.icon, // TODO if not present, load and save when loaded, do not overwrite
-            System.currentTimeMillis(),
+            iconFile = fileName,
+            timeStampNow,
             favorite = formerAppEntry?.favorite ?: false,
         )
 

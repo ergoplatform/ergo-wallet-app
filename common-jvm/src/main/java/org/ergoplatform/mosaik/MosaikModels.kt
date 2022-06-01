@@ -7,7 +7,7 @@ data class MosaikAppEntry(
     val url: String,
     val name: String,
     val description: String?,
-    val icon: ByteArray?,
+    val iconFile: String?,
     val lastVisited: Long,
     val favorite: Boolean,
 )
