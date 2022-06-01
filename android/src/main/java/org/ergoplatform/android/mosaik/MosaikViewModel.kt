@@ -12,6 +12,7 @@ import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.MosaikGuidManager
 import org.ergoplatform.mosaik.model.MosaikManifest
+import org.ergoplatform.persistance.CacheFileManager
 import java.util.*
 
 class MosaikViewModel : ViewModel() {
@@ -56,10 +57,16 @@ class MosaikViewModel : ViewModel() {
 
     var platformType: MosaikContext.Platform? = null
 
-    fun initialize(appUrl: String, appDb: AppDatabase, platformType: MosaikContext.Platform) {
+    fun initialize(
+        appUrl: String,
+        appDb: AppDatabase,
+        platformType: MosaikContext.Platform,
+        cacheFileManager: CacheFileManager?
+    ) {
         this.platformType = platformType
         mosaikRuntime.appDatabase = appDb
         mosaikRuntime.guidManager.appDatabase = appDb
+        mosaikRuntime.cacheFileManager = cacheFileManager
         if (!initialized) {
             initialized = true
             mosaikRuntime.loadUrlEnteredByUser(appUrl)

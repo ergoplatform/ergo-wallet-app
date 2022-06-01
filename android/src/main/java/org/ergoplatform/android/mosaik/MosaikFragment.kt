@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentMosaikBinding
+import org.ergoplatform.android.persistence.AndroidCacheFiles
 import org.ergoplatform.android.ui.copyStringToClipboard
 import org.ergoplatform.android.ui.decodeSampledBitmapFromByteArray
 import org.ergoplatform.android.ui.hideForcedSoftKeyboard
@@ -140,7 +141,12 @@ class MosaikFragment : Fragment() {
             backPressedHandler
         )
 
-        viewModel.initialize(args.url, AppDatabase.getInstance(requireContext()), getPlatformType())
+        viewModel.initialize(
+            args.url,
+            AppDatabase.getInstance(requireContext()),
+            getPlatformType(),
+            AndroidCacheFiles(requireContext())
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

@@ -7,7 +7,9 @@ interface CacheFileManager {
 
     fun fileExists(id: String): Boolean
 
-    fun saveFile(id: String, fileContent: ByteArray)
+    fun readFileContent(id: String): ByteArray?
 
-    fun deleteFile(iconFile: String)
+    fun saveFileContent(id: String, fileContent: ByteArray)
+
+    fun deleteFile(id: String)
 }

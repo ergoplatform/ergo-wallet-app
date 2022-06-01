@@ -1,5 +1,6 @@
 package org.ergoplatform.mosaik
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.ergoplatform.api.OkHttpSingleton
@@ -7,6 +8,7 @@ import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.persistance.CacheFileManager
 import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getHostname
 import org.ergoplatform.utils.normalizeUrl
 import java.util.*
@@ -55,17 +57,20 @@ abstract class AppMosaikRuntime(
         val fileName = formerAppEntry?.iconFile ?: UUID.randomUUID().toString()
 
         if (manifest.iconUrl != null &&
-            (timeStampNow - lastVisit > 1000L * 60 || cacheFileManager?.fileExists(fileName) == false)
+            (timeStampNow - lastVisit > 1000L * 60 * 30
+                    || cacheFileManager?.fileExists(fileName) == false
+                    || manifest.appName != formerAppEntry?.name)
         ) {
             cacheFileManager?.let { cacheFileManager ->
-                coroutineScope.launch {
+                coroutineScope.launch(Dispatchers.IO) {
                     try {
                         val image =
                             backendConnector.fetchImage(manifest.iconUrl!!, appUrl!!, appUrl)
                         if (image.size <= 250000)
-                            cacheFileManager.saveFile(fileName, image)
+                            cacheFileManager.saveFileContent(fileName, image)
                     } catch (t: Throwable) {
                         // Image could not be loaded
+                        LogUtils.logDebug("AppMosaikRuntime", "Error saving appicon", t)
                     }
                 }
             }

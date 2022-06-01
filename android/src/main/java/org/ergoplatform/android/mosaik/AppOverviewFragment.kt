@@ -14,9 +14,12 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.databinding.FragmentAppOverviewBinding
 import org.ergoplatform.android.databinding.FragmentAppOverviewItemBinding
+import org.ergoplatform.android.persistence.AndroidCacheFiles
+import org.ergoplatform.android.ui.decodeSampledBitmapFromByteArray
 import org.ergoplatform.android.ui.hideForcedSoftKeyboard
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.mosaik.MosaikAppEntry
+import org.ergoplatform.utils.LogUtils
 
 class AppOverviewFragment : Fragment() {
     private var _binding: FragmentAppOverviewBinding? = null
@@ -98,6 +101,19 @@ class AppOverviewFragment : Fragment() {
             if (mosaikApp.description.isNullOrBlank()) mosaikApp.url else mosaikApp.description
         binding.labelAppDesc.maxLines = if (mosaikApp.description.isNullOrBlank()) 1 else 3
         binding.root.setOnClickListener { navigateToApp(mosaikApp.url, mosaikApp.name) }
+
+        // set icon, if we have one
+        mosaikApp.iconFile?.let { fileId ->
+            AndroidCacheFiles(requireContext()).readFileContent(fileId)?.let { iconContent ->
+                try {
+                    binding.imageAppIcon.setImageBitmap(
+                        decodeSampledBitmapFromByteArray(iconContent, 500, 500)
+                    )
+                } catch (t: Throwable) {
+                    LogUtils.logDebug("AppOverView", "Could not read icon file", t)
+                }
+            }
+        }
     }
 
     private fun navigateToApp() {
