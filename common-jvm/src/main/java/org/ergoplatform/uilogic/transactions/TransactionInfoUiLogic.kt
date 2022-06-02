@@ -100,7 +100,7 @@ abstract class TransactionInfoUiLogic {
      */
     val transactionPurpose: String?
         get() = if (localDbInfo != null) localDbInfo?.message
-        else explorerTxInfo?.outputs?.firstOrNull()?.getAttachmentText()
+        else explorerTxInfo?.outputs?.map { it.getAttachmentText() }?.filterNotNull()?.firstOrNull()
 
     fun getTransactionExecutionState(stringProvider: StringProvider): String =
         localDbInfo?.getTransactionStateString(stringProvider)
