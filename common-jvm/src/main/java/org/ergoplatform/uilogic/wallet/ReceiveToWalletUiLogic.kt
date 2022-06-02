@@ -47,7 +47,7 @@ class ReceiveToWalletUiLogic {
 
     fun getOtherCurrencyLabel(textProvider: StringProvider): String? {
         val nodeConnector = WalletStateSyncManager.getInstance()
-        return if (nodeConnector.fiatCurrency.isNotEmpty()) {
+        return if (nodeConnector.hasFiatValue) {
             if (!amountToReceive.inputIsFiat) {
                 textProvider.getString(
                     STRING_LABEL_FIAT_AMOUNT,

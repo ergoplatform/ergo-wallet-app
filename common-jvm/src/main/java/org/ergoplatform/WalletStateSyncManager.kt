@@ -31,6 +31,7 @@ class WalletStateSyncManager {
         private set
     var fiatCurrency: String = ""
         private set
+    val hasFiatValue get() = fiatValue.value > 0f && fiatCurrency.isNotEmpty()
     private val coinGeckoApi: CoinGeckoApi
 
     private val tokenPrices: HashMap<String, TokenPrice> = HashMap()

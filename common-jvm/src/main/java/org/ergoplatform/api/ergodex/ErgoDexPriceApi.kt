@@ -23,7 +23,7 @@ class ErgoDexPriceApi : TokenPriceApi {
 
 
     override fun getTokenPrices(): List<Pair<TokenPrice, PriceImportance>>? {
-        val swapList = ergoDexApi.swaps.execute()
+        val swapList = ergoDexApi.getSwaps(System.currentTimeMillis() - 1000L * 24 * 60 * 60).execute()
 
         val ergBasePrices = swapList.body()
             ?.filter { it.baseId.equals(baseIdErg) && it.baseDisplayName.equals("ERG") }
