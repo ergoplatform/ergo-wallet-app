@@ -12,17 +12,23 @@ import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.MosaikGuidManager
 import org.ergoplatform.mosaik.model.MosaikManifest
+import org.ergoplatform.mosaik.model.actions.ErgoPayAction
 import org.ergoplatform.persistance.CacheFileManager
-import java.util.*
+import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.uilogic.StringProvider
 
 class MosaikViewModel : ViewModel() {
     val browserEvent = SingleLiveEvent<String?>()
     val pasteToClipboardEvent = SingleLiveEvent<String?>()
     val showDialogEvent = SingleLiveEvent<MosaikDialog?>()
+    val showAddressChooserEvent = SingleLiveEvent<String?>()
     val manifestLiveData = MutableLiveData<MosaikManifest?>()
     val noAppLiveData = MutableLiveData<Throwable?>()
 
     private var initialized = false
+
+    var valueIdForAddressChooser: String? = null
+    var walletForAddressChooser: Wallet? = null
 
     val mosaikRuntime = object : AppMosaikRuntime(
         "Ergo Wallet App (Android)",
@@ -33,9 +39,8 @@ class MosaikViewModel : ViewModel() {
         override val coroutineScope: CoroutineScope
             get() = viewModelScope
 
-        override fun openBrowser(url: String): Boolean {
+        override fun openBrowser(url: String) {
             browserEvent.postValue(url)
-            return true
         }
 
         override fun pasteToClipboard(text: String) {
@@ -53,6 +58,14 @@ class MosaikViewModel : ViewModel() {
         override fun noAppLoaded(cause: Throwable) {
             noAppLiveData.postValue(cause)
         }
+
+        override fun runErgoPayAction(action: ErgoPayAction) {
+            TODO("Not yet implemented")
+        }
+
+        override fun showErgoAddressChooser(valueId: String) {
+            showAddressChooserEvent.postValue(valueId)
+        }
     }
 
     var platformType: MosaikContext.Platform? = null
@@ -61,12 +74,14 @@ class MosaikViewModel : ViewModel() {
         appUrl: String,
         appDb: AppDatabase,
         platformType: MosaikContext.Platform,
+        stringProvider: StringProvider,
         cacheFileManager: CacheFileManager?
     ) {
         this.platformType = platformType
         mosaikRuntime.appDatabase = appDb
         mosaikRuntime.guidManager.appDatabase = appDb
         mosaikRuntime.cacheFileManager = cacheFileManager
+        mosaikRuntime.stringProvider = stringProvider
         if (!initialized) {
             initialized = true
             mosaikRuntime.loadUrlEnteredByUser(appUrl)

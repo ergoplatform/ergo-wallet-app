@@ -14,8 +14,8 @@ interface MosaikDbDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateAppEntry(vararg mosaikApp: MosaikAppDbEntity)
 
-    @Query("SELECT * FROM mosaik_app WHERE favorite != 0")
-    fun getAllAppFavorites(): Flow<List<MosaikAppDbEntity>>
+    @Query("SELECT * FROM mosaik_app WHERE favorite != 0  ORDER BY last_visited DESC")
+    fun getAppFavoritesByLastVisited(): Flow<List<MosaikAppDbEntity>>
 
     @Query("SELECT * FROM mosaik_app WHERE favorite == 0 ORDER BY last_visited DESC LIMIT :limit")
     fun getAllAppsByLastVisited(limit: Int): Flow<List<MosaikAppDbEntity>>

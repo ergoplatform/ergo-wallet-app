@@ -11,22 +11,28 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentMosaikBinding
 import org.ergoplatform.android.persistence.AndroidCacheFiles
-import org.ergoplatform.android.ui.copyStringToClipboard
-import org.ergoplatform.android.ui.decodeSampledBitmapFromByteArray
-import org.ergoplatform.android.ui.hideForcedSoftKeyboard
-import org.ergoplatform.android.ui.openUrlWithBrowser
+import org.ergoplatform.android.ui.*
+import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
+import org.ergoplatform.android.wallet.WalletChooserCallback
+import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
+import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
+import org.ergoplatform.mosaik.MosaikComposeConfig
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.MosaikViewTree
-import org.ergoplatform.mosaik.convertByteArrayToImageBitmap
 import org.ergoplatform.mosaik.model.MosaikContext
-import org.ergoplatform.mosaik.scrollMinAlpha
+import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.wallet.getDerivedAddress
+import org.ergoplatform.wallet.getNumOfAddresses
 
-class MosaikFragment : Fragment() {
+class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback {
     private var _binding: FragmentMosaikBinding? = null
     private val binding get() = _binding!!
 
@@ -82,7 +88,7 @@ class MosaikFragment : Fragment() {
             requireActivity().invalidateOptionsMenu()
             hideForcedSoftKeyboard(requireContext(), binding.composeView)
 
-            // TODO Mosaik 0.1.1 enable navigate back
+            backPressedHandler.isEnabled = viewModel.mosaikRuntime.canNavigateBack()
         }
         viewModel.noAppLiveData.observe(viewLifecycleOwner) { errorCause ->
             binding.layoutNoApp.visibility = if (errorCause == null) View.GONE else View.VISIBLE
@@ -94,6 +100,14 @@ class MosaikFragment : Fragment() {
                     )
             }
         }
+        viewModel.showAddressChooserEvent.observe(viewLifecycleOwner) { valueId ->
+            viewModel.valueIdForAddressChooser = valueId
+            valueId?.let {
+                ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
+            }
+        }
+
+
         binding.buttonNoApp.setOnClickListener {
             viewModel.retryLoading(args.url)
         }
@@ -105,14 +119,16 @@ class MosaikFragment : Fragment() {
         }
 
         // set some custom vars for Compose environment
-        val minPixelSize = (300 * binding.root.resources.displayMetrics.density).toInt()
-        scrollMinAlpha = 0f
-        convertByteArrayToImageBitmap = { byteArray ->
-            decodeSampledBitmapFromByteArray(
-                byteArray,
-                minPixelSize,
-                minPixelSize
-            ).asImageBitmap()
+        MosaikComposeConfig.apply {
+            val minPixelSize = (300 * binding.root.resources.displayMetrics.density).toInt()
+            scrollMinAlpha = 0f
+            convertByteArrayToImageBitmap = { byteArray ->
+                decodeSampledBitmapFromByteArray(
+                    byteArray,
+                    minPixelSize,
+                    minPixelSize
+                ).asImageBitmap()
+            }
         }
         binding.composeView.setContent {
             MosaikStyleConfig.apply {
@@ -141,11 +157,13 @@ class MosaikFragment : Fragment() {
             backPressedHandler
         )
 
+        val context = requireContext()
         viewModel.initialize(
             args.url,
-            AppDatabase.getInstance(requireContext()),
+            AppDatabase.getInstance(context),
             getPlatformType(),
-            AndroidCacheFiles(requireContext())
+            AndroidStringProvider(context),
+            AndroidCacheFiles(context)
         )
     }
 
@@ -173,6 +191,39 @@ class MosaikFragment : Fragment() {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onWalletChosen(walletConfig: WalletConfig) {
+        val valueId = viewModel.valueIdForAddressChooser ?: return
+
+        // ok, let's see if we have multiple addresses
+        viewLifecycleOwner.lifecycleScope.launch {
+            val wallet = withContext(Dispatchers.IO) {
+                AppDatabase.getInstance(requireContext())
+                    .walletDbProvider.loadWalletWithStateById(walletConfig.id)
+            }
+            if (wallet?.getNumOfAddresses() == 1) {
+                viewModel.valueIdForAddressChooser = null
+                viewModel.mosaikRuntime.setValue(
+                    valueId,
+                    wallet.getDerivedAddress(0)
+                )
+            } else {
+                viewModel.walletForAddressChooser = wallet
+                ChooseAddressListDialogFragment.newInstance(walletConfig.id)
+                    .show(childFragmentManager, null)
+            }
+        }
+    }
+
+    override fun onAddressChosen(addressDerivationIdx: Int?) {
+        val valueId = viewModel.valueIdForAddressChooser ?: return
+        val wallet = viewModel.walletForAddressChooser ?: return
+
+        viewModel.valueIdForAddressChooser = null
+        viewModel.walletForAddressChooser = null
+
+        viewModel.mosaikRuntime.setValue(valueId, wallet.getDerivedAddress(addressDerivationIdx!!))
+    }
+
     private fun getPlatformType(): MosaikContext.Platform {
         // Chrome OS
         return if (requireContext().packageManager.hasSystemFeature("org.chromium.arc.device_management"))
@@ -190,7 +241,7 @@ class MosaikFragment : Fragment() {
 
     private val backPressedHandler = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
-            // TODO Mosaik 0.1.1 navigate back
+            viewModel.mosaikRuntime.navigateBack()
         }
 
     }

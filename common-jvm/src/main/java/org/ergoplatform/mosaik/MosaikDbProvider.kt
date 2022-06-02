@@ -7,7 +7,7 @@ interface MosaikDbProvider {
 
     suspend fun insertOrUpdateAppEntry(mosaikApp: MosaikAppEntry)
 
-    fun getAllAppFavorites(): Flow<List<MosaikAppEntry>>
+    fun getAllAppFavoritesByLastVisited(): Flow<List<MosaikAppEntry>>
 
     fun getAllAppsByLastVisited(limit: Int): Flow<List<MosaikAppEntry>>
 

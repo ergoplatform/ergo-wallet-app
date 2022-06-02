@@ -4,13 +4,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.ergoplatform.api.OkHttpSingleton
+import org.ergoplatform.isValidErgoAddress
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.persistance.CacheFileManager
 import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.uilogic.STRING_BUTTON_CHOOSE_ADDRESS
+import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getHostname
 import org.ergoplatform.utils.normalizeUrl
+import org.ergoplatform.wallet.addresses.getAddressLabel
 import java.util.*
 
 abstract class AppMosaikRuntime(
@@ -140,6 +145,37 @@ abstract class AppMosaikRuntime(
     }
 
     private val normalizedAppUrl get() = appUrl?.let { normalizeUrl(it) }
+
+    lateinit var stringProvider: StringProvider
+
+    override fun formatString(string: StringConstant, values: String?): String {
+        val appConstant = when (string) {
+            StringConstant.ChooseAddress -> STRING_BUTTON_CHOOSE_ADDRESS
+        }
+        return values?.let {
+            stringProvider.getString(appConstant, values)
+        } ?: stringProvider.getString(appConstant)
+
+    }
+
+    override fun getErgoAddressLabel(ergoAddress: String): String? =
+        runBlocking {
+            val derivedAddress =
+                guidManager.appDatabase.walletDbProvider.loadWalletAddress(ergoAddress)
+
+            val walletConfig = guidManager.appDatabase.walletDbProvider.loadWalletByFirstAddress(
+                derivedAddress?.walletFirstAddress ?: ergoAddress
+            )
+
+            walletConfig?.let {
+                (walletConfig.displayName?.let { "$it - " } ?: "") +
+                        (derivedAddress ?: WalletAddress(0, ergoAddress, 0, ergoAddress, null))
+                            .getAddressLabel(stringProvider)
+            }
+        }
+
+    override fun isErgoAddressValid(ergoAddress: String): Boolean =
+        isValidErgoAddress(ergoAddress)
 }
 
 class MosaikGuidManager {

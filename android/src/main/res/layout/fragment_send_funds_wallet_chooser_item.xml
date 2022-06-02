@@ -6,8 +6,7 @@
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
     android:orientation="horizontal"
-    android:paddingHorizontal="@dimen/activity_horizontal_margin"
-    android:paddingVertical="@dimen/half_horizontal_margin">
+    android:padding="@dimen/activity_horizontal_margin">
 
     <TextView
         android:id="@+id/wallet_name"

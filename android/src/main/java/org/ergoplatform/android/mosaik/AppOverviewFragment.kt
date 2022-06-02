@@ -62,8 +62,8 @@ class AppOverviewFragment : Fragment() {
                     }
                 }
                 launch {
-                    db.mosaikDbProvider.getAllAppFavorites().collect { favorites ->
-                        refreshFavorites(favorites.sortedBy { it.name.lowercase() })
+                    db.mosaikDbProvider.getAllAppFavoritesByLastVisited().collect { favorites ->
+                        refreshFavorites(favorites)
                     }
                 }
             }
