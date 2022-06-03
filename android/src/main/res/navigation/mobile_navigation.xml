@@ -439,6 +439,20 @@
             android:name="title"
             app:argType="string"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_mosaikFragment_to_ergoPaySigningFragment"
+            app:destination="@id/ergoPaySigningFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" >
+            <argument
+                android:name="wallet_id"
+                android:defaultValue="-1" />
+            <argument
+                android:name="derivation_idx"
+                android:defaultValue="-1" />
+        </action>
     </fragment>
     <fragment
         android:id="@+id/navigation_mosaik"

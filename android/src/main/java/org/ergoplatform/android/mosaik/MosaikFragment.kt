@@ -9,6 +9,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +19,7 @@ import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentMosaikBinding
 import org.ergoplatform.android.persistence.AndroidCacheFiles
+import org.ergoplatform.android.transactions.ErgoPaySigningFragment
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
 import org.ergoplatform.android.wallet.WalletChooserCallback
@@ -40,6 +42,15 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+
+        parentFragmentManager.setFragmentResultListener(
+            ErgoPaySigningFragment.ergoPayActionRequestKey,
+            this
+        ) { _, bundle ->
+            if (bundle.getBoolean(ErgoPaySigningFragment.ergoPayActionCompletedBundleKey, false)) {
+                viewModel.ergoPayActionCompleted()
+            }
+        }
     }
 
     override fun onCreateView(
@@ -56,6 +67,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
 
         binding.fragmentTitle.text = args.title ?: args.url
 
+        // Observe events and live data
         viewModel.browserEvent.observe(viewLifecycleOwner) { url ->
             url?.let { openUrlWithBrowser(requireContext(), url) }
         }
@@ -103,8 +115,17 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
             }
         }
+        viewModel.ergoPayActionEvent.observe(viewLifecycleOwner) { ergoPayAction ->
+            ergoPayAction?.let {
+                findNavController().navigateSafe(
+                    MosaikFragmentDirections.actionMosaikFragmentToErgoPaySigningFragment(
+                        ergoPayAction.url
+                    )
+                )
+            }
+        }
 
-
+        // click listeners
         binding.buttonNoApp.setOnClickListener {
             viewModel.retryLoading(args.url)
         }
@@ -115,7 +136,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
             }
         }
 
-        // set some custom vars for Compose environment
+        // set up Compose view
         MosaikComposeConfig.apply {
             val minPixelSize = (300 * binding.root.resources.displayMetrics.density).toInt()
             scrollMinAlpha = 0f
@@ -149,6 +170,8 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 MosaikViewTree(viewModel.mosaikRuntime.viewTree)
             }
         }
+
+        // initialize our view
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             backPressedHandler

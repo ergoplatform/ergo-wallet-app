@@ -7,14 +7,15 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.BuildConfig
 import org.ergoplatform.android.ui.SingleLiveEvent
-import org.ergoplatform.mosaik.MosaikDialog
-import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.AppMosaikRuntime
+import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.mosaik.MosaikGuidManager
+import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
 import org.ergoplatform.persistance.CacheFileManager
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.wallet.getDerivedAddress
 
@@ -23,6 +24,7 @@ class MosaikViewModel : ViewModel() {
     val pasteToClipboardEvent = SingleLiveEvent<String?>()
     val showDialogEvent = SingleLiveEvent<MosaikDialog?>()
     val showAddressChooserEvent = SingleLiveEvent<String?>()
+    val ergoPayActionEvent = SingleLiveEvent<ErgoPayAction?>()
     val manifestLiveData = MutableLiveData<MosaikManifest?>()
     val noAppLiveData = MutableLiveData<Throwable?>()
 
@@ -30,6 +32,7 @@ class MosaikViewModel : ViewModel() {
 
     private var valueIdForAddressChooser: String? = null
     private var walletForAddressChooser: Wallet? = null
+    private var ergoPayOnFinishedActionId: String? = null
 
     val mosaikRuntime = object : AppMosaikRuntime(
         "Ergo Wallet App (Android)",
@@ -61,7 +64,12 @@ class MosaikViewModel : ViewModel() {
         }
 
         override fun runErgoPayAction(action: ErgoPayAction) {
-            TODO("Not yet implemented")
+            if (isErgoPaySigningRequest(action.url)) {
+                ergoPayOnFinishedActionId = action.onFinished
+                ergoPayActionEvent.postValue(action)
+            } else {
+                // TODO Mosaik next version errorRaised(IllegalArgumentException("ErgoPayAction without actual signing request: ${action.url}"))
+            }
         }
 
         override fun showErgoAddressChooser(valueId: String) {
@@ -107,5 +115,12 @@ class MosaikViewModel : ViewModel() {
         walletForAddressChooser = null
 
         mosaikRuntime.setValue(valueId, wallet.getDerivedAddress(addressDerivationIdx))
+    }
+
+    fun ergoPayActionCompleted() {
+        ergoPayOnFinishedActionId?.let { actionId ->
+            ergoPayOnFinishedActionId = null
+            mosaikRuntime.runAction(actionId)
+        }
     }
 }

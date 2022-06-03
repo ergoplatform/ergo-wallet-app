@@ -23,22 +23,21 @@ abstract class AppMosaikRuntime(
     val appVersionName: String,
     val platformType: () -> MosaikContext.Platform,
     val guidManager: MosaikGuidManager,
-) :
-    MosaikRuntime(
-        OkHttpBackendConnector(
-            OkHttpSingleton.getInstance().newBuilder(),
-            { url ->
-                MosaikContext(
-                    MosaikContext.LIBRARY_MOSAIK_VERSION,
-                    guidManager.getGuidForHost(getHostname(url)),
-                    Locale.getDefault().language,
-                    appName,
-                    appVersionName,
-                    platformType()
-                )
-            }
-        )
-    ) {
+) : MosaikRuntime(
+    OkHttpBackendConnector(
+        OkHttpSingleton.getInstance().newBuilder(),
+        { url ->
+            MosaikContext(
+                MosaikContext.LIBRARY_MOSAIK_VERSION,
+                guidManager.getGuidForHost(getHostname(url)),
+                Locale.getDefault().language,
+                appName,
+                appVersionName,
+                platformType()
+            )
+        }
+    )
+) {
 
     lateinit var appDatabase: IAppDatabase
     var cacheFileManager: CacheFileManager? = null
@@ -159,7 +158,7 @@ abstract class AppMosaikRuntime(
     }
 
     override fun getErgoAddressLabel(ergoAddress: String): String? =
-        // TODO Mosaik runblocking here works because db is fast and Compose implementation
+    // TODO Mosaik runblocking here works because db is fast and Compose implementation
         //  remembers - but used addresses should be cached or loaded beforehand
         runBlocking {
             val derivedAddress =
