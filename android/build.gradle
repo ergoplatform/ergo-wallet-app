@@ -119,4 +119,14 @@ configurations {
             disableDependencyVerification()
         }
     }
+    ergotestnetDebugAndroidTestRuntimeClasspath {
+        resolutionStrategy {
+            disableDependencyVerification()
+        }
+    }
+    ergotestnetDebugAndroidTestCompileClasspath {
+        resolutionStrategy {
+            disableDependencyVerification()
+        }
+    }
 }
