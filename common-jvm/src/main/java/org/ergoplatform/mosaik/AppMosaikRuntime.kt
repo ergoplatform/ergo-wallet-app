@@ -159,6 +159,8 @@ abstract class AppMosaikRuntime(
     }
 
     override fun getErgoAddressLabel(ergoAddress: String): String? =
+        // TODO Mosaik runblocking here works because db is fast and Compose implementation
+        //  remembers - but used addresses should be cached or loaded beforehand
         runBlocking {
             val derivedAddress =
                 guidManager.appDatabase.walletDbProvider.loadWalletAddress(ergoAddress)

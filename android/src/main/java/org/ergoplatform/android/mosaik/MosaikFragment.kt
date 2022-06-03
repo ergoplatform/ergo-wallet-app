@@ -27,9 +27,7 @@ import org.ergoplatform.mosaik.MosaikComposeConfig
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.MosaikViewTree
 import org.ergoplatform.mosaik.model.MosaikContext
-import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletConfig
-import org.ergoplatform.wallet.getDerivedAddress
 import org.ergoplatform.wallet.getNumOfAddresses
 
 class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback {
@@ -101,7 +99,6 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
             }
         }
         viewModel.showAddressChooserEvent.observe(viewLifecycleOwner) { valueId ->
-            viewModel.valueIdForAddressChooser = valueId
             valueId?.let {
                 ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
             }
@@ -192,22 +189,16 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
     }
 
     override fun onWalletChosen(walletConfig: WalletConfig) {
-        val valueId = viewModel.valueIdForAddressChooser ?: return
-
         // ok, let's see if we have multiple addresses
         viewLifecycleOwner.lifecycleScope.launch {
             val wallet = withContext(Dispatchers.IO) {
                 AppDatabase.getInstance(requireContext())
                     .walletDbProvider.loadWalletWithStateById(walletConfig.id)
             }
+            viewModel.onWalletChosen(wallet)
             if (wallet?.getNumOfAddresses() == 1) {
-                viewModel.valueIdForAddressChooser = null
-                viewModel.mosaikRuntime.setValue(
-                    valueId,
-                    wallet.getDerivedAddress(0)
-                )
+                viewModel.onAddressChosen(0)
             } else {
-                viewModel.walletForAddressChooser = wallet
                 ChooseAddressListDialogFragment.newInstance(walletConfig.id)
                     .show(childFragmentManager, null)
             }
@@ -215,13 +206,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
-        val valueId = viewModel.valueIdForAddressChooser ?: return
-        val wallet = viewModel.walletForAddressChooser ?: return
-
-        viewModel.valueIdForAddressChooser = null
-        viewModel.walletForAddressChooser = null
-
-        viewModel.mosaikRuntime.setValue(valueId, wallet.getDerivedAddress(addressDerivationIdx!!))
+        viewModel.onAddressChosen(addressDerivationIdx!!)
     }
 
     private fun getPlatformType(): MosaikContext.Platform {

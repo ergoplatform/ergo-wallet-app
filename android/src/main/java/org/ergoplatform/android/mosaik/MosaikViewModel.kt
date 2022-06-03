@@ -16,6 +16,7 @@ import org.ergoplatform.mosaik.model.actions.ErgoPayAction
 import org.ergoplatform.persistance.CacheFileManager
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.wallet.getDerivedAddress
 
 class MosaikViewModel : ViewModel() {
     val browserEvent = SingleLiveEvent<String?>()
@@ -27,8 +28,8 @@ class MosaikViewModel : ViewModel() {
 
     private var initialized = false
 
-    var valueIdForAddressChooser: String? = null
-    var walletForAddressChooser: Wallet? = null
+    private var valueIdForAddressChooser: String? = null
+    private var walletForAddressChooser: Wallet? = null
 
     val mosaikRuntime = object : AppMosaikRuntime(
         "Ergo Wallet App (Android)",
@@ -64,6 +65,7 @@ class MosaikViewModel : ViewModel() {
         }
 
         override fun showErgoAddressChooser(valueId: String) {
+            valueIdForAddressChooser = valueId
             showAddressChooserEvent.postValue(valueId)
         }
     }
@@ -91,5 +93,19 @@ class MosaikViewModel : ViewModel() {
     fun retryLoading(appUrl: String) {
         noAppLiveData.postValue(null)
         mosaikRuntime.loadUrlEnteredByUser(appUrl)
+    }
+
+    fun onWalletChosen(wallet: Wallet?) {
+        walletForAddressChooser = wallet
+    }
+
+    fun onAddressChosen(addressDerivationIdx: Int) {
+        val valueId = valueIdForAddressChooser ?: return
+        val wallet = walletForAddressChooser ?: return
+
+        valueIdForAddressChooser = null
+        walletForAddressChooser = null
+
+        mosaikRuntime.setValue(valueId, wallet.getDerivedAddress(addressDerivationIdx))
     }
 }
