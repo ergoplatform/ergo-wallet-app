@@ -155,7 +155,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 defaultLabelColor = colorResource(id = R.color.text_color)
                 primaryButtonTextColor = colorResource(id = R.color.textcolor)
                 secondaryButtonTextColor = colorResource(id = R.color.textcolor)
-                secondaryButtonColor = colorResource(id = R.color.textcolor)
+                secondaryButtonColor = colorResource(id = R.color.secondary)
                 secondaryButtonTextColor = colorResource(id = R.color.text_color_ondark)
                 textButtonTextColor = colorResource(id = R.color.primary)
                 textButtonColorDisabled = secondaryLabelColor
