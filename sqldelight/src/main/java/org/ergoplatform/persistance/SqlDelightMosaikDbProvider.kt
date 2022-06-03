@@ -14,7 +14,7 @@ class SqlDelightMosaikDbProvider(sqlDelightAppDb: SqlDelightAppDb) : MosaikDbPro
         TODO("Not yet implemented")
     }
 
-    override fun getAllAppFavorites(): Flow<List<MosaikAppEntry>> {
+    override fun getAllAppFavoritesByLastVisited(): Flow<List<MosaikAppEntry>> {
         TODO("Not yet implemented")
     }
 
