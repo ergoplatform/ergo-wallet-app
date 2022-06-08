@@ -453,6 +453,9 @@
                 android:name="derivation_idx"
                 android:defaultValue="-1" />
         </action>
+        <action
+            android:id="@+id/action_mosaikFragment_to_tokenInformationDialogFragment"
+            app:destination="@id/tokenInformationDialogFragment" />
     </fragment>
     <fragment
         android:id="@+id/navigation_mosaik"

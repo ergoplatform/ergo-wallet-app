@@ -13,6 +13,7 @@ import org.ergoplatform.mosaik.MosaikGuidManager
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
+import org.ergoplatform.mosaik.model.actions.TokenInformationAction
 import org.ergoplatform.persistance.CacheFileManager
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.isErgoPaySigningRequest
@@ -25,6 +26,7 @@ class MosaikViewModel : ViewModel() {
     val showDialogEvent = SingleLiveEvent<MosaikDialog?>()
     val showAddressChooserEvent = SingleLiveEvent<String?>()
     val ergoPayActionEvent = SingleLiveEvent<ErgoPayAction?>()
+    val showTokenInfoEvent = SingleLiveEvent<String?>()
     val manifestLiveData = MutableLiveData<MosaikManifest?>()
     val noAppLiveData = MutableLiveData<Throwable?>()
 
@@ -75,6 +77,10 @@ class MosaikViewModel : ViewModel() {
         override fun showErgoAddressChooser(valueId: String) {
             valueIdForAddressChooser = valueId
             showAddressChooserEvent.postValue(valueId)
+        }
+
+        override fun runTokenInformationAction(action: TokenInformationAction) {
+            showTokenInfoEvent.postValue(action.tokenId)
         }
     }
 

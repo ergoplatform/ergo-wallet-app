@@ -3,6 +3,8 @@ package org.ergoplatform.android.mosaik
 import android.os.Bundle
 import android.view.*
 import androidx.activity.OnBackPressedCallback
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.colorResource
@@ -124,6 +126,15 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 )
             }
         }
+        viewModel.showTokenInfoEvent.observe(viewLifecycleOwner) { tokenId ->
+            tokenId?.let {
+                findNavController().navigateSafe(
+                    MosaikFragmentDirections.actionMosaikFragmentToTokenInformationDialogFragment(
+                        tokenId
+                    )
+                )
+            }
+        }
 
         // click listeners
         binding.buttonNoApp.setOnClickListener {
@@ -146,6 +157,22 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                     minPixelSize,
                     minPixelSize
                 ).asImageBitmap()
+            }
+
+            DropDownMenu = { expanded,
+                             dismiss,
+                             modifier,
+                             content ->
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = dismiss,
+                    modifier = modifier,
+                    content = content,
+                )
+            }
+
+            DropDownItem = { onClick, content ->
+                DropdownMenuItem(onClick = onClick, content = content)
             }
         }
         binding.composeView.setContent {

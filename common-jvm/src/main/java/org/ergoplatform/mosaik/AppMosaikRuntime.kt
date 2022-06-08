@@ -3,6 +3,7 @@ package org.ergoplatform.mosaik
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.isValidErgoAddress
 import org.ergoplatform.mosaik.model.MosaikContext
@@ -11,8 +12,10 @@ import org.ergoplatform.persistance.CacheFileManager
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.uilogic.STRING_BUTTON_CHOOSE_ADDRESS
+import org.ergoplatform.uilogic.STRING_DROPDOWN_CHOOSE_OPTION
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
+import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.utils.getHostname
 import org.ergoplatform.utils.normalizeUrl
 import org.ergoplatform.wallet.addresses.getAddressLabel
@@ -150,11 +153,23 @@ abstract class AppMosaikRuntime(
     override fun formatString(string: StringConstant, values: String?): String {
         val appConstant = when (string) {
             StringConstant.ChooseAddress -> STRING_BUTTON_CHOOSE_ADDRESS
+            StringConstant.PleaseChoose -> STRING_DROPDOWN_CHOOSE_OPTION
         }
         return values?.let {
             stringProvider.getString(appConstant, values)
         } ?: stringProvider.getString(appConstant)
 
+    }
+
+    override fun convertErgToFiat(nanoErg: Long): String? {
+        val walletStateManager = WalletStateSyncManager.getInstance()
+        return if (walletStateManager.hasFiatValue)
+            formatFiatToString(
+                ErgoAmount(nanoErg).toDouble() * walletStateManager.fiatValue.value,
+                walletStateManager.fiatCurrency,
+                stringProvider
+            )
+        else null
     }
 
     override fun getErgoAddressLabel(ergoAddress: String): String? =

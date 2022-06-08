@@ -279,7 +279,8 @@
     <string name="title_favorites">Favorites</string>
     <string name="desc_none">None yet</string>
     <string name="menu_favorite">Favorite</string>
-    <string name="button_choose_address">Choose address...</string>
+    <string name="button_choose_address">Choose address…</string>
+    <string name="dropdown_choose_option">(please choose)</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>

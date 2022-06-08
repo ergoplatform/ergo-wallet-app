@@ -123,6 +123,7 @@ const val STRING_DEVICE_ENC_SECURITY_BIOMETRIC_STRONG = "device_enc_security_bio
 const val STRING_DEVICE_ENC_SECURITY_BIOMETRIC_WEAK = "device_enc_security_biometric_weak"
 const val STRING_DEVICE_ENC_SECURITY_NONE = "device_enc_security_none"
 const val STRING_DEVICE_ENC_SECURITY_PASS = "device_enc_security_pass"
+const val STRING_DROPDOWN_CHOOSE_OPTION = "dropdown_choose_option"
 const val STRING_DROPDOWN_MENU = "dropdown_menu"
 const val STRING_ERR_PASSWORD = "err_password"
 const val STRING_ERR_PASSWORD_CONFIRM = "err_password_confirm"
