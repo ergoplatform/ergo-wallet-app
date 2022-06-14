@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentMosaikBinding
 import org.ergoplatform.android.persistence.AndroidCacheFiles
@@ -112,7 +113,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                     )
             }
         }
-        viewModel.showAddressChooserEvent.observe(viewLifecycleOwner) { valueId ->
+        viewModel.showWalletOrAddressChooserEvent.observe(viewLifecycleOwner) { valueId ->
             valueId?.let {
                 ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
             }
@@ -210,6 +211,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
             AppDatabase.getInstance(context),
             getPlatformType(),
             AndroidStringProvider(context),
+            Preferences(context),
             AndroidCacheFiles(context)
         )
     }
@@ -245,12 +247,15 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 AppDatabase.getInstance(requireContext())
                     .walletDbProvider.loadWalletWithStateById(walletConfig.id)
             }
-            viewModel.onWalletChosen(wallet)
-            if (wallet?.getNumOfAddresses() == 1) {
-                viewModel.onAddressChosen(0)
-            } else {
-                ChooseAddressListDialogFragment.newInstance(walletConfig.id)
-                    .show(childFragmentManager, null)
+            val done = viewModel.onWalletChosen(wallet)
+            if (!done) {
+                // we need to choose an address
+                if (wallet?.getNumOfAddresses() == 1) {
+                    viewModel.onAddressChosen(0)
+                } else {
+                    ChooseAddressListDialogFragment.newInstance(walletConfig.id)
+                        .show(childFragmentManager, null)
+                }
             }
         }
     }

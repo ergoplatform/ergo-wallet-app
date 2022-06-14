@@ -10,8 +10,10 @@ import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.persistance.CacheFileManager
 import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.uilogic.STRING_BUTTON_CHOOSE_ADDRESS
+import org.ergoplatform.uilogic.STRING_BUTTON_CHOOSE_WALLET
 import org.ergoplatform.uilogic.STRING_DROPDOWN_CHOOSE_OPTION
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
@@ -44,6 +46,7 @@ abstract class AppMosaikRuntime(
 
     lateinit var appDatabase: IAppDatabase
     var cacheFileManager: CacheFileManager? = null
+    var preferencesProvider: PreferencesProvider? = null
 
     init {
         appLoaded = { manifest ->
@@ -154,6 +157,7 @@ abstract class AppMosaikRuntime(
         val appConstant = when (string) {
             StringConstant.ChooseAddress -> STRING_BUTTON_CHOOSE_ADDRESS
             StringConstant.PleaseChoose -> STRING_DROPDOWN_CHOOSE_OPTION
+            StringConstant.ChooseWallet -> STRING_BUTTON_CHOOSE_WALLET
         }
         return values?.let {
             stringProvider.getString(appConstant, values)
@@ -161,16 +165,33 @@ abstract class AppMosaikRuntime(
 
     }
 
-    override fun convertErgToFiat(nanoErg: Long): String? {
+    override val fiatRate: Double?
+        get() {
+            val walletStateManager = WalletStateSyncManager.getInstance()
+            return if (walletStateManager.hasFiatValue)
+                walletStateManager.fiatValue.value.toDouble()
+            else null
+        }
+
+    override fun convertErgToFiat(nanoErg: Long, withCurrency: Boolean): String? {
         val walletStateManager = WalletStateSyncManager.getInstance()
         return if (walletStateManager.hasFiatValue)
             formatFiatToString(
                 ErgoAmount(nanoErg).toDouble() * walletStateManager.fiatValue.value,
                 walletStateManager.fiatCurrency,
-                stringProvider
+                stringProvider,
+                withCurrency
             )
         else null
     }
+
+    override fun getErgoWalletLabel(firstAddress: String): String? =
+        runBlocking {
+            val walletConfig = guidManager.appDatabase.walletDbProvider.loadWalletByFirstAddress(
+                firstAddress
+            )
+            walletConfig?.displayName
+        }
 
     override fun getErgoAddressLabel(ergoAddress: String): String? =
     // TODO Mosaik runblocking here works because db is fast and Compose implementation
@@ -192,6 +213,12 @@ abstract class AppMosaikRuntime(
 
     override fun isErgoAddressValid(ergoAddress: String): Boolean =
         isValidErgoAddress(ergoAddress)
+
+    override var preferFiatInput: Boolean
+        get() = preferencesProvider?.isSendInputFiatAmount ?: false
+        set(value) {
+            preferencesProvider?.isSendInputFiatAmount = value
+        }
 }
 
 class MosaikGuidManager {
