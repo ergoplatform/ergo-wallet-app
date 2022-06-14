@@ -99,6 +99,7 @@ task convertStrings {
         convertFile("pt_PT")
         convertFile("it")
         convertFile("tr")
+        convertFile("ru")
     }
 }
 
