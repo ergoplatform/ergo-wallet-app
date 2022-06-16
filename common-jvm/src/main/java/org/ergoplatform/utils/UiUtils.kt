@@ -42,16 +42,9 @@ fun formatTokenPriceToString(
 /**
  * fiat is formatted according to users locale, because it is his local currency
  */
-fun formatFiatToString(
-    amount: Double,
-    currency: String,
-    text: StringProvider,
-    withCurrency: Boolean = true
-): String {
-    val formattedAmount = DecimalFormat(text.getString(STRING_FORMAT_FIAT)).format(amount)
-    return if (withCurrency)
-        formattedAmount + " " + currency.uppercase(Locale.getDefault())
-    else formattedAmount
+fun formatFiatToString(amount: Double, currency: String, text: StringProvider): String {
+    return DecimalFormat(text.getString(STRING_FORMAT_FIAT)).format(amount) +
+            " " + currency.uppercase(Locale.getDefault())
 }
 
 fun formatDoubleWithPrettyReduction(amount: Double): String {

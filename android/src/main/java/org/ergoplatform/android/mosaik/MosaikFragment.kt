@@ -1,5 +1,6 @@
 package org.ergoplatform.android.mosaik
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.activity.OnBackPressedCallback
@@ -14,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,6 +23,7 @@ import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentMosaikBinding
+import org.ergoplatform.android.ergoauth.ErgoAuthenticationFragment
 import org.ergoplatform.android.persistence.AndroidCacheFiles
 import org.ergoplatform.android.transactions.ErgoPaySigningFragment
 import org.ergoplatform.android.ui.*
@@ -46,6 +49,18 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
 
+        parentFragmentManager.setFragmentResultListener(
+            ErgoAuthenticationFragment.ergoAuthActionRequestKey,
+            this
+        ) { _, bundle ->
+            if (bundle.getBoolean(
+                    ErgoAuthenticationFragment.ergoAuthActionCompletedBundleKey,
+                    false
+                )
+            ) {
+                viewModel.ergoAuthActionCompleted()
+            }
+        }
         parentFragmentManager.setFragmentResultListener(
             ErgoPaySigningFragment.ergoPayActionRequestKey,
             this
@@ -125,6 +140,20 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                         ergoPayAction.url
                     )
                 )
+            }
+        }
+        viewModel.ergoAuthActionEvent.observe(viewLifecycleOwner) { ergoAuthAction ->
+            ergoAuthAction?.let {
+                findNavController().navigateSafe(
+                    MosaikFragmentDirections.actionMosaikFragmentToErgoAuthenticationFragment(
+                        ergoAuthAction.url
+                    )
+                )
+            }
+        }
+        viewModel.scanQrCodeEvent.observe(viewLifecycleOwner) { qrScanActionId ->
+            qrScanActionId?.let {
+                IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
             }
         }
         viewModel.showTokenInfoEvent.observe(viewLifecycleOwner) { tokenId ->
@@ -277,6 +306,15 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            result.contents?.let { viewModel.qrCodeScanned(it) }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     private val backPressedHandler = object : OnBackPressedCallback(false) {

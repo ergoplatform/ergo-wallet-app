@@ -5,7 +5,7 @@ buildscript {
     ext.robovm_version = "2.3.16"
     ext.sqldelight_version = "1.5.3"
     ext.coroutines_version = "1.6.0"
-    ext.mosaik_version = "4f6f8969f1" // 0.4.0 + clipping fix
+    ext.mosaik_version = "e8b73e22c7" // 0.4.0 + clipping fix + ErgoAuth/QrCodeAction
     ext.compose_version = "1.1.0"
     ext.mockito_version = "4.0.0"
     ext.junit_version = "4.13.2"

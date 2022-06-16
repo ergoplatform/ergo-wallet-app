@@ -7,11 +7,13 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.BuildConfig
 import org.ergoplatform.android.ui.SingleLiveEvent
+import org.ergoplatform.ergoauth.isErgoAuthRequest
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.mosaik.MosaikGuidManager
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
+import org.ergoplatform.mosaik.model.actions.ErgoAuthAction
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
 import org.ergoplatform.mosaik.model.actions.TokenInformationAction
 import org.ergoplatform.persistance.CacheFileManager
@@ -28,6 +30,8 @@ class MosaikViewModel : ViewModel() {
     val showDialogEvent = SingleLiveEvent<MosaikDialog?>()
     val showWalletOrAddressChooserEvent = SingleLiveEvent<String?>()
     val ergoPayActionEvent = SingleLiveEvent<ErgoPayAction?>()
+    val ergoAuthActionEvent = SingleLiveEvent<ErgoAuthAction?>()
+    val scanQrCodeEvent = SingleLiveEvent<String?>()
     val showTokenInfoEvent = SingleLiveEvent<String?>()
     val manifestLiveData = MutableLiveData<MosaikManifest?>()
     val noAppLiveData = MutableLiveData<Throwable?>()
@@ -38,6 +42,8 @@ class MosaikViewModel : ViewModel() {
     private var valueIdForAddressChooser: String? = null
     private var walletForAddressChooser: Wallet? = null
     private var ergoPayOnFinishedActionId: String? = null
+    private var ergoAuthOnFinishedActionId: String? = null
+    private var scanQrCodeActionId: String? = null
 
     val mosaikRuntime = object : AppMosaikRuntime(
         "Ergo Wallet App (Android)",
@@ -73,8 +79,22 @@ class MosaikViewModel : ViewModel() {
                 ergoPayOnFinishedActionId = action.onFinished
                 ergoPayActionEvent.postValue(action)
             } else {
-                // TODO Mosaik next version errorRaised(IllegalArgumentException("ErgoPayAction without actual signing request: ${action.url}"))
+                raiseError(IllegalArgumentException("ErgoPayAction without actual signing request: ${action.url}"))
             }
+        }
+
+        override fun runErgoAuthAction(action: ErgoAuthAction) {
+            if (isErgoAuthRequest(action.url)) {
+                ergoAuthOnFinishedActionId = action.onFinished
+                ergoAuthActionEvent.postValue(action)
+            } else {
+                raiseError(IllegalArgumentException("ErgoAuthAction without actual authentication request: ${action.url}"))
+            }
+        }
+
+        override fun scanQrCode(actionId: String) {
+            scanQrCodeActionId = actionId
+            scanQrCodeEvent.postValue(actionId)
         }
 
         override fun showErgoAddressChooser(valueId: String) {
@@ -156,6 +176,20 @@ class MosaikViewModel : ViewModel() {
         ergoPayOnFinishedActionId?.let { actionId ->
             ergoPayOnFinishedActionId = null
             mosaikRuntime.runAction(actionId)
+        }
+    }
+
+    fun ergoAuthActionCompleted() {
+        ergoAuthOnFinishedActionId?.let { actionId ->
+            ergoAuthOnFinishedActionId = null
+            mosaikRuntime.runAction(actionId)
+        }
+    }
+
+    fun qrCodeScanned(qrCode: String) {
+        scanQrCodeActionId?.let { actionId ->
+            scanQrCodeActionId = null
+            mosaikRuntime.qrCodeScanned(actionId, qrCode)
         }
     }
 }

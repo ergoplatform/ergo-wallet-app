@@ -21,6 +21,8 @@ import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.utils.getHostname
 import org.ergoplatform.utils.normalizeUrl
 import org.ergoplatform.wallet.addresses.getAddressLabel
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.*
 
 abstract class AppMosaikRuntime(
@@ -173,16 +175,18 @@ abstract class AppMosaikRuntime(
             else null
         }
 
-    override fun convertErgToFiat(nanoErg: Long, withCurrency: Boolean): String? {
+    override fun convertErgToFiat(nanoErg: Long, formatted: Boolean): String? {
         val walletStateManager = WalletStateSyncManager.getInstance()
-        return if (walletStateManager.hasFiatValue)
-            formatFiatToString(
-                ErgoAmount(nanoErg).toDouble() * walletStateManager.fiatValue.value,
-                walletStateManager.fiatCurrency,
-                stringProvider,
-                withCurrency
-            )
-        else null
+        return if (walletStateManager.hasFiatValue) {
+            val fiatAmount = ErgoAmount(nanoErg).toDouble() * walletStateManager.fiatValue.value
+            if (formatted) {
+                formatFiatToString(
+                    fiatAmount,
+                    walletStateManager.fiatCurrency,
+                    stringProvider,
+                )
+            } else BigDecimal(fiatAmount).setScale(2, RoundingMode.HALF_UP).toString()
+        } else null
     }
 
     override fun getErgoWalletLabel(firstAddress: String): String? =
