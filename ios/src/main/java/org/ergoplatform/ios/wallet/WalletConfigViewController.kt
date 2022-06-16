@@ -45,7 +45,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
         val nameInputLabel = Body1Label()
         nameInputLabel.text = texts.get(STRING_LABEL_WALLET_NAME)
 
-        nameInputField = createTextField()
+        nameInputField = EndIconTextField()
         nameInputField.returnKeyType = UIReturnKeyType.Done
         nameInputField.clearButtonMode = UITextFieldViewMode.Always
         nameInputField.delegate = object : UITextFieldDelegateAdapter() {
@@ -153,8 +153,10 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
 
     private fun onDisplayXpubClicked() {
         uiLogic.wallet?.secretStorage?.let {
-            startAuthFlow(uiLogic.wallet!!) { mnemonic ->
-                displayXpub(getSerializedXpubKeyFromMnemonic(mnemonic))
+            startAuthFlow(uiLogic.wallet!!) { signingSecrets ->
+                val xpubkey = getSerializedXpubKeyFromMnemonic(signingSecrets)
+                signingSecrets.clearMemory()
+                displayXpub(xpubkey)
             }
         } ?: uiLogic.wallet?.extendedPublicKey?.let {
             displayXpub(it)

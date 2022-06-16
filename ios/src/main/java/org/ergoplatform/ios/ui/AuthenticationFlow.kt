@@ -2,6 +2,7 @@ package org.ergoplatform.ios.ui
 
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.api.IosAuthentication
 import org.ergoplatform.ios.api.IosEncryptionManager
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
@@ -34,7 +35,7 @@ fun UIViewController.startAuthFlow(wallet: WalletConfig, callback: (mnemonic: Si
                             wallet.secretStorage!!, context
                         )
 
-                        val mnemonic = SigningSecrets.fromJson(String(decrypted))!!
+                        val mnemonic = SigningSecrets.fromBytes(decrypted)!!
 
                         runOnMainThread { callback.invoke(mnemonic) }
                     } catch (t: Throwable) {
@@ -42,7 +43,7 @@ fun UIViewController.startAuthFlow(wallet: WalletConfig, callback: (mnemonic: Si
                         runOnMainThread {
                             val uac = buildSimpleAlertController(
                                 texts.format(STRING_ERROR_DEVICE_SECURITY, ""),
-                                t.message ?: "", texts
+                                texts.get(STRING_ERROR_DEVICE_SECURITY_CLOUD_HINT), texts
                             )
                             presentViewController(uac, true) {}
                         }
@@ -70,14 +71,14 @@ fun UIViewController.startAuthFlow(wallet: WalletConfig, callback: (mnemonic: Si
 
 private fun proceedAuthFlowWithPassword(
     wallet: WalletConfig,
-    password: String,
+    password: SecretString,
     callback: (mnemonic: SigningSecrets) -> Unit
 ): Boolean {
     wallet.secretStorage?.let {
         val mnemonic: SigningSecrets?
         try {
             val decryptData = AesEncryptionManager.decryptData(password, it)
-            mnemonic = SigningSecrets.fromJson(String(decryptData!!))
+            mnemonic = SigningSecrets.fromBytes(decryptData!!)
         } catch (t: Throwable) {
             // Password wrong
             return false

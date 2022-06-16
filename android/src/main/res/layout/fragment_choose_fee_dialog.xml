@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:background="?attr/colorSurface">
+
+    <!-- <include tools:layout="@layout/fragment_choose_fee_dialog_item" /> -->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/layout_fee_items"
+        style="@style/width_match_parent_max_500"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_marginVertical="@dimen/half_horizontal_margin"
+        android:orientation="vertical" />
+
+    <LinearLayout
+        style="@style/width_match_parent_max_500"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_marginVertical="@dimen/half_horizontal_margin"
+        android:orientation="vertical"
+        android:padding="@dimen/half_horizontal_margin">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/label_fee_custom"
+            app:endIconMode="clear_text"
+            app:layout_constraintTop_toBottomOf="@id/public_address">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_fee_amount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:imeOptions="actionDone"
+                android:inputType="numberDecimal"
+                android:maxLines="1" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_apply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/button_apply" />
+
+    </LinearLayout>
+
+</LinearLayout>

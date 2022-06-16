@@ -1,13 +1,14 @@
 package org.ergoplatform.ios.ui
 
 import org.ergoplatform.URL_FORGOT_PASSWORD_HELP
+import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.uilogic.*
 import org.robovm.apple.uikit.*
 
 object PasswordViewController {
     fun showDialog(
         parentViewController: UIViewController,
-        onPasswordEntered: (String?) -> String?,
+        onPasswordEntered: (SecretString?) -> String?,
         showConfirmation: Boolean = false
     ) {
         showDialog(parentViewController, onPasswordEntered, showConfirmation, null, null, null)
@@ -15,7 +16,7 @@ object PasswordViewController {
 
     private fun showDialog(
         parentViewController: UIViewController,
-        onPasswordEntered: (String?) -> String?, showConfirmation: Boolean, errorMessage: String?,
+        onPasswordEntered: (SecretString?) -> String?, showConfirmation: Boolean, errorMessage: String?,
         password: String?, confirm: String?
     ) {
         val textProvider = getAppDelegate().texts
@@ -80,8 +81,11 @@ object PasswordViewController {
             UIAlertAction(textProvider.get(STRING_ZXING_BUTTON_OK), UIAlertActionStyle.Default) {
                 val enteredPassword = alertController.textFields.get(0).text
                 val enteredConfirmation = if (showConfirmation) alertController.textFields.get(1).text else null
-                val newErrorMessage = if (showConfirmation && !enteredPassword.equals(enteredConfirmation))
-                    textProvider.get(STRING_ERR_PASSWORD_CONFIRM) else onPasswordEntered.invoke(enteredPassword)
+                val newErrorMessage =
+                    if (showConfirmation && !enteredPassword.equals(enteredConfirmation))
+                        textProvider.get(STRING_ERR_PASSWORD_CONFIRM)
+                    else
+                        onPasswordEntered.invoke(SecretString.create(enteredPassword))
                 if (newErrorMessage != null) {
                     showDialog(
                         parentViewController,

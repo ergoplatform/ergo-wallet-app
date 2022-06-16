@@ -8,13 +8,17 @@ class SigningSecretsTest {
 
     @Test
     fun serializationTests() {
-        val signingSecretsDeprecated = SigningSecrets("mnemonic", true)
-        assertEquals(signingSecretsDeprecated, SigningSecrets.fromJson(signingSecretsDeprecated.toJson()))
+        val signingSecretsDeprecated = SigningSecrets("mnemonic✅", true)
+        assertEquals(signingSecretsDeprecated, SigningSecrets.fromBytes(signingSecretsDeprecated.toBytes()))
         val signingSecretsPast1627 = SigningSecrets("mnemonic", false)
-        // TODO BIP-32 fix assertEquals(signingSecretsPast1627, SigningSecrets.fromJson(signingSecretsPast1627.toJson()))
+        // TODO BIP-32 fix assertEquals(signingSecretsPast1627, SigningSecrets.fromBytes(signingSecretsPast1627.toBytes()))
 
-        val oldVersion = "{\"mnemonic\":\"mnemonic\"}"
-        val signingSecretsBackwardsCompatibility = SigningSecrets.fromJson(oldVersion)
+        val oldSerializationVersion = "{\"mnemonic\":\"mnemonic✅\"}".toByteArray()
+        val signingSecretsBackwardsCompatibility = SigningSecrets.fromBytes(oldSerializationVersion)
         assertEquals(signingSecretsDeprecated, signingSecretsBackwardsCompatibility)
+
+        val newSerializationVersion = "mnemonic✅".toByteArray()
+        val signingSecrets = SigningSecrets.fromBytes(newSerializationVersion)
+        assertEquals(signingSecretsDeprecated, signingSecrets)
     }
 }

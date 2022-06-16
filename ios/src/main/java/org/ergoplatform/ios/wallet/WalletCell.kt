@@ -9,9 +9,11 @@ import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.tokens.fillTokenOverview
+import org.ergoplatform.tokens.getTokenErgoValueSum
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
+import org.ergoplatform.utils.formatTokenPriceToString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
 import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
@@ -28,6 +30,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
     private lateinit var nameLabel: Body1Label
     private lateinit var balanceLabel: ErgoAmountView
     private lateinit var fiatBalance: Body1Label
+    private lateinit var tokenValueBalance: Body1Label
     private lateinit var unconfirmedBalance: Body1BoldLabel
     private lateinit var tokenCount: Headline2Label
     private lateinit var unfoldTokensButton: UIImageView
@@ -70,6 +73,19 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
             layoutMargins = UIEdgeInsets(DEFAULT_MARGIN * .5, DEFAULT_MARGIN * 2, 0.0, 0.0)
             isLayoutMarginsRelativeArrangement = true
         }
+        tokenValueBalance = Body1Label().apply {
+            textColor = UIColor.secondaryLabel()
+            numberOfLines = 1
+        }
+        val tokenTitles = UIView(CGRect.Zero()).apply {
+            layoutMargins = UIEdgeInsets.Zero()
+            addSubview(tokenCount)
+            addSubview(tokenValueBalance)
+            tokenCount.leftToSuperview().topToSuperview().bottomToSuperview().enforceKeepIntrinsicWidth()
+            tokenValueBalance.centerVerticallyTo(tokenCount).leftToRightOf(tokenCount, DEFAULT_MARGIN * 1.5f)
+                .rightToSuperview()
+        }
+
         configButton = UIImageView(getIosSystemImage(IMAGE_SETTINGS, UIImageSymbolScale.Small)).apply {
             tintColor = UIColor.label()
         }
@@ -86,7 +102,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
                     fiatBalance,
                     unconfirmedBalance,
                     spacing,
-                    tokenCount,
+                    tokenTitles,
                     tokenStack
                 )
             )
@@ -134,8 +150,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
 
         configButton.topToSuperview().rightToSuperview()
 
-        unfoldTokensButton.centerVerticallyTo(tokenCount)
-        unfoldTokensButton.rightToLeftOf(tokenCount, DEFAULT_MARGIN)
+        unfoldTokensButton.centerVerticallyTo(tokenTitles).rightToLeftOf(tokenTitles, DEFAULT_MARGIN)
 
         cardView.contentView.isUserInteractionEnabled = true
         cardView.contentView.addGestureRecognizer(UITapGestureRecognizer {
@@ -162,7 +177,10 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
 
     private fun toggleTokenUnfold() {
         wallet?.walletConfig?.let { config ->
-            getAppDelegate().database.walletDbProvider.updateWalletDisplayTokens(!config.unfoldTokens, config.id)
+            getAppDelegate().database.walletDbProvider.updateWalletDisplayTokens(
+                !config.unfoldTokens,
+                config.id
+            )
         }
     }
 
@@ -183,9 +201,10 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         val nodeConnector = WalletStateSyncManager.getInstance()
         val ergoPrice = nodeConnector.fiatValue.value
         fiatBalance.isHidden = ergoPrice == 0f
+        val stringProvider = IosStringProvider(textBundle)
         fiatBalance.text = formatFiatToString(
             ergoPrice.toDouble() * ergoAmount.toDouble(),
-            nodeConnector.fiatCurrency, IosStringProvider(textBundle)
+            nodeConnector.fiatCurrency, stringProvider
         )
         val unconfirmedErgs = wallet.getUnconfirmedBalanceForAllAddresses()
         unconfirmedBalance.text = if (unconfirmedErgs == 0L) "" else
@@ -196,6 +215,13 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         val tokens = wallet.getTokensForAllAddresses()
         tokenCount.text = tokens.size.toString() + " tokens"
         tokenCount.isHidden = tokens.isEmpty()
+        val tokenErgAmount = getTokenErgoValueSum(tokens, nodeConnector)
+        tokenValueBalance.isHidden = tokenCount.isHidden || tokenErgAmount.isZero()
+        if (!tokenValueBalance.isHidden) {
+            tokenValueBalance.text =
+                formatTokenPriceToString(tokenErgAmount, nodeConnector, stringProvider)
+        }
+
         unfoldTokensButton.isHidden = tokens.isEmpty()
         unfoldTokensButton.image = getIosSystemImage(
             if (!wallet.walletConfig.unfoldTokens) IMAGE_PLUS_CIRCLE else IMAGE_MINUS_CIRCLE,
@@ -204,11 +230,14 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
 
         tokenStack.clearArrangedSubviews()
         if (wallet.walletConfig.unfoldTokens) {
-            fillTokenOverview(tokens, {
-                tokenStack.addArrangedSubview(TokenEntryView().bindWalletToken(it, textBundle))
-            }, {
-                tokenStack.addArrangedSubview(TokenEntryView().bindHasMoreTokenHint(it))
-            })
+            fillTokenOverview(
+                tokens,
+                addToken = {
+                    tokenStack.addArrangedSubview(TokenEntryView().bindWalletToken(it, textBundle))
+                },
+                addMoreTokenHint = {
+                    tokenStack.addArrangedSubview(TokenEntryView().bindHasMoreTokenHint(it))
+                })
         }
     }
 

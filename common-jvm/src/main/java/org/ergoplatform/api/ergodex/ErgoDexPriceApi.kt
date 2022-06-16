@@ -1,6 +1,7 @@
 package org.ergoplatform.api.ergodex
 
 import org.ergoplatform.api.OkHttpSingleton
+import org.ergoplatform.api.PriceImportance
 import org.ergoplatform.api.TokenPriceApi
 import org.ergoplatform.persistance.TokenPrice
 import retrofit2.Retrofit
@@ -10,7 +11,7 @@ class ErgoDexPriceApi : TokenPriceApi {
     private val priceSource = "ergodex.io"
     private val baseIdErg = "0000000000000000000000000000000000000000000000000000000000000000"
 
-    val ergoDexApi: ErgoDexApi
+    private val ergoDexApi: ErgoDexApi
 
     init {
         val retrofit = Retrofit.Builder().baseUrl("https://api.ergodex.io/")
@@ -21,8 +22,8 @@ class ErgoDexPriceApi : TokenPriceApi {
     }
 
 
-    override fun getTokenPrices(): List<TokenPrice>? {
-        val swapList = ergoDexApi.swaps.execute()
+    override fun getTokenPrices(): List<Pair<TokenPrice, PriceImportance>>? {
+        val swapList = ergoDexApi.getSwaps(System.currentTimeMillis() - 1000L * 24 * 60 * 60).execute()
 
         val ergBasePrices = swapList.body()
             ?.filter { it.baseId.equals(baseIdErg) && it.baseDisplayName.equals("ERG") }
@@ -33,13 +34,14 @@ class ErgoDexPriceApi : TokenPriceApi {
             ergBasePrices.forEach {
                 val otherEntry = hashMap.get(it.tokenId)
 
+                // prefer pools without more trading volume
                 if (otherEntry == null || otherEntry.baseVolume.value < it.baseVolume.value)
                     hashMap.put(it.tokenId, it)
             }
 
             hashMap.values.map {
                 TokenPrice(it.tokenId, it.displayName, priceSource, it.lastPrice)
-            }
+            }.map { Pair(it, PriceImportance.Low) }
         }
     }
 }

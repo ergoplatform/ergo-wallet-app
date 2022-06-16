@@ -3,7 +3,7 @@ package org.ergoplatform.transactions
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.ergoplatform.ErgoApi
+import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.deserializeUnsignedTxOffline
 import org.ergoplatform.utils.*
 
@@ -69,7 +69,7 @@ fun getErgoPaySigningRequest(
         val httpUrl = (if (isLocalOrIpAddress(requestData)) "http:" else "https:") +
                 ergopayUrl.substringAfter(uriSchemePrefix)
 
-        val jsonResponse = fetchHttpGetStringSync(httpUrl)
+        val jsonResponse = fetchHttpGetStringSync(httpUrl, 30)
         parseErgoPaySigningRequestFromJson(jsonResponse)
     }
 
@@ -133,7 +133,7 @@ private fun parseErgoPaySigningRequestFromUri(uri: String): ErgoPaySigningReques
  * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
  * switches to non-UI thread, use within an applicable try/catch phrase
  */
-suspend fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoApi): TransactionInfo? {
+suspend fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ErgoExplorerApi): TransactionInfo? {
     if (reducedTx == null) return null
     val reducedTransaction = deserializeUnsignedTxOffline(reducedTx)
     return reducedTransaction.buildTransactionInfo(ergoApiService)

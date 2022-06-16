@@ -4,7 +4,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.api.IosAuthentication
@@ -61,7 +61,7 @@ class SaveWalletViewController(
             textColor = uiColorErgo
             text = texts.get(STRING_LABEL_WALLET_NAME)
         }
-        nameInputField = createTextField().apply {
+        nameInputField = EndIconTextField().apply {
             clearButtonMode = UITextFieldViewMode.Always
             returnKeyType = UIReturnKeyType.Done
             delegate = object : UITextFieldDelegateAdapter() {
@@ -91,7 +91,7 @@ class SaveWalletViewController(
 
                     val encrypted = AesEncryptionManager.encryptData(
                         password,
-                        uiLogic.signingSecrets.toJson().toByteArray()
+                        uiLogic.signingSecrets.toBytes()
                     )
 
                     saveToDbAndDismissController(ENC_TYPE_PASSWORD, encrypted)
@@ -112,7 +112,7 @@ class SaveWalletViewController(
                     override fun onAuthenticationSucceeded(context: LAContext) {
                         try {
                             val encrypted = IosEncryptionManager.encryptDataWithKeychain(
-                                uiLogic.signingSecrets.toJson().toByteArray(),
+                                uiLogic.signingSecrets.toBytes(),
                                 context
                             )
 
@@ -205,7 +205,9 @@ class SaveWalletViewController(
                 encType, secretStorage
             )
         }
-        navigationController.dismissViewController(true) {}
+        navigationController.dismissViewController(true) {
+            uiLogic.eraseSecrets()
+        }
     }
 
     override fun viewWillAppear(animated: Boolean) {
@@ -242,7 +244,7 @@ class SaveWalletViewController(
         }
 
         uiLogic.startDerivedAddressesSearch(
-            ErgoApiService.getOrInit(appDelegate.prefs),
+            ApiServiceManager.getOrInit(appDelegate.prefs),
             db
         ) { num ->
             runOnMainThread {

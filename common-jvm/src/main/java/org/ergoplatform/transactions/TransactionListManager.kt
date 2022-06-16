@@ -5,8 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.ErgoApi
 import org.ergoplatform.TokenAmount
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.TransactionInfo
@@ -15,6 +15,26 @@ import org.ergoplatform.utils.LogUtils
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.math.max
 
+/**
+ * This singleton manages the in app transaction history lists by ensuring that only one download
+ * is launched at a time and automatic downloads aren't launched too frequently. It holds the logic
+ * for updating transaction lists.
+ *
+ * Transaction history lists are updated as follows per address:
+ * - the most recent securely confirmed history list entry is loaded from the DB. Securely confirmed
+ *   means no orphaning or other changes are expected any more
+ * - transaction history for this address is fetched from Ergo Explorer in chunks until the block
+ *   height of the most recent securely confirmed history list entry is reached
+ * - mempool is also fetched
+ * - the fetched tx history list from Explorer is merged with the not securely confirmed history
+ *   list from our DB: transactions are added or updated or, if not known in the blockchain any more,
+ *   set to cancelled
+ *
+ * The algorithm is more meant to be fast and to save bandwidth than to be 100% accurate. For
+ * addresses with a high throughput rate, transactions might get lost when loading chunks from
+ * Explorer is cancelled midway. However, the saved data can always be fixed by starting a
+ * complete download which wipes all address data before starting to download the complete history.
+ */
 object TransactionListManager {
     val isDownloading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val downloadProgress: MutableStateFlow<Int> = MutableStateFlow(0)
@@ -27,7 +47,11 @@ object TransactionListManager {
      * enqueues address for downloading its transaction list and starts processing queue if not
      * already in operation
      */
-    fun downloadTransactionListForAddress(address: String, ergoApi: ErgoApi, db: IAppDatabase) {
+    fun downloadTransactionListForAddress(
+        address: String,
+        ergoApi: ApiServiceManager,
+        db: IAppDatabase
+    ) {
         if (!addressRecentlyRefreshed(address)) {
             addressesToDownload.add(address)
 
@@ -36,7 +60,7 @@ object TransactionListManager {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun startProcessQueueIfNecessary(ergoApi: ErgoApi, db: IAppDatabase) {
+    private fun startProcessQueueIfNecessary(ergoApi: ApiServiceManager, db: IAppDatabase) {
         if (!(isDownloading.value)) {
             setDownloadState(true)
             GlobalScope.launch(Dispatchers.IO) {
@@ -52,10 +76,14 @@ object TransactionListManager {
         }
     }
 
+    /**
+     * When no download is in progress, this will wipe all data saved for this address and attempt
+     * to download tx history list until block height 0
+     */
     @OptIn(DelicateCoroutinesApi::class)
     fun startDownloadAllAddressTransactions(
         address: String,
-        ergoApi: ErgoApi,
+        ergoApi: ApiServiceManager,
         db: IAppDatabase
     ): Boolean {
         return if (!(isDownloading.value)) {
@@ -68,10 +96,14 @@ object TransactionListManager {
         } else false
     }
 
+    /**
+     * determines how many transactions must be fetched from Explorer, fetches it and calls
+     * helper methods to merge the downloaded and current data
+     */
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun doDownloadTransactionList(
         address: String,
-        ergoApi: ErgoApi,
+        ergoApi: ApiServiceManager,
         db: IAppDatabase,
         loadAllTx: Boolean = false
     ) {
@@ -143,37 +175,50 @@ object TransactionListManager {
             }
 
             // now unconfirmed
-            // TODO also check mempool from node since explorer's mempool is not reliable
             val transactionsMempoolCall = ergoApi.getMempoolTransactionsForAddress(
                 address,
                 100,
                 0
             ).execute()
 
-            if (!transactionsMempoolCall.isSuccessful) {
-                throw IllegalStateException(transactionsMempoolCall.errorBody()!!.string())
-            }
+            val mempoolTransactionsExplorer = if (transactionsMempoolCall.isSuccessful) {
+                transactionsMempoolCall.body()!!.items
+            } else emptyList()
 
             mergeTransactionsWithExistingAndSaveToDb(
                 address,
                 db,
                 notSecurelyConfirmedTransactions,
-                transactionsMempoolCall.body()!!.items,
+                mempoolTransactionsExplorer,
                 false
             )
 
-            // items still in notSecurelyConfirmedTransactions: set cancelled when older than ten minutes and save to db
-            notSecurelyConfirmedTransactions.values.forEach { unseenTransaction ->
-                if (unseenTransaction.timestamp < System.currentTimeMillis() - 10L * 60 * 1000L) {
-                    val newInclusionHeight =
-                        if (unseenTransaction.inclusionHeight == INCLUSION_HEIGHT_NOT_INCLUDED) highestExecuted + 1
-                        else unseenTransaction.inclusionHeight
-                    db.transactionDbProvider.insertOrUpdateAddressTransaction(
-                        unseenTransaction.copy(
-                            state = TX_STATE_CANCELLED,
-                            inclusionHeight = newInclusionHeight
+            if (notSecurelyConfirmedTransactions.isNotEmpty()) {
+                // explorer's mempool is not reliable: sometimes it returns blank, so also check
+                // mempool from node and add the transaction ids so that we don't show transactions
+                // as cancelled that are still waiting
+                val unconfirmedTransactionsNodeCall =
+                    ergoApi.getUnconfirmedTransactions(1000).execute()
+
+                val unconfirmedTxIdsNode = if (unconfirmedTransactionsNodeCall.isSuccessful) {
+                    unconfirmedTransactionsNodeCall.body()!!.map { it.id }
+                } else emptyList()
+
+                // items still in notSecurelyConfirmedTransactions: set cancelled when older than ten minutes and save to db
+                notSecurelyConfirmedTransactions.values.forEach { unseenTransaction ->
+                    if (unseenTransaction.timestamp < System.currentTimeMillis() - 10L * 60 * 1000L &&
+                        !unconfirmedTxIdsNode.contains(unseenTransaction.txId)
+                    ) {
+                        val newInclusionHeight =
+                            if (unseenTransaction.inclusionHeight == INCLUSION_HEIGHT_UNCONFIRMED) highestExecuted + 1
+                            else unseenTransaction.inclusionHeight
+                        db.transactionDbProvider.insertOrUpdateAddressTransaction(
+                            unseenTransaction.copy(
+                                state = TX_STATE_CANCELLED,
+                                inclusionHeight = newInclusionHeight
+                            )
                         )
-                    )
+                    }
                 }
             }
 
@@ -188,6 +233,10 @@ object TransactionListManager {
         }
     }
 
+    /**
+     * merges existing data with downloaded data, updates transaction state and (in case
+     * transaction was not completely known before) the transaction data as well
+     */
     private suspend fun mergeTransactionsWithExistingAndSaveToDb(
         address: String,
         db: IAppDatabase,
@@ -201,7 +250,7 @@ object TransactionListManager {
             val newState =
                 if (!newConfirmed) TX_STATE_WAITING else if (newTransaction.numConfirmations < CONFIRMATIONS_NUM_SECURE) TX_STATE_CONFIRMED_UNSECURE else TX_STATE_CONFIRMED_SECURE
             val newInclusionHeight =
-                if (newConfirmed) newTransaction.inclusionHeight.toLong() else INCLUSION_HEIGHT_NOT_INCLUDED
+                if (newConfirmed) newTransaction.inclusionHeight.toLong() else INCLUSION_HEIGHT_UNCONFIRMED
 
             val transactionToMerge = if (
                 existingTransaction?.state == TX_STATE_SUBMITTED ||
@@ -252,6 +301,10 @@ object TransactionListManager {
         }
     }
 
+    /**
+     * converts given transaction data into address transaction data by reducing inputs and outputs
+     * into a single amount per token
+     */
     suspend fun convertAndSaveTransactionInfoToDb(
         txInfo: org.ergoplatform.transactions.TransactionInfo,
         address: String,
@@ -269,8 +322,9 @@ object TransactionListManager {
 
         if (addressInput != null || addressOutput != null) {
             val ergAmount = ErgoAmount((addressOutput?.value ?: 0) - (addressInput?.value ?: 0))
-            val firstTextAttachmentToAddress = txInfo.outputs.firstOrNull { it.address.equals(address) }?.getAttachmentText()
-                ?: txInfo.outputs.firstOrNull()?.getAttachmentText()
+            val firstTextAttachmentToAddress =
+                txInfo.outputs.firstOrNull { it.address.equals(address) }?.getAttachmentText()
+                    ?: txInfo.outputs.firstOrNull()?.getAttachmentText()
             LogUtils.logDebug(this.javaClass.simpleName, "Saving ${reducedTxInfo.id} for $address")
             val newAddressTx = AddressTransaction(
                 0,
@@ -351,5 +405,6 @@ object TransactionListManager {
     }
 
     private fun addressRecentlyRefreshed(address: String) =
-        System.currentTimeMillis() - (lastAddressRefreshMs[address] ?: 0) <= 1000L * 30
+        System.currentTimeMillis() - (lastAddressRefreshMs[address]
+            ?: 0) <= 1000L * 30 // 30 seconds
 }

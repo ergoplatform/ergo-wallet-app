@@ -43,7 +43,7 @@ abstract class TokenEntryViewUiLogic(val walletToken: WalletToken) {
 
         setDisplayedPrice(if (!singularToken) {
             val walletSyncManager = WalletStateSyncManager.getInstance()
-            val tokenPrice = walletSyncManager.tokenPrices[tokenId]
+            val tokenPrice = walletSyncManager.getTokenPrice(tokenId)
             tokenPrice?.let {
                 formatTokenPriceToString(
                     balanceAmount,

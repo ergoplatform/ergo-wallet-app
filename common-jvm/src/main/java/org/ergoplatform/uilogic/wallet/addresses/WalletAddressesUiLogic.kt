@@ -92,6 +92,7 @@ abstract class WalletAddressesUiLogic {
                         addedAddresses.add(nextAddress)
                     }
                 }
+                signingSecrets?.clearMemory()
                 notifyUiLocked(false)
                 // make NodeConnector fetch the balances of the added addresses, in case they
                 // were used before

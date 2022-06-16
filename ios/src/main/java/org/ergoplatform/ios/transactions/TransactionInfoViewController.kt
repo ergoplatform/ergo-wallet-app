@@ -1,7 +1,7 @@
 package org.ergoplatform.ios.transactions
 
 import com.badlogic.gdx.utils.I18NBundle
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.getExplorerTxUrl
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.ui.*
@@ -11,7 +11,10 @@ import org.ergoplatform.uilogic.transactions.TransactionInfoUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
-class TransactionInfoViewController(private val txId: String) : CoroutineViewController() {
+class TransactionInfoViewController(
+    private val txId: String,
+    private val address: String?,
+) : CoroutineViewController() {
     private val uiLogic = IosTransactionInfoUiLogic()
     private lateinit var infoContainer: TransactionInfoContainer
     private lateinit var activityView: UIActivityIndicatorView
@@ -48,7 +51,13 @@ class TransactionInfoViewController(private val txId: String) : CoroutineViewCon
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        uiLogic.init(txId, ErgoApiService.getOrInit(getAppDelegate().prefs))
+        val appDelegate = getAppDelegate()
+        uiLogic.init(
+            txId,
+            address,
+            ApiServiceManager.getOrInit(appDelegate.prefs),
+            appDelegate.database
+        )
         activityView.startAnimating()
     }
 
@@ -78,7 +87,8 @@ class TransactionInfoViewController(private val txId: String) : CoroutineViewCon
 
     }
 
-    inner class TransactionInfoContainer(private val texts: I18NBundle) : TransactionContainer(texts) {
+    inner class TransactionInfoContainer(private val texts: I18NBundle) :
+        TransactionContainer(texts, this@TransactionInfoViewController) {
         override val titleInboxes get() = STRING_TITLE_TRANSACTION_INBOXES
         override val descInboxes get() = STRING_DESC_TRANSACTION_INBOXES
         override val titleOutboxes get() = STRING_TITLE_OUTBOXES
@@ -89,6 +99,10 @@ class TransactionInfoViewController(private val txId: String) : CoroutineViewCon
             numberOfLines = 1
             lineBreakMode = NSLineBreakMode.TruncatingMiddle
             textAlignment = NSTextAlignment.Center
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UILongPressGestureRecognizer {
+                this@TransactionInfoViewController.shareText(text, this)
+            })
         }
 
         private val purposeLabel = Body2Label().apply {

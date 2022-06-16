@@ -17,7 +17,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
@@ -25,6 +25,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.EntryWalletTokenDetailsBinding
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.tokens.WalletDetailsTokenEntryView
+import org.ergoplatform.android.tokens.setTokenPrice
 import org.ergoplatform.android.transactions.inflateAddressTransactionEntry
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.navigateSafe
@@ -33,6 +34,7 @@ import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.tokens.getTokenErgoValueSum
 import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 
@@ -215,10 +217,10 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
         // Fill fiat value
         val nodeConnector = WalletStateSyncManager.getInstance()
-        val ergoPrice = nodeConnector.fiatValue.value
-        if (ergoPrice == 0f) {
+        if (!nodeConnector.hasFiatValue) {
             binding.walletFiat.visibility = View.GONE
         } else {
+            val ergoPrice = nodeConnector.fiatValue.value
             binding.walletFiat.visibility = View.VISIBLE
             binding.walletFiat.amount = ergoPrice * ergoAmount.toDouble()
             binding.walletFiat.setSymbol(nodeConnector.fiatCurrency.uppercase())
@@ -256,9 +258,17 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                 val ctx = requireContext()
                 walletDetailsViewModel.uiLogic.gatherTokenInformation(
                     AppDatabase.getInstance(ctx).tokenDbProvider,
-                    ErgoApiService.getOrInit(Preferences(ctx))
+                    ApiServiceManager.getOrInit(Preferences(ctx))
                 )
             }
+        }
+        if (!wallet.walletConfig.unfoldTokens) {
+            val tokenErgoValueSum = getTokenErgoValueSum(tokensList, nodeConnector)
+            binding.walletTokenValue.visibility =
+                if (tokenErgoValueSum.nanoErgs > 0) View.VISIBLE else View.GONE
+            binding.walletTokenValue.setTokenPrice(tokenErgoValueSum, nodeConnector)
+        } else {
+            binding.walletTokenValue.visibility = View.GONE
         }
 
         binding.unfoldTokens.setImageResource(
@@ -300,7 +310,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                 AppDatabase.getInstance(context).transactionDbProvider
             )
 
-            val listContentsChanged = uiLogic.hasChangedNewTxList(transactionList, currentlyShownTransactionList)
+            val listContentsChanged =
+                uiLogic.hasChangedNewTxList(transactionList, currentlyShownTransactionList)
 
             if (listContentsChanged) binding.transactionList.apply {
                 currentlyShownTransactionList = transactionList
@@ -322,7 +333,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                     binding.layoutTransactionInfo.setOnClickListener {
                         findNavController().navigateSafe(
                             WalletDetailsFragmentDirections.actionNavigationWalletDetailsToTransactionInfoFragment(
-                                tx.addressTransaction.txId
+                                tx.addressTransaction.txId,
+                                tx.addressTransaction.address
                             )
                         )
                     }
@@ -392,7 +404,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         walletDetailsViewModel.uiLogic.qrCodeScanned(
             qrCode,
             AndroidStringProvider(requireContext()),
-            { data ->
+            navigateToColdWalletSigning = { data ->
                 findNavController().navigate(
                     WalletDetailsFragmentDirections
                         .actionNavigationWalletDetailsToColdWalletSigningFragment(
@@ -401,7 +413,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                         )
                 )
             },
-            { ergoPayRequest ->
+            navigateToErgoPaySigning = { ergoPayRequest ->
                 findNavController().navigateSafe(
                     WalletDetailsFragmentDirections.actionNavigationWalletDetailsToErgoPaySigningFragment(
                         ergoPayRequest,
@@ -410,7 +422,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                     )
                 )
             },
-            { data ->
+            navigateToSendFundsScreen = { data ->
                 findNavController().navigate(
                     WalletDetailsFragmentDirections
                         .actionNavigationWalletDetailsToSendFundsFragment(
@@ -418,7 +430,15 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                             walletDetailsViewModel.selectedIdx ?: -1
                         ).setPaymentRequest(data)
                 )
-            }, {
+            },
+            navigateToAuthentication = {
+                findNavController().navigate(
+                    WalletDetailsFragmentDirections.actionNavigationWalletDetailsToErgoAuthFragment(
+                        it
+                    ).setWalletId(walletDetailsViewModel.wallet!!.walletConfig.id)
+                )
+            },
+            showErrorMessage = {
                 MaterialAlertDialogBuilder(requireContext()).setMessage(it)
                     .setPositiveButton(R.string.zxing_button_ok, null)
                     .show()

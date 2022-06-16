@@ -1,5 +1,6 @@
 package org.ergoplatform.api
 
+import org.ergoplatform.appkit.SecretString
 import org.junit.Assert
 import org.junit.Test
 
@@ -16,17 +17,17 @@ class AesEncryptionManagerTest {
         )
         Assert.assertEquals(
             "{\"mnemonic\":\"1 2 3 4 5 6 7 8 9 10 11 12\"}",
-            String(AesEncryptionManager.decryptData("passwort", ByteArray(list.size, { list[it].toByte() })))
+            String(AesEncryptionManager.decryptData(SecretString.create("passwort"), ByteArray(list.size, { list[it].toByte() })))
         )
 
-        val secretData = "SecretData".encodeToByteArray()
-        val password = "password"
-        val encryptedData = AesEncryptionManager.encryptData(password, secretData)
+        val secretData = "SecretData"
+        val password = SecretString.create("password")
+        val encryptedData = AesEncryptionManager.encryptData(password, secretData.toByteArray())
 
-        Assert.assertEquals(String(secretData), String(AesEncryptionManager.decryptData(password, encryptedData)))
+        Assert.assertEquals(secretData, String(AesEncryptionManager.decryptData(password, encryptedData)))
 
         Assert.assertThrows(
             Throwable::class.java
-        ) { AesEncryptionManager.decryptData("wrong", encryptedData) }
+        ) { AesEncryptionManager.decryptData(SecretString.create("wrong"), encryptedData) }
     }
 }

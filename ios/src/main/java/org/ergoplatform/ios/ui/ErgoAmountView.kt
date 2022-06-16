@@ -1,6 +1,7 @@
 package org.ergoplatform.ios.ui
 
 import org.ergoplatform.ErgoAmount
+import org.ergoplatform.ergoCurrencyText
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
@@ -61,7 +62,7 @@ class ErgoAmountView(bold: Boolean, baseSize: Double = FONT_SIZE_HEADLINE2, priv
         decimalValueLabel.setContentCompressionResistancePriority(900f, UILayoutConstraintAxis.Horizontal)
         decimalValueLabel.setContentHuggingPriority(700f, UILayoutConstraintAxis.Horizontal)
 
-        currencyLabel.text = "ERG"
+        currencyLabel.text = ergoCurrencyText
 
         setErgoAmount(ErgoAmount.ZERO)
     }

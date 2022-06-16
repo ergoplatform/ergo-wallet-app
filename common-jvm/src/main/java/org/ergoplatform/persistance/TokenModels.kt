@@ -11,6 +11,10 @@ data class TokenPrice(
     val tokenId: String,
     val displayName: String?,
     val priceSource: String,
+    /**
+     * amount of tokens to get for 1 ERG
+     * (=> tokenPrice in ERG is 1/token.ergValue)
+     */
     val ergValue: BigDecimal
 )
 

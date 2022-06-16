@@ -1,13 +1,11 @@
 package org.ergoplatform.persistance
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-
-class SqlDelightTransactionDbProvider(private val appDatabase: AppDatabase) :
+class SqlDelightTransactionDbProvider(private val sqlDelightAppDb: SqlDelightAppDb) :
     TransactionDbProvider() {
+    private val appDatabase = sqlDelightAppDb.appDatabase
 
     override suspend fun insertOrUpdateAddressTransaction(addressTransaction: AddressTransaction) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             val tx = addressTransaction.toDbEntity()
             appDatabase.addressTransactionQueries.insertOrReplace(
                 if (tx.id > 0) tx.id else null,
@@ -27,7 +25,7 @@ class SqlDelightTransactionDbProvider(private val appDatabase: AppDatabase) :
         limit: Int,
         page: Int
     ): List<AddressTransaction> {
-        return withContext(Dispatchers.IO) {
+        return sqlDelightAppDb.useIoContext {
             appDatabase.addressTransactionQueries.loadAddressTransactions(
                 address,
                 limit.toLong(),
@@ -36,15 +34,27 @@ class SqlDelightTransactionDbProvider(private val appDatabase: AppDatabase) :
         }
     }
 
+    override suspend fun loadAddressTransaction(
+        address: String,
+        txId: String
+    ): AddressTransaction? {
+        return sqlDelightAppDb.useIoContext {
+            appDatabase.addressTransactionQueries.loadAddressTransactionByAddressAndTxId(
+                address,
+                txId
+            ).executeAsOneOrNull()?.toModel()
+        }
+    }
+
     override suspend fun deleteAddressTransactions(address: String) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             appDatabase.addressTransactionQueries.deleteByAddress(address)
             appDatabase.addressTransactionTokenQueries.deleteByAddress(address)
         }
     }
 
     override suspend fun deleteTransaction(id: Int) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             appDatabase.addressTransactionQueries.loadAddressTransaction(id.toLong())
                 .executeAsOneOrNull()?.let { addressTransaction ->
                     appDatabase.addressTransactionTokenQueries.deleteAddressTxTokens(
@@ -57,7 +67,7 @@ class SqlDelightTransactionDbProvider(private val appDatabase: AppDatabase) :
     }
 
     override suspend fun insertOrUpdateAddressTransactionToken(addressTxToken: AddressTransactionToken) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             val txToken = addressTxToken.toDbEntity()
             appDatabase.addressTransactionTokenQueries.insertOrReplace(
                 if (txToken.id > 0) txToken.id else null,
@@ -75,7 +85,7 @@ class SqlDelightTransactionDbProvider(private val appDatabase: AppDatabase) :
         address: String,
         txId: String
     ): List<AddressTransactionToken> {
-        return withContext(Dispatchers.IO) {
+        return sqlDelightAppDb.useIoContext {
             appDatabase.addressTransactionTokenQueries.loadAddressTxTokens(address, txId)
                 .executeAsList().map { it.toModel() }
         }

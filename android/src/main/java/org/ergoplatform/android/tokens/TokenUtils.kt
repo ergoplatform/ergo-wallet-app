@@ -1,7 +1,11 @@
 package org.ergoplatform.android.tokens
 
+import org.ergoplatform.ErgoAmount
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.android.R
+import org.ergoplatform.ergoCurrencyText
 import org.ergoplatform.persistance.*
+import org.fabiomsr.moneytextview.MoneyTextView
 
 fun TokenInformation.getGenuineDrawableId() = getGenuineDrawableId(genuineFlag)
 
@@ -21,5 +25,20 @@ fun getThumbnailDrawableId(thumbnailType: Int): Int {
         THUMBNAIL_TYPE_NFT_VID -> R.drawable.ic_videocam_24
         THUMBNAIL_TYPE_NFT_AUDIO -> R.drawable.ic_music_note_24
         else -> 0
+    }
+}
+
+fun MoneyTextView.setTokenPrice(
+    tokenErgoValueSum: ErgoAmount,
+    stateSyncManager: WalletStateSyncManager
+) {
+    if (stateSyncManager.hasFiatValue) {
+        val tokenValueToShow =
+            tokenErgoValueSum.toDouble() * stateSyncManager.fiatValue.value
+        amount = tokenValueToShow
+        setSymbol(stateSyncManager.fiatCurrency.uppercase())
+    } else {
+        setAmount(tokenErgoValueSum.toBigDecimal())
+        setSymbol(ergoCurrencyText)
     }
 }

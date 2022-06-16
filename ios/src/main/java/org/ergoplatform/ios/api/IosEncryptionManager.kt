@@ -2,6 +2,7 @@ package org.ergoplatform.ios.api
 
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.api.PasswordGenerator
+import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.localauthentication.LAContext
 
@@ -13,13 +14,13 @@ object IosEncryptionManager {
     private const val KEY_LENGTH = 28
 
     fun encryptDataWithKeychain(data: ByteArray, context: LAContext): ByteArray {
-        val key = loadOrGenerateKey(context)
+        val key = SecretString.create(loadOrGenerateKey(context))
         return AesEncryptionManager.encryptData(key, data)
     }
 
     fun decryptDataWithKeychain(encryptedData: ByteArray, context: LAContext): ByteArray {
         val key = loadOrGenerateKey(context)
-        return AesEncryptionManager.decryptData(key, encryptedData)
+        return AesEncryptionManager.decryptData(SecretString.create(key), encryptedData)
     }
 
     private fun loadOrGenerateKey(context: LAContext): String {

@@ -11,6 +11,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.CardWalletAddressBinding
 import org.ergoplatform.android.databinding.FragmentWalletAddressesBinding
@@ -18,6 +19,7 @@ import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.wallet.addresses.isDerivedAddress
 
 
@@ -63,12 +65,12 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
         })
     }
 
-    override fun proceedAuthFlowFromBiometrics() {
-        viewModel.addAddressWithBiometricAuth(requireContext())
-    }
+    override val authenticationWalletConfig: WalletConfig?
+        get() = viewModel.wallet?.walletConfig
 
-    override fun proceedAuthFlowWithPassword(password: String) =
-        viewModel.addAddressWithPass(requireContext(), password)
+    override fun proceedFromAuthFlow(secrets: SigningSecrets) {
+        viewModel.addNextAddresses(requireContext(), secrets)
+    }
 
     inner class WalletAddressesAdapter : RecyclerView.Adapter<WalletAddressViewHolder>() {
         // holder that holds the add address button, for showing the progress bar
@@ -143,7 +145,7 @@ class WalletAddressesFragment : AbstractAuthenticationFragment() {
                 viewModel.numAddressesToAdd = getNumAddressesToAdd()
                 walletConfig?.let { walletConfig ->
                     walletConfig.secretStorage?.let {
-                        startAuthFlow(walletConfig)
+                        startAuthFlow()
                     } ?: viewModel.addNextAddresses(requireContext(), null)
                 }
             }

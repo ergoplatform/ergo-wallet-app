@@ -16,6 +16,7 @@
             <string>pt</string>
             <string>pt_PT</string>
             <string>tr</string>
+            <string>ru</string>
             <string>zh</string>
         </array>
         <key>CFBundleIdentifier</key>
@@ -39,6 +40,7 @@
                 <array>
                     <string>ergo</string>
                     <string>ergopay</string>
+                    <string>ergoauth</string>
                 </array>
             </dict>
         </array>

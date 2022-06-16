@@ -3,6 +3,7 @@ package org.ergoplatform.ios
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
 import org.ergoplatform.ios.settings.SettingsViewController
 import org.ergoplatform.ios.transactions.ChooseSpendingWalletViewController
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
@@ -13,7 +14,9 @@ import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.MainAppUiLogic
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
+import org.robovm.apple.foundation.Foundation
 import org.robovm.apple.foundation.NSArray
+import org.robovm.apple.foundation.NSDictionary
 import org.robovm.apple.uikit.*
 
 class BottomNavigationBar : UITabBarController() {
@@ -56,10 +59,33 @@ class BottomNavigationBar : UITabBarController() {
     }
 
     override fun viewDidLoad() {
-        tabBar.barTintColor = uiColorErgo
-        tabBar.tintColor = UIColor.label()
-        tabBar.unselectedItemTintColor = UIColor.label()
+        if (Foundation.getMajorSystemVersion() >= 15) {
+            val appearance = UITabBarAppearance()
+            appearance.backgroundColor = uiColorErgo
+            setItemAppearance(appearance.compactInlineLayoutAppearance)
+            setItemAppearance(appearance.inlineLayoutAppearance)
+            setItemAppearance(appearance.stackedLayoutAppearance)
+            tabBar.standardAppearance = appearance
+            tabBar.scrollEdgeAppearance = appearance
+        } else {
+            tabBar.barTintColor = uiColorErgo
+            tabBar.tintColor = UIColor.label()
+            tabBar.unselectedItemTintColor = UIColor.label()
+        }
         setupVcs()
+    }
+
+    private fun setItemAppearance(itemAppearance: UITabBarItemAppearance) {
+        itemAppearance.normal.iconColor = UIColor.label()
+        val textAttributes = NSDictionary(
+            NSAttributedStringAttribute.Values.ForegroundColor(),
+            UIColor.label(),
+            NSAttributedStringAttribute.Values.ParagraphStyle(),
+            NSParagraphStyle.getDefaultParagraphStyle()
+        )
+        itemAppearance.normal.titleTextAttributes = textAttributes
+        itemAppearance.selected.iconColor = UIColor.label()
+        itemAppearance.selected.titleTextAttributes = textAttributes
     }
 
     fun handlePaymentRequest(paymentRequest: String, fromQr: Boolean) {
@@ -67,9 +93,10 @@ class BottomNavigationBar : UITabBarController() {
         MainAppUiLogic.handleRequests(paymentRequest,
             fromQr,
             IosStringProvider(texts),
-            {
+            navigateToChooseWalletDialog = {
                 CoroutineScope(Dispatchers.Default).launch {
-                    val wallets = getAppDelegate().database.walletDbProvider.getAllWalletConfigsSynchronous()
+                    val wallets =
+                        getAppDelegate().database.walletDbProvider.getAllWalletConfigsSynchronous()
 
                     runOnMainThread {
                         if (wallets.size == 1) {
@@ -83,10 +110,26 @@ class BottomNavigationBar : UITabBarController() {
                         }
                     }
                 }
-
-            }, { message ->
+            },
+            navigateToErgoPay = { request ->
+                navigateToWalletListAndPushVc(ErgoPaySigningViewController(request), true)
+            },
+            navigateToAuthentication = { request ->
+                navigateToWalletListAndPushVc(ErgoAuthenticationViewController(request, null), true)
+            },
+            presentUserMessage = { message ->
                 presentViewController(buildSimpleAlertController("", message, texts), true) {}
             })
+    }
+
+    private fun navigateToWalletListAndPushVc(vc: UIViewController, animated: Boolean) {
+        // set view to first controller (wallet list), go back to its root and switch to the
+        // wallet's send funds screen
+        selectedViewController = viewControllers.first()
+        (selectedViewController as? UINavigationController)?.apply {
+            popToRootViewController(false)
+            pushViewController(vc, animated)
+        }
     }
 
     private fun navigateToNextScreen(
@@ -94,17 +137,13 @@ class BottomNavigationBar : UITabBarController() {
         paymentRequest: String,
         fromChooseScreen: Boolean
     ) {
-        // set view to first controller (wallet list), go back to its root and switch to the
-        // wallet's send funds screen
-        selectedViewController = viewControllers.first()
-        (selectedViewController as? UINavigationController)?.apply {
-            popToRootViewController(false)
-            pushViewController(
-                if (isErgoPaySigningRequest(paymentRequest)) ErgoPaySigningViewController(paymentRequest, walletId)
-                else SendFundsViewController(walletId, paymentRequest = paymentRequest),
-                !fromChooseScreen
+        navigateToWalletListAndPushVc(
+            if (isErgoPaySigningRequest(paymentRequest)) ErgoPaySigningViewController(
+                paymentRequest,
+                walletId
             )
-        }
-
+            else SendFundsViewController(walletId, paymentRequest = paymentRequest),
+            !fromChooseScreen
+        )
     }
 }

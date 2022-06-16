@@ -310,7 +310,7 @@
             android:gravity="center"
             android:text="@string/label_error_fetching"
             android:visibility="gone"
-            app:drawableTopCompat="@drawable/ic_warning_amber_24" />
+            app:drawableTopCompat="@drawable/ic_warning_amber_100" />
 
     </FrameLayout>
 

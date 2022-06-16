@@ -6,12 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.ergoplatform.URL_FORGOT_PASSWORD_HELP
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPasswordDialogBinding
+import org.ergoplatform.appkit.SecretString
 
 const val ARG_SHOW_CONFIRMATION = "ARG_SHOW_CONFIRMATION"
 
@@ -69,19 +71,23 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun buttonDone() {
-        val password = binding.editPassword.editText?.text?.toString()
+        val password = binding.editPassword.editText?.getSecretString()
 
         if (binding.editPasswordConfirm.visibility == View.VISIBLE) {
-            val confirmPassword = binding.editPasswordConfirm.editText?.text?.toString()
+            val confirmPassword = binding.editPasswordConfirm.editText?.getSecretString()
 
-            if (password == null || !password.equals(confirmPassword)) {
+            if (password == null || password != confirmPassword) {
+                confirmPassword?.erase()
+                password?.erase()
                 binding.editPassword.error = getString(R.string.err_password_confirm)
                 return
             }
+            confirmPassword.erase()
         }
 
         val error =
             (parentFragment as? PasswordDialogCallback)?.onPasswordEntered(password)
+        password?.erase()
 
         if (error != null)
             binding.editPassword.error = error
@@ -91,6 +97,13 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
+    private fun EditText.getSecretString(): SecretString {
+        val length: Int = length()
+        val pd = CharArray(length)
+        text.getChars(0, length, pd, 0)
+        return SecretString.create(pd)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -98,5 +111,10 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
 }
 
 interface PasswordDialogCallback {
-    fun onPasswordEntered(password: String?): String?
+    /**
+     * called by [PasswordDialogFragment]
+     * @param password password. Will be erased after method returns
+     * @return error message to be shown to user in case of an error
+     */
+    fun onPasswordEntered(password: SecretString?): String?
 }

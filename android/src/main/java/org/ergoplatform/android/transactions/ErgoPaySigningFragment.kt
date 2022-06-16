@@ -1,26 +1,30 @@
 package org.ergoplatform.android.transactions
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.activity.addCallback
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentErgoPaySigningBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.getSeverityDrawableResId
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
+import org.ergoplatform.android.wallet.WalletChooserCallback
+import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
 
-class ErgoPaySigningFragment : SubmitTransactionFragment() {
+class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallback {
     private var _binding: FragmentErgoPaySigningBinding? = null
     private val binding get() = _binding!!
 
@@ -28,6 +32,11 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
 
     override val viewModel: ErgoPaySigningViewModel
         get() = ViewModelProvider(this).get(ErgoPaySigningViewModel::class.java)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,11 +69,18 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
             binding.layoutDoneInfo.visibility =
                 visibleWhen(state, ErgoPaySigningUiLogic.State.DONE)
             binding.layoutChooseAddress.visibility =
-                visibleWhen(state, ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS)
+                if (state == ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS ||
+                    state == ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET
+                ) View.VISIBLE else View.GONE
 
             when (state) {
                 ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS -> {
-                    // nothing to do
+                    binding.labelChooseWalletOrAddress.setText(R.string.label_ergo_pay_choose_address)
+                    binding.buttonChooseAddress.setText(R.string.title_choose_address)
+                }
+                ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET -> {
+                    binding.labelChooseWalletOrAddress.setText(R.string.label_ergo_pay_choose_wallet)
+                    binding.buttonChooseAddress.setText(R.string.title_choose_wallet)
                 }
                 ErgoPaySigningUiLogic.State.FETCH_DATA -> showFetchData()
                 ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION -> showTransactionInfo()
@@ -87,28 +103,88 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
 
         // Click listeners
         binding.transactionInfo.buttonSignTx.setOnClickListener {
-            startAuthFlow(viewModel.uiLogic.wallet!!.walletConfig)
+            startAuthFlow()
         }
         binding.buttonDismiss.setOnClickListener {
-            findNavController().popBackStack()
+            if (args.closeApp) {
+                requireActivity().finish()
+            } else {
+                findNavController().popBackStack()
+            }
+        }
+        binding.buttonRetry.setOnClickListener {
+            startReloadFromDapp()
         }
         binding.buttonChooseAddress.setOnClickListener {
-            showChooseAddressList(false)
+            showAddressOrWalletChooser()
         }
+
+        if (args.closeApp) {
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+                requireActivity().finish()
+            }
+        }
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_ergopay, menu)
+    }
+
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        menu.findItem(R.id.menu_reload).isEnabled = viewModel.uiLogic.canReloadFromDapp()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.menu_reload) {
+            startReloadFromDapp()
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun startReloadFromDapp() {
+        val context = requireContext()
+        viewModel.uiLogic.reloadFromDapp(
+            Preferences(context),
+            AndroidStringProvider(context),
+            AppDatabase.getInstance(context).walletDbProvider
+        )
+    }
+
+    private fun showAddressOrWalletChooser() {
+        val uiLogic = viewModel.uiLogic
+        if (uiLogic.wallet != null) {
+            showChooseAddressList(false)
+        } else {
+            ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
+        }
+    }
+
+    override fun onWalletChosen(walletConfig: WalletConfig) {
+        val context = requireContext()
+        viewModel.uiLogic.setWalletId(
+            walletConfig.id,
+            Preferences(context),
+            AndroidStringProvider(context),
+            AppDatabase.getInstance(context).walletDbProvider
+        )
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
         super.onAddressChosen(addressDerivationIdx)
-        // redo the request - can't be done within uilogic because the context is needed
         val uiLogic = viewModel.uiLogic
-        uiLogic.lastRequest?.let {
-            val context = requireContext()
-            uiLogic.hasNewRequest(
-                it,
-                Preferences(context),
-                AndroidStringProvider(context)
-            )
-        }
+        // retry the request - can't be called within uiLogic because the context is needed
+        val context = requireContext()
+        uiLogic.derivedAddressIdChanged(
+            Preferences(context),
+            AndroidStringProvider(context),
+            AppDatabase.getInstance(context).walletDbProvider,
+        )
     }
 
     private fun visibleWhen(
@@ -127,18 +203,22 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
         binding.tvMessage.text = uiLogic.getDoneMessage(AndroidStringProvider(requireContext()))
         binding.tvMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(
             0,
-            getSeverityDrawableResId(uiLogic.getDoneSeverity()),
+            uiLogic.getDoneSeverity().getSeverityDrawableResId(),
             0, 0
         )
-    }
+        val shouldReload =
+            (uiLogic.getDoneSeverity() == MessageSeverity.ERROR && uiLogic.canReloadFromDapp())
+        binding.buttonDismiss.visibility = if (!shouldReload) View.VISIBLE else View.GONE
+        binding.buttonRetry.visibility = if (shouldReload) View.VISIBLE else View.GONE
 
-    private fun getSeverityDrawableResId(severity: MessageSeverity) =
-        when (severity) {
-            MessageSeverity.NONE -> 0
-            MessageSeverity.INFORMATION -> R.drawable.ic_info_24
-            MessageSeverity.WARNING -> R.drawable.ic_warning_amber_24
-            MessageSeverity.ERROR -> R.drawable.ic_error_outline_24
+        viewModel.uiLogic.txId?.let {
+            parentFragmentManager.setFragmentResult(
+                ergoPayActionRequestKey, bundleOf(
+                    ergoPayActionCompletedBundleKey to true
+                )
+            )
         }
+    }
 
     private fun showTransactionInfo() {
         val uiLogic = viewModel.uiLogic
@@ -153,9 +233,8 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
         )
         binding.layoutTiMessage.visibility = uiLogic.epsr?.message?.let {
             binding.tvTiMessage.text = getString(R.string.label_message_from_dapp, it)
-            val severityResId = getSeverityDrawableResId(
-                uiLogic.epsr?.messageSeverity ?: MessageSeverity.NONE
-            )
+            val severityResId =
+                (uiLogic.epsr?.messageSeverity ?: MessageSeverity.NONE).getSeverityDrawableResId()
             binding.imageTiMessage.setImageResource(severityResId)
             binding.imageTiMessage.visibility = if (severityResId == 0) View.GONE else View.VISIBLE
             View.VISIBLE
@@ -165,5 +244,10 @@ class ErgoPaySigningFragment : SubmitTransactionFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        val ergoPayActionRequestKey = "KEY_ERGOPAY_SIGNING_FRAGMENT"
+        val ergoPayActionCompletedBundleKey = "KEY_ERGOPAY_SUBMITTED_DONE"
     }
 }

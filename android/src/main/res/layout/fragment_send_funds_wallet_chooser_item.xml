@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
     android:orientation="horizontal"
-    android:paddingHorizontal="@dimen/activity_horizontal_margin"
-    android:paddingVertical="@dimen/half_horizontal_margin">
+    android:padding="@dimen/activity_horizontal_margin">
 
     <TextView
         android:id="@+id/wallet_name"
         style="@style/TextAppearance.App.Body1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/half_horizontal_margin"
         android:layout_weight="1"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="?attr/colorSecondary"
         android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/wallet_balance"
+        app:layout_constraintEnd_toStartOf="@id/wallet_balance"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/wallet_balance"
         tools:text="@string/label_wallet_default" />
 
     <org.fabiomsr.moneytextview.MoneyTextView
@@ -30,5 +33,22 @@
         app:baseTextSize="@dimen/headline2_textsize"
         app:baseTextStyle="bold"
         app:decimalMargin="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:amount="-123.2536" />
-</LinearLayout>
+
+    <TextView
+        android:id="@+id/label_token_num"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/wallet_balance"
+        app:layout_constraintTop_toBottomOf="@id/wallet_balance"
+        tools:text="999 tokens"
+        tools:visibility="visible" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,6 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -30,6 +32,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import org.ergoplatform.android.R
+import org.ergoplatform.transactions.MessageSeverity
 
 fun forceShowSoftKeyboard(context: Context) {
     ContextCompat.getSystemService(
@@ -38,11 +41,11 @@ fun forceShowSoftKeyboard(context: Context) {
     )?.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
 }
 
-fun hideForcedSoftKeyboard(context: Context, editText: EditText) {
+fun hideForcedSoftKeyboard(context: Context, view: View) {
     ContextCompat.getSystemService(
         context,
         InputMethodManager::class.java
-    )?.hideSoftInputFromWindow(editText.windowToken, 0)
+    )?.hideSoftInputFromWindow(view.windowToken, 0)
 }
 
 fun TextView.enableLinks() {
@@ -178,4 +181,64 @@ fun Fragment.shareText(textToShare: String) {
 
     val shareIntent = Intent.createChooser(sendIntent, null)
     startActivity(shareIntent)
+}
+
+fun MessageSeverity.getSeverityDrawableResId() =
+    when (this) {
+        MessageSeverity.NONE -> 0
+        MessageSeverity.INFORMATION -> R.drawable.ic_info_100
+        MessageSeverity.WARNING -> R.drawable.ic_warning_amber_100
+        MessageSeverity.ERROR -> R.drawable.ic_error_outline_100
+    }
+
+fun decodeSampledBitmapFromByteArray(
+    bitmapBytes: ByteArray,
+    minPixelWidth: Int,
+    minPixelHeight: Int
+): Bitmap {
+    // see https://developer.android.com/topic/performance/graphics/load-bitmap.html#read-bitmap
+
+    // First decode with inJustDecodeBounds=true to check dimensions
+    return BitmapFactory.Options().run {
+        inJustDecodeBounds = true
+        BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.size, this)
+
+        // Crashes when displaying images that are too big - calculate inSampleSize
+
+        inSampleSize = calculateInSampleSize(
+            this,
+            minPixelWidth,
+            minPixelHeight
+        )
+
+        // Decode bitmap with inSampleSize set
+        inJustDecodeBounds = false
+
+        BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.size, this)
+    }
+}
+
+private fun calculateInSampleSize(
+    options: BitmapFactory.Options,
+    reqWidth: Int,
+    reqHeight: Int
+): Int {
+    // Raw height and width of image
+    val height = options.outHeight
+    val width = options.outWidth
+    var inSampleSize = 1
+
+    if (height > reqHeight || width > reqWidth) {
+
+        val halfHeight: Int = height / 2
+        val halfWidth: Int = width / 2
+
+        // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+        // height and width larger than the requested height and width.
+        while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+            inSampleSize *= 2
+        }
+    }
+
+    return inSampleSize
 }

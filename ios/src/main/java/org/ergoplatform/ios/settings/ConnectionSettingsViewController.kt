@@ -11,6 +11,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
 
     private lateinit var explorerApiInput: UITextField
     private lateinit var nodeApiInput: UITextField
+    private lateinit var tokenVerificationInput: UITextField
     private lateinit var ipfsGatewayInput: UITextField
 
     override fun viewDidLoad() {
@@ -32,6 +33,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
         saveButton.setOnClickListener {
             prefs.prefNodeUrl = nodeApiInput.text
             prefs.prefExplorerApiUrl = explorerApiInput.text
+            prefs.prefTokenVerificationUrl = tokenVerificationInput.text
             prefs.prefIpfsGatewayUrl = ipfsGatewayInput.text
             dismissViewController(true) {}
         }
@@ -39,7 +41,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
         val explorerApiLabel = Body1Label().apply {
             text = texts.get(STRING_LABEL_EXPLORER_API_URL)
         }
-        explorerApiInput = createTextField().apply {
+        explorerApiInput = EndIconTextField().apply {
             returnKeyType = UIReturnKeyType.Next
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
@@ -55,11 +57,11 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
             text = texts.get(STRING_LABEL_NODE_URL)
         }
 
-        nodeApiInput = createTextField().apply {
+        nodeApiInput = EndIconTextField().apply {
             returnKeyType = UIReturnKeyType.Next
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
-                    ipfsGatewayInput.becomeFirstResponder()
+                    tokenVerificationInput.becomeFirstResponder()
                     return true
                 }
             }
@@ -67,10 +69,26 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
             clearButtonMode = UITextFieldViewMode.Always
         }
 
+        val tokenVerificationLabel = Body1Label().apply {
+            text = texts.get(STRING_LABEL_TOKEN_VERIFICATION_URL)
+        }
+
+        tokenVerificationInput = EndIconTextField().apply {
+            returnKeyType = UIReturnKeyType.Next
+            delegate = object : UITextFieldDelegateAdapter() {
+                override fun shouldReturn(textField: UITextField?): Boolean {
+                    ipfsGatewayInput.becomeFirstResponder()
+                    return true
+                }
+            }
+            text = prefs.prefTokenVerificationUrl
+            clearButtonMode = UITextFieldViewMode.Always
+        }
+
         val ipfsGatewayTitle = Body1Label().apply {
             text = texts.get(STRING_LABEL_IPFS_HTTP_GATEWAY)
         }
-        ipfsGatewayInput = createTextField().apply {
+        ipfsGatewayInput = EndIconTextField().apply {
             returnKeyType = UIReturnKeyType.Done
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
@@ -87,6 +105,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
             addOnTouchUpInsideListener { _, _ ->
                 nodeApiInput.text = prefs.getDefaultNodeApiUrl()
                 explorerApiInput.text = getDefaultExplorerApiUrl()
+                tokenVerificationInput.text = prefs.defaultTokenVerificationUrl
                 ipfsGatewayInput.text = prefs.defaultIpfsGatewayUrl
             }
         }
@@ -100,6 +119,8 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
                     explorerApiInput,
                     nodeApiLabel,
                     nodeApiInput,
+                    tokenVerificationLabel,
+                    tokenVerificationInput,
                     ipfsGatewayTitle,
                     ipfsGatewayInput,
                     buttonContainer
@@ -111,6 +132,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
                 isLayoutMarginsRelativeArrangement = true
                 setCustomSpacing(DEFAULT_MARGIN * 2, explorerApiInput)
                 setCustomSpacing(DEFAULT_MARGIN * 2, nodeApiInput)
+                setCustomSpacing(DEFAULT_MARGIN * 2, tokenVerificationInput)
             }
 
         val scrollView = stackView.wrapInVerticalScrollView()
