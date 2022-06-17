@@ -16,6 +16,7 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.slide
 import com.arkivanov.decompose.router.router
 import org.ergoplatform.Application
+import org.ergoplatform.desktop.transactions.ReceiveToWalletComponent
 import org.ergoplatform.desktop.transactions.SendFundsComponent
 import org.ergoplatform.desktop.wallet.WalletListComponent
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
@@ -53,6 +54,11 @@ class NavHostComponent(
                 componentContext, this,
                 screenConfig.name
             )
+
+            is ScreenConfig.ReceiveToWallet -> ReceiveToWalletComponent(
+                componentContext, this, screenConfig.walletConfig
+            )
+
             ScreenConfig.Settings -> TODO()
         }
     }
@@ -79,7 +85,9 @@ class NavHostComponent(
                         icon = {
                             Icon(
                                 Icons.Outlined.AccountBalanceWallet,
-                                contentDescription = Application.texts.getString(STRING_TITLE_WALLETS)
+                                contentDescription = Application.texts.getString(
+                                    STRING_TITLE_WALLETS
+                                )
                             )
                         },
                         selected = navItemState.value == NavItem.WALLETS,
@@ -93,7 +101,9 @@ class NavHostComponent(
                         icon = {
                             Icon(
                                 Icons.Outlined.Settings,
-                                contentDescription = Application.texts.getString(STRING_TITLE_SETTINGS)
+                                contentDescription = Application.texts.getString(
+                                    STRING_TITLE_SETTINGS
+                                )
                             )
                         },
                         selected = navItemState.value == NavItem.SETTINGS,

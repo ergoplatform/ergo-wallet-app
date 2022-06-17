@@ -7,11 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.persistance.WalletConfig
 
 @Composable
 fun WalletListScreen(
     walletList: List<Wallet>,
     onSendClicked: (String) -> Unit,
+    onReceiveClicked: (WalletConfig) -> Unit,
 ) {
 
     LazyColumn(
@@ -21,7 +23,7 @@ fun WalletListScreen(
     ) {
         items(walletList.size) { index ->
 
-            WalletCard(walletList[index], onSendClicked)
+            WalletCard(walletList[index], onSendClicked, onReceiveClicked)
 
         }
     }

@@ -9,20 +9,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.router.Router
 import com.arkivanov.decompose.router.pop
 import org.ergoplatform.desktop.ui.navigation.Component
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
+import org.ergoplatform.mosaik.MosaikStyleConfig
 
-val uiErgoColor = Color(0xff, 0x45, 0x3a)
+val uiErgoColor = MosaikStyleConfig.primaryLabelColor
 val secondary = Color(24, 25, 29)
-val tsBody1 = TextStyle(fontSize = 18.sp)
-val tsHeadline1 = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold)
+val defaultPadding = 16.dp
 
 private val DarkColors = darkColors(
     primary = uiErgoColor,
