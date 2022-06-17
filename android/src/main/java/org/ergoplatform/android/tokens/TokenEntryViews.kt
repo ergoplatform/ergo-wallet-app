@@ -36,8 +36,10 @@ fun inflateAndBindTokenView(
     itemBinding.root.background = null // no selectable item background
 }
 
-class WalletDetailsTokenEntryView(val binding: EntryWalletTokenDetailsBinding, walletToken: WalletToken) :
-    TokenEntryViewUiLogic(walletToken) {
+class WalletDetailsTokenEntryView(
+    val binding: EntryWalletTokenDetailsBinding,
+    walletToken: WalletToken
+) : TokenEntryViewUiLogic(walletToken, noIdWhenPriceAvail = true) {
     override val texts: StringProvider
         get() = AndroidStringProvider(binding.root.context)
 
@@ -73,7 +75,10 @@ class WalletDetailsTokenEntryView(val binding: EntryWalletTokenDetailsBinding, w
     }
 }
 
-class ChooseTokenEntryView(val binding: FragmentChooseTokenDialogItemBinding, walletToken: WalletToken) : TokenEntryViewUiLogic(walletToken) {
+class ChooseTokenEntryView(
+    val binding: FragmentChooseTokenDialogItemBinding,
+    walletToken: WalletToken
+) : TokenEntryViewUiLogic(walletToken, noIdWhenPriceAvail = false) {
     override val texts: StringProvider
         get() = AndroidStringProvider(binding.root.context)
 
