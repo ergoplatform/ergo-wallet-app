@@ -36,9 +36,18 @@ abstract class WalletDetailsUiLogic {
     private var tokenInformationJob: Job? = null
     val tokenInformation: HashMap<String, TokenInformation> = HashMap()
 
+    private var initialized = false
+
     abstract val coroutineScope: CoroutineScope
 
-    fun setUpWalletStateFlowCollector(database: IAppDatabase, walletId: Int) {
+    fun setUpWalletStateFlowCollector(database: IAppDatabase, walletId: Int, addressIdx: Int? = null) {
+        if (initialized)
+            return
+
+        initialized = true
+
+        addressIdx?.let { this.addressIdx = addressIdx }
+
         coroutineScope.launch {
             database.walletDbProvider.walletWithStateByIdAsFlow(walletId).collect {
                 // called every time something changes in the DB
