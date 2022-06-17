@@ -4,8 +4,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 dependencies {
@@ -20,6 +20,12 @@ dependencies {
     implementation("com.arkivanov.decompose:decompose:0.5.2")
     implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.5.2")
     implementation("net.harawata:appdirs:1.2.1") // https://github.com/harawata/appdirs
+
+    // https://levelup.gitconnected.com/qr-code-scanner-in-kotlin-e15dd9bfbb1f
+    arrayOf("core","kotlin","WebcamCapture").forEach()
+    { implementation("org.boofcv:boofcv-$it:0.40.1") {
+        exclude("org.boofcv", "boofcv-swing")
+    } }
 }
 
 compose.desktop {

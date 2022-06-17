@@ -1,18 +1,24 @@
 package org.ergoplatform.desktop.transactions
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.defaultPadding
+import org.ergoplatform.desktop.ui.getQrCodeImageBitmap
 import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
@@ -23,7 +29,9 @@ import org.ergoplatform.wallet.addresses.getAddressLabel
 
 @Composable
 fun ReceiveToWalletScreen(walletConfig: WalletConfig, address: WalletAddress) {
-    Box(Modifier.fillMaxSize())
+    val qrImage = remember(address) { getQrCodeImageBitmap(address.publicAddress) }
+
+    Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()))
     {
         Card(
             Modifier.padding(defaultPadding).align(Alignment.Center).defaultMinSize(400.dp, 200.dp)
@@ -44,12 +52,18 @@ fun ReceiveToWalletScreen(walletConfig: WalletConfig, address: WalletAddress) {
                     style = labelStyle(LabelStyle.BODY1BOLD)
                 )
 
-                // TODO QR Code
+                Image(
+                    qrImage,
+                    null,
+                    Modifier.size(400.dp).padding(defaultPadding)
+                        .align(Alignment.CenterHorizontally)
+                )
 
                 Row {
                     Text(
                         text = address.publicAddress,
                         style = labelStyle(LabelStyle.HEADLINE2),
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f),
                     )
 
