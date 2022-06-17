@@ -17,6 +17,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.uilogic.STRING_LABEL_SCAN_QR
+import org.ergoplatform.utils.LogUtils
 import kotlin.coroutines.coroutineContext
 
 class QrScannerComponent(
@@ -54,6 +55,7 @@ class QrScannerComponent(
             }
         } catch (t: Throwable) {
             errorState.value = "Error accessing webcam"
+            LogUtils.logDebug(this.javaClass.simpleName, t.message ?: "", t)
         }
     }
 
