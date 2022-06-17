@@ -1,5 +1,6 @@
 package org.ergoplatform.desktop.ui.navigation
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import com.arkivanov.essenty.lifecycle.LifecycleOwner
 import com.arkivanov.essenty.lifecycle.subscribe
@@ -13,6 +14,8 @@ abstract class NavClientScreenComponent(
 ) : Component {
 
     abstract val appBarLabel: String
+
+    open val actions: @Composable RowScope.() -> Unit = {}
 
     val router by lazy { navHost.router }
 
@@ -31,7 +34,7 @@ abstract class NavClientScreenComponent(
 
     @Composable
     override fun render() {
-        AppBarView(appBarLabel, router) { renderScreenContents() }
+        AppBarView(appBarLabel, actions, router) { renderScreenContents() }
     }
 
     @Composable

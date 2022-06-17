@@ -12,6 +12,8 @@ import org.ergoplatform.persistance.WalletConfig
 @Composable
 fun WalletListScreen(
     walletList: List<Wallet>,
+    fiatValue: Float,
+    isRefreshing: Boolean,
     onSendClicked: (String) -> Unit,
     onReceiveClicked: (WalletConfig) -> Unit,
 ) {
@@ -23,7 +25,7 @@ fun WalletListScreen(
     ) {
         items(walletList.size) { index ->
 
-            WalletCard(walletList[index], onSendClicked, onReceiveClicked)
+            WalletCard(walletList[index], fiatValue, onSendClicked, onReceiveClicked)
 
         }
     }

@@ -6,6 +6,7 @@ import org.ergoplatform.persistance.WalletConfig
 sealed class ScreenConfig : Parcelable {
     object WalletList : ScreenConfig()
     object Settings : ScreenConfig()
+    object AddWalletChooser : ScreenConfig()
     data class SendFunds(val name: String) : ScreenConfig()
     data class ReceiveToWallet(val walletConfig: WalletConfig) : ScreenConfig()
     data class QrCodeScanner(val callback: (String) -> Unit) : ScreenConfig()

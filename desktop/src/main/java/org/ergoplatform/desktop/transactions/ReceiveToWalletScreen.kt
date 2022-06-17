@@ -7,6 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
@@ -31,10 +32,10 @@ import org.ergoplatform.wallet.addresses.getAddressLabel
 fun ReceiveToWalletScreen(walletConfig: WalletConfig, address: WalletAddress) {
     val qrImage = remember(address) { getQrCodeImageBitmap(address.publicAddress) }
 
-    Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()))
-    {
+    Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Card(
-            Modifier.padding(defaultPadding).align(Alignment.Center).defaultMinSize(400.dp, 200.dp)
+            Modifier.padding(defaultPadding).align(Alignment.Center)
+                .defaultMinSize(400.dp, 200.dp)
                 .widthIn(max = 600.dp)
         ) {
 
@@ -67,13 +68,16 @@ fun ReceiveToWalletScreen(walletConfig: WalletConfig, address: WalletAddress) {
                         modifier = Modifier.weight(1f),
                     )
 
-                    Icon(
-                        Icons.Default.ContentCopy,
-                        null,
-                        Modifier.size(24.dp).clickable { // TODO
-                        },
-                        tint = MosaikStyleConfig.secondaryLabelColor
-                    )
+                    IconButton({
+                        // TODO
+                    }) {
+                        Icon(
+                            Icons.Default.ContentCopy,
+                            null,
+                            Modifier.size(24.dp).align(Alignment.CenterVertically),
+                            tint = MosaikStyleConfig.secondaryLabelColor
+                        )
+                    }
                 }
             }
         }

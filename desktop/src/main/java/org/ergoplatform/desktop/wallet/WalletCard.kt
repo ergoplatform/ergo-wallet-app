@@ -13,7 +13,9 @@ import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.desktop.ui.defaultPadding
+import org.ergoplatform.desktop.ui.primaryButtonColors
 import org.ergoplatform.desktop.ui.uiErgoColor
+import org.ergoplatform.ergoCurrencyText
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
@@ -27,6 +29,7 @@ import org.ergoplatform.wallet.getBalanceForAllAddresses
 @Composable
 fun WalletCard(
     wallet: Wallet,
+    fiatValue: Float,
     onSendClicked: (String) -> Unit,
     onReceiveClicked: (WalletConfig) -> Unit,
 ) {
@@ -59,7 +62,7 @@ fun WalletCard(
                     val balanceErgoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
 
                     Text(
-                        text = balanceErgoAmount.toStringRoundToDecimals(),
+                        text = balanceErgoAmount.toStringRoundToDecimals() + " $ergoCurrencyText",
                         style = labelStyle(LabelStyle.HEADLINE1)
                     )
 
@@ -68,7 +71,7 @@ fun WalletCard(
 
                         Text(
                             text = formatFiatToString(
-                                balanceErgoAmount.toDouble() * walletSyncManager.fiatValue.value,
+                                balanceErgoAmount.toDouble() * fiatValue,
                                 walletSyncManager.fiatCurrency, Application.texts
                             ),
                             style = labelStyle(LabelStyle.BODY1)
@@ -85,10 +88,7 @@ fun WalletCard(
                 Button(
                     onClick = { onReceiveClicked(wallet.walletConfig) },
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        MosaikStyleConfig.secondaryButtonColor,
-                        MosaikStyleConfig.secondaryButtonTextColor
-                    )
+                    colors = primaryButtonColors()
                 ) {
                     Text(Application.texts.getString(STRING_BUTTON_RECEIVE))
                 }

@@ -1,8 +1,10 @@
 package org.ergoplatform.desktop.ui
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
+import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -31,6 +33,12 @@ private val DarkColors = darkColors(
 )
 
 @Composable
+fun primaryButtonColors() = buttonColors(
+    MosaikStyleConfig.secondaryButtonColor,
+    MosaikStyleConfig.secondaryButtonTextColor
+)
+
+@Composable
 fun DecomposeDesktopExampleTheme(
     content: @Composable () -> Unit
 ) {
@@ -49,11 +57,16 @@ fun DecomposeDesktopExampleTheme(
 }
 
 @Composable
-private fun WalletAppBar(title: String, router: Router<ScreenConfig, Component>) {
+private fun WalletAppBar(
+    title: String,
+    router: Router<ScreenConfig, Component>,
+    actions: @Composable RowScope.() -> Unit
+) {
     CompositionLocalProvider(LocalElevationOverlay provides null) {
         TopAppBar(
             backgroundColor = MaterialTheme.colors.primary,
             title = { Text(title) },
+            actions = actions,
             navigationIcon = if (router.state.value.backStack.isEmpty()) null else ({
                 IconButton(onClick = router::pop) {
                     Icon(
@@ -69,8 +82,9 @@ private fun WalletAppBar(title: String, router: Router<ScreenConfig, Component>)
 @Composable
 fun AppBarView(
     title: String,
+    actions: @Composable RowScope.() -> Unit,
     router: Router<ScreenConfig, Component>,
     content: @Composable (PaddingValues) -> Unit
 ) {
-    Scaffold(topBar = { WalletAppBar(title, router) }, content = content)
+    Scaffold(topBar = { WalletAppBar(title, router, actions = actions) }, content = content)
 }
