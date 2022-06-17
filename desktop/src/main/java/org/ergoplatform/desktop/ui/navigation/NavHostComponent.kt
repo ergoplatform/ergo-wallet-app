@@ -18,6 +18,7 @@ import com.arkivanov.decompose.router.router
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.transactions.ReceiveToWalletComponent
 import org.ergoplatform.desktop.transactions.SendFundsComponent
+import org.ergoplatform.desktop.ui.QrScannerComponent
 import org.ergoplatform.desktop.wallet.WalletListComponent
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
@@ -57,6 +58,12 @@ class NavHostComponent(
 
             is ScreenConfig.ReceiveToWallet -> ReceiveToWalletComponent(
                 componentContext, this, screenConfig.walletConfig
+            )
+
+            is ScreenConfig.QrCodeScanner -> QrScannerComponent(
+                componentContext,
+                this,
+                screenConfig.callback
             )
 
             ScreenConfig.Settings -> TODO()

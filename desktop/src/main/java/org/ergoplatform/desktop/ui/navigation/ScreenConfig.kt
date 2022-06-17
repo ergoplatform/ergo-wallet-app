@@ -8,4 +8,5 @@ sealed class ScreenConfig : Parcelable {
     object Settings : ScreenConfig()
     data class SendFunds(val name: String) : ScreenConfig()
     data class ReceiveToWallet(val walletConfig: WalletConfig) : ScreenConfig()
+    data class QrCodeScanner(val callback: (String) -> Unit) : ScreenConfig()
 }
