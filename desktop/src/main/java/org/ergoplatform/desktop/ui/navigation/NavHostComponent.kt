@@ -79,7 +79,7 @@ class NavHostComponent(
                         icon = {
                             Icon(
                                 Icons.Outlined.AccountBalanceWallet,
-                                contentDescription = Application.texts.get(STRING_TITLE_WALLETS)
+                                contentDescription = Application.texts.getString(STRING_TITLE_WALLETS)
                             )
                         },
                         selected = navItemState.value == NavItem.WALLETS,
@@ -87,13 +87,13 @@ class NavHostComponent(
                             navItemState.value = NavItem.WALLETS
                             router.navigate { mutableListOf(ScreenConfig.WalletList) }
                         },
-                        label = { Text(text = Application.texts.get(STRING_TITLE_WALLETS)) },
+                        label = { Text(text = Application.texts.getString(STRING_TITLE_WALLETS)) },
                     )
                     BottomNavigationItem(
                         icon = {
                             Icon(
                                 Icons.Outlined.Settings,
-                                contentDescription = Application.texts.get(STRING_TITLE_SETTINGS)
+                                contentDescription = Application.texts.getString(STRING_TITLE_SETTINGS)
                             )
                         },
                         selected = navItemState.value == NavItem.SETTINGS,
@@ -101,7 +101,7 @@ class NavHostComponent(
                             navItemState.value = NavItem.SETTINGS
                             router.navigate { listOf(ScreenConfig.WalletList) }
                         },
-                        label = { Text(text = Application.texts.get(STRING_TITLE_SETTINGS)) },
+                        label = { Text(text = Application.texts.getString(STRING_TITLE_SETTINGS)) },
                     )
                 }
             }

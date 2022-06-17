@@ -13,6 +13,7 @@ import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import net.harawata.appdirs.AppDirsFactory
 import org.ergoplatform.desktop.Preferences
 import org.ergoplatform.desktop.ui.DecomposeDesktopExampleTheme
+import org.ergoplatform.desktop.ui.DesktopStringProvider
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.persistance.AppDatabase
 import org.ergoplatform.persistance.DbInitializer
@@ -33,9 +34,10 @@ fun main() {
         LifecycleController(lifecycle, windowState)
 
         // activate for testnet: isErgoMainNet = false
-        LogUtils.logDebug = !isErgoMainNet
+        LogUtils.logDebug = true
 
-        Application.texts = I18NBundle.createBundle(ResourceWrapper("/i18n/strings"))
+        Application.texts =
+            DesktopStringProvider(I18NBundle.createBundle(ResourceWrapper("/i18n/strings")))
 
         val appDirs = AppDirsFactory.getInstance()
         val dataDir = appDirs.getUserDataDir("ergowallet", null, null)
@@ -46,7 +48,7 @@ fun main() {
         Window(
             onCloseRequest = ::exitApplication,
             state = windowState,
-            title = Application.texts.get(STRING_APP_NAME)
+            title = Application.texts.getString(STRING_APP_NAME)
         ) {
             DecomposeDesktopExampleTheme {
                 root.render()
@@ -71,7 +73,7 @@ private fun setupDatabase(dataDir: String): AppDatabase {
 }
 
 object Application {
-    lateinit var texts: I18NBundle
+    lateinit var texts: DesktopStringProvider
     lateinit var database: SqlDelightAppDb
     lateinit var prefs: PreferencesProvider
 }

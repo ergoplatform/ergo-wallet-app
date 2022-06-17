@@ -59,7 +59,7 @@ class SendFundsComponent(
     }
 
     override val appBarLabel: String
-        get() = Application.texts.get(STRING_BUTTON_SEND)
+        get() = Application.texts.getString(STRING_BUTTON_SEND)
 
     @Composable
     override fun renderScreenContents() {

@@ -15,6 +15,7 @@ dependencies {
 
     implementation(compose.desktop.currentOs)
     implementation(compose.materialIconsExtended)
+    implementation("com.github.MrStahlfelge.mosaik:common-compose:e8b73e22c7")
 
     implementation("com.arkivanov.decompose:decompose:0.5.2")
     implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.5.2")

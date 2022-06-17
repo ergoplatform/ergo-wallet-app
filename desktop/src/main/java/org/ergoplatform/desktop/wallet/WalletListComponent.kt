@@ -17,7 +17,7 @@ class WalletListComponent(
 ) : NavClientScreenComponent(navHost), ComponentContext by componentContext {
 
     override val appBarLabel: String
-        get() = Application.texts.get(STRING_TITLE_WALLETS)
+        get() = Application.texts.getString(STRING_TITLE_WALLETS)
 
     @Composable
     override fun renderScreenContents() {
@@ -28,7 +28,7 @@ class WalletListComponent(
 
         WalletListScreen(
             state.value,
-            onGoClicked = { router.push(ScreenConfig.SendFunds(it)) }
+            onSendClicked = { router.push(ScreenConfig.SendFunds(it)) }
         )
     }
 }

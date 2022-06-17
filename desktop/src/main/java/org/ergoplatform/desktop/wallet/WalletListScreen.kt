@@ -11,7 +11,7 @@ import org.ergoplatform.persistance.Wallet
 @Composable
 fun WalletListScreen(
     walletList: List<Wallet>,
-    onGoClicked: (String) -> Unit,
+    onSendClicked: (String) -> Unit,
 ) {
 
     LazyColumn(
@@ -21,7 +21,7 @@ fun WalletListScreen(
     ) {
         items(walletList.size) { index ->
 
-            WalletCard(walletList[index], onGoClicked)
+            WalletCard(walletList[index], onSendClicked)
 
         }
     }
