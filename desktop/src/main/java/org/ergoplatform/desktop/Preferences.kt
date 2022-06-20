@@ -33,6 +33,7 @@ class Preferences(private val file: File) : PreferencesProvider() {
 
     override fun saveLong(key: String, value: Long) {
         properties[key] = value.toString()
+        flush()
     }
 
     override fun getFloat(key: String, default: Float): Float {
@@ -41,6 +42,7 @@ class Preferences(private val file: File) : PreferencesProvider() {
 
     override fun saveFloat(key: String, value: Float) {
         properties[key] = value.toString()
+        flush()
     }
 
     private fun flush() {

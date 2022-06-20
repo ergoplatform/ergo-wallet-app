@@ -42,8 +42,7 @@ class QrScannerComponent(
                     detector.process(image.asGrayU8())
 
                     for (qr in detector.detections) {
-                        callback(qr.message)
-                        navHost.router.pop()
+                        qrCodeScanned(qr.message)
                     }
 
                     // Update the display
@@ -59,6 +58,11 @@ class QrScannerComponent(
         }
     }
 
+    private fun qrCodeScanned(scannedQr: String) {
+        callback(scannedQr)
+        navHost.router.pop()
+    }
+
     private val imageState = mutableStateOf<ImageBitmap?>(null)
     private val errorState = mutableStateOf("")
 
@@ -68,7 +72,7 @@ class QrScannerComponent(
 
     @Composable
     override fun renderScreenContents() {
-        QrScannerScreen(imageState, errorState)
+        QrScannerScreen(imageState, errorState, ::qrCodeScanned)
     }
 
 }

@@ -12,19 +12,23 @@ import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.desktop.tokens.TokenEntryView
 import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.desktop.ui.primaryButtonColors
 import org.ergoplatform.desktop.ui.uiErgoColor
-import org.ergoplatform.ergoCurrencyText
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletConfig
-import org.ergoplatform.uilogic.STRING_BUTTON_RECEIVE
-import org.ergoplatform.uilogic.STRING_BUTTON_SEND
+import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.tokens.fillTokenOverview
+import org.ergoplatform.tokens.getTokenErgoValueSum
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.formatFiatToString
+import org.ergoplatform.utils.formatTokenPriceToString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
+import org.ergoplatform.wallet.getTokensForAllAddresses
 
 @Composable
 fun WalletCard(
@@ -62,7 +66,9 @@ fun WalletCard(
                     val balanceErgoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
 
                     Text(
-                        text = balanceErgoAmount.toStringRoundToDecimals() + " $ergoCurrencyText",
+                        text = Application.texts.getString(
+                            STRING_LABEL_ERG_AMOUNT, balanceErgoAmount.toStringRoundToDecimals()
+                        ),
                         style = labelStyle(LabelStyle.HEADLINE1)
                     )
 
@@ -74,14 +80,66 @@ fun WalletCard(
                                 balanceErgoAmount.toDouble() * fiatValue,
                                 walletSyncManager.fiatCurrency, Application.texts
                             ),
+                            color = MosaikStyleConfig.secondaryLabelColor,
                             style = labelStyle(LabelStyle.BODY1)
                         )
 
 
                     }
 
-                }
 
+                    val tokens = wallet.getTokensForAllAddresses()
+                    val tokenCount = tokens.size
+
+                    if (tokenCount > 0) {
+
+                        val tokenValueToShow = getTokenErgoValueSum(tokens, walletSyncManager)
+
+
+                        Row(Modifier.padding(top = defaultPadding)) {
+                            Text(
+                                text = Application.texts.getString(
+                                    STRING_LABEL_WALLET_TOKEN_BALANCE,
+                                    tokenCount
+                                ),
+                                style = labelStyle(LabelStyle.HEADLINE2),
+                            )
+
+                            if (!tokenValueToShow.isZero()) {
+                                Text(
+                                    text = formatTokenPriceToString(
+                                        tokenValueToShow,
+                                        walletSyncManager,
+                                        Application.texts
+                                    ),
+                                    style = labelStyle(LabelStyle.BODY1),
+                                    color = MosaikStyleConfig.secondaryLabelColor,
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                        .padding(start = defaultPadding / 2),
+                                )
+                            }
+                        }
+
+                        val tokenList = mutableListOf<WalletToken>()
+                        var moreTokenHint: Int? = null
+                        fillTokenOverview(
+                            tokens,
+                            addToken = { tokenList.add(it) },
+                            addMoreTokenHint = { moreTokenHint = it }
+                        )
+
+                        tokenList.forEach { walletToken ->
+                            TokenEntryView(walletToken)
+                        }
+
+                        moreTokenHint?.let {
+                            TokenEntryView(
+                                "+$moreTokenHint ",
+                                Application.texts.getString(STRING_LABEL_MORE_TOKENS)
+                            )
+                        }
+                    }
+                }
             }
 
             Row(Modifier.padding(top = defaultPadding)) {

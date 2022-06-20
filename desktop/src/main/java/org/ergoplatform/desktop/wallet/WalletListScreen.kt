@@ -2,7 +2,9 @@ package org.ergoplatform.desktop.wallet
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +19,10 @@ fun WalletListScreen(
     onSendClicked: (String) -> Unit,
     onReceiveClicked: (WalletConfig) -> Unit,
 ) {
+
+    if (isRefreshing) {
+        LinearProgressIndicator(Modifier.fillMaxWidth())
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
