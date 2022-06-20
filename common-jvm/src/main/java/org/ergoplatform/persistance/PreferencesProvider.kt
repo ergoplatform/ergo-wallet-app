@@ -14,6 +14,7 @@ const val KEY_DOWNLOAD_NFT_CONTENT = "downloadNftContent"
 const val KEY_SEND_TX_MESSAGES = "sendTxMessages"
 const val KEY_INPUT_FIAT_AMOUNT = "inputFiatAmount"
 const val KEY_LASTREFRESH = "lastRefreshMs"
+const val KEY_MOSAIK_ENABLED = "enableMosaik"
 const val FIAT_CURRENCY_DEFAULT = "usd"
 
 private const val DEFAULT_IPFS_GATEWAY = "https://cloudflare-ipfs.com/"
@@ -94,6 +95,12 @@ abstract class PreferencesProvider {
         get() = getBoolean(KEY_DOWNLOAD_NFT_CONTENT, false)
         set(value) {
             saveBoolean(KEY_DOWNLOAD_NFT_CONTENT, value)
+        }
+
+    var mosaikEnabled: Boolean
+        get() = getBoolean(KEY_MOSAIK_ENABLED, false)
+        set(value) {
+            saveBoolean(KEY_MOSAIK_ENABLED, value)
         }
 
     var sendTxMessages: Boolean
