@@ -261,6 +261,11 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.mosaikRuntime.checkViewTreeValidity()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_switch_favorite) {
             viewModel.mosaikRuntime.switchFavorite()
