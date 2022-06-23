@@ -4,10 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import org.ergoplatform.desktop.ui.scrollbar
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletConfig
 
@@ -24,8 +27,16 @@ fun WalletListScreen(
         LinearProgressIndicator(Modifier.fillMaxWidth())
     }
 
+    val state = rememberLazyListState()
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        state = state,
+        modifier = Modifier.fillMaxSize().scrollbar(
+            state,
+            false,
+            hiddenAlpha = .8f,
+            knobColor = Color.White,
+            trackColor = Color.Transparent
+        ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
