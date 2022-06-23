@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.ergoplatform.desktop.ui.scrollbar
+import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletConfig
 
@@ -33,8 +34,8 @@ fun WalletListScreen(
         modifier = Modifier.fillMaxSize().scrollbar(
             state,
             false,
-            hiddenAlpha = .8f,
-            knobColor = Color.White,
+            hiddenAlpha = 1f,
+            knobColor = MosaikStyleConfig.secondaryLabelColor,
             trackColor = Color.Transparent
         ),
         horizontalAlignment = Alignment.CenterHorizontally,

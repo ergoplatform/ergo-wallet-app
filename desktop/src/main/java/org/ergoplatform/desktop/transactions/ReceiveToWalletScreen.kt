@@ -1,7 +1,6 @@
 package org.ergoplatform.desktop.transactions
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -22,6 +21,7 @@ import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.desktop.ui.getQrCodeImageBitmap
 import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.MosaikStyleConfig
+import org.ergoplatform.mosaik.drawVerticalScrollbar
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.WalletAddress
@@ -32,7 +32,8 @@ import org.ergoplatform.wallet.addresses.getAddressLabel
 fun ReceiveToWalletScreen(walletConfig: WalletConfig, address: WalletAddress) {
     val qrImage = remember(address) { getQrCodeImageBitmap(address.publicAddress) }
 
-    Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+    val scrollState = rememberScrollState()
+    Box(Modifier.fillMaxSize().drawVerticalScrollbar(scrollState).verticalScroll(scrollState)) {
         Card(
             Modifier.padding(defaultPadding).align(Alignment.Center)
                 .defaultMinSize(400.dp, 200.dp)

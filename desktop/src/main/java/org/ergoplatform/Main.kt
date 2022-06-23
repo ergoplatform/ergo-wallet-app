@@ -19,6 +19,7 @@ import org.ergoplatform.desktop.Preferences
 import org.ergoplatform.desktop.ui.DecomposeDesktopExampleTheme
 import org.ergoplatform.desktop.ui.DesktopStringProvider
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.mosaik.MosaikComposeConfig
 import org.ergoplatform.persistance.AppDatabase
 import org.ergoplatform.persistance.DbInitializer
 import org.ergoplatform.persistance.PreferencesProvider
@@ -54,6 +55,8 @@ fun main() {
 
         WalletStateSyncManager.getInstance()
             .loadPreferenceValues(Application.prefs, Application.database)
+
+        MosaikComposeConfig.scrollMinAlpha = 1f
 
         Window(
             onCloseRequest = ::exitApplication,
