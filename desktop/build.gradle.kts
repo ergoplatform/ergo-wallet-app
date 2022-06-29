@@ -9,6 +9,8 @@ java {
 }
 
 dependencies {
+    val decomposeVersion = "0.7.0"
+
     implementation(project(":common-jvm"))
     implementation(project(":sqldelight"))
     implementation("com.squareup.sqldelight:sqlite-driver:1.5.3")
@@ -17,8 +19,8 @@ dependencies {
     implementation(compose.materialIconsExtended)
     implementation("com.github.MrStahlfelge.mosaik:common-compose:e8b73e22c7")
 
-    implementation("com.arkivanov.decompose:decompose:0.5.2")
-    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.5.2")
+    implementation("com.arkivanov.decompose:decompose:$decomposeVersion")
+    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:$decomposeVersion")
     implementation("net.harawata:appdirs:1.2.1") // https://github.com/harawata/appdirs
 
     // https://levelup.gitconnected.com/qr-code-scanner-in-kotlin-e15dd9bfbb1f

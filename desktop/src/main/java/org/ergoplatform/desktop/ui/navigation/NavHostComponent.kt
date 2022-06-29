@@ -13,9 +13,11 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.Children
-import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.slide
+import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.childAnimation
+import com.arkivanov.decompose.router.navigate
 import com.arkivanov.decompose.router.router
 import org.ergoplatform.Application
+import org.ergoplatform.desktop.settings.SettingsComponent
 import org.ergoplatform.desktop.transactions.ReceiveToWalletComponent
 import org.ergoplatform.desktop.transactions.SendFundsComponent
 import org.ergoplatform.desktop.ui.QrScannerComponent
@@ -71,7 +73,9 @@ class NavHostComponent(
                 screenConfig.callback
             )
 
-            ScreenConfig.Settings -> TODO()
+            ScreenConfig.Settings -> SettingsComponent(
+                componentContext, this
+            )
         }
     }
 
@@ -88,7 +92,9 @@ class NavHostComponent(
             Children(
                 modifier = Modifier.weight(1f, true),
                 routerState = router.state,
-                animation = slide()
+                animation = childAnimation { child, direction ->
+                    child.instance.animation
+                }
             ) { it.instance.render() }
 
             CompositionLocalProvider(LocalElevationOverlay provides null) {
@@ -121,7 +127,7 @@ class NavHostComponent(
                         selected = navItemState.value == NavItem.SETTINGS,
                         onClick = {
                             navItemState.value = NavItem.SETTINGS
-                            router.navigate { listOf(ScreenConfig.WalletList) }
+                            router.navigate { listOf(ScreenConfig.Settings) }
                         },
                         label = { Text(text = Application.texts.getString(STRING_TITLE_SETTINGS)) },
                     )

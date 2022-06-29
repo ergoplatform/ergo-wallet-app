@@ -13,6 +13,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.ExperimentalDecomposeApi
+import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.ChildAnimator
+import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.fade
 import com.arkivanov.decompose.router.push
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnResume
@@ -38,6 +41,10 @@ class WalletListComponent(
 
     override val appBarLabel: String
         get() = Application.texts.getString(STRING_TITLE_WALLETS)
+
+    @OptIn(ExperimentalDecomposeApi::class)
+    override val animation: ChildAnimator
+        get() = fade()
 
     override val actions: @Composable RowScope.() -> Unit
         get() {
