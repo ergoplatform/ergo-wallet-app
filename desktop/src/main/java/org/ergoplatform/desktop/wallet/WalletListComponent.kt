@@ -15,7 +15,9 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.ChildAnimator
+import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.Direction
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.fade
+import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.slide
 import com.arkivanov.decompose.router.push
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnResume
@@ -43,8 +45,11 @@ class WalletListComponent(
         get() = Application.texts.getString(STRING_TITLE_WALLETS)
 
     @OptIn(ExperimentalDecomposeApi::class)
-    override val animation: ChildAnimator
-        get() = fade()
+    override fun animation(direction: Direction): ChildAnimator =
+        when (direction) {
+            Direction.ENTER_BACK -> slide()
+            else -> fade()
+        }
 
     override val actions: @Composable RowScope.() -> Unit
         get() {

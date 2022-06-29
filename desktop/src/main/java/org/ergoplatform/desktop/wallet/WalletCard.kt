@@ -15,6 +15,7 @@ import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.desktop.tokens.TokenEntryView
 import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.desktop.ui.primaryButtonColors
+import org.ergoplatform.desktop.ui.secondaryButtonColors
 import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
@@ -146,7 +147,7 @@ fun WalletCard(
                 Button(
                     onClick = { onReceiveClicked(wallet.walletConfig) },
                     modifier = Modifier.weight(1f),
-                    colors = primaryButtonColors()
+                    colors = secondaryButtonColors()
                 ) {
                     Text(Application.texts.getString(STRING_BUTTON_RECEIVE))
                 }
@@ -154,10 +155,7 @@ fun WalletCard(
                 Button(
                     onClick = { onSendClicked(wallet.walletConfig.displayName!!) },
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        MosaikStyleConfig.primaryLabelColor,
-                        MosaikStyleConfig.primaryButtonTextColor
-                    )
+                    colors = primaryButtonColors()
                 ) {
                     Text(Application.texts.getString(STRING_BUTTON_SEND))
                 }

@@ -93,7 +93,7 @@ class NavHostComponent(
                 modifier = Modifier.weight(1f, true),
                 routerState = router.state,
                 animation = childAnimation { child, direction ->
-                    child.instance.animation
+                    child.instance.animation(direction)
                 }
             ) { it.instance.render() }
 

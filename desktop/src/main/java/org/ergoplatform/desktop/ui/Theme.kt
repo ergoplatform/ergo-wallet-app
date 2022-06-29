@@ -34,6 +34,12 @@ private val DarkColors = darkColors(
 
 @Composable
 fun primaryButtonColors() = buttonColors(
+    MosaikStyleConfig.primaryLabelColor,
+    MosaikStyleConfig.primaryButtonTextColor
+)
+
+@Composable
+fun secondaryButtonColors() = buttonColors(
     MosaikStyleConfig.secondaryButtonColor,
     MosaikStyleConfig.secondaryButtonTextColor
 )
