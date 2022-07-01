@@ -16,9 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.appVersionString
-import org.ergoplatform.desktop.ui.LinkifyText
-import org.ergoplatform.desktop.ui.defaultPadding
-import org.ergoplatform.desktop.ui.secondaryButtonColors
+import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.drawVerticalScrollbar
 import org.ergoplatform.mosaik.labelStyle
@@ -75,7 +73,8 @@ fun SettingsScreen(
             Modifier.fillMaxSize().drawVerticalScrollbar(scrollState).verticalScroll(scrollState)
         ) {
 
-            Card(Modifier.widthIn(max = 600.dp).align(Alignment.CenterHorizontally)) {
+            // Fiat currency
+            AppCard(Modifier.widthIn(max = defaultMaxWidth).align(Alignment.CenterHorizontally)) {
                 Column(Modifier.padding(defaultPadding)) {
                     LinkifyText(
                         Application.texts.getString(STRING_DESC_COINGECKO),
@@ -90,6 +89,29 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(currencyButtonTextState.value)
+                    }
+                }
+
+            }
+
+            // Expert settings
+            AppCard(
+                Modifier.widthIn(max = defaultMaxWidth).align(Alignment.CenterHorizontally)
+                    .padding(top = defaultPadding)
+            ) {
+                Column(Modifier.padding(defaultPadding)) {
+                    Text(
+                        Application.texts.getString(STRING_DESC_EXPERT_SETTINGS),
+                        Modifier.padding(defaultPadding / 2).align(Alignment.CenterHorizontally),
+                        style = labelStyle(LabelStyle.BODY1),
+                    )
+
+                    Button(
+                        onClick = { onChangeCurrencyClicked() },
+                        colors = secondaryButtonColors(),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = defaultPadding),
+                    ) {
+                        Text(Application.texts.getString(STRING_BUTTON_CONNECTION_SETTINGS))
                     }
                 }
 

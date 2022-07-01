@@ -1,7 +1,11 @@
 package org.ergoplatform.desktop.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.input.key.*
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -11,5 +15,12 @@ fun Modifier.addOnEnterListener(onEnter: () -> Unit): Modifier {
             onEnter()
             true
         } else false
+    }
+}
+
+inline fun Modifier.noRippleClickable(crossinline onClick: ()->Unit): Modifier = composed {
+    clickable(indication = null,
+        interactionSource = remember { MutableInteractionSource() }) {
+        onClick()
     }
 }

@@ -1,8 +1,9 @@
 package org.ergoplatform.desktop.wallet
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.runtime.Composable
@@ -13,10 +14,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.desktop.tokens.TokenEntryView
-import org.ergoplatform.desktop.ui.defaultPadding
-import org.ergoplatform.desktop.ui.primaryButtonColors
-import org.ergoplatform.desktop.ui.secondaryButtonColors
-import org.ergoplatform.desktop.ui.uiErgoColor
+import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
@@ -38,11 +36,9 @@ fun WalletCard(
     onSendClicked: (String) -> Unit,
     onReceiveClicked: (WalletConfig) -> Unit,
 ) {
-    Card(
-        shape = RoundedCornerShape(8.dp),
+    AppCard(
         modifier = Modifier.padding(defaultPadding).defaultMinSize(400.dp, 200.dp)
-            .widthIn(max = 600.dp),
-        backgroundColor = MaterialTheme.colors.surface,
+            .widthIn(max = defaultMaxWidth),
     ) {
         Column(Modifier.padding(defaultPadding)) {
             Row {

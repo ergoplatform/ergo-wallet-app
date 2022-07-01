@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
+import org.ergoplatform.desktop.ui.defaultMaxWidth
 import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.desktop.ui.getQrCodeImageBitmap
 import org.ergoplatform.desktop.ui.uiErgoColor
@@ -37,7 +38,7 @@ fun ReceiveToWalletScreen(walletConfig: WalletConfig, address: WalletAddress) {
         Card(
             Modifier.padding(defaultPadding).align(Alignment.Center)
                 .defaultMinSize(400.dp, 200.dp)
-                .widthIn(max = 600.dp)
+                .widthIn(max = defaultMaxWidth)
         ) {
 
             Column(Modifier.padding(defaultPadding)) {

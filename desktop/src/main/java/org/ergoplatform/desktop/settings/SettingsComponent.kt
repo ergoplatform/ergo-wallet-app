@@ -10,6 +10,7 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.Dire
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.slide
 import org.ergoplatform.Application
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
@@ -34,17 +35,41 @@ class SettingsComponent(
     @Composable
     override fun renderScreenContents() {
         val currencyButtonTextState = remember {
-            mutableStateOf(
-                uiLogic.getFiatCurrencyButtonText(
-                    Application.prefs,
-                    Application.texts
-                )
-            )
+            mutableStateOf(getCurrencyButtonText())
         }
+
+        val dialogState = remember { mutableStateOf(DialogToShow.None) }
 
         SettingsScreen(
             currencyButtonTextState,
-            onChangeCurrencyClicked = {}
+            onChangeCurrencyClicked = {
+                WalletStateSyncManager.getInstance().fetchCurrencies()
+                dialogState.value = DialogToShow.DisplayCurrencyList
+            }
         )
+
+        when (dialogState.value) {
+            DialogToShow.None -> {}
+            DialogToShow.DisplayCurrencyList -> DisplayCurrencyListDialog(
+                onDismissRequest = {
+                    dialogState.value = DialogToShow.None
+                },
+                onCurrencyChosen = { currency ->
+                    Application.prefs.prefDisplayCurrency = currency
+                    WalletStateSyncManager.getInstance().invalidateCache(resetFiatValue = true)
+                    currencyButtonTextState.value = getCurrencyButtonText()
+                }
+            )
+        }
+    }
+
+    private fun getCurrencyButtonText() = uiLogic.getFiatCurrencyButtonText(
+        Application.prefs,
+        Application.texts
+    )
+
+    enum class DialogToShow {
+        None,
+        DisplayCurrencyList,
     }
 }
