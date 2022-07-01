@@ -1,5 +1,6 @@
 package org.ergoplatform.desktop.settings
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -26,7 +27,7 @@ import org.ergoplatform.uilogic.STRING_LABEL_NONE
 @Composable
 fun DisplayCurrencyListDialog(onDismissRequest: () -> Unit, onCurrencyChosen: (String) -> Unit) {
     AppDialog(onDismissRequest) {
-        Box {
+        Box(Modifier.fillMaxWidth().animateContentSize()) {
             val currencyListState =
                 WalletStateSyncManager.getInstance().currencies.collectAsState()
             val currencyList = currencyListState.value
