@@ -53,6 +53,12 @@ fun secondaryButtonColors() = buttonColors(
 )
 
 @Composable
+fun appTextFieldColors() = TextFieldDefaults.outlinedTextFieldColors(
+    focusedBorderColor = MaterialTheme.colors.onSurface,
+    focusedLabelColor = MaterialTheme.colors.onSurface,
+)
+
+@Composable
 fun DecomposeDesktopExampleTheme(
     content: @Composable () -> Unit
 ) {

@@ -13,10 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
-import org.ergoplatform.desktop.ui.defaultMaxWidth
-import org.ergoplatform.desktop.ui.defaultPadding
-import org.ergoplatform.desktop.ui.primaryButtonColors
-import org.ergoplatform.desktop.ui.uiErgoColor
+import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.uilogic.STRING_INTRO_ADD_READONLY
@@ -63,6 +60,7 @@ fun AddReadOnlyWalletScreen(
                             Icon(Icons.Default.QrCodeScanner, null)
                         }
                     },
+                    colors = appTextFieldColors(),
                 )
 
                 errorMsg.value?.let {
@@ -78,6 +76,7 @@ fun AddReadOnlyWalletScreen(
                     maxLines = 1,
                     singleLine = true,
                     label = { Text(Application.texts.getString(STRING_LABEL_WALLET_NAME)) },
+                    colors = appTextFieldColors(),
                 )
 
                 Button(

@@ -27,6 +27,7 @@ import org.ergoplatform.uilogic.*
 fun SettingsScreen(
     currencyButtonTextState: MutableState<String>,
     onChangeCurrencyClicked: () -> Unit,
+    onChangeConnectionSettings: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     Column {
@@ -107,7 +108,7 @@ fun SettingsScreen(
                     )
 
                     Button(
-                        onClick = { onChangeCurrencyClicked() },
+                        onClick = { onChangeConnectionSettings() },
                         colors = secondaryButtonColors(),
                         modifier = Modifier.fillMaxWidth().padding(horizontal = defaultPadding),
                     ) {

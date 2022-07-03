@@ -72,6 +72,7 @@ fun QrScannerScreen(
                     Icon(Icons.Default.KeyboardReturn, null)
                 }
             },
+            colors = appTextFieldColors(),
         )
     }
 }

@@ -45,6 +45,9 @@ class SettingsComponent(
             onChangeCurrencyClicked = {
                 WalletStateSyncManager.getInstance().fetchCurrencies()
                 dialogState.value = DialogToShow.DisplayCurrencyList
+            },
+            onChangeConnectionSettings = {
+                dialogState.value = DialogToShow.ConnectionSettings
             }
         )
 
@@ -60,6 +63,7 @@ class SettingsComponent(
                     currencyButtonTextState.value = getCurrencyButtonText()
                 }
             )
+            DialogToShow.ConnectionSettings -> ConnectionSettingsDialog { dialogState.value = DialogToShow.None }
         }
     }
 
@@ -71,5 +75,6 @@ class SettingsComponent(
     enum class DialogToShow {
         None,
         DisplayCurrencyList,
+        ConnectionSettings,
     }
 }
