@@ -116,6 +116,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:hint="@string/label_purpose"
+                        android:visibility="gone"
                         app:endIconDrawable="@drawable/ic_info_24"
                         app:endIconMode="custom"
                         app:layout_constraintEnd_toEndOf="@id/tv_receiver"
@@ -139,9 +140,9 @@
                         android:hint="@string/label_amount"
                         app:endIconDrawable="@drawable/ic_use_all_24"
                         app:endIconMode="custom"
-                        app:layout_constraintEnd_toEndOf="@id/ti_message"
-                        app:layout_constraintStart_toStartOf="@id/ti_message"
-                        app:layout_constraintTop_toBottomOf="@id/ti_message">
+                        app:layout_constraintEnd_toEndOf="@id/tv_receiver"
+                        app:layout_constraintStart_toStartOf="@id/tv_receiver"
+                        app:layout_constraintTop_toBottomOf="@id/tv_receiver">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:layout_width="match_parent"

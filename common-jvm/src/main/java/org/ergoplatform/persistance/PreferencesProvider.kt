@@ -58,7 +58,7 @@ abstract class PreferencesProvider {
         }
 
     fun getDefaultNodeApiUrl() =
-        if (isErgoMainNet) "http://213.239.193.208:9053/"
+        if (isErgoMainNet) "http://159.65.11.55:9053/"
         else "http://213.239.193.208:9052/"
 
     var prefExplorerApiUrl: String

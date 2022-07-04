@@ -6,8 +6,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
@@ -40,7 +40,7 @@ import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 
 class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
-    private lateinit var walletDetailsViewModel: WalletDetailsViewModel
+    private val walletDetailsViewModel: WalletDetailsViewModel by viewModels()
 
     private var _binding: FragmentWalletDetailsBinding? = null
     private val binding get() = _binding!!
@@ -57,8 +57,6 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        walletDetailsViewModel =
-            ViewModelProvider(this).get(WalletDetailsViewModel::class.java)
         walletDetailsViewModel.init(requireContext(), args.walletId)
         _binding = FragmentWalletDetailsBinding.inflate(layoutInflater, container, false)
 
