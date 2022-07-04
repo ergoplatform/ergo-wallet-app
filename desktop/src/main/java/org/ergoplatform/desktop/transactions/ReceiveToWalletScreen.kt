@@ -1,9 +1,7 @@
 package org.ergoplatform.desktop.transactions
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -22,7 +20,6 @@ import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.desktop.ui.getQrCodeImageBitmap
 import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.MosaikStyleConfig
-import org.ergoplatform.mosaik.drawVerticalScrollbar
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.WalletAddress
@@ -33,55 +30,63 @@ import org.ergoplatform.wallet.addresses.getAddressLabel
 fun ReceiveToWalletScreen(walletConfig: WalletConfig, address: WalletAddress) {
     val qrImage = remember(address) { getQrCodeImageBitmap(address.publicAddress) }
 
-    val scrollState = rememberScrollState()
-    Box(Modifier.fillMaxSize().drawVerticalScrollbar(scrollState).verticalScroll(scrollState)) {
-        Card(
-            Modifier.padding(defaultPadding).align(Alignment.Center)
-                .defaultMinSize(400.dp, 200.dp)
-                .widthIn(max = defaultMaxWidth)
-        ) {
+    Box {
+        val scrollState = rememberScrollState()
+        Box(Modifier.fillMaxSize().verticalScroll(scrollState)) {
+            Card(
+                Modifier.padding(defaultPadding).align(Alignment.Center)
+                    .defaultMinSize(400.dp, 200.dp)
+                    .widthIn(max = defaultMaxWidth)
+            ) {
 
-            Column(Modifier.padding(defaultPadding)) {
+                Column(Modifier.padding(defaultPadding)) {
 
-                Text(
-                    text = walletConfig.displayName ?: "",
-                    color = uiErgoColor,
-                    style = labelStyle(LabelStyle.HEADLINE2)
-                )
-
-                Text(
-                    text = address.getAddressLabel(Application.texts),
-                    color = uiErgoColor,
-                    style = labelStyle(LabelStyle.BODY1BOLD)
-                )
-
-                Image(
-                    qrImage,
-                    null,
-                    Modifier.size(400.dp).padding(defaultPadding)
-                        .align(Alignment.CenterHorizontally)
-                )
-
-                Row {
                     Text(
-                        text = address.publicAddress,
-                        style = labelStyle(LabelStyle.HEADLINE2),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f),
+                        text = walletConfig.displayName ?: "",
+                        color = uiErgoColor,
+                        style = labelStyle(LabelStyle.HEADLINE2)
                     )
 
-                    IconButton({
-                        // TODO
-                    }) {
-                        Icon(
-                            Icons.Default.ContentCopy,
-                            null,
-                            Modifier.size(24.dp).align(Alignment.CenterVertically),
-                            tint = MosaikStyleConfig.secondaryLabelColor
+                    Text(
+                        text = address.getAddressLabel(Application.texts),
+                        color = uiErgoColor,
+                        style = labelStyle(LabelStyle.BODY1BOLD)
+                    )
+
+                    Image(
+                        qrImage,
+                        null,
+                        Modifier.size(400.dp).padding(defaultPadding)
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                    Row {
+                        Text(
+                            text = address.publicAddress,
+                            style = labelStyle(LabelStyle.HEADLINE2),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(1f),
                         )
+
+                        IconButton({
+                            // TODO
+                        }) {
+                            Icon(
+                                Icons.Default.ContentCopy,
+                                null,
+                                Modifier.size(24.dp).align(Alignment.CenterVertically),
+                                tint = MosaikStyleConfig.secondaryLabelColor
+                            )
+                        }
                     }
                 }
             }
         }
+
+        VerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterEnd)
+                .fillMaxHeight(),
+            adapter = rememberScrollbarAdapter(scrollState)
+        )
     }
 }

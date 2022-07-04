@@ -1,11 +1,8 @@
 package org.ergoplatform.desktop.settings
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
-import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -18,7 +15,6 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.appVersionString
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.MosaikStyleConfig
-import org.ergoplatform.mosaik.drawVerticalScrollbar
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.uilogic.*
@@ -29,7 +25,6 @@ fun SettingsScreen(
     onChangeCurrencyClicked: () -> Unit,
     onChangeConnectionSettings: () -> Unit,
 ) {
-    val scrollState = rememberScrollState()
     Column {
         Column(Modifier.fillMaxWidth()) {
             Image(
@@ -70,54 +65,67 @@ fun SettingsScreen(
             )
         }
 
-        Column(
-            Modifier.fillMaxSize().drawVerticalScrollbar(scrollState).verticalScroll(scrollState)
-        ) {
+        Box {
+            val scrollState = rememberScrollState()
 
-            // Fiat currency
-            AppCard(Modifier.widthIn(max = defaultMaxWidth).align(Alignment.CenterHorizontally)) {
-                Column(Modifier.padding(defaultPadding)) {
-                    LinkifyText(
-                        Application.texts.getString(STRING_DESC_COINGECKO),
-                        Modifier.padding(defaultPadding / 2).align(Alignment.CenterHorizontally),
-                        style = labelStyle(LabelStyle.BODY1),
-                        isHtml = true
-                    )
-
-                    Button(
-                        onClick = { onChangeCurrencyClicked() },
-                        colors = secondaryButtonColors(),
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(currencyButtonTextState.value)
-                    }
-                }
-
-            }
-
-            // Expert settings
-            AppCard(
-                Modifier.widthIn(max = defaultMaxWidth).align(Alignment.CenterHorizontally)
-                    .padding(top = defaultPadding)
+            Column(
+                Modifier.fillMaxSize().padding(defaultPadding).verticalScroll(scrollState)
             ) {
-                Column(Modifier.padding(defaultPadding)) {
-                    Text(
-                        Application.texts.getString(STRING_DESC_EXPERT_SETTINGS),
-                        Modifier.padding(defaultPadding / 2).align(Alignment.CenterHorizontally),
-                        style = labelStyle(LabelStyle.BODY1),
-                    )
 
-                    Button(
-                        onClick = { onChangeConnectionSettings() },
-                        colors = secondaryButtonColors(),
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = defaultPadding),
-                    ) {
-                        Text(Application.texts.getString(STRING_BUTTON_CONNECTION_SETTINGS))
+                // Fiat currency
+                AppCard(
+                    Modifier.widthIn(max = defaultMaxWidth).align(Alignment.CenterHorizontally)
+                ) {
+                    Column(Modifier.padding(defaultPadding)) {
+                        LinkifyText(
+                            Application.texts.getString(STRING_DESC_COINGECKO),
+                            Modifier.padding(defaultPadding / 2)
+                                .align(Alignment.CenterHorizontally),
+                            style = labelStyle(LabelStyle.BODY1),
+                            isHtml = true
+                        )
+
+                        Button(
+                            onClick = { onChangeCurrencyClicked() },
+                            colors = secondaryButtonColors(),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(currencyButtonTextState.value)
+                        }
                     }
+
+                }
+
+                // Expert settings
+                AppCard(
+                    Modifier.widthIn(max = defaultMaxWidth).align(Alignment.CenterHorizontally)
+                        .padding(top = defaultPadding)
+                ) {
+                    Column(Modifier.padding(defaultPadding)) {
+                        Text(
+                            Application.texts.getString(STRING_DESC_EXPERT_SETTINGS),
+                            Modifier.padding(defaultPadding / 2)
+                                .align(Alignment.CenterHorizontally),
+                            style = labelStyle(LabelStyle.BODY1),
+                        )
+
+                        Button(
+                            onClick = { onChangeConnectionSettings() },
+                            colors = secondaryButtonColors(),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = defaultPadding),
+                        ) {
+                            Text(Application.texts.getString(STRING_BUTTON_CONNECTION_SETTINGS))
+                        }
+                    }
+
                 }
 
             }
-
+            VerticalScrollbar(
+                modifier = Modifier.align(Alignment.CenterEnd)
+                    .fillMaxHeight(),
+                adapter = rememberScrollbarAdapter(scrollState)
+            )
         }
     }
 }
