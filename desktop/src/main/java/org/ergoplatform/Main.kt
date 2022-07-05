@@ -3,6 +3,7 @@ package org.ergoplatform
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
@@ -44,22 +45,35 @@ fun main() {
     val dataDir = appDirs.getUserDataDir("ergowallet", null, null)
 
     Application.database = SqlDelightAppDb(setupDatabase(dataDir))
-    Application.prefs = Preferences.getPrefsFor(dataDir)
+    val desktopPrefs = Preferences.getPrefsFor(dataDir)
+    Application.prefs = desktopPrefs
 
     WalletStateSyncManager.getInstance()
         .loadPreferenceValues(Application.prefs, Application.database)
+
+    val windowSize = desktopPrefs.windowSize
+    val windowPos = desktopPrefs.windowPos
 
     MosaikComposeConfig.scrollMinAlpha = 1f
 
     application {
         val windowState = rememberWindowState(
-            position = WindowPosition(Alignment.Center),
-            size = DpSize(1200.dp, 800.dp)
+            position = if (windowPos.second < 0f) WindowPosition(Alignment.Center) else WindowPosition(
+                windowPos.first.dp,
+                windowPos.second.dp
+            ),
+            size = DpSize(max(300.dp, windowSize.first.dp), max(200.dp, windowSize.second.dp))
         )
         LifecycleController(lifecycle, windowState)
 
         Window(
-            onCloseRequest = ::exitApplication,
+            onCloseRequest = {
+                desktopPrefs.windowSize =
+                    Pair(windowState.size.width.value, windowState.size.height.value)
+                desktopPrefs.windowPos =
+                    Pair(windowState.position.x.value, windowState.position.y.value)
+                exitApplication()
+            },
             state = windowState,
             title = Application.texts.getString(STRING_APP_NAME)
         ) {

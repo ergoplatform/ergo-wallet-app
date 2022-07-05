@@ -7,6 +7,11 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.*
 
+const val windowX = "windowX"
+const val windowY = "windowY"
+const val windowWidth = "windowWidth"
+const val windowHeight = "windowHeight"
+
 class Preferences(private val file: File) : PreferencesProvider() {
     private val properties = Properties()
 
@@ -62,4 +67,26 @@ class Preferences(private val file: File) : PreferencesProvider() {
             return Preferences(prefFile)
         }
     }
+
+    var windowSize: Pair<Float, Float>
+        get() = Pair(
+            getFloat(windowWidth, 1200f), getFloat(
+                windowHeight, 800f
+            )
+        )
+        set(value) {
+            saveFloat(windowWidth, value.first)
+            saveFloat(windowHeight, value.second)
+        }
+
+    var windowPos: Pair<Float, Float>
+        get() = Pair(
+            getFloat(windowX, 0f), getFloat(
+                windowY, -1f
+            )
+        )
+        set(value) {
+            saveFloat(windowX, value.first)
+            saveFloat(windowY, value.second)
+        }
 }
