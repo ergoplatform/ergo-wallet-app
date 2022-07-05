@@ -17,6 +17,8 @@ abstract class NavClientScreenComponent(
 
     open val actions: @Composable RowScope.() -> Unit = {}
 
+    open val fullScreen = false
+
     val router by lazy { navHost.router }
 
     private var _componentScope: CoroutineScope? = null
@@ -34,7 +36,7 @@ abstract class NavClientScreenComponent(
 
     @Composable
     override fun render() {
-        AppBarView(appBarLabel, actions, router) { renderScreenContents() }
+        renderScreenContents()
     }
 
     @Composable

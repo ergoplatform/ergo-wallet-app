@@ -34,29 +34,29 @@ fun main() {
     val lifecycle = LifecycleRegistry()
     val root = NavHostComponent(DefaultComponentContext(lifecycle = lifecycle))
 
+    // activate for testnet: isErgoMainNet = false
+    LogUtils.logDebug = true
+
+    Application.texts =
+        DesktopStringProvider(I18NBundle.createBundle(ResourceWrapper("/i18n/strings")))
+
+    val appDirs = AppDirsFactory.getInstance()
+    val dataDir = appDirs.getUserDataDir("ergowallet", null, null)
+
+    Application.database = SqlDelightAppDb(setupDatabase(dataDir))
+    Application.prefs = Preferences.getPrefsFor(dataDir)
+
+    WalletStateSyncManager.getInstance()
+        .loadPreferenceValues(Application.prefs, Application.database)
+
+    MosaikComposeConfig.scrollMinAlpha = 1f
+
     application {
         val windowState = rememberWindowState(
             position = WindowPosition(Alignment.Center),
             size = DpSize(1200.dp, 800.dp)
         )
         LifecycleController(lifecycle, windowState)
-
-        // activate for testnet: isErgoMainNet = false
-        LogUtils.logDebug = true
-
-        Application.texts =
-            DesktopStringProvider(I18NBundle.createBundle(ResourceWrapper("/i18n/strings")))
-
-        val appDirs = AppDirsFactory.getInstance()
-        val dataDir = appDirs.getUserDataDir("ergowallet", null, null)
-
-        Application.database = SqlDelightAppDb(setupDatabase(dataDir))
-        Application.prefs = Preferences.getPrefsFor(dataDir)
-
-        WalletStateSyncManager.getInstance()
-            .loadPreferenceValues(Application.prefs, Application.database)
-
-        MosaikComposeConfig.scrollMinAlpha = 1f
 
         Window(
             onCloseRequest = ::exitApplication,

@@ -23,6 +23,9 @@ class AddReadOnlyWalletComponent(
     override val appBarLabel: String
         get() = Application.texts.getString(STRING_LABEL_READONLY_WALLET)
 
+    override val fullScreen: Boolean
+        get() = true
+
     private val walletAddress = mutableStateOf(TextFieldValue())
     private val walletName = mutableStateOf(
         TextFieldValue(
@@ -39,7 +42,8 @@ class AddReadOnlyWalletComponent(
 
     @Composable
     override fun renderScreenContents() {
-        AddReadOnlyWalletScreen(walletAddress, walletName, errorMessage,
+        AddReadOnlyWalletScreen(
+            walletAddress, walletName, errorMessage,
             onScanAddress = {
                 router.push(ScreenConfig.QrCodeScanner { qrCode ->
                     walletAddress.value = TextFieldValue(uiLogic.getInputFromQrCode(qrCode))
@@ -57,7 +61,8 @@ class AddReadOnlyWalletComponent(
                     if (success)
                         router.pop()
                 }
-            }
+            },
+            onDismiss = router::pop
         )
     }
 }

@@ -6,7 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -14,12 +14,14 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.childAnimation
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.decompose.router.navigate
 import com.arkivanov.decompose.router.router
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.settings.SettingsComponent
 import org.ergoplatform.desktop.transactions.ReceiveToWalletComponent
 import org.ergoplatform.desktop.transactions.SendFundsComponent
+import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.QrScannerComponent
 import org.ergoplatform.desktop.wallet.AddReadOnlyWalletComponent
 import org.ergoplatform.desktop.wallet.WalletListComponent
@@ -89,50 +91,69 @@ class NavHostComponent(
         val navItemState = remember { mutableStateOf(NavItem.WALLETS) }
 
         Column {
-            Children(
-                modifier = Modifier.weight(1f, true),
-                routerState = router.state,
-                animation = childAnimation { child, direction ->
-                    child.instance.animation(direction)
-                }
-            ) { it.instance.render() }
-
-            CompositionLocalProvider(LocalElevationOverlay provides null) {
-                BottomNavigation(backgroundColor = MaterialTheme.colors.primary) {
-                    BottomNavigationItem(
-                        icon = {
-                            Icon(
-                                Icons.Outlined.AccountBalanceWallet,
-                                contentDescription = Application.texts.getString(
-                                    STRING_TITLE_WALLETS
-                                )
-                            )
-                        },
-                        selected = navItemState.value == NavItem.WALLETS,
-                        onClick = {
-                            navItemState.value = NavItem.WALLETS
-                            router.navigate { mutableListOf(ScreenConfig.WalletList) }
-                        },
-                        label = { Text(text = Application.texts.getString(STRING_TITLE_WALLETS)) },
-                    )
-                    BottomNavigationItem(
-                        icon = {
-                            Icon(
-                                Icons.Outlined.Settings,
-                                contentDescription = Application.texts.getString(
-                                    STRING_TITLE_SETTINGS
-                                )
-                            )
-                        },
-                        selected = navItemState.value == NavItem.SETTINGS,
-                        onClick = {
-                            navItemState.value = NavItem.SETTINGS
-                            router.navigate { listOf(ScreenConfig.Settings) }
-                        },
-                        label = { Text(text = Application.texts.getString(STRING_TITLE_SETTINGS)) },
-                    )
-                }
+            val drawChildren = @Composable {
+                Children(
+                    modifier = Modifier.weight(1f, true),
+                    routerState = router.state,
+                    animation = childAnimation { child, direction ->
+                        child.instance.animation(direction)
+                    }
+                ) { it.instance.render() }
             }
+
+            val state = router.state.subscribeAsState()
+            val navClientScreenComponent =
+                state.value.activeChild.instance as? NavClientScreenComponent
+            val showAppBars = navClientScreenComponent?.fullScreen != true
+
+            if (showAppBars) {
+                AppBarView(
+                    navClientScreenComponent?.appBarLabel ?: "",
+                    navClientScreenComponent?.actions ?: {},
+                    router,
+                    bottombar = { BottomBar(navItemState) }
+                ) { drawChildren() }
+            } else {
+                drawChildren()
+            }
+        }
+    }
+
+    @Composable
+    private fun BottomBar(navItemState: MutableState<NavItem>) {
+        BottomNavigation(backgroundColor = MaterialTheme.colors.primary) {
+            BottomNavigationItem(
+                icon = {
+                    Icon(
+                        Icons.Outlined.AccountBalanceWallet,
+                        contentDescription = Application.texts.getString(
+                            STRING_TITLE_WALLETS
+                        )
+                    )
+                },
+                selected = navItemState.value == NavItem.WALLETS,
+                onClick = {
+                    navItemState.value = NavItem.WALLETS
+                    router.navigate { mutableListOf(ScreenConfig.WalletList) }
+                },
+                label = { Text(text = Application.texts.getString(STRING_TITLE_WALLETS)) },
+            )
+            BottomNavigationItem(
+                icon = {
+                    Icon(
+                        Icons.Outlined.Settings,
+                        contentDescription = Application.texts.getString(
+                            STRING_TITLE_SETTINGS
+                        )
+                    )
+                },
+                selected = navItemState.value == NavItem.SETTINGS,
+                onClick = {
+                    navItemState.value = NavItem.SETTINGS
+                    router.navigate { listOf(ScreenConfig.Settings) }
+                },
+                label = { Text(text = Application.texts.getString(STRING_TITLE_SETTINGS)) },
+            )
         }
     }
 

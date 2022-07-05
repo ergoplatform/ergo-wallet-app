@@ -88,12 +88,7 @@ private fun WalletAppBar(
             title = { Text(title) },
             actions = actions,
             navigationIcon = if (router.state.value.backStack.isEmpty()) null else ({
-                IconButton(onClick = router::pop) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = null
-                    )
-                }
+                AppBackButton(onClick = router::pop)
             })
         )
     }
@@ -104,9 +99,10 @@ fun AppBarView(
     title: String,
     actions: @Composable RowScope.() -> Unit,
     router: Router<ScreenConfig, Component>,
+    bottombar: @Composable () -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
-    Scaffold(topBar = { WalletAppBar(title, router, actions = actions) }, content = content)
+    Scaffold(topBar = { WalletAppBar(title, router, actions = actions) }, content = content, bottomBar = bottombar)
 }
 
 @Composable
@@ -165,5 +161,15 @@ fun AppDialog(
                 content()
             }
         }
+    }
+}
+
+@Composable
+fun AppBackButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    IconButton(onClick = onClick, modifier = modifier) {
+        Icon(
+            imageVector = Icons.Default.ArrowBack,
+            contentDescription = null
+        )
     }
 }

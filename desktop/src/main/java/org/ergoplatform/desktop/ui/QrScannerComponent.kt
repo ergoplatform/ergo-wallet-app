@@ -33,6 +33,9 @@ class QrScannerComponent(
     override val appBarLabel: String
         get() = Application.texts.getString(STRING_LABEL_SCAN_QR)
 
+    override val fullScreen: Boolean
+        get() = true
+
     private suspend fun observeWebcam() {
         try {
             // Open a webcam and create the detector
@@ -113,21 +116,25 @@ class QrScannerComponent(
 
     @Composable
     override fun renderScreenContents() {
-        QrScannerScreen(imageState, errorState, ::qrCodeScanned, pasteImage = {
-            val image = getImageFromClipboard()
-            image?.let {
-                val detector = FactoryFiducial.qrcode(null, GrayU8::class.java)
-                // Convert to gray scale and detect QR codes inside
-                detector.process(image.asGrayU8())
+        QrScannerScreen(
+            imageState, errorState, ::qrCodeScanned, pasteImage = {
+                val image = getImageFromClipboard()
+                image?.let {
+                    val detector = FactoryFiducial.qrcode(null, GrayU8::class.java)
+                    // Convert to gray scale and detect QR codes inside
+                    detector.process(image.asGrayU8())
 
-                val detections = detector.detections
+                    val detections = detector.detections
 
-                if (detections.isNotEmpty())
-                    qrCodeScanned(detections.first().message)
-                else
-                    errorState.value = "No QR code found in image. Make sure to copy QR code with a margin."
-            } ?: run { errorState.value = "No image in clipboard" } // TODO i18N
-        })
+                    if (detections.isNotEmpty())
+                        qrCodeScanned(detections.first().message)
+                    else
+                        errorState.value =
+                            "No QR code found in image. Make sure to copy QR code with a margin."
+                } ?: run { errorState.value = "No image in clipboard" } // TODO i18N
+            },
+            dismiss = router::pop
+        )
     }
 
 }

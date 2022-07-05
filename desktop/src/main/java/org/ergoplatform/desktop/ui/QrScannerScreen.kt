@@ -23,6 +23,7 @@ fun QrScannerScreen(
     errorState: MutableState<String>,
     scannedQr: (String) -> Unit,
     pasteImage: () -> Unit,
+    dismiss: () -> Unit,
 ) {
 
     Column(Modifier.fillMaxSize()) {
@@ -41,6 +42,8 @@ fun QrScannerScreen(
                 style = labelStyle(LabelStyle.HEADLINE2),
                 textAlign = TextAlign.Center,
             )
+
+            AppBackButton(onClick = dismiss)
         }
 
         Button(

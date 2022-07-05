@@ -16,10 +16,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
-import org.ergoplatform.uilogic.STRING_INTRO_ADD_READONLY
-import org.ergoplatform.uilogic.STRING_LABEL_WALLET_ADDRESS
-import org.ergoplatform.uilogic.STRING_LABEL_WALLET_NAME
-import org.ergoplatform.uilogic.STRING_MENU_ADD_WALLET
+import org.ergoplatform.uilogic.*
 
 @Composable
 fun AddReadOnlyWalletScreen(
@@ -28,6 +25,7 @@ fun AddReadOnlyWalletScreen(
     errorMsg: MutableState<String?>,
     onScanAddress: () -> Unit,
     onAddClicked: () -> Unit,
+    onDismiss: () -> Unit,
 ) {
 
     Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -79,16 +77,23 @@ fun AddReadOnlyWalletScreen(
                     colors = appTextFieldColors(),
                 )
 
-                Button(
-                    onClick = { onAddClicked() },
-                    modifier = Modifier.padding(top = defaultPadding).align(Alignment.End),
-                    colors = primaryButtonColors()
-                ) {
-                    Text(Application.texts.getString(STRING_MENU_ADD_WALLET))
+                Row(Modifier.align(Alignment.End).padding(top = defaultPadding)) {
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.padding(end = defaultPadding),
+                        colors = secondaryButtonColors()
+                    ) {
+                        Text(Application.texts.getString(STRING_LABEL_CANCEL))
+                    }
+
+                    Button(
+                        onClick = { onAddClicked() },
+                        colors = primaryButtonColors()
+                    ) {
+                        Text(Application.texts.getString(STRING_MENU_ADD_WALLET))
+                    }
                 }
-
             }
-
         }
     }
 
