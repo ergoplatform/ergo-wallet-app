@@ -25,10 +25,7 @@ import org.ergoplatform.desktop.transactions.ReceiveToWalletComponent
 import org.ergoplatform.desktop.transactions.SendFundsComponent
 import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.QrScannerComponent
-import org.ergoplatform.desktop.wallet.AddReadOnlyWalletComponent
-import org.ergoplatform.desktop.wallet.AddWalletChooserComponent
-import org.ergoplatform.desktop.wallet.WalletConfigComponent
-import org.ergoplatform.desktop.wallet.WalletListComponent
+import org.ergoplatform.desktop.wallet.*
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
 
@@ -65,6 +62,9 @@ class NavHostComponent(
 
             is ScreenConfig.AddReadOnlyWallet ->
                 AddReadOnlyWalletComponent(componentContext, this)
+
+            is ScreenConfig.RestoreWallet ->
+                RestoreWalletComponent(componentContext, this)
 
             is ScreenConfig.WalletConfiguration ->
                 WalletConfigComponent(componentContext, this, screenConfig.walletConfig)

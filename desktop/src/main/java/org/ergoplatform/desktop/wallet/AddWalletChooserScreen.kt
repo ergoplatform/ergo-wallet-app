@@ -60,16 +60,14 @@ fun AddWalletChooser(gotoScreen: (ScreenConfig) -> Unit) {
         )
 
         ChooserEntry(
-            { },
+            { gotoScreen(ScreenConfig.RestoreWallet) },
             Application.texts.getString(STRING_LABEL_RESTORE_WALLET),
             Application.texts.getString(STRING_DESC_RESTORE_WALLET),
             Icons.Default.SettingsBackupRestore
         )
 
         ChooserEntry(
-            {
-                gotoScreen(ScreenConfig.AddReadOnlyWallet)
-            },
+            { gotoScreen(ScreenConfig.AddReadOnlyWallet) },
             Application.texts.getString(STRING_LABEL_READONLY_WALLET),
             Application.texts.getString(STRING_DESC_READONLY_WALLET),
             Icons.Default.ZoomIn

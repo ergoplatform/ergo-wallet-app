@@ -8,6 +8,7 @@ sealed class ScreenConfig : Parcelable {
     object Settings : ScreenConfig()
     object AddWalletChooser : ScreenConfig()
     object AddReadOnlyWallet : ScreenConfig()
+    object RestoreWallet : ScreenConfig()
     data class SendFunds(val name: String) : ScreenConfig()
     data class ReceiveToWallet(val walletConfig: WalletConfig) : ScreenConfig()
     data class WalletConfiguration(val walletConfig: WalletConfig) : ScreenConfig()

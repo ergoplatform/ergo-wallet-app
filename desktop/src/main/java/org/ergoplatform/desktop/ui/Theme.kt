@@ -58,6 +58,8 @@ fun secondaryButtonColors() = buttonColors(
 fun appTextFieldColors() = TextFieldDefaults.outlinedTextFieldColors(
     focusedBorderColor = MaterialTheme.colors.onSurface,
     focusedLabelColor = MaterialTheme.colors.onSurface,
+    errorLabelColor = uiErgoColor,
+    errorBorderColor = uiErgoColor,
 )
 
 @Composable

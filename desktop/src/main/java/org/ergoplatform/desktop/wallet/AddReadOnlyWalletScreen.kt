@@ -28,7 +28,7 @@ fun AddReadOnlyWalletScreen(
     onBack: () -> Unit,
 ) {
 
-    Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+    AppScrollingLayout {
         Card(
             Modifier.padding(defaultPadding).align(Alignment.Center)
                 .defaultMinSize(400.dp, 200.dp)
@@ -36,9 +36,15 @@ fun AddReadOnlyWalletScreen(
         ) {
 
             Column(Modifier.padding(defaultPadding)) {
+                Text(
+                    Application.texts.getString(STRING_LABEL_READONLY_WALLET),
+                    style = labelStyle(LabelStyle.HEADLINE2),
+                    color = uiErgoColor
+                )
 
                 Text(
                     Application.texts.getString(STRING_INTRO_ADD_READONLY),
+                    Modifier.padding(top = defaultPadding),
                     style = labelStyle(LabelStyle.BODY1)
                 )
 
