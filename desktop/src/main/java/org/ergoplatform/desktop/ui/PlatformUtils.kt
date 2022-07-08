@@ -1,6 +1,8 @@
 package org.ergoplatform.desktop.ui
 
 import java.awt.Desktop
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 import java.net.URI
 import java.util.*
 
@@ -20,4 +22,10 @@ fun openBrowser(url: String) {
             Runtime.getRuntime().exec("xdg-open $url")
         }
     }
+}
+
+fun String.copyToClipoard() {
+    val selection = StringSelection(this)
+    val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+    clipboard.setContents(selection, selection)
 }

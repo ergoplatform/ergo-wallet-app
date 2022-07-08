@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -110,7 +111,7 @@ class WalletListComponent(
     private val walletStates = mutableStateOf<List<Wallet>>(emptyList())
 
     @Composable
-    override fun renderScreenContents() {
+    override fun renderScreenContents(scaffoldState: ScaffoldState?) {
         val fiatState = WalletStateSyncManager.getInstance().fiatValue.collectAsState()
         val refreshState = WalletStateSyncManager.getInstance().isRefreshing.collectAsState(false)
 
@@ -119,6 +120,7 @@ class WalletListComponent(
             onPushScreen = { router.push(it) },
             onSendClicked = { router.push(ScreenConfig.SendFunds(it)) },
             onReceiveClicked = { router.push(ScreenConfig.ReceiveToWallet(it)) },
+            onSettingsClicked = { router.push(ScreenConfig.WalletConfiguration(it)) },
         )
     }
 }

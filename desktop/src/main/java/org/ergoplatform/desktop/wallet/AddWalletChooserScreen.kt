@@ -1,12 +1,11 @@
 package org.ergoplatform.desktop.wallet
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
-import androidx.compose.material.LocalContentColor
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Eco
@@ -15,7 +14,6 @@ import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.*
@@ -85,11 +83,10 @@ private fun ChooserEntry(onClick: () -> Unit, title: String, desc: String, icon:
     AppCard(Modifier.fillMaxWidth().padding(bottom = defaultPadding)) {
 
         Row(Modifier.clickable { onClick() }.padding(defaultPadding)) {
-            Image(
+            Icon(
                 icon,
                 null,
                 Modifier.size(bigIconSize).align(Alignment.CenterVertically),
-                colorFilter = ColorFilter.tint(LocalContentColor.current)
             )
 
             Column(Modifier.padding(start = defaultPadding)) {

@@ -1,5 +1,6 @@
 package org.ergoplatform.desktop.settings
 
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +34,7 @@ class SettingsComponent(
     private val uiLogic = SettingsUiLogic()
 
     @Composable
-    override fun renderScreenContents() {
+    override fun renderScreenContents(scaffoldState: ScaffoldState?) {
         val currencyButtonTextState = remember {
             mutableStateOf(getCurrencyButtonText())
         }

@@ -1,18 +1,21 @@
 package org.ergoplatform.desktop.wallet
 
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.popWhile
 import com.arkivanov.decompose.router.push
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
+import org.ergoplatform.desktop.ui.AppLockScreen
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
-import org.ergoplatform.uilogic.STRING_LABEL_READONLY_WALLET
 import org.ergoplatform.uilogic.STRING_LABEL_READONLY_WALLET_DEFAULT
 import org.ergoplatform.uilogic.wallet.AddReadOnlyWalletUiLogic
 
@@ -42,7 +45,9 @@ class AddReadOnlyWalletComponent(
     }
 
     @Composable
-    override fun renderScreenContents() {
+    override fun renderScreenContents(scaffoldState: ScaffoldState?) {
+        val locked = remember { mutableStateOf(false) }
+
         AddReadOnlyWalletScreen(
             walletAddress, walletName, errorMessage,
             onScanAddress = {
@@ -51,7 +56,11 @@ class AddReadOnlyWalletComponent(
                 })
             },
             onAddClicked = {
-                componentScope().launch {
+                if (locked.value)
+                    return@AddReadOnlyWalletScreen
+
+                locked.value = true
+                componentScope().launch(Dispatchers.Default) {
                     val success = uiLogic.addWalletToDb(
                         walletAddress.value.text,
                         Application.database.walletDbProvider,
@@ -61,9 +70,12 @@ class AddReadOnlyWalletComponent(
 
                     if (success)
                         router.popWhile { !(it is ScreenConfig.WalletList) }
+
+                    locked.value = false
                 }
             },
             onBack = router::pop
         )
+        AppLockScreen(locked.value)
     }
 }

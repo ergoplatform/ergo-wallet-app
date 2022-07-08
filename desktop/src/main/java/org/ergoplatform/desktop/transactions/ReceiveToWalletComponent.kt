@@ -1,5 +1,6 @@
 package org.ergoplatform.desktop.transactions
 
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import com.arkivanov.decompose.ComponentContext
 import kotlinx.coroutines.runBlocking
@@ -28,7 +29,7 @@ class ReceiveToWalletComponent(
     }
 
     @Composable
-    override fun renderScreenContents() {
-        ReceiveToWalletScreen(walletConfig, uiLogic.address!!)
+    override fun renderScreenContents(scaffoldState: ScaffoldState?) {
+        ReceiveToWalletScreen(walletConfig, uiLogic.address!!, scaffoldState)
     }
 }

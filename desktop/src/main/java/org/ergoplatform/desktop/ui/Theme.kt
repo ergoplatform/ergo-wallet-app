@@ -1,11 +1,8 @@
 package org.ergoplatform.desktop.ui
 
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.VerticalScrollbar
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults.buttonColors
@@ -105,9 +102,15 @@ fun AppBarView(
     actions: @Composable RowScope.() -> Unit,
     router: Router<ScreenConfig, Component>,
     bottombar: @Composable () -> Unit,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable (PaddingValues, ScaffoldState) -> Unit
 ) {
-    Scaffold(topBar = { WalletAppBar(title, router, actions = actions) }, content = content, bottomBar = bottombar)
+    val scaffoldState = rememberScaffoldState()
+    Scaffold(
+        topBar = { WalletAppBar(title, router, actions = actions) },
+        scaffoldState = scaffoldState,
+        content = { paddingValues -> content(paddingValues, scaffoldState) },
+        bottomBar = bottombar
+    )
 }
 
 @Composable
@@ -180,10 +183,37 @@ fun AppBackButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun AppScrollingLayout(content: @Composable BoxScope.() -> Unit) {
+    Box {
+        val scrollState = rememberScrollState()
+        Box(Modifier.fillMaxSize().verticalScroll(scrollState)) {
+            content()
+        }
+
+        AppScrollbar(scrollState)
+    }
+}
+
+@Composable
 fun BoxScope.AppScrollbar(scrollState: ScrollState) {
     VerticalScrollbar(
         modifier = Modifier.align(Alignment.CenterEnd)
             .fillMaxHeight(),
         adapter = rememberScrollbarAdapter(scrollState)
     )
+}
+
+@Composable
+fun AppLockScreen(locked: Boolean) {
+    if (locked)
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.1f))
+                .noRippleClickable {
+                    // needed to grab user interaction
+                }) {
+            CircularProgressIndicator(
+                Modifier.size(48.dp).align(Alignment.Center),
+                color = uiErgoColor
+            )
+        }
 }

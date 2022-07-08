@@ -80,7 +80,7 @@ fun main(args: Array<String>) {
             title = Application.texts.getString(STRING_APP_NAME)
         ) {
             DecomposeDesktopExampleTheme {
-                root.render()
+                root.render(null)
             }
         }
     }

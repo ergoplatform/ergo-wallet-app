@@ -1,5 +1,6 @@
 package org.ergoplatform.desktop.wallet
 
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
@@ -19,7 +20,7 @@ class AddWalletChooserComponent(
         get() = true
 
     @Composable
-    override fun renderScreenContents() {
+    override fun renderScreenContents(scaffoldState: ScaffoldState?) {
         AddWalletChooserScreen(
             { config ->
                 router.push(config)

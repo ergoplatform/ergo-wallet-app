@@ -1,5 +1,6 @@
 package org.ergoplatform.desktop.transactions
 
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
@@ -62,7 +63,7 @@ class SendFundsComponent(
         get() = Application.texts.getString(STRING_BUTTON_SEND)
 
     @Composable
-    override fun renderScreenContents() {
+    override fun renderScreenContents(scaffoldState: ScaffoldState?) {
         SendFundsScreen(
             greeting = "$greeting, $name",
             onGoBackClicked = { navHost.router.pop() }

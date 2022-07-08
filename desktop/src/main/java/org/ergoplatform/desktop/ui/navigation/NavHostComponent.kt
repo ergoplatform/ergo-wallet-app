@@ -27,6 +27,7 @@ import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.QrScannerComponent
 import org.ergoplatform.desktop.wallet.AddReadOnlyWalletComponent
 import org.ergoplatform.desktop.wallet.AddWalletChooserComponent
+import org.ergoplatform.desktop.wallet.WalletConfigComponent
 import org.ergoplatform.desktop.wallet.WalletListComponent
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
@@ -65,6 +66,9 @@ class NavHostComponent(
             is ScreenConfig.AddReadOnlyWallet ->
                 AddReadOnlyWalletComponent(componentContext, this)
 
+            is ScreenConfig.WalletConfiguration ->
+                WalletConfigComponent(componentContext, this, screenConfig.walletConfig)
+
             is ScreenConfig.SendFunds -> SendFundsComponent(
                 componentContext, this,
                 screenConfig.name
@@ -92,18 +96,18 @@ class NavHostComponent(
      */
     @OptIn(ExperimentalDecomposeApi::class)
     @Composable
-    override fun render() {
+    override fun render(scaffoldState: ScaffoldState?) {
         val navItemState = remember { mutableStateOf(NavItem.WALLETS) }
 
         Column {
-            val drawChildren = @Composable {
+            val drawChildren: @Composable (ScaffoldState?) -> Unit = { scaffoldState ->
                 Children(
                     modifier = Modifier.weight(1f, true),
                     routerState = router.state,
                     animation = childAnimation { child, direction ->
                         child.instance.animation(direction)
                     }
-                ) { it.instance.render() }
+                ) { it.instance.render(scaffoldState) }
             }
 
             val state = router.state.subscribeAsState()
@@ -117,13 +121,13 @@ class NavHostComponent(
                     navClientScreenComponent?.actions ?: {},
                     router,
                     bottombar = { BottomBar(navItemState) }
-                ) { innerPadding ->
+                ) { innerPadding, scaffoldState ->
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        drawChildren()
+                        drawChildren(scaffoldState)
                     }
                 }
             } else {
-                drawChildren()
+                drawChildren(null)
             }
         }
     }

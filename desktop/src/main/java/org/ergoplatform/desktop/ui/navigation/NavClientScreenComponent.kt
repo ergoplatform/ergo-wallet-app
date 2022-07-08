@@ -1,13 +1,13 @@
 package org.ergoplatform.desktop.ui.navigation
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import com.arkivanov.essenty.lifecycle.LifecycleOwner
 import com.arkivanov.essenty.lifecycle.subscribe
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import org.ergoplatform.desktop.ui.AppBarView
 
 abstract class NavClientScreenComponent(
     private val navHost: NavHostComponent
@@ -35,10 +35,10 @@ abstract class NavClientScreenComponent(
     }
 
     @Composable
-    override fun render() {
-        renderScreenContents()
+    override fun render(scaffoldState: ScaffoldState?) {
+        renderScreenContents(scaffoldState)
     }
 
     @Composable
-    abstract fun renderScreenContents()
+    abstract fun renderScreenContents(scaffoldState: ScaffoldState?)
 }

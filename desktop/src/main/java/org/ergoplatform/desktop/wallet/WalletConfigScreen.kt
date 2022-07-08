@@ -1,15 +1,16 @@
-package org.ergoplatform.desktop.transactions
+package org.ergoplatform.desktop.wallet
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -17,18 +18,17 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
-import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.uilogic.STRING_BUTTON_APPLY
 import org.ergoplatform.uilogic.STRING_LABEL_COPIED
-import org.ergoplatform.wallet.addresses.getAddressLabel
+import org.ergoplatform.uilogic.STRING_LABEL_WALLET_NAME
 
 @Composable
-fun ReceiveToWalletScreen(
+fun WalletConfigScreen(
     walletConfig: WalletConfig,
-    address: WalletAddress,
-    scaffoldState: ScaffoldState?
+    scaffoldState: ScaffoldState?,
+    onChangeName: suspend (String) -> Unit,
 ) {
-    val qrImage = remember(address) { getQrCodeImageBitmap(address.publicAddress) }
     val coroutineScope = rememberCoroutineScope()
 
     AppScrollingLayout {
@@ -37,34 +37,13 @@ fun ReceiveToWalletScreen(
                 .defaultMinSize(400.dp, 200.dp)
                 .widthIn(max = defaultMaxWidth)
         ) {
-
             Column(Modifier.padding(defaultPadding)) {
-
-                Text(
-                    text = walletConfig.displayName ?: "",
-                    color = uiErgoColor,
-                    style = labelStyle(LabelStyle.HEADLINE2)
-                )
-
-                Text(
-                    text = address.getAddressLabel(Application.texts),
-                    color = uiErgoColor,
-                    style = labelStyle(LabelStyle.BODY1BOLD)
-                )
-
-                Image(
-                    qrImage,
-                    null,
-                    Modifier.size(400.dp).padding(defaultPadding)
-                        .align(Alignment.CenterHorizontally)
-                )
-
                 Row {
                     Text(
-                        text = address.publicAddress,
+                        walletConfig.firstAddress!!,
                         style = labelStyle(LabelStyle.HEADLINE2),
-                        textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
                     )
 
                     IconButton(
@@ -80,6 +59,33 @@ fun ReceiveToWalletScreen(
                     ) {
                         Icon(Icons.Default.ContentCopy, null)
                     }
+                }
+
+                val nameTextSate =
+                    remember { mutableStateOf(TextFieldValue(walletConfig.displayName ?: "")) }
+
+                OutlinedTextField(
+                    nameTextSate.value,
+                    { textFieldValue ->
+                        nameTextSate.value = textFieldValue
+                    },
+                    Modifier.padding(top = defaultPadding * 1.5f).fillMaxWidth(),
+                    maxLines = 1,
+                    singleLine = true,
+                    label = { Text(Application.texts.getString(STRING_LABEL_WALLET_NAME)) },
+                    colors = appTextFieldColors(),
+                )
+
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            onChangeName(nameTextSate.value.text)
+                        }
+                    },
+                    colors = primaryButtonColors(),
+                    modifier = Modifier.align(Alignment.End),
+                ) {
+                    Text(Application.texts.getString(STRING_BUTTON_APPLY))
                 }
             }
         }

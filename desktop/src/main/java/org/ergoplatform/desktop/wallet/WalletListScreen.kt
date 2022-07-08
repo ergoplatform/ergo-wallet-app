@@ -26,6 +26,7 @@ fun WalletListScreen(
     onSendClicked: (String) -> Unit,
     onReceiveClicked: (WalletConfig) -> Unit,
     onPushScreen: (ScreenConfig) -> Unit,
+    onSettingsClicked: (WalletConfig) -> Unit,
 ) {
 
     if (isRefreshing) {
@@ -42,7 +43,13 @@ fun WalletListScreen(
         ) {
             items(walletList.size) { index ->
 
-                WalletCard(walletList[index], fiatValue, onSendClicked, onReceiveClicked)
+                WalletCard(
+                    walletList[index],
+                    fiatValue,
+                    onSendClicked,
+                    onReceiveClicked,
+                    onSettingsClicked
+                )
 
             }
         }

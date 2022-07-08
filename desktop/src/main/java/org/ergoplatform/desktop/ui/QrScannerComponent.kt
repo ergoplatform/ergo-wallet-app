@@ -1,5 +1,6 @@
 package org.ergoplatform.desktop.ui
 
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
@@ -115,7 +116,7 @@ class QrScannerComponent(
     }
 
     @Composable
-    override fun renderScreenContents() {
+    override fun renderScreenContents(scaffoldState: ScaffoldState?) {
         QrScannerScreen(
             imageState, errorState, ::qrCodeScanned, pasteImage = {
                 val image = getImageFromClipboard()
