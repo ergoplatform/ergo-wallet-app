@@ -24,10 +24,11 @@ import com.arkivanov.decompose.router.Router
 import com.arkivanov.decompose.router.pop
 import org.ergoplatform.desktop.ui.navigation.Component
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
+import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import java.awt.event.KeyEvent
 
-val uiErgoColor = MosaikStyleConfig.primaryLabelColor
+val uiErgoColor get() = if (isErgoMainNet) MosaikStyleConfig.primaryLabelColor else Color(0xff4284FF)
 val secondary = Color(24, 25, 29)
 val defaultPadding = 16.dp
 val defaultMaxWidth = 600.dp

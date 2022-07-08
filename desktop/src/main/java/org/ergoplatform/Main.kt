@@ -31,11 +31,13 @@ import java.io.File
 
 
 @OptIn(ExperimentalDecomposeApi::class)
-fun main() {
+fun main(args: Array<String>) {
     val lifecycle = LifecycleRegistry()
     val root = NavHostComponent(DefaultComponentContext(lifecycle = lifecycle))
 
-    // activate for testnet: isErgoMainNet = false
+    if (args.any { it.equals("--testnet", true) }) {
+        isErgoMainNet = false
+    }
     LogUtils.logDebug = true
 
     Application.texts =

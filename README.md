@@ -44,6 +44,7 @@ The APK file can be installed on your Android device. If you sideload for the fi
 
 * [Android](android/BUILD.md)
 * [iOS](ios/BUILD.md)
+* [Desktop](desktop/BUILD.md)
 
 ### Translations
 
