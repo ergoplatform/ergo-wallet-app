@@ -1,6 +1,8 @@
 package org.ergoplatform.desktop.ui.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
@@ -24,6 +26,7 @@ import org.ergoplatform.desktop.transactions.SendFundsComponent
 import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.QrScannerComponent
 import org.ergoplatform.desktop.wallet.AddReadOnlyWalletComponent
+import org.ergoplatform.desktop.wallet.AddWalletChooserComponent
 import org.ergoplatform.desktop.wallet.WalletListComponent
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
@@ -57,7 +60,9 @@ class NavHostComponent(
             }
 
             is ScreenConfig.AddWalletChooser ->
-                // TODO chooser, not read only
+                AddWalletChooserComponent(componentContext, this)
+
+            is ScreenConfig.AddReadOnlyWallet ->
                 AddReadOnlyWalletComponent(componentContext, this)
 
             is ScreenConfig.SendFunds -> SendFundsComponent(
@@ -112,7 +117,11 @@ class NavHostComponent(
                     navClientScreenComponent?.actions ?: {},
                     router,
                     bottombar = { BottomBar(navItemState) }
-                ) { drawChildren() }
+                ) { innerPadding ->
+                    Box(modifier = Modifier.padding(innerPadding)) {
+                        drawChildren()
+                    }
+                }
             } else {
                 drawChildren()
             }

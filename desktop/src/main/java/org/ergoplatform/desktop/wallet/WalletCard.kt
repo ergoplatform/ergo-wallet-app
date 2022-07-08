@@ -46,7 +46,7 @@ fun WalletCard(
                 Icon(
                     Icons.Default.AccountBalanceWallet,
                     null,
-                    Modifier.align(Alignment.Top).size(58.dp)
+                    Modifier.align(Alignment.Top).size(bigIconSize)
                 )
 
                 Column(

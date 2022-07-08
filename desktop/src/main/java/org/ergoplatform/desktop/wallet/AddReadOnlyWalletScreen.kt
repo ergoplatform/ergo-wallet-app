@@ -25,7 +25,7 @@ fun AddReadOnlyWalletScreen(
     errorMsg: MutableState<String?>,
     onScanAddress: () -> Unit,
     onAddClicked: () -> Unit,
-    onDismiss: () -> Unit,
+    onBack: () -> Unit,
 ) {
 
     Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -79,11 +79,11 @@ fun AddReadOnlyWalletScreen(
 
                 Row(Modifier.align(Alignment.End).padding(top = defaultPadding)) {
                     Button(
-                        onClick = onDismiss,
+                        onClick = onBack,
                         modifier = Modifier.padding(end = defaultPadding),
                         colors = secondaryButtonColors()
                     ) {
-                        Text(Application.texts.getString(STRING_LABEL_CANCEL))
+                        Text("Back") // TODO i18n
                     }
 
                     Button(

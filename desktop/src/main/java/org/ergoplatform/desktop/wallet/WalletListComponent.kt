@@ -116,6 +116,7 @@ class WalletListComponent(
 
         WalletListScreen(
             walletStates.value, fiatState.value, refreshState.value,
+            onPushScreen = { router.push(it) },
             onSendClicked = { router.push(ScreenConfig.SendFunds(it)) },
             onReceiveClicked = { router.push(ScreenConfig.ReceiveToWallet(it)) },
         )

@@ -1,8 +1,11 @@
 package org.ergoplatform.desktop.ui
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults.buttonColors
@@ -29,14 +32,15 @@ import org.ergoplatform.mosaik.MosaikStyleConfig
 import java.awt.event.KeyEvent
 
 val uiErgoColor get() = if (isErgoMainNet) MosaikStyleConfig.primaryLabelColor else Color(0xff4284FF)
-val secondary = Color(24, 25, 29)
+val secondaryColor = Color(24, 25, 29)
 val defaultPadding = 16.dp
 val defaultMaxWidth = 600.dp
+val bigIconSize = 58.dp
 
 private val DarkColors = darkColors(
     primary = uiErgoColor,
     secondary = uiErgoColor,
-    surface = secondary,
+    surface = secondaryColor,
     onPrimary = Color.White,
     onSecondary = Color.White
 )
@@ -173,4 +177,13 @@ fun AppBackButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
             contentDescription = null
         )
     }
+}
+
+@Composable
+fun BoxScope.AppScrollbar(scrollState: ScrollState) {
+    VerticalScrollbar(
+        modifier = Modifier.align(Alignment.CenterEnd)
+            .fillMaxHeight(),
+        adapter = rememberScrollbarAdapter(scrollState)
+    )
 }

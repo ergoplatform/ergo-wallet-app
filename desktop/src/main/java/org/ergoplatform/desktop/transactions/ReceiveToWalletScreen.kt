@@ -15,10 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
-import org.ergoplatform.desktop.ui.defaultMaxWidth
-import org.ergoplatform.desktop.ui.defaultPadding
-import org.ergoplatform.desktop.ui.getQrCodeImageBitmap
-import org.ergoplatform.desktop.ui.uiErgoColor
+import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
@@ -83,10 +80,6 @@ fun ReceiveToWalletScreen(walletConfig: WalletConfig, address: WalletAddress) {
             }
         }
 
-        VerticalScrollbar(
-            modifier = Modifier.align(Alignment.CenterEnd)
-                .fillMaxHeight(),
-            adapter = rememberScrollbarAdapter(scrollState)
-        )
+        AppScrollbar(scrollState)
     }
 }

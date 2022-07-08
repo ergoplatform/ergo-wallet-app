@@ -69,7 +69,7 @@ fun SettingsScreen(
             val scrollState = rememberScrollState()
 
             Column(
-                Modifier.fillMaxSize().padding(defaultPadding).verticalScroll(scrollState)
+                Modifier.fillMaxSize().verticalScroll(scrollState).padding(defaultPadding)
             ) {
 
                 // Fiat currency
@@ -121,11 +121,7 @@ fun SettingsScreen(
                 }
 
             }
-            VerticalScrollbar(
-                modifier = Modifier.align(Alignment.CenterEnd)
-                    .fillMaxHeight(),
-                adapter = rememberScrollbarAdapter(scrollState)
-            )
+            AppScrollbar(scrollState)
         }
     }
 }

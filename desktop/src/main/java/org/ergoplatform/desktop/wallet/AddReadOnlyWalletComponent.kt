@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
+import com.arkivanov.decompose.router.popWhile
 import com.arkivanov.decompose.router.push
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
@@ -21,7 +22,7 @@ class AddReadOnlyWalletComponent(
 ) : NavClientScreenComponent(navHost), ComponentContext by componentContext {
 
     override val appBarLabel: String
-        get() = Application.texts.getString(STRING_LABEL_READONLY_WALLET)
+        get() = "" // no app bar shown
 
     override val fullScreen: Boolean
         get() = true
@@ -59,10 +60,10 @@ class AddReadOnlyWalletComponent(
                     )
 
                     if (success)
-                        router.pop()
+                        router.popWhile { !(it is ScreenConfig.WalletList) }
                 }
             },
-            onDismiss = router::pop
+            onBack = router::pop
         )
     }
 }
