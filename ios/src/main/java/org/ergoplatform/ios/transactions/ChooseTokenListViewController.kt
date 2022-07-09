@@ -123,7 +123,9 @@ class ChooseTokenListViewController(
         }
 
         fun bind(walletToken: WalletToken, texts: I18NBundle, tokenInformation: TokenInformation?) {
-            val viewLogic = object : TokenEntryViewUiLogic(walletToken) {
+            val viewLogic = object : TokenEntryViewUiLogic(
+                walletToken, noIdWhenPriceAvail = false
+            ) {
                 override val texts: StringProvider
                     get() = IosStringProvider(texts)
 

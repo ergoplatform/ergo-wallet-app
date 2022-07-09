@@ -293,7 +293,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     }
 
     private fun getActualMessageToSend(): String? {
-        return if (message.isBlank()) null else message.take(maxMessageLength)
+        return null // TODO bring back for node 5.0 return if (message.isBlank()) null else message.take(maxMessageLength)
     }
 
     fun checkCanMakePayment(preferences: PreferencesProvider): CheckCanPayResponse {

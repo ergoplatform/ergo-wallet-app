@@ -55,7 +55,9 @@ class WalletDetailsTokenEntryView(
         return this
     }
 
-    private val displayLogic = object : TokenEntryViewUiLogic(walletToken) {
+    private val displayLogic = object : TokenEntryViewUiLogic(
+        walletToken, noIdWhenPriceAvail = true
+    ) {
         override val texts: StringProvider
             get() = IosStringProvider(this@WalletDetailsTokenEntryView.texts)
 

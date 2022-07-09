@@ -9,10 +9,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import org.ergoplatform.android.App
-import org.ergoplatform.android.BuildConfig
-import org.ergoplatform.android.Preferences
-import org.ergoplatform.android.R
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSettingsBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.enableLinks
@@ -81,12 +78,27 @@ class SettingsFragment : Fragment() {
             preferences.downloadNftContent = !preferences.downloadNftContent
             setButtonDownloadContentText()
         }
+
+        setButtonMosaikEnabledText()
+        binding.buttonMosaikEnabled.setOnClickListener {
+            val preferences = Preferences(requireContext())
+            preferences.mosaikEnabled = !preferences.mosaikEnabled
+            setButtonMosaikEnabledText()
+            (requireActivity() as? MainActivity)?.setMosaikButtonVisibility()
+        }
     }
 
     private fun setButtonDownloadContentText() {
         binding.buttonDownloadContent.setText(
             if (Preferences(requireContext()).downloadNftContent) R.string.button_download_content_off
             else R.string.button_download_content_on
+        )
+    }
+
+    private fun setButtonMosaikEnabledText() {
+        binding.buttonMosaikEnabled.setText(
+            if (Preferences(requireContext()).mosaikEnabled) R.string.button_mosaik_enabled
+            else R.string.button_mosaik_disabled
         )
     }
 
