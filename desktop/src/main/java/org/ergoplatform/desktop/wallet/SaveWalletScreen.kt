@@ -52,7 +52,7 @@ fun SaveWalletScreen(
                         null,
                         colorFilter = ColorFilter.tint(MosaikStyleConfig.secondaryButtonTextColor),
                         modifier = Modifier.height(90.dp).align(Alignment.CenterVertically)
-                            .padding(end = defaultPadding / 2)
+                            .padding(end = defaultPadding)
                     )
 
                     Text(
@@ -79,7 +79,7 @@ fun SaveWalletScreen(
                         )
                     } else
                         Application.texts.getString(STRING_INTRO_SAVE_WALLET2),
-                    Modifier.padding(top = defaultPadding / 2, bottom = defaultPadding * 1.5f),
+                    Modifier.padding(top = defaultPadding / 2, bottom = defaultPadding * 1.5f).fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     style = labelStyle(LabelStyle.BODY1),
                 )
