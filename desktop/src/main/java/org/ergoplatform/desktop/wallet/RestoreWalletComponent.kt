@@ -6,9 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
+import com.arkivanov.decompose.router.push
 import org.ergoplatform.Application
+import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.uilogic.wallet.RestoreWalletUiLogic
 
 class RestoreWalletComponent(
@@ -47,7 +50,7 @@ class RestoreWalletComponent(
         }
 
         override fun navigateToSaveWalletDialog(mnemonic: String) {
-            // TODO
+            router.push(ScreenConfig.SaveWallet(SecretString.create(mnemonic), true))
         }
 
         override fun hideForcedSoftKeyboard() {

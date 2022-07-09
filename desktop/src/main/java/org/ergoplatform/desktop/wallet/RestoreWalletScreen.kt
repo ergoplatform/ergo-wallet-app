@@ -29,7 +29,7 @@ fun RestoreWalletScreen(
     hintText: String,
 ) {
     AppScrollingLayout {
-        Card(
+        AppCard(
             Modifier.padding(defaultPadding).align(Alignment.Center)
                 .defaultMinSize(400.dp, 200.dp)
                 .widthIn(max = defaultMaxWidth)

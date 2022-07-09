@@ -28,7 +28,7 @@ fun SettingsScreen(
     Column {
         Column(Modifier.fillMaxWidth()) {
             Image(
-                painterResource("symbol_bold__1080px__black.svg"),
+                ergoLogo(),
                 null,
                 colorFilter = ColorFilter.tint(MosaikStyleConfig.secondaryButtonTextColor),
                 modifier = Modifier.height(90.dp).align(Alignment.CenterHorizontally)

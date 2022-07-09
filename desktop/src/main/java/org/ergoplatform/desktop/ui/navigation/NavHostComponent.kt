@@ -66,6 +66,14 @@ class NavHostComponent(
             is ScreenConfig.RestoreWallet ->
                 RestoreWalletComponent(componentContext, this)
 
+            is ScreenConfig.SaveWallet ->
+                SaveWalletComponent(
+                    componentContext,
+                    this,
+                    screenConfig.mnemonic,
+                    screenConfig.fromRestore
+                )
+
             is ScreenConfig.WalletConfiguration ->
                 WalletConfigComponent(componentContext, this, screenConfig.walletConfig)
 

@@ -28,7 +28,7 @@ import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import java.awt.event.KeyEvent
 
-val uiErgoColor get() = if (isErgoMainNet) MosaikStyleConfig.primaryLabelColor else Color(0xff4284FF)
+val uiErgoColor get() = if (isErgoMainNet) Color(0xffff3b30) else Color(0xff4284FF)
 val secondaryColor = Color(24, 25, 29)
 val defaultPadding = 16.dp
 val defaultMaxWidth = 600.dp

@@ -1,6 +1,7 @@
 package org.ergoplatform.desktop.ui.navigation
 
 import com.arkivanov.essenty.parcelable.Parcelable
+import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.persistance.WalletConfig
 
 sealed class ScreenConfig : Parcelable {
@@ -9,6 +10,7 @@ sealed class ScreenConfig : Parcelable {
     object AddWalletChooser : ScreenConfig()
     object AddReadOnlyWallet : ScreenConfig()
     object RestoreWallet : ScreenConfig()
+    data class SaveWallet(val mnemonic: SecretString, val fromRestore: Boolean) : ScreenConfig()
     data class SendFunds(val name: String) : ScreenConfig()
     data class ReceiveToWallet(val walletConfig: WalletConfig) : ScreenConfig()
     data class WalletConfiguration(val walletConfig: WalletConfig) : ScreenConfig()

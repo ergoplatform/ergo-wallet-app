@@ -20,7 +20,9 @@ import org.ergoplatform.desktop.Preferences
 import org.ergoplatform.desktop.ui.DecomposeDesktopExampleTheme
 import org.ergoplatform.desktop.ui.DesktopStringProvider
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.MosaikComposeConfig
+import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.persistance.AppDatabase
 import org.ergoplatform.persistance.DbInitializer
 import org.ergoplatform.persistance.PreferencesProvider
@@ -57,6 +59,7 @@ fun main(args: Array<String>) {
     val windowPos = desktopPrefs.windowPos
 
     MosaikComposeConfig.scrollMinAlpha = 1f
+    MosaikStyleConfig.primaryLabelColor = uiErgoColor
 
     application {
         val windowState = rememberWindowState(
