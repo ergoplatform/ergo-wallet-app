@@ -15,10 +15,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
-import org.ergoplatform.uilogic.STRING_BUTTON_RESTORE
-import org.ergoplatform.uilogic.STRING_INTRO_RESTORE_WALLET
-import org.ergoplatform.uilogic.STRING_LABEL_RESTORE_WALLET
-import org.ergoplatform.uilogic.STRING_LABEL_RESTORE_WALLET_WORD_LIST
+import org.ergoplatform.uilogic.*
 
 @Composable
 fun RestoreWalletScreen(
@@ -77,7 +74,7 @@ fun RestoreWalletScreen(
                         modifier = Modifier.padding(end = defaultPadding),
                         colors = secondaryButtonColors()
                     ) {
-                        Text("Back") // TODO i18n
+                        Text(Application.texts.getString(STRING_BUTTON_BACK))
                     }
 
                     Button(

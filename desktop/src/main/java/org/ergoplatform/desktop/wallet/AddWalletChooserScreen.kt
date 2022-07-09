@@ -41,7 +41,7 @@ fun AddWalletChooserScreen(
                 modifier = Modifier.padding(top = defaultPadding).align(Alignment.End),
                 colors = primaryButtonColors()
             ) {
-                Text("Back") // TODO i18n
+                Text(Application.texts.getString(STRING_BUTTON_BACK))
             }
         }
 

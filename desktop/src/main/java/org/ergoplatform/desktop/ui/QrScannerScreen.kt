@@ -14,8 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import org.ergoplatform.Application
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
+import org.ergoplatform.uilogic.STRING_BUTTON_IMAGE_FROM_CLIPBOARD
+import org.ergoplatform.uilogic.STRING_INPUT_ENTER_OR_PASTE_MANUALLY
 
 @Composable
 fun QrScannerScreen(
@@ -50,7 +53,7 @@ fun QrScannerScreen(
             onClick = pasteImage,
             Modifier.align(Alignment.CenterHorizontally).padding(top = defaultPadding)
         ) {
-            Text("Paste image from clipboard") // TODO i18n
+            Text(Application.texts.getString(STRING_BUTTON_IMAGE_FROM_CLIPBOARD))
         }
 
         val manualTextFieldValue = remember { mutableStateOf(TextFieldValue()) }
@@ -69,7 +72,7 @@ fun QrScannerScreen(
             Modifier.padding(defaultPadding).fillMaxWidth().addOnEnterListener(onClickOrEnter),
             maxLines = 1,
             singleLine = true,
-            label = { Text("or enter/paste manually") }, // TODO i18n
+            label = { Text(Application.texts.getString(STRING_INPUT_ENTER_OR_PASTE_MANUALLY)) },
             trailingIcon = {
                 IconButton(onClick = onClickOrEnter) {
                     Icon(Icons.Default.KeyboardReturn, null)

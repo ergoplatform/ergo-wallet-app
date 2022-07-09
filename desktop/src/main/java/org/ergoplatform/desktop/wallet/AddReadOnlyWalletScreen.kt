@@ -89,7 +89,7 @@ fun AddReadOnlyWalletScreen(
                         modifier = Modifier.padding(end = defaultPadding),
                         colors = secondaryButtonColors()
                     ) {
-                        Text("Back") // TODO i18n
+                        Text(Application.texts.getString(STRING_BUTTON_BACK))
                     }
 
                     Button(
