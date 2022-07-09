@@ -33,6 +33,7 @@
     <string name="label_dismiss">Dismiss</string>
     <string name="label_remove">Remove</string>
     <string name="label_confirm">Confirm</string>
+    <string name="button_back">Back</string>
     <string name="label_erg_amount">%1$s ERG</string>
     <string name="label_time_span_just_now">just now</string>
     <string name="label_time_span_moments_ago">a few moments ago</string>
@@ -235,6 +236,8 @@
         Scan this QR code to proceed.</string>
     <string name="desc_show_signed_multiple">Your transaction was signed and needs to be sent to the network.
         Scan these QR codes to proceed.</string>
+    <string name="button_image_from_clipboard">Paste image from clipboard</string>
+    <string name="input_enter_or_paste_manually">or enter/paste manually</string>
 
     <!-- Ergo Pay Signing -->
     <string name="title_ergo_pay_request">Ergo Pay Request</string>

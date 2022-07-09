@@ -1,10 +1,11 @@
 package org.ergoplatform.uilogic
 
 import org.ergoplatform.ergoauth.isErgoAuthRequest
-import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.isPaymentRequestUrl
+import org.ergoplatform.isValidErgoAddress
 import org.ergoplatform.transactions.getColdSignedTxChunk
 import org.ergoplatform.transactions.isColdSigningRequestChunk
+import org.ergoplatform.transactions.isErgoPaySigningRequest
 
 object MainAppUiLogic {
 
@@ -26,6 +27,9 @@ object MainAppUiLogic {
             presentUserMessage.invoke(stringProvider.getString(STRING_HINT_SIGNING_REQUEST))
         } else if (isErgoAuthRequest(data)) {
             navigateToAuthentication.invoke(data)
+        } else if (fromQrCode && isValidErgoAddress(data)) {
+            // simply an ERG address
+            navigateToChooseWalletDialog.invoke(data)
         } else if (fromQrCode) {
             presentUserMessage.invoke(stringProvider.getString(STRING_ERROR_QR_CODE_CONTENT_UNKNOWN))
         }
