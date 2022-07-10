@@ -7,8 +7,12 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
@@ -25,6 +29,8 @@ fun RestoreWalletScreen(
     mnemonicTextState: MutableState<TextFieldValue>,
     hintText: String,
 ) {
+    val focusRequester = remember { FocusRequester() }
+
     AppScrollingLayout {
         AppCard(
             Modifier.padding(defaultPadding).align(Alignment.Center)
@@ -60,7 +66,8 @@ fun RestoreWalletScreen(
                         if (textChanged)
                             onTextChange()
                     },
-                    Modifier.fillMaxWidth().padding(top = defaultPadding).height(200.dp),
+                    Modifier.fillMaxWidth().padding(top = defaultPadding).height(200.dp)
+                        .focusRequester(focusRequester),
                     colors = appTextFieldColors(),
                     isError = hintText.isNotEmpty(),
                 )
@@ -86,5 +93,9 @@ fun RestoreWalletScreen(
                 }
             }
         }
+    }
+
+    SideEffect {
+        focusRequester.requestFocus()
     }
 }

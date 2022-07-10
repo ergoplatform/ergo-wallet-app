@@ -9,10 +9,13 @@ import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -32,6 +35,7 @@ fun PasswordDialog(
     val passwordFieldState = remember { mutableStateOf(TextFieldValue()) }
     val confirmationFieldState = remember { mutableStateOf(TextFieldValue()) }
     val errorString = remember { mutableStateOf<String?>(null) }
+    val focusRequester = remember { FocusRequester() }
 
     AppDialog({}) {
         Column(Modifier.fillMaxWidth().padding(defaultPadding)) {
@@ -59,7 +63,7 @@ fun PasswordDialog(
                 Modifier.fillMaxWidth().padding(
                     top = defaultPadding,
                     bottom = if (hasError) 0.dp else defaultPadding
-                ),
+                ).focusRequester(focusRequester),
                 visualTransformation = PasswordVisualTransformation(),
                 maxLines = 1,
                 isError = hasError,
@@ -133,5 +137,9 @@ fun PasswordDialog(
                 }
             }
         }
+    }
+
+    SideEffect {
+        focusRequester.requestFocus()
     }
 }
