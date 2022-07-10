@@ -13,29 +13,68 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.URL_FORGOT_PASSWORD_HELP
+import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
+import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
+import java.util.*
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PasswordDialog(
     showConfirmation: Boolean = false,
     onDismissRequest: () -> Unit,
-    onPasswordEntered: (SecretString) -> String?
+    onPasswordEntered: (SecretString?) -> String?
 ) {
     val passwordFieldState = remember { mutableStateOf(TextFieldValue()) }
     val confirmationFieldState = remember { mutableStateOf(TextFieldValue()) }
     val errorString = remember { mutableStateOf<String?>(null) }
     val focusRequester = remember { FocusRequester() }
+
+    val onDone = {
+        val passwordString = passwordFieldState.value.text
+        val password = if (passwordString.isNotEmpty()) SecretString.create(passwordString) else null
+
+        val proceed = if (showConfirmation) {
+            val confirmPassword =
+                SecretString.create(confirmationFieldState.value.text)
+
+            if (password == null || password != confirmPassword) {
+                confirmPassword?.erase()
+                password?.erase()
+                errorString.value =
+                    Application.texts.getString(STRING_ERR_PASSWORD_CONFIRM)
+                false
+            } else {
+                confirmPassword.erase()
+                true
+            }
+        } else true
+
+        if (proceed) {
+            val error = onPasswordEntered(password)
+            password?.erase()
+
+            if (error != null)
+                errorString.value = error
+            else {
+                onDismissRequest()
+            }
+        }
+    }
 
     AppDialog({}) {
         Column(Modifier.fillMaxWidth().padding(defaultPadding)) {
@@ -63,7 +102,12 @@ fun PasswordDialog(
                 Modifier.fillMaxWidth().padding(
                     top = defaultPadding,
                     bottom = if (hasError) 0.dp else defaultPadding
-                ).focusRequester(focusRequester),
+                ).focusRequester(focusRequester).onKeyEvent {
+                    if (!showConfirmation && it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                        onDone()
+                        true
+                    } else false
+                },
                 visualTransformation = PasswordVisualTransformation(),
                 maxLines = 1,
                 isError = hasError,
@@ -105,32 +149,7 @@ fun PasswordDialog(
                     Text(Application.texts.getString(STRING_LABEL_CANCEL))
                 }
                 Button(
-                    onClick = {
-                        val password = SecretString.create(passwordFieldState.value.text)
-
-                        if (showConfirmation) {
-                            val confirmPassword =
-                                SecretString.create(confirmationFieldState.value.text)
-
-                            if (password == null || password != confirmPassword) {
-                                confirmPassword?.erase()
-                                password?.erase()
-                                errorString.value =
-                                    Application.texts.getString(STRING_ERR_PASSWORD_CONFIRM)
-                                return@Button
-                            }
-                            confirmPassword.erase()
-                        }
-
-                        val error = onPasswordEntered(password)
-                        password?.erase()
-
-                        if (error != null)
-                            errorString.value = error
-                        else {
-                            onDismissRequest()
-                        }
-                    },
+                    onClick = onDone,
                     colors = primaryButtonColors(),
                 ) {
                     Text(Application.texts.getString(STRING_BUTTON_DONE))
@@ -142,4 +161,55 @@ fun PasswordDialog(
     SideEffect {
         focusRequester.requestFocus()
     }
+}
+
+/**
+ * Called after password is entered. Password may be wrong, so
+ * @return false to show a warning about a wrong password
+ */
+fun proceedAuthFlowWithPassword(
+    password: SecretString?,
+    walletConfig: WalletConfig,
+    proceedFromAuthFlow: (SigningSecrets) -> Unit
+): String? {
+    password?.let {
+        if (!proceedAuthFlowWithPasswordIntn(password, walletConfig, proceedFromAuthFlow)) {
+            return Application.texts.getString(STRING_ERROR_PASSWORD_WRONG)
+        } else {
+            return null
+        }
+    }
+    return Application.texts.getString(STRING_ERROR_PASSWORD_EMPTY)
+}
+
+private fun proceedAuthFlowWithPasswordIntn(
+    password: SecretString,
+    walletConfig: WalletConfig,
+    proceedFromAuthFlow: (SigningSecrets) -> Unit
+): Boolean {
+    walletConfig.secretStorage?.let {
+        val secrets: SigningSecrets?
+        var decryptData: ByteArray? = null
+        try {
+            decryptData = AesEncryptionManager.decryptData(password, it)
+            secrets = SigningSecrets.fromBytes(decryptData!!)
+        } catch (t: Throwable) {
+            // Password wrong
+            decryptData?.let {
+                Arrays.fill(decryptData, 0)
+            }
+            return false
+        }
+
+        if (secrets == null) {
+            // deserialization error, corrupted db data
+            return false
+        }
+
+        proceedFromAuthFlow(secrets)
+
+        return true
+    }
+
+    return false
 }

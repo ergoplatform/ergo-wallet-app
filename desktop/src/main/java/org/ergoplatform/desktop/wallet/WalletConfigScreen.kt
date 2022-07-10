@@ -19,15 +19,14 @@ import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.WalletConfig
-import org.ergoplatform.uilogic.STRING_BUTTON_APPLY
-import org.ergoplatform.uilogic.STRING_LABEL_COPIED
-import org.ergoplatform.uilogic.STRING_LABEL_WALLET_NAME
+import org.ergoplatform.uilogic.*
 
 @Composable
 fun WalletConfigScreen(
     walletConfig: WalletConfig,
     scaffoldState: ScaffoldState?,
     onChangeName: suspend (String) -> Unit,
+    onShowMnemonic: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -72,7 +71,7 @@ fun WalletConfigScreen(
                     Modifier.padding(top = defaultPadding * 1.5f).fillMaxWidth(),
                     maxLines = 1,
                     singleLine = true,
-                    label = { Text(Application.texts.getString(STRING_LABEL_WALLET_NAME)) },
+                    label = { Text(remember { Application.texts.getString(STRING_LABEL_WALLET_NAME) }) },
                     colors = appTextFieldColors(),
                 )
 
@@ -85,7 +84,22 @@ fun WalletConfigScreen(
                     colors = primaryButtonColors(),
                     modifier = Modifier.align(Alignment.End),
                 ) {
-                    Text(Application.texts.getString(STRING_BUTTON_APPLY))
+                    Text(remember { Application.texts.getString(STRING_BUTTON_APPLY) })
+                }
+
+                Text(
+                    remember { Application.texts.getString(STRING_DESC_DISPLAY_MNEMONIC) },
+                    Modifier.padding(top = defaultPadding * 1.5f)
+                )
+
+
+                Button(
+                    onClick = onShowMnemonic,
+                    colors = secondaryButtonColors(),
+                    enabled = walletConfig.secretStorage != null,
+                    modifier = Modifier.align(Alignment.End).padding(top = defaultPadding / 2),
+                ) {
+                    Text(remember { Application.texts.getString(STRING_BUTTON_DISPLAY_MNEMONIC) })
                 }
             }
         }

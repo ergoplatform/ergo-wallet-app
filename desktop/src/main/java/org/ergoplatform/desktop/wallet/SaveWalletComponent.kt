@@ -65,7 +65,7 @@ class SaveWalletComponent(
         }
     }
 
-    private fun onPasswordEntered(password: SecretString): String? {
+    private fun onPasswordEntered(password: SecretString?): String? {
         return if (uiLogic!!.isPasswordWeak(password)) {
             Application.texts.getString(STRING_ERR_PASSWORD)
         } else {

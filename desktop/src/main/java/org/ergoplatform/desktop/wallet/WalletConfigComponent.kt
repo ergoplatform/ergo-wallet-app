@@ -13,19 +13,21 @@ import com.arkivanov.decompose.router.pop
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.desktop.ui.ConfirmationDialog
+import org.ergoplatform.desktop.ui.PasswordDialog
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.proceedAuthFlowWithPassword
+import org.ergoplatform.desktop.ui.showSensitiveDataCopyDialog
+import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.persistance.WalletConfig
-import org.ergoplatform.uilogic.STRING_BUTTON_DELETE
-import org.ergoplatform.uilogic.STRING_LABEL_CHANGES_SAVED
-import org.ergoplatform.uilogic.STRING_LABEL_CONFIRM_DELETE
-import org.ergoplatform.uilogic.STRING_TITLE_WALLET_DETAILS
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.WalletConfigUiLogic
 
 class WalletConfigComponent(
     private val componentContext: ComponentContext,
-    navHost: NavHostComponent,
+    private val navHost: NavHostComponent,
     walletConfig: WalletConfig,
 ) : NavClientScreenComponent(navHost), ComponentContext by componentContext {
 
@@ -61,8 +63,9 @@ class WalletConfigComponent(
         router.pop()
     }
 
-    val walletConfigState = mutableStateOf(walletConfig)
-    val confirmationDialogState = mutableStateOf(false)
+    private val walletConfigState = mutableStateOf(walletConfig)
+    private val confirmationDialogState = mutableStateOf(false)
+    private val passwordDialog = mutableStateOf(PasswordNeededFor.Nothing)
 
     val uiLogic = object : WalletConfigUiLogic() {
         init {
@@ -86,10 +89,15 @@ class WalletConfigComponent(
                         )
                     )
                 }
-            })
+            },
+            onShowMnemonic = {
+                passwordDialog.value = PasswordNeededFor.DISPLAY_MNEMONIC
+            }
+        )
 
         if (confirmationDialogState.value) {
-            ConfirmationDialog(Application.texts.getString(STRING_BUTTON_DELETE),
+            ConfirmationDialog(
+                Application.texts.getString(STRING_BUTTON_DELETE),
                 Application.texts.getString(STRING_LABEL_CONFIRM_DELETE),
                 onDismissRequest = {
                     confirmationDialogState.value = false
@@ -99,5 +107,41 @@ class WalletConfigComponent(
                 },
             )
         }
+
+        if (passwordDialog.value != PasswordNeededFor.Nothing) {
+            PasswordDialog(
+                onDismissRequest = { passwordDialog.value = PasswordNeededFor.Nothing },
+                onPasswordEntered = {
+                    proceedAuthFlowWithPassword(it, uiLogic.wallet!!, ::proceedFromAuthFlow)
+                }
+            )
+        }
     }
+
+    private fun proceedFromAuthFlow(signingSecrets: SigningSecrets) {
+        when (passwordDialog.value) {
+            PasswordNeededFor.Nothing -> {}
+            PasswordNeededFor.DISPLAY_MNEMONIC -> showMnemonic(signingSecrets)
+            PasswordNeededFor.SHOW_XPUB -> TODO()
+        }
+    }
+
+    private fun showMnemonic(signingSecrets: SigningSecrets) {
+        val mnemonic = signingSecrets.mnemonic.toStringUnsecure()
+        signingSecrets.clearMemory()
+
+        navHost.dialogHandler.showDialog(
+            MosaikDialog(
+                mnemonic,
+                Application.texts.getString(STRING_BUTTON_COPY),
+                Application.texts.getString(STRING_LABEL_DISMISS),
+                {
+                    showSensitiveDataCopyDialog(navHost, mnemonic)
+                },
+                null
+            )
+        )
+    }
+
+    enum class PasswordNeededFor { Nothing, DISPLAY_MNEMONIC, SHOW_XPUB }
 }
