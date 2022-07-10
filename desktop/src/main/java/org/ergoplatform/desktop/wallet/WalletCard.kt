@@ -1,10 +1,8 @@
 package org.ergoplatform.desktop.wallet
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Settings
@@ -40,7 +38,7 @@ fun WalletCard(
     onSettingsClicked: (WalletConfig) -> Unit,
 ) {
     AppCard(
-        modifier = Modifier.padding(defaultPadding).defaultMinSize(400.dp, 200.dp)
+        modifier = Modifier.padding(defaultPadding).defaultMinSize(400.dp)
             .widthIn(max = defaultMaxWidth),
     ) {
         Box {
@@ -152,8 +150,18 @@ fun WalletCard(
                         }
                     }
                 }
+                OutlinedButton(
+                    onClick = { },
+                    Modifier.fillMaxWidth().padding(top = defaultPadding),
+                    border = BorderStroke(
+                        ButtonDefaults.OutlinedBorderSize, MosaikStyleConfig.secondaryButtonColor
+                    ),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MosaikStyleConfig.secondaryButtonColor)
+                ) {
+                    Text(Application.texts.getString(STRING_LABEL_DETAILS))
+                }
 
-                Row(Modifier.padding(top = defaultPadding)) {
+                Row(Modifier) {
                     Button(
                         onClick = { onReceiveClicked(wallet.walletConfig) },
                         modifier = Modifier.weight(1f),

@@ -1,6 +1,7 @@
 package org.ergoplatform
 
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
@@ -59,7 +60,11 @@ fun main(args: Array<String>) {
     val windowPos = desktopPrefs.windowPos
 
     MosaikComposeConfig.scrollMinAlpha = 1f
-    MosaikStyleConfig.primaryLabelColor = uiErgoColor
+    MosaikStyleConfig.apply {
+        primaryLabelColor = uiErgoColor
+        secondaryButtonColor = Color.White.copy(alpha = 0.87f) // 0.87 is LocalContentAlpha.current
+        secondaryButtonTextColor = Color.Black
+    }
 
     application {
         val windowState = rememberWindowState(
