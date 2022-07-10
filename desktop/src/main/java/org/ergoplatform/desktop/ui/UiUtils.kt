@@ -9,6 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.res.painterResource
+import org.ergoplatform.Application
+import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.mosaik.MosaikDialog
+import org.ergoplatform.uilogic.STRING_BUTTON_COPY_SENSITIVE_DATA
+import org.ergoplatform.uilogic.STRING_DESC_COPY_SENSITIVE_DATA
+import org.ergoplatform.uilogic.STRING_LABEL_CANCEL
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun Modifier.addOnEnterListener(onEnter: () -> Unit): Modifier {
@@ -25,6 +31,18 @@ inline fun Modifier.noRippleClickable(crossinline onClick: ()->Unit): Modifier =
         interactionSource = remember { MutableInteractionSource() }) {
         onClick()
     }
+}
+
+fun showSensitiveDataCopyDialog(navHost: NavHostComponent, dataToCopy: String) {
+    navHost.dialogHandler.showDialog(
+        MosaikDialog(
+            Application.texts.getString(STRING_DESC_COPY_SENSITIVE_DATA),
+            Application.texts.getString(STRING_BUTTON_COPY_SENSITIVE_DATA),
+            Application.texts.getString(STRING_LABEL_CANCEL),
+            { dataToCopy.copyToClipoard() },
+            null
+        )
+    )
 }
 
 @Composable

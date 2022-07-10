@@ -64,6 +64,7 @@ fun main(args: Array<String>) {
         primaryLabelColor = uiErgoColor
         secondaryButtonColor = Color.White.copy(alpha = 0.87f) // 0.87 is LocalContentAlpha.current
         secondaryButtonTextColor = Color.Black
+        textButtonTextColor = uiErgoColor
     }
 
     application {

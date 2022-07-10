@@ -53,7 +53,7 @@ fun AddWalletChooserScreen(
 fun AddWalletChooser(gotoScreen: (ScreenConfig) -> Unit) {
     Column {
         ChooserEntry(
-            { },
+            { gotoScreen(ScreenConfig.CreateWallet) },
             Application.texts.getString(STRING_LABEL_CREATE_WALLET),
             Application.texts.getString(STRING_DESC_CREATE_WALLET),
             Icons.Default.Eco

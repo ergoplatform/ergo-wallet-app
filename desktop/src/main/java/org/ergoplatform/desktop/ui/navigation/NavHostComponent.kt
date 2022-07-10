@@ -1,7 +1,6 @@
 package org.ergoplatform.desktop.ui.navigation
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -26,6 +25,8 @@ import org.ergoplatform.desktop.transactions.SendFundsComponent
 import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.QrScannerComponent
 import org.ergoplatform.desktop.wallet.*
+import org.ergoplatform.mosaik.MosaikComposeDialog
+import org.ergoplatform.mosaik.MosaikComposeDialogHandler
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
 
@@ -40,6 +41,8 @@ class NavHostComponent(
         initialConfiguration = ScreenConfig.WalletList,
         childFactory = ::createScreenComponent
     )
+
+    val dialogHandler = MosaikComposeDialogHandler()
 
     /**
      * Factory function to create screen from given ScreenConfig
@@ -62,6 +65,12 @@ class NavHostComponent(
 
             is ScreenConfig.AddReadOnlyWallet ->
                 AddReadOnlyWalletComponent(componentContext, this)
+
+            is ScreenConfig.CreateWallet ->
+                CreateWalletComponent(componentContext, this)
+
+            is ScreenConfig.ConfirmCreateWallet ->
+                ConfirmCreateWalletComponent(componentContext, this, screenConfig.mnemonic)
 
             is ScreenConfig.RestoreWallet ->
                 RestoreWalletComponent(componentContext, this)
@@ -107,10 +116,9 @@ class NavHostComponent(
     override fun render(scaffoldState: ScaffoldState?) {
         val navItemState = remember { mutableStateOf(NavItem.WALLETS) }
 
-        Column {
+        Box {
             val drawChildren: @Composable (ScaffoldState?) -> Unit = { scaffoldState ->
                 Children(
-                    modifier = Modifier.weight(1f, true),
                     routerState = router.state,
                     animation = childAnimation { child, direction ->
                         child.instance.animation(direction)
@@ -137,6 +145,8 @@ class NavHostComponent(
             } else {
                 drawChildren(null)
             }
+
+            MosaikComposeDialog(dialogHandler)
         }
     }
 
