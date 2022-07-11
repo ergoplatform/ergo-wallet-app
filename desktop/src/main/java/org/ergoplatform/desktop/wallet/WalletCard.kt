@@ -33,7 +33,7 @@ import org.ergoplatform.wallet.getTokensForAllAddresses
 fun WalletCard(
     wallet: Wallet,
     fiatValue: Float,
-    onSendClicked: (String) -> Unit,
+    onSendClicked: (WalletConfig) -> Unit,
     onReceiveClicked: (WalletConfig) -> Unit,
     onSettingsClicked: (WalletConfig) -> Unit,
 ) {
@@ -171,7 +171,7 @@ fun WalletCard(
                     }
                     Box(Modifier.size(defaultPadding))
                     Button(
-                        onClick = { onSendClicked(wallet.walletConfig.displayName!!) },
+                        onClick = { onSendClicked(wallet.walletConfig) },
                         modifier = Modifier.weight(1f),
                         colors = primaryButtonColors()
                     ) {

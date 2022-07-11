@@ -88,7 +88,7 @@ class NavHostComponent(
 
             is ScreenConfig.SendFunds -> SendFundsComponent(
                 componentContext, this,
-                screenConfig.name
+                screenConfig.walletConfig
             )
 
             is ScreenConfig.ReceiveToWallet -> ReceiveToWalletComponent(

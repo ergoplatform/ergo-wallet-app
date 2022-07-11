@@ -23,7 +23,7 @@ fun WalletListScreen(
     walletList: List<Wallet>,
     fiatValue: Float,
     isRefreshing: Boolean,
-    onSendClicked: (String) -> Unit,
+    onSendClicked: (WalletConfig) -> Unit,
     onReceiveClicked: (WalletConfig) -> Unit,
     onPushScreen: (ScreenConfig) -> Unit,
     onSettingsClicked: (WalletConfig) -> Unit,

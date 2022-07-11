@@ -2,72 +2,102 @@ package org.ergoplatform.desktop.transactions
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.router.pop
-import com.arkivanov.essenty.lifecycle.Lifecycle
+import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.Application
-import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
+import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
+import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 
 class SendFundsComponent(
     private val componentContext: ComponentContext,
     private val navHost: NavHostComponent,
-    private val name: String,
+    private val waletConfig: WalletConfig,
 ) : NavClientScreenComponent(navHost), ComponentContext by componentContext {
-
-    companion object {
-        private val greetings = listOf(
-            "Bonjour",
-            "Hola",
-            "Olá",
-            "Ciao",
-            "Hi",
-            "Hallo",
-            "Hey"
-        )
-    }
-
-    private val greeting = greetings.random()
-
-    init {
-        lifecycle.subscribe(object : Lifecycle.Callbacks {
-            override fun onCreate() {
-                println("onCreate")
-            }
-
-            override fun onDestroy() {
-                println("onDestroy")
-            }
-
-            override fun onPause() {
-                println("onPause")
-            }
-
-            override fun onResume() {
-                println("onRsume")
-            }
-
-            override fun onStart() {
-                println("onStart")
-            }
-
-            override fun onStop() {
-                println("onStop")
-            }
-
-        })
-    }
 
     override val appBarLabel: String
         get() = Application.texts.getString(STRING_BUTTON_SEND)
 
+    private val walletAddressState = mutableStateOf<WalletAddress?>(null)
+    private val recipientAddress = mutableStateOf(TextFieldValue())
+    private val recipientError = mutableStateOf(false)
+    private val amountToSend = mutableStateOf(TextFieldValue())
+    private val amountError = mutableStateOf(false)
+
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
         SendFundsScreen(
-            greeting = "$greeting, $name",
-            onGoBackClicked = { navHost.router.pop() }
+            waletConfig,
+            walletAddressState.value,
+            recipientAddress,
+            amountToSend,
+            recipientError.value,
+            amountError.value,
+            uiLogic.feeAmount,
+            uiLogic.grossAmount,
+            onChooseToken = {
+
+            },
+            onMaxAmountClicked = {
+                uiLogic.setAmountToSendErg(uiLogic.getMaxPossibleAmountToSend())
+            }
         )
+    }
+
+    val uiLogic = object : SendFundsUiLogic() {
+        override fun notifyTokensChosenChanged() {
+            TODO("Not yet implemented")
+        }
+
+        override fun notifyAmountsChanged() {
+            TODO("Not yet implemented")
+        }
+
+        override fun notifyBalanceChanged() {
+            TODO("Not yet implemented")
+        }
+
+        override fun showErrorMessage(message: String) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onNotifySuggestedFees() {
+            TODO("Not yet implemented")
+        }
+
+        override val coroutineScope: CoroutineScope
+            get() = componentScope()
+
+        override fun notifyWalletStateLoaded() {
+            TODO("Not yet implemented")
+        }
+
+        override fun notifyDerivedAddressChanged() {
+            walletAddressState.value = derivedAddress
+        }
+
+        override fun notifyUiLocked(locked: Boolean) {
+            TODO("Not yet implemented")
+        }
+
+        override fun notifyHasTxId(txId: String) {
+            TODO("Not yet implemented")
+        }
+
+        override fun notifyHasErgoTxResult(txResult: TransactionResult) {
+            TODO("Not yet implemented")
+        }
+
+        override fun notifyHasSigningPromptData(signingPrompt: String) {
+            TODO("Not yet implemented")
+        }
+
     }
 }
 

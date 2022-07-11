@@ -66,6 +66,7 @@ fun main(args: Array<String>) {
         secondaryButtonTextColor = Color.Black
         textButtonTextColor = uiErgoColor
         defaultLabelColor = secondaryButtonColor
+        secondaryLabelColor = Color(0xFFBBBBBB)
     }
 
     application {
