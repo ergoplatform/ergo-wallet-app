@@ -93,7 +93,8 @@ fun WalletConfigScreen(
 
                 Text(
                     remember { Application.texts.getString(STRING_DESC_WALLET_ADDRESSES) },
-                    Modifier.padding(top = defaultPadding * 1.5f)
+                    Modifier.padding(top = defaultPadding * 1.5f),
+                    style = labelStyle(LabelStyle.BODY1)
                 )
                 Button(
                     onClick = onAddAddresses,
@@ -107,7 +108,8 @@ fun WalletConfigScreen(
 
                 Text(
                     remember { Application.texts.getString(STRING_DESC_DISPLAY_XPUBKEY) },
-                    Modifier.padding(top = defaultPadding * 1.5f)
+                    Modifier.padding(top = defaultPadding * 1.5f),
+                    style = labelStyle(LabelStyle.BODY1)
                 )
                 Button(
                     onClick = onShowXpubKey,
@@ -122,7 +124,8 @@ fun WalletConfigScreen(
 
                 Text(
                     remember { Application.texts.getString(STRING_DESC_DISPLAY_MNEMONIC) },
-                    Modifier.padding(top = defaultPadding * 1.5f)
+                    Modifier.padding(top = defaultPadding * 1.5f),
+                    style = labelStyle(LabelStyle.BODY1)
                 )
                 Button(
                     onClick = onShowMnemonic,
