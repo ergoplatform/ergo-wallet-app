@@ -27,6 +27,8 @@ fun WalletConfigScreen(
     scaffoldState: ScaffoldState?,
     onChangeName: suspend (String) -> Unit,
     onShowMnemonic: () -> Unit,
+    onShowXpubKey: () -> Unit,
+    onAddAddresses: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -87,12 +89,41 @@ fun WalletConfigScreen(
                     Text(remember { Application.texts.getString(STRING_BUTTON_APPLY) })
                 }
 
+
+
+                Text(
+                    remember { Application.texts.getString(STRING_DESC_WALLET_ADDRESSES) },
+                    Modifier.padding(top = defaultPadding * 1.5f)
+                )
+                Button(
+                    onClick = onAddAddresses,
+                    colors = secondaryButtonColors(),
+                    modifier = Modifier.align(Alignment.End).padding(top = defaultPadding / 2),
+                ) {
+                    Text(remember { Application.texts.getString(STRING_TITLE_WALLET_ADDRESSES) })
+                }
+
+
+
+                Text(
+                    remember { Application.texts.getString(STRING_DESC_DISPLAY_XPUBKEY) },
+                    Modifier.padding(top = defaultPadding * 1.5f)
+                )
+                Button(
+                    onClick = onShowXpubKey,
+                    colors = secondaryButtonColors(),
+                    enabled = walletConfig.extendedPublicKey != null || walletConfig.secretStorage != null,
+                    modifier = Modifier.align(Alignment.End).padding(top = defaultPadding / 2),
+                ) {
+                    Text(remember { Application.texts.getString(STRING_BUTTON_DISPLAY_XPUBKEY) })
+                }
+
+
+
                 Text(
                     remember { Application.texts.getString(STRING_DESC_DISPLAY_MNEMONIC) },
                     Modifier.padding(top = defaultPadding * 1.5f)
                 )
-
-
                 Button(
                     onClick = onShowMnemonic,
                     colors = secondaryButtonColors(),

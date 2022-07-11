@@ -14,12 +14,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
 import org.ergoplatform.SigningSecrets
-import org.ergoplatform.desktop.ui.ConfirmationDialog
-import org.ergoplatform.desktop.ui.PasswordDialog
+import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
-import org.ergoplatform.desktop.ui.proceedAuthFlowWithPassword
-import org.ergoplatform.desktop.ui.showSensitiveDataCopyDialog
+import org.ergoplatform.getSerializedXpubKeyFromMnemonic
 import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
@@ -66,6 +64,7 @@ class WalletConfigComponent(
     private val walletConfigState = mutableStateOf(walletConfig)
     private val confirmationDialogState = mutableStateOf(false)
     private val passwordDialog = mutableStateOf(PasswordNeededFor.Nothing)
+    private val shareWithQrDialogState = mutableStateOf<String?>(null)
 
     val uiLogic = object : WalletConfigUiLogic() {
         init {
@@ -88,6 +87,16 @@ class WalletConfigComponent(
                             STRING_LABEL_CHANGES_SAVED
                         )
                     )
+                }
+            },
+            onAddAddresses = {
+                // TODO Addresses
+            },
+            onShowXpubKey = {
+                uiLogic.wallet?.secretStorage?.let {
+                    passwordDialog.value = PasswordNeededFor.SHOW_XPUB
+                } ?: uiLogic.wallet?.extendedPublicKey?.let {
+                    displayXpubKey(it)
                 }
             },
             onShowMnemonic = {
@@ -116,14 +125,28 @@ class WalletConfigComponent(
                 }
             )
         }
+
+        shareWithQrDialogState.value?.let { qrMsg ->
+            ShareWithQrDialog(qrMsg, onDismiss = { shareWithQrDialogState.value = null })
+        }
     }
 
     private fun proceedFromAuthFlow(signingSecrets: SigningSecrets) {
         when (passwordDialog.value) {
             PasswordNeededFor.Nothing -> {}
             PasswordNeededFor.DISPLAY_MNEMONIC -> showMnemonic(signingSecrets)
-            PasswordNeededFor.SHOW_XPUB -> TODO()
+            PasswordNeededFor.SHOW_XPUB -> displayXpubKeyFromMnemonic(signingSecrets)
         }
+    }
+
+    private fun displayXpubKeyFromMnemonic(signingSecrets: SigningSecrets) {
+        val xpubkey = getSerializedXpubKeyFromMnemonic(signingSecrets)
+        signingSecrets.clearMemory()
+        displayXpubKey(xpubkey)
+    }
+
+    private fun displayXpubKey(xpubkey: String) {
+        shareWithQrDialogState.value = xpubkey
     }
 
     private fun showMnemonic(signingSecrets: SigningSecrets) {
