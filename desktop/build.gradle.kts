@@ -34,12 +34,13 @@ compose.desktop {
     application {
         mainClass = "org.ergoplatform.MainKt"
         nativeDistributions {
+            modules("java.sql")
             targetFormats(
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi,
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb
             )
-            packageName = "Ergo Wallet App"
+            packageName = "ergowalletapp"
         }
     }
 }
