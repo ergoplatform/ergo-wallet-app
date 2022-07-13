@@ -60,6 +60,7 @@ fun appTextFieldColors() = TextFieldDefaults.outlinedTextFieldColors(
     focusedLabelColor = MaterialTheme.colors.onSurface,
     errorLabelColor = uiErgoColor,
     errorBorderColor = uiErgoColor,
+    errorTrailingIconColor = uiErgoColor,
 )
 
 @Composable

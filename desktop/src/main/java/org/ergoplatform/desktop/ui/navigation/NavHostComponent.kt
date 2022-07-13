@@ -1,7 +1,10 @@
 package org.ergoplatform.desktop.ui.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
@@ -10,7 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.Children
@@ -24,6 +30,7 @@ import org.ergoplatform.desktop.transactions.ReceiveToWalletComponent
 import org.ergoplatform.desktop.transactions.SendFundsComponent
 import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.QrScannerComponent
+import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.desktop.wallet.*
 import org.ergoplatform.mosaik.MosaikComposeDialog
 import org.ergoplatform.mosaik.MosaikComposeDialogHandler
@@ -43,6 +50,8 @@ class NavHostComponent(
     )
 
     val dialogHandler = MosaikComposeDialogHandler()
+
+    val lockScreen = mutableStateOf(false)
 
     /**
      * Factory function to create screen from given ScreenConfig
@@ -147,6 +156,14 @@ class NavHostComponent(
             }
 
             MosaikComposeDialog(dialogHandler)
+
+            if (lockScreen.value) {
+                Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)))
+                CircularProgressIndicator(
+                    Modifier.size(48.dp).align(Alignment.Center),
+                    color = uiErgoColor
+                )
+            }
         }
     }
 

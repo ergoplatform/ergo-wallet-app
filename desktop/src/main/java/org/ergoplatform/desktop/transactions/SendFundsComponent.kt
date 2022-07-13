@@ -14,7 +14,6 @@ import com.arkivanov.decompose.router.push
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
-import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.mosaik.MosaikDialog
@@ -26,12 +25,12 @@ import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 
 class SendFundsComponent(
-    private val componentContext: ComponentContext,
-    private val navHost: NavHostComponent,
+    componentContext: ComponentContext,
+    navHost: NavHostComponent,
     private val walletConfig: WalletConfig,
     private val derivationIdx: Int = -1,
     private val paymentRequest: String? = null,
-) : NavClientScreenComponent(navHost), ComponentContext by componentContext {
+) : SubmitTransactionComponent(componentContext, navHost) {
 
     override val appBarLabel: String
         get() = Application.texts.getString(STRING_BUTTON_SEND)
@@ -63,20 +62,42 @@ class SendFundsComponent(
             recipientAddress,
             amountToSend,
             amountsChangedCount.value,
-            recipientError.value,
-            amountError.value,
+            recipientError,
+            amountError,
             uiLogic,
             onChooseToken = {
 
             },
+            onSendClicked = { checkAndStartPayment() },
         )
+
+        SubmitTransactionOverlays()
     }
 
     private fun onQrCodeScanned(qrCode: String) {
         TODO("Not yet implemented")
     }
 
-    val uiLogic = object : SendFundsUiLogic() {
+    private fun checkAndStartPayment() {
+        val checkResponse = uiLogic.checkCanMakePayment(Application.prefs)
+
+        recipientError.value = checkResponse.receiverError
+        amountError.value = checkResponse.amountError
+        // TODO inputMessage.setHasError(checkResponse.messageError)
+        // TODO focus
+        if (checkResponse.tokenError) {
+            // TODO tokensError.setHiddenAnimated(false)
+        }
+        if (checkResponse.messageError) {
+            // TODO
+        }
+
+        if (checkResponse.canPay) {
+            startPayment()
+        }
+    }
+
+    override val uiLogic = object : SendFundsUiLogic() {
         override fun notifyTokensChosenChanged() {
             // TODO
         }
@@ -114,7 +135,7 @@ class SendFundsComponent(
         }
 
         override fun notifyUiLocked(locked: Boolean) {
-            TODO("Not yet implemented")
+            navHost.lockScreen.value = locked
         }
 
         override fun notifyHasTxId(txId: String) {

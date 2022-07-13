@@ -28,6 +28,7 @@ import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.utils.formatTokenPriceToString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
+import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
 
 @Composable
 fun WalletCard(
@@ -73,11 +74,12 @@ fun WalletCard(
                         )
 
                         val balanceErgoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
+                        val unconfirmed = wallet.getUnconfirmedBalanceForAllAddresses() != 0L
 
                         Text(
                             text = Application.texts.getString(
                                 STRING_LABEL_ERG_AMOUNT, balanceErgoAmount.toStringRoundToDecimals()
-                            ),
+                            ) + (if (unconfirmed) "*" else ""),
                             style = labelStyle(LabelStyle.HEADLINE1)
                         )
 

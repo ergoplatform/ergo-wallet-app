@@ -37,10 +37,11 @@ fun SendFundsScreen(
     recipientAddress: MutableState<TextFieldValue>,
     amountToSend: MutableState<TextFieldValue>,
     amountsChangedCount: Int,
-    recipientError: Boolean,
-    amountError: Boolean,
+    recipientError: MutableState<Boolean>,
+    amountError: MutableState<Boolean>,
     uiLogic: SendFundsUiLogic,
     onChooseToken: () -> Unit,
+    onSendClicked: () -> Unit,
 ) {
     AppScrollingLayout {
         Card(
@@ -111,10 +112,12 @@ fun SendFundsScreen(
                     recipientAddress.value,
                     onValueChange = {
                         recipientAddress.value = it
+                        recipientError.value = false
+                        uiLogic.receiverAddress = it.text
                     },
                     Modifier.fillMaxWidth().padding(top = defaultPadding / 2),
                     singleLine = true,
-                    isError = recipientError,
+                    isError = recipientError.value,
                     label = { Text(Application.texts.getString(STRING_LABEL_RECEIVER_ADDRESS)) },
                     colors = appTextFieldColors(),
                 )
@@ -123,11 +126,12 @@ fun SendFundsScreen(
                     amountToSend.value,
                     onValueChange = {
                         amountToSend.value = it
+                        amountError.value = false
                         uiLogic.inputAmountChanged(it.text)
                     },
                     Modifier.fillMaxWidth().padding(top = defaultPadding),
                     singleLine = true,
-                    isError = amountError,
+                    isError = amountError.value,
                     label = {
                         Text(
                             remember(uiLogic.inputIsFiat) {
@@ -202,7 +206,7 @@ fun SendFundsScreen(
 
                     Box(Modifier.weight(1f)) {
                         Button(
-                            {},
+                            onSendClicked,
                             Modifier.align(Alignment.CenterEnd),
                         ) {
                             Icon(
