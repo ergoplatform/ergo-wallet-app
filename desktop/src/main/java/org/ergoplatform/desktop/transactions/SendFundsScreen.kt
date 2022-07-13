@@ -1,5 +1,7 @@
 package org.ergoplatform.desktop.transactions
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -15,7 +17,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
-import org.ergoplatform.ErgoAmount
+import org.ergoplatform.URL_COLD_WALLET_HELP
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
@@ -23,6 +26,9 @@ import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
+import org.ergoplatform.wallet.addresses.getAddressLabel
+import org.ergoplatform.wallet.getNumOfAddresses
 
 @Composable
 fun SendFundsScreen(
@@ -30,11 +36,10 @@ fun SendFundsScreen(
     walletAddress: WalletAddress?,
     recipientAddress: MutableState<TextFieldValue>,
     amountToSend: MutableState<TextFieldValue>,
+    amountsChangedCount: Int,
     recipientError: Boolean,
     amountError: Boolean,
-    feeAmount: ErgoAmount,
-    grossAmount: ErgoAmount,
-    onMaxAmountClicked: () -> Unit,
+    uiLogic: SendFundsUiLogic,
     onChooseToken: () -> Unit,
 ) {
     AppScrollingLayout {
@@ -56,26 +61,48 @@ fun SendFundsScreen(
                     style = labelStyle(LabelStyle.BODY1),
                 )
 
+                // TODO address TextWithTrailingImage
                 Text(
-                    remember(walletAddress) { "Address name here" },
+                    remember(walletAddress) {
+                        uiLogic.derivedAddress?.getAddressLabel(Application.texts)
+                            ?: Application.texts.getString(
+                                STRING_LABEL_ALL_ADDRESSES,
+                                uiLogic.wallet?.getNumOfAddresses() ?: 0
+                            )
+                    },
                     style = labelStyle(LabelStyle.BODY1BOLD),
                     color = uiErgoColor,
                     maxLines = 1,
                 )
 
                 Text(
-                    remember(walletAddress) {
+                    remember(amountsChangedCount) {
                         Application.texts.getString(
-                            STRING_LABEL_WALLET_BALANCE, "????"
+                            STRING_LABEL_WALLET_BALANCE,
+                            uiLogic.balance.toStringRoundToDecimals()
                         )
                     },
                     style = labelStyle(LabelStyle.BODY1),
                 )
 
-                // TODO read only wallet hint
+                if (walletConfig.secretStorage == null)
+                    Box(Modifier.padding(top = defaultPadding)) {
+                        Card(modifier = Modifier.border(1.dp, uiErgoColor)) {
+                            LinkifyText(
+                                remember {
+                                    Application.texts.getString(STRING_HINT_READ_ONLY)
+                                        .replace("href=\"\"", "href=\"$URL_COLD_WALLET_HELP\"")
+                                },
+                                Modifier.padding(defaultPadding / 2),
+                                labelStyle(LabelStyle.BODY1),
+                                uiErgoColor,
+                                true
+                            )
+                        }
+                    }
 
                 Text(
-                    remember(walletAddress) { Application.texts.getString(STRING_DESC_SEND_FUNDS) },
+                    remember { Application.texts.getString(STRING_DESC_SEND_FUNDS) },
                     Modifier.padding(top = defaultPadding),
                     style = labelStyle(LabelStyle.BODY1),
                 )
@@ -96,47 +123,68 @@ fun SendFundsScreen(
                     amountToSend.value,
                     onValueChange = {
                         amountToSend.value = it
+                        uiLogic.inputAmountChanged(it.text)
                     },
                     Modifier.fillMaxWidth().padding(top = defaultPadding),
                     singleLine = true,
                     isError = amountError,
-                    label = { Text(Application.texts.getString(STRING_LABEL_AMOUNT)) },
+                    label = {
+                        Text(
+                            remember(uiLogic.inputIsFiat) {
+                                if (uiLogic.inputIsFiat) Application.texts.getString(
+                                    STRING_HINT_AMOUNT_CURRENCY,
+                                    WalletStateSyncManager.getInstance().fiatCurrency.uppercase()
+                                ) else Application.texts.getString(STRING_LABEL_AMOUNT)
+                            })
+                    },
                     trailingIcon = {
-                        IconButton(onClick = onMaxAmountClicked) {
+                        IconButton(onClick = {
+                            uiLogic.setAmountToSendErg(uiLogic.getMaxPossibleAmountToSend())
+                            amountToSend.value = TextFieldValue(uiLogic.inputAmountString)
+                        }) {
                             Icon(Icons.Default.ArrowCircleDown, null)
                         }
                     },
                     colors = appTextFieldColors(),
                 )
 
-                Row(Modifier.align(Alignment.End)) {
-                    Text(
-                        remember(amountToSend.value) {
-                            Application.texts.getString(
-                                STRING_LABEL_FIAT_AMOUNT
-                            )
-                        },
-                        style = labelStyle(LabelStyle.BODY1),
-                        color = MosaikStyleConfig.secondaryLabelColor,
-                    )
-                    Icon(
-                        Icons.Default.SyncAlt,
-                        null,
-                        Modifier.padding(start = defaultPadding / 4),
-                        tint = MosaikStyleConfig.secondaryLabelColor
-                    )
-                }
+                val otherCurrency =
+                    remember(amountsChangedCount) { uiLogic.getOtherCurrencyLabel(Application.texts) }
 
+                if (otherCurrency != null)
+                    Row(Modifier.align(Alignment.End).clickable {
+                        val changed = uiLogic.switchInputAmountMode()
+                        if (changed) {
+                            Application.prefs.isSendInputFiatAmount = uiLogic.inputIsFiat
+                            amountToSend.value = TextFieldValue(uiLogic.inputAmountString)
+                            uiLogic.notifyAmountsChanged()
+                        }
+                    }) {
+                        Text(
+                            otherCurrency,
+                            style = labelStyle(LabelStyle.BODY1),
+                            color = MosaikStyleConfig.secondaryLabelColor,
+                        )
+                        Icon(
+                            Icons.Default.SyncAlt,
+                            null,
+                            Modifier.padding(start = defaultPadding / 4),
+                            tint = MosaikStyleConfig.secondaryLabelColor
+                        )
+                    }
+
+                // TODO choose fee amount
                 Text(
-                    remember(feeAmount) { Application.texts.getString(STRING_DESC_FEE, "????") },
+                    remember(amountsChangedCount) { uiLogic.getFeeDescriptionLabel(Application.texts) },
                     Modifier.padding(vertical = defaultPadding / 2),
                     style = labelStyle(LabelStyle.BODY1),
                 )
 
                 Text(
-                    remember(grossAmount) {
+                    remember(amountsChangedCount) {
                         Application.texts.getString(
-                            STRING_LABEL_ERG_AMOUNT, grossAmount.toStringRoundToDecimals()
+                            STRING_LABEL_ERG_AMOUNT,
+                            uiLogic.grossAmount.toStringRoundToDecimals()
                         )
                     },
                     Modifier.padding(vertical = defaultPadding).fillMaxWidth(),

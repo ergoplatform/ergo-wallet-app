@@ -1,70 +1,101 @@
 package org.ergoplatform.desktop.transactions
 
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.push
 import kotlinx.coroutines.CoroutineScope
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.navigation.ScreenConfig
+import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
+import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 
 class SendFundsComponent(
     private val componentContext: ComponentContext,
     private val navHost: NavHostComponent,
-    private val waletConfig: WalletConfig,
+    private val walletConfig: WalletConfig,
+    private val derivationIdx: Int = -1,
+    private val paymentRequest: String? = null,
 ) : NavClientScreenComponent(navHost), ComponentContext by componentContext {
 
     override val appBarLabel: String
         get() = Application.texts.getString(STRING_BUTTON_SEND)
 
+    override val actions: @Composable RowScope.() -> Unit
+        get() = {
+            IconButton({
+                router.push(ScreenConfig.QrCodeScanner { qrCode ->
+                    onQrCodeScanned(qrCode)
+                })
+            }) {
+                Icon(Icons.Default.QrCodeScanner, null)
+            }
+        }
+
     private val walletAddressState = mutableStateOf<WalletAddress?>(null)
     private val recipientAddress = mutableStateOf(TextFieldValue())
     private val recipientError = mutableStateOf(false)
-    private val amountToSend = mutableStateOf(TextFieldValue())
     private val amountError = mutableStateOf(false)
+    private val amountsChangedCount = mutableStateOf(0)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
+        // TODO address chooser
+
         SendFundsScreen(
-            waletConfig,
+            walletConfig,
             walletAddressState.value,
             recipientAddress,
             amountToSend,
+            amountsChangedCount.value,
             recipientError.value,
             amountError.value,
-            uiLogic.feeAmount,
-            uiLogic.grossAmount,
+            uiLogic,
             onChooseToken = {
 
             },
-            onMaxAmountClicked = {
-                uiLogic.setAmountToSendErg(uiLogic.getMaxPossibleAmountToSend())
-            }
         )
+    }
+
+    private fun onQrCodeScanned(qrCode: String) {
+        TODO("Not yet implemented")
     }
 
     val uiLogic = object : SendFundsUiLogic() {
         override fun notifyTokensChosenChanged() {
-            TODO("Not yet implemented")
+            // TODO
         }
 
         override fun notifyAmountsChanged() {
-            TODO("Not yet implemented")
+            amountsChangedCount.value = amountsChangedCount.value + 1
         }
 
         override fun notifyBalanceChanged() {
-            TODO("Not yet implemented")
+            notifyAmountsChanged()
         }
 
         override fun showErrorMessage(message: String) {
-            TODO("Not yet implemented")
+            navHost.dialogHandler.showDialog(
+                MosaikDialog(
+                    message, Application.texts.getString(STRING_ZXING_BUTTON_OK),
+                    null, null, null
+                )
+            )
         }
 
         override fun onNotifySuggestedFees() {
@@ -75,7 +106,7 @@ class SendFundsComponent(
             get() = componentScope()
 
         override fun notifyWalletStateLoaded() {
-            TODO("Not yet implemented")
+            notifyAmountsChanged()
         }
 
         override fun notifyDerivedAddressChanged() {
@@ -98,6 +129,14 @@ class SendFundsComponent(
             TODO("Not yet implemented")
         }
 
+    }.apply {
+        initWallet(
+            Application.database, ApiServiceManager.getOrInit(Application.prefs),
+            walletConfig.id, derivationIdx, paymentRequest
+        )
     }
+
+    private val amountToSend = mutableStateOf(TextFieldValue(uiLogic.inputAmountString))
+
 }
 
