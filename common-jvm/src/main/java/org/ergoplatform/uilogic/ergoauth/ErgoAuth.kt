@@ -12,11 +12,21 @@ private const val uriSchemePrefix = "ergoauth://"
 fun isErgoAuthRequest(qrCode: String) = qrCode.startsWith(uriSchemePrefix, true)
 
 fun getErgoAuthRequest(ergoAuthUrl: String): ErgoAuthRequest {
-    val httpUrl = (if (isLocalOrIpAddress(ergoAuthUrl)) "http://" else "https://") +
-            ergoAuthUrl.substringAfter(uriSchemePrefix)
+    val httpProtocolPrefix = if (isLocalOrIpAddress(ergoAuthUrl)) "http://" else "https://"
+    val httpUrl = httpProtocolPrefix + ergoAuthUrl.substringAfter(uriSchemePrefix)
 
     val jsonResponse = fetchHttpGetStringSync(httpUrl, 30)
-    return parseErgoAuthRequestFromJson(jsonResponse)
+    val requestHost =
+        httpProtocolPrefix + ergoAuthUrl.substringAfter(uriSchemePrefix).substringBefore('/')
+    val ergoAuthRequest = parseErgoAuthRequestFromJson(jsonResponse, requestHost)
+
+    // check if reply to url matches our http url
+
+    if (ergoAuthRequest.replyToUrl?.take(requestHost.length + 1) != requestHost + "/") {
+        throw IllegalStateException("ErgoAuth reply URL not on host $requestHost")
+    }
+
+    return ergoAuthRequest
 }
 
 fun postErgoAuthResponse(replyUrl: String, authResponse: ErgoAuthResponse) {
@@ -29,7 +39,7 @@ private const val JSON_KEY_USERMESSAGE = "userMessage"
 private const val JSON_KEY_MESSAGE_SEVERITY = "messageSeverity"
 private const val JSON_KEY_REPLY_TO = "replyTo"
 
-fun parseErgoAuthRequestFromJson(jsonString: String): ErgoAuthRequest {
+fun parseErgoAuthRequestFromJson(jsonString: String, requestHost: String): ErgoAuthRequest {
     val jsonObject = JsonParser().parse(jsonString).asJsonObject
     val sigmaBoolean = jsonObject.get(JSON_KEY_SIGMABOOLEAN)?.asString?.let {
         SigmaProp.parseFromBytes(Base64Coder.decode(it, false))
@@ -41,7 +51,8 @@ fun parseErgoAuthRequestFromJson(jsonString: String): ErgoAuthRequest {
         jsonObject.get(JSON_KEY_USERMESSAGE)?.asString,
         jsonObject.get(JSON_KEY_MESSAGE_SEVERITY)?.asString?.let { MessageSeverity.valueOf(it) }
             ?: MessageSeverity.NONE,
-        jsonObject.get(JSON_KEY_REPLY_TO)?.asString
+        jsonObject.get(JSON_KEY_REPLY_TO)?.asString,
+        requestHost
     )
 }
 
@@ -50,10 +61,22 @@ data class ErgoAuthRequest(
     val sigmaBoolean: SigmaProp?,
     val userMessage: String?,
     val messageSeverity: MessageSeverity = MessageSeverity.NONE,
-    val replyToUrl: String? = null
+    val replyToUrl: String? = null,
+    val requestHost: String,
 )
 
-private const val JSON_KEY_PROOF= "proof"
+fun getErgoAuthReason(ergoAuthRequest: ErgoAuthRequest): String? {
+    return try {
+        val signingMessage = ergoAuthRequest.signingMessage
+
+        val reason = signingMessage?.substringBefore('\u0000', "")
+        return if (reason.isNullOrEmpty()) null else reason
+    } catch (t: Throwable) {
+        null
+    }
+}
+
+private const val JSON_KEY_PROOF = "proof"
 private const val JSON_KEY_SIGNEDMESSAGE = "signedMessage"
 
 data class ErgoAuthResponse(

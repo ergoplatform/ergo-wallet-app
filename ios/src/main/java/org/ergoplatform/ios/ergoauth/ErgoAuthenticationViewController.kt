@@ -119,14 +119,13 @@ class ErgoAuthenticationViewController(
         }
 
         fun showRequestInfo() {
-            requestFromDappCard.isHidden = uiLogic.ergAuthRequest?.userMessage?.let {
-                messageFromDApp.text = texts.getString(STRING_LABEL_MESSAGE_FROM_DAPP, it)
-                messageIcon.isHidden = uiLogic.ergAuthRequest!!.messageSeverity.getImage()?.let {
-                    messageIcon.image = getIosSystemImage(it, UIImageSymbolScale.Medium)
-                    false
-                } ?: true
+            requestFromDappCard.isHidden = false
+            messageFromDApp.text = uiLogic.getAuthenticationMessage(texts)
+            messageIcon.isHidden = uiLogic.ergAuthRequest!!.messageSeverity.getImage()?.let {
+                messageIcon.image = getIosSystemImage(it, UIImageSymbolScale.Medium)
                 false
             } ?: true
+
             mainRequestContainer.refreshAddressInfo()
         }
     }
