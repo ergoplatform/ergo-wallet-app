@@ -210,7 +210,7 @@ fun BoxScope.AppScrollbar(scrollState: ScrollState) {
 fun AppLockScreen(locked: Boolean) {
     if (locked)
         Box(
-            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.1f))
+            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f))
                 .noRippleClickable {
                     // needed to grab user interaction
                 }) {
