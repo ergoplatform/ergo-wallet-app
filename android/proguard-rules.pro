@@ -47,4 +47,3 @@
 -dontwarn scala.**
 -dontobfuscate
 -dontoptimize
--dontpreverify
