@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowCircleDown
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.SyncAlt
@@ -39,6 +40,8 @@ fun SendFundsScreen(
     amountsChangedCount: Int,
     recipientError: MutableState<Boolean>,
     amountError: MutableState<Boolean>,
+    tokensChosen: List<String>,
+    tokensError: MutableState<Boolean>,
     uiLogic: SendFundsUiLogic,
     onChooseToken: () -> Unit,
     onSendClicked: () -> Unit,
@@ -196,18 +199,48 @@ fun SendFundsScreen(
                     textAlign = TextAlign.Center,
                 )
 
-                // TODO tokens list
-                // TODO token amount error
+                tokensChosen.forEach { ergoId ->
+                    uiLogic.tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }
+                        ?.let { tokenDbEntity ->
+                            SendTokenItem(
+                                tokenDbEntity,
+                                tokensError,
+                                uiLogic,
+                                onRemove = { uiLogic.removeToken(tokenDbEntity.tokenId!!) }
+                            )
+                        }
+                }
+                if (tokensError.value) {
+                    Text(
+                        remember { Application.texts.getString(STRING_ERROR_TOKEN_AMOUNT) },
+                        Modifier.fillMaxWidth().padding(horizontal = defaultPadding / 2),
+                        color = uiErgoColor,
+                        textAlign = TextAlign.Center,
+                    )
+                }
 
-                Row(Modifier.fillMaxWidth()) {
+                Row(Modifier.fillMaxWidth().padding(top = defaultPadding / 2)) {
                     Box(Modifier.weight(1f)) {
-                        // TODO add token button
+                        if ((uiLogic.tokensChosen.size < uiLogic.tokensAvail.size))
+                            Button(
+                                onChooseToken,
+                                Modifier.align(Alignment.CenterStart),
+                                colors = secondaryButtonColors(),
+                            ) {
+                                Icon(
+                                    Icons.Default.Add,
+                                    null,
+                                    Modifier.padding(end = defaultPadding / 2)
+                                )
+                                Text(remember { Application.texts.getString(STRING_LABEL_ADD_TOKEN) })
+                            }
                     }
 
                     Box(Modifier.weight(1f)) {
                         Button(
                             onSendClicked,
                             Modifier.align(Alignment.CenterEnd),
+                            colors = primaryButtonColors(),
                         ) {
                             Icon(
                                 Icons.Default.Send,

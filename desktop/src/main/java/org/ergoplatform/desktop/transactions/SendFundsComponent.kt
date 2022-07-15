@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
@@ -55,6 +56,9 @@ class SendFundsComponent(
     private val amountError = mutableStateOf(false)
     private val amountsChangedCount = mutableStateOf(0)
     private val txIdState = mutableStateOf<String?>(null)
+    private val addTokenDialogState = mutableStateOf(false)
+    private val tokensChosenState = mutableStateOf(emptyList<String>())
+    private val tokensError = mutableStateOf(false)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -71,12 +75,23 @@ class SendFundsComponent(
                 amountsChangedCount.value,
                 recipientError,
                 amountError,
+                tokensChosenState.value,
+                tokensError,
                 uiLogic,
                 onChooseToken = {
-
+                    addTokenDialogState.value = true
                 },
                 onSendClicked = { checkAndStartPayment() },
             )
+
+            if (addTokenDialogState.value) {
+                ChooseTokenListDialog(
+                    remember { uiLogic.getTokensToChooseFrom() },
+                    uiLogic.tokensInfo,
+                    onTokenChosen = { uiLogic.newTokenChosen(it.tokenId!!) },
+                    onDismissRequest = { addTokenDialogState.value = false }
+                )
+            }
 
             SubmitTransactionOverlays()
         }
@@ -105,9 +120,8 @@ class SendFundsComponent(
         amountError.value = checkResponse.amountError
         // TODO purpose message inputMessage.setHasError(checkResponse.messageError)
         // TODO focus
-        if (checkResponse.tokenError) {
-            // TODO tokensError.setHiddenAnimated(false)
-        }
+        tokensError.value = checkResponse.tokenError
+
         if (checkResponse.messageError) {
             // TODO purpose message not implemented
         }
@@ -119,7 +133,11 @@ class SendFundsComponent(
 
     override val uiLogic = object : SendFundsUiLogic() {
         override fun notifyTokensChosenChanged() {
-            // TODO sending tokens not implemented
+            tokensChosenState.value = tokensChosen.keys.toList()
+
+            getPaymentRequestWarnings(Application.texts)?.let {
+                showErrorMessage(it)
+            }
         }
 
         override fun notifyAmountsChanged() {
