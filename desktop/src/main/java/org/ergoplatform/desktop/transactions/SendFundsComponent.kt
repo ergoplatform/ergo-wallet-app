@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.push
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ApiServiceManager
@@ -21,6 +22,7 @@ import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
+import org.ergoplatform.uilogic.STRING_ERROR_SEND_TRANSACTION
 import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 
@@ -51,27 +53,32 @@ class SendFundsComponent(
     private val recipientError = mutableStateOf(false)
     private val amountError = mutableStateOf(false)
     private val amountsChangedCount = mutableStateOf(0)
+    private val txIdState = mutableStateOf<String?>(null)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
         // TODO address chooser
 
-        SendFundsScreen(
-            walletConfig,
-            walletAddressState.value,
-            recipientAddress,
-            amountToSend,
-            amountsChangedCount.value,
-            recipientError,
-            amountError,
-            uiLogic,
-            onChooseToken = {
+        if (txIdState.value != null) {
+            TransactionSubmittedScreen(txIdState.value!!, router::pop)
+        } else {
+            SendFundsScreen(
+                walletConfig,
+                walletAddressState.value,
+                recipientAddress,
+                amountToSend,
+                amountsChangedCount.value,
+                recipientError,
+                amountError,
+                uiLogic,
+                onChooseToken = {
 
-            },
-            onSendClicked = { checkAndStartPayment() },
-        )
+                },
+                onSendClicked = { checkAndStartPayment() },
+            )
 
-        SubmitTransactionOverlays()
+            SubmitTransactionOverlays()
+        }
     }
 
     private fun onQrCodeScanned(qrCode: String) {
@@ -83,13 +90,13 @@ class SendFundsComponent(
 
         recipientError.value = checkResponse.receiverError
         amountError.value = checkResponse.amountError
-        // TODO inputMessage.setHasError(checkResponse.messageError)
+        // TODO purpose message inputMessage.setHasError(checkResponse.messageError)
         // TODO focus
         if (checkResponse.tokenError) {
             // TODO tokensError.setHiddenAnimated(false)
         }
         if (checkResponse.messageError) {
-            // TODO
+            // TODO purpose message not implemented
         }
 
         if (checkResponse.canPay) {
@@ -99,7 +106,7 @@ class SendFundsComponent(
 
     override val uiLogic = object : SendFundsUiLogic() {
         override fun notifyTokensChosenChanged() {
-            // TODO
+            // TODO sending tokens not implemented
         }
 
         override fun notifyAmountsChanged() {
@@ -120,7 +127,7 @@ class SendFundsComponent(
         }
 
         override fun onNotifySuggestedFees() {
-            TODO("Not yet implemented")
+            TODO("Editable fee not implemented")
         }
 
         override val coroutineScope: CoroutineScope
@@ -139,15 +146,19 @@ class SendFundsComponent(
         }
 
         override fun notifyHasTxId(txId: String) {
-            TODO("Not yet implemented")
+            txIdState.value = txId
         }
 
         override fun notifyHasErgoTxResult(txResult: TransactionResult) {
-            TODO("Not yet implemented")
+            if (!txResult.success) {
+                showErrorMessage(Application.texts.getString(STRING_ERROR_SEND_TRANSACTION)
+                        + (txResult.errorMsg?.let { "\n\n$it" } ?: "")
+                )
+            }
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
-            TODO("Not yet implemented")
+            TODO("Cold waller support not implemented")
         }
 
     }.apply {
