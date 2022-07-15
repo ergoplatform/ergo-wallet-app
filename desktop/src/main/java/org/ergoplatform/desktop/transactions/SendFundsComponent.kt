@@ -51,6 +51,7 @@ class SendFundsComponent(
     private val walletAddressState = mutableStateOf<WalletAddress?>(null)
     private val recipientAddress = mutableStateOf(TextFieldValue())
     private val recipientError = mutableStateOf(false)
+    // amountToSend declared below to be able to access uiLogic
     private val amountError = mutableStateOf(false)
     private val amountsChangedCount = mutableStateOf(0)
     private val txIdState = mutableStateOf<String?>(null)
@@ -82,7 +83,19 @@ class SendFundsComponent(
     }
 
     private fun onQrCodeScanned(qrCode: String) {
-        TODO("Not yet implemented")
+        uiLogic.qrCodeScanned(qrCode, Application.texts,
+            navigateToColdWalletSigning = { data, walletId ->
+                // TODO cold wallet
+            },
+            navigateToErgoPaySigning = { ergoPayRequest ->
+                // TODO ErgoPay
+            }, setPaymentRequestDataToUi = { address, amount, message ->
+                recipientAddress.value = TextFieldValue(address)
+                uiLogic.receiverAddress = address
+                amountToSend.value = TextFieldValue(amount?.toStringTrimTrailingZeros() ?: "")
+                uiLogic.inputAmountChanged(amountToSend.value.text)
+                // TODO purpose message
+            })
     }
 
     private fun checkAndStartPayment() {
@@ -158,7 +171,7 @@ class SendFundsComponent(
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
-            TODO("Cold waller support not implemented")
+            TODO("Cold wallet support not implemented")
         }
 
     }.apply {
