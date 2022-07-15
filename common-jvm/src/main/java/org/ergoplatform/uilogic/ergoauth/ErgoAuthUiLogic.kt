@@ -102,7 +102,8 @@ abstract class ErgoAuthUiLogic {
 
                 val prefix = PasswordGenerator.generatePassword(20)
                 val suffix = PasswordGenerator.generatePassword(20)
-                val signedMessage = prefix + ergAuthRequest.signingMessage + ergAuthRequest.requestHost + suffix
+                val signedMessage =
+                    prefix + ergAuthRequest.signingMessage + ergAuthRequest.requestHost + suffix
                 val signature = signMessage(
                     secrets,
                     walletAddresses.map { it.derivationIndex },
@@ -127,9 +128,13 @@ abstract class ErgoAuthUiLogic {
     }
 
     fun getAuthenticationMessage(texts: StringProvider): String {
+        val secConnectionMessage = ergAuthRequest?.sslValidatedBy?.let {
+            texts.getString(STRING_DESC_SECURE_CONN, it)
+        } ?: texts.getString(STRING_DESC_INSECURE_CONN)
+
         return texts.getString(
             STRING_INTRO_AUTH_REQUEST,
-            ergAuthRequest!!.requestHost,
+            ergAuthRequest!!.requestHost + " ($secConnectionMessage)",
             getErgoAuthReason(ergAuthRequest!!) ?: texts.getString(
                 STRING_ERROR_NO_AUTH_REASON
             )

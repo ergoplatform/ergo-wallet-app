@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.SigmaProp
-import org.ergoplatform.transactions.*
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.utils.*
 
 private const val uriSchemePrefix = "ergoauth://"
@@ -15,10 +15,13 @@ fun getErgoAuthRequest(ergoAuthUrl: String): ErgoAuthRequest {
     val httpProtocolPrefix = if (isLocalOrIpAddress(ergoAuthUrl)) "http://" else "https://"
     val httpUrl = httpProtocolPrefix + ergoAuthUrl.substringAfter(uriSchemePrefix)
 
-    val jsonResponse = fetchHttpGetStringSync(httpUrl, 30)
+    val httpsResponse = fetchHttpsGetStringSync(httpUrl, 30)
     val requestHost =
         httpProtocolPrefix + ergoAuthUrl.substringAfter(uriSchemePrefix).substringBefore('/')
-    val ergoAuthRequest = parseErgoAuthRequestFromJson(jsonResponse, requestHost)
+    val ergoAuthRequest = parseErgoAuthRequestFromJson(
+        httpsResponse.first, requestHost,
+        httpsResponse.second?.firstOrNull()?.getIssuerOrg()
+    )
 
     // check if reply to url matches our http url
 
@@ -39,7 +42,11 @@ private const val JSON_KEY_USERMESSAGE = "userMessage"
 private const val JSON_KEY_MESSAGE_SEVERITY = "messageSeverity"
 private const val JSON_KEY_REPLY_TO = "replyTo"
 
-fun parseErgoAuthRequestFromJson(jsonString: String, requestHost: String): ErgoAuthRequest {
+fun parseErgoAuthRequestFromJson(
+    jsonString: String,
+    requestHost: String,
+    sslValidatedBy: String?
+): ErgoAuthRequest {
     val jsonObject = JsonParser().parse(jsonString).asJsonObject
     val sigmaBoolean = jsonObject.get(JSON_KEY_SIGMABOOLEAN)?.asString?.let {
         SigmaProp.parseFromBytes(Base64Coder.decode(it, false))
@@ -52,7 +59,8 @@ fun parseErgoAuthRequestFromJson(jsonString: String, requestHost: String): ErgoA
         jsonObject.get(JSON_KEY_MESSAGE_SEVERITY)?.asString?.let { MessageSeverity.valueOf(it) }
             ?: MessageSeverity.NONE,
         jsonObject.get(JSON_KEY_REPLY_TO)?.asString,
-        requestHost
+        requestHost,
+        sslValidatedBy
     )
 }
 
@@ -63,6 +71,7 @@ data class ErgoAuthRequest(
     val messageSeverity: MessageSeverity = MessageSeverity.NONE,
     val replyToUrl: String? = null,
     val requestHost: String,
+    val sslValidatedBy: String?
 )
 
 fun getErgoAuthReason(ergoAuthRequest: ErgoAuthRequest): String? {

@@ -254,6 +254,8 @@
     <!-- Ergo Auth Signing -->
     <string name="intro_auth_request">dApp on %1$s\nrequests your authentication to\n%2$s.\n\nAuthenticate
         only when you consent to this.</string>
+    <string name="desc_secure_conn">Secure connection verified by %1$s</string>
+    <string name="desc_insecure_conn">Secure connection failed!</string>
     <string name="title_ergo_auth_request">Authentication Request</string>
     <string name="error_no_auth_reason">(no reason provided)</string>
     <string name="button_authenticate">Authenticate</string>
