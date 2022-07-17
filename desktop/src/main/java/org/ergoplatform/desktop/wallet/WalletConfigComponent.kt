@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
+import com.arkivanov.decompose.router.push
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
@@ -17,6 +18,7 @@ import org.ergoplatform.SigningSecrets
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.getSerializedXpubKeyFromMnemonic
 import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.persistance.WalletConfig
@@ -90,7 +92,7 @@ class WalletConfigComponent(
                 }
             },
             onAddAddresses = {
-                // TODO Addresses
+                router.push(ScreenConfig.WalletAddressesList(walletConfigState.value))
             },
             onShowXpubKey = {
                 uiLogic.wallet?.secretStorage?.let {

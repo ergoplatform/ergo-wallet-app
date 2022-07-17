@@ -26,6 +26,7 @@ import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.AppLockScreen
 import org.ergoplatform.desktop.ui.QrScannerComponent
 import org.ergoplatform.desktop.wallet.*
+import org.ergoplatform.desktop.wallet.addresses.WalletAddressesComponent
 import org.ergoplatform.mosaik.MosaikComposeDialog
 import org.ergoplatform.mosaik.MosaikComposeDialogHandler
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
@@ -88,6 +89,9 @@ class NavHostComponent(
 
             is ScreenConfig.WalletConfiguration ->
                 WalletConfigComponent(componentContext, this, screenConfig.walletConfig)
+
+            is ScreenConfig.WalletAddressesList ->
+                WalletAddressesComponent(componentContext, this, screenConfig.walletConfig)
 
             is ScreenConfig.SendFunds -> SendFundsComponent(
                 componentContext, this,

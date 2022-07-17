@@ -16,5 +16,6 @@ sealed class ScreenConfig : Parcelable {
     data class SendFunds(val walletConfig: WalletConfig) : ScreenConfig()
     data class ReceiveToWallet(val walletConfig: WalletConfig) : ScreenConfig()
     data class WalletConfiguration(val walletConfig: WalletConfig) : ScreenConfig()
+    data class WalletAddressesList(val walletConfig: WalletConfig) : ScreenConfig()
     data class QrCodeScanner(val callback: (String) -> Unit) : ScreenConfig()
 }
