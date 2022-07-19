@@ -44,6 +44,7 @@ fun SendFundsScreen(
     tokensChosen: List<String>,
     tokensError: MutableState<Boolean>,
     uiLogic: SendFundsUiLogic,
+    onChooseAddressClicked: () -> Unit,
     onChooseToken: () -> Unit,
     onSendClicked: () -> Unit,
 ) {
@@ -66,8 +67,11 @@ fun SendFundsScreen(
                     style = labelStyle(LabelStyle.BODY1),
                 )
 
-                // TODO address TextWithTrailingImage
-                ChooseAddressButton(walletAddress, uiLogic.wallet, onClick = {})
+                ChooseAddressButton(
+                    walletAddress,
+                    uiLogic.wallet,
+                    onClick = onChooseAddressClicked
+                )
 
                 Text(
                     remember(amountsChangedCount) {

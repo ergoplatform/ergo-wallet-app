@@ -9,6 +9,7 @@ import org.ergoplatform.desktop.ui.PasswordDialog
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.proceedAuthFlowWithPassword
+import org.ergoplatform.desktop.wallet.addresses.ChooseAddressesListDialog
 import org.ergoplatform.uilogic.transactions.SubmitTransactionUiLogic
 
 abstract class SubmitTransactionComponent(
@@ -17,7 +18,8 @@ abstract class SubmitTransactionComponent(
 ) : NavClientScreenComponent(navHost), ComponentContext by componentContext {
     protected abstract val uiLogic: SubmitTransactionUiLogic
 
-    protected val passwordDialog = mutableStateOf(false)
+    private val passwordDialog = mutableStateOf(false)
+    private val chooseAddressDialog = mutableStateOf(false)
 
     @Composable
     protected fun SubmitTransactionOverlays() {
@@ -33,6 +35,21 @@ abstract class SubmitTransactionComponent(
                 }
             )
         }
+        if (chooseAddressDialog.value) {
+            ChooseAddressesListDialog(
+                uiLogic.wallet!!,
+                true,
+                onAddressChosen = { walletAddress ->
+                    chooseAddressDialog.value = false
+                    uiLogic.derivedAddressIdx = walletAddress?.derivationIndex
+                },
+                onDismiss = { chooseAddressDialog.value = false },
+            )
+        }
+    }
+
+    protected fun startChooseAddress() {
+        chooseAddressDialog.value = true
     }
 
     protected fun startPayment() {

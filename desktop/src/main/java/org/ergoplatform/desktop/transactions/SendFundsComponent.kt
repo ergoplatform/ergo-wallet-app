@@ -62,8 +62,6 @@ class SendFundsComponent(
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
-        // TODO address chooser
-
         if (txIdState.value != null) {
             TransactionSubmittedScreen(txIdState.value!!, router::pop)
         } else {
@@ -82,6 +80,7 @@ class SendFundsComponent(
                     addTokenDialogState.value = true
                 },
                 onSendClicked = { checkAndStartPayment() },
+                onChooseAddressClicked = ::startChooseAddress,
             )
 
             if (addTokenDialogState.value) {

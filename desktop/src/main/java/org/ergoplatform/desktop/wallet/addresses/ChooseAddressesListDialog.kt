@@ -54,7 +54,10 @@ fun ChooseAddressesListDialog(
                 if (withAllAddresses && addresses.size > 1) {
                     Divider(color = MosaikStyleConfig.secondaryLabelColor)
 
-                    Column(Modifier.fillMaxWidth().clickable { onAddressChosen(null) }) {
+                    Column(
+                        Modifier.fillMaxWidth().clickable { onAddressChosen(null) }
+                            .padding(defaultPadding)
+                    ) {
                         Text(
                             remember {
                                 Application.texts.getString(

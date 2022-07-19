@@ -29,7 +29,7 @@ fun ChooseAddressButton(
 ) {
     Row(modifier.clickable(onClick = onClick)) {
         Text(
-            remember(walletAddress) {
+            remember(walletAddress, wallet) {
                 walletAddress?.getAddressLabel(Application.texts)
                     ?: Application.texts.getString(
                         STRING_LABEL_ALL_ADDRESSES,

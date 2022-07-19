@@ -1,17 +1,13 @@
 package org.ergoplatform.desktop.wallet.addresses
 
 import androidx.compose.foundation.VerticalScrollbar
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.Button
-import androidx.compose.material.Icon
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +19,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.AppCard
 import org.ergoplatform.desktop.ui.defaultMaxWidth
 import org.ergoplatform.desktop.ui.defaultPadding
+import org.ergoplatform.desktop.ui.secondaryButtonColors
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.Wallet
@@ -30,6 +27,8 @@ import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.uilogic.STRING_BUTTON_ADD_ADDRESS
 import org.ergoplatform.uilogic.STRING_BUTTON_ADD_ADDRESSES
 import org.ergoplatform.uilogic.STRING_DESC_WALLET_ADDRESSES
+import org.ergoplatform.uilogic.STRING_LABEL_DETAILS
+import org.ergoplatform.wallet.addresses.isDerivedAddress
 
 @Composable
 fun WalletAddressesScreen(
@@ -76,16 +75,18 @@ fun WalletAddressCard(
         modifier = Modifier.padding(defaultPadding).defaultMinSize(400.dp)
             .widthIn(max = defaultMaxWidth),
     ) {
-        Box {
+        Column {
             AddressInfoBox(walletAddress, wallet, true, Modifier.fillMaxWidth())
 
-            Icon(
-                Icons.Default.MoreVert,
-                null,
-                Modifier.align(Alignment.TopEnd).padding(top = defaultPadding / 4).clickable {
-                    onOpenDetails(walletAddress)
+            if (walletAddress.isDerivedAddress())
+                Button(
+                    onClick = { onOpenDetails(walletAddress) },
+                    Modifier.padding(horizontal = defaultPadding)
+                        .padding(bottom = defaultPadding).align(Alignment.End),
+                    colors = secondaryButtonColors()
+                ) {
+                    Text(remember { Application.texts.getString(STRING_LABEL_DETAILS) })
                 }
-            )
         }
     }
 
