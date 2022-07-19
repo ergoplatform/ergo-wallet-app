@@ -21,6 +21,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.URL_COLD_WALLET_HELP
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.desktop.ui.*
+import org.ergoplatform.desktop.wallet.addresses.ChooseAddressButton
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
@@ -66,18 +67,7 @@ fun SendFundsScreen(
                 )
 
                 // TODO address TextWithTrailingImage
-                Text(
-                    remember(walletAddress) {
-                        uiLogic.derivedAddress?.getAddressLabel(Application.texts)
-                            ?: Application.texts.getString(
-                                STRING_LABEL_ALL_ADDRESSES,
-                                uiLogic.wallet?.getNumOfAddresses() ?: 0
-                            )
-                    },
-                    style = labelStyle(LabelStyle.BODY1BOLD),
-                    color = uiErgoColor,
-                    maxLines = 1,
-                )
+                ChooseAddressButton(walletAddress, uiLogic.wallet, onClick = {})
 
                 Text(
                     remember(amountsChangedCount) {

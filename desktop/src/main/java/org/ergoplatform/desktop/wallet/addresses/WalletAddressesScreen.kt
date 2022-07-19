@@ -1,13 +1,17 @@
 package org.ergoplatform.desktop.wallet.addresses
 
 import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,22 +23,20 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.AppCard
 import org.ergoplatform.desktop.ui.defaultMaxWidth
 import org.ergoplatform.desktop.ui.defaultPadding
-import org.ergoplatform.desktop.ui.uiErgoColor
-import org.ergoplatform.mosaik.MiddleEllipsisText
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.uilogic.STRING_BUTTON_ADD_ADDRESS
 import org.ergoplatform.uilogic.STRING_BUTTON_ADD_ADDRESSES
 import org.ergoplatform.uilogic.STRING_DESC_WALLET_ADDRESSES
-import org.ergoplatform.wallet.addresses.getAddressLabel
-import org.ergoplatform.wallet.addresses.isDerivedAddress
 
 @Composable
 fun WalletAddressesScreen(
     addressList: List<WalletAddress>,
     wallet: Wallet?,
     onDeriveAddresses: ((Int) -> Unit)?,
+    onOpenDetails: (WalletAddress) -> Unit,
 ) {
     val state = rememberLazyListState()
     Box {
@@ -48,7 +50,8 @@ fun WalletAddressesScreen(
                 if (index < addressList.size)
                     WalletAddressCard(
                         addressList[index],
-                        wallet
+                        wallet,
+                        onOpenDetails,
                     )
                 else
                     AddAddressCard(onDeriveAddresses = onDeriveAddresses)
@@ -67,29 +70,22 @@ fun WalletAddressesScreen(
 fun WalletAddressCard(
     walletAddress: WalletAddress,
     wallet: Wallet?,
+    onOpenDetails: (WalletAddress) -> Unit,
 ) {
     AppCard(
         modifier = Modifier.padding(defaultPadding).defaultMinSize(400.dp)
             .widthIn(max = defaultMaxWidth),
     ) {
-        Row(Modifier.padding(defaultPadding)) {
-            if (walletAddress.isDerivedAddress()) {
-                Text(
-                    walletAddress.derivationIndex.toString(),
-                    Modifier.align(Alignment.CenterVertically).padding(end = defaultPadding),
-                    style = labelStyle(LabelStyle.HEADLINE1),
-                )
-            }
+        Box {
+            AddressInfoBox(walletAddress, wallet, true, Modifier.fillMaxWidth())
 
-            Column(Modifier.weight(1f)) {
-                Text(
-                    walletAddress.getAddressLabel(Application.texts),
-                    maxLines = 1,
-                    style = labelStyle(LabelStyle.BODY1BOLD),
-                    color = uiErgoColor,
-                )
-                MiddleEllipsisText(walletAddress.publicAddress)
-            }
+            Icon(
+                Icons.Default.MoreVert,
+                null,
+                Modifier.align(Alignment.TopEnd).padding(top = defaultPadding / 4).clickable {
+                    onOpenDetails(walletAddress)
+                }
+            )
         }
     }
 
@@ -113,6 +109,7 @@ fun AddAddressCard(
             )
 
             val sliderPosition = remember { mutableStateOf(1f) }
+            val sliderValue = (sliderPosition.value + .5f).toInt()
             Slider(
                 value = sliderPosition.value,
                 onValueChange = { sliderPosition.value = it },
@@ -125,15 +122,18 @@ fun AddAddressCard(
             )
 
             Button(
-                { onDeriveAddresses!!.invoke(sliderPosition.value.toInt()) },
+                { onDeriveAddresses!!.invoke(sliderValue) },
                 Modifier.align(Alignment.CenterHorizontally),
                 enabled = onDeriveAddresses != null,
             ) {
                 Text(
-                    Application.texts.getString(
-                        STRING_BUTTON_ADD_ADDRESSES,
-                        sliderPosition.value.toInt()
-                    )
+                    if (sliderValue > 1)
+                        Application.texts.getString(
+                            STRING_BUTTON_ADD_ADDRESSES,
+                            sliderValue
+                        )
+                    else
+                        Application.texts.getString(STRING_BUTTON_ADD_ADDRESS)
                 )
             }
         }

@@ -51,7 +51,10 @@ class WalletAddressesComponent(
             uiLogic.wallet,
             if (uiLogic.canDeriveAddresses()) { num ->
                 addAddresses(num)
-            } else null
+            } else null,
+            onOpenDetails = {
+                // TODO addresses
+            }
         )
 
 

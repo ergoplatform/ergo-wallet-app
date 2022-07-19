@@ -129,7 +129,9 @@ fun AppCard(modifier: Modifier, content: @Composable () -> Unit) {
 
 @Composable
 fun AppDialog(
-    onDismissRequest: () -> Unit, maxWidth: Dp = defaultMaxWidth,
+    onDismissRequest: () -> Unit,
+    maxWidth: Dp = defaultMaxWidth,
+    verticalPadding: Dp = defaultPadding,
     content: @Composable () -> Unit
 ) {
     Popup(
@@ -161,7 +163,7 @@ fun AppDialog(
             contentAlignment = Alignment.Center
         ) {
             AppCard(
-                modifier = Modifier.padding(defaultPadding)
+                modifier = Modifier.padding(horizontal = defaultPadding, vertical = verticalPadding)
                     .widthIn(min = 400.dp, max = maxWidth)
                     .heightIn(min = 200.dp)
                     .noRippleClickable {

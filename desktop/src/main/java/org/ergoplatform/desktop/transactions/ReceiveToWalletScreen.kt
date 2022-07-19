@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.*
+import org.ergoplatform.desktop.wallet.addresses.ChooseAddressButton
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.WalletAddress
@@ -26,6 +27,7 @@ import org.ergoplatform.wallet.addresses.getAddressLabel
 fun ReceiveToWalletScreen(
     walletConfig: WalletConfig,
     address: WalletAddress,
+    onChooseAddress: () -> Unit,
     scaffoldState: ScaffoldState?
 ) {
     val qrImage = remember(address) { getQrCodeImageBitmap(address.publicAddress) }
@@ -46,11 +48,7 @@ fun ReceiveToWalletScreen(
                     style = labelStyle(LabelStyle.HEADLINE2)
                 )
 
-                Text(
-                    text = address.getAddressLabel(Application.texts),
-                    color = uiErgoColor,
-                    style = labelStyle(LabelStyle.BODY1BOLD)
-                )
+                ChooseAddressButton(address, null, onChooseAddress)
 
                 Image(
                     qrImage,
@@ -69,7 +67,7 @@ fun ReceiveToWalletScreen(
 
                     IconButton(
                         onClick = {
-                            walletConfig.firstAddress?.copyToClipoard()
+                            address.publicAddress.copyToClipoard()
                             coroutineScope.launch {
                                 scaffoldState?.snackbarHostState?.showSnackbar(
                                     Application.texts.getString(STRING_LABEL_COPIED),
