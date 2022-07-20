@@ -18,8 +18,11 @@ Features:
 * Show wallet balance, configurable comparison fiat currency
 * Cold wallet capable ([more information](https://github.com/ergoplatform/ergo-wallet-app/wiki/Cold-wallet))
 * ErgoPay support
+* ErgoAuth support
 
 You need at least Android 7 or iOS 13 to run Ergo Wallet.
+
+On Linux and MacOS, you need Java 11 or 17 to run Ergo Wallet. [More information](desktop/RUN.md)
 
 Visit the [Ergo Discord](https://discord.gg/kj7s7nb) to give feedback.
 

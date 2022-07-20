@@ -3,6 +3,8 @@ name: Create Icons
 on:
   workflow_dispatch:
   push:
+    branches:
+      - '*'
     paths:
       - '**/icon.svg'
 
