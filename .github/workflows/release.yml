@@ -28,21 +28,17 @@ jobs:
         run: mv debug.keystore ~/.android/debug.keystore
       - name: Build Android debug apks
         run: ./gradlew clean android:assembleDebug
-      - name: Release mainnet artifact
-        uses: actions/upload-release-asset@v1
+      - name: Build desktop macos-x64
+        run: ./gradlew desktop:build -Posarch=macos-x64
+      - name: Build desktop windows-x64
+        run: ./gradlew desktop:build -Posarch=windows-x64
+      - name: Build desktop linux-arm64
+        run: ./gradlew desktop:build -Posarch=linux-arm64
+      - name: Build desktop linux-x64
+        run: ./gradlew desktop:build -Posarch=linux-x64
+      - name: Upload release binaries
+        uses: alexellis/upload-assets@0.2.2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: android/build/outputs/apk/ergomainnet/debug/android-ergomainnet-debug.apk
-          asset_name: ergowallet-mainnet-debug.apk
-          asset_content_type: application/zip
-      - name: Release testnet artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: android/build/outputs/apk/ergotestnet/debug/android-ergotestnet-debug.apk
-          asset_name: ergowallet-testnet-debug.apk
-          asset_content_type: application/zip
+          asset_paths: '"desktop/build/libs/ergo-wallet-app*64.jar", ["android/build/outputs/apk/ergotestnet/debug/android-ergotestnet-debug.apk", "android/build/outputs/apk/ergomainnet/debug/android-ergomainnet-debug.apk"]'
