@@ -41,4 +41,41 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '"desktop/build/libs/ergo-wallet-app*64.jar", ["android/build/outputs/apk/ergotestnet/debug/android-ergotestnet-debug.apk", "android/build/outputs/apk/ergomainnet/debug/android-ergomainnet-debug.apk"]'
+          asset_paths: '["desktop/build/libs/ergo-wallet-app*64.jar", "android/build/outputs/apk/ergotestnet/debug/android-ergotestnet-debug.apk", "android/build/outputs/apk/ergomainnet/debug/android-ergomainnet-debug.apk"]'
+      - name: Upload windows artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-jar
+          path: desktop/build/libs/ergo-wallet-app*windows-x64.jar
+          retention-days: 1
+
+  build-windows-installer:
+    name: Build Installer on Windows
+    runs-on: windows-latest
+    needs: [build]
+    steps:
+
+      - id: checkout-code
+        name: Checkout code
+        uses: actions/checkout@v2
+      - id: setup-jdk
+        name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Download windows build
+        uses: actions/download-artifact@v2.0.5
+        with:
+          name: windows-jar
+          path: desktop/build/libs
+      - id: build
+        name: Build distribution
+        run: |
+          jpackage --verbose "@deskop/jpackage.cfg" "@desktop/jpackage-windows.cfg"
+      - name: Upload release binaries
+        uses: alexellis/upload-assets@0.2.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '["desktop/build/windows/*"]'
