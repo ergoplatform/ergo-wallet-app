@@ -6,10 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.api.PasswordGenerator
-import org.ergoplatform.ergoauth.ErgoAuthRequest
-import org.ergoplatform.ergoauth.ErgoAuthResponse
-import org.ergoplatform.ergoauth.getErgoAuthRequest
-import org.ergoplatform.ergoauth.postErgoAuthResponse
+import org.ergoplatform.ergoauth.*
 import org.ergoplatform.getErrorMessage
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.WalletAddress
@@ -105,7 +102,8 @@ abstract class ErgoAuthUiLogic {
 
                 val prefix = PasswordGenerator.generatePassword(20)
                 val suffix = PasswordGenerator.generatePassword(20)
-                val signedMessage = prefix + ergAuthRequest.signingMessage + suffix
+                val signedMessage =
+                    prefix + ergAuthRequest.signingMessage + ergAuthRequest.requestHost + suffix
                 val signature = signMessage(
                     secrets,
                     walletAddresses.map { it.derivationIndex },
@@ -127,6 +125,25 @@ abstract class ErgoAuthUiLogic {
             secrets.clearMemory()
             notifyStateChanged(State.DONE)
         }
+    }
+
+    fun getAuthenticationMessage(texts: StringProvider): String {
+        val secConnectionMessage = ergAuthRequest?.sslValidatedBy?.let {
+            texts.getString(STRING_DESC_SECURE_CONN, it)
+        } ?: texts.getString(STRING_DESC_INSECURE_CONN)
+
+        return texts.getString(
+            STRING_INTRO_AUTH_REQUEST,
+            ergAuthRequest!!.requestHost + " ($secConnectionMessage)",
+            getErgoAuthReason(ergAuthRequest!!) ?: texts.getString(
+                STRING_ERROR_NO_AUTH_REASON
+            )
+        ) + (ergAuthRequest?.userMessage?.let {
+            "\n\n" + texts.getString(
+                STRING_LABEL_MESSAGE_FROM_DAPP,
+                it
+            )
+        } ?: "")
     }
 
     fun getDoneMessage(texts: StringProvider): String =
