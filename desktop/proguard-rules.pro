@@ -10,8 +10,14 @@
 -keep class org.jetbrains.skiko.** { *; }
 -keep class com.arkivanov.essenty.** { *; }
 -keep class org.sqlite.** { *; }
+
+# Webcam
 -keep class com.github.sarxos.webcam.** { *; }
 -keep class org.bridj.** { *; }
+
+# Windows folders
+-keep class com.sun.jna.* { *; }
+-keepclassmembers class * extends com.sun.jna.* { public *; }
 
 -assumenosideeffects public class androidx.compose.runtime.ComposerKt {
     void sourceInformation(androidx.compose.runtime.Composer,java.lang.String);

@@ -36,9 +36,10 @@ dependencies {
     } }
 }
 
+val mainClassName = "org.ergoplatform.MainKt"
 compose.desktop {
     application {
-        mainClass = "org.ergoplatform.MainKt"
+        mainClass = mainClassName
         nativeDistributions {
             modules("java.sql")
             targetFormats(
@@ -86,7 +87,7 @@ tasks {
         isZip64 = true
         mergeServiceFiles()
         manifest {
-            attributes(mapOf("Main-Class" to "org.ergoplatform.MainKt"))
+            attributes(mapOf("Main-Class" to mainClassName))
         }
     }
 }
