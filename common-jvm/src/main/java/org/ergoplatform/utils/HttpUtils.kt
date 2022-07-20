@@ -1,10 +1,19 @@
 package org.ergoplatform.utils
 
-import okhttp3.*
+import okhttp3.MediaType
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import okio.*
+import org.bouncycastle.asn1.x500.X500Name
+import org.bouncycastle.asn1.x500.style.BCStyle
+import org.bouncycastle.asn1.x500.style.IETFUtils
 import org.ergoplatform.api.OkHttpSingleton
 import java.io.IOException
+import java.security.cert.Certificate
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
+
 
 private const val IPV4_PATTERN =
     "^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\\.(?!$)|$)){4}$"
@@ -34,9 +43,12 @@ fun normalizeUrl(url: String): String {
         lcHostname.trimEnd('/') else lcHostname
 }
 
-fun fetchHttpGetStringSync(httpUrl: String, timeout: Long = 10): String {
+fun fetchHttpGetStringSync(httpUrl: String, timeout: Long = 10): String =
+    fetchHttpsGetStringSync(httpUrl, timeout).first
+
+fun fetchHttpsGetStringSync(httpUrl: String, timeout: Long = 10): Pair<String, List<Certificate>?> {
     val request = Request.Builder().url(httpUrl).build()
-    val stringResponse =
+    val response =
         OkHttpSingleton.getInstance().newBuilder()
             .connectTimeout(timeout, TimeUnit.SECONDS)
             .readTimeout(timeout, TimeUnit.SECONDS)
@@ -46,10 +58,21 @@ fun fetchHttpGetStringSync(httpUrl: String, timeout: Long = 10): String {
                     throw IOException("Unexpected response code $response")
                 }
 
-                response.body()!!.string()
-
+                Pair(response.body()!!.string(), response.handshake()?.peerCertificates())
             }
-    return stringResponse
+    return response
+}
+
+fun Certificate.getIssuerOrg(): String? {
+    return try {
+        val x509cert = this as X509Certificate
+        val x500name = X500Name(x509cert.issuerX500Principal.name)
+        val cn = x500name.getRDNs(BCStyle.O)[0]
+
+        IETFUtils.valueToString(cn.first.value)
+    } catch (t: Throwable) {
+        null
+    }
 }
 
 fun httpPostStringSync(httpUrl: String, body: String, mediaType: String) {
