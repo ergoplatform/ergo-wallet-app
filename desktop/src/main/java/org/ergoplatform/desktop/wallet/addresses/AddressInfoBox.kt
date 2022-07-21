@@ -8,6 +8,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.desktop.ui.defaultPadding
@@ -44,6 +45,7 @@ fun AddressInfoBox(walletAddress: WalletAddress, wallet: Wallet?, showFullInfo: 
                     Text(
                         addressLabel,
                         maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         style = labelStyle(LabelStyle.BODY1BOLD),
                         color = uiErgoColor,
                     )
@@ -55,6 +57,7 @@ fun AddressInfoBox(walletAddress: WalletAddress, wallet: Wallet?, showFullInfo: 
                 addressLabel,
                 Modifier.align(Alignment.CenterHorizontally),
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 style = labelStyle(LabelStyle.BODY1BOLD),
                 color = uiErgoColor,
             )

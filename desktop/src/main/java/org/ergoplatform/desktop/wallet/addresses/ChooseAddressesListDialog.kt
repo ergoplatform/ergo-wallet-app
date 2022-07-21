@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.desktop.ui.AppDialog
@@ -67,6 +68,7 @@ fun ChooseAddressesListDialog(
                             },
                             Modifier.align(Alignment.CenterHorizontally),
                             maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                             style = labelStyle(LabelStyle.BODY1BOLD),
                             color = uiErgoColor,
                         )

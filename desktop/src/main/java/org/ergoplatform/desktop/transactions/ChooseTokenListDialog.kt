@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.tokens.TokenEntryViewData
 import org.ergoplatform.desktop.ui.AppDialog
@@ -69,6 +70,7 @@ fun ChooseTokenListDialog(
                                 Text(
                                     token.displayedName ?: "",
                                     maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                     style = labelStyle(LabelStyle.HEADLINE2),
                                 )
 

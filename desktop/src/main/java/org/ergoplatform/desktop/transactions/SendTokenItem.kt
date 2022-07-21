@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.TokenAmount
@@ -55,6 +56,7 @@ fun SendTokenItem(
                             ?: Application.texts.getString(STRING_LABEL_UNNAMED_TOKEN),
                         Modifier.weight(.55f).align(Alignment.CenterVertically),
                         maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         style = labelStyle(LabelStyle.BODY1),
                     )
 
