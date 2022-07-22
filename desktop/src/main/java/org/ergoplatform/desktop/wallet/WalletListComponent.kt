@@ -92,7 +92,7 @@ class WalletListComponent(
 
                 IconButton({
                     router.push(ScreenConfig.QrCodeScanner { qrCode ->
-                        onQrCodeScanned(qrCode)
+                        handlePaymentRequests(qrCode, true)
                     })
                 }) {
                     Icon(Icons.Default.QrCodeScanner, null)
@@ -115,6 +115,11 @@ class WalletListComponent(
                 WalletStateSyncManager.getInstance().isRefreshing.collect {
                     walletStates.value =
                         Application.database.walletDbProvider.getWalletsWithStates()
+
+                    if (!walletsInitialized) {
+                        walletsInitialized = true
+                        onCreateWithWalletsLoaded()
+                    }
                 }
             }
             componentScope().launch(Dispatchers.IO) {
@@ -124,8 +129,16 @@ class WalletListComponent(
         }
     }
 
+    // Called after onCreate() set walletStates the first time
+    private fun onCreateWithWalletsLoaded() {
+        Application.startUpArguments.forEach {
+            handlePaymentRequests(it, false)
+        }
+    }
+
     private val walletStates = mutableStateOf<List<Wallet>>(emptyList())
     private val chooseWalletDialogState = mutableStateOf<String?>(null)
+    private var walletsInitialized = false
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -161,9 +174,9 @@ class WalletListComponent(
         router.push(ScreenConfig.SendFunds(walletConfig, paymentRequestString))
     }
 
-    private fun onQrCodeScanned(qrCode: String) {
+    private fun handlePaymentRequests(request: String, fromQrCode: Boolean) {
         MainAppUiLogic.handleRequests(
-            qrCode, true,
+            request, fromQrCode,
             Application.texts,
             navigateToChooseWalletDialog = { paymentRequest ->
                 if (walletStates.value.size == 1) {

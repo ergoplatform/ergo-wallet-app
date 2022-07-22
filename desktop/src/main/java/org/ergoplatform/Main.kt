@@ -38,10 +38,14 @@ fun main(args: Array<String>) {
     val lifecycle = LifecycleRegistry()
     val root = NavHostComponent(DefaultComponentContext(lifecycle = lifecycle))
 
+    // Process CLI arguments
     if (args.any { it.equals("--testnet", true) }) {
         isErgoMainNet = false
     }
-    LogUtils.logDebug = true
+    if (args.any { it.equals("--debug", true) }) {
+        LogUtils.logDebug = true
+    }
+    Application.startUpArguments = args.toList()
 
     Application.texts =
         DesktopStringProvider(I18NBundle.createBundle(ResourceWrapper("/i18n/strings")))
@@ -116,4 +120,5 @@ object Application {
     lateinit var texts: DesktopStringProvider
     lateinit var database: SqlDelightAppDb
     lateinit var prefs: PreferencesProvider
+    lateinit var startUpArguments: List<String>
 }
