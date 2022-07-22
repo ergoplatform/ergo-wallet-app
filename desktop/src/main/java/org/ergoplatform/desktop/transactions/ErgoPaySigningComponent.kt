@@ -1,14 +1,21 @@
 package org.ergoplatform.desktop.transactions
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_TITLE_ERGO_PAY_REQUEST
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
@@ -27,7 +34,18 @@ class ErgoPaySigningComponent(
 
     override val actions: @Composable RowScope.() -> Unit
         get() = {
-            // TODO Reload button
+            IconButton(
+                {
+                    ergoPayUiLogic.reloadFromDapp(
+                        Application.prefs,
+                        Application.texts,
+                        Application.database.walletDbProvider
+                    )
+                },
+                enabled = ergoPayUiLogic.canReloadFromDapp(),
+            ) {
+                Icon(Icons.Default.Refresh, null)
+            }
         }
 
     private val ergoPayUiLogic = DesktopErgoPayUiLogic()
@@ -35,6 +53,7 @@ class ErgoPaySigningComponent(
     override val uiLogic: SubmitTransactionUiLogic = ergoPayUiLogic
 
     private val ergoPayState = mutableStateOf(ErgoPaySigningUiLogic.State.FETCH_DATA)
+    private val chooseWalletDialog = mutableStateOf<List<Wallet>?>(null)
 
     init {
         ergoPayUiLogic.init(
@@ -49,7 +68,8 @@ class ErgoPaySigningComponent(
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
-        ErgoPaySigningScreen(ergoPayState.value,
+        ErgoPaySigningScreen(
+            ergoPayState.value,
             ergoPayUiLogic,
             onReload = {
                 ergoPayUiLogic.reloadFromDapp(
@@ -58,13 +78,56 @@ class ErgoPaySigningComponent(
                     Application.database.walletDbProvider
                 )
             },
-            onDismiss = router::pop
+            onChooseAddress = {
+                if (uiLogic.wallet != null) {
+                    startChooseAddress(false)
+                } else {
+                    startChooseWallet()
+                }
+            },
+            onConfirm = {
+                // TODO
+            },
+            onDismiss = router::pop,
+        )
+        if (chooseWalletDialog.value != null)
+            ChooseWalletListDialog(
+                chooseWalletDialog.value!!, true,
+                onWalletChosen = { walletConfig ->
+                    chooseWalletDialog.value = null
+                    ergoPayUiLogic.setWalletId(
+                        walletConfig.id,
+                        Application.prefs,
+                        Application.texts,
+                        Application.database.walletDbProvider
+                    )
+                },
+                onDismiss = { chooseWalletDialog.value = null },
+            )
+
+        SubmitTransactionOverlays()
+    }
+
+    private fun startChooseWallet() {
+        componentScope().launch {
+            chooseWalletDialog.value = Application.database.walletDbProvider.getWalletsWithStates()
+        }
+    }
+
+    override fun onAddressChosen(derivationIndex: Int?) {
+        super.onAddressChosen(derivationIndex)
+        // redo the request - can't be done within uilogic because context is needed on Android
+        ergoPayUiLogic.derivedAddressIdChanged(
+            Application.prefs,
+            Application.texts,
+            Application.database.walletDbProvider
         )
     }
 
     private inner class DesktopErgoPayUiLogic : ErgoPaySigningUiLogic() {
         override fun notifyStateChanged(newState: State) {
             ergoPayState.value = newState
+            enforceRefreshAppbar()
         }
 
         override val coroutineScope: CoroutineScope

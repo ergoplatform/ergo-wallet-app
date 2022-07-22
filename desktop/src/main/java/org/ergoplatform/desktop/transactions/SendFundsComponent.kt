@@ -77,7 +77,7 @@ class SendFundsComponent(
                     addTokenDialogState.value = true
                 },
                 onSendClicked = { checkAndStartPayment() },
-                onChooseAddressClicked = ::startChooseAddress,
+                onChooseAddressClicked = { startChooseAddress(true) },
             )
 
             if (addTokenDialogState.value) {

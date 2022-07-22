@@ -23,7 +23,7 @@ abstract class SubmitTransactionComponent(
     protected abstract val uiLogic: SubmitTransactionUiLogic
 
     private val passwordDialog = mutableStateOf(false)
-    private val chooseAddressDialog = mutableStateOf(false)
+    private val chooseAddressDialog = mutableStateOf<Boolean?>(null)
 
     @Composable
     protected fun SubmitTransactionOverlays() {
@@ -39,21 +39,25 @@ abstract class SubmitTransactionComponent(
                 }
             )
         }
-        if (chooseAddressDialog.value) {
+        if (chooseAddressDialog.value != null) {
             ChooseAddressesListDialog(
                 uiLogic.wallet!!,
-                true,
+                chooseAddressDialog.value!!,
                 onAddressChosen = { walletAddress ->
-                    chooseAddressDialog.value = false
-                    uiLogic.derivedAddressIdx = walletAddress?.derivationIndex
+                    chooseAddressDialog.value = null
+                    onAddressChosen(walletAddress?.derivationIndex)
                 },
-                onDismiss = { chooseAddressDialog.value = false },
+                onDismiss = { chooseAddressDialog.value = null },
             )
         }
     }
 
-    protected fun startChooseAddress() {
-        chooseAddressDialog.value = true
+    protected fun startChooseAddress(withAllAddresses: Boolean) {
+        chooseAddressDialog.value = withAllAddresses
+    }
+
+    protected open fun onAddressChosen(derivationIndex: Int?) {
+        uiLogic.derivedAddressIdx = derivationIndex
     }
 
     protected fun startPayment() {
