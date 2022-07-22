@@ -20,6 +20,7 @@ import com.arkivanov.decompose.router.navigate
 import com.arkivanov.decompose.router.router
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.settings.SettingsComponent
+import org.ergoplatform.desktop.transactions.ErgoPaySigningComponent
 import org.ergoplatform.desktop.transactions.ReceiveToWalletComponent
 import org.ergoplatform.desktop.transactions.SendFundsComponent
 import org.ergoplatform.desktop.ui.AppBarView
@@ -29,8 +30,10 @@ import org.ergoplatform.desktop.wallet.*
 import org.ergoplatform.desktop.wallet.addresses.WalletAddressesComponent
 import org.ergoplatform.mosaik.MosaikComposeDialog
 import org.ergoplatform.mosaik.MosaikComposeDialogHandler
+import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
+import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
 
 /**
  * Navigator
@@ -45,6 +48,18 @@ class NavHostComponent(
     )
 
     val dialogHandler = MosaikComposeDialogHandler()
+
+    fun showErrorDialog(message: String) {
+        dialogHandler.showDialog(
+            MosaikDialog(
+                message,
+                Application.texts.getString(STRING_ZXING_BUTTON_OK),
+                null,
+                null,
+                null
+            )
+        )
+    }
 
     val lockScreen = mutableStateOf(false)
 
@@ -92,6 +107,15 @@ class NavHostComponent(
 
             is ScreenConfig.WalletAddressesList ->
                 WalletAddressesComponent(componentContext, this, screenConfig.walletConfig)
+
+            is ScreenConfig.ErgoPay ->
+                ErgoPaySigningComponent(
+                    screenConfig.request,
+                    screenConfig.walletId,
+                    screenConfig.derivationIndex,
+                    componentContext,
+                    this
+                )
 
             is ScreenConfig.SendFunds -> SendFundsComponent(
                 componentContext, this,

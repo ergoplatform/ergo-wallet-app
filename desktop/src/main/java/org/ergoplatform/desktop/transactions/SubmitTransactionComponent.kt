@@ -10,6 +10,10 @@ import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.proceedAuthFlowWithPassword
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressesListDialog
+import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.transactions.TransactionResult
+import org.ergoplatform.uilogic.STRING_ERROR_PREPARE_TRANSACTION
+import org.ergoplatform.uilogic.STRING_ERROR_SEND_TRANSACTION
 import org.ergoplatform.uilogic.transactions.SubmitTransactionUiLogic
 
 abstract class SubmitTransactionComponent(
@@ -67,4 +71,14 @@ abstract class SubmitTransactionComponent(
             Application.database
         )
     }
+
+    protected fun getTransactionResultErrorMessage(result: TransactionResult): String {
+        val errorMsgPrefix = if (result is PromptSigningResult)
+            STRING_ERROR_PREPARE_TRANSACTION
+        else STRING_ERROR_SEND_TRANSACTION
+
+        return (Application.texts.getString(errorMsgPrefix)
+                + (result.errorMsg?.let { "\n\n$it" } ?: ""))
+    }
+
 }

@@ -1,7 +1,9 @@
 package org.ergoplatform.desktop.transactions
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -12,6 +14,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.tokens.TokenEntryViewData
 import org.ergoplatform.desktop.ui.AppDialog
+import org.ergoplatform.desktop.ui.AppScrollbar
 import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.mosaik.MiddleEllipsisText
 import org.ergoplatform.mosaik.MosaikStyleConfig
@@ -88,11 +91,7 @@ fun ChooseTokenListDialog(
                     }
                 }
             }
-            VerticalScrollbar(
-                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                adapter = rememberScrollbarAdapter(scrollState)
-            )
-
+            AppScrollbar(scrollState)
         }
     }
 }

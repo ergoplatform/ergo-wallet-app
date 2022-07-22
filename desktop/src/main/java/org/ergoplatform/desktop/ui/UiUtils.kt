@@ -2,17 +2,23 @@ package org.ergoplatform.desktop.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.res.painterResource
 import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.mosaik.MosaikDialog
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.uilogic.STRING_BUTTON_COPY_SENSITIVE_DATA
 import org.ergoplatform.uilogic.STRING_DESC_COPY_SENSITIVE_DATA
 import org.ergoplatform.uilogic.STRING_LABEL_CANCEL
@@ -57,3 +63,11 @@ fun ErgoAmount.toComposableText() = remember {
         toStringRoundToDecimals()
     )
 }
+
+fun MessageSeverity.getSeverityIcon(): ImageVector? =
+    when (this) {
+        MessageSeverity.NONE -> null
+        MessageSeverity.INFORMATION -> Icons.Default.Info
+        MessageSeverity.WARNING -> Icons.Default.Warning
+        MessageSeverity.ERROR -> Icons.Default.Error
+    }

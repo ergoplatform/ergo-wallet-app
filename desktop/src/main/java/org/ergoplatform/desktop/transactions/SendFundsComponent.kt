@@ -18,13 +18,10 @@ import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
-import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
-import org.ergoplatform.uilogic.STRING_ERROR_SEND_TRANSACTION
-import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 
 class SendFundsComponent(
@@ -51,6 +48,7 @@ class SendFundsComponent(
 
     private val walletAddressState = mutableStateOf<WalletAddress?>(null)
     private val recipientError = mutableStateOf(false)
+
     // amountToSend declared below to be able to access uiLogic
     private val amountError = mutableStateOf(false)
     private val amountsChangedCount = mutableStateOf(0)
@@ -101,7 +99,7 @@ class SendFundsComponent(
                 // TODO cold wallet
             },
             navigateToErgoPaySigning = { ergoPayRequest ->
-                // TODO ErgoPay
+                router.push(ScreenConfig.ErgoPay(ergoPayRequest, walletConfig.id, null))
             }, setPaymentRequestDataToUi = { address, amount, message ->
                 recipientAddress.value = TextFieldValue(address)
                 uiLogic.receiverAddress = address
@@ -147,12 +145,7 @@ class SendFundsComponent(
         }
 
         override fun showErrorMessage(message: String) {
-            navHost.dialogHandler.showDialog(
-                MosaikDialog(
-                    message, Application.texts.getString(STRING_ZXING_BUTTON_OK),
-                    null, null, null
-                )
-            )
+            navHost.showErrorDialog(message)
         }
 
         override fun onNotifySuggestedFees() {
@@ -180,9 +173,7 @@ class SendFundsComponent(
 
         override fun notifyHasErgoTxResult(txResult: TransactionResult) {
             if (!txResult.success) {
-                showErrorMessage(Application.texts.getString(STRING_ERROR_SEND_TRANSACTION)
-                        + (txResult.errorMsg?.let { "\n\n$it" } ?: "")
-                )
+                showErrorMessage(getTransactionResultErrorMessage(txResult))
             }
         }
 

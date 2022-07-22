@@ -32,7 +32,6 @@ import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
-import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.parsePaymentRequest
@@ -41,7 +40,6 @@ import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.MainAppUiLogic
 import org.ergoplatform.uilogic.STRING_LABEL_LAST_SYNC
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
-import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
 import org.ergoplatform.utils.getTimeSpanString
 
 class WalletListComponent(
@@ -186,20 +184,14 @@ class WalletListComponent(
                     chooseWalletDialogState.value = paymentRequest
                 }
             },
-            navigateToErgoPay = {
-                // TODO ergopay
+            navigateToErgoPay = { paymentRequest ->
+                router.push(ScreenConfig.ErgoPay(paymentRequest, null, null))
             },
             navigateToAuthentication = {
                 // TODO ErgoAUth
             },
             presentUserMessage = { message ->
-                navHost.dialogHandler.showDialog(
-                    MosaikDialog(
-                        message,
-                        Application.texts.getString(STRING_ZXING_BUTTON_OK),
-                        null, null, null
-                    )
-                )
+                navHost.showErrorDialog(message)
             }
         )
     }

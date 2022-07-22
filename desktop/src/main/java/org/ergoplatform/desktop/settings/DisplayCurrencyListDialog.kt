@@ -1,8 +1,10 @@
 package org.ergoplatform.desktop.settings
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.desktop.ui.AppDialog
+import org.ergoplatform.desktop.ui.AppScrollbar
 import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
@@ -58,11 +61,7 @@ fun DisplayCurrencyListDialog(onDismissRequest: () -> Unit, onCurrencyChosen: (S
                         )
                     }
                 }
-                VerticalScrollbar(
-                    modifier = Modifier.align(Alignment.CenterEnd)
-                        .fillMaxHeight(),
-                    adapter = rememberScrollbarAdapter(scrollState)
-                )
+                AppScrollbar(scrollState)
             } else if (currencyList != null && currencyList.isEmpty()) {
                 Text(
                     Application.texts.getString(STRING_LABEL_CG_CONN_ERROR),
