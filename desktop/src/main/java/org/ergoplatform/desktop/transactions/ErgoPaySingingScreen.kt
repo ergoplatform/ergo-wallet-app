@@ -15,6 +15,7 @@ import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
 
@@ -55,28 +56,38 @@ private fun BoxScope.ErgoPayTransactionInfoLayout(
     uiLogic: ErgoPaySigningUiLogic,
     onConfirm: () -> Unit
 ) {
-    uiLogic.epsr?.message?.let { message ->
-        AppCard(
-            Modifier.align(Alignment.Center).widthIn(max = defaultMaxWidth)
-        ) {
-            Row(Modifier.padding(defaultPadding)) {
-                uiLogic.getDoneSeverity().getSeverityIcon()?.let { icon ->
-                    Icon(
-                        icon,
-                        null,
-                        Modifier.size(36.dp).padding(end = defaultPadding / 2)
-                            .align(Alignment.CenterVertically)
+    Column(Modifier.widthIn(max = defaultMaxWidth).align(Alignment.Center)) {
+        uiLogic.epsr?.message?.let { message ->
+            AppCard(Modifier.fillMaxWidth().padding(bottom = defaultPadding)) {
+                Row(Modifier.padding(defaultPadding)) {
+                    uiLogic.getDoneSeverity().getSeverityIcon()?.let { icon ->
+                        Icon(
+                            icon,
+                            null,
+                            Modifier.size(36.dp).padding(end = defaultPadding / 2)
+                                .align(Alignment.CenterVertically)
+                        )
+                    }
+
+                    Text(
+                        Application.texts.getString(STRING_LABEL_MESSAGE_FROM_DAPP, message),
+                        Modifier.align(Alignment.CenterVertically).weight(1f),
+                        style = labelStyle(LabelStyle.BODY1),
                     )
                 }
-
-                Text(
-                    Application.texts.getString(STRING_LABEL_MESSAGE_FROM_DAPP, message),
-                    Modifier.align(Alignment.CenterVertically).weight(1f),
-                    style = labelStyle(LabelStyle.BODY1),
-                )
             }
         }
+
+        AppCard(Modifier.fillMaxWidth()) {
+            TransactionInfoLayout(Modifier.padding(defaultPadding),
+                uiLogic.transactionInfo!!.reduceBoxes(),
+                onConfirm = onConfirm,
+                onTokenClick = { tokenId ->
+                    // TODO token info
+                })
+        }
     }
+
 }
 
 @Composable

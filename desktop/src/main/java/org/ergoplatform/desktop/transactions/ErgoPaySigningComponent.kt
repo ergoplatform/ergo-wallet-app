@@ -85,9 +85,7 @@ class ErgoPaySigningComponent(
                     startChooseWallet()
                 }
             },
-            onConfirm = {
-                // TODO
-            },
+            onConfirm = ::startPayment,
             onDismiss = router::pop,
         )
         if (chooseWalletDialog.value != null)
