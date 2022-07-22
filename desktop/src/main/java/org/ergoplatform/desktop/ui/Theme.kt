@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.Font
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
@@ -90,7 +91,7 @@ private fun WalletAppBar(
     CompositionLocalProvider(LocalElevationOverlay provides null) {
         TopAppBar(
             backgroundColor = MaterialTheme.colors.primary,
-            title = { Text(title) },
+            title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
             actions = actions,
             navigationIcon = if (router.state.value.backStack.isEmpty()) null else ({
                 AppBackButton(onClick = router::pop)

@@ -95,7 +95,8 @@ class NavHostComponent(
 
             is ScreenConfig.SendFunds -> SendFundsComponent(
                 componentContext, this,
-                screenConfig.walletConfig
+                screenConfig.walletConfig,
+                paymentRequest = screenConfig.paymentRequest,
             )
 
             is ScreenConfig.ReceiveToWallet -> ReceiveToWalletComponent(

@@ -10,11 +10,13 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.res.painterResource
 import org.ergoplatform.Application
+import org.ergoplatform.ErgoAmount
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.uilogic.STRING_BUTTON_COPY_SENSITIVE_DATA
 import org.ergoplatform.uilogic.STRING_DESC_COPY_SENSITIVE_DATA
 import org.ergoplatform.uilogic.STRING_LABEL_CANCEL
+import org.ergoplatform.uilogic.STRING_LABEL_ERG_AMOUNT
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun Modifier.addOnEnterListener(onEnter: () -> Unit): Modifier {
@@ -26,7 +28,7 @@ fun Modifier.addOnEnterListener(onEnter: () -> Unit): Modifier {
     }
 }
 
-inline fun Modifier.noRippleClickable(crossinline onClick: ()->Unit): Modifier = composed {
+inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier = composed {
     clickable(indication = null,
         interactionSource = remember { MutableInteractionSource() }) {
         onClick()
@@ -47,3 +49,11 @@ fun showSensitiveDataCopyDialog(navHost: NavHostComponent, dataToCopy: String) {
 
 @Composable
 fun ergoLogo() = painterResource("symbol_bold__1080px__black.svg")
+
+@Composable
+fun ErgoAmount.toComposableText() = remember {
+    Application.texts.getString(
+        STRING_LABEL_ERG_AMOUNT,
+        toStringRoundToDecimals()
+    )
+}

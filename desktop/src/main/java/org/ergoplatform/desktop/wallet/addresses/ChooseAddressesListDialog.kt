@@ -13,6 +13,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.desktop.ui.AppDialog
 import org.ergoplatform.desktop.ui.defaultPadding
+import org.ergoplatform.desktop.ui.toComposableText
 import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
@@ -20,7 +21,6 @@ import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.uilogic.STRING_LABEL_ALL_ADDRESSES
-import org.ergoplatform.uilogic.STRING_LABEL_ERG_AMOUNT
 import org.ergoplatform.uilogic.STRING_LABEL_WALLET_TOKEN_BALANCE
 import org.ergoplatform.uilogic.STRING_TITLE_CHOOSE_ADDRESS
 import org.ergoplatform.wallet.getBalanceForAllAddresses
@@ -78,10 +78,7 @@ fun ChooseAddressesListDialog(
                                 .align(Alignment.CenterHorizontally)
                         ) {
                             Text(
-                                text = Application.texts.getString(
-                                    STRING_LABEL_ERG_AMOUNT,
-                                    ErgoAmount(wallet.getBalanceForAllAddresses()).toStringRoundToDecimals()
-                                ),
+                                text = ErgoAmount(wallet.getBalanceForAllAddresses()).toComposableText(),
                                 style = labelStyle(LabelStyle.BODY1BOLD)
                             )
                             val tokenNum = wallet.getTokensForAllAddresses().size

@@ -104,8 +104,8 @@ class QrScannerComponent(
     }
 
     private fun qrCodeScanned(scannedQr: String) {
-        callback(scannedQr)
         navHost.router.pop()
+        callback(scannedQr)
     }
 
     private val imageState = mutableStateOf<ImageBitmap?>(null)

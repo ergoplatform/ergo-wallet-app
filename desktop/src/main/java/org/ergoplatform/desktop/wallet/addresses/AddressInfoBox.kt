@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.desktop.ui.defaultPadding
+import org.ergoplatform.desktop.ui.toComposableText
 import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.MiddleEllipsisText
 import org.ergoplatform.mosaik.MosaikStyleConfig
@@ -19,7 +20,6 @@ import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
-import org.ergoplatform.uilogic.STRING_LABEL_ERG_AMOUNT
 import org.ergoplatform.uilogic.STRING_LABEL_WALLET_TOKEN_BALANCE
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.addresses.isDerivedAddress
@@ -77,10 +77,7 @@ fun AddressInfoBox(walletAddress: WalletAddress, wallet: Wallet?, showFullInfo: 
                     .align(Alignment.CenterHorizontally)
             ) {
                 Text(
-                    text = Application.texts.getString(
-                        STRING_LABEL_ERG_AMOUNT,
-                        ErgoAmount(state?.balance ?: 0).toStringRoundToDecimals()
-                    ),
+                    text = ErgoAmount(state?.balance ?: 0).toComposableText(),
                     style = labelStyle(LabelStyle.BODY1BOLD)
                 )
                 if (tokens.isNotEmpty()) {

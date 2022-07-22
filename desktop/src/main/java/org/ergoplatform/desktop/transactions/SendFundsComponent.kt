@@ -50,7 +50,6 @@ class SendFundsComponent(
         }
 
     private val walletAddressState = mutableStateOf<WalletAddress?>(null)
-    private val recipientAddress = mutableStateOf(TextFieldValue())
     private val recipientError = mutableStateOf(false)
     // amountToSend declared below to be able to access uiLogic
     private val amountError = mutableStateOf(false)
@@ -199,6 +198,7 @@ class SendFundsComponent(
     }
 
     private val amountToSend = mutableStateOf(TextFieldValue(uiLogic.inputAmountString))
+    private val recipientAddress = mutableStateOf(TextFieldValue(uiLogic.receiverAddress))
 
 }
 
