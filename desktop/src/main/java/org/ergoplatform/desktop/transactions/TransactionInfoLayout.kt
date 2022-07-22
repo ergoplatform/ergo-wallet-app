@@ -1,5 +1,6 @@
 package org.ergoplatform.desktop.transactions
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,8 +15,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
+import org.ergoplatform.ErgoAmount
+import org.ergoplatform.TokenAmount
+import org.ergoplatform.desktop.tokens.TokenEntryView
+import org.ergoplatform.desktop.ui.ErgoAddressText
 import org.ergoplatform.desktop.ui.defaultPadding
+import org.ergoplatform.desktop.ui.toComposableText
 import org.ergoplatform.desktop.ui.uiErgoColor
+import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
@@ -56,7 +63,16 @@ fun TransactionInfoLayout(
         )
 
         // Inboxes
-        Column(Modifier.padding(defaultPadding / 2)) { }
+        Column(Modifier.padding(defaultPadding / 2)) {
+            transactionInfo.inputs.forEach { input ->
+                TransactionInfoBox(
+                    input.value,
+                    input.address,
+                    input.assets,
+                    onTokenClick,
+                )
+            }
+        }
 
         Divider(
             Modifier.padding(vertical = defaultPadding / 2),
@@ -75,7 +91,17 @@ fun TransactionInfoLayout(
         )
 
         // Outboxes
-        Column(Modifier.padding(defaultPadding / 2)) { }
+        Column(Modifier.padding(defaultPadding / 2)) {
+            transactionInfo.outputs.forEach { output ->
+                TransactionInfoBox(
+                    output.value,
+                    output.address,
+                    output.assets,
+                    onTokenClick,
+                )
+            }
+
+        }
 
         Button(
             onConfirm,
@@ -83,6 +109,45 @@ fun TransactionInfoLayout(
                 .widthIn(min = 120.dp)
         ) {
             Text(remember { Application.texts.getString(STRING_LABEL_CONFIRM) })
+        }
+    }
+
+}
+
+@Composable
+fun TransactionInfoBox(
+    value: Long?,
+    address: String,
+    assets: List<AssetInstanceInfo>?,
+    tokenClickListener: ((String) -> Unit)?,
+) {
+
+    Column(Modifier.padding(vertical = defaultPadding / 2)) {
+        ErgoAddressText(address, style = labelStyle(LabelStyle.BODY1BOLD), color = uiErgoColor)
+
+        Text(
+            ErgoAmount(value ?: 0).toComposableText(),
+            Modifier.padding(horizontal = defaultPadding / 2),
+            style = labelStyle(LabelStyle.BODY1BOLD),
+        )
+
+        assets?.let {
+            Column(
+                Modifier.padding(horizontal = defaultPadding / 2).padding(top = defaultPadding / 2)
+            ) {
+                assets.forEach { token ->
+                    TokenEntryView(
+                        TokenAmount(token.amount, token.decimals ?: 0).toStringUsFormatted(),
+                        displayName = token.name ?: token.tokenId,
+                        modifier = tokenClickListener?.let {
+                            Modifier.clickable {
+                                tokenClickListener(
+                                    token.tokenId
+                                )
+                            }
+                        } ?: Modifier)
+                }
+            }
         }
     }
 

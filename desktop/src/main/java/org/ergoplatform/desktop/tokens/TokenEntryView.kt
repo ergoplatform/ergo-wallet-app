@@ -2,6 +2,7 @@ package org.ergoplatform.desktop.tokens
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -21,21 +22,20 @@ fun TokenEntryView(walletToken: WalletToken) {
         walletToken.amount ?: 0,
         walletToken.decimals,
     ).toStringPrettified()
-    val tokenVal = if (amount.isNotBlank()) "$amount " else ""
-
-    TokenEntryView(tokenVal, displayName)
+    TokenEntryView(amount, displayName)
 }
 
 @Composable
-fun TokenEntryView(tokenVal: String, displayName: String) {
+fun TokenEntryView(displayAmount: String, displayName: String, modifier: Modifier = Modifier) {
     Text(
         text = buildAnnotatedString {
             pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-            append(tokenVal)
+            append(if (displayAmount.isNotBlank()) "$displayAmount " else "")
             pop()
             append(displayName)
             toAnnotatedString()
         },
         style = labelStyle(LabelStyle.BODY1),
+        modifier = modifier,
     )
 }

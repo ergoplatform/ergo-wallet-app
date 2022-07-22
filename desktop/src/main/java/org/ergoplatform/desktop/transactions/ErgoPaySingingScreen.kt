@@ -64,7 +64,7 @@ private fun BoxScope.ErgoPayTransactionInfoLayout(
                         Icon(
                             icon,
                             null,
-                            Modifier.size(36.dp).padding(end = defaultPadding / 2)
+                            Modifier.padding(end = defaultPadding / 2).size(36.dp)
                                 .align(Alignment.CenterVertically)
                         )
                     }
@@ -102,8 +102,8 @@ private fun BoxScope.ErgoPayChooseAddressLayout(
             Icon(
                 ergoLogo(),
                 null,
-                Modifier.align(Alignment.CenterHorizontally).size(bigIconSize)
-                    .padding(bottom = defaultPadding)
+                Modifier.align(Alignment.CenterHorizontally).padding(bottom = defaultPadding)
+                    .size(bigIconSize)
             )
 
             Text(
@@ -153,8 +153,8 @@ private fun BoxScope.ErgoPayDoneLayout(
                 Icon(
                     icon,
                     null,
-                    Modifier.align(Alignment.CenterHorizontally).size(96.dp)
-                        .padding(bottom = defaultPadding)
+                    Modifier.align(Alignment.CenterHorizontally).padding(bottom = defaultPadding)
+                        .size(96.dp)
                 )
             }
 
