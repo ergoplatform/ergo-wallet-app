@@ -24,6 +24,7 @@ abstract class SubmitTransactionComponent(
 
     private val passwordDialog = mutableStateOf(false)
     private val chooseAddressDialog = mutableStateOf<Boolean?>(null)
+    private val signingPromptDialog = mutableStateOf<String?>(null)
 
     @Composable
     protected fun SubmitTransactionOverlays() {
@@ -50,6 +51,17 @@ abstract class SubmitTransactionComponent(
                 onDismiss = { chooseAddressDialog.value = null },
             )
         }
+        signingPromptDialog.value?.let {
+            SigningPromptDialog(it, uiLogic,
+                onContinueClicked = {
+                    // TODO
+                },
+                onDismissRequest = { signingPromptDialog.value = null })
+        }
+    }
+
+    protected fun showSigningPrompt(signingPrompt: String) {
+        signingPromptDialog.value = signingPrompt
     }
 
     protected fun startChooseAddress(withAllAddresses: Boolean) {

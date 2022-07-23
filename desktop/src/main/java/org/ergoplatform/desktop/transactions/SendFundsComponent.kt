@@ -178,7 +178,7 @@ class SendFundsComponent(
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
-            TODO("Cold wallet support not implemented")
+            showSigningPrompt(signingPrompt)
         }
 
     }.apply {

@@ -136,7 +136,7 @@ class ErgoPaySigningComponent(
         }
 
         override fun notifyDerivedAddressChanged() {
-            // TODO
+            // TODO show selected address at top of screen
         }
 
         override fun notifyUiLocked(locked: Boolean) {
@@ -150,7 +150,7 @@ class ErgoPaySigningComponent(
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
-            TODO("Not yet implemented")
+            showSigningPrompt(signingPrompt)
         }
 
     }
