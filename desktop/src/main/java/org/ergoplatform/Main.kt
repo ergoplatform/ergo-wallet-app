@@ -2,6 +2,7 @@ package org.ergoplatform
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
@@ -82,6 +83,7 @@ fun main(args: Array<String>) {
             size = DpSize(max(300.dp, windowSize.first.dp), max(200.dp, windowSize.second.dp))
         )
         LifecycleController(lifecycle, windowState)
+        val windowIcon = painterResource("icon.png")
 
         Window(
             onCloseRequest = {
@@ -92,6 +94,7 @@ fun main(args: Array<String>) {
                 exitApplication()
             },
             state = windowState,
+            icon = windowIcon,
             title = Application.texts.getString(STRING_APP_NAME)
         ) {
             DecomposeDesktopExampleTheme {
