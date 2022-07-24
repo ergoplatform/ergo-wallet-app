@@ -5,15 +5,15 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
 import org.ergoplatform.uilogic.STRING_BUTTON_NEXT
-import org.ergoplatform.uilogic.STRING_DESC_PROMPT_SIGNING
-import org.ergoplatform.uilogic.STRING_DESC_PROMPT_SIGNING_MULTIPLE
 import org.ergoplatform.uilogic.STRING_LABEL_QR_PAGES_INFO
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
 abstract class PagedQrCodeContainer(
     protected val texts: I18NBundle,
-    continueButtonText: String
+    lastPageButtonTextLabel: String,
+    private val descriptionLabel: String,
+    private val lastPageDescriptionLabel: String,
 ) : UIView(CGRect.Zero()) {
 
     private var qrPages: List<String> = emptyList()
@@ -44,7 +44,7 @@ abstract class PagedQrCodeContainer(
             scrollToQrCode(nextPage)
         }
     }
-    private val continueButton = PrimaryButton(continueButtonText).apply {
+    private val continueButton = PrimaryButton(texts.get(lastPageButtonTextLabel)).apply {
         addOnTouchUpInsideListener { _, _ ->
             continueButtonPressed()
         }
@@ -121,8 +121,8 @@ abstract class PagedQrCodeContainer(
 
         descContainer.animateLayoutChanges {
             description.text = texts.get(
-                if (lastPage) STRING_DESC_PROMPT_SIGNING
-                else STRING_DESC_PROMPT_SIGNING_MULTIPLE
+                if (lastPage) lastPageDescriptionLabel
+                else descriptionLabel
             )
             nextButton.isHidden = lastPage
             continueButton.isHidden = !lastPage

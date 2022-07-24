@@ -117,7 +117,12 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         }
     }
 
-    inner class SignedQrCodeContainer : PagedQrCodeContainer(texts, texts.get(STRING_LABEL_DISMISS)) {
+    inner class SignedQrCodeContainer : PagedQrCodeContainer(
+        texts,
+        STRING_LABEL_DISMISS,
+        descriptionLabel = STRING_DESC_SHOW_SIGNED_MULTIPLE,
+        lastPageDescriptionLabel = STRING_DESC_SHOW_SIGNED,
+    ) {
         override fun calcChunksFromRawData(rawData: String, limit: Int): List<String> {
             return coldSigningResponseToQrChunks(rawData, limit)
         }
