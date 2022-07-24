@@ -54,6 +54,9 @@ fun SigningPromptDialog(
                             )
                         },
                         onContinueClicked,
+                        lastPageButtonLabel = STRING_BUTTON_SCAN_SIGNED_TX,
+                        descriptionLabel = STRING_DESC_PROMPT_SIGNING_MULTIPLE,
+                        lastPageDescriptionLabel = STRING_DESC_PROMPT_SIGNING,
                     )
 
                     // shown when first pages are scanned
@@ -94,7 +97,10 @@ fun SigningPromptDialog(
 fun PagedQrContainer(
     lowRes: Boolean,
     calcChunks: (limit: Int) -> List<String>,
-    onContinueClicked: () -> Unit,
+    onLastPageButtonClicked: () -> Unit,
+    lastPageButtonLabel: String,
+    descriptionLabel: String,
+    lastPageDescriptionLabel: String,
 ) {
     var page by remember(lowRes) { mutableStateOf(0) }
     val qrPages = remember(lowRes) {
@@ -126,8 +132,8 @@ fun PagedQrContainer(
         Text(
             remember(lastPage) {
                 Application.texts.getString(
-                    if (lastPage) STRING_DESC_PROMPT_SIGNING
-                    else STRING_DESC_PROMPT_SIGNING_MULTIPLE
+                    if (lastPage) lastPageDescriptionLabel
+                    else descriptionLabel
                 )
             },
             Modifier.fillMaxWidth().padding(horizontal = defaultPadding),
@@ -145,11 +151,11 @@ fun PagedQrContainer(
             )
 
         Button(
-            { if (!lastPage) page += 1 else onContinueClicked() },
+            { if (!lastPage) page += 1 else onLastPageButtonClicked() },
             Modifier.align(Alignment.CenterHorizontally).padding(top = defaultPadding),
             colors = primaryButtonColors()
         ) {
-            Text(remember(lastPage) { Application.texts.getString(if (!lastPage) STRING_BUTTON_NEXT else STRING_BUTTON_SCAN_SIGNED_TX) })
+            Text(remember(lastPage) { Application.texts.getString(if (!lastPage) STRING_BUTTON_NEXT else lastPageButtonLabel) })
         }
     }
 

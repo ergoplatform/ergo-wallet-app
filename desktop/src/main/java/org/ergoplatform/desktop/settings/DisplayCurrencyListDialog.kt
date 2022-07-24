@@ -2,23 +2,24 @@ package org.ergoplatform.desktop.settings
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.desktop.ui.AppDialog
+import org.ergoplatform.desktop.ui.AppProgressIndicator
 import org.ergoplatform.desktop.ui.AppScrollbar
 import org.ergoplatform.desktop.ui.defaultPadding
-import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.uilogic.STRING_LABEL_CG_CONN_ERROR
@@ -70,10 +71,7 @@ fun DisplayCurrencyListDialog(onDismissRequest: () -> Unit, onCurrencyChosen: (S
                     textAlign = TextAlign.Center,
                 )
             } else {
-                CircularProgressIndicator(
-                    Modifier.size(48.dp).align(Alignment.Center),
-                    color = MosaikStyleConfig.primaryLabelColor,
-                )
+                AppProgressIndicator()
             }
         }
     }

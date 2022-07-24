@@ -20,9 +20,7 @@ import com.arkivanov.decompose.router.navigate
 import com.arkivanov.decompose.router.router
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.settings.SettingsComponent
-import org.ergoplatform.desktop.transactions.ErgoPaySigningComponent
-import org.ergoplatform.desktop.transactions.ReceiveToWalletComponent
-import org.ergoplatform.desktop.transactions.SendFundsComponent
+import org.ergoplatform.desktop.transactions.*
 import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.AppLockScreen
 import org.ergoplatform.desktop.ui.QrScannerComponent
@@ -108,6 +106,14 @@ class NavHostComponent(
 
             is ScreenConfig.WalletAddressesList ->
                 WalletAddressesComponent(componentContext, this, screenConfig.walletConfig)
+
+            is ScreenConfig.ColdSigning ->
+                ColdWalletSigningComponent(
+                    screenConfig.signingRequest,
+                    screenConfig.walletId,
+                    componentContext,
+                    this
+                )
 
             is ScreenConfig.ErgoPay ->
                 ErgoPaySigningComponent(

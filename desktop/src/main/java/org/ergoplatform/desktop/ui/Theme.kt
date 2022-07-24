@@ -217,9 +217,14 @@ fun AppLockScreen(locked: Boolean) {
                 .noRippleClickable {
                     // needed to grab user interaction
                 }) {
-            CircularProgressIndicator(
-                Modifier.size(48.dp).align(Alignment.Center),
-                color = uiErgoColor
-            )
+            AppProgressIndicator()
         }
+}
+
+@Composable
+fun BoxScope.AppProgressIndicator() {
+    CircularProgressIndicator(
+        Modifier.size(48.dp).align(Alignment.Center),
+        color = MosaikStyleConfig.primaryLabelColor,
+    )
 }

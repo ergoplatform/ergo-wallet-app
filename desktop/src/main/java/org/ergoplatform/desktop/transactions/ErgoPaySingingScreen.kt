@@ -2,7 +2,6 @@ package org.ergoplatform.desktop.transactions
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -37,11 +36,9 @@ fun ErgoPaySigningScreen(
                 uiLogic, onChooseAddress
             )
             ErgoPaySigningUiLogic.State.FETCH_DATA -> {
-                CircularProgressIndicator(
-                    Modifier.size(48.dp).align(Alignment.Center),
-                    color = uiErgoColor
-                )
+                AppProgressIndicator()
             }
+
             ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION -> ErgoPayTransactionInfoLayout(
                 uiLogic,
                 onConfirm

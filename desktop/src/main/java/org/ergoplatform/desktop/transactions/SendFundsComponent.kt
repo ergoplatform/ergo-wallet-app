@@ -96,7 +96,7 @@ class SendFundsComponent(
     private fun onQrCodeScanned(qrCode: String) {
         uiLogic.qrCodeScanned(qrCode, Application.texts,
             navigateToColdWalletSigning = { data, walletId ->
-                // TODO cold wallet
+                router.push(ScreenConfig.ColdSigning(walletId, data))
             },
             navigateToErgoPaySigning = { ergoPayRequest ->
                 router.push(ScreenConfig.ErgoPay(ergoPayRequest, walletConfig.id, null))
