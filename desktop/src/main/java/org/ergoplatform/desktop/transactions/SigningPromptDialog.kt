@@ -11,6 +11,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BurstMode
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,13 +26,13 @@ import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
 import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.uilogic.*
-import org.ergoplatform.uilogic.transactions.SubmitTransactionUiLogic
 
 @Composable
 fun SigningPromptDialog(
     signingPrompt: String,
-    uiLogic: SubmitTransactionUiLogic,
     onContinueClicked: () -> Unit,
+    pagesScanned: Int?,
+    pagesToScan: Int?,
     onDismissRequest: () -> Unit,
 ) {
     var lowRes by remember { mutableStateOf(false) }
@@ -54,17 +56,24 @@ fun SigningPromptDialog(
                         onContinueClicked,
                     )
 
-                    uiLogic.signedTxQrCodePagesCollector?.let {
-                        if (it.pagesAdded > 0)
-                            Text(
+                    // shown when first pages are scanned
+                    if ((pagesScanned ?: 0) > 0) {
+                        Text(
+                            remember(pagesScanned) {
                                 Application.texts.getString(
                                     STRING_LABEL_QR_PAGES_INFO,
-                                    it.pagesAdded, it.pagesCount
-                                ),
-                                Modifier.fillMaxWidth().padding(horizontal = defaultPadding),
-                                textAlign = TextAlign.Center,
-                                style = labelStyle(LabelStyle.HEADLINE2),
-                            )
+                                    pagesScanned!!,
+                                    pagesToScan!!
+                                )
+                            },
+                            Modifier.align(Alignment.CenterHorizontally)
+                                .padding(horizontal = defaultPadding / 2),
+                            style = labelStyle(LabelStyle.HEADLINE2),
+                        )
+                        // scrolls to bottom on every new page scanned
+                        LaunchedEffect(pagesScanned) {
+                            scrollState.scrollTo(scrollState.maxValue)
+                        }
                     }
                 }
 
@@ -92,19 +101,27 @@ fun PagedQrContainer(
         calcChunks(if (lowRes) QR_DATA_LENGTH_LOW_RES else QR_DATA_LENGTH_LIMIT)
     }
     val qrImage = remember(page, qrPages) { getQrCodeImageBitmap(qrPages[page]) }
+    val lastPage = page == qrPages.size - 1
 
     Column {
         Row(Modifier.fillMaxWidth()) {
-            // TODO back/forward
+            IconButton(
+                { page-- },
+                Modifier.align(Alignment.CenterVertically),
+                enabled = page > 0
+            ) { Icon(Icons.Default.ChevronLeft, null) }
             Image(
                 qrImage,
                 null,
                 Modifier.height(400.dp).padding(vertical = defaultPadding)
                     .weight(1f)
             )
+            IconButton(
+                { page++ },
+                Modifier.align(Alignment.CenterVertically),
+                enabled = !lastPage
+            ) { Icon(Icons.Default.ChevronRight, null) }
         }
-
-        val lastPage = page == qrPages.size - 1
 
         Text(
             remember(lastPage) {

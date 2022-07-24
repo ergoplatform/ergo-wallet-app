@@ -148,7 +148,7 @@ private fun BoxScope.ErgoPayDoneLayout(
     AppCard(
         Modifier.align(Alignment.Center).widthIn(max = defaultMaxWidth)
     ) {
-        Column(Modifier.padding(defaultPadding)) {
+        Column(Modifier.padding(defaultPadding).fillMaxWidth()) {
             uiLogic.getDoneSeverity().getSeverityIcon()?.let { icon ->
                 Icon(
                     icon,
