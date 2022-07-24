@@ -82,8 +82,8 @@ fun ColdSigningResultLayout(
                 lastPageButtonLabel = STRING_LABEL_DISMISS,
                 descriptionLabel = STRING_DESC_SHOW_SIGNED_MULTIPLE,
                 lastPageDescriptionLabel = STRING_DESC_SHOW_SIGNED,
-
-                )
+                modifier = Modifier.padding(top = defaultPadding * 1.5f)
+            )
 
             // TODO cold wallet save/load functionality
             IconButton({ lowRes = !lowRes }, Modifier.align(Alignment.TopEnd)) {

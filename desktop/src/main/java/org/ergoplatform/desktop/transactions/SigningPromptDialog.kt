@@ -101,6 +101,7 @@ fun PagedQrContainer(
     lastPageButtonLabel: String,
     descriptionLabel: String,
     lastPageDescriptionLabel: String,
+    modifier: Modifier = Modifier,
 ) {
     var page by remember(lowRes) { mutableStateOf(0) }
     val qrPages = remember(lowRes) {
@@ -109,24 +110,26 @@ fun PagedQrContainer(
     val qrImage = remember(page, qrPages) { getQrCodeImageBitmap(qrPages[page]) }
     val lastPage = page == qrPages.size - 1
 
-    Column {
+    Column(modifier) {
         Row(Modifier.fillMaxWidth()) {
-            IconButton(
-                { page-- },
-                Modifier.align(Alignment.CenterVertically),
-                enabled = page > 0
-            ) { Icon(Icons.Default.ChevronLeft, null) }
+            if (qrPages.size > 1)
+                IconButton(
+                    { page-- },
+                    Modifier.align(Alignment.CenterVertically),
+                    enabled = page > 0
+                ) { Icon(Icons.Default.ChevronLeft, null) }
             Image(
                 qrImage,
                 null,
                 Modifier.height(400.dp).padding(vertical = defaultPadding)
                     .weight(1f)
             )
-            IconButton(
-                { page++ },
-                Modifier.align(Alignment.CenterVertically),
-                enabled = !lastPage
-            ) { Icon(Icons.Default.ChevronRight, null) }
+            if (qrPages.size > 1)
+                IconButton(
+                    { page++ },
+                    Modifier.align(Alignment.CenterVertically),
+                    enabled = !lastPage
+                ) { Icon(Icons.Default.ChevronRight, null) }
         }
 
         Text(
