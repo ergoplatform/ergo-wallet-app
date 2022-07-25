@@ -127,6 +127,7 @@ class NavHostComponent(
                     screenConfig.request,
                     screenConfig.walletId,
                     screenConfig.derivationIndex,
+                    screenConfig.onCompleted,
                     componentContext,
                     this
                 )

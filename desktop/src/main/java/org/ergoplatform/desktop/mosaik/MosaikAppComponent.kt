@@ -9,19 +9,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.res.loadImageBitmap
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.push
 import com.arkivanov.essenty.lifecycle.doOnResume
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.appVersionString
 import org.ergoplatform.desktop.ui.copyToClipoard
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.navigation.ScreenConfig
+import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
+import org.ergoplatform.desktop.wallet.addresses.ChooseAddressesListDialog
 import org.ergoplatform.mosaik.*
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoAuthAction
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
 import org.ergoplatform.mosaik.model.actions.TokenInformationAction
+import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.transactions.isErgoPaySigningRequest
+import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 class MosaikAppComponent(
     private val appTitle: String?,
@@ -34,6 +43,8 @@ class MosaikAppComponent(
         get() = manifestState.value?.appName ?: appTitle ?: appUrl
 
     private val isFavoriteState = mutableStateOf(false)
+
+    private var runOnResume: (() -> Unit)? = null
 
     override val actions: @Composable RowScope.() -> Unit
         get() = {
@@ -74,7 +85,17 @@ class MosaikAppComponent(
         }
 
         override fun runErgoPayAction(action: ErgoPayAction) {
-            TODO("Not yet implemented")
+            if (isErgoPaySigningRequest(action.url)) {
+                val runOnEpComplete: (() -> Unit)? = action.onFinished?.let { onFinishedAction ->
+                    { runOnResume = { runAction(onFinishedAction) } }
+                }
+
+                router.push(
+                    ScreenConfig.ErgoPay(action.url, null, null, onCompleted = runOnEpComplete)
+                )
+            } else {
+                raiseError(IllegalArgumentException("ErgoPayAction without actual signing request: ${action.url}"))
+            }
         }
 
         override fun runTokenInformationAction(action: TokenInformationAction) {
@@ -83,7 +104,9 @@ class MosaikAppComponent(
         }
 
         override fun scanQrCode(actionId: String) {
-            TODO("Not yet implemented")
+            router.push(ScreenConfig.QrCodeScanner { qrCode ->
+                qrCodeScanned(actionId, qrCode)
+            })
         }
 
         override fun showDialog(dialog: MosaikDialog) {
@@ -91,11 +114,13 @@ class MosaikAppComponent(
         }
 
         override fun showErgoAddressChooser(valueId: String) {
-            TODO("Not yet implemented")
+            valueIdAddressChosen = valueId
+            startWalletChooser()
         }
 
         override fun showErgoWalletChooser(valueId: String) {
-            TODO("Not yet implemented")
+            valueIdWalletChosen = valueId
+            startWalletChooser()
         }
 
         override fun onAppNavigated(manifest: MosaikManifest) {
@@ -110,6 +135,8 @@ class MosaikAppComponent(
 
     init {
         lifecycle.doOnResume {
+            runOnResume?.invoke()
+            runOnResume = null
             mosaikRuntime.checkViewTreeValidity()
         }
 
@@ -144,6 +171,10 @@ class MosaikAppComponent(
 
     private val noAppLoadedErrorState = mutableStateOf<Throwable?>(null)
     private val manifestState = mutableStateOf<MosaikManifest?>(null)
+    private var valueIdWalletChosen: String? = null
+    private var valueIdAddressChosen: String? = null
+    private val chooseWalletDialog = mutableStateOf<List<Wallet>?>(null)
+    private val chooseAddressDialog = mutableStateOf<Wallet?>(null)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -155,6 +186,66 @@ class MosaikAppComponent(
                 mosaikRuntime.loadMosaikApp(appUrl)
             }
         )
+
+        if (chooseWalletDialog.value != null) {
+            val walletList = chooseWalletDialog.value!!
+            ChooseWalletListDialog(
+                walletList, true,
+                onWalletChosen = { walletConfig ->
+                    val walletChosen = walletList.first { walletConfig == it.walletConfig }
+                    chooseWalletDialog.value = null
+                    onWalletChosen(walletChosen)
+                },
+                onDismiss = { chooseWalletDialog.value = null },
+            )
+        }
+
+        if (chooseAddressDialog.value != null) {
+            ChooseAddressesListDialog(
+                chooseAddressDialog.value!!,
+                withAllAddresses = false,
+                onAddressChosen = { walletAddress ->
+                    chooseAddressDialog.value = null
+                    mosaikRuntime.setValue(valueIdAddressChosen!!, walletAddress!!.publicAddress)
+                },
+                onDismiss = { chooseAddressDialog.value = null },
+            )
+        }
+
+    }
+
+    private fun startWalletChooser() {
+        componentScope().launch {
+            chooseWalletDialog.value =
+                Application.database.walletDbProvider.getWalletsWithStates()
+        }
+    }
+
+    private fun onWalletChosen(walletChosen: Wallet) {
+        valueIdWalletChosen?.let { valueId ->
+            mosaikRuntime.setValue(
+                valueId,
+                walletChosen.getSortedDerivedAddressesList().map { it.publicAddress })
+            valueIdWalletChosen = null
+        }
+
+        valueIdAddressChosen?.let {
+            val addresses = walletChosen.getSortedDerivedAddressesList()
+            if (addresses.size == 1)
+                onAddressChosen(addresses.first())
+            else
+                chooseAddressDialog.value = walletChosen
+        }
+
+    }
+
+    private fun onAddressChosen(walletAddress: WalletAddress) {
+        mosaikRuntime.setValue(
+            valueIdAddressChosen!!,
+            walletAddress.publicAddress
+        )
+        valueIdAddressChosen = null
+
     }
 
     override fun onNavigateBack(): Boolean = mosaikRuntime.navigateBack()

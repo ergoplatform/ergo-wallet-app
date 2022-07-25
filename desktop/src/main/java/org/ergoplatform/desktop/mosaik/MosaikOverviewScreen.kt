@@ -11,12 +11,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesomeMosaic
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
@@ -107,7 +105,8 @@ private fun MosaikAppList(
                     .clickable { onAppClicked(mosaikApp) }) {
 
                 Row(Modifier.padding(defaultPadding / 2)) {
-                    val appIconModifier = Modifier.align(Alignment.CenterVertically).size(bigIconSize)
+                    val appIconModifier =
+                        Modifier.align(Alignment.CenterVertically).size(bigIconSize)
 
                     AppIcon(mosaikApp, appIconModifier)
 
@@ -138,27 +137,25 @@ private fun AppIcon(
     mosaikApp: MosaikAppEntry,
     modifier: Modifier
 ) {
-    val imageBitmapState =
-        remember(mosaikApp.iconFile) { mutableStateOf<ImageBitmap?>(null) }
-
     // set icon, if we have one
-    mosaikApp.iconFile?.let { fileId ->
-        LaunchedEffect(fileId) {
-            Application.filesCache.readFileContent(fileId)?.let { imageBytes ->
+    val imageBitmap = mosaikApp.iconFile?.let { iconFile ->
+        remember(iconFile) {
+            Application.filesCache.readFileContent(iconFile)?.let { imageBytes ->
                 try {
-                    imageBitmapState.value = loadImageBitmap(imageBytes.inputStream())
+                    loadImageBitmap(imageBytes.inputStream())
                 } catch (t: Throwable) {
                     LogUtils.logDebug(
                         "AppOverView",
                         "Could not read icon file",
                         t
                     )
+                    null
                 }
             }
         }
     }
 
-    if (imageBitmapState.value == null)
+    if (imageBitmap == null)
         Icon(
             Icons.Default.AutoAwesomeMosaic,
             mosaikApp.name,
@@ -167,7 +164,7 @@ private fun AppIcon(
         )
     else
         Image(
-            imageBitmapState.value!!,
+            imageBitmap,
             mosaikApp.name,
             modifier
         )
