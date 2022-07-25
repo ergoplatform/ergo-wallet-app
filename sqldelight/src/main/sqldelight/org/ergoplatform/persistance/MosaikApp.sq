@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS `mosaik_app` (
+    `url` TEXT NOT NULL,
+    `name` TEXT NOT NULL,
+    `description` TEXT,
+    `iconFile` TEXT,
+    `last_visited` INTEGER NOT NULL,
+    `favorite` INTEGER AS Boolean NOT NULL,
+    PRIMARY KEY(`url`)
+);
+
+CREATE INDEX IF NOT EXISTS `index_mosaik_app_favorite_name` ON `mosaik_app` (`favorite`, `name`);
+
+insertOrReplace:
+INSERT OR REPLACE INTO `mosaik_app` (
+    `url`,`name`,`description`,`iconFile`,`last_visited`,`favorite`
+) VALUES ?;
+
+deleteOldest:
+DELETE FROM mosaik_app WHERE favorite == 0 AND last_visited < ?;
+
+allAppsByLastVisited:
+SELECT * FROM mosaik_app WHERE favorite == 0 ORDER BY last_visited DESC LIMIT 10;
+
+appFavoritesByLastVisited:
+SELECT * FROM mosaik_app WHERE favorite != 0  ORDER BY last_visited DESC;
+
+loadAppEntry:
+SELECT * FROM mosaik_app WHERE url == ?;
