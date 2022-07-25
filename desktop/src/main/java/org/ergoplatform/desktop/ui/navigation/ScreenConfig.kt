@@ -6,6 +6,8 @@ import org.ergoplatform.persistance.WalletConfig
 
 sealed class ScreenConfig : Parcelable {
     object WalletList : ScreenConfig()
+    object MosaikAppOverview : ScreenConfig()
+    data class MosaikApp(val appTitle: String?, val appUrl: String) : ScreenConfig()
     object Settings : ScreenConfig()
     object AddWalletChooser : ScreenConfig()
     object AddReadOnlyWallet : ScreenConfig()

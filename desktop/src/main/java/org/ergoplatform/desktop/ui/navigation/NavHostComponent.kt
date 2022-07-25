@@ -4,8 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.AutoAwesomeMosaic
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -19,8 +20,13 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.decompose.router.navigate
 import com.arkivanov.decompose.router.router
 import org.ergoplatform.Application
+import org.ergoplatform.desktop.mosaik.MosaikOverviewComponent
+import org.ergoplatform.desktop.mosaik.MosaikAppComponent
 import org.ergoplatform.desktop.settings.SettingsComponent
-import org.ergoplatform.desktop.transactions.*
+import org.ergoplatform.desktop.transactions.ColdWalletSigningComponent
+import org.ergoplatform.desktop.transactions.ErgoPaySigningComponent
+import org.ergoplatform.desktop.transactions.ReceiveToWalletComponent
+import org.ergoplatform.desktop.transactions.SendFundsComponent
 import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.AppLockScreen
 import org.ergoplatform.desktop.ui.QrScannerComponent
@@ -29,6 +35,7 @@ import org.ergoplatform.desktop.wallet.addresses.WalletAddressesComponent
 import org.ergoplatform.mosaik.MosaikComposeDialog
 import org.ergoplatform.mosaik.MosaikComposeDialogHandler
 import org.ergoplatform.mosaik.MosaikDialog
+import org.ergoplatform.uilogic.STRING_TITLE_MOSAIK
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
 import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
@@ -140,6 +147,15 @@ class NavHostComponent(
                 screenConfig.callback
             )
 
+            is ScreenConfig.MosaikAppOverview -> MosaikOverviewComponent(
+                componentContext, this
+            )
+
+            is ScreenConfig.MosaikApp -> MosaikAppComponent(
+                screenConfig.appTitle, screenConfig.appUrl,
+                componentContext, this
+            )
+
             ScreenConfig.Settings -> SettingsComponent(
                 componentContext, this
             )
@@ -202,7 +218,7 @@ class NavHostComponent(
             BottomNavigationItem(
                 icon = {
                     Icon(
-                        Icons.Outlined.AccountBalanceWallet,
+                        Icons.Default.AccountBalanceWallet,
                         contentDescription = Application.texts.getString(
                             STRING_TITLE_WALLETS
                         )
@@ -218,7 +234,21 @@ class NavHostComponent(
             BottomNavigationItem(
                 icon = {
                     Icon(
-                        Icons.Outlined.Settings,
+                        Icons.Default.AutoAwesomeMosaic,
+                        contentDescription = Application.texts.getString(STRING_TITLE_MOSAIK)
+                    )
+                },
+                selected = navItemState.value == NavItem.MOSAIK,
+                onClick = {
+                    navItemState.value = NavItem.MOSAIK
+                    router.navigate { mutableListOf(ScreenConfig.MosaikAppOverview) }
+                },
+                label = { Text(text = Application.texts.getString(STRING_TITLE_MOSAIK)) },
+            )
+            BottomNavigationItem(
+                icon = {
+                    Icon(
+                        Icons.Default.Settings,
                         contentDescription = Application.texts.getString(
                             STRING_TITLE_SETTINGS
                         )
@@ -235,7 +265,7 @@ class NavHostComponent(
     }
 
     private enum class NavItem {
-        WALLETS, SETTINGS
+        WALLETS, SETTINGS, MOSAIK
     }
 }
 

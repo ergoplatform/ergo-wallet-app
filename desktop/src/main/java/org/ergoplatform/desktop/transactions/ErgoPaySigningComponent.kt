@@ -32,6 +32,8 @@ class ErgoPaySigningComponent(
     override val appBarLabel: String
         get() = Application.texts.getString(STRING_TITLE_ERGO_PAY_REQUEST)
 
+    private val canReloadState = mutableStateOf(false)
+
     override val actions: @Composable RowScope.() -> Unit
         get() = {
             IconButton(
@@ -42,7 +44,7 @@ class ErgoPaySigningComponent(
                         Application.database.walletDbProvider
                     )
                 },
-                enabled = ergoPayUiLogic.canReloadFromDapp(),
+                enabled = canReloadState.value,
             ) {
                 Icon(Icons.Default.Refresh, null)
             }
@@ -126,6 +128,7 @@ class ErgoPaySigningComponent(
         override fun notifyStateChanged(newState: State) {
             ergoPayState.value = newState
             enforceRefreshAppbar()
+            canReloadState.value = ergoPayUiLogic.canReloadFromDapp()
         }
 
         override val coroutineScope: CoroutineScope

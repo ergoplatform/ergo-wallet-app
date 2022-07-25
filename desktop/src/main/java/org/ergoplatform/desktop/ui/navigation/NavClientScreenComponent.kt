@@ -48,4 +48,6 @@ abstract class NavClientScreenComponent(
     fun enforceRefreshAppbar() {
         refreshAppbarState.value = refreshAppbarState.value + 1
     }
+
+    open fun onNavigateBack(): Boolean = false
 }

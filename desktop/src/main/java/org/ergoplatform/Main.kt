@@ -19,16 +19,14 @@ import com.badlogic.gdx.utils.ResourceWrapper
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import net.harawata.appdirs.AppDirsFactory
 import org.ergoplatform.desktop.Preferences
+import org.ergoplatform.desktop.persistance.DesktopCacheFileManager
 import org.ergoplatform.desktop.ui.DecomposeDesktopExampleTheme
 import org.ergoplatform.desktop.ui.DesktopStringProvider
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.MosaikComposeConfig
 import org.ergoplatform.mosaik.MosaikStyleConfig
-import org.ergoplatform.persistance.AppDatabase
-import org.ergoplatform.persistance.DbInitializer
-import org.ergoplatform.persistance.PreferencesProvider
-import org.ergoplatform.persistance.SqlDelightAppDb
+import org.ergoplatform.persistance.*
 import org.ergoplatform.uilogic.STRING_APP_NAME
 import org.ergoplatform.utils.LogUtils
 import java.io.File
@@ -52,6 +50,10 @@ fun main(args: Array<String>) {
         DesktopStringProvider(I18NBundle.createBundle(ResourceWrapper("/i18n/strings")))
 
     val appDirs = AppDirsFactory.getInstance()
+    Application.filesCache = DesktopCacheFileManager(
+        appDirs.getUserCacheDir("ergowallet", null, null)
+    )
+
     val dataDir = appDirs.getUserDataDir("ergowallet", null, null)
 
     Application.database = SqlDelightAppDb(setupDatabase(dataDir))
@@ -124,4 +126,5 @@ object Application {
     lateinit var database: SqlDelightAppDb
     lateinit var prefs: PreferencesProvider
     lateinit var startUpArguments: List<String>
+    lateinit var filesCache: CacheFileManager
 }

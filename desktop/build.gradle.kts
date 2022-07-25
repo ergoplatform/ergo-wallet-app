@@ -64,7 +64,7 @@ tasks {
     }
 }
 
-project.version = "1.10.2213"
+project.version = "1.10.2213" // TODO inject to jpackage.cfg and Constants.kt
 
 val currentArch by lazy { System.getProperty("os.arch") }
 

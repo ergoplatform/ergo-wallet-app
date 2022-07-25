@@ -24,6 +24,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import com.arkivanov.decompose.router.Router
 import com.arkivanov.decompose.router.pop
 import org.ergoplatform.desktop.ui.navigation.Component
+import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.mosaik.MosaikStyleConfig
@@ -94,7 +95,10 @@ private fun WalletAppBar(
             title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
             actions = actions,
             navigationIcon = if (router.state.value.backStack.isEmpty()) null else ({
-                AppBackButton(onClick = router::pop)
+                AppBackButton(onClick = {
+                    if ((router.state.value.activeChild.instance as? NavClientScreenComponent)?.onNavigateBack() != true)
+                        router.pop()
+                })
             })
         )
     }
