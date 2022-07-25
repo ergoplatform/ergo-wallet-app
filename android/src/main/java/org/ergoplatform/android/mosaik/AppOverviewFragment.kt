@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -25,8 +26,7 @@ class AppOverviewFragment : Fragment() {
     private var _binding: FragmentAppOverviewBinding? = null
     private val binding get() = _binding!!
 
-    // TODO Mosaik way to delete mosaik_host entries and non-favorite apps
-    //  TODO delete cached icon files not linked any more
+    private val viewModel: MosaikAppOverviewViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,24 +45,16 @@ class AppOverviewFragment : Fragment() {
             true
         }
 
-        fillAppLists()
-    }
-
-    private fun fillAppLists() {
-        val db = AppDatabase.getInstance(requireContext())
+        viewModel.uiLogic.init(AppDatabase.getInstance(requireContext()))
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    db.mosaikDbProvider.getAllAppsByLastVisited(5).collect { lastVisited ->
-                        lastVisited.lastOrNull()?.lastVisited?.let { oldestShownEntry ->
-                            db.mosaikDbProvider.deleteAppsNotFavoriteVisitedBefore(oldestShownEntry)
-                        }
-
-                        refreshLastVisited(lastVisited)
+                    viewModel.uiLogic.lastVisitedFlow.collect {
+                        refreshLastVisited(it)
                     }
                 }
                 launch {
-                    db.mosaikDbProvider.getAllAppFavoritesByLastVisited().collect { favorites ->
+                    viewModel.uiLogic.favoritesFlow.collect { favorites ->
                         refreshFavorites(favorites)
                     }
                 }
