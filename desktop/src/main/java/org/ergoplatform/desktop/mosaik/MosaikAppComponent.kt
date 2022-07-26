@@ -115,11 +115,13 @@ class MosaikAppComponent(
 
         override fun showErgoAddressChooser(valueId: String) {
             valueIdAddressChosen = valueId
+            valueIdWalletChosen = null
             startWalletChooser()
         }
 
         override fun showErgoWalletChooser(valueId: String) {
             valueIdWalletChosen = valueId
+            valueIdAddressChosen = null
             startWalletChooser()
         }
 
