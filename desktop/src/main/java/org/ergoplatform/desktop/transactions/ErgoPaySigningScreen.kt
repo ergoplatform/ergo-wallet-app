@@ -53,7 +53,9 @@ private fun BoxScope.ErgoPayTransactionInfoLayout(
     uiLogic: ErgoPaySigningUiLogic,
     onConfirm: () -> Unit
 ) {
-    Column(Modifier.widthIn(max = defaultMaxWidth).align(Alignment.Center)) {
+    Column(
+        Modifier.widthIn(max = defaultMaxWidth).align(Alignment.Center).padding(defaultPadding)
+    ) {
         uiLogic.epsr?.message?.let { message ->
             AppCard(Modifier.fillMaxWidth().padding(bottom = defaultPadding)) {
                 Row(Modifier.padding(defaultPadding)) {
@@ -93,7 +95,7 @@ private fun BoxScope.ErgoPayChooseAddressLayout(
     onChooseAddress: () -> Unit
 ) {
     AppCard(
-        Modifier.align(Alignment.Center).widthIn(max = defaultMaxWidth)
+        Modifier.align(Alignment.Center).widthIn(max = defaultMaxWidth).padding(defaultPadding)
     ) {
         Column(Modifier.padding(defaultPadding)) {
             Icon(
@@ -143,7 +145,7 @@ private fun BoxScope.ErgoPayDoneLayout(
     onDismiss: () -> Unit,
 ) {
     AppCard(
-        Modifier.align(Alignment.Center).widthIn(max = defaultMaxWidth)
+        Modifier.align(Alignment.Center).widthIn(max = defaultMaxWidth).padding(defaultPadding)
     ) {
         Column(Modifier.padding(defaultPadding).fillMaxWidth()) {
             uiLogic.getDoneSeverity().getSeverityIcon()?.let { icon ->
@@ -157,6 +159,7 @@ private fun BoxScope.ErgoPayDoneLayout(
 
             Text(
                 uiLogic.getDoneMessage(Application.texts),
+                Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 style = labelStyle(LabelStyle.BODY1),
             )

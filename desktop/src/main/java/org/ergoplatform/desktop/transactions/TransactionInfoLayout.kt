@@ -125,11 +125,13 @@ fun TransactionInfoBox(
     Column(Modifier.padding(vertical = defaultPadding / 2)) {
         ErgoAddressText(address, style = labelStyle(LabelStyle.BODY1BOLD), color = uiErgoColor)
 
-        Text(
-            ErgoAmount(value ?: 0).toComposableText(),
-            Modifier.padding(horizontal = defaultPadding / 2),
-            style = labelStyle(LabelStyle.BODY1BOLD),
-        )
+        val nanoErgs = value ?: 0
+        if (nanoErgs > 0)
+            Text(
+                ErgoAmount(nanoErgs).toComposableText(),
+                Modifier.padding(horizontal = defaultPadding / 2),
+                style = labelStyle(LabelStyle.BODY1BOLD),
+            )
 
         assets?.let {
             Column(
