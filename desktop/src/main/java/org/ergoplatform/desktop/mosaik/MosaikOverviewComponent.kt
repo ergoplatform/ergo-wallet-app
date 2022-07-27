@@ -41,10 +41,12 @@ class MosaikOverviewComponent(
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
         val favoritesList = uiLogic.favoritesFlow.collectAsState()
         val lastVisitedList = uiLogic.lastVisitedFlow.collectAsState()
+        val suggestionsList = uiLogic.suggestionFlow.collectAsState()
 
         MosaikOverviewScreen(
             favoritesList.value,
             lastVisitedList.value,
+            suggestionsList.value,
             onAddressEntered = ::navigateTo,
             onAppClicked = { navigateTo(it.url, title = it.name) }
         )

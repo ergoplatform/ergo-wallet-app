@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.MosaikAppEntry
+import org.ergoplatform.mosaik.MosaikAppSuggestion
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
@@ -31,6 +32,7 @@ import org.ergoplatform.utils.LogUtils
 fun MosaikOverviewScreen(
     favoritesList: List<MosaikAppEntry>,
     lastVisitedList: List<MosaikAppEntry>,
+    suggestionList: List<MosaikAppSuggestion>,
     onAddressEntered: (String) -> Unit,
     onAppClicked: (MosaikAppEntry) -> Unit,
 ) {
@@ -81,6 +83,25 @@ fun MosaikOverviewScreen(
                 color = uiErgoColor,
             )
             MosaikAppList(lastVisitedList, onAppClicked)
+
+            if (suggestionList.isNotEmpty()) {
+                Text(
+                    remember { Application.texts.getString(STRING_TITLE_SUGGESTIONS) },
+                    Modifier.padding(top = defaultPadding * 1.5f),
+                    style = labelStyle(LabelStyle.BODY1BOLD),
+                    color = uiErgoColor,
+                )
+                MosaikAppList(suggestionList.map {
+                    MosaikAppEntry(
+                        it.appUrl,
+                        it.appName,
+                        it.appDescription,
+                        null,
+                        0,
+                        false
+                    )
+                }, onAppClicked)
+            }
         }
     }
 }
