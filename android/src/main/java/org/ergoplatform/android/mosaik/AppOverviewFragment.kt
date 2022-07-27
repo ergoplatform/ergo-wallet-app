@@ -20,6 +20,7 @@ import org.ergoplatform.android.ui.decodeSampledBitmapFromByteArray
 import org.ergoplatform.android.ui.hideForcedSoftKeyboard
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.mosaik.MosaikAppEntry
+import org.ergoplatform.mosaik.MosaikAppSuggestion
 import org.ergoplatform.utils.LogUtils
 
 class AppOverviewFragment : Fragment() {
@@ -58,6 +59,25 @@ class AppOverviewFragment : Fragment() {
                         refreshFavorites(favorites)
                     }
                 }
+                launch {
+                    viewModel.uiLogic.suggestionFlow.collect { suggestions ->
+                        refreshSuggestions(suggestions)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun refreshSuggestions(suggestions: List<MosaikAppSuggestion>) {
+        binding.titleSuggestions.visibility = if (suggestions.isEmpty()) View.GONE else View.VISIBLE
+
+        binding.layoutSuggestions.apply {
+            removeAllViews()
+            suggestions.forEach {
+                addAppEntry(
+                    this,
+                    MosaikAppEntry(it.appUrl, it.appName, it.appDescription, null, 0, false)
+                )
             }
         }
     }
