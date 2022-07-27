@@ -287,6 +287,7 @@
     <string name="error_no_mosaik_app">Could not load app.\nReason:\n%1$s</string>
     <string name="title_last_visited">Last visited</string>
     <string name="title_favorites">Favorites</string>
+    <string name="title_suggestions">Suggested apps</string>
     <string name="desc_none">None yet</string>
     <string name="menu_favorite">Favorite</string>
     <string name="button_choose_address">Choose address…</string>
