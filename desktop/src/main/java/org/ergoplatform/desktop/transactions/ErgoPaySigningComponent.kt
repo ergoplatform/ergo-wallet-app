@@ -128,7 +128,6 @@ class ErgoPaySigningComponent(
     private inner class DesktopErgoPayUiLogic : ErgoPaySigningUiLogic() {
         override fun notifyStateChanged(newState: State) {
             ergoPayState.value = newState
-            enforceRefreshAppbar()
             canReloadState.value = ergoPayUiLogic.canReloadFromDapp()
 
             if (newState == State.DONE && ergoPayUiLogic.txId != null) {

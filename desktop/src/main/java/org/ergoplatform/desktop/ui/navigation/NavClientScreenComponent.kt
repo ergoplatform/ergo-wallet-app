@@ -3,7 +3,6 @@ package org.ergoplatform.desktop.ui.navigation
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.essenty.lifecycle.LifecycleOwner
 import com.arkivanov.essenty.lifecycle.subscribe
 import kotlinx.coroutines.CoroutineScope
@@ -19,8 +18,6 @@ abstract class NavClientScreenComponent(
     open val actions: @Composable RowScope.() -> Unit = {}
 
     open val fullScreen = false
-
-    val refreshAppbarState = mutableStateOf(0)
 
     val router by lazy { navHost.router }
 
@@ -44,10 +41,6 @@ abstract class NavClientScreenComponent(
 
     @Composable
     abstract fun renderScreenContents(scaffoldState: ScaffoldState?)
-
-    fun enforceRefreshAppbar() {
-        refreshAppbarState.value = refreshAppbarState.value + 1
-    }
 
     open fun onNavigateBack(): Boolean = false
 }

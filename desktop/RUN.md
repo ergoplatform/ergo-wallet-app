@@ -9,4 +9,8 @@ Download and run them with Java 11 or Java 17:
 For Windows, there is also an msi setup package provided - you don't need to install Java.
 
 ### Command line arguments
-* `--testnet` will run for testnet
+* `--testnet` runs testnet version
+* `--debug` prints out debug information
+* `ergopay://...` performs ErgoPay singing request
+* `ergo:..` performs ergo payment request
+* `ergoauth://...` performs ErgoAuth action

@@ -20,8 +20,8 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.decompose.router.navigate
 import com.arkivanov.decompose.router.router
 import org.ergoplatform.Application
-import org.ergoplatform.desktop.mosaik.MosaikOverviewComponent
 import org.ergoplatform.desktop.mosaik.MosaikAppComponent
+import org.ergoplatform.desktop.mosaik.MosaikOverviewComponent
 import org.ergoplatform.desktop.settings.SettingsComponent
 import org.ergoplatform.desktop.transactions.ColdWalletSigningComponent
 import org.ergoplatform.desktop.transactions.ErgoPaySigningComponent
@@ -39,7 +39,6 @@ import org.ergoplatform.uilogic.STRING_TITLE_MOSAIK
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
 import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
-import org.ergoplatform.utils.LogUtils
 
 /**
  * Navigator
@@ -188,11 +187,6 @@ class NavHostComponent(
             val showAppBars = navClientScreenComponent?.fullScreen != true
 
             if (showAppBars) {
-                val refreshState =
-                    remember { navClientScreenComponent?.refreshAppbarState ?: mutableStateOf(0) }
-                // it is needed to access the state so that the refresh works
-                LogUtils.logDebug("State refresh", "${refreshState.value}")
-
                 AppBarView(
                     navClientScreenComponent?.appBarLabel ?: "",
                     navClientScreenComponent?.actions ?: {},
