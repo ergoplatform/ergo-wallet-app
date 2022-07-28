@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddTask
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -60,7 +60,7 @@ fun TransactionSubmittedScreen(
                         },
                         Modifier.align(Alignment.CenterVertically)
                     ) {
-                        Icon(Icons.Default.Share, null)
+                        Icon(Icons.Default.OpenInBrowser, null)
                     }
                 }
 

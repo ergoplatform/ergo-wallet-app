@@ -10,10 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
@@ -26,6 +23,7 @@ import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnResume
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
 import org.ergoplatform.WalletStateSyncManager
@@ -67,17 +65,25 @@ class WalletListComponent(
                     syncManager.refreshByUser(Application.prefs, Application.database)
                 }
                 if (!refreshState.value && lastRefreshMs > 0) {
+                    val textLastRefresh = remember(lastRefreshMs) { mutableStateOf("") }
                     Text(
-                        Application.texts.getString(
-                            STRING_LABEL_LAST_SYNC,
-                            getTimeSpanString(
-                                (System.currentTimeMillis() - lastRefreshMs) / 1000L,
-                                Application.texts
-                            )
-                        ),
+                        textLastRefresh.value,
                         style = labelStyle(LabelStyle.BODY2),
                         modifier = Modifier.clickable { refreshClick() }
                     )
+                    LaunchedEffect(textLastRefresh) {
+                        // upate the last refreshed label while it is shown
+                        while (isActive) {
+                            textLastRefresh.value = Application.texts.getString(
+                                STRING_LABEL_LAST_SYNC,
+                                getTimeSpanString(
+                                    (System.currentTimeMillis() - lastRefreshMs) / 1000L,
+                                    Application.texts
+                                )
+                            )
+                            delay(30000)
+                        }
+                    }
                 }
 
                 IconButton(refreshClick) {
