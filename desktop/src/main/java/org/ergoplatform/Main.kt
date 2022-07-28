@@ -1,5 +1,7 @@
 package org.ergoplatform
 
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -17,6 +19,7 @@ import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.ResourceWrapper
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+import io.github.sanyarnd.applocker.AppLocker
 import net.harawata.appdirs.AppDirsFactory
 import org.ergoplatform.desktop.Preferences
 import org.ergoplatform.desktop.persistance.DesktopCacheFileManager
@@ -30,12 +33,15 @@ import org.ergoplatform.persistance.*
 import org.ergoplatform.uilogic.STRING_APP_NAME
 import org.ergoplatform.utils.LogUtils
 import java.io.File
+import java.nio.file.Paths
+import kotlin.system.exitProcess
 
 
 @OptIn(ExperimentalDecomposeApi::class)
 fun main(args: Array<String>) {
     val lifecycle = LifecycleRegistry()
     val root = NavHostComponent(DefaultComponentContext(lifecycle = lifecycle))
+    val bringToTop = mutableStateOf(false)
 
     // Process CLI arguments
     if (args.any { it.equals("--testnet", true) }) {
@@ -50,9 +56,21 @@ fun main(args: Array<String>) {
         DesktopStringProvider(I18NBundle.createBundle(ResourceWrapper("/i18n/strings")))
 
     val appDirs = AppDirsFactory.getInstance()
-    Application.filesCache = DesktopCacheFileManager(
-        appDirs.getUserCacheDir("ergowallet", null, null)
-    )
+    val cacheDir = appDirs.getUserCacheDir("ergowallet", null, null)
+    Application.filesCache = DesktopCacheFileManager(cacheDir)
+    val locker = AppLocker.create("org.ergoplatform.ergowallet.app#$isErgoMainNet")
+        .setPath(Paths.get(cacheDir))
+        .setMessageHandler { message ->
+            bringToTop.value = true
+            //bringToTop.value = false
+            LogUtils.logDebug("AppLocker", "Received instance message $message")
+            ""
+        } // handle messages (default: NULL)
+        .onBusy(
+            Application.startUpArguments.joinToString(" ")
+        ) { exitProcess(0) } // send message to the instance which currently owns the lock and exit
+        .build()
+    locker.lock()
 
     val dataDir = appDirs.getUserDataDir("ergowallet", null, null)
 
@@ -93,12 +111,24 @@ fun main(args: Array<String>) {
                     Pair(windowState.size.width.value, windowState.size.height.value)
                 desktopPrefs.windowPos =
                     Pair(windowState.position.x.value, windowState.position.y.value)
+                locker.unlock()
                 exitApplication()
             },
             state = windowState,
             icon = windowIcon,
             title = Application.texts.getString(STRING_APP_NAME)
         ) {
+            LaunchedEffect(bringToTop.value) {
+                if (bringToTop.value) {
+                    // workarounds to really bring the window in front
+                    window.isVisible = false
+                    window.isVisible = true
+                    window.toFront()
+                    window.isMinimized = false
+                    bringToTop.value = false
+                }
+            }
+
             DecomposeDesktopExampleTheme {
                 root.render(null)
             }

@@ -28,6 +28,7 @@ dependencies {
     implementation("com.arkivanov.decompose:decompose:$decomposeVersion")
     implementation("com.arkivanov.decompose:extensions-compose-jetbrains:$decomposeVersion")
     implementation("net.harawata:appdirs:1.2.1") // https://github.com/harawata/appdirs
+    implementation ("io.github.sanyarnd:app-locker:1.1.2") // https://github.com/sanyarnd/applocker
 
     // https://levelup.gitconnected.com/qr-code-scanner-in-kotlin-e15dd9bfbb1f
     arrayOf("core","kotlin","WebcamCapture").forEach()
