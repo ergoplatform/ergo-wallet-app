@@ -62,7 +62,7 @@
             app:enterAnim="@anim/slide_in_from_right"
             app:exitAnim="@anim/slide_out_to_left"
             app:popEnterAnim="@anim/slide_in_from_left"
-            app:popExitAnim="@anim/slide_out_to_right" >
+            app:popExitAnim="@anim/slide_out_to_right">
             <argument
                 android:name="wallet_id"
                 android:defaultValue="-1" />
@@ -155,7 +155,6 @@
     <dialog
         android:id="@+id/addWalletChooserFragment"
         android:name="org.ergoplatform.android.wallet.AddWalletChooserFragmentDialog"
-        android:label="fragment_add_wallet_chooser"
         tools:layout="@layout/fragment_add_wallet_chooser">
         <action
             android:id="@+id/action_to_createWalletDialog"
@@ -172,7 +171,6 @@
     <dialog
         android:id="@+id/createWalletDialog"
         android:name="org.ergoplatform.android.wallet.CreateWalletFragmentDialog"
-        android:label="fragment_add_wallet_create_mnemonic_dialog"
         tools:layout="@layout/fragment_create_wallet_dialog">
         <action
             android:id="@+id/action_createWalletDialog_to_confirmCreateWalletFragment"
@@ -181,7 +179,6 @@
     <dialog
         android:id="@+id/restoreWalletFragmentDialog"
         android:name="org.ergoplatform.android.wallet.RestoreWalletFragmentDialog"
-        android:label="fragment_restore_wallet"
         tools:layout="@layout/fragment_restore_wallet">
         <action
             android:id="@+id/action_restoreWalletFragmentDialog_to_saveWalletFragmentDialog"
@@ -190,7 +187,6 @@
     <dialog
         android:id="@+id/saveWalletFragmentDialog"
         android:name="org.ergoplatform.android.wallet.SaveWalletFragmentDialog"
-        android:label="fragment_save_wallet_dialog"
         tools:layout="@layout/fragment_save_wallet_dialog">
         <action
             android:id="@+id/action_saveWalletFragmentDialog_to_navigation_wallet"
@@ -250,7 +246,6 @@
     <dialog
         android:id="@+id/addReadOnlyWalletFragmentDialog"
         android:name="org.ergoplatform.android.wallet.AddReadOnlyWalletFragmentDialog"
-        android:label="AddReadOnlyWalletFragmentDialog"
         tools:layout="@layout/fragment_add_read_only_wallet_dialog">
         <action
             android:id="@+id/action_addReadOnlyWalletFragmentDialog_to_wallet_list"
@@ -259,7 +254,6 @@
     <fragment
         android:id="@+id/walletConfigFragment"
         android:name="org.ergoplatform.android.wallet.WalletConfigFragment"
-        android:label="fragment_wallet_config"
         tools:layout="@layout/fragment_wallet_config">
         <argument
             android:name="wallet_id"
@@ -279,7 +273,6 @@
     <dialog
         android:id="@+id/confirmCreateWalletFragment"
         android:name="org.ergoplatform.android.wallet.ConfirmCreateWalletFragment"
-        android:label="fragment_confirm_create_wallet"
         tools:layout="@layout/fragment_confirm_create_wallet">
         <action
             android:id="@+id/action_confirmCreateWalletFragment_to_saveWalletFragmentDialog"
@@ -291,7 +284,6 @@
     <dialog
         android:id="@+id/chooseSpendingWalletFragmentDialog"
         android:name="org.ergoplatform.android.transactions.ChooseSpendingWalletFragmentDialog"
-        android:label="ChooseSpendingWalletFragmentDialog"
         tools:layout="@layout/fragment_send_funds_wallet_chooser">
         <action
             android:id="@+id/action_chooseSpendingWalletFragmentDialog_to_sendFundsFragment"
@@ -307,7 +299,6 @@
     <fragment
         android:id="@+id/walletAddressesFragment"
         android:name="org.ergoplatform.android.wallet.addresses.WalletAddressesFragment"
-        android:label="WalletAddressesFragment"
         tools:layout="@layout/fragment_wallet_addresses">
         <argument
             android:name="walletId"
@@ -319,12 +310,10 @@
     <dialog
         android:id="@+id/connectionSettingsDialogFragment"
         android:name="org.ergoplatform.android.settings.ConnectionSettingsDialogFragment"
-        android:label="ConnectionSettingsDialogFragment"
         tools:layout="@layout/fragment_connection_settings" />
     <dialog
         android:id="@+id/walletAddressDetailsDialog"
         android:name="org.ergoplatform.android.wallet.addresses.WalletAddressDetailsDialog"
-        android:label="WalletAddressDetailsDialog"
         tools:layout="@layout/fragment_wallet_address_details_dialog">
         <argument
             android:name="walletAddressId"
@@ -333,7 +322,6 @@
     <fragment
         android:id="@+id/coldWalletSigningFragment"
         android:name="org.ergoplatform.android.transactions.ColdWalletSigningFragment"
-        android:label="ColdWalletSigningFragment"
         tools:layout="@layout/fragment_cold_wallet_signing">
         <argument
             android:name="qr_code"
@@ -346,7 +334,6 @@
     <fragment
         android:id="@+id/ergoPaySigningFragment"
         android:name="org.ergoplatform.android.transactions.ErgoPaySigningFragment"
-        android:label="ErgoPaySigningFragment"
         tools:layout="@layout/fragment_ergo_pay_signing">
         <argument
             android:name="request"
@@ -362,13 +349,12 @@
             app:destination="@id/tokenInformationDialogFragment" />
         <argument
             android:name="closeApp"
-            app:argType="boolean"
-            android:defaultValue="false" />
+            android:defaultValue="false"
+            app:argType="boolean" />
     </fragment>
     <dialog
         android:id="@+id/shareWithQrDialogFragment"
         android:name="org.ergoplatform.android.ui.ShareWithQrDialogFragment"
-        android:label="ShareWithQrDialogFragment"
         tools:layout="@layout/fragment_share_qr">
         <argument
             android:name="dateToShare"
@@ -389,7 +375,6 @@
     <fragment
         android:id="@+id/addressTransactionsFragment"
         android:name="org.ergoplatform.android.transactions.AddressTransactionsFragment"
-        android:label="AddressTransactionsFragment"
         tools:layout="@layout/fragment_address_transactions">
         <argument
             android:name="wallet_id"
@@ -415,7 +400,6 @@
     <fragment
         android:id="@+id/transactionInfoFragment"
         android:name="org.ergoplatform.android.transactions.TransactionInfoFragment"
-        android:label="TransactionInfoFragment"
         tools:layout="@layout/fragment_transaction_info">
         <action
             android:id="@+id/action_transactionInfoFragment_to_tokenInformationDialogFragment"
@@ -435,7 +419,6 @@
     <fragment
         android:id="@+id/ergoAuthenticationFragment"
         android:name="org.ergoplatform.android.ergoauth.ErgoAuthenticationFragment"
-        android:label="ErgoAuthenticationFragment"
         tools:layout="@layout/fragment_ergo_authentication">
         <argument
             android:name="ergoAuthUrl"
@@ -444,5 +427,53 @@
             android:name="walletId"
             android:defaultValue="-1"
             app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/mosaikFragment"
+        android:name="org.ergoplatform.android.mosaik.MosaikFragment"
+        tools:layout="@layout/fragment_mosaik">
+        <argument
+            android:name="url"
+            app:argType="string" />
+        <argument
+            android:name="title"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_mosaikFragment_to_ergoPaySigningFragment"
+            app:destination="@id/ergoPaySigningFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right">
+            <argument
+                android:name="wallet_id"
+                android:defaultValue="-1" />
+            <argument
+                android:name="derivation_idx"
+                android:defaultValue="-1" />
+        </action>
+        <action
+            android:id="@+id/action_mosaikFragment_to_tokenInformationDialogFragment"
+            app:destination="@id/tokenInformationDialogFragment" />
+        <action
+            android:id="@+id/action_mosaikFragment_to_ergoAuthenticationFragment"
+            app:destination="@id/ergoAuthenticationFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_mosaik"
+        android:name="org.ergoplatform.android.mosaik.AppOverviewFragment"
+        tools:layout="@layout/fragment_app_overview">
+        <action
+            android:id="@+id/action_appOverviewFragment_to_mosaik"
+            app:destination="@id/mosaikFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
 </navigation>

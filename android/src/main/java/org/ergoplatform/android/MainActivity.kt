@@ -33,7 +33,9 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_wallet, R.id.navigation_settings
+                R.id.navigation_wallet,
+                R.id.navigation_mosaik,
+                R.id.navigation_settings
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -46,6 +48,12 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             handleIntent(navController)
         }
+
+        setMosaikButtonVisibility(navView)
+    }
+
+    fun setMosaikButtonVisibility(navView: BottomNavigationView = findViewById(R.id.nav_view)) {
+        navView.menu.findItem(R.id.navigation_mosaik).isVisible = Preferences(this).mosaikEnabled
     }
 
     fun scanQrCode() {

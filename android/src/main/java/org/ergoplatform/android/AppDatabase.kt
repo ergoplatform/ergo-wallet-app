@@ -9,6 +9,10 @@ import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.ergoplatform.android.mosaik.MosaikAppDbEntity
+import org.ergoplatform.android.mosaik.MosaikDbDao
+import org.ergoplatform.android.mosaik.MosaikHostDbEntity
+import org.ergoplatform.android.mosaik.toDbEntity
 import org.ergoplatform.android.tokens.TokenDbDao
 import org.ergoplatform.android.tokens.TokenInformationDbEntity
 import org.ergoplatform.android.tokens.TokenPriceDbEntity
@@ -18,6 +22,9 @@ import org.ergoplatform.android.transactions.AddressTransactionTokenDbEntity
 import org.ergoplatform.android.transactions.TransactionDbDao
 import org.ergoplatform.android.transactions.toDbEntity
 import org.ergoplatform.android.wallet.*
+import org.ergoplatform.mosaik.MosaikAppEntry
+import org.ergoplatform.mosaik.MosaikAppHost
+import org.ergoplatform.mosaik.MosaikDbProvider
 import org.ergoplatform.persistance.*
 
 @Database(
@@ -29,15 +36,18 @@ import org.ergoplatform.persistance.*
         AddressTransactionDbEntity::class,
         AddressTransactionTokenDbEntity::class,
         TokenPriceDbEntity::class,
-        TokenInformationDbEntity::class
+        TokenInformationDbEntity::class,
+        MosaikAppDbEntity::class,
+        MosaikHostDbEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase(), IAppDatabase {
     abstract fun walletDao(): WalletDbDao
     abstract fun tokenDao(): TokenDbDao
     abstract fun transactionDao(): TransactionDbDao
+    abstract fun mosaikDao(): MosaikDbDao
 
     companion object {
 
@@ -59,6 +69,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 .addMigrations(MIGRATION_4_5)
                 .addMigrations(MIGRATION_5_6)
                 .addMigrations(MIGRATION_6_7)
+                .addMigrations(MIGRATION_7_8)
                 .build()
         }
 
@@ -116,12 +127,23 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_address_transaction_token_address_tx_id` ON `address_transaction_token` (`address`, `tx_id`)")
             }
         }
+
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS `mosaik_app` (`url` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT, `iconFile` TEXT, `last_visited` INTEGER NOT NULL, `favorite` INTEGER NOT NULL, PRIMARY KEY(`url`))")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_mosaik_app_favorite_name` ON `mosaik_app` (`favorite`, `name`)")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `mosaik_host` (`hostName` TEXT NOT NULL, `guid` TEXT NOT NULL, PRIMARY KEY(`hostName`))")
+            }
+        }
+
     }
 
     override val tokenDbProvider get() = RoomTokenDbProvider(this)
     override val walletDbProvider get() = RoomWalletDbProvider(this)
     override val transactionDbProvider: TransactionDbProvider
         get() = RoomTransactionDbProvider(this)
+    override val mosaikDbProvider: MosaikDbProvider
+        get() = RoomMosaikDbProvider(this)
 }
 
 class RoomWalletDbProvider(private val database: AppDatabase) : WalletDbProvider {
@@ -287,5 +309,29 @@ class RoomTransactionDbProvider(private val database: AppDatabase) : Transaction
         return database.transactionDao().loadAddressTransactionTokens(address, txId)
             .map { it.toModel() }
     }
+
+}
+
+class RoomMosaikDbProvider(private val database: AppDatabase) : MosaikDbProvider {
+    override suspend fun loadAppEntry(url: String): MosaikAppEntry? =
+        database.mosaikDao().loadAppEntry(url)?.toModel()
+
+    override suspend fun insertOrUpdateAppEntry(mosaikApp: MosaikAppEntry) =
+        database.mosaikDao().insertOrUpdateAppEntry(mosaikApp.toDbEntity())
+
+    override fun getAllAppFavoritesByLastVisited(): Flow<List<MosaikAppEntry>> =
+        database.mosaikDao().getAppFavoritesByLastVisited().map { it.map { it.toModel() } }
+
+    override fun getAllAppsByLastVisited(limit: Int): Flow<List<MosaikAppEntry>> =
+        database.mosaikDao().getAllAppsByLastVisited(limit).map { it.map { it.toModel() } }
+
+    override suspend fun deleteAppsNotFavoriteVisitedBefore(timestamp: Long) =
+        database.mosaikDao().deleteAppsNotFavoriteVisitedBefore(timestamp)
+
+    override suspend fun insertOrUpdateAppHost(mosaikApp: MosaikAppHost) =
+        database.mosaikDao().insertOrUpdateAppHost(mosaikApp.toDbEntity())
+
+    override suspend fun getMosaikHostInfo(hostname: String): MosaikAppHost? =
+        database.mosaikDao().getMosaikHostInfo(hostname)?.toModel()
 
 }

@@ -277,6 +277,22 @@
         Please be aware that this content is created by third parties and might be unwanted.</string>
     <string name="button_download_content_on">Activate</string>
     <string name="button_download_content_off">Deactivate</string>
+    <string name="button_mosaik_enabled">Mosaik plugins enabled</string>
+    <string name="button_mosaik_disabled">Mosaik plugins disabled</string>
+
+    <!-- Mosaik view -->
+    <string name="title_mosaik">dApps</string>
+    <string name="hint_app_url">App URL</string>
+    <string name="desc_mosaik">You can use and add dApps that support wallet integration here.</string>
+    <string name="error_no_mosaik_app">Could not load app.\nReason:\n%1$s</string>
+    <string name="title_last_visited">Last visited</string>
+    <string name="title_favorites">Favorites</string>
+    <string name="title_suggestions">Suggested apps</string>
+    <string name="desc_none">None yet</string>
+    <string name="menu_favorite">Favorite</string>
+    <string name="button_choose_address">Choose address…</string>
+    <string name="button_choose_wallet">Choose wallet…</string>
+    <string name="dropdown_choose_option">(please choose)</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>

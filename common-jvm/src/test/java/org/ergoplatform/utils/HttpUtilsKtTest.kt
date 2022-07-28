@@ -20,4 +20,11 @@ class HttpUtilsKtTest : TestCase() {
         Assert.assertEquals("localhost", getHostname("ergopay://localhost"))
         Assert.assertEquals("localhost", getHostname("https://localhost:8080/usw/uwf"))
     }
+
+    fun testNormalizeHostname() {
+        Assert.assertEquals("http://www.hostname.com/UrL", normalizeUrl("http://www.Hostname.com/UrL"))
+        Assert.assertEquals("http://www.hostname.com/UrL/", normalizeUrl("http://www.Hostname.com/UrL/"))
+        Assert.assertEquals("http://www.hostname.com", normalizeUrl("http://www.Hostname.com/"))
+        Assert.assertEquals("http://www.hostname.com", normalizeUrl("http://www.Hostname.com"))
+    }
 }
