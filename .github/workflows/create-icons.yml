@@ -27,12 +27,12 @@ jobs:
           convert -version
           convert -background transparent -density 100 \
           -resize 64x64 \
-          desktop/icon.svg \
-          desktop/icon.png
+          desktop/deploy/icon.svg \
+          desktop/deploy/icon.png
           convert -background transparent -density 100 \
           -define icon:auto-resize -colors 256 \
-          desktop/icon.svg \
-          desktop/icon.ico
+          desktop/deploy/icon.svg \
+          desktop/deploy/icon.ico
 
       - id: push-icons
         name: Commit icons to repository
@@ -40,6 +40,6 @@ jobs:
           # Commit icons to repository
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add ./desktop/icon.*
+          git add ./desktop/deploy/icon.*
           git commit -m "Create icons for different platforms"
           git push

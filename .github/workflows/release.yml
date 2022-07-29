@@ -72,7 +72,7 @@ jobs:
       - id: build
         name: Build distribution
         run: |
-          jpackage --verbose "@desktop/jpackage.cfg" "@desktop/jpackage-windows.cfg"
+          jpackage --verbose "@desktop/deploy/jpackage.cfg" "@desktop/deploy/jpackage-windows.cfg"
       - name: Upload release binaries
         uses: alexellis/upload-assets@0.2.2
         env:
