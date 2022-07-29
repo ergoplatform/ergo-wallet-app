@@ -111,6 +111,7 @@ class WalletListComponent(
                 delay(300) // we wait a little before doing the refresh to give DB some time
                 WalletStateSyncManager.getInstance()
                     .refreshWhenNeeded(Application.prefs, Application.database)
+                processStartUpArguments()
             }
         }
 
@@ -122,7 +123,7 @@ class WalletListComponent(
 
                     if (!walletsInitialized) {
                         walletsInitialized = true
-                        onCreateWithWalletsLoaded()
+                        processStartUpArguments()
                     }
                 }
             }
@@ -134,8 +135,10 @@ class WalletListComponent(
     }
 
     // Called after onCreate() set walletStates the first time
-    private fun onCreateWithWalletsLoaded() {
-        Application.startUpArguments.forEach {
+    private fun processStartUpArguments() {
+        val startUpArguments = Application.startUpArguments
+        Application.startUpArguments = null
+        startUpArguments?.forEach {
             handlePaymentRequests(it, false)
         }
     }

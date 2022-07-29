@@ -15,6 +15,7 @@ import androidx.compose.ui.window.rememberWindowState
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.lifecycle.LifecycleController
+import com.arkivanov.decompose.router.navigate
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.ResourceWrapper
@@ -26,6 +27,7 @@ import org.ergoplatform.desktop.persistance.DesktopCacheFileManager
 import org.ergoplatform.desktop.ui.DecomposeDesktopExampleTheme
 import org.ergoplatform.desktop.ui.DesktopStringProvider
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.MosaikComposeConfig
 import org.ergoplatform.mosaik.MosaikStyleConfig
@@ -43,7 +45,16 @@ fun main(args: Array<String>) {
     val root = NavHostComponent(DefaultComponentContext(lifecycle = lifecycle))
     val bringToTop = mutableStateOf(false)
 
-    // Process CLI arguments
+    Application.texts =
+        DesktopStringProvider(I18NBundle.createBundle(ResourceWrapper("/i18n/strings")))
+
+    val appDirs = AppDirsFactory.getInstance()
+    val cacheDir = appDirs.getUserCacheDir("ergowallet", null, null)
+    val dataDir = appDirs.getUserDataDir("ergowallet", null, null)
+
+    Application.filesCache = DesktopCacheFileManager(cacheDir)
+
+    // Process CLI arguments and check for existing appliation instance
     if (args.any { it.equals("--testnet", true) }) {
         isErgoMainNet = false
     }
@@ -51,29 +62,27 @@ fun main(args: Array<String>) {
         LogUtils.logDebug = true
     }
     Application.startUpArguments = args.toList()
-
-    Application.texts =
-        DesktopStringProvider(I18NBundle.createBundle(ResourceWrapper("/i18n/strings")))
-
-    val appDirs = AppDirsFactory.getInstance()
-    val cacheDir = appDirs.getUserCacheDir("ergowallet", null, null)
-    Application.filesCache = DesktopCacheFileManager(cacheDir)
     val locker = AppLocker.create("org.ergoplatform.ergowallet.app#$isErgoMainNet")
         .setPath(Paths.get(cacheDir))
         .setMessageHandler { message ->
             bringToTop.value = true
-            //bringToTop.value = false
             LogUtils.logDebug("AppLocker", "Received instance message $message")
+
+            if (message.toString().isNotBlank()) {
+                Application.startUpArguments = message.toString().split(' ')
+                // FIXME this only resets the navigation, but the selected bottom nav item does not change
+                root.router.navigate { mutableListOf(ScreenConfig.WalletList) }
+            }
+
             ""
         } // handle messages (default: NULL)
         .onBusy(
-            Application.startUpArguments.joinToString(" ")
+            Application.startUpArguments!!.joinToString(" ")
         ) { exitProcess(0) } // send message to the instance which currently owns the lock and exit
         .build()
     locker.lock()
 
-    val dataDir = appDirs.getUserDataDir("ergowallet", null, null)
-
+    // Database and prefs init
     Application.database = SqlDelightAppDb(setupDatabase(dataDir))
     val desktopPrefs = Preferences.getPrefsFor(dataDir)
     Application.prefs = desktopPrefs
@@ -84,6 +93,7 @@ fun main(args: Array<String>) {
     val windowSize = desktopPrefs.windowSize
     val windowPos = desktopPrefs.windowPos
 
+    // set Mosaik and app style
     MosaikComposeConfig.scrollMinAlpha = 1f
     MosaikStyleConfig.apply {
         primaryLabelColor = uiErgoColor
@@ -155,6 +165,7 @@ object Application {
     lateinit var texts: DesktopStringProvider
     lateinit var database: SqlDelightAppDb
     lateinit var prefs: PreferencesProvider
-    lateinit var startUpArguments: List<String>
     lateinit var filesCache: CacheFileManager
+
+    var startUpArguments: List<String>? = null
 }
