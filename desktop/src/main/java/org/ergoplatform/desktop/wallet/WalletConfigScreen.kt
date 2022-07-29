@@ -49,7 +49,7 @@ fun WalletConfigScreen(
 
                     IconButton(
                         onClick = {
-                            walletConfig.firstAddress?.copyToClipoard()
+                            walletConfig.firstAddress?.copyToClipboard()
                             coroutineScope.launch {
                                 scaffoldState?.snackbarHostState?.showSnackbar(
                                     Application.texts.getString(STRING_LABEL_COPIED),

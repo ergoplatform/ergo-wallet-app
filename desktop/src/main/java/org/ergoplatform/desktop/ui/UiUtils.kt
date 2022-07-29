@@ -47,7 +47,7 @@ fun showSensitiveDataCopyDialog(navHost: NavHostComponent, dataToCopy: String) {
             Application.texts.getString(STRING_DESC_COPY_SENSITIVE_DATA),
             Application.texts.getString(STRING_BUTTON_COPY_SENSITIVE_DATA),
             Application.texts.getString(STRING_LABEL_CANCEL),
-            { dataToCopy.copyToClipoard() },
+            { dataToCopy.copyToClipboard() },
             null
         )
     )

@@ -48,7 +48,7 @@ fun ShareWithQrDialog(
                 )
 
                 IconButton(
-                    onClick = { text.copyToClipoard() },
+                    onClick = { text.copyToClipboard() },
                     Modifier.align(Alignment.CenterVertically)
                 ) {
                     Icon(Icons.Default.ContentCopy, null)

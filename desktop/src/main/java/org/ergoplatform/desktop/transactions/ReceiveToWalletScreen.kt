@@ -21,7 +21,6 @@ import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.STRING_LABEL_COPIED
-import org.ergoplatform.wallet.addresses.getAddressLabel
 
 @Composable
 fun ReceiveToWalletScreen(
@@ -67,7 +66,7 @@ fun ReceiveToWalletScreen(
 
                     IconButton(
                         onClick = {
-                            address.publicAddress.copyToClipoard()
+                            address.publicAddress.copyToClipboard()
                             coroutineScope.launch {
                                 scaffoldState?.snackbarHostState?.showSnackbar(
                                     Application.texts.getString(STRING_LABEL_COPIED),

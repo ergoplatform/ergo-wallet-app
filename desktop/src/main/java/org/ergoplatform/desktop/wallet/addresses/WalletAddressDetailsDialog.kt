@@ -49,7 +49,7 @@ fun WalletAddressDetailsDialog(
 
                 IconButton(
                     onClick = {
-                        address.publicAddress.copyToClipoard()
+                        address.publicAddress.copyToClipboard()
                         coroutineScope.launch {
                             scaffoldState?.snackbarHostState?.showSnackbar(
                                 Application.texts.getString(STRING_LABEL_COPIED),

@@ -23,7 +23,7 @@ private val explorerPaymentUrlPrefix
         else "https://testnet.ergoplatform.com/payment-request?"
 
 /**
- * referenced in AndroidManifest.xml and Info.plist.xml
+ * referenced in AndroidManifest.xml PlatformUtils.kt and Info.plist.xml
  */
 private val PAYMENT_URI_SCHEME = "ergo:"
 

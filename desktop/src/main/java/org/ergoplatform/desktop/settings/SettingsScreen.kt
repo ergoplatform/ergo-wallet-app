@@ -1,7 +1,9 @@
 package org.ergoplatform.desktop.settings
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -9,7 +11,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.appVersionString
@@ -24,6 +26,7 @@ fun SettingsScreen(
     currencyButtonTextState: MutableState<String>,
     onChangeCurrencyClicked: () -> Unit,
     onChangeConnectionSettings: () -> Unit,
+    registerUriScheme: (() -> Unit)?,
 ) {
     Column {
         Column(Modifier.fillMaxWidth()) {
@@ -94,6 +97,33 @@ fun SettingsScreen(
                         }
                     }
 
+                }
+
+                // Register URI schemes
+                registerUriScheme?.let {
+                    AppCard(
+                        Modifier.widthIn(max = defaultMaxWidth).align(Alignment.CenterHorizontally)
+                            .padding(top = defaultPadding)
+                    ) {
+                        Column(Modifier.padding(defaultPadding)) {
+                            Text( // TODO i18n
+                                "You can register this application to handle Ergo specific protocols like ErgoPay and ErgoAuth.",
+                                Modifier.padding(defaultPadding / 2)
+                                    .align(Alignment.CenterHorizontally),
+                                style = labelStyle(LabelStyle.BODY1),
+                                textAlign = TextAlign.Center,
+                            )
+
+                            Button(
+                                onClick = registerUriScheme,
+                                colors = secondaryButtonColors(),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text("Register as Ergo protocol handler") // TODO i18n
+                            }
+                        }
+
+                    }
                 }
 
                 // Expert settings

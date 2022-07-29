@@ -15,7 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.appVersionString
-import org.ergoplatform.desktop.ui.copyToClipoard
+import org.ergoplatform.desktop.ui.copyToClipboard
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
@@ -76,7 +76,7 @@ class MosaikAppComponent(
         }
 
         override fun pasteToClipboard(text: String) {
-            text.copyToClipoard()
+            text.copyToClipboard()
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {

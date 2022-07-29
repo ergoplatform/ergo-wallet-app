@@ -12,8 +12,10 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.slide
 import org.ergoplatform.Application
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.desktop.ui.canRegisterUriScheme
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.registerUriSchemes
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.settings.SettingsUiLogic
 
@@ -49,7 +51,8 @@ class SettingsComponent(
             },
             onChangeConnectionSettings = {
                 dialogState.value = DialogToShow.ConnectionSettings
-            }
+            },
+            registerUriScheme = if (canRegisterUriScheme()) ::registerUriSchemes else null,
         )
 
         when (dialogState.value) {
