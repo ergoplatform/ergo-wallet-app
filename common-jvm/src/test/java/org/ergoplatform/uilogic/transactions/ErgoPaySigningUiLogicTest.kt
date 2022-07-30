@@ -408,6 +408,10 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                     }
                 }
 
+                override fun getUnconfirmedBoxById(boxId: String): OutputInfo? {
+                    TODO("Not yet implemented")
+                }
+
                 override fun getTokenInformation(tokenId: String): Call<TokenInfo> {
                     error("Not yet implemented")
                 }
