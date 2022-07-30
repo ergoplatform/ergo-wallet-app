@@ -1,6 +1,7 @@
 package org.ergoplatform
 
 import org.ergoplatform.api.*
+import org.ergoplatform.api.graphql.ExplorerGraphQlApi
 import org.ergoplatform.explorer.client.DefaultApi
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.persistance.PreferencesProvider
@@ -13,6 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 open class ApiServiceManager(
     private val defaultApi: DefaultApi,
     private val nodeTransactionsApi: TransactionsApi,
+    private val graphQlApi: ExplorerGraphQlApi,
     private val tokenVerificationApi: TokenVerificationApi
 ) : ErgoExplorerApi, TokenVerificationApi, ErgoNodeApi {
 
@@ -21,6 +23,9 @@ open class ApiServiceManager(
 
     override fun getBoxInformation(boxId: String): Call<OutputInfo> =
         defaultApi.getApiV1BoxesP1(boxId)
+
+    override fun getUnconfirmedBoxById(boxId: String): OutputInfo? =
+        graphQlApi.getUnconfirmedBoxById(boxId)
 
     override fun getTokenInformation(tokenId: String): Call<TokenInfo> =
         defaultApi.getApiV1TokensP1(tokenId)
@@ -88,6 +93,7 @@ open class ApiServiceManager(
                 ergoApiService = ApiServiceManager(
                     defaultApi,
                     nodeTransactionsApi,
+                    ExplorerGraphQlApi(preferences.prefGraphQlApiUrl),
                     tokenVerificationApi
                 )
             }

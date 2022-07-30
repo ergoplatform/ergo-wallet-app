@@ -19,4 +19,6 @@ interface ErgoExplorerApi {
         limit: Int,
         offset: Int
     ): Call<Items<TransactionInfo>>
+
+    fun getUnconfirmedBoxById(boxId: String): OutputInfo?
 }

@@ -43,7 +43,8 @@ suspend fun Transaction.buildTransactionInfo(ergoApiService: ErgoExplorerApi): T
         val inputsMap = HashMap<String, TransactionInfoBox>()
         inputBoxesIds.forEach { boxId ->
             val boxInfo = ergoApiService.getBoxInformation(boxId).execute().body()
-            // TODO explorer does not return information for unconfirmed boxes
+                ?: ergoApiService.getUnconfirmedBoxById(boxId)
+
             if (boxInfo == null)
                 throw IllegalStateException("Could not retrieve information for box $boxId.\n" +
                         "If you have unconfirmed transactions, try again after confirmation.")

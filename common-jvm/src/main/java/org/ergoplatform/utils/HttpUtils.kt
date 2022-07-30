@@ -75,14 +75,16 @@ fun Certificate.getIssuerOrg(): String? {
     }
 }
 
-fun httpPostStringSync(httpUrl: String, body: String, mediaType: String) {
+fun httpPostStringSync(httpUrl: String, body: String, mediaType: String): String? {
     val request = Request.Builder()
         .url(httpUrl)
         .post(RequestBody.create(MediaType.parse(mediaType), body))
         .build()
 
-    OkHttpSingleton.getInstance().newCall(request).execute().use { response ->
+    return OkHttpSingleton.getInstance().newCall(request).execute().use { response ->
         if (!response.isSuccessful) throw IOException("$httpUrl returned $response")
+
+        response.body()?.string()
     }
 }
 
