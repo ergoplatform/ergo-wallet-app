@@ -82,16 +82,12 @@ private fun parsePaymentRequestFromQuery(query: String): PaymentRequest? {
         } else if (it.startsWith(DESCRIPTION_PARAM_PREFIX)) {
             description =
                 URLDecoder.decode(it.substring(DESCRIPTION_PARAM_PREFIX.length), URI_ENCODING)
-        } else if (it.contains('=')) {
+        } else if (it.startsWith(TOKEN_PARAM_PREFIX) && it.contains('=')) {
             // this could be a token
-            // we accept token params without token-prefix to not break compatibility with
-            // auction house for now.
-            // TODO Q2/2022 remove backwards compatiblity
-            val keyVal = it.split('=')
+            val keyVal = it.substring(TOKEN_PARAM_PREFIX.length).split('=')
             try {
-                val tokenId = keyVal.get(0)
-                    .let { if (it.startsWith(TOKEN_PARAM_PREFIX)) it.substring(TOKEN_PARAM_PREFIX.length) else it }
-                val tokenAmount = keyVal.get(1)
+                val tokenId = keyVal[0]
+                val tokenAmount = keyVal[1]
                 // throws exception when it is not numeric
                 tokenAmount.toDouble()
                 tokenMap.put(tokenId, tokenAmount)
