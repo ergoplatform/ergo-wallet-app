@@ -34,7 +34,14 @@ dependencies {
     arrayOf("core","kotlin","WebcamCapture").forEach()
     { implementation("org.boofcv:boofcv-$it:0.40.1") {
         exclude("org.boofcv", "boofcv-swing")
+        exclude("com.github.sarxos", "webcam-capture")
     } }
+    implementation("com.nativelibs4java:bridj:0.7-20140918-3") {
+        exclude ("com.google.android.tools", "dx")
+    }
+    implementation("com.github.sarxos:webcam-capture:0.3.13-SNAPSHOT") {
+        exclude ("com.nativelibs4java", "bridj")
+    }
 }
 
 val mainClassName = "org.ergoplatform.MainKt"
