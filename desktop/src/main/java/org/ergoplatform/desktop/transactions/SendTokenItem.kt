@@ -1,10 +1,15 @@
 package org.ergoplatform.desktop.transactions
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowCircleDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -14,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
@@ -26,8 +32,10 @@ import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.toTokenAmount
 import org.ergoplatform.tokens.isSingularToken
+import org.ergoplatform.uilogic.STRING_LABEL_FIAT_AMOUNT
 import org.ergoplatform.uilogic.STRING_LABEL_UNNAMED_TOKEN
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
+import org.ergoplatform.utils.formatTokenPriceToString
 
 @Composable
 fun SendTokenItem(
@@ -37,8 +45,32 @@ fun SendTokenItem(
     onRemove: () -> Unit,
 ) {
 
-    val amountChosen = uiLogic.tokensChosen[token.tokenId!!]!!.value
-    val tokenPrice = WalletStateSyncManager.getInstance().getTokenPrice(token.tokenId)
+    val tokenId = token.tokenId!!
+    val amountChosen = uiLogic.tokensChosen[tokenId]!!.value
+    val tokenPrice =
+        remember(tokenId) { WalletStateSyncManager.getInstance().getTokenPrice(tokenId) }
+    val inputAmount = remember(tokenId) {
+        mutableStateOf(
+            TextFieldValue(
+                uiLogic.tokenAmountToText(amountChosen, token.decimals)
+            )
+        )
+    }
+    val tokenPriceState = remember(inputAmount.value, tokenPrice) {
+        tokenPrice?.let {
+            mutableStateOf(
+                Application.texts.getString(
+                    STRING_LABEL_FIAT_AMOUNT, formatTokenPriceToString(
+                        inputAmount.value.text.toTokenAmount(token.decimals)
+                            ?: TokenAmount(0, token.decimals),
+                        it.ergValue,
+                        WalletStateSyncManager.getInstance(),
+                        Application.texts,
+                    )
+                )
+            )
+        }
+    }
     val isSingular =
         token.isSingularToken() && amountChosen == 1L && tokenPrice == null
 
@@ -49,43 +81,80 @@ fun SendTokenItem(
         ) {
             Row {
 
-                Row(Modifier.fillMaxWidth().weight(1f).align(Alignment.CenterVertically)) {
+                Column(Modifier.fillMaxWidth().weight(1f).align(Alignment.CenterVertically)) {
 
-                    Text(
-                        token.name
-                            ?: Application.texts.getString(STRING_LABEL_UNNAMED_TOKEN),
-                        Modifier.weight(.55f).align(Alignment.CenterVertically),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = labelStyle(LabelStyle.BODY1),
-                    )
+                    Row(Modifier.fillMaxWidth()) {
 
-                    if (!isSingular) {
-                        val inputAmount = remember {
-                            mutableStateOf(
-                                TextFieldValue(
-                                    uiLogic.tokenAmountToText(amountChosen, token.decimals)
-                                )
+                        Text(
+                            token.name
+                                ?: Application.texts.getString(STRING_LABEL_UNNAMED_TOKEN),
+                            Modifier.weight(.55f).align(Alignment.CenterVertically),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = labelStyle(LabelStyle.BODY1),
+                        )
+
+                        if (!isSingular) {
+                            TextField(
+                                inputAmount.value,
+                                onValueChange = {
+                                    inputAmount.value = it
+                                    uiLogic.setTokenAmount(
+                                        token.tokenId!!,
+                                        it.text.toTokenAmount(token.decimals) ?: TokenAmount(
+                                            0,
+                                            token.decimals
+                                        )
+                                    )
+                                    tokensError.value = false
+                                },
+                                singleLine = true,
+                                modifier = Modifier.weight(.45f).scale(.8f)
                             )
                         }
-                        TextField(
-                            inputAmount.value,
-                            onValueChange = {
-                                inputAmount.value = it
-                                uiLogic.setTokenAmount(
-                                    token.tokenId!!,
-                                    it.text.toTokenAmount(token.decimals) ?: TokenAmount(
-                                        0,
+                    }
+
+                    if (!isSingular) {
+                        Row(Modifier.fillMaxWidth()) {
+                            Row(Modifier.clickable {
+                                uiLogic.setTokenAmount(token.tokenId!!, token.toTokenAmount())
+                                inputAmount.value = TextFieldValue(
+                                    uiLogic.tokenAmountToText(
+                                        token.amount ?: 0,
                                         token.decimals
                                     )
                                 )
-                                // TODO update token price
-                                tokensError.value = false
-                            },
-                            singleLine = true,
-                            modifier = Modifier.weight(.45f).scale(.8f)
-                        )
+                            }) {
+
+                                Icon(
+                                    Icons.Default.ArrowCircleDown,
+                                    null,
+                                    Modifier.size(defaultPadding * 1.5f),
+                                    tint = MosaikStyleConfig.defaultLabelColor
+                                )
+                                Text(
+                                    token.toTokenAmount().toStringPrettified(),
+                                    Modifier.padding(start = defaultPadding / 4),
+                                    style = labelStyle(LabelStyle.BODY1BOLD),
+                                    maxLines = 1,
+                                )
+                            }
+
+                            if (tokenPriceState != null)
+                                Text(
+                                    tokenPriceState.value,
+                                    Modifier.weight(1f).padding(
+                                        start = defaultPadding,
+                                        end = defaultPadding * 1.5f
+                                    ),
+                                    style = labelStyle(LabelStyle.BODY1),
+                                    color = MosaikStyleConfig.secondaryLabelColor,
+                                    textAlign = TextAlign.End,
+                                    maxLines = 1,
+                                )
+                        }
                     }
+
                 }
 
                 IconButton(onRemove, Modifier.align(Alignment.CenterVertically)) {
@@ -94,35 +163,4 @@ fun SendTokenItem(
             }
         }
     }
-
-    // TODO tokens show price, show balance with max amount setter
-//    if (isSingular) {
-//        itemBinding.labelTokenBalance.visibility = View.GONE
-//        itemBinding.labelBalanceValue.visibility = View.GONE
-//    } else {
-//          tokenDbEntity.toTokenAmount().toStringPrettified() max Amount
-//        itemBinding.inputTokenAmount.addTextChangedListener(
-//            TokenAmountWatcher(
-//                tokenDbEntity,
-//                tokenPrice,
-//                itemBinding
-//            )
-//        )
-//        itemBinding.labelBalanceValue.visibility =
-//            if (tokenPrice == null) View.GONE else View.VISIBLE
-//        itemBinding.inputTokenAmount.setText(
-//            viewModel.uiLogic.tokenAmountToText(
-//                amountChosen,
-//                tokenDbEntity.decimals
-//            )
-//        )
-//        itemBinding.labelTokenBalance.setOnClickListener {
-//            itemBinding.inputTokenAmount.setText(
-//                viewModel.uiLogic.tokenAmountToText(
-//                    tokenDbEntity.amount!!,
-//                    tokenDbEntity.decimals
-//                )
-//            )
-//        }
-//    }
 }

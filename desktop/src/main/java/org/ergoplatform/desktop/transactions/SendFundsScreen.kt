@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -196,12 +197,14 @@ fun SendFundsScreen(
                 tokensChosen.forEach { ergoId ->
                     uiLogic.tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }
                         ?.let { tokenDbEntity ->
-                            SendTokenItem(
-                                tokenDbEntity,
-                                tokensError,
-                                uiLogic,
-                                onRemove = { uiLogic.removeToken(tokenDbEntity.tokenId!!) }
-                            )
+                            key(tokenDbEntity.tokenId) {
+                                SendTokenItem(
+                                    tokenDbEntity,
+                                    tokensError,
+                                    uiLogic,
+                                    onRemove = { uiLogic.removeToken(tokenDbEntity.tokenId!!) }
+                                )
+                            }
                         }
                 }
                 if (tokensError.value) {
