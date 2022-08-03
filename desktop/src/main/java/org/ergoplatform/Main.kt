@@ -29,6 +29,7 @@ import org.ergoplatform.desktop.ui.DesktopStringProvider
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.ui.uiErgoColor
+import org.ergoplatform.desktop.wallet.WalletListComponent
 import org.ergoplatform.mosaik.MosaikComposeConfig
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.persistance.*
@@ -70,8 +71,14 @@ fun main(args: Array<String>) {
 
             if (message.toString().isNotBlank()) {
                 Application.startUpArguments = message.toString().split(' ')
-                // FIXME this only resets the navigation, but the selected bottom nav item does not change
-                root.router.navigate { mutableListOf(ScreenConfig.WalletList) }
+
+                val currentComponent = root.router.state.value.activeChild.instance
+                if (currentComponent is WalletListComponent){
+                    currentComponent.processStartUpArguments()
+                } else {
+                    // FIXME this only resets the navigation, but the selected bottom nav item does not change
+                    root.router.navigate { mutableListOf(ScreenConfig.WalletList) }
+                }
             }
 
             ""

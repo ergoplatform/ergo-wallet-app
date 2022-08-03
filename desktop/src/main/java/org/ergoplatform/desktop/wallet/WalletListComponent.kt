@@ -135,7 +135,7 @@ class WalletListComponent(
     }
 
     // Called after onCreate() set walletStates the first time
-    private fun processStartUpArguments() {
+    internal fun processStartUpArguments() {
         val startUpArguments = Application.startUpArguments
         Application.startUpArguments = null
         startUpArguments?.forEach {
