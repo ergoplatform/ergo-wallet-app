@@ -9,5 +9,5 @@
 ### Create the APK
 * Clone this repo
 * Download and install Android SDK (not necessary when you installed Android Studio)
-* Set up OpenJDK8 (not necessary when you installed Android Studio)
+* Set up OpenJDK11 (not necessary when you installed Android Studio)
 * Run `./gradlew assembleDebug`
