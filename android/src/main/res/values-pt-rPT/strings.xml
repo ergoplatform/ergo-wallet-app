@@ -36,14 +36,14 @@
     <string name="button_back">Voltar atrás</string>
     <string name="label_erg_amount">%1$s ERG</string>
     <string name="label_time_span_just_now">agora mesmo</string>
-    <string name="label_time_span_moments_ago">à uns momentos atrás</string>
+    <string name="label_time_span_moments_ago">há uns momentos atrás</string>
     <string name="label_time_span_minutes_ago">%1$s minutos atrás</string>
     <string name="label_time_span_hours_ago">%1$s horas atrás</string>
     <string name="label_time_span_days_ago">%1$s dias atrás</string>
-    <string name="error_camera">Erro ao iniciar a câmera. Por favor verifique as suas definições de privaidade.</string>
+    <string name="error_camera">Erro ao iniciar a câmera. Por favor verifique as suas definições de privacidade.</string>
     <string name="desc_copy_sensitive_data">Note que ao realizar a cópia desta informação para o dispositivo,
         todas as aplicações poderão ter acesso à mesma, até que sobreponha outra informação.
-        Avance com cuidade, tendo o conhecimento acima.</string>
+        Avance com cuidado, tendo o conhecimento acima.</string>
     <string name="button_copy_sensitive_data">Copiar e aceitar os riscos</string>
     <string name="error_no_wallet">Não existem ainda carteiras adicionadas nesta aplicação.</string>
 
@@ -110,7 +110,7 @@
     <string name="intro_save_wallet3">Escolha de que forma a carteira e as chaves deverão ser guardadas no dispositivo.</string>
     <string name="button_alt_address">Este não é o meu endereço</string>
     <string name="button_save_password_encrypted">Guardar password encriptada</string>
-    <string name="desc_save_password_encrypted">Introduza a password que irá utilizar cada vez que seja necessário enviar fundos?</string>
+    <string name="desc_save_password_encrypted">Introduza a password que irá utilizar cada vez que seja necessário enviar fundos.</string>
     <string name="button_save_device_encrypted">Guardar dispositivo encriptado</string>
     <string name="desc_save_device_encrypted">Realizar a autenticação no seu dispositivo para guardar a sua carteira e enviar fundos.\nActualmente
 	o método de autenticação é: %1$s</string>
@@ -189,7 +189,7 @@
     <string name="info_purpose_message_accept">Aceitar</string>
     <string name="info_purpose_message_decline">Registar</string>
     <string name="error_purpose_message">Aceitrar os termos antes de assinar a transacção.</string>
-    <string name="error_receiver_address">Por favor introduza um endereço ERG válido?</string>
+    <string name="error_receiver_address">Por favor introduza um endereço ERG válido.</string>
     <string name="error_amount">Por favor introduza uma quantia válida</string>
     <string name="error_send_transaction">Não foi possível enviar a transacção</string>
     <string name="error_prepare_transaction">Não foi possível preparar a transacção</string>
