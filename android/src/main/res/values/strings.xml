@@ -192,6 +192,7 @@
     <string name="error_amount">Please enter a valid amount</string>
     <string name="error_send_transaction">Could not send transaction</string>
     <string name="error_prepare_transaction">Could not prepare transaction</string>
+    <string name="error_use_other_node">If the problem persists, change the Ergo Node URL (Settings - Expert settings) and try again.</string>
     <string name="error_password_empty">Please enter a valid password</string>
     <string name="error_password_wrong">Wrong password</string>
     <string name="desc_transaction_send">Transaction was sent successfully and awaits confirmation. Transaction ID:</string>
