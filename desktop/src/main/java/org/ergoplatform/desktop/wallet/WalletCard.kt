@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.compose.settings.primaryButtonColors
+import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.desktop.tokens.TokenEntryView
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.MosaikStyleConfig

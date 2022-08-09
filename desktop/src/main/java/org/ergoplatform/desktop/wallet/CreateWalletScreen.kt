@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
+import org.ergoplatform.compose.settings.primaryButtonColors
+import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle

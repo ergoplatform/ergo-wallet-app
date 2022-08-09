@@ -2,7 +2,6 @@ package org.ergoplatform.desktop.wallet
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
-import androidx.compose.material.Card
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +15,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
+import org.ergoplatform.compose.settings.appTextFieldColors
+import org.ergoplatform.compose.settings.primaryButtonColors
+import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle

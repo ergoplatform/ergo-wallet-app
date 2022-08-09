@@ -5,7 +5,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -23,6 +22,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import com.arkivanov.decompose.router.Router
 import com.arkivanov.decompose.router.pop
+import org.ergoplatform.compose.settings.defaultMaxWidth
+import org.ergoplatform.compose.settings.defaultPadding
 import org.ergoplatform.desktop.ui.navigation.Component
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
@@ -42,27 +43,6 @@ private val DarkColors = darkColors(
     surface = secondaryColor,
     onPrimary = Color.White,
     onSecondary = Color.White
-)
-
-@Composable
-fun primaryButtonColors() = buttonColors(
-    MosaikStyleConfig.primaryLabelColor,
-    MosaikStyleConfig.primaryButtonTextColor
-)
-
-@Composable
-fun secondaryButtonColors() = buttonColors(
-    MosaikStyleConfig.secondaryButtonColor,
-    MosaikStyleConfig.secondaryButtonTextColor
-)
-
-@Composable
-fun appTextFieldColors() = TextFieldDefaults.outlinedTextFieldColors(
-    focusedBorderColor = MaterialTheme.colors.onSurface,
-    focusedLabelColor = MaterialTheme.colors.onSurface,
-    errorLabelColor = uiErgoColor,
-    errorBorderColor = uiErgoColor,
-    errorTrailingIconColor = uiErgoColor,
 )
 
 @Composable

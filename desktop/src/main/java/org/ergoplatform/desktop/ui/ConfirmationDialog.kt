@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.ergoplatform.Application
+import org.ergoplatform.compose.settings.primaryButtonColors
+import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.uilogic.STRING_LABEL_CANCEL

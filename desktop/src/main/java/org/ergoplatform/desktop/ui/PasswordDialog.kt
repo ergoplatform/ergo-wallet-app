@@ -26,6 +26,9 @@ import org.ergoplatform.SigningSecrets
 import org.ergoplatform.URL_FORGOT_PASSWORD_HELP
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.compose.settings.appTextFieldColors
+import org.ergoplatform.compose.settings.primaryButtonColors
+import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.WalletConfig

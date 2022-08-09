@@ -16,6 +16,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
+import org.ergoplatform.compose.settings.appTextFieldColors
+import org.ergoplatform.compose.settings.primaryButtonColors
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.getAddressDerivationPath
 import org.ergoplatform.mosaik.labelStyle

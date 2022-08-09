@@ -15,6 +15,7 @@ dependencies {
     val decomposeVersion = "0.7.0"
 
     implementation(project(":common-jvm"))
+    implementation(project(":common-compose"))
     implementation(project(":sqldelight"))
     implementation("com.squareup.sqldelight:sqlite-driver:1.5.3")
     if (osArch != null) {

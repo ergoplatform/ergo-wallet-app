@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
+import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.desktop.appVersionString
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.MosaikStyleConfig

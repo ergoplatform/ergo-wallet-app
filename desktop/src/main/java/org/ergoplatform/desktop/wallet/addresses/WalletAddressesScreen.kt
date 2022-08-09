@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
+import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.desktop.ui.AppCard
 import org.ergoplatform.desktop.ui.defaultMaxWidth
 import org.ergoplatform.desktop.ui.defaultPadding
-import org.ergoplatform.desktop.ui.secondaryButtonColors
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.Wallet

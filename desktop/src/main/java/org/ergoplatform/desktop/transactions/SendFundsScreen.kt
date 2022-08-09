@@ -21,6 +21,9 @@ import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.URL_COLD_WALLET_HELP
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.compose.settings.appTextFieldColors
+import org.ergoplatform.compose.settings.primaryButtonColors
+import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressButton
 import org.ergoplatform.mosaik.MosaikStyleConfig
@@ -30,8 +33,6 @@ import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
-import org.ergoplatform.wallet.addresses.getAddressLabel
-import org.ergoplatform.wallet.getNumOfAddresses
 
 @Composable
 fun SendFundsScreen(

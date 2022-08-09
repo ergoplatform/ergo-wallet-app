@@ -1,8 +1,6 @@
 package org.ergoplatform.desktop.wallet
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -13,7 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
-import org.ergoplatform.desktop.ui.*
+import org.ergoplatform.compose.settings.appTextFieldColors
+import org.ergoplatform.compose.settings.primaryButtonColors
+import org.ergoplatform.compose.settings.secondaryButtonColors
+import org.ergoplatform.desktop.ui.AppScrollingLayout
+import org.ergoplatform.desktop.ui.defaultMaxWidth
+import org.ergoplatform.desktop.ui.defaultPadding
+import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.uilogic.*

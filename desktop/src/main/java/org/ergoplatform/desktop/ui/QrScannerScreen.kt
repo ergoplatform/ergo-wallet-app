@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import org.ergoplatform.Application
+import org.ergoplatform.compose.settings.appTextFieldColors
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.uilogic.STRING_BUTTON_IMAGE_FROM_CLIPBOARD
