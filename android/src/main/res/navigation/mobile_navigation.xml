@@ -309,8 +309,7 @@
     </fragment>
     <dialog
         android:id="@+id/connectionSettingsDialogFragment"
-        android:name="org.ergoplatform.android.settings.ConnectionSettingsDialogFragment"
-        tools:layout="@layout/fragment_connection_settings" />
+        android:name="org.ergoplatform.android.settings.ConnectionSettingsDialogFragment" />
     <dialog
         android:id="@+id/walletAddressDetailsDialog"
         android:name="org.ergoplatform.android.wallet.addresses.WalletAddressDetailsDialog"

@@ -6,9 +6,8 @@ import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -32,7 +31,6 @@ import org.ergoplatform.android.wallet.WalletChooserCallback
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.mosaik.MosaikComposeConfig
-import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.MosaikViewTree
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.persistance.WalletConfig
@@ -153,7 +151,8 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
         }
         viewModel.scanQrCodeEvent.observe(viewLifecycleOwner) { qrScanActionId ->
             qrScanActionId?.let {
-                IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+                IntentIntegrator.forSupportFragment(this)
+                    .initiateScan(setOf(IntentIntegrator.QR_CODE))
             }
         }
         viewModel.showTokenInfoEvent.observe(viewLifecycleOwner) { tokenId ->
@@ -205,25 +204,9 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 DropdownMenuItem(onClick = onClick, content = content)
             }
         }
+        binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
-            MosaikStyleConfig.apply {
-                primaryLabelColor = colorResource(id = R.color.primary)
-                secondaryLabelColor = colorResource(id = R.color.darkgrey)
-                defaultLabelColor = colorResource(id = R.color.text_color)
-                primaryButtonTextColor = colorResource(id = R.color.textcolor)
-                secondaryButtonTextColor = colorResource(id = R.color.textcolor)
-                secondaryButtonColor = colorResource(id = R.color.secondary)
-                secondaryButtonTextColor = colorResource(id = R.color.text_color_ondark)
-                textButtonTextColor = colorResource(id = R.color.primary)
-                textButtonColorDisabled = secondaryLabelColor
-            }
-
-            MaterialTheme(
-                colors = MaterialTheme.colors.copy(
-                    surface = colorResource(id = R.color.cardview_background),
-                    isLight = resources.getBoolean(R.bool.isLight)
-                )
-            ) {
+            AppComposeTheme {
                 MosaikViewTree(viewModel.mosaikRuntime.viewTree)
             }
         }

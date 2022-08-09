@@ -3,4 +3,5 @@ include ':desktop'
 include ':ios'
 include ':sqldelight'
 include ':common-jvm'
+include('common-compose')
 rootProject.name = "Ergo Wallet"
