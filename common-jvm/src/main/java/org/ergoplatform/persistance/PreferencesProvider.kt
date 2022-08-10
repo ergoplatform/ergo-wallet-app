@@ -60,10 +60,10 @@ abstract class PreferencesProvider {
             saveString(KEY_NODE_URL, savedNodeUrl)
         }
 
-    var knownNodesList: String
-        get() = getString(KEY_NODE_LIST, "")
+    var knownNodesList: List<String>
+        get() = getString(KEY_NODE_LIST, "").split(',').filterNot { it.isBlank() }
         set(value) {
-            saveString(KEY_NODE_LIST, value)
+            saveString(KEY_NODE_LIST, value.joinToString(","))
             saveLong(KEY_LASTNODELISTREFRESH, System.currentTimeMillis())
         }
 

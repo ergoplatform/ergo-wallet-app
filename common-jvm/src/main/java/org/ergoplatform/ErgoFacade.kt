@@ -313,10 +313,9 @@ private fun refreshNodeListWhenNeeded(prefs: PreferencesProvider, nodeUrl: Strin
             val peerUrlList = peersApi.connectedPeers.execute().body()!!.map { it.restApiUrl }
             val openPeers = peerUrlList.filter { !it.isNullOrBlank() && it != nodeUrl }.distinct()
             val peersStringList = openPeers.sortedBy { if (it.startsWith("https://")) 0 else 1 }.take(10)
-                .joinToString(",")
 
             LogUtils.logDebug("PeersApi", "Found alternative nodes to connect to: $peersStringList")
-            if (peersStringList.isNotBlank())
+            if (peersStringList.isNotEmpty())
                 prefs.knownNodesList = peersStringList
         } catch (t: Throwable) {
             LogUtils.logDebug("PeersApi", "Could not fetch connected peers of $nodeUrl")

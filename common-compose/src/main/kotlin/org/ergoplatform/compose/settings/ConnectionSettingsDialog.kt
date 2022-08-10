@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -51,7 +51,13 @@ fun ColumnScope.ConnectionSettingsLayout(
 
     ConnectionTextField(explorerApiUrl, stringProvider, STRING_LABEL_EXPLORER_API_URL)
 
-    ConnectionTextField(nodeApiUrl, stringProvider, STRING_LABEL_NODE_URL)
+    ConnectionTextField(nodeApiUrl, stringProvider, STRING_LABEL_NODE_URL, trailingIcon = {
+        IconButton(onClick = {
+            preferences.knownNodesList.randomOrNull()?.let { nodeApiUrl.value = TextFieldValue(it) }
+        }) {
+            Icon(Icons.Default.AutoFixHigh, null)
+        }
+    })
 
     ConnectionTextField(tokenVerificationUrl, stringProvider, STRING_LABEL_TOKEN_VERIFICATION_URL)
 
@@ -91,7 +97,8 @@ private fun ConnectionTextField(
     explorerApiUrl: MutableState<TextFieldValue>,
     stringProvider: StringProvider,
     label: String,
-    apply: (() -> Unit)? = null
+    apply: (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     OutlinedTextField(
         explorerApiUrl.value,
@@ -100,10 +107,11 @@ private fun ConnectionTextField(
         },
         Modifier.padding(bottom = defaultPadding).fillMaxWidth(),
         keyboardOptions = KeyboardOptions(imeAction = if (apply == null) ImeAction.Next else ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = apply?.let{ { apply() } }),
+        keyboardActions = KeyboardActions(onDone = apply?.let { { apply() } }),
         maxLines = 1,
         singleLine = true,
         label = { Text(stringProvider.getString(label)) },
         colors = appTextFieldColors(),
+        trailingIcon = trailingIcon
     )
 }
