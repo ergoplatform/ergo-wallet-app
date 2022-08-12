@@ -57,4 +57,5 @@
         <attr name="fontPath" format="string"/>
     </declare-styleable>
 
+    <bool name="isTablet">false</bool>
 </resources>

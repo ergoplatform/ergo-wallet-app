@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS `mosaik_host` (
+    `hostName` TEXT NOT NULL,
+    `guid` TEXT NOT NULL,
+    PRIMARY KEY(`hostName`)
+);
+
+insertOrReplace:
+INSERT OR REPLACE INTO `mosaik_host` (`hostName`,`guid`) VALUES ?;
+
+getHostInfo:
+SELECT * FROM mosaik_host WHERE hostName = ?;

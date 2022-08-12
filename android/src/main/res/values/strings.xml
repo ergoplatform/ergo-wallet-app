@@ -33,6 +33,7 @@
     <string name="label_dismiss">Dismiss</string>
     <string name="label_remove">Remove</string>
     <string name="label_confirm">Confirm</string>
+    <string name="button_back">Back</string>
     <string name="label_erg_amount">%1$s ERG</string>
     <string name="label_time_span_just_now">just now</string>
     <string name="label_time_span_moments_ago">a few moments ago</string>
@@ -235,6 +236,8 @@
         Scan this QR code to proceed.</string>
     <string name="desc_show_signed_multiple">Your transaction was signed and needs to be sent to the network.
         Scan these QR codes to proceed.</string>
+    <string name="button_image_from_clipboard">Paste image from clipboard</string>
+    <string name="input_enter_or_paste_manually">or enter/paste manually</string>
 
     <!-- Ergo Pay Signing -->
     <string name="title_ergo_pay_request">Ergo Pay Request</string>
@@ -249,7 +252,12 @@
     <string name="error_prover_cant_sign">The transaction could not be signed with this wallet\'s keys.</string>
 
     <!-- Ergo Auth Signing -->
+    <string name="intro_auth_request">dApp on %1$s\nrequests your authentication to\n%2$s.\n\nAuthenticate
+        only when you consent to this.</string>
+    <string name="desc_secure_conn">Secure connection verified by %1$s</string>
+    <string name="desc_insecure_conn">Secure connection failed!</string>
     <string name="title_ergo_auth_request">Authentication Request</string>
+    <string name="error_no_auth_reason">(no reason provided)</string>
     <string name="button_authenticate">Authenticate</string>
     <string name="desc_authentication_wallet">Wallet used for authentication:</string>
     <string name="desc_auth_response_send">Authentication was sent to dApp successfully.</string>
@@ -269,6 +277,22 @@
         Please be aware that this content is created by third parties and might be unwanted.</string>
     <string name="button_download_content_on">Activate</string>
     <string name="button_download_content_off">Deactivate</string>
+    <string name="button_mosaik_enabled">Mosaik plugins enabled</string>
+    <string name="button_mosaik_disabled">Mosaik plugins disabled</string>
+
+    <!-- Mosaik view -->
+    <string name="title_mosaik">dApps</string>
+    <string name="hint_app_url">App URL</string>
+    <string name="desc_mosaik">You can use and add dApps that support wallet integration here.</string>
+    <string name="error_no_mosaik_app">Could not load app.\nReason:\n%1$s</string>
+    <string name="title_last_visited">Last visited</string>
+    <string name="title_favorites">Favorites</string>
+    <string name="title_suggestions">Suggested apps</string>
+    <string name="desc_none">None yet</string>
+    <string name="menu_favorite">Favorite</string>
+    <string name="button_choose_address">Choose address…</string>
+    <string name="button_choose_wallet">Choose wallet…</string>
+    <string name="dropdown_choose_option">(please choose)</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>

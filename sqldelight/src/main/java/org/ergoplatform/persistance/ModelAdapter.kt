@@ -2,6 +2,8 @@ package org.ergoplatform.persistance
 
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TokenAmount
+import org.ergoplatform.mosaik.MosaikAppEntry
+import org.ergoplatform.mosaik.MosaikAppHost
 import java.math.BigDecimal
 
 fun Wallet_configs.toModel(): WalletConfig {
@@ -144,3 +146,15 @@ fun Address_transaction_token.toModel() =
         name,
         TokenAmount(amount, decimals.toInt())
     )
+
+fun MosaikAppEntry.toDbEntity() =
+    Mosaik_app(url, name, description, iconFile, lastVisited, favorite)
+
+fun Mosaik_app.toModel() =
+    MosaikAppEntry(url, name, description, iconFile, last_visited, favorite)
+
+fun MosaikAppHost.toDbEntity() =
+    Mosaik_host(hostName, guid)
+
+fun Mosaik_host.toModel() =
+    MosaikAppHost(hostName, guid)

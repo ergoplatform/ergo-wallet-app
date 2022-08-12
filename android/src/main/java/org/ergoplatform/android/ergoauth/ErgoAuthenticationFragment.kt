@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -56,9 +57,14 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
             binding.layoutAuthenticate.visibility =
                 if (state == ErgoAuthUiLogic.State.WAIT_FOR_AUTH) View.VISIBLE else View.GONE
 
-            if (state == ErgoAuthUiLogic.State.DONE)
+            if (state == ErgoAuthUiLogic.State.DONE) {
                 refreshDoneScreen()
-            else if (state == ErgoAuthUiLogic.State.WAIT_FOR_AUTH)
+                parentFragmentManager.setFragmentResult(
+                    ergoAuthActionRequestKey, bundleOf(
+                        ergoAuthActionCompletedBundleKey to true
+                    )
+                )
+            } else if (state == ErgoAuthUiLogic.State.WAIT_FOR_AUTH)
                 refreshAuthPrompt()
         }
 
@@ -96,16 +102,15 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
     private fun refreshAuthPrompt() {
         refreshWalletLabel()
         val uiLogic = viewModel.uiLogic
-        binding.layoutAuthMessage.visibility = uiLogic.ergAuthRequest?.userMessage?.let {
-            binding.tvAuthMessage.text = getString(R.string.label_message_from_dapp, it)
-            val severityResId =
-                (uiLogic.ergAuthRequest?.messageSeverity
-                    ?: MessageSeverity.NONE).getSeverityDrawableResId()
-            binding.imageAuthMessage.setImageResource(severityResId)
-            binding.imageAuthMessage.visibility =
-                if (severityResId == 0) View.GONE else View.VISIBLE
-            View.VISIBLE
-        } ?: View.GONE
+        binding.layoutAuthMessage.visibility = View.VISIBLE
+        binding.tvAuthMessage.text =
+            uiLogic.getAuthenticationMessage(AndroidStringProvider(requireContext()))
+        val severityResId =
+            (uiLogic.ergAuthRequest?.messageSeverity
+                ?: MessageSeverity.NONE).getSeverityDrawableResId()
+        binding.imageAuthMessage.setImageResource(severityResId)
+        binding.imageAuthMessage.visibility =
+            if (severityResId == 0) View.GONE else View.VISIBLE
 
     }
 
@@ -130,5 +135,10 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        val ergoAuthActionRequestKey = "KEY_ERGOAUTH_FRAGMENT"
+        val ergoAuthActionCompletedBundleKey = "KEY_ERGOAUTH_COMPLETED"
     }
 }

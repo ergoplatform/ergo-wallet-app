@@ -3,6 +3,7 @@ package org.ergoplatform.android.transactions
 import android.os.Bundle
 import android.view.*
 import androidx.activity.addCallback
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -205,9 +206,18 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
             uiLogic.getDoneSeverity().getSeverityDrawableResId(),
             0, 0
         )
-        val shouldReload = (uiLogic.getDoneSeverity() == MessageSeverity.ERROR && uiLogic.canReloadFromDapp())
+        val shouldReload =
+            (uiLogic.getDoneSeverity() == MessageSeverity.ERROR && uiLogic.canReloadFromDapp())
         binding.buttonDismiss.visibility = if (!shouldReload) View.VISIBLE else View.GONE
         binding.buttonRetry.visibility = if (shouldReload) View.VISIBLE else View.GONE
+
+        viewModel.uiLogic.txId?.let {
+            parentFragmentManager.setFragmentResult(
+                ergoPayActionRequestKey, bundleOf(
+                    ergoPayActionCompletedBundleKey to true
+                )
+            )
+        }
     }
 
     private fun showTransactionInfo() {
@@ -234,5 +244,10 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        val ergoPayActionRequestKey = "KEY_ERGOPAY_SIGNING_FRAGMENT"
+        val ergoPayActionCompletedBundleKey = "KEY_ERGOPAY_SUBMITTED_DONE"
     }
 }

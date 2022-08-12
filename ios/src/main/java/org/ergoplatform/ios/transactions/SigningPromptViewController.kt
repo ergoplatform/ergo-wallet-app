@@ -3,6 +3,8 @@ package org.ergoplatform.ios.transactions
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.uilogic.STRING_BUTTON_SCAN_SIGNED_TX
+import org.ergoplatform.uilogic.STRING_DESC_PROMPT_SIGNING
+import org.ergoplatform.uilogic.STRING_DESC_PROMPT_SIGNING_MULTIPLE
 import org.ergoplatform.uilogic.STRING_LABEL_QR_PAGES_INFO
 import org.ergoplatform.uilogic.transactions.SubmitTransactionUiLogic
 import org.robovm.apple.coregraphics.CGRect
@@ -60,7 +62,12 @@ class SigningPromptViewController(
     }
 
     inner class QrCodeContainer :
-        PagedQrCodeContainer(texts, texts.get(STRING_BUTTON_SCAN_SIGNED_TX)) {
+        PagedQrCodeContainer(
+            texts,
+            STRING_BUTTON_SCAN_SIGNED_TX,
+            lastPageDescriptionLabel = STRING_DESC_PROMPT_SIGNING,
+            descriptionLabel = STRING_DESC_PROMPT_SIGNING_MULTIPLE
+        ) {
         override fun calcChunksFromRawData(rawData: String, limit: Int): List<String> {
             return coldSigningRequestToQrChunks(
                 rawData, limit

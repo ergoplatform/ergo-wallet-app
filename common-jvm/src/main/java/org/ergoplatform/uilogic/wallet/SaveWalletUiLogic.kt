@@ -30,7 +30,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
 //                )
 //            ))
 
-    private var derivedAddressesFound: Int = 0
+    private val derivedAddressesFound = emptyList<String>().toMutableList()
     private var derivedAddressesSearchJob: Job? = null
 
     // methods
@@ -41,7 +41,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
         if (hasAlternativeAddress) {
             // TODO BIP-32 fix useDeprecatedDerivation = !useDeprecatedDerivation
             derivedAddressesSearchJob?.cancel()
-            derivedAddressesFound = 0
+            derivedAddressesFound.clear()
             derivedAddressesSearchJob = null
             publicAddress = getPublicErgoAddressFromMnemonic(signingSecrets)
         }
@@ -73,11 +73,10 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
                                 .execute().body()!!.items.isNotEmpty() && isActive
 
                         if (histFound) {
-                            derivedAddressesFound = derivedAddressIdx
+                            derivedAddressesFound.add(derivedAddress)
                             callback(derivedAddressIdx)
+                            derivedAddressIdx++
                         }
-
-                        derivedAddressIdx++
                     }
                 } catch (t: Throwable) {
                     LogUtils.logDebug(this.javaClass.simpleName, "Error searching derived addresses: ${t.message}", t)
@@ -140,14 +139,12 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
             walletDbProvider.insertWalletConfig(walletConfig)
 
             // add derived addresses, if we've found some
-            val lastDerivedAddressIdx = derivedAddressesFound
-            for (derivedAddressIdx in 1..lastDerivedAddressIdx) {
-                val nextAddress = getPublicErgoAddressFromMnemonic(signingSecrets, derivedAddressIdx)
+            derivedAddressesFound.forEachIndexed { idx, nextAddress ->
                 // this address could be already added as a read only address - delete it
                 walletDbProvider.deleteWalletConfigAndStates(nextAddress)
                 walletDbProvider.insertWalletAddress(
                     WalletAddress(
-                        0, publicAddress, derivedAddressIdx,
+                        0, publicAddress, idx + 1,
                         nextAddress, null
                     )
                 )
