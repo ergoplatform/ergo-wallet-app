@@ -41,6 +41,7 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
                     showDialogWithCopyOption(
                         requireContext(),
                         getString(errorMsgPrefix) + "\n\n" + result.errorMsg
+                                + "\n\n" + getString(R.string.error_use_other_node)
                     )
                 } else {
                     Snackbar.make(

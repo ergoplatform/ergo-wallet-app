@@ -2,11 +2,10 @@ package org.ergoplatform
 
 import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.appkit.*
-import org.ergoplatform.appkit.ExplorerAndPoolUnspentBoxesLoader
 import org.ergoplatform.appkit.impl.InputBoxImpl
 import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.persistance.PreferencesProvider
-import org.ergoplatform.restapi.client.Parameters
+import org.ergoplatform.restapi.client.PeersApi
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
@@ -19,6 +18,8 @@ import org.ergoplatform.utils.getMessageOrName
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
 import org.ergoplatform.wallet.secrets.ExtendedPublicKey
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import scala.collection.JavaConversions
 import sigmastate.interpreter.HintsBag
 import sigmastate.serialization.`SigmaSerializer$`
@@ -286,14 +287,41 @@ fun signMessage(
     }
 }
 
-private fun getRestErgoClient(prefs: PreferencesProvider) =
-    RestApiErgoClient.createWithHttpClientBuilder(
-        prefs.prefNodeUrl,
+private fun getRestErgoClient(prefs: PreferencesProvider): ErgoClient {
+    val nodeToConnectTo = prefs.prefNodeUrl
+    val ergoClient = RestApiErgoClient.createWithHttpClientBuilder(
+        nodeToConnectTo,
         getErgoNetworkType(),
         "",
         prefs.prefExplorerApiUrl,
         OkHttpSingleton.getInstance().newBuilder()
     )
+    refreshNodeListWhenNeeded(prefs, nodeToConnectTo)
+    return ergoClient
+}
+
+private fun refreshNodeListWhenNeeded(prefs: PreferencesProvider, nodeUrl: String) {
+    if (System.currentTimeMillis() - prefs.lastNodeListRefreshMs > 1000L * 60 * 60 * 24) {
+        val retrofitNode = Retrofit.Builder()
+            .baseUrl(nodeUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(OkHttpSingleton.getInstance())
+            .build()
+        val peersApi = retrofitNode.create(PeersApi::class.java)
+
+        try {
+            val peerUrlList = peersApi.connectedPeers.execute().body()!!.map { it.restApiUrl }
+            val openPeers = peerUrlList.filter { !it.isNullOrBlank() && it != nodeUrl }.distinct()
+            val peersStringList = openPeers.sortedBy { if (it.startsWith("https://")) 0 else 1 }.take(10)
+
+            LogUtils.logDebug("PeersApi", "Found alternative nodes to connect to: $peersStringList")
+            if (peersStringList.isNotEmpty())
+                prefs.knownNodesList = peersStringList
+        } catch (t: Throwable) {
+            LogUtils.logDebug("PeersApi", "Could not fetch connected peers of $nodeUrl")
+        }
+    }
+}
 
 private fun getColdErgoClient() = ColdErgoClient(
     getErgoNetworkType(),

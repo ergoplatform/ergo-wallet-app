@@ -31,6 +31,7 @@
 -keep class special.**  { *; }
 -keep class wrappers.**  { *; }
 -keep class org.ergoplatform.restapi.**  { *; }
+-keep class org.ergoplatform.mosaik.model.**  { *; }
 -keep class org.ergoplatform.appkit.**  { *; }
 -keep class scorex.util.encode.** { *; }
 -keep class scala.util.control.** { *; }
