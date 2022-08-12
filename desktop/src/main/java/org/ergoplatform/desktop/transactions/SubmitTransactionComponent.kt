@@ -16,6 +16,7 @@ import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_ERROR_PREPARE_TRANSACTION
 import org.ergoplatform.uilogic.STRING_ERROR_SEND_TRANSACTION
+import org.ergoplatform.uilogic.STRING_ERROR_USE_OTHER_NODE
 import org.ergoplatform.uilogic.transactions.SubmitTransactionUiLogic
 
 abstract class SubmitTransactionComponent(
@@ -115,7 +116,8 @@ abstract class SubmitTransactionComponent(
         else STRING_ERROR_SEND_TRANSACTION
 
         return (Application.texts.getString(errorMsgPrefix)
-                + (result.errorMsg?.let { "\n\n$it" } ?: ""))
+                + (result.errorMsg?.let { "\n\n$it" } ?: "")
+                + "\n\n" + Application.texts.getString(STRING_ERROR_USE_OTHER_NODE))
     }
 
 }
