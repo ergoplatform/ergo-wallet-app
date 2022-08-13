@@ -173,9 +173,11 @@ fun AppBackButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun AppScrollingLayout(content: @Composable BoxScope.() -> Unit) {
+fun AppScrollingLayout(
+    scrollState: ScrollState = rememberScrollState(),
+    content: @Composable BoxScope.() -> Unit
+) {
     Box {
-        val scrollState = rememberScrollState()
         Box(Modifier.fillMaxSize().verticalScroll(scrollState)) {
             content()
         }

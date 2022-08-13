@@ -3,7 +3,7 @@ package org.ergoplatform.desktop.wallet
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
@@ -21,6 +21,7 @@ import org.ergoplatform.persistance.WalletConfig
 @Composable
 fun WalletListScreen(
     walletList: List<Wallet>,
+    state: LazyListState,
     fiatValue: Float,
     isRefreshing: Boolean,
     onSendClicked: (WalletConfig) -> Unit,
@@ -33,7 +34,6 @@ fun WalletListScreen(
         LinearProgressIndicator(Modifier.fillMaxWidth())
     }
 
-    val state = rememberLazyListState()
     Box {
         LazyColumn(
             state = state,

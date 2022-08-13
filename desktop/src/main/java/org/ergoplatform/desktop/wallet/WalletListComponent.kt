@@ -2,6 +2,7 @@ package org.ergoplatform.desktop.wallet
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.ScaffoldState
@@ -146,6 +147,7 @@ class WalletListComponent(
     private val walletStates = mutableStateOf<List<Wallet>>(emptyList())
     private val chooseWalletDialogState = mutableStateOf<String?>(null)
     private var walletsInitialized = false
+    private val scrollState = LazyListState()
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -153,7 +155,7 @@ class WalletListComponent(
         val refreshState = WalletStateSyncManager.getInstance().isRefreshing.collectAsState(false)
 
         WalletListScreen(
-            walletStates.value, fiatState.value, refreshState.value,
+            walletStates.value, scrollState, fiatState.value, refreshState.value,
             onPushScreen = { router.push(it) },
             onSendClicked = { wallet -> navigateToSendScreen(wallet) },
             onReceiveClicked = { router.push(ScreenConfig.ReceiveToWallet(it)) },
