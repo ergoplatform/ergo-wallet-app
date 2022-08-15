@@ -15,6 +15,7 @@ import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
+import org.ergoplatform.uilogic.STRING_HINT_READONLY_SIGNING_REQUEST
 import org.ergoplatform.uilogic.STRING_LABEL_ALL_ADDRESSES
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
@@ -40,7 +41,11 @@ abstract class WalletDetailsUiLogic {
 
     abstract val coroutineScope: CoroutineScope
 
-    fun setUpWalletStateFlowCollector(database: IAppDatabase, walletId: Int, addressIdx: Int? = null) {
+    fun setUpWalletStateFlowCollector(
+        database: IAppDatabase,
+        walletId: Int,
+        addressIdx: Int? = null
+    ) {
         if (initialized)
             return
 
@@ -182,8 +187,11 @@ abstract class WalletDetailsUiLogic {
         navigateToAuthentication: (String) -> Unit,
         showErrorMessage: ((errorMessage: String) -> Unit)
     ) {
-        if (wallet?.walletConfig?.secretStorage != null && isColdSigningRequestChunk(qrCodeData)) {
-            navigateToColdWalletSigning.invoke(qrCodeData)
+        if (isColdSigningRequestChunk(qrCodeData)) {
+            if (wallet?.walletConfig?.secretStorage != null)
+                navigateToColdWalletSigning.invoke(qrCodeData)
+            else
+                showErrorMessage(stringProvider.getString(STRING_HINT_READONLY_SIGNING_REQUEST))
         } else if (isErgoPaySigningRequest(qrCodeData)) {
             navigateToErgoPaySigning.invoke(qrCodeData)
         } else if (isErgoAuthRequest(qrCodeData)) {
@@ -204,12 +212,20 @@ abstract class WalletDetailsUiLogic {
         val addresses = getSelectedAddresses()?.map { it.publicAddress }
 
         return if (addresses?.size == 1) {
-            transactionDbProvider.loadAddressTransactionsWithTokens(addresses.first(), maxTransactionsToShow, 0)
+            transactionDbProvider.loadAddressTransactionsWithTokens(
+                addresses.first(),
+                maxTransactionsToShow,
+                0
+            )
         } else {
             val returnedTransactions = mutableListOf<AddressTransactionWithTokens>()
             addresses?.forEach { address ->
                 returnedTransactions.addAll(
-                    transactionDbProvider.loadAddressTransactionsWithTokens(address, maxTransactionsToShow, 0)
+                    transactionDbProvider.loadAddressTransactionsWithTokens(
+                        address,
+                        maxTransactionsToShow,
+                        0
+                    )
                 )
             }
             returnedTransactions.sortedByDescending { it.addressTransaction.inclusionHeight }

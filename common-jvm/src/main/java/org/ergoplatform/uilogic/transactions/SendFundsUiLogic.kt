@@ -471,8 +471,11 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         navigateToErgoPaySigning: ((ergoPayRequest: String) -> Unit),
         setPaymentRequestDataToUi: ((receiverAddress: String, amount: ErgoAmount?, message: String?) -> Unit),
     ) {
-        if (wallet?.walletConfig?.secretStorage != null && isColdSigningRequestChunk(qrCodeData)) {
-            navigateToColdWalletSigning.invoke(qrCodeData, wallet!!.walletConfig.id)
+        if (isColdSigningRequestChunk(qrCodeData)) {
+            if (wallet?.walletConfig?.secretStorage != null)
+                navigateToColdWalletSigning.invoke(qrCodeData, wallet!!.walletConfig.id)
+            else
+                showErrorMessage(stringProvider.getString(STRING_HINT_READONLY_SIGNING_REQUEST))
         } else if (isErgoPaySigningRequest(qrCodeData)) {
             navigateToErgoPaySigning.invoke(
                 qrCodeData
