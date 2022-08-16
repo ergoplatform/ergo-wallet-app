@@ -14,7 +14,6 @@ import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.ui.proceedAuthFlowWithPassword
 import org.ergoplatform.transactions.SigningResult
-import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.STRING_ERROR_PREPARE_TRANSACTION
 import org.ergoplatform.uilogic.STRING_TITLE_SIGNING_REQUEST
@@ -35,7 +34,7 @@ class ColdWalletSigningComponent(
     }
 
     private val scanningState = mutableStateOf(0)
-    private val txInfoState = mutableStateOf<TransactionInfo?>(null)
+    private val txInfoState = mutableStateOf(uiLogic.transactionInfo?.reduceBoxes())
     private val passwordInputState = mutableStateOf(false)
 
     @Composable
