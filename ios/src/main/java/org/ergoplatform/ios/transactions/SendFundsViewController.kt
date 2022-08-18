@@ -10,6 +10,7 @@ import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
+import org.ergoplatform.wallet.isReadOnly
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -374,7 +375,7 @@ class SendFundsViewController(
                 // if we already have a successful tx, there is no need to refresh the ui
                 if (txDoneView == null) {
                     walletTitle.text = texts.format(STRING_LABEL_SEND_FROM, wallet!!.walletConfig.displayName)
-                    readOnlyHint.isHidden = uiLogic.wallet!!.walletConfig.secretStorage != null
+                    readOnlyHint.isHidden = !uiLogic.wallet!!.isReadOnly()
                     scrollView.isHidden = false
                 }
             }

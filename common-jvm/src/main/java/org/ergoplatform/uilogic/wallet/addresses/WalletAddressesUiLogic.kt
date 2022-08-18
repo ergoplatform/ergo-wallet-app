@@ -12,6 +12,7 @@ import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.getSortedDerivedAddressesList
+import org.ergoplatform.wallet.isReadOnly
 
 abstract class WalletAddressesUiLogic {
     var wallet: Wallet? = null
@@ -102,7 +103,7 @@ abstract class WalletAddressesUiLogic {
     }
 
     fun canDeriveAddresses(): Boolean {
-        return wallet?.walletConfig?.secretStorage != null || wallet?.walletConfig?.extendedPublicKey != null
+        return wallet?.walletConfig?.isReadOnly() == false || wallet?.walletConfig?.extendedPublicKey != null
     }
 
     abstract fun notifyNewAddresses()

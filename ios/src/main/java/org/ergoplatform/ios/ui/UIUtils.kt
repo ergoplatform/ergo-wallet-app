@@ -4,11 +4,15 @@ import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.Main
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.transactions.MessageSeverity
-import org.ergoplatform.uilogic.*
-import org.robovm.apple.coregraphics.CGAffineTransform
+import org.ergoplatform.uilogic.STRING_BUTTON_COPY_SENSITIVE_DATA
+import org.ergoplatform.uilogic.STRING_DESC_COPY_SENSITIVE_DATA
+import org.ergoplatform.uilogic.STRING_LABEL_CANCEL
+import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
+import org.robovm.apple.coreanimation.CAFilter
 import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.coregraphics.CGSize
+import org.robovm.apple.coreimage.CIContext
 import org.robovm.apple.coreimage.CIFilter
 import org.robovm.apple.foundation.*
 import org.robovm.apple.uikit.*
@@ -94,17 +98,30 @@ fun UIImageView.setQrCode(data: String, size: Double) {
     val nsString = NSString(data).toData(NSStringEncoding.ASCII)
     val filter = CIFilter("CIQRCodeGenerator")
     filter.keyValueCoder.setValue("inputMessage", nsString)
-    val unscaledOutput = filter.outputImage
+    val outputWithoutQuietZone = filter.outputImage
 
-    unscaledOutput?.let {
-        val scaleX = size / it.extent.size.width
-        val scaleY = size / it.extent.size.height
-        val transform = CGAffineTransform.createScale(scaleX, scaleY)
+    outputWithoutQuietZone?.let { image ->
+        val cgImage = CIContext().createCGImage(image, image.extent)
+        val qrImage = UIImage(cgImage)
+        val quietZonePixels = 5.0
+        val widthWithQuietZone = qrImage.size.width + quietZonePixels * 2
+        println("widthWithQuietZone: $widthWithQuietZone")
+        val sizeWithQuietZone = CGSize(widthWithQuietZone, widthWithQuietZone)
 
-        val output = unscaledOutput.newImageByApplyingTransform(transform)
-        val image = UIImage(output)
-        setImage(image)
+        UIGraphics.beginImageContext(sizeWithQuietZone, false, qrImage.scale)
+        val imageWithZone = UIGraphics.getCurrentContext()?.let { ctx ->
+            ctx.setFillColor(UIColor.white().cgColor)
+            val container = CGRect(CGPoint.Zero(), sizeWithQuietZone)
+            ctx.fillRect(container)
+            qrImage.draw(CGRect(CGPoint(quietZonePixels, quietZonePixels), qrImage.size))
+            UIGraphics.getImageFromCurrentImageContext()
+        }
+        UIGraphics.endImageContext()
+
+        setImage(imageWithZone ?: qrImage)
     }
+        layer.magnificationFilter = CAFilter.Nearest
+        layer.setShouldRasterize(true)
 }
 
 fun UITextView.setHtmlText(html: String) {

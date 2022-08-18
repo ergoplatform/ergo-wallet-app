@@ -13,6 +13,7 @@ import org.ergoplatform.android.databinding.FragmentWalletConfigBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.getSerializedXpubKeyFromMnemonic
 import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.wallet.isReadOnly
 
 /**
  * Shows settings and details for a wallet
@@ -64,9 +65,9 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
                     )
                 }
 
-                binding.buttonExport.isEnabled = it.secretStorage != null
+                binding.buttonExport.isEnabled = !it.isReadOnly()
                 binding.buttonDisplayXpubkey.isEnabled =
-                    it.extendedPublicKey != null || it.secretStorage != null
+                    it.extendedPublicKey != null || !it.isReadOnly()
             }
         }
 

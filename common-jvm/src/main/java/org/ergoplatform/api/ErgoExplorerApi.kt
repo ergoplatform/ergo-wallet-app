@@ -5,7 +5,7 @@ import retrofit2.Call
 
 interface ErgoExplorerApi {
     fun getTotalBalanceForAddress(publicAddress: String): Call<TotalBalance>
-    fun getBoxInformation(boxId: String): Call<OutputInfo>
+    fun getExplorerBoxInformation(boxId: String): Call<OutputInfo>
     fun getTokenInformation(tokenId: String): Call<TokenInfo>
     fun getTransactionInformation(txId: String): Call<TransactionInfo>
     fun getMempoolTransactionsForAddress(

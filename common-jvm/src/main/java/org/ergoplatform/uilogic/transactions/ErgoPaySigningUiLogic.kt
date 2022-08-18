@@ -5,7 +5,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.*
-import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletDbProvider
@@ -13,7 +12,6 @@ import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
-import java.lang.IllegalArgumentException
 
 abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     private var isInitialized = false
@@ -234,7 +232,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     }
 
     // override in unit tests
-    protected open fun getErgoApiService(prefs: PreferencesProvider): ErgoExplorerApi =
+    protected open fun getErgoApiService(prefs: PreferencesProvider) =
         ApiServiceManager.getOrInit(prefs)
 
     private fun resetLastMessage() {

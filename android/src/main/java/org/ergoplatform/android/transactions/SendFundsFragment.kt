@@ -29,6 +29,7 @@ import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.utils.formatTokenPriceToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
+import org.ergoplatform.wallet.isReadOnly
 
 
 /**
@@ -72,7 +73,7 @@ class SendFundsFragment : SubmitTransactionFragment() {
             // when wallet is loaded, wallet name is set. we can init everything wallet specific here
             binding.walletName.text = getString(R.string.label_send_from, it)
             binding.hintReadonly.visibility =
-                if (viewModel.uiLogic.wallet!!.walletConfig.secretStorage == null) View.VISIBLE else View.GONE
+                if (viewModel.uiLogic.wallet!!.isReadOnly()) View.VISIBLE else View.GONE
             enableLayoutChangeAnimations()
         })
         viewModel.address.observe(viewLifecycleOwner, {
