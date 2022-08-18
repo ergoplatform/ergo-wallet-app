@@ -36,6 +36,7 @@ import org.ergoplatform.utils.getTimeSpanString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
 import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
+import org.ergoplatform.wallet.isReadOnly
 import java.util.*
 
 
@@ -243,6 +244,7 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         binding.walletName.text = wallet.walletConfig.displayName
         val walletBalance = ErgoAmount(wallet.getBalanceForAllAddresses())
         binding.walletBalance.setAmount(walletBalance.toBigDecimal())
+        binding.walletLogo.setImageResource(if (wallet.isReadOnly()) R.drawable.ic_add_readonly_24 else R.drawable.ic_wallet_24)
 
         // Fill token headline
         val tokens = wallet.getTokensForAllAddresses()

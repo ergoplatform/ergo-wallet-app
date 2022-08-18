@@ -17,6 +17,7 @@ import org.ergoplatform.utils.formatTokenPriceToString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
 import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
+import org.ergoplatform.wallet.isReadOnly
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -40,6 +41,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
     private lateinit var textBundle: I18NBundle
     private lateinit var tokenStack: UIStackView
     private lateinit var configButton: UIView
+    private lateinit var walletImage: UIImageView
 
     private var wallet: Wallet? = null
 
@@ -110,7 +112,7 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         stackView.axis = UILayoutConstraintAxis.Vertical
         stackView.setCustomSpacing(DEFAULT_MARGIN * 1.5, spacing)
 
-        val walletImage = UIImageView(getIosSystemImage(IMAGE_WALLET, UIImageSymbolScale.Large))
+        walletImage = UIImageView(getIosSystemImage(IMAGE_WALLET, UIImageSymbolScale.Large))
         walletImage.tintColor = UIColor.secondaryLabel()
         walletImage.enforceKeepIntrinsicWidth()
 
@@ -196,6 +198,10 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
     private fun bindImmediately(wallet: Wallet) {
         this.wallet = wallet
         nameLabel.text = wallet.walletConfig.displayName
+        walletImage.image = getIosSystemImage(
+            if (wallet.isReadOnly()) IMAGE_READONLY_WALLET else IMAGE_WALLET,
+            UIImageSymbolScale.Large
+        )
         val ergoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())
         balanceLabel.setErgoAmount(ergoAmount)
         val nodeConnector = WalletStateSyncManager.getInstance()
