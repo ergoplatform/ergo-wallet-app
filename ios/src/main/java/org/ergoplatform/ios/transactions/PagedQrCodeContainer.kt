@@ -97,7 +97,7 @@ abstract class PagedQrCodeContainer(
                 val qrCode = UIImageView(CGRect.Zero())
                 qrCode.fixedWidth(DEFAULT_QR_CODE_SIZE + DEFAULT_MARGIN * 2).fixedHeight(DEFAULT_QR_CODE_SIZE)
                 qrCode.setQrCode(it, DEFAULT_QR_CODE_SIZE)
-                qrCode.contentMode = UIViewContentMode.Center
+                qrCode.contentMode = UIViewContentMode.ScaleAspectFit
                 qrContainer.addArrangedSubview(qrCode)
             }
             pager.layoutIfNeeded()
