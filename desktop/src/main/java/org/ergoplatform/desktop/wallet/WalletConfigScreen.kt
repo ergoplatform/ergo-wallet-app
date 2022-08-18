@@ -23,6 +23,7 @@ import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.wallet.isReadOnly
 
 @Composable
 fun WalletConfigScreen(
@@ -117,7 +118,7 @@ fun WalletConfigScreen(
                 Button(
                     onClick = onShowXpubKey,
                     colors = secondaryButtonColors(),
-                    enabled = walletConfig.extendedPublicKey != null || walletConfig.secretStorage != null,
+                    enabled = walletConfig.extendedPublicKey != null || !walletConfig.isReadOnly(),
                     modifier = Modifier.align(Alignment.End).padding(top = defaultPadding / 2),
                 ) {
                     Text(remember { Application.texts.getString(STRING_BUTTON_DISPLAY_XPUBKEY) })
@@ -133,7 +134,7 @@ fun WalletConfigScreen(
                 Button(
                     onClick = onShowMnemonic,
                     colors = secondaryButtonColors(),
-                    enabled = walletConfig.secretStorage != null,
+                    enabled = !walletConfig.isReadOnly(),
                     modifier = Modifier.align(Alignment.End).padding(top = defaultPadding / 2),
                 ) {
                     Text(remember { Application.texts.getString(STRING_BUTTON_DISPLAY_MNEMONIC) })

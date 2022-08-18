@@ -33,6 +33,7 @@ import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
+import org.ergoplatform.wallet.isReadOnly
 
 @Composable
 fun SendFundsScreen(
@@ -85,7 +86,7 @@ fun SendFundsScreen(
                     style = labelStyle(LabelStyle.BODY1),
                 )
 
-                if (walletConfig.secretStorage == null)
+                if (walletConfig.isReadOnly())
                     Box(Modifier.padding(top = defaultPadding)) {
                         Card(modifier = Modifier.border(1.dp, uiErgoColor)) {
                             LinkifyText(

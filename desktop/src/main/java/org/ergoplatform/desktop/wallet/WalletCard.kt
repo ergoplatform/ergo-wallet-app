@@ -6,6 +6,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,7 @@ import org.ergoplatform.utils.formatTokenPriceToString
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
 import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
+import org.ergoplatform.wallet.isReadOnly
 
 @Composable
 fun WalletCard(
@@ -59,7 +61,7 @@ fun WalletCard(
                 Row {
 
                     Icon(
-                        Icons.Default.AccountBalanceWallet,
+                        if (wallet.isReadOnly()) Icons.Default.ZoomIn else Icons.Default.AccountBalanceWallet,
                         null,
                         Modifier.align(Alignment.Top).size(bigIconSize)
                     )
