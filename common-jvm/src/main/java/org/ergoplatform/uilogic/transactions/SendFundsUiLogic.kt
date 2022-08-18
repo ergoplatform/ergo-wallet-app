@@ -21,10 +21,7 @@ import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
-import org.ergoplatform.wallet.getBalanceForAllAddresses
-import org.ergoplatform.wallet.getStateForAddress
-import org.ergoplatform.wallet.getTokensForAddress
-import org.ergoplatform.wallet.getTokensForAllAddresses
+import org.ergoplatform.wallet.*
 import kotlin.math.max
 
 abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
@@ -472,7 +469,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         setPaymentRequestDataToUi: ((receiverAddress: String, amount: ErgoAmount?, message: String?) -> Unit),
     ) {
         if (isColdSigningRequestChunk(qrCodeData)) {
-            if (wallet?.walletConfig?.secretStorage != null)
+            if (wallet?.walletConfig?.isReadOnly() == false)
                 navigateToColdWalletSigning.invoke(qrCodeData, wallet!!.walletConfig.id)
             else
                 showErrorMessage(stringProvider.getString(STRING_HINT_READONLY_SIGNING_REQUEST))

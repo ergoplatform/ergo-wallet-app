@@ -188,7 +188,7 @@ abstract class WalletDetailsUiLogic {
         showErrorMessage: ((errorMessage: String) -> Unit)
     ) {
         if (isColdSigningRequestChunk(qrCodeData)) {
-            if (wallet?.walletConfig?.secretStorage != null)
+            if (wallet?.walletConfig?.isReadOnly() == false)
                 navigateToColdWalletSigning.invoke(qrCodeData)
             else
                 showErrorMessage(stringProvider.getString(STRING_HINT_READONLY_SIGNING_REQUEST))

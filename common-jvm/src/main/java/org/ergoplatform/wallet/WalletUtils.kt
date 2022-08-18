@@ -1,9 +1,6 @@
 package org.ergoplatform.wallet
 
-import org.ergoplatform.persistance.Wallet
-import org.ergoplatform.persistance.WalletAddress
-import org.ergoplatform.persistance.WalletState
-import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.persistance.*
 import org.ergoplatform.wallet.addresses.ensureWalletAddressListHasFirstAddress
 
 /**
@@ -84,3 +81,7 @@ fun Wallet.getNumOfAddresses(): Int {
 fun Wallet.getStateForAddress(address: String): WalletState? {
     return state.filter { it.publicAddress.equals(address) }.firstOrNull()
 }
+
+fun WalletConfig.isReadOnly(): Boolean = secretStorage == null
+
+fun Wallet.isReadOnly(): Boolean = walletConfig.isReadOnly()
