@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.appVersionString
 import org.ergoplatform.desktop.ui.copyToClipboard
+import org.ergoplatform.desktop.ui.getQrCodeImageBitmap
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
@@ -30,6 +31,7 @@ import org.ergoplatform.mosaik.model.actions.TokenInformationAction
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.transactions.isErgoPaySigningRequest
+import org.ergoplatform.uilogic.STRING_LABEL_COPIED
 import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 class MosaikAppComponent(
@@ -77,6 +79,11 @@ class MosaikAppComponent(
 
         override fun pasteToClipboard(text: String) {
             text.copyToClipboard()
+            navHost.showSnackbar(Application.texts.getString(STRING_LABEL_COPIED))
+        }
+
+        override fun onAddressLongPress(address: String) {
+            pasteToClipboard(address)
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {
@@ -149,25 +156,27 @@ class MosaikAppComponent(
         mosaikRuntime.preferencesProvider = Application.prefs
 
         MosaikLogger.logger = MosaikLogger.DefaultLogger
-        MosaikComposeConfig.convertByteArrayToImageBitmap =
-            { imageBytes -> loadImageBitmap(imageBytes.inputStream()) }
-        MosaikComposeConfig.interceptReturnForImeAction = true
-        MosaikComposeConfig.DropDownMenu = { expanded,
-                                             dismiss,
-                                             modifier,
-                                             content ->
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = dismiss,
-                modifier = modifier,
-                content = content,
-            )
-        }
+        MosaikComposeConfig.apply {
+            convertByteArrayToImageBitmap =
+                { imageBytes -> loadImageBitmap(imageBytes.inputStream()) }
+            convertQrCodeContentToImageBitmap = ::getQrCodeImageBitmap
+            interceptReturnForImeAction = true
+            DropDownMenu = { expanded,
+                             dismiss,
+                             modifier,
+                             content ->
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = dismiss,
+                    modifier = modifier,
+                    content = content,
+                )
+            }
 
-        MosaikComposeConfig.DropDownItem = { onClick, content ->
-            DropdownMenuItem(onClick = onClick, content = content)
+            DropDownItem = { onClick, content ->
+                DropdownMenuItem(onClick = onClick, content = content)
+            }
         }
-
         mosaikRuntime.loadUrlEnteredByUser(appUrl)
     }
 
