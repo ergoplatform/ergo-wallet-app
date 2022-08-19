@@ -7,10 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.AutoAwesomeMosaic
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.ExperimentalDecomposeApi
@@ -19,6 +16,7 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.chil
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.decompose.router.navigate
 import com.arkivanov.decompose.router.router
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.mosaik.MosaikAppComponent
 import org.ergoplatform.desktop.mosaik.MosaikOverviewComponent
@@ -65,6 +63,11 @@ class NavHostComponent(
             )
         )
     }
+
+    fun showSnackbar(message: String) {
+        snackbarText.value = message
+    }
+    private val snackbarText = MutableStateFlow<String?>(null)
 
     val lockScreen = mutableStateOf(false)
 
@@ -173,6 +176,15 @@ class NavHostComponent(
 
         Box {
             val drawChildren: @Composable (ScaffoldState?) -> Unit = { scaffoldState ->
+                LaunchedEffect(scaffoldState) {
+                    snackbarText.collect { text ->
+                        text?.let {
+                            scaffoldState?.snackbarHostState?.showSnackbar(text)
+                            snackbarText.value = null
+                        }
+                    }
+                }
+
                 Children(
                     routerState = router.state,
                     animation = childAnimation { child, direction ->
