@@ -8,6 +8,7 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -178,7 +179,8 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
 
         // set up Compose view
         MosaikComposeConfig.apply {
-            val minPixelSize = (300 * binding.root.resources.displayMetrics.density).toInt()
+            val dpToPx = binding.root.resources.displayMetrics.density
+            val minPixelSize = (300 * dpToPx).toInt()
             scrollMinAlpha = 0f
             convertByteArrayToImageBitmap = { byteArray ->
                 decodeSampledBitmapFromByteArray(
@@ -187,6 +189,9 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                     minPixelSize
                 ).asImageBitmap()
             }
+            qrCodeSize = 250.dp
+            val qrSizePx = (250 * dpToPx).toInt()
+            convertQrCodeContentToImageBitmap = { convertQrCodeToBitmap(it, qrSizePx, qrSizePx)?.asImageBitmap() }
 
             DropDownMenu = { expanded,
                              dismiss,
