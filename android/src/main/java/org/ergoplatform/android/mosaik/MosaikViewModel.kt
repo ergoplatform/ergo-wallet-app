@@ -62,6 +62,10 @@ class MosaikViewModel : ViewModel() {
             pasteToClipboardEvent.postValue(text)
         }
 
+        override fun onAddressLongPress(address: String) {
+            pasteToClipboard(address)
+        }
+
         override fun showDialog(dialog: MosaikDialog) {
             showDialogEvent.postValue(dialog)
         }
