@@ -1,5 +1,6 @@
 package org.ergoplatform.android.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
@@ -7,8 +8,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.ergoplatform.android.R
+import org.ergoplatform.compose.settings.defaultPadding
 import org.ergoplatform.mosaik.MosaikStyleConfig
+import org.ergoplatform.mosaik.labelStyle
+import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 
 @Composable
 fun AppComposeTheme(content: @Composable () -> Unit) {
@@ -20,7 +28,11 @@ fun AppComposeTheme(content: @Composable () -> Unit) {
             surface = colorResource(id = R.color.cardview_background),
             onSurface = colorResource(id = R.color.text_color),
             isLight = LocalContext.current.resources.getBoolean(R.bool.isLight)
-        )
+        ),
+        typography = MaterialTheme.typography.copy(
+            body1 = labelStyle(LabelStyle.BODY1),
+            button = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 18.sp.times(0.0892857143)),
+        ),
     ) {
         CompositionLocalProvider(
             LocalContentColor provides colorResource(id = R.color.text_color),
@@ -41,5 +53,8 @@ private fun prepareMosaikConfig() {
         secondaryButtonColor = colorResource(id = R.color.secondary)
         textButtonTextColor = colorResource(id = R.color.primary)
         textButtonColorDisabled = secondaryLabelColor
+        cardShapeRadius = 10.dp
+        buttonShapeRadius = 16.dp
+        buttonPadding = PaddingValues(defaultPadding, 12.dp)
     }
 }
