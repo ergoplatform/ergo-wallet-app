@@ -1,9 +1,11 @@
 package org.ergoplatform.compose.settings
 
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults.buttonColors
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.mosaik.MosaikStyleConfig
 
@@ -31,3 +33,34 @@ fun appTextFieldColors() = TextFieldDefaults.outlinedTextFieldColors(
     errorBorderColor = MosaikStyleConfig.primaryLabelColor,
     errorTrailingIconColor = MosaikStyleConfig.primaryLabelColor,
 )
+
+@Composable
+fun AppButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: ButtonColors = primaryButtonColors(),
+    content: @Composable RowScope.() -> Unit
+) {
+    Button(
+        onClick,
+        modifier,
+        enabled,
+        shape = RoundedCornerShape(MosaikStyleConfig.buttonShapeRadius),
+        contentPadding = MosaikStyleConfig.buttonPadding,
+        colors = colors,
+    ) {
+        content()
+    }
+}
+
+@Composable
+fun AppCard(modifier: Modifier, content: @Composable () -> Unit) {
+    Card(
+        shape = RoundedCornerShape(MosaikStyleConfig.cardShapeRadius),
+        modifier = modifier,
+        backgroundColor = MaterialTheme.colors.surface,
+    ) {
+        content()
+    }
+}

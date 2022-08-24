@@ -74,7 +74,7 @@ class MosaikViewModel : ViewModel() {
             manifestLiveData.postValue(manifest)
         }
 
-        override fun noAppLoaded(cause: Throwable) {
+        override fun appNotLoaded(cause: Throwable) {
             noAppLiveData.postValue(cause)
         }
 
@@ -113,8 +113,8 @@ class MosaikViewModel : ViewModel() {
             showWalletOrAddressChooserEvent.postValue(valueId)
         }
 
-        override fun runTokenInformationAction(action: TokenInformationAction) {
-            showTokenInfoEvent.postValue(action.tokenId)
+        override fun runTokenInformationAction(tokenId: String) {
+            showTokenInfoEvent.postValue(tokenId)
         }
     }
 

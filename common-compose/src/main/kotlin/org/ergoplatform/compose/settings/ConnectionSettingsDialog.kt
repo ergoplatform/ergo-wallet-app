@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.runtime.Composable
@@ -69,7 +72,7 @@ fun ColumnScope.ConnectionSettingsLayout(
     )
 
     Row(Modifier.align(Alignment.End)) {
-        Button(
+        AppButton(
             onClick = {
                 explorerApiUrl.value = TextFieldValue(getDefaultExplorerApiUrl())
                 nodeApiUrl.value = TextFieldValue(preferences.getDefaultNodeApiUrl())
@@ -79,15 +82,15 @@ fun ColumnScope.ConnectionSettingsLayout(
                     TextFieldValue(preferences.defaultIpfsGatewayUrl)
             },
             colors = secondaryButtonColors(),
-            modifier = Modifier.padding(end = defaultPadding * 2),
+            modifier = Modifier.padding(end = defaultPadding),
         ) {
             Text(remember { stringProvider.getString(STRING_BUTTON_RESET_DEFAULTS) })
         }
-        Button(
+        AppButton(
             onClick = applySettings,
             colors = primaryButtonColors(),
         ) {
-            Text(remember { stringProvider.getString(STRING_ZXING_BUTTON_OK) })
+            Text(remember { stringProvider.getString(STRING_BUTTON_APPLY) })
         }
     }
 }

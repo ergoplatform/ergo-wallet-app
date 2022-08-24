@@ -146,7 +146,6 @@
     <string name="button_scan_signed_tx">Scansione tx firmato</string>
     <string name="button_next">Prossimo</string>
     <string name="title_authenticate">Autenticazione richiesta</string>
-    <string name="error_device_security">Errore di sicurezza: %1$s</string>
     <string name="label_add_token">Gettone</string>
     <string name="label_send_all">Invia tutto</string>
     <string name="title_add_token">Scegli il gettone da inviare</string>

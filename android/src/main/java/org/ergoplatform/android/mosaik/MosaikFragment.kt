@@ -97,12 +97,12 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 val builder = MaterialAlertDialogBuilder(requireContext())
                     .setMessage(dialog.message)
                     .setPositiveButton(dialog.positiveButtonText) { _, _ ->
-                        dialog.positiveButtonClicked?.run()
+                        dialog.positiveButtonClicked?.invoke()
                     }
 
                 dialog.negativeButtonText?.let {
                     builder.setNegativeButton(dialog.negativeButtonText) { _, _ ->
-                        dialog.negativeButtonClicked?.run()
+                        dialog.negativeButtonClicked?.invoke()
                     }
                 }
 
@@ -119,12 +119,9 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
         }
         viewModel.noAppLiveData.observe(viewLifecycleOwner) { errorCause ->
             binding.layoutNoApp.visibility = if (errorCause == null) View.GONE else View.VISIBLE
+            binding.composeView.visibility = if (errorCause == null) View.VISIBLE else View.GONE
             errorCause?.let {
-                binding.textNoApp.text =
-                    getString(
-                        R.string.error_no_mosaik_app,
-                        errorCause.javaClass.simpleName + " " + errorCause.message
-                    )
+                binding.textNoApp.text = viewModel.mosaikRuntime.getUserErrorMessage(errorCause)
             }
         }
         viewModel.showWalletOrAddressChooserEvent.observe(viewLifecycleOwner) { valueId ->
@@ -192,6 +189,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
             qrCodeSize = 250.dp
             val qrSizePx = (250 * dpToPx).toInt()
             convertQrCodeContentToImageBitmap = { convertQrCodeToBitmap(it, qrSizePx, qrSizePx)?.asImageBitmap() }
+            preselectEditableInputs = false
 
             DropDownMenu = { expanded,
                              dismiss,
@@ -313,6 +311,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
     private val backPressedHandler = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
             viewModel.mosaikRuntime.navigateBack()
+            isEnabled = viewModel.mosaikRuntime.canNavigateBack()
         }
 
     }

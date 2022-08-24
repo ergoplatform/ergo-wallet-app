@@ -153,7 +153,6 @@
     <string name="button_scan_signed_tx">İmzalı işlemi tara</string>
     <string name="button_next">Sonraki</string>
     <string name="title_authenticate">Kimlik doğrulaması gerekli</string>
-    <string name="error_device_security">Güvenlik hatası: %1$s</string>
     <string name="label_add_token">Token</string>
     <string name="label_send_all">Tümünü gönder</string>
     <string name="title_add_token">Gönderilecek jetonu seçin</string>
