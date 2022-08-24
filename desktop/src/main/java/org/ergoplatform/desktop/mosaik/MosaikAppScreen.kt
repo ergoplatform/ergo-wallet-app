@@ -21,24 +21,17 @@ import org.ergoplatform.uilogic.STRING_ERROR_NO_MOSAIK_APP
 @Composable
 fun MosaikAppScreen(
     viewTree: ViewTree,
-    noAppLoadedErrorState: MutableState<Throwable?>,
+    noAppLoadedErrorMessage: MutableState<String?>,
     retryClicked: () -> Unit,
 ) {
-    MosaikViewTree(viewTree)
+    if (noAppLoadedErrorMessage.value == null) {
+        MosaikViewTree(viewTree)
+    }
 
     Box(Modifier.fillMaxSize()) {
 
-        noAppLoadedErrorState.value?.let { error ->
-            NoAppLoadedError(
-                remember(error) {
-                    Application.texts.getString(
-                        STRING_ERROR_NO_MOSAIK_APP,
-                        error.javaClass.simpleName + " " + error.message
-                    )
-
-                },
-                retryClicked,
-            )
+        noAppLoadedErrorMessage.value?.let { error ->
+            NoAppLoadedError(error, retryClicked)
         }
 
     }

@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.ergoplatform.Application
+import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig

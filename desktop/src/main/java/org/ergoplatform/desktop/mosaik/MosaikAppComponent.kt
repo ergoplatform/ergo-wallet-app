@@ -105,7 +105,7 @@ class MosaikAppComponent(
             }
         }
 
-        override fun runTokenInformationAction(action: TokenInformationAction) {
+        override fun runTokenInformationAction(tokenId: String) {
             // TODO tokenInfo
             navHost.showErrorDialog("TokenInfo not available yet")
         }
@@ -137,8 +137,8 @@ class MosaikAppComponent(
             isFavoriteState.value = isFavoriteApp
         }
 
-        override fun noAppLoaded(cause: Throwable) {
-            noAppLoadedErrorState.value = cause
+        override fun appNotLoaded(cause: Throwable) {
+            noAppLoadedErrorMessage.value = getUserErrorMessage(cause)
         }
     }
 
@@ -180,7 +180,7 @@ class MosaikAppComponent(
         mosaikRuntime.loadUrlEnteredByUser(appUrl)
     }
 
-    private val noAppLoadedErrorState = mutableStateOf<Throwable?>(null)
+    private val noAppLoadedErrorMessage = mutableStateOf<String?>(null)
     private val manifestState = mutableStateOf<MosaikManifest?>(null)
     private var valueIdWalletChosen: String? = null
     private var valueIdAddressChosen: String? = null
@@ -191,9 +191,9 @@ class MosaikAppComponent(
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
         MosaikAppScreen(
             mosaikRuntime.viewTree,
-            noAppLoadedErrorState,
+            noAppLoadedErrorMessage,
             retryClicked = {
-                noAppLoadedErrorState.value = null
+                noAppLoadedErrorMessage.value = null
                 mosaikRuntime.loadMosaikApp(appUrl)
             }
         )

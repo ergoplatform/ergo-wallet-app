@@ -19,6 +19,7 @@ import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
+import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.appTextFieldColors
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.MosaikAppEntry

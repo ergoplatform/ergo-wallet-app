@@ -3,7 +3,6 @@ package org.ergoplatform.desktop.ui
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -14,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.awtEventOrNull
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,6 +22,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import com.arkivanov.decompose.router.Router
 import com.arkivanov.decompose.router.pop
+import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.defaultMaxWidth
 import org.ergoplatform.compose.settings.defaultPadding
 import org.ergoplatform.desktop.ui.navigation.Component
@@ -29,6 +30,8 @@ import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.mosaik.MosaikStyleConfig
+import org.ergoplatform.mosaik.labelStyle
+import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import java.awt.event.KeyEvent
 
 val uiErgoColor get() = if (isErgoMainNet) Color(0xffff3b30) else Color(0xff4284FF)
@@ -46,13 +49,16 @@ private val DarkColors = darkColors(
 )
 
 @Composable
-fun DecomposeDesktopExampleTheme(
+fun DesktopTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
         colors = DarkColors,
         typography = Typography(
             defaultFontFamily = FontFamily(Font("google_sans_regular.ttf"))
+        ).copy(
+            body1 = labelStyle(LabelStyle.BODY1),
+            button = TextStyle(fontSize = 18.sp),
         )
     ) {
         Surface(
@@ -99,17 +105,6 @@ fun AppBarView(
         content = { paddingValues -> content(paddingValues, scaffoldState) },
         bottomBar = bottombar
     )
-}
-
-@Composable
-fun AppCard(modifier: Modifier, content: @Composable () -> Unit) {
-    Card(
-        shape = RoundedCornerShape(8.dp),
-        modifier = modifier,
-        backgroundColor = MaterialTheme.colors.surface,
-    ) {
-        content()
-    }
 }
 
 @Composable

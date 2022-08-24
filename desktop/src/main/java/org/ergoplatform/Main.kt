@@ -24,7 +24,7 @@ import io.github.sanyarnd.applocker.AppLocker
 import net.harawata.appdirs.AppDirsFactory
 import org.ergoplatform.desktop.Preferences
 import org.ergoplatform.desktop.persistance.DesktopCacheFileManager
-import org.ergoplatform.desktop.ui.DecomposeDesktopExampleTheme
+import org.ergoplatform.desktop.ui.DesktopTheme
 import org.ergoplatform.desktop.ui.DesktopStringProvider
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
@@ -109,6 +109,7 @@ fun main(args: Array<String>) {
         textButtonTextColor = uiErgoColor
         defaultLabelColor = secondaryButtonColor
         secondaryLabelColor = Color(0xFFBBBBBB)
+        cardShapeRadius = 8.dp
     }
 
     application {
@@ -146,7 +147,7 @@ fun main(args: Array<String>) {
                 }
             }
 
-            DecomposeDesktopExampleTheme {
+            DesktopTheme {
                 root.render(null)
             }
         }
