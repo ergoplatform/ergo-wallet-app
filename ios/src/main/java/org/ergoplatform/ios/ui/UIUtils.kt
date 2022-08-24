@@ -105,7 +105,6 @@ fun UIImageView.setQrCode(data: String, size: Double) {
         val qrImage = UIImage(cgImage)
         val quietZonePixels = 5.0
         val widthWithQuietZone = qrImage.size.width + quietZonePixels * 2
-        println("widthWithQuietZone: $widthWithQuietZone")
         val sizeWithQuietZone = CGSize(widthWithQuietZone, widthWithQuietZone)
 
         UIGraphics.beginImageContext(sizeWithQuietZone, false, qrImage.scale)
