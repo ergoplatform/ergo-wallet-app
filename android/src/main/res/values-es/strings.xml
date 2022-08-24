@@ -145,7 +145,6 @@
     <string name="button_scan_signed_tx">Escanear el tx firmado</string>
     <string name="button_next">Siguiente</string>
     <string name="title_authenticate">Autenticacion requerida</string>
-    <string name="error_device_security">Error de seguridad: %1$s</string>
     <string name="label_add_token">Token</string>
     <string name="label_send_all">Enviar todos</string>
     <string name="title_add_token">Elija el token para enviar</string>

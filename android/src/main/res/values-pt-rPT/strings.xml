@@ -200,10 +200,6 @@
     <string name="button_scan_signed_tx">Realize o scan da transacção assinada</string>
     <string name="button_next">Próximo</string>
     <string name="title_authenticate">Autenticação necessária</string>
-    <string name="error_device_security">Erro de segurança: %1$s</string>
-    <string name="error_device_security_cloud_hint">Não foi possível ler a informação para desencriptar a sua chave secreta. Note que
-        esta informação não está sincronizada com um backup na cloud. Se o erro persistir, por favor restaure esta carteira com a
-        frase mnemónica anotada anteriormente.</string>
     <string name="label_add_token">Token</string>
     <string name="label_send_all">Enviar tudo</string>
     <string name="title_add_token">Escolha o token para enviar</string>
