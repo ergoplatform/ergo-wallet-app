@@ -276,7 +276,7 @@
     <!-- Mosaik view -->
     <string name="title_mosaik">Applicações</string>
     <string name="hint_app_url">App URL</string>
-    <string name="error_no_mosaik_app">Não foi possível iniciar a aplicação.\nJustificação:\n%1$s</string>
+    <string name="error_loading_mosaik_app">Não foi possível iniciar a aplicação.\nJustificação:\n%1$s</string>
     <string name="title_last_visited">A última visita </string>
     <string name="title_favorites">Favoritos</string>
     <string name="title_suggestions">Applicações Sugeridas</string>

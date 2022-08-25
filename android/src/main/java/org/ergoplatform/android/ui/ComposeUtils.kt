@@ -27,11 +27,16 @@ fun AppComposeTheme(content: @Composable () -> Unit) {
             primary = colorResource(id = R.color.primary),
             surface = colorResource(id = R.color.cardview_background),
             onSurface = colorResource(id = R.color.text_color),
+            error = colorResource(id = R.color.primary),
             isLight = LocalContext.current.resources.getBoolean(R.bool.isLight)
         ),
         typography = MaterialTheme.typography.copy(
             body1 = labelStyle(LabelStyle.BODY1),
-            button = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 18.sp.times(0.0892857143)),
+            button = TextStyle(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 18.sp.times(0.0892857143)
+            ),
         ),
     ) {
         CompositionLocalProvider(

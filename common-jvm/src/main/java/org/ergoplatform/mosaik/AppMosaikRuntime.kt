@@ -232,10 +232,12 @@ abstract class AppMosaikRuntime(
         return when (errorCause) {
             is ConnectionException ->
                 stringProvider.getString(STRING_ERROR_MOSAIK_CONNECTION)
+            is NoMosaikAppException ->
+                stringProvider.getString(STRING_ERROR_NO_MOSAIK_APP, errorCause.url)
             is InvalidValuesException -> errorCause.message!!
             else ->
                 stringProvider.getString(
-                    STRING_ERROR_NO_MOSAIK_APP,
+                    STRING_ERROR_LOADING_MOSAIK_APP,
                     errorCause.javaClass.simpleName + " " + errorCause.message
                 )
         }

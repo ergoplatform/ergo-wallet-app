@@ -32,6 +32,8 @@ fun appTextFieldColors() = TextFieldDefaults.outlinedTextFieldColors(
     errorLabelColor = MosaikStyleConfig.primaryLabelColor,
     errorBorderColor = MosaikStyleConfig.primaryLabelColor,
     errorTrailingIconColor = MosaikStyleConfig.primaryLabelColor,
+    errorCursorColor = MosaikStyleConfig.primaryLabelColor,
+    errorLeadingIconColor = MosaikStyleConfig.primaryLabelColor,
 )
 
 @Composable

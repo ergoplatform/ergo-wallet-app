@@ -289,7 +289,7 @@
     <string name="desc_mosaik">You can use and add dApps that support wallet integration here. Decentralized
         applications (dApps) connect your wallet to smart contracts. dApps are third-party plug-ins.
         They are not affiliated with Ergo Wallet. Use at your discretion.</string>
-    <string name="error_no_mosaik_app">Could not load app.\nReason:\n%1$s</string>
+    <string name="error_loading_mosaik_app">Could not load app.\nReason:\n%1$s</string>
     <string name="title_last_visited">Last visited</string>
     <string name="title_favorites">Favorites</string>
     <string name="title_suggestions">Suggested apps</string>
@@ -299,6 +299,7 @@
     <string name="button_choose_wallet">Choose wallet…</string>
     <string name="dropdown_choose_option">(please choose)</string>
     <string name="error_mosaik_connection">Could not load application.\nCheck your connection and try again.</string>
+    <string name="error_no_mosaik_app">No wallet app plugin found at given address %1$s. Please check for misspellings.</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>
