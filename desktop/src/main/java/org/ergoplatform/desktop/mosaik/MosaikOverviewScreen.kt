@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
 import org.ergoplatform.compose.settings.AppCard
@@ -47,6 +48,13 @@ fun MosaikOverviewScreen(
                 remember(lastVisitedList) { mutableStateOf(TextFieldValue()) }
             val onClickOrEnter: () -> Unit = { onAddressEntered(addressTextFieldValue.value.text) }
 
+            if (favoritesList.isEmpty())
+                Text(
+                    remember { Application.texts.getString(STRING_DESC_MOSAIK) },
+                    Modifier.padding(defaultPadding * 1.5f),
+                    textAlign = TextAlign.Center,
+                )
+
             OutlinedTextField(
                 addressTextFieldValue.value,
                 onValueChange = {
@@ -62,12 +70,6 @@ fun MosaikOverviewScreen(
                     }
                 },
                 colors = appTextFieldColors(),
-            )
-
-            Text(
-                remember { Application.texts.getString(STRING_DESC_MOSAIK) },
-                Modifier.padding(top = defaultPadding * 1.5f),
-                style = labelStyle(LabelStyle.BODY1),
             )
 
             Text(
