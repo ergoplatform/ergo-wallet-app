@@ -276,7 +276,6 @@
     <!-- Mosaik view -->
     <string name="title_mosaik">Applicações</string>
     <string name="hint_app_url">App URL</string>
-    <string name="desc_mosaik">Pode utilizar e adicionar aplicações que suportam a integração com a carteira aqui.</string>
     <string name="error_no_mosaik_app">Não foi possível iniciar a aplicação.\nJustificação:\n%1$s</string>
     <string name="title_last_visited">A última visita </string>
     <string name="title_favorites">Favoritos</string>
