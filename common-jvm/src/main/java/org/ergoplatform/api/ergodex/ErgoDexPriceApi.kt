@@ -8,7 +8,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class ErgoDexPriceApi : TokenPriceApi {
-    private val priceSource = "ergodex.io"
+    private val priceSource = "spectrum.fi"
     private val baseIdErg = "0000000000000000000000000000000000000000000000000000000000000000"
 
     private val ergoDexApi: ErgoDexApi
