@@ -11,13 +11,14 @@ import boofcv.kotlin.asGrayU8
 import boofcv.struct.image.GrayU8
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
-import org.ergoplatform.uilogic.STRING_LABEL_SCAN_QR
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import java.awt.Image
 import java.awt.Toolkit
@@ -59,12 +60,21 @@ class QrScannerComponent(
                     delay(100)
                 }
             } finally {
+                imageState.value = null
                 webcam.close()
             }
+        } catch (ce: CancellationException) {
+            // ignore
         } catch (t: Throwable) {
-            errorState.value = "Error accessing webcam"
+            errorState.value =
+                Application.texts.getString(if (isMacOS()) STRING_ERROR_ACCESSING_WEBCAM_MACOS else STRING_ERROR_ACCESSING_WEBCAM) +
+                        "\n\n" + Application.texts.getString(STRING_HINT_NO_WEBCAM)
             LogUtils.logDebug(this.javaClass.simpleName, t.message ?: "", t)
         }
+    }
+
+    private fun stopObserveCam() {
+        observeCamJob.cancel()
     }
 
     /**
@@ -110,15 +120,13 @@ class QrScannerComponent(
 
     private val imageState = mutableStateOf<ImageBitmap?>(null)
     private val errorState = mutableStateOf("")
-
-    init {
-        componentScope().launch { observeWebcam() }
-    }
+    private var observeCamJob = componentScope().launch { observeWebcam() }
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
         QrScannerScreen(
             imageState, errorState, ::qrCodeScanned, pasteImage = {
+                stopObserveCam()
                 val image = getImageFromClipboard()
                 image?.let {
                     val detector = FactoryFiducial.qrcode(null, GrayU8::class.java)
@@ -130,9 +138,14 @@ class QrScannerComponent(
                     if (detections.isNotEmpty())
                         qrCodeScanned(detections.first().message)
                     else
-                        errorState.value =
-                            "No QR code found in image. Make sure to copy QR code with a margin."
-                } ?: run { errorState.value = "No image in clipboard" } // TODO i18N
+                        errorState.value = Application.texts.getString(
+                            STRING_ERROR_NO_QRCODE_IMAGE_CLIPBOARD
+                        )
+                } ?: run {
+                    errorState.value = Application.texts.getString(
+                        STRING_ERROR_NO_IMAGE_CLIPBOARD
+                    )
+                }
             },
             dismiss = router::pop
         )

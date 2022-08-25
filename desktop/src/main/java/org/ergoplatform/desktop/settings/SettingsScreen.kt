@@ -8,6 +8,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -108,8 +109,10 @@ fun SettingsScreen(
                             .padding(top = defaultPadding)
                     ) {
                         Column(Modifier.padding(defaultPadding)) {
-                            Text( // TODO i18n
-                                "You can register this application to handle Ergo specific protocols like ErgoPay and ErgoAuth.",
+                            Text(
+                                remember {
+                                    Application.texts.getString(STRING_DESC_REGISTER_HANDLER)
+                                },
                                 Modifier.padding(defaultPadding / 2)
                                     .align(Alignment.CenterHorizontally),
                                 style = labelStyle(LabelStyle.BODY1),
@@ -121,7 +124,9 @@ fun SettingsScreen(
                                 colors = secondaryButtonColors(),
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
-                                Text("Register as Ergo protocol handler") // TODO i18n
+                                Text(remember {
+                                    Application.texts.getString(STRING_BUTTON_REGISTER_HANDLER)
+                                })
                             }
                         }
 

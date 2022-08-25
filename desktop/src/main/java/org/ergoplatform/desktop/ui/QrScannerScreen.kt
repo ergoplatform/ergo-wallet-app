@@ -42,14 +42,13 @@ fun QrScannerScreen(
 
             Text(
                 errorState.value,
-                Modifier.align(Alignment.Center).padding(defaultPadding),
+                Modifier.align(Alignment.Center).padding(defaultPadding * 3, defaultPadding),
                 style = labelStyle(LabelStyle.HEADLINE2),
                 textAlign = TextAlign.Center,
             )
 
             AppBackButton(onClick = dismiss)
         }
-
         Button(
             onClick = pasteImage,
             Modifier.align(Alignment.CenterHorizontally).padding(top = defaultPadding)

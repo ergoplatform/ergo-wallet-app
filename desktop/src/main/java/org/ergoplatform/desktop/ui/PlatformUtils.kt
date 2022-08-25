@@ -19,13 +19,16 @@ private val jvmFullPath by lazy(LazyThreadSafetyMode.NONE) {
     System.getProperty("java.home")
 }
 
+fun isWindows() = "windows" in osName
+fun isMacOS() = "mac" in osName
+
 fun openBrowser(url: String) {
     val desktop = Desktop.getDesktop()
     when {
         Desktop.isDesktopSupported() && desktop.isSupported(Desktop.Action.BROWSE) -> {
             desktop.browse(URI(url))
         }
-        "mac" in osName -> {
+        isMacOS() -> {
             Runtime.getRuntime().exec("open $url")
         }
         "nix" in osName || "nux" in osName -> {
@@ -40,12 +43,12 @@ fun String.copyToClipboard() {
     clipboard.setContents(selection, selection)
 }
 
-fun canRegisterUriScheme(): Boolean = "windows" in osName
+fun canRegisterUriScheme(): Boolean = isWindows()
 
 fun registerUriSchemes() {
 
     try {
-        if ("windows" in osName) {
+        if (isWindows()) {
             val applicationPath = ProcessHandle.current().getCommandLineWindows().insertFullJvmDir()
             registerUriSchemesWindows(applicationPath, listOf("ergopay", "ergo", "ergoauth"))
         } else {
