@@ -207,7 +207,7 @@
     <string name="button_next">Next</string>
     <string name="title_authenticate">Authentication required</string>
     <string name="error_device_security">Security error: %1$s\n\nMost likely this is caused by a change in device\'s authentication settings.
-        If this error persists, please restore this wallet with themnemonic you have noted.</string>
+        If this error persists, please restore this wallet with the mnemonic you have noted.</string>
     <string name="error_device_security_cloud_hint">The information to decrypt your secrets could not be read. Please note
         that this information is not synced with cloud backup.</string>
     <string name="label_add_token">Token</string>
@@ -286,9 +286,11 @@
     <!-- Mosaik view -->
     <string name="title_mosaik">dApps</string>
     <string name="hint_app_url">App URL</string>
-    <string name="desc_mosaik">You can use and add dApps that support wallet integration here. Decentralized
-        applications (dApps) connect your wallet to smart contracts. dApps are third-party plug-ins.
-        They are not affiliated with Ergo Wallet. Use at your discretion.</string>
+    <string name="desc_mosaik">You can use and add dApps that support wallet integration here.
+        Decentralized applications (dApps) are third-party plug-ins that connect your wallet to smart
+        contracts. They may collect personal information. Before adding a dApp, please confirm the
+        App URL, and review its terms of use and privacy policies. dApps are not affiliated with
+        Ergo Wallet. Use at your discretion.</string>
     <string name="error_loading_mosaik_app">Could not load app.\nReason:\n%1$s</string>
     <string name="title_last_visited">Last visited</string>
     <string name="title_favorites">Favorites</string>
