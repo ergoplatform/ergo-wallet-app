@@ -13,7 +13,9 @@ import com.arkivanov.decompose.router.push
 import com.arkivanov.essenty.lifecycle.doOnResume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
+import org.ergoplatform.compose.tokens.getAppMosaikTokenLabelBuilder
 import org.ergoplatform.desktop.appVersionString
 import org.ergoplatform.desktop.ui.copyToClipboard
 import org.ergoplatform.desktop.ui.getQrCodeImageBitmap
@@ -176,6 +178,12 @@ class MosaikAppComponent(
             DropDownItem = { onClick, content ->
                 DropdownMenuItem(onClick = onClick, content = content)
             }
+
+            TokenLabel = getAppMosaikTokenLabelBuilder(
+                tokenDb = { Application.database.tokenDbProvider },
+                apiService = { ApiServiceManager.getOrInit(Application.prefs) },
+                stringResolver = { Application.texts }
+            )
         }
         mosaikRuntime.loadUrlEnteredByUser(appUrl)
     }

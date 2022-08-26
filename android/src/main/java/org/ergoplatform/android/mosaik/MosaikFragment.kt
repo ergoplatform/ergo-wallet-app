@@ -19,6 +19,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -31,6 +32,7 @@ import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
 import org.ergoplatform.android.wallet.WalletChooserCallback
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
+import org.ergoplatform.compose.tokens.getAppMosaikTokenLabelBuilder
 import org.ergoplatform.mosaik.MosaikComposeConfig
 import org.ergoplatform.mosaik.MosaikViewTree
 import org.ergoplatform.mosaik.model.MosaikContext
@@ -188,7 +190,8 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
             }
             qrCodeSize = 250.dp
             val qrSizePx = (250 * dpToPx).toInt()
-            convertQrCodeContentToImageBitmap = { convertQrCodeToBitmap(it, qrSizePx, qrSizePx)?.asImageBitmap() }
+            convertQrCodeContentToImageBitmap =
+                { convertQrCodeToBitmap(it, qrSizePx, qrSizePx)?.asImageBitmap() }
             preselectEditableInputs = false
 
             DropDownMenu = { expanded,
@@ -206,6 +209,12 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
             DropDownItem = { onClick, content ->
                 DropdownMenuItem(onClick = onClick, content = content)
             }
+
+            TokenLabel = getAppMosaikTokenLabelBuilder(
+                tokenDb = { AppDatabase.getInstance(requireContext()).tokenDbProvider },
+                apiService = { ApiServiceManager.getOrInit(Preferences(requireContext())) },
+                stringResolver = { AndroidStringProvider(requireContext()) }
+            )
         }
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
@@ -297,6 +306,8 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        // TokenLabel references this fragment (requireContext Call), so we set it as a DisposableEffect that is cleaned up
+        MosaikComposeConfig.TokenLabel = { properties, modifier, content -> }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

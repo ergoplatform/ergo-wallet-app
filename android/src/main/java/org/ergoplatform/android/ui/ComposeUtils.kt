@@ -8,11 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ergoplatform.android.R
+import org.ergoplatform.compose.ComposePlatformUtils
 import org.ergoplatform.compose.settings.defaultPadding
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
@@ -21,6 +23,7 @@ import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 @Composable
 fun AppComposeTheme(content: @Composable () -> Unit) {
     prepareMosaikConfig()
+    initComposePlatformUtils()
 
     MaterialTheme(
         colors = MaterialTheme.colors.copy(
@@ -61,5 +64,18 @@ private fun prepareMosaikConfig() {
         cardShapeRadius = 10.dp
         buttonShapeRadius = 16.dp
         buttonPadding = PaddingValues(defaultPadding, 12.dp)
+    }
+}
+
+private fun initComposePlatformUtils() {
+    ComposePlatformUtils.getDrawablePainter = {
+        painterResource(
+            when (it) {
+                ComposePlatformUtils.Drawable.Octagon -> R.drawable.ic_octagon_48
+                ComposePlatformUtils.Drawable.NftImage -> R.drawable.ic_photo_camera_24
+                ComposePlatformUtils.Drawable.NftAudio -> R.drawable.ic_music_note_24
+                ComposePlatformUtils.Drawable.NftVideo -> R.drawable.ic_videocam_24
+            }
+        )
     }
 }
