@@ -26,6 +26,7 @@ import org.ergoplatform.desktop.Preferences
 import org.ergoplatform.desktop.persistance.DesktopCacheFileManager
 import org.ergoplatform.desktop.ui.DesktopTheme
 import org.ergoplatform.desktop.ui.DesktopStringProvider
+import org.ergoplatform.desktop.ui.initComposePlatformUtils
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.ui.uiErgoColor
@@ -101,6 +102,7 @@ fun main(args: Array<String>) {
     val windowPos = desktopPrefs.windowPos
 
     // set Mosaik and app style
+    initComposePlatformUtils()
     MosaikComposeConfig.scrollMinAlpha = 1f
     MosaikStyleConfig.apply {
         primaryLabelColor = uiErgoColor

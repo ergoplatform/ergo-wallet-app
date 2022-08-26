@@ -16,6 +16,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.res.painterResource
 import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
+import org.ergoplatform.compose.ComposePlatformUtils
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.transactions.MessageSeverity
@@ -71,3 +72,16 @@ fun MessageSeverity.getSeverityIcon(): ImageVector? =
         MessageSeverity.WARNING -> Icons.Default.Warning
         MessageSeverity.ERROR -> Icons.Default.Error
     }
+
+fun initComposePlatformUtils() {
+    ComposePlatformUtils.getDrawablePainter = {
+        painterResource(
+            when (it) {
+                ComposePlatformUtils.Drawable.Octagon -> "ic_octagon_48.xml"
+                ComposePlatformUtils.Drawable.NftImage -> "ic_photo_camera_24.xml"
+                ComposePlatformUtils.Drawable.NftAudio -> "ic_music_note_24.xml"
+                ComposePlatformUtils.Drawable.NftVideo -> "ic_videocam_24.xml"
+            }
+        )
+    }
+}
