@@ -16,6 +16,7 @@ class TokenEntryViewData(
     var balance: String? = null
     var price: String? = null
     var genuityFlag: Int? = null
+    var thumbnailType: Int? = null
 
     override fun setDisplayedTokenName(tokenName: String) {
         displayedName = tokenName
@@ -38,6 +39,6 @@ class TokenEntryViewData(
     }
 
     override fun setThumbnail(thumbnailType: Int) {
-
+        this.thumbnailType = thumbnailType
     }
 }
