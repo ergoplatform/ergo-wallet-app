@@ -70,7 +70,11 @@ fun ChooseTokenListDialog(
                     ) {
 
                         Column(Modifier.fillMaxWidth()) {
-                            TokenLabel(token, Modifier.align(Alignment.CenterHorizontally))
+                            TokenLabel(
+                                token,
+                                Modifier.align(Alignment.CenterHorizontally),
+                                showAmount = false
+                            )
 
                             if (token.displayedId != null)
                                 MiddleEllipsisText(

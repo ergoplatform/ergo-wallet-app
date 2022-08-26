@@ -25,44 +25,59 @@ fun TokenLabel(
     tokenData: TokenEntryViewData,
     modifier: Modifier = Modifier,
     labelStyle: LabelStyle = LabelStyle.HEADLINE2,
+    showAmount: Boolean = true,
+    showTumbnail: Boolean = true,
+    showGenuity: Boolean = true,
 ) {
     Row(modifier) {
-        tokenData.thumbnailType?.let { getThumbnailDrawableId(it) }?.let { thumbnail ->
-            Box(
-                Modifier.padding(end = defaultPadding / 2).size(smallIconSize)
-                    .align(Alignment.CenterVertically)
-            ) {
-                Icon(
-                    ComposePlatformUtils.getDrawablePainter(ComposePlatformUtils.Drawable.Octagon),
-                    null,
-                    tint = MosaikStyleConfig.secondaryLabelColor
-                )
-
-                Icon(
-                    ComposePlatformUtils.getDrawablePainter(thumbnail),
-                    null,
-                    Modifier.size(14.dp).align(Alignment.Center),
-                    tint = MaterialTheme.colors.surface
+        if (showTumbnail)
+            tokenData.thumbnailType?.let { getThumbnailDrawableId(it) }?.let { thumbnail ->
+                TokenThumbnail(
+                    thumbnail,
+                    Modifier.padding(end = defaultPadding / 2).size(smallIconSize)
+                        .align(Alignment.CenterVertically)
                 )
             }
-        }
 
         Text(
-            tokenData.displayedName ?: "",
+            ((if (showAmount) tokenData.balance else null)?.let { "$it " } ?: "") +
+                    (tokenData.displayedName ?: ""),
             Modifier.weight(1f, false),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = labelStyle(labelStyle),
         )
 
-        tokenData.genuityFlag?.let { getGenuineImageVector(it) }?.let {
-            Icon(
-                it,
-                null,
-                Modifier.padding(start = defaultPadding / 2).size(minIconSize)
-                    .align(Alignment.CenterVertically),
-                tint = MosaikStyleConfig.primaryLabelColor
-            )
-        }
+        if (showGenuity)
+            tokenData.genuityFlag?.let { getGenuineImageVector(it) }?.let {
+                Icon(
+                    it,
+                    null,
+                    Modifier.padding(start = defaultPadding / 2).size(minIconSize)
+                        .align(Alignment.CenterVertically),
+                    tint = MosaikStyleConfig.primaryLabelColor
+                )
+            }
+    }
+}
+
+@Composable
+fun TokenThumbnail(
+    thumbnail: ComposePlatformUtils.Drawable,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier) {
+        Icon(
+            ComposePlatformUtils.getDrawablePainter(ComposePlatformUtils.Drawable.Octagon),
+            null,
+            tint = MosaikStyleConfig.secondaryLabelColor
+        )
+
+        Icon(
+            ComposePlatformUtils.getDrawablePainter(thumbnail),
+            null,
+            Modifier.size(smallIconSize * 0.56f).align(Alignment.Center),
+            tint = MaterialTheme.colors.surface
+        )
     }
 }
