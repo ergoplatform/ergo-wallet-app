@@ -1,13 +1,15 @@
-package org.ergoplatform.desktop.tokens
+package org.ergoplatform.compose.tokens
 
-import org.ergoplatform.Application
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.uilogic.tokens.TokenEntryViewUiLogic
 
-class TokenEntryViewData(walletToken: WalletToken, noIdWhenPriceAvail: Boolean) :
+class TokenEntryViewData(
+    walletToken: WalletToken,
+    noIdWhenPriceAvail: Boolean,
+    override val texts: StringProvider
+) :
     TokenEntryViewUiLogic(walletToken, noIdWhenPriceAvail) {
-    override val texts: StringProvider get() = Application.texts
 
     var displayedName: String? = null
     var displayedId: String? = null

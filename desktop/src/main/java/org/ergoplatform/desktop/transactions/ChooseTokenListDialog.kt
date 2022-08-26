@@ -1,7 +1,10 @@
 package org.ergoplatform.desktop.transactions
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -10,9 +13,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
-import org.ergoplatform.desktop.tokens.TokenEntryViewData
+import org.ergoplatform.compose.tokens.TokenEntryViewData
+import org.ergoplatform.compose.tokens.TokenLabel
 import org.ergoplatform.desktop.ui.AppDialog
 import org.ergoplatform.desktop.ui.AppScrollbar
 import org.ergoplatform.desktop.ui.defaultPadding
@@ -34,7 +37,7 @@ fun ChooseTokenListDialog(
     val preparedList = remember {
         tokenToChooseFrom.map { token ->
             TokenEntryViewData(
-                token, false
+                token, false, Application.texts
             ).apply { bind(tokenInfoMap[token.tokenId]) }
         }
     }
@@ -67,18 +70,7 @@ fun ChooseTokenListDialog(
                     ) {
 
                         Column(Modifier.fillMaxWidth()) {
-                            Row(Modifier.align(Alignment.CenterHorizontally)) {
-                                // TODO token thumbnail
-
-                                Text(
-                                    token.displayedName ?: "",
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    style = labelStyle(LabelStyle.HEADLINE2),
-                                )
-
-                                // TODO token genuity flag
-                            }
+                            TokenLabel(token, Modifier.align(Alignment.CenterHorizontally))
 
                             if (token.displayedId != null)
                                 MiddleEllipsisText(
