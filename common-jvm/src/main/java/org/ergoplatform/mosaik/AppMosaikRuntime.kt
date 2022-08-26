@@ -143,10 +143,7 @@ abstract class AppMosaikRuntime(
         showDialog(
             MosaikDialog(
                 getUserErrorMessage(error),
-                "OK",
-                null,
-                null,
-                null
+                stringProvider.getString(STRING_ZXING_BUTTON_OK)
             )
         )
     }
