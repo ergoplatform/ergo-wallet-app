@@ -63,7 +63,7 @@ private fun prepareMosaikConfig() {
         textButtonColorDisabled = secondaryLabelColor
         cardShapeRadius = 10.dp
         buttonShapeRadius = 16.dp
-        buttonPadding = PaddingValues(defaultPadding, 12.dp)
+        buttonPadding = PaddingValues(defaultPadding, 10.dp)
     }
 }
 

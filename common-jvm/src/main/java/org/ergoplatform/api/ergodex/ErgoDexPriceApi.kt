@@ -10,6 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class ErgoDexPriceApi : TokenPriceApi {
     private val priceSource = "spectrum.fi"
     private val baseIdErg = "0000000000000000000000000000000000000000000000000000000000000000"
+    private val fetchAllPricesTimeStamp = 1653075262280
 
     private val ergoDexApi: ErgoDexApi
 
@@ -23,7 +24,7 @@ class ErgoDexPriceApi : TokenPriceApi {
 
 
     override fun getTokenPrices(): List<Pair<TokenPrice, PriceImportance>>? {
-        val swapList = ergoDexApi.getSwaps(1653075262280).execute()
+        val swapList = ergoDexApi.getSwaps(fetchAllPricesTimeStamp).execute()
 
         val ergBasePrices = swapList.body()
             ?.filter { it.baseId.equals(baseIdErg) && it.baseDisplayName.equals("ERG") }

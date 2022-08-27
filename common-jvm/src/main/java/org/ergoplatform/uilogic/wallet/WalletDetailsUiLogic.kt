@@ -215,7 +215,7 @@ abstract class WalletDetailsUiLogic {
             transactionDbProvider.loadAddressTransactionsWithTokens(
                 addresses.first(),
                 maxTransactionsToShow,
-                0
+                page = 0
             )
         } else {
             val returnedTransactions = mutableListOf<AddressTransactionWithTokens>()
