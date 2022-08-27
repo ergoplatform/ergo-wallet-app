@@ -12,6 +12,8 @@ import org.ergoplatform.mosaik.MosaikStyleConfig
 val defaultPadding = 16.dp
 val defaultMaxWidth = 600.dp
 val bigIconSize = 58.dp
+val smallIconSize = 24.dp
+val minIconSize = 18.dp
 
 @Composable
 fun primaryButtonColors() = buttonColors(

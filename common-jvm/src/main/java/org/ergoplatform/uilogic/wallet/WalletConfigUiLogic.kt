@@ -6,7 +6,7 @@ import org.ergoplatform.persistance.WalletDbProvider
 abstract class WalletConfigUiLogic {
 
     var wallet: WalletConfig? = null
-        private set(value) {
+        protected set(value) {
             field = value
             onConfigChanged(value)
         }
