@@ -6,6 +6,7 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.ChooseWalletViewController
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
+import org.ergoplatform.wallet.isReadOnly
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -143,7 +144,7 @@ class ErgoAuthenticationViewController(
         private val authButton = PrimaryButton(texts.getString(STRING_BUTTON_AUTHENTICATE)).apply {
             addOnTouchUpInsideListener { _, _ ->
                 uiLogic.walletConfig?.let { walletConfig ->
-                    if (walletConfig.secretStorage != null) {
+                    if (!walletConfig.isReadOnly()) {
                         startAuthFlow(walletConfig) { secrets ->
                             uiLogic.startResponse(secrets, texts)
                         }

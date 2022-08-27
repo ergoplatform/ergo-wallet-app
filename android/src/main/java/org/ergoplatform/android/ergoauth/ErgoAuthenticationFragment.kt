@@ -21,6 +21,7 @@ import org.ergoplatform.android.wallet.WalletChooserCallback
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
+import org.ergoplatform.wallet.isReadOnly
 
 class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChooserCallback {
     private var _binding: FragmentErgoAuthenticationBinding? = null
@@ -80,7 +81,7 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
     }
 
     override fun startAuthFlow() {
-        if (authenticationWalletConfig?.secretStorage == null) {
+        if (authenticationWalletConfig?.isReadOnly() != false) {
             // read only wallet not supported (yet)
             MaterialAlertDialogBuilder(requireContext())
                 .setMessage(R.string.error_wallet_type_ergoauth_not_avail)

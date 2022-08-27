@@ -4,11 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.Preferences
-import org.ergoplatform.android.databinding.FragmentConnectionSettingsBinding
-import org.ergoplatform.getDefaultExplorerApiUrl
+import org.ergoplatform.android.R
+import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.AppComposeTheme
+import org.ergoplatform.compose.settings.ConnectionSettingsLayout
+import org.ergoplatform.compose.settings.defaultPadding
+import org.ergoplatform.mosaik.labelStyle
+import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 
 /**
  *
@@ -16,62 +27,31 @@ import org.ergoplatform.getDefaultExplorerApiUrl
  */
 class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
 
-    private var _binding: FragmentConnectionSettingsBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
 
-        _binding = FragmentConnectionSettingsBinding.inflate(inflater, container, false)
-        return binding.root
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                AppComposeTheme {
+                    Column(Modifier.padding(defaultPadding)) {
 
-    }
+                        Text(
+                            text = stringResource(id = R.string.button_connection_settings),
+                            modifier = Modifier.padding(bottom = defaultPadding),
+                            style = labelStyle(LabelStyle.BODY1),
+                        )
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val preferences = Preferences(requireContext())
-        binding.editNodeUrl.editText?.setText(preferences.prefNodeUrl)
-        binding.editExplorerApiUrl.editText?.setText(preferences.prefExplorerApiUrl)
-        binding.inputTokenVerificationUrl.setText(preferences.prefTokenVerificationUrl)
-        binding.inputIpfsGateway.setText(preferences.prefIpfsGatewayUrl)
-        binding.buttonApply.setOnClickListener { buttonApply() }
-        binding.inputIpfsGateway.setOnEditorActionListener { _, _, _ ->
-            buttonApply()
-            true
+                        ConnectionSettingsLayout(
+                            preferences = Preferences(requireContext()),
+                            stringProvider = AndroidStringProvider(requireContext()),
+                            onDismissRequest = { dismiss() }
+                        )
+                    }
+                }
+            }
         }
-        binding.buttonDefaults.setOnClickListener {
-            binding.editNodeUrl.editText?.setText(preferences.getDefaultNodeApiUrl())
-            binding.editExplorerApiUrl.editText?.setText(getDefaultExplorerApiUrl())
-            binding.inputIpfsGateway.setText(preferences.defaultIpfsGatewayUrl)
-            binding.inputTokenVerificationUrl.setText(preferences.defaultTokenVerificationUrl)
-        }
-    }
-
-    private fun buttonApply() {
-        val nodeUrl = binding.editNodeUrl.editText?.text?.toString() ?: ""
-        val explorerApiUrl = binding.editExplorerApiUrl.editText?.text?.toString() ?: ""
-
-        val preferences = Preferences(requireContext())
-        preferences.prefExplorerApiUrl = explorerApiUrl
-        preferences.prefNodeUrl = nodeUrl
-        preferences.prefIpfsGatewayUrl = binding.inputIpfsGateway.text?.toString() ?: ""
-        preferences.prefTokenVerificationUrl =
-            binding.inputTokenVerificationUrl.text?.toString() ?: ""
-
-        // reset api service of NodeConnector to load new settings
-        ApiServiceManager.resetApiService()
-
-        dismiss()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

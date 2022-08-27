@@ -8,19 +8,23 @@ import okhttp3.Request
 import okhttp3.ResponseBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.TestPreferencesProvider
 import org.ergoplatform.TestStringProvider
-import org.ergoplatform.api.ErgoExplorerApi
-import org.ergoplatform.explorer.client.model.*
+import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletDbProvider
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.STATIC_ERGO_PAY_URI
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_LABEL_ERROR_OCCURED
 import org.ergoplatform.uilogic.STRING_LABEL_MESSAGE_FROM_DAPP
 import org.ergoplatform.uilogic.TestUiWallet
 import org.ergoplatform.utils.LogUtils
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -263,7 +267,12 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 waitWhileFetching(this)
                 assertEquals(ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET, state)
                 assertNull(epsr)
-                setWalletId(TestUiWallet.singleAddressWallet.walletConfig.id, TestPreferencesProvider(), TestStringProvider(), db)
+                setWalletId(
+                    TestUiWallet.singleAddressWallet.walletConfig.id,
+                    TestPreferencesProvider(),
+                    TestStringProvider(),
+                    db
+                )
                 delay(100) // give some time to make the "db" access
                 assertEquals(ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION, state)
                 assertNotNull(epsr)
@@ -272,13 +281,22 @@ class ErgoPaySigningUiLogicTest : TestCase() {
             }
 
             // request with address, but two derived addresses configured: ask user
-            buildUiLogic("$url?address=#P2PK_ADDRESS#", twoAddresses = true, initWithWallet = false).apply {
+            buildUiLogic(
+                "$url?address=#P2PK_ADDRESS#",
+                twoAddresses = true,
+                initWithWallet = false
+            ).apply {
                 assertEquals(ErgoPaySigningUiLogic.State.FETCH_DATA, state)
                 waitWhileFetching(this)
                 assertEquals(ErgoPaySigningUiLogic.State.WAIT_FOR_WALLET, state)
                 assertNull(epsr)
                 assertNull(transactionInfo)
-                setWalletId(TestUiWallet.singleAddressWallet.walletConfig.id, TestPreferencesProvider(), TestStringProvider(), db)
+                setWalletId(
+                    TestUiWallet.singleAddressWallet.walletConfig.id,
+                    TestPreferencesProvider(),
+                    TestStringProvider(),
+                    db
+                )
                 delay(100) // give some time to make the "db" access
                 assertEquals(ErgoPaySigningUiLogic.State.WAIT_FOR_ADDRESS, state)
                 derivedAddressIdx = 0
@@ -357,77 +375,51 @@ class ErgoPaySigningUiLogicTest : TestCase() {
 
         }
 
-        override fun getErgoApiService(prefs: PreferencesProvider): ErgoExplorerApi {
-            return object : ErgoExplorerApi {
-                override fun getTotalBalanceForAddress(publicAddress: String): Call<TotalBalance> {
-                    error("Not implemented")
-                }
-
-                override fun getTransactionInformation(txId: String): Call<TransactionInfo> {
-                    error("Not implemented")
-                }
-
-                override fun getBoxInformation(boxId: String): Call<OutputInfo> {
-                    return object : Call<OutputInfo> {
-                        override fun clone(): Call<OutputInfo> {
-                            error("Not implemented")
-                        }
-
-                        override fun execute(): Response<OutputInfo> {
-                            return if (ergoApiFailure)
-                                Response.error(404, ResponseBody.create(null, "Moved"))
-                            else
-                                Response.success(OutputInfo().apply {
-                                    setBoxId(boxId)
-                                    address = wallet?.walletConfig?.firstAddress ?: ""
-                                    value = 1000L * 1000L * 1000L
-                                    assets = emptyList()
-                                })
-                        }
-
-                        override fun enqueue(callback: Callback<OutputInfo>) {
-                            error("Not implemented")
-                        }
-
-                        override fun isExecuted(): Boolean {
-                            error("Not implemented")
-                        }
-
-                        override fun cancel() {
-                            error("Not implemented")
-                        }
-
-                        override fun isCanceled(): Boolean {
-                            error("Not implemented")
-                        }
-
-                        override fun request(): Request {
-                            error("Not implemented")
-                        }
-
+        override fun getErgoApiService(prefs: PreferencesProvider): ApiServiceManager {
+            val apiService: ApiServiceManager = mock(ApiServiceManager::class.java)
+            whenever(apiService.getExplorerBoxInformation(any())).doAnswer {
+                val boxId = it.arguments[0] as String
+                return@doAnswer object : Call<OutputInfo> {
+                    override fun clone(): Call<OutputInfo> {
+                        error("Not implemented")
                     }
-                }
 
-                override fun getTokenInformation(tokenId: String): Call<TokenInfo> {
-                    error("Not yet implemented")
-                }
+                    override fun execute(): Response<OutputInfo> {
+                        return if (ergoApiFailure)
+                            Response.error(404, ResponseBody.create(null, "Moved"))
+                        else
+                            Response.success(OutputInfo().apply {
+                                setBoxId(boxId)
+                                address = wallet?.walletConfig?.firstAddress ?: ""
+                                value = 1000L * 1000L * 1000L
+                                assets = emptyList()
+                            })
+                    }
 
-                override fun getMempoolTransactionsForAddress(
-                    publicAddress: String,
-                    limit: Int,
-                    offset: Int
-                ): Call<Items<TransactionInfo>> {
-                    error("Not implemented")
-                }
+                    override fun enqueue(callback: Callback<OutputInfo>) {
+                        error("Not implemented")
+                    }
 
-                override fun getConfirmedTransactionsForAddress(
-                    publicAddress: String,
-                    limit: Int,
-                    offset: Int
-                ): Call<Items<TransactionInfo>> {
-                    error("Not implemented")
+                    override fun isExecuted(): Boolean {
+                        error("Not implemented")
+                    }
+
+                    override fun cancel() {
+                        error("Not implemented")
+                    }
+
+                    override fun isCanceled(): Boolean {
+                        error("Not implemented")
+                    }
+
+                    override fun request(): Request {
+                        error("Not implemented")
+                    }
+
                 }
             }
+
+            return apiService
         }
     }
 }

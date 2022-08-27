@@ -200,10 +200,6 @@
     <string name="button_scan_signed_tx">Realize o scan da transacção assinada</string>
     <string name="button_next">Próximo</string>
     <string name="title_authenticate">Autenticação necessária</string>
-    <string name="error_device_security">Erro de segurança: %1$s</string>
-    <string name="error_device_security_cloud_hint">Não foi possível ler a informação para desencriptar a sua chave secreta. Note que
-        esta informação não está sincronizada com um backup na cloud. Se o erro persistir, por favor restaure esta carteira com a
-        frase mnemónica anotada anteriormente.</string>
     <string name="label_add_token">Token</string>
     <string name="label_send_all">Enviar tudo</string>
     <string name="title_add_token">Escolha o token para enviar</string>
@@ -280,8 +276,7 @@
     <!-- Mosaik view -->
     <string name="title_mosaik">Applicações</string>
     <string name="hint_app_url">App URL</string>
-    <string name="desc_mosaik">Pode utilizar e adicionar aplicações que suportam a integração com a carteira aqui.</string>
-    <string name="error_no_mosaik_app">Não foi possível iniciar a aplicação.\nJustificação:\n%1$s</string>
+    <string name="error_loading_mosaik_app">Não foi possível iniciar a aplicação.\nJustificação:\n%1$s</string>
     <string name="title_last_visited">A última visita </string>
     <string name="title_favorites">Favoritos</string>
     <string name="title_suggestions">Applicações Sugeridas</string>

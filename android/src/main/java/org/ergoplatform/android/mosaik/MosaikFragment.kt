@@ -6,9 +6,9 @@ import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -32,7 +32,6 @@ import org.ergoplatform.android.wallet.WalletChooserCallback
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.mosaik.MosaikComposeConfig
-import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.MosaikViewTree
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.persistance.WalletConfig
@@ -98,12 +97,12 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 val builder = MaterialAlertDialogBuilder(requireContext())
                     .setMessage(dialog.message)
                     .setPositiveButton(dialog.positiveButtonText) { _, _ ->
-                        dialog.positiveButtonClicked?.run()
+                        dialog.positiveButtonClicked?.invoke()
                     }
 
                 dialog.negativeButtonText?.let {
                     builder.setNegativeButton(dialog.negativeButtonText) { _, _ ->
-                        dialog.negativeButtonClicked?.run()
+                        dialog.negativeButtonClicked?.invoke()
                     }
                 }
 
@@ -120,12 +119,9 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
         }
         viewModel.noAppLiveData.observe(viewLifecycleOwner) { errorCause ->
             binding.layoutNoApp.visibility = if (errorCause == null) View.GONE else View.VISIBLE
+            binding.composeView.visibility = if (errorCause == null) View.VISIBLE else View.GONE
             errorCause?.let {
-                binding.textNoApp.text =
-                    getString(
-                        R.string.error_no_mosaik_app,
-                        errorCause.javaClass.simpleName + " " + errorCause.message
-                    )
+                binding.textNoApp.text = viewModel.mosaikRuntime.getUserErrorMessage(errorCause)
             }
         }
         viewModel.showWalletOrAddressChooserEvent.observe(viewLifecycleOwner) { valueId ->
@@ -153,7 +149,8 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
         }
         viewModel.scanQrCodeEvent.observe(viewLifecycleOwner) { qrScanActionId ->
             qrScanActionId?.let {
-                IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+                IntentIntegrator.forSupportFragment(this)
+                    .initiateScan(setOf(IntentIntegrator.QR_CODE))
             }
         }
         viewModel.showTokenInfoEvent.observe(viewLifecycleOwner) { tokenId ->
@@ -179,7 +176,8 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
 
         // set up Compose view
         MosaikComposeConfig.apply {
-            val minPixelSize = (300 * binding.root.resources.displayMetrics.density).toInt()
+            val dpToPx = binding.root.resources.displayMetrics.density
+            val minPixelSize = (300 * dpToPx).toInt()
             scrollMinAlpha = 0f
             convertByteArrayToImageBitmap = { byteArray ->
                 decodeSampledBitmapFromByteArray(
@@ -188,6 +186,10 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                     minPixelSize
                 ).asImageBitmap()
             }
+            qrCodeSize = 250.dp
+            val qrSizePx = (250 * dpToPx).toInt()
+            convertQrCodeContentToImageBitmap = { convertQrCodeToBitmap(it, qrSizePx, qrSizePx)?.asImageBitmap() }
+            preselectEditableInputs = false
 
             DropDownMenu = { expanded,
                              dismiss,
@@ -205,25 +207,9 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 DropdownMenuItem(onClick = onClick, content = content)
             }
         }
+        binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
-            MosaikStyleConfig.apply {
-                primaryLabelColor = colorResource(id = R.color.primary)
-                secondaryLabelColor = colorResource(id = R.color.darkgrey)
-                defaultLabelColor = colorResource(id = R.color.text_color)
-                primaryButtonTextColor = colorResource(id = R.color.textcolor)
-                secondaryButtonTextColor = colorResource(id = R.color.textcolor)
-                secondaryButtonColor = colorResource(id = R.color.secondary)
-                secondaryButtonTextColor = colorResource(id = R.color.text_color_ondark)
-                textButtonTextColor = colorResource(id = R.color.primary)
-                textButtonColorDisabled = secondaryLabelColor
-            }
-
-            MaterialTheme(
-                colors = MaterialTheme.colors.copy(
-                    surface = colorResource(id = R.color.cardview_background),
-                    isLight = resources.getBoolean(R.bool.isLight)
-                )
-            ) {
+            AppComposeTheme {
                 MosaikViewTree(viewModel.mosaikRuntime.viewTree)
             }
         }
@@ -325,6 +311,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
     private val backPressedHandler = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
             viewModel.mosaikRuntime.navigateBack()
+            isEnabled = viewModel.mosaikRuntime.canNavigateBack()
         }
 
     }

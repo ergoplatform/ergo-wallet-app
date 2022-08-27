@@ -146,7 +146,6 @@
     <string name="button_scan_signed_tx">扫描已签名交易</string>
     <string name="button_next">下一步</string>
     <string name="title_authenticate">需要验证</string>
-    <string name="error_device_security">安全错误：%1$s</string>
     <string name="label_add_token">代币</string>
     <string name="label_send_all">全部发送</string>
     <string name="title_add_token">选择要发送的代币</string>

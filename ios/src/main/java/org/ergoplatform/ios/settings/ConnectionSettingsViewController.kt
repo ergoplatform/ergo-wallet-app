@@ -66,7 +66,14 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
                 }
             }
             text = prefs.prefNodeUrl
-            clearButtonMode = UITextFieldViewMode.Always
+            setCustomActionField(
+                getIosSystemImage(
+                    IMAGE_AUTO_FIX,
+                    UIImageSymbolScale.Small
+                )!!
+            ) { prefs.knownNodesList.randomOrNull()?.let { text = it } }
+            clearButtonMode = UITextFieldViewMode.WhileEditing
+            rightViewMode = UITextFieldViewMode.UnlessEditing
         }
 
         val tokenVerificationLabel = Body1Label().apply {

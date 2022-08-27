@@ -5,10 +5,9 @@ import org.ergoplatform.ios.ui.IosStringProvider
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.ios.ui.getAppDelegate
 import org.ergoplatform.ios.ui.startAuthFlow
+import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.TransactionResult
-import org.ergoplatform.uilogic.STRING_BUTTON_SEND
-import org.ergoplatform.uilogic.STRING_ERROR_SEND_TRANSACTION
-import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SubmitTransactionUiLogic
 import org.robovm.apple.uikit.UIAlertAction
 import org.robovm.apple.uikit.UIAlertActionStyle
@@ -47,7 +46,11 @@ abstract class SubmitTransactionViewController : ViewControllerWithKeyboardLayou
 
     protected fun showTxResultError(txResult: TransactionResult) {
         val message =
-            texts.get(STRING_ERROR_SEND_TRANSACTION) + (txResult.errorMsg?.let { "\n\n$it" } ?: "")
+            texts.get(
+                if (txResult is PromptSigningResult) STRING_ERROR_PREPARE_TRANSACTION
+                else STRING_ERROR_SEND_TRANSACTION
+            ) + (txResult.errorMsg?.let { "\n\n$it" } ?: "") +
+                    "\n\n" + texts.get(STRING_ERROR_USE_OTHER_NODE)
         val alertVc =
             UIAlertController(
                 texts.get(STRING_BUTTON_SEND),

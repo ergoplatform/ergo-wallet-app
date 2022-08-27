@@ -198,10 +198,6 @@
     <string name="button_scan_signed_tx">Сканировать подписанную транзакцию</string>
     <string name="button_next">Далее</string>
     <string name="title_authenticate">Требуется авторизация</string>
-    <string name="error_device_security">Ошибка безопасности: %1$s</string>
-    <string name="error_device_security_cloud_hint">Не удалось прочитать информацию для расшифровки ваших секретных ключей. Пожалуйста, обратите внимание,
-что эта информация не синхронизируется с облачным резервным хранилищем. Если эта ошибка повторится, пожалуйста, восстановите этот кошелек с
-помощью сохраненной вами мнемоники (сид-фразы).</string>
     <string name="label_add_token">Токен</string>
     <string name="label_send_all">Отправить все</string>
     <string name="title_add_token">Выберите токен для отправки</string>

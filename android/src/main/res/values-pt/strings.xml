@@ -146,7 +146,6 @@
     <string name="button_scan_signed_tx">Escaneie transação assinada</string>
     <string name="button_next">Próximo</string>
     <string name="title_authenticate">Autenticação requerida</string>
-    <string name="error_device_security">Erro de segurança: %1$s</string>
     <string name="label_add_token">Token</string>
     <string name="label_send_all">Enviar todos</string>
     <string name="title_add_token">Escolha token para enviar</string>

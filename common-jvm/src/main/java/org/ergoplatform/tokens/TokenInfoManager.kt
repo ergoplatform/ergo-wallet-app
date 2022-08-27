@@ -147,7 +147,7 @@ class TokenInfoManager {
 
         val issuingBoxId = tokenApiResponse.body()!!.boxId
 
-        val boxInfo: OutputInfo = apiService.getBoxInformation(issuingBoxId).execute().body()!!
+        val boxInfo: OutputInfo = apiService.getExplorerBoxInformation(issuingBoxId).execute().body()!!
 
         val tokenInfo = boxInfo.assets.find { it.tokenId == tokenId }!!
 

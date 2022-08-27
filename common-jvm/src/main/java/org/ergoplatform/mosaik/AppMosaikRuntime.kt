@@ -12,10 +12,7 @@ import org.ergoplatform.persistance.CacheFileManager
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletAddress
-import org.ergoplatform.uilogic.STRING_BUTTON_CHOOSE_ADDRESS
-import org.ergoplatform.uilogic.STRING_BUTTON_CHOOSE_WALLET
-import org.ergoplatform.uilogic.STRING_DROPDOWN_CHOOSE_OPTION
-import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.utils.getHostname
@@ -116,7 +113,7 @@ abstract class AppMosaikRuntime(
 
     abstract fun onAppNavigated(manifest: MosaikManifest)
 
-    abstract fun noAppLoaded(cause: Throwable)
+    abstract fun appNotLoaded(cause: Throwable)
 
     fun loadUrlEnteredByUser(appUrl: String) {
         val loadUrl =
@@ -143,12 +140,16 @@ abstract class AppMosaikRuntime(
     }
 
     override fun showError(error: Throwable) {
-        // check if this error is on first app load, we show a retry button in this case
-        if (viewTree.content == null) {
-            noAppLoaded(error)
-        } else {
-            super.showError(error)
-        }
+        showDialog(
+            MosaikDialog(
+                getUserErrorMessage(error),
+                stringProvider.getString(STRING_ZXING_BUTTON_OK)
+            )
+        )
+    }
+
+    override fun appNotLoadedError(appUrl: String, error: Throwable) {
+        appNotLoaded(error)
     }
 
     private val normalizedAppUrl get() = appUrl?.let { normalizeUrl(it) }
@@ -223,6 +224,21 @@ abstract class AppMosaikRuntime(
         set(value) {
             preferencesProvider?.isSendInputFiatAmount = value
         }
+
+    fun getUserErrorMessage(errorCause: Throwable): String {
+        return when (errorCause) {
+            is ConnectionException ->
+                stringProvider.getString(STRING_ERROR_MOSAIK_CONNECTION)
+            is NoMosaikAppException ->
+                stringProvider.getString(STRING_ERROR_NO_MOSAIK_APP, errorCause.url)
+            is InvalidValuesException -> errorCause.message!!
+            else ->
+                stringProvider.getString(
+                    STRING_ERROR_LOADING_MOSAIK_APP,
+                    errorCause.javaClass.simpleName + " " + errorCause.message
+                )
+        }
+    }
 }
 
 class MosaikGuidManager {

@@ -62,6 +62,8 @@
     <string name="label_readonly_wallet_default">My wallet (Read only)</string>
     <string name="hint_signing_request">Please scan the signing request from the appropriate
        Wallet\'s Send funds screen.</string>
+    <string name="hint_readonly_signing_request">You scanned a signing request, but the wallet is
+        set up as read only. Please restore with your mnemonic.</string>
     <string name="error_qr_code_content_unknown">The scanned QR code was not of a known format.</string>
 
     <!-- add wallet -->
@@ -192,6 +194,7 @@
     <string name="error_amount">Please enter a valid amount</string>
     <string name="error_send_transaction">Could not send transaction</string>
     <string name="error_prepare_transaction">Could not prepare transaction</string>
+    <string name="error_use_other_node">If the problem persists, change the Ergo Node URL (Settings - Expert settings) and try again.</string>
     <string name="error_password_empty">Please enter a valid password</string>
     <string name="error_password_wrong">Wrong password</string>
     <string name="desc_transaction_send">Transaction was sent successfully and awaits confirmation. Transaction ID:</string>
@@ -203,10 +206,10 @@
     <string name="button_scan_signed_tx">Scan signed tx</string>
     <string name="button_next">Next</string>
     <string name="title_authenticate">Authentication required</string>
-    <string name="error_device_security">Security error: %1$s</string>
+    <string name="error_device_security">Security error: %1$s\n\nMost likely this is caused by a change in device\'s authentication settings.
+        If this error persists, please restore this wallet with the mnemonic you have noted.</string>
     <string name="error_device_security_cloud_hint">The information to decrypt your secrets could not be read. Please note
-        that this information is not synced with cloud backup. If this error persists, please restore this wallet with the
-        mnemonic you have noted.</string>
+        that this information is not synced with cloud backup.</string>
     <string name="label_add_token">Token</string>
     <string name="label_send_all">Send all</string>
     <string name="title_add_token">Choose token to send</string>
@@ -283,8 +286,12 @@
     <!-- Mosaik view -->
     <string name="title_mosaik">dApps</string>
     <string name="hint_app_url">App URL</string>
-    <string name="desc_mosaik">You can use and add dApps that support wallet integration here.</string>
-    <string name="error_no_mosaik_app">Could not load app.\nReason:\n%1$s</string>
+    <string name="desc_mosaik">You can use and add dApps that support wallet integration here.
+        Decentralized applications (dApps) are third-party plug-ins that connect your wallet to smart
+        contracts. They may collect personal information. Before adding a dApp, please confirm the
+        App URL, and review its terms of use and privacy policies. dApps are not affiliated with
+        Ergo Wallet. Use at your discretion.</string>
+    <string name="error_loading_mosaik_app">Could not load app.\nReason:\n%1$s</string>
     <string name="title_last_visited">Last visited</string>
     <string name="title_favorites">Favorites</string>
     <string name="title_suggestions">Suggested apps</string>
@@ -293,6 +300,8 @@
     <string name="button_choose_address">Choose address…</string>
     <string name="button_choose_wallet">Choose wallet…</string>
     <string name="dropdown_choose_option">(please choose)</string>
+    <string name="error_mosaik_connection">Could not load application.\nCheck your connection and try again.</string>
+    <string name="error_no_mosaik_app">No wallet app plugin found at given address %1$s. Please check for misspellings.</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>

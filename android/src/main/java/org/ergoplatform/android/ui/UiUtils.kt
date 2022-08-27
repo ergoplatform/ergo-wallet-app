@@ -105,16 +105,21 @@ fun NavController.navigateSafe(directions: NavDirections, navOptions: NavOptions
 }
 
 fun setQrCodeToImageView(imageViewQrCode: ImageView, text: String, width: Int, height: Int) {
-    try {
+    val bitmap = convertQrCodeToBitmap(text, width, height)
+    imageViewQrCode.setImageBitmap(bitmap)
+}
+
+fun convertQrCodeToBitmap(text: String, width: Int, height: Int): Bitmap? {
+    return try {
         val barcodeEncoder = BarcodeEncoder()
-        val bitmap = barcodeEncoder.encodeBitmap(
+        barcodeEncoder.encodeBitmap(
             text,
             BarcodeFormat.QR_CODE,
             width,
             height
         )
-        imageViewQrCode.setImageBitmap(bitmap)
     } catch (e: Exception) {
+        null
     }
 }
 

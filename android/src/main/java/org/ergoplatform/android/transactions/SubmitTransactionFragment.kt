@@ -15,6 +15,7 @@ import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.wallet.isReadOnly
 
 abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
     AddressChooserCallback {
@@ -41,6 +42,7 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
                     showDialogWithCopyOption(
                         requireContext(),
                         getString(errorMsgPrefix) + "\n\n" + result.errorMsg
+                                + "\n\n" + getString(R.string.error_use_other_node)
                     )
                 } else {
                     Snackbar.make(
@@ -73,7 +75,7 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
         get() = viewModel.uiLogic.wallet?.walletConfig
 
     override fun startAuthFlow() {
-        if (authenticationWalletConfig?.secretStorage == null) {
+        if (authenticationWalletConfig?.isReadOnly() != false) {
             // we have a read only wallet here, let's go to cold wallet support mode
             val context = requireContext()
             viewModel.uiLogic.startColdWalletPayment(

@@ -7,6 +7,7 @@ const val NAME_SHAREDPREFS = "ergowallet"
 const val KEY_FIAT_CURRENCY = "fiatCurrency"
 const val KEY_FIAT_VALUE = "fiatValue"
 const val KEY_NODE_URL = "nodeUrl"
+const val KEY_NODE_LIST = "nodeList"
 const val KEY_EXPLORER_API_URL = "explorerApiUrl"
 const val KEY_IPFS_GATEWAY_URL = "ipfsGatewayUrl"
 const val KEY_TOKEN_VERIFY_URL = "tokenVerificationUrl"
@@ -14,6 +15,7 @@ const val KEY_DOWNLOAD_NFT_CONTENT = "downloadNftContent"
 const val KEY_SEND_TX_MESSAGES = "sendTxMessages"
 const val KEY_INPUT_FIAT_AMOUNT = "inputFiatAmount"
 const val KEY_LASTREFRESH = "lastRefreshMs"
+const val KEY_LASTNODELISTREFRESH = "lastNodeListRefresh"
 const val KEY_MOSAIK_ENABLED = "enableMosaik"
 const val FIAT_CURRENCY_DEFAULT = "usd"
 
@@ -56,6 +58,13 @@ abstract class PreferencesProvider {
             }
 
             saveString(KEY_NODE_URL, savedNodeUrl)
+        }
+
+    var knownNodesList: List<String>
+        get() = getString(KEY_NODE_LIST, "").split(',').filterNot { it.isBlank() }
+        set(value) {
+            saveString(KEY_NODE_LIST, value.joinToString(","))
+            saveLong(KEY_LASTNODELISTREFRESH, System.currentTimeMillis())
         }
 
     fun getDefaultNodeApiUrl() =
@@ -129,6 +138,9 @@ abstract class PreferencesProvider {
         set(time) {
             saveLong(KEY_LASTREFRESH, time)
         }
+
+    val lastNodeListRefreshMs: Long
+        get() = getLong(KEY_LASTNODELISTREFRESH, 0)
 
     var lastFiatValue: Float
         get() = getFloat(KEY_FIAT_VALUE, 0f)

@@ -95,8 +95,6 @@ class AppOverviewFragment : Fragment() {
     }
 
     private fun refreshLastVisited(lastVisited: List<MosaikAppEntry>) {
-        if (lastVisited.isNotEmpty())
-            binding.descEmpty.visibility = View.GONE
         binding.descLastVisitedEmpty.visibility =
             if (lastVisited.isEmpty()) View.VISIBLE else View.GONE
 
