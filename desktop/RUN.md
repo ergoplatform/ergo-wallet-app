@@ -22,8 +22,10 @@ If you need to download a Java version, we recommend an [Adoptium JRE](https://a
 
 Please note the following about securing your data:
 
-* Ergo Wallet App for Desktop will encrypt your mnemonic with an AES256 algorithm. Please give a password of at least 12, better 24 for best security.
+* Ergo Wallet App for Desktop will encrypt your mnemonic with an AES256 algorithm. Please give a password of at least 12, better 24 characters for best security.
 * Besides the mnemonic, wallet app stores your set up P2PK addresses, balances and other data it displays. This non-confidential data is not encrypted. If you want to secure this data against third parties, please enable a disk encryption on operating system level.
-* Most operating systems do not protect applications against threads like screen grabbers, key grabbers, memory inspection etc. etc. 
-We strongly recommend that you hold the secrets needed to access your funds on mobile devices (as iOS and Android separate application process and their data completely), 
-on offline devices, or on secure desktop operating systems like Qubes OS.
+* Most operating systems do not protect applications against threats like screen grabbers, key grabbers, memory inspection etc. etc. 
+We strongly recommend that you hold the secrets needed to access your funds:
+  - on mobile devices (as iOS and Android separate application processes and their data completely), 
+  - on offline devices, 
+  - or on secure desktop operating systems like Qubes OS.
