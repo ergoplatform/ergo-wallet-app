@@ -25,8 +25,12 @@ class SettingsUiLogic {
 
     val checkNodesState: StateFlow<CheckNodesState> get() = _checkNodesState
     private val _checkNodesState = MutableStateFlow<CheckNodesState>(CheckNodesState.Waiting)
+    var lastNodeList: List<NodeInfo> = emptyList()
+        private set
 
-    suspend fun checkAvailableNodes(prefs: PreferencesProvider): List<NodeInfo> {
+    suspend fun checkAvailableNodes(prefs: PreferencesProvider) {
+        if (_checkNodesState.value != CheckNodesState.Waiting) return
+
         var knownNodesList = prefs.knownNodesList
 
         if (knownNodesList.isEmpty()) {
@@ -40,7 +44,13 @@ class SettingsUiLogic {
             }
         }
 
-        knownNodesList = mutableListOf(prefs.prefNodeUrl).apply { addAll(knownNodesList) }
+        knownNodesList = knownNodesList.map { it.trimEnd('/') }
+
+        knownNodesList = (
+                if (knownNodesList.contains(prefs.prefNodeUrl.trimEnd('/')))
+                    knownNodesList
+                else (mutableListOf(prefs.prefNodeUrl).apply { addAll(knownNodesList) })
+                ).take(10)
 
         val nodeInfo = knownNodesList.map { nodeUrl ->
             if (coroutineContext.isActive) {
@@ -73,9 +83,9 @@ class SettingsUiLogic {
             }
         }
 
-        _checkNodesState.value = CheckNodesState.Waiting
-        return nodeInfo.filter { it.connected }
+        lastNodeList = nodeInfo.filter { it.connected }
             .sortedWith(compareByDescending<NodeInfo> { it.blockHeight }.thenBy { it.responseTime })
+        _checkNodesState.value = CheckNodesState.Waiting
     }
 
     data class NodeInfo(
