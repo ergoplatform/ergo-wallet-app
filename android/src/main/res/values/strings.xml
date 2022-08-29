@@ -334,6 +334,7 @@
     <string name="label_checking_node">Checking %1$s…</string>
     <string name="label_node_alternatives">Alternative nodes:</string>
     <string name="label_node_info">Block %1$s, response time %2$s ms</string>
+    <string name="label_node_none_found">No node found. Please check your connection.</string>
     <string name="label_token_verification_url">Token verification service URL</string>
     <string name="button_show_debug_info">Show debug information</string>
     <string name="label_ipfs_http_gateway">IPFS HTTP gateway</string>

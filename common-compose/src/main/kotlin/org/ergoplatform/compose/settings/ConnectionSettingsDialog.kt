@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,16 +58,18 @@ fun ColumnScope.ConnectionSettingsLayout(
     ConnectionTextField(explorerApiUrl, stringProvider, STRING_LABEL_EXPLORER_API_URL)
 
     val checkNodesState = uiLogic.checkNodesState.collectAsState()
+    val showList = remember { mutableStateOf(false) }
 
     if (checkNodesState.value == SettingsUiLogic.CheckNodesState.Waiting) {
 
         ConnectionTextField(nodeApiUrl, stringProvider, STRING_LABEL_NODE_URL, trailingIcon = {
-            IconButton(onClick = onStartNodeDetection) {
+            IconButton(onClick = {
+                onStartNodeDetection()
+                showList.value = true
+            }) {
                 Icon(Icons.Default.AutoFixHigh, null)
             }
         })
-
-        val showList = remember(uiLogic.lastNodeList) { mutableStateOf(true) }
 
         if (uiLogic.lastNodeList.isNotEmpty() && showList.value) {
 
@@ -85,6 +88,14 @@ fun ColumnScope.ConnectionSettingsLayout(
                 }
             }
 
+        } else if (showList.value) {
+            Row(Modifier.padding(bottom = defaultPadding).padding(horizontal = defaultPadding)) {
+
+                Icon(Icons.Default.Error, null, tint = MosaikStyleConfig.primaryLabelColor)
+
+                Text(remember { stringProvider.getString(STRING_LABEL_NODE_NONE_FOUND) }, Modifier.padding(start = defaultPadding / 2))
+
+            }
         }
     } else {
         CheckNodeStateView(checkNodesState, stringProvider)

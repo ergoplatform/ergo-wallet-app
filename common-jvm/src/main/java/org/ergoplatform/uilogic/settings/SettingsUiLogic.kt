@@ -31,17 +31,14 @@ class SettingsUiLogic {
     suspend fun checkAvailableNodes(prefs: PreferencesProvider) {
         if (_checkNodesState.value != CheckNodesState.Waiting) return
 
+        // try to connect to current node to fetch a new list
+        _checkNodesState.value = CheckNodesState.FetchingNodes
+        refreshNodeList(prefs)
+
         var knownNodesList = prefs.knownNodesList
 
-        if (knownNodesList.isEmpty()) {
-            // try to connect to current node to fetch the list
-            _checkNodesState.value = CheckNodesState.FetchingNodes
-            refreshNodeList(prefs)
-            knownNodesList = prefs.knownNodesList
-
-            if (coroutineContext.isActive) {
-                // TODO #143 if still empty, connect TokenJay and fetch the list
-            }
+        if (knownNodesList.isEmpty() && coroutineContext.isActive) {
+            // TODO #143 if still empty, connect TokenJay and fetch the list
         }
 
         knownNodesList = knownNodesList.map { it.trimEnd('/') }
