@@ -296,30 +296,31 @@ private fun getRestErgoClient(prefs: PreferencesProvider): ErgoClient {
         prefs.prefExplorerApiUrl,
         OkHttpSingleton.getInstance().newBuilder()
     )
-    refreshNodeListWhenNeeded(prefs, nodeToConnectTo)
+    refreshNodeListWhenNeeded(prefs)
     return ergoClient
 }
 
-private fun refreshNodeListWhenNeeded(prefs: PreferencesProvider, nodeUrl: String) {
+private fun refreshNodeListWhenNeeded(prefs: PreferencesProvider) {
     if (System.currentTimeMillis() - prefs.lastNodeListRefreshMs > 1000L * 60 * 60 * 24) {
-        val retrofitNode = Retrofit.Builder()
-            .baseUrl(nodeUrl)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(OkHttpSingleton.getInstance())
-            .build()
-        val peersApi = retrofitNode.create(PeersApi::class.java)
+        refreshNodeList(prefs)
+    }
+}
 
-        try {
-            val peerUrlList = peersApi.connectedPeers.execute().body()!!.map { it.restApiUrl }
-            val openPeers = peerUrlList.filter { !it.isNullOrBlank() && it != nodeUrl }.distinct()
-            val peersStringList = openPeers.sortedBy { if (it.startsWith("https://")) 0 else 1 }.take(10)
+fun refreshNodeList(prefs: PreferencesProvider) {
+    val nodeUrl = prefs.prefNodeUrl
+    val peersApi = ApiServiceManager.buildRetrofitForNode(PeersApi::class.java, nodeUrl)
 
-            LogUtils.logDebug("PeersApi", "Found alternative nodes to connect to: $peersStringList")
-            if (peersStringList.isNotEmpty())
-                prefs.knownNodesList = peersStringList
-        } catch (t: Throwable) {
-            LogUtils.logDebug("PeersApi", "Could not fetch connected peers of $nodeUrl")
-        }
+    try {
+        val peerUrlList = peersApi.connectedPeers.execute().body()!!.map { it.restApiUrl }
+        val openPeers = peerUrlList.filter { !it.isNullOrBlank() && it != nodeUrl }.distinct()
+        val peersStringList =
+            openPeers.sortedBy { if (it.startsWith("https://")) 0 else 1 }.take(10)
+
+        LogUtils.logDebug("PeersApi", "Found alternative nodes to connect to: $peersStringList")
+        if (peersStringList.isNotEmpty())
+            prefs.knownNodesList = peersStringList
+    } catch (t: Throwable) {
+        LogUtils.logDebug("PeersApi", "Could not fetch connected peers of $nodeUrl")
     }
 }
 

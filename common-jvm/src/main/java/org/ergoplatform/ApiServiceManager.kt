@@ -18,16 +18,11 @@ open class ApiServiceManager(
     private val tokenVerificationApi: TokenVerificationApi
 ) : ErgoExplorerApi, TokenVerificationApi, ErgoNodeApi {
 
-    private val nodeTransactionsApi by lazy { buildRetrofitFor(TransactionsApi::class.java) }
-    private val nodeBoxesApi by lazy { buildRetrofitFor(UtxoApi::class.java) }
-
-    private fun <S> buildRetrofitFor(serviceClass: Class<S>): S {
-        val retrofitNode = Retrofit.Builder()
-            .baseUrl(nodeApiUrl)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(OkHttpSingleton.getInstance())
-            .build()
-        return retrofitNode.create(serviceClass)
+    private val nodeTransactionsApi by lazy {
+        buildRetrofitForNode(TransactionsApi::class.java, nodeApiUrl)
+    }
+    private val nodeBoxesApi by lazy {
+        buildRetrofitForNode(UtxoApi::class.java, nodeApiUrl)
     }
 
     override fun getTotalBalanceForAddress(publicAddress: String): Call<TotalBalance> =
@@ -76,6 +71,15 @@ open class ApiServiceManager(
 
     companion object {
         private var ergoApiService: ApiServiceManager? = null
+
+        fun <S> buildRetrofitForNode(serviceClass: Class<S>, nodeApiUrl: String): S {
+            val retrofitNode = Retrofit.Builder()
+                .baseUrl(nodeApiUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(OkHttpSingleton.getInstance())
+                .build()
+            return retrofitNode.create(serviceClass)
+        }
 
         fun getOrInit(preferences: PreferencesProvider): ApiServiceManager {
             if (ergoApiService == null) {
