@@ -58,7 +58,7 @@ fun ColumnScope.ConnectionSettingsLayout(
     ConnectionTextField(explorerApiUrl, stringProvider, STRING_LABEL_EXPLORER_API_URL)
 
     val checkNodesState = uiLogic.checkNodesState.collectAsState()
-    val showList = remember { mutableStateOf(false) }
+    val showList = remember { mutableStateOf(checkNodesState.value != SettingsUiLogic.CheckNodesState.Waiting) }
 
     if (checkNodesState.value == SettingsUiLogic.CheckNodesState.Waiting) {
 
