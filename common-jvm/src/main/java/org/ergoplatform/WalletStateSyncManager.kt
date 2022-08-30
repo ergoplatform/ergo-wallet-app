@@ -9,7 +9,7 @@ import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.api.TokenPriceApi
 import org.ergoplatform.api.coingecko.CoinGeckoApi
 import org.ergoplatform.api.ergodex.ErgoDexPriceApi
-import org.ergoplatform.api.tokenjay.TokenJayPriceApi
+import org.ergoplatform.api.tokenjay.TokenJayApiClient
 import org.ergoplatform.persistance.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.addresses.ensureWalletAddressListHasFirstAddress
@@ -39,7 +39,7 @@ class WalletStateSyncManager {
     private var lastTokenPriceRefreshMs: Long = 0
     private val tokenPriceSources: List<TokenPriceApi> = listOf(
         ErgoDexPriceApi(),
-        TokenJayPriceApi()
+        TokenJayApiClient()
     )
 
     init {

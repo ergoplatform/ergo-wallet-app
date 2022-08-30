@@ -4,16 +4,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.api.tokenjay.TokenJayApiClient
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.refreshNodeList
 import org.ergoplatform.restapi.client.InfoApi
 import org.ergoplatform.uilogic.STRING_BUTTON_DISPLAY_CURRENCY
 import org.ergoplatform.uilogic.STRING_LABEL_NONE
 import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.utils.LogUtils
 import java.util.*
 import kotlin.coroutines.coroutineContext
 
 class SettingsUiLogic {
+    private val maxNumToConnectTo = 10
+
     fun getFiatCurrencyButtonText(preferences: PreferencesProvider, texts: StringProvider): String {
         val displayCurrency =
             preferences.prefDisplayCurrency.uppercase(Locale.getDefault())
@@ -37,17 +41,33 @@ class SettingsUiLogic {
 
         var knownNodesList = prefs.knownNodesList
 
-        if (knownNodesList.isEmpty() && coroutineContext.isActive) {
-            // TODO #143 if still empty, connect TokenJay and fetch the list
-        }
-
         knownNodesList = knownNodesList.map { it.trimEnd('/') }
 
-        knownNodesList = (
-                if (knownNodesList.contains(prefs.prefNodeUrl.trimEnd('/')))
-                    knownNodesList
-                else (mutableListOf(prefs.prefNodeUrl).apply { addAll(knownNodesList) })
-                ).take(10)
+        if (knownNodesList.size < maxNumToConnectTo && coroutineContext.isActive) {
+            try {
+                val peers = TokenJayApiClient().getDetectedNodePeers()
+                val highestBlockHeight = peers.firstOrNull()?.blockHeight ?: 0
+
+                knownNodesList = knownNodesList + peers
+                    // filter the nodes that are not synced
+                    .filter { it.blockHeight >= highestBlockHeight - 30 }
+                    .map { it.url.trimEnd('/') }
+                    // if we already know it, don't add it again
+                    .filter { !knownNodesList.contains(it) }
+                    // prefer https nodes
+                    .sortedBy { if (it.startsWith("https://")) 0 else 1 }
+
+            } catch (t: Throwable) {
+                LogUtils.logDebug("TokenJay API", "Error fetching TokenJay peers", t)
+            }
+        }
+
+        knownNodesList = knownNodesList.take(maxNumToConnectTo).map { it.trimEnd('/') }
+
+        knownNodesList =
+            if (knownNodesList.contains(prefs.prefNodeUrl.trimEnd('/')))
+                knownNodesList
+            else (listOf(prefs.prefNodeUrl) + knownNodesList).take(maxNumToConnectTo)
 
         val nodeInfo = knownNodesList.map { nodeUrl ->
             if (coroutineContext.isActive) {

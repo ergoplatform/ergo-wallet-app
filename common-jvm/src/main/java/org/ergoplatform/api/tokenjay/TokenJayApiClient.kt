@@ -9,7 +9,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.math.BigDecimal
 
-class TokenJayPriceApi : TokenPriceApi {
+class TokenJayApiClient : TokenPriceApi {
     private val priceSource = "tokenjay.app"
     private val ageUsdTokens = listOf(
         "03faf2cb329f2e90d6d23b58d91bbb6c046aa143261cc21f52fbe2824bfcbf04", // SigUSD
@@ -47,4 +47,7 @@ class TokenJayPriceApi : TokenPriceApi {
             )
         }
     }
+
+    fun getDetectedNodePeers(): List<TokenJayNodePeer> =
+        tokenJayApi.getDetectedNodesList().execute().body()!!
 }

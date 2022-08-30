@@ -8,8 +8,9 @@ class SettingsUiLogicTest: TestCase() {
 
     fun testCheckAvailableNodes() {
         runBlocking {
-            val nodeInfo = SettingsUiLogic().checkAvailableNodes(TestPreferencesProvider())
-            println(nodeInfo)
+            val settingsUiLogic = SettingsUiLogic()
+            settingsUiLogic.checkAvailableNodes(TestPreferencesProvider())
+            println(settingsUiLogic.lastNodeList)
         }
     }
 }
