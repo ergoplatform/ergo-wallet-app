@@ -199,10 +199,10 @@
     <string name="error_password_wrong">Wrong password</string>
     <string name="desc_transaction_send">Transaction was sent successfully and awaits confirmation. Transaction ID:</string>
     <string name="desc_prompt_signing">Your transaction was prepared. Scan this QR code
-       with your signing device to proceed.\n\nWhen present, scan the signed transaction QR code to
-        sent it to the network.</string>
+       with your signing device to proceed. If you experience problems scanning, lower the resolution with the icon at the top.\n\n
+        When present, scan the signed transaction QR code to sent it to the network.</string>
     <string name="desc_prompt_signing_multiple">Your transaction was prepared. Scan these QR codes
-       with your signing device to proceed.</string>
+       with your signing device to proceed. If you experience problems scanning, lower the resolution with the icon at the top.</string>
     <string name="button_scan_signed_tx">Scan signed tx</string>
     <string name="button_next">Next</string>
     <string name="title_authenticate">Authentication required</string>
