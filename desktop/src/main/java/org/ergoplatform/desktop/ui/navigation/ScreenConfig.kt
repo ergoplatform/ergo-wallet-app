@@ -26,7 +26,7 @@ sealed class ScreenConfig : Parcelable {
         val request: String,
         val walletId: Int?,
         val derivationIndex: Int?,
-        val onCompleted: (() -> Unit)? = null
+        val onCompleted: (() -> Unit) = {}
     ) : ScreenConfig()
 
 }

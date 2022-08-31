@@ -50,6 +50,8 @@ class RestoreWalletComponent(
         }
 
         override fun navigateToSaveWalletDialog(mnemonic: String) {
+            // This mnemonic object is erased in
+            // [SaveWalletComponent.saveToDbAndNavigateToWallet] after encryption.
             router.push(ScreenConfig.SaveWallet(SecretString.create(mnemonic), true))
         }
 

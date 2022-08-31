@@ -91,6 +91,7 @@ class SaveWalletComponent(
                 secretStorage
             )
         }
+        mnemonic.erase()
         router.popWhile { !(it is ScreenConfig.WalletList) }
     }
 
@@ -102,9 +103,6 @@ class SaveWalletComponent(
             newAddress()
 
             startDerivedAddressesSearch()
-        }
-        lifecycle.doOnDestroy {
-            mnemonic.erase()
         }
     }
 

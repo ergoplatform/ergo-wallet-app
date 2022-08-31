@@ -41,5 +41,11 @@ class CreateWalletComponent(
         )
     }
 
+    /**
+     * this mnemonic object is shared passed through and shared between the onboarding screens
+     * CreateWallet -> ConfirmCreateWallet -> SaveWallet. It is stored so that back/forth
+     * navigating of the user won't change it. It is ultimately erased in
+     * [SaveWalletComponent.saveToDbAndNavigateToWallet] after encryption.
+     */
     private val mnemonic = SecretString.create(Mnemonic.generateEnglishMnemonic())
 }

@@ -58,6 +58,8 @@ fun PasswordDialog(
             if (password == null || password != confirmPassword) {
                 confirmPassword?.erase()
                 password?.erase()
+                passwordFieldState.value = TextFieldValue()
+                confirmationFieldState.value = TextFieldValue()
                 errorString.value =
                     Application.texts.getString(STRING_ERR_PASSWORD_CONFIRM)
                 false

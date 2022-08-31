@@ -99,8 +99,9 @@ class WalletAddressesComponent(
         if (passwordAddAddresses.value > 0) {
             PasswordDialog(
                 onDismissRequest = { passwordAddAddresses.value = 0 },
-                onPasswordEntered = {
-                    proceedAuthFlowWithPassword(it, walletConfig, ::proceedFromAuthFlow)
+                onPasswordEntered = { password ->
+                    // password is erased by [PasswordDialog] when this method completed
+                    proceedAuthFlowWithPassword(password, walletConfig, ::proceedFromAuthFlow)
                 }
             )
         }

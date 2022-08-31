@@ -98,7 +98,7 @@ class MosaikAppComponent(
                 }
 
                 router.push(
-                    ScreenConfig.ErgoPay(action.url, null, null, onCompleted = runOnEpComplete)
+                    ScreenConfig.ErgoPay(action.url, null, null, onCompleted = runOnEpComplete ?: {})
                 )
             } else {
                 raiseError(IllegalArgumentException("ErgoPayAction without actual signing request: ${action.url}"))

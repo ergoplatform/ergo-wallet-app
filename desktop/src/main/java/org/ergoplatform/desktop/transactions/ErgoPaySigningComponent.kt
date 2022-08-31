@@ -25,7 +25,7 @@ class ErgoPaySigningComponent(
     private val request: String,
     private val walletId: Int?,
     private val derivationIndex: Int?,
-    private val doOnComplete: (() -> Unit)?,
+    private val doOnComplete: (() -> Unit),
     componentContext: ComponentContext,
     private val navHost: NavHostComponent
 ) : SubmitTransactionComponent(componentContext, navHost) {
@@ -131,7 +131,7 @@ class ErgoPaySigningComponent(
             canReloadState.value = ergoPayUiLogic.canReloadFromDapp()
 
             if (newState == State.DONE && ergoPayUiLogic.txId != null) {
-                doOnComplete?.invoke()
+                doOnComplete()
             }
         }
 
