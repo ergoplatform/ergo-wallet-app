@@ -105,6 +105,10 @@
     <string name="mnemonic_unknown_words">Mnemonic contains invalid words. Check for typos.</string>
     <string name="mnemonic_invalid">Mnemonic validation failed. If you are sure you have entered it correctly, you can tap again to proceed.</string>
 
+    <string name="hint_desktop_kya">Please read and understand our <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/develop/desktop/RUN.md#know-your-assumptions">KYA
+        regarding storing your secrets</a>. For best security, use a <a href="https://github.com/ergoplatform/ergo-wallet-app/wiki/Cold-wallet">cold wallet</a>.
+    </string>
+
     <!-- Save wallet -->
     <string name="intro_save_wallet">Your wallet\'s main public address is:</string>
     <string name="intro_save_wallet2">You can add additional addresses later.</string>
@@ -239,8 +243,15 @@
         Scan this QR code to proceed.</string>
     <string name="desc_show_signed_multiple">Your transaction was signed and needs to be sent to the network.
         Scan these QR codes to proceed.</string>
+
+    <!-- Qr code screen -->
     <string name="button_image_from_clipboard">Paste image from clipboard</string>
     <string name="input_enter_or_paste_manually">or enter/paste manually</string>
+    <string name="error_accessing_webcam">Error accessing webcam</string>
+    <string name="error_accessing_webcam_macos">On MacOS, accessing the webcam does not work due to security restrictions. If you are using an M1 mac, you can use the iOS Ergo Wallet App which can access the cam.</string>
+    <string name="hint_no_webcam">As an alternative, you can copy a QR code image to the clipboard and press the button below, or copy the QR code contents and paste them below.</string>
+    <string name="error_no_image_clipboard">No image found in system clipboard.</string>
+    <string name="error_no_qrcode_image_clipboard">No QR code found in image.\n\nMake sure to copy QR code with a margin.</string>
 
     <!-- Ergo Pay Signing -->
     <string name="title_ergo_pay_request">Ergo Pay Request</string>
@@ -326,4 +337,6 @@
     <string name="label_token_verification_url">Token verification service URL</string>
     <string name="button_show_debug_info">Show debug information</string>
     <string name="label_ipfs_http_gateway">IPFS HTTP gateway</string>
+    <string name="desc_register_handler">You can register this application to handle Ergo specific protocols like ErgoPay and ErgoAuth.</string>
+    <string name="button_register_handler">Register as Ergo protocol handler</string>
 </resources>

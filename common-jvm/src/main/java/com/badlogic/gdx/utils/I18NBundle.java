@@ -18,7 +18,9 @@ package com.badlogic.gdx.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -137,6 +139,10 @@ public class I18NBundle {
      * @throws MissingResourceException if no bundle for the specified base file handle can be found
      */
     public static I18NBundle createBundle(File baseFileHandle) {
+        return createBundle(new FileWrapper(baseFileHandle));
+    }
+
+    public static I18NBundle createBundle(FileHandle baseFileHandle) {
         return createBundleImpl(baseFileHandle, Locale.getDefault(), DEFAULT_ENCODING);
     }
 
@@ -150,7 +156,7 @@ public class I18NBundle {
      * @throws NullPointerException     if <code>baseFileHandle</code> or <code>locale</code> is <code>null</code>
      * @throws MissingResourceException if no bundle for the specified base file handle can be found
      */
-    public static I18NBundle createBundle(File baseFileHandle, Locale locale) {
+    public static I18NBundle createBundle(FileHandle baseFileHandle, Locale locale) {
         return createBundleImpl(baseFileHandle, locale, DEFAULT_ENCODING);
     }
 
@@ -163,7 +169,7 @@ public class I18NBundle {
      * @throws NullPointerException     if <code>baseFileHandle</code> or <code>encoding</code> is <code>null</code>
      * @throws MissingResourceException if no bundle for the specified base file handle can be found
      */
-    public static I18NBundle createBundle(File baseFileHandle, String encoding) {
+    public static I18NBundle createBundle(FileHandle baseFileHandle, String encoding) {
         return createBundleImpl(baseFileHandle, Locale.getDefault(), encoding);
     }
 
@@ -178,11 +184,11 @@ public class I18NBundle {
      *                                  <code>null</code>
      * @throws MissingResourceException if no bundle for the specified base file handle can be found
      */
-    public static I18NBundle createBundle(File baseFileHandle, Locale locale, String encoding) {
+    public static I18NBundle createBundle(FileHandle baseFileHandle, Locale locale, String encoding) {
         return createBundleImpl(baseFileHandle, locale, encoding);
     }
 
-    private static I18NBundle createBundleImpl(File baseFileHandle, Locale locale, String encoding) {
+    private static I18NBundle createBundleImpl(FileHandle baseFileHandle, Locale locale, String encoding) {
         if (baseFileHandle == null || locale == null || encoding == null)
             throw new NullPointerException();
 
@@ -322,7 +328,7 @@ public class I18NBundle {
         return locale.equals(defaultLocale) ? null : defaultLocale;
     }
 
-    private static I18NBundle loadBundleChain(File baseFileHandle, String encoding, List<Locale> candidateLocales,
+    private static I18NBundle loadBundleChain(FileHandle baseFileHandle, String encoding, List<Locale> candidateLocales,
                                               int candidateIndex, I18NBundle baseBundle) {
         Locale targetLocale = candidateLocales.get(candidateIndex);
         I18NBundle parent = null;
@@ -344,13 +350,13 @@ public class I18NBundle {
     }
 
     // Tries to load the bundle for the given locale.
-    private static I18NBundle loadBundle(File baseFileHandle, String encoding, Locale targetLocale) {
+    private static I18NBundle loadBundle(FileHandle baseFileHandle, String encoding, Locale targetLocale) {
         I18NBundle bundle = null;
-        File fileHandle = toFileHandle(baseFileHandle, targetLocale);
+        FileHandle fileHandle = toFileHandle(baseFileHandle, targetLocale);
         if (checkFileExistence(fileHandle)) {
             // Instantiate the bundle
             bundle = new I18NBundle();
-            try (Reader reader = new InputStreamReader(new FileInputStream(fileHandle), encoding)) {
+            try (Reader reader = new InputStreamReader(fileHandle.getStream(), encoding)) {
                 // Load bundle properties from the stream with the specified encoding
                 bundle.load(reader);
             } catch (IOException e) {
@@ -366,7 +372,7 @@ public class I18NBundle {
 
     // On Android this is much faster than fh.exists(), see https://github.com/libgdx/libgdx/issues/2342
     // Also this should fix a weird problem on iOS, see https://github.com/libgdx/libgdx/issues/2345
-    private static boolean checkFileExistence(File fh) {
+    private static boolean checkFileExistence(FileHandle fh) {
         try {
             return fh.exists();
         } catch (Exception e) {
@@ -406,7 +412,7 @@ public class I18NBundle {
      * @return the file handle for the bundle
      * @throws NullPointerException if <code>baseFileHandle</code> or <code>locale</code> is <code>null</code>
      */
-    private static File toFileHandle(File baseFileHandle, Locale locale) {
+    private static FileHandle toFileHandle(FileHandle baseFileHandle, Locale locale) {
         StringBuilder sb = new StringBuilder(baseFileHandle.getName());
         if (!locale.equals(ROOT_LOCALE)) {
             String language = locale.getLanguage();
@@ -427,7 +433,7 @@ public class I18NBundle {
                 }
             }
         }
-        return new File(baseFileHandle.getParent(), sb.append(".properties").toString());
+        return baseFileHandle.getSibling(sb.append(".properties").toString());
     }
 
     /**
@@ -499,6 +505,47 @@ public class I18NBundle {
 
         for (String s : keys) {
             properties.put(s, placeholder);
+        }
+    }
+
+    public interface FileHandle {
+        String getName();
+        String getPath();
+        boolean exists();
+        InputStream getStream() throws FileNotFoundException;
+        FileHandle getSibling(String siblingName);
+    }
+
+    static class FileWrapper implements FileHandle {
+        private final File file;
+
+        FileWrapper(File file) {
+            this.file = file;
+        }
+
+        @Override
+        public String getName() {
+            return file.getName();
+        }
+
+        @Override
+        public String getPath() {
+            return file.getPath();
+        }
+
+        @Override
+        public boolean exists() {
+            return file.exists();
+        }
+
+        @Override
+        public InputStream getStream() throws FileNotFoundException {
+            return new FileInputStream(file);
+        }
+
+        @Override
+        public FileHandle getSibling(String siblingName) {
+            return new FileWrapper(new File(file.getParent(), siblingName));
         }
     }
 }
