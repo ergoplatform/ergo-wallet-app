@@ -78,6 +78,8 @@ fun RestoreWalletScreen(
                 if (hintText.isNotEmpty())
                     Text(hintText, color = uiErgoColor, style = labelStyle(LabelStyle.BODY2))
 
+                DesktopKyaBox()
+
                 Row(Modifier.align(Alignment.End).padding(top = defaultPadding)) {
                     Button(
                         onClick = onBack,

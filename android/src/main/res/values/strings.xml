@@ -105,6 +105,10 @@
     <string name="mnemonic_unknown_words">Mnemonic contains invalid words. Check for typos.</string>
     <string name="mnemonic_invalid">Mnemonic validation failed. If you are sure you have entered it correctly, you can tap again to proceed.</string>
 
+    <string name="hint_desktop_kya">Please read and understand our <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/develop/desktop/RUN.md#know-your-assumptions">KYA
+        regarding storing your secrets</a>. For best security, use a <a href="https://github.com/ergoplatform/ergo-wallet-app/wiki/Cold-wallet">cold wallet</a>.
+    </string>
+
     <!-- Save wallet -->
     <string name="intro_save_wallet">Your wallet\'s main public address is:</string>
     <string name="intro_save_wallet2">You can add additional addresses later.</string>

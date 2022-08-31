@@ -25,6 +25,14 @@ class RestoreWalletComponent(
     override val fullScreen: Boolean
         get() = true
 
+    /**
+     * Holding the mnemonic text state referencing a String holding the entered mnemonic leaks the
+     * mnemonic to uncontrolled GC behaviour. Jetbrains Compose lacks a secure TextFieldValue state
+     * for now, so this is nothing we can change so far on Desktop.
+     * When the situation changes and a TextFieldValue implementation hiding the entered String,
+     * only exposing a char array is available, it should be used here and in other security
+     * critical places ([PasswordDialog], [CreateWalletScreen])
+     */
     private val mnemonicTextState = mutableStateOf(TextFieldValue())
     private val hintTextState = mutableStateOf("")
 
@@ -50,6 +58,8 @@ class RestoreWalletComponent(
         }
 
         override fun navigateToSaveWalletDialog(mnemonic: String) {
+            // This mnemonic object is erased in
+            // [SaveWalletComponent.saveToDbAndNavigateToWallet] after encryption.
             router.push(ScreenConfig.SaveWallet(SecretString.create(mnemonic), true))
         }
 

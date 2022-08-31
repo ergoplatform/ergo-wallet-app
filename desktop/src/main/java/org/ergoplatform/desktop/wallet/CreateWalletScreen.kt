@@ -1,13 +1,12 @@
 package org.ergoplatform.desktop.wallet
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -67,6 +66,8 @@ fun CreateWalletScreen(
                     }
                 }
 
+                DesktopKyaBox()
+
                 Row(Modifier.align(Alignment.End).padding(top = defaultPadding)) {
                     Button(
                         onClick = onBack,
@@ -84,6 +85,20 @@ fun CreateWalletScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun DesktopKyaBox() {
+    Box(Modifier.padding(top = defaultPadding)) {
+        Card(modifier = Modifier.border(1.dp, uiErgoColor)) {
+            LinkifyText(
+                remember { Application.texts.getString(STRING_HINT_DESKTOP_KYA) },
+                Modifier.padding(defaultPadding / 2),
+                labelStyle(LabelStyle.BODY1),
+                isHtml = true
+            )
         }
     }
 }
