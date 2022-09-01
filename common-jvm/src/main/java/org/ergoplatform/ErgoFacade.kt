@@ -18,8 +18,6 @@ import org.ergoplatform.utils.getMessageOrName
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
 import org.ergoplatform.wallet.secrets.ExtendedPublicKey
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import scala.collection.JavaConversions
 import sigmastate.interpreter.HintsBag
 import sigmastate.serialization.`SigmaSerializer$`
@@ -128,16 +126,15 @@ fun sendErgoTx(
         val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
             val prover = buildProver(ctx, signingSecrets, derivedKeyIndices)
+            val unsignedTx = buildUnsignedTx(
+                BoxOperations.createForEip3Prover(prover, ctx),
+                recipient,
+                amountToSend,
+                feeAmount,
+                tokensToSend,
+                message
+            )
 
-            val contract: ErgoContract = recipient.toErgoContract()
-            val unsignedTx =
-                BoxOperations.createForEip3Prover(prover, ctx).withAmountToSpend(amountToSend)
-                    .withFeeAmount(feeAmount)
-                    .withMessage(message)
-                    .withInputBoxesLoader(
-                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
-                    )
-                    .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
             val signed = prover.sign(unsignedTx)
             ctx.sendTransaction(signed)
 
@@ -149,6 +146,24 @@ fun sendErgoTx(
         LogUtils.logDebug("sendErgoTx", "Error caught", t)
         return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
     }
+}
+
+private fun buildUnsignedTx(
+    boxOperations: BoxOperations,
+    recipient: Address,
+    amountToSend: Long,
+    feeAmount: Long,
+    tokensToSend: List<ErgoToken>,
+    message: String?
+): UnsignedTransaction {
+    val contract: ErgoContract = recipient.toErgoContract()
+    return boxOperations.withAmountToSpend(amountToSend)
+        .withFeeAmount(feeAmount)
+        .withMessage(message)
+        .withInputBoxesLoader(
+            ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
+        )
+        .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
 }
 
 fun buildPromptSigningResultFromErgoPayRequest(
@@ -193,15 +208,14 @@ fun prepareSerializedErgoTx(
     try {
         val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
-            val contract: ErgoContract = recipient.toErgoContract()
-            val unsigned =
-                BoxOperations.createForSenders(senderAddresses, ctx).withAmountToSpend(amountToSend)
-                    .withFeeAmount(feeAmount)
-                    .withMessage(message)
-                    .withInputBoxesLoader(
-                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
-                    )
-                    .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
+            val unsigned = buildUnsignedTx(
+                BoxOperations.createForSenders(senderAddresses, ctx),
+                recipient,
+                amountToSend,
+                feeAmount,
+                tokensToSend,
+                message
+            )
 
             val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
                 val ergoBox = box.box()
