@@ -48,6 +48,10 @@ abstract class AppMosaikRuntime(
     var preferencesProvider: PreferencesProvider? = null
 
     init {
+        MosaikLogger.logger = { severity, msg, throwable ->
+            LogUtils.logDebug("Mosaik", "$severity: $msg", throwable)
+        }
+
         appLoaded = { manifest ->
             coroutineScope.launch {
                 saveVisitToDb(manifest)
