@@ -67,7 +67,7 @@ open class ApiServiceManager(
         defaultApi.getApiV1AddressesP1Transactions(publicAddress, offset, limit, false)
 
     override fun checkToken(tokenId: String, tokenName: String): Call<TokenCheckResponse> =
-        tokenVerificationApi.checkToken(tokenId, tokenName)
+        tokenVerificationApi.checkToken(tokenId, tokenName.replace("/", "-").replace("|", "-"))
 
     companion object {
         private var ergoApiService: ApiServiceManager? = null
