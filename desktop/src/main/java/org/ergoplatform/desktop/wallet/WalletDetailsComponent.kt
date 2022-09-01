@@ -18,6 +18,7 @@ import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.push
 import com.arkivanov.essenty.lifecycle.doOnResume
 import kotlinx.coroutines.CoroutineScope
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
@@ -68,19 +69,17 @@ class WalletDetailsComponent(
     }
 
     private val chooseAddressDialog = mutableStateOf(false)
+    private val informationVersionState = mutableStateOf(0)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
         val syncingState = WalletStateSyncManager.getInstance().isRefreshing.collectAsState()
         val downloadingTransactionsState = TransactionListManager.isDownloading.collectAsState()
 
-        if (syncingState.value || downloadingTransactionsState.value) {
-            LinearProgressIndicator(Modifier.fillMaxWidth())
-        }
-
         uiLogic.wallet?.let { wallet ->
             WalletDetailsScreen(
                 uiLogic,
+                informationVersionState.value,
                 onChooseAddressClicked = { chooseAddressDialog.value = true },
                 onScanClicked = {
                     router.push(ScreenConfig.QrCodeScanner { qrCode -> handleQrCode(qrCode) })
@@ -100,6 +99,10 @@ class WalletDetailsComponent(
                 },
                 onAddressesClicked = { router.push(ScreenConfig.WalletAddressesList(walletConfig)) },
             )
+        }
+
+        if (syncingState.value || downloadingTransactionsState.value) {
+            LinearProgressIndicator(Modifier.fillMaxWidth())
         }
 
         if (chooseAddressDialog.value) {
@@ -162,11 +165,18 @@ class WalletDetailsComponent(
                 return
             }
 
+            informationVersionState.value = informationVersionState.value + 1
+
+            uiLogic.gatherTokenInformation(
+                Application.database.tokenDbProvider,
+                ApiServiceManager.getOrInit(Application.prefs)
+            )
+
             startRefreshWhenNeeded()
         }
 
         override fun onNewTokenInfoGathered(tokenInformation: TokenInformation) {
-            // TODO refresh tokens list
+            informationVersionState.value = informationVersionState.value + 1
         }
     }
 }

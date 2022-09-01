@@ -17,23 +17,30 @@ import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.mediumIconSize
 import org.ergoplatform.compose.settings.smallIconSize
+import org.ergoplatform.compose.tokens.TokenEntryViewData
+import org.ergoplatform.compose.tokens.TokenLabel
 import org.ergoplatform.desktop.ui.AppScrollingLayout
 import org.ergoplatform.desktop.ui.defaultMaxWidth
 import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressButton
+import org.ergoplatform.mosaik.MiddleEllipsisText
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
+import org.ergoplatform.tokens.getTokenErgoValueSum
 import org.ergoplatform.uilogic.STRING_LABEL_ERG_AMOUNT
+import org.ergoplatform.uilogic.STRING_LABEL_TOKENS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLET_ADDRESS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLET_BALANCE
 import org.ergoplatform.uilogic.wallet.WalletDetailsUiLogic
 import org.ergoplatform.utils.formatFiatToString
+import org.ergoplatform.utils.formatTokenPriceToString
 
 @Composable
 fun WalletDetailsScreen(
     uiLogic: WalletDetailsUiLogic,
+    informationVersion: Int,
     onScanClicked: () -> Unit,
     onChooseAddressClicked: () -> Unit,
     onReceiveClicked: () -> Unit,
@@ -56,6 +63,10 @@ fun WalletDetailsScreen(
             )
 
             ErgoBalanceLayout(uiLogic)
+
+            if (uiLogic.tokensList.isNotEmpty()) {
+                WalletTokensLayout(uiLogic)
+            }
         }
     }
 }
@@ -69,7 +80,7 @@ private fun SelectAddressLayout(
     onSendClicked: () -> Unit,
     onAddressesClicked: () -> Unit
 ) {
-    AppCard(Modifier.padding(top = defaultPadding)) {
+    AppCard(Modifier.padding(defaultPadding)) {
         Column(Modifier.padding(defaultPadding)) {
 
             Row {
@@ -122,7 +133,7 @@ private fun SelectAddressLayout(
 
 @Composable
 private fun ErgoBalanceLayout(uiLogic: WalletDetailsUiLogic) {
-    AppCard(Modifier.padding(top = defaultPadding)) {
+    AppCard(Modifier.padding(defaultPadding)) {
         Column(Modifier.padding(defaultPadding)) {
             Row {
                 Box(Modifier.requiredWidth(mediumIconSize))
@@ -173,6 +184,89 @@ private fun ErgoBalanceLayout(uiLogic: WalletDetailsUiLogic) {
 
                 }
 
+        }
+    }
+}
+
+@Composable
+private fun WalletTokensLayout(uiLogic: WalletDetailsUiLogic) {
+    AppCard(Modifier.padding(defaultPadding)) {
+        Column(Modifier.padding(defaultPadding)) {
+
+            // HEADER
+            Row {
+                Icon(
+                    painterResource("ic_erglogo_filled.xml"), null,
+                    Modifier.requiredSize(mediumIconSize)
+                )
+
+                Text(
+                    uiLogic.tokensList.size.toString(),
+                    Modifier.padding(start = defaultPadding)
+                        .align(Alignment.CenterVertically),
+                    style = labelStyle(LabelStyle.HEADLINE2),
+                )
+
+                Text(
+                    Application.texts.getString(STRING_LABEL_TOKENS),
+                    Modifier.padding(start = defaultPadding / 2).weight(1f)
+                        .align(Alignment.CenterVertically),
+                    style = labelStyle(LabelStyle.BODY1BOLD),
+                    color = uiErgoColor
+                )
+
+                val walletSyncManager = WalletStateSyncManager.getInstance()
+                val tokenValueToShow = getTokenErgoValueSum(
+                    uiLogic.tokensList,
+                    walletSyncManager
+                )
+                if (!tokenValueToShow.isZero()) {
+                    Text(
+                        text = formatTokenPriceToString(
+                            tokenValueToShow,
+                            walletSyncManager,
+                            Application.texts
+                        ),
+                        style = labelStyle(LabelStyle.BODY1),
+                        color = MosaikStyleConfig.secondaryLabelColor,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                            .padding(start = defaultPadding / 2),
+                    )
+                }
+            }
+
+            // TOKENS LIST
+
+            uiLogic.tokensList.forEach { walletToken ->
+
+                val data = TokenEntryViewData(walletToken, true, Application.texts)
+                data.bind(uiLogic.tokenInformation[walletToken.tokenId])
+
+                Column(Modifier.fillMaxWidth().padding(top = defaultPadding)) {
+                    // TODO TokenInfo clickable
+
+                    TokenLabel(
+                        data,
+                        Modifier.align(Alignment.CenterHorizontally),
+                        labelStyle = LabelStyle.BODY1BOLD,
+                    )
+
+                    data.displayedId?.let {
+                        MiddleEllipsisText(
+                            it,
+                            Modifier.align(Alignment.CenterHorizontally),
+                            color = MosaikStyleConfig.secondaryLabelColor
+                        )
+                    }
+
+                    data.price?.let {
+                        Text(
+                            it, Modifier.align(Alignment.CenterHorizontally),
+                            color = MosaikStyleConfig.secondaryLabelColor
+                        )
+                    }
+                }
+            }
         }
     }
 }
