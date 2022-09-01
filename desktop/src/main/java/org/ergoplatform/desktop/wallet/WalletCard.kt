@@ -18,7 +18,10 @@ import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.primaryButtonColors
 import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.desktop.tokens.TokenEntryView
-import org.ergoplatform.desktop.ui.*
+import org.ergoplatform.desktop.ui.bigIconSize
+import org.ergoplatform.desktop.ui.defaultMaxWidth
+import org.ergoplatform.desktop.ui.defaultPadding
+import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
@@ -41,6 +44,7 @@ fun WalletCard(
     fiatValue: Float,
     onSendClicked: (WalletConfig) -> Unit,
     onReceiveClicked: (WalletConfig) -> Unit,
+    onDetailsClicked: (WalletConfig) -> Unit,
     onSettingsClicked: (WalletConfig) -> Unit,
 ) {
     AppCard(
@@ -158,7 +162,7 @@ fun WalletCard(
                     }
                 }
                 OutlinedButton(
-                    onClick = { },
+                    onClick = { onDetailsClicked(wallet.walletConfig) },
                     Modifier.fillMaxWidth().padding(top = defaultPadding),
                     border = BorderStroke(
                         ButtonDefaults.OutlinedBorderSize, MosaikStyleConfig.secondaryButtonColor

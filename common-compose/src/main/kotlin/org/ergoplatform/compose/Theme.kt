@@ -16,6 +16,7 @@ import org.ergoplatform.mosaik.MosaikStyleConfig
 val defaultPadding = 16.dp
 val defaultMaxWidth = 600.dp
 val bigIconSize = 58.dp
+val mediumIconSize = 36.dp
 val smallIconSize = 24.dp
 val minIconSize = 18.dp
 

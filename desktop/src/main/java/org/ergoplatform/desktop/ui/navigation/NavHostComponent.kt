@@ -110,6 +110,9 @@ class NavHostComponent(
                     screenConfig.fromRestore
                 )
 
+            is ScreenConfig.WalletDetails ->
+                WalletDetailsComponent(componentContext, this, screenConfig.walletConfig)
+
             is ScreenConfig.WalletConfiguration ->
                 WalletConfigComponent(componentContext, this, screenConfig.walletConfig)
 
@@ -137,11 +140,12 @@ class NavHostComponent(
             is ScreenConfig.SendFunds -> SendFundsComponent(
                 componentContext, this,
                 screenConfig.walletConfig,
+                screenConfig.derivationIndex ?: -1,
                 paymentRequest = screenConfig.paymentRequest,
             )
 
             is ScreenConfig.ReceiveToWallet -> ReceiveToWalletComponent(
-                componentContext, this, screenConfig.walletConfig
+                componentContext, this, screenConfig.walletConfig, screenConfig.addressIdx
             )
 
             is ScreenConfig.QrCodeScanner -> QrScannerComponent(

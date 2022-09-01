@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.AppProgressIndicator
+import org.ergoplatform.compose.settings.mediumIconSize
 import org.ergoplatform.compose.settings.primaryButtonColors
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
@@ -66,7 +67,7 @@ private fun BoxScope.ErgoPayTransactionInfoLayout(
                         Icon(
                             icon,
                             null,
-                            Modifier.padding(end = defaultPadding / 2).size(36.dp)
+                            Modifier.padding(end = defaultPadding / 2).size(mediumIconSize)
                                 .align(Alignment.CenterVertically)
                         )
                     }
