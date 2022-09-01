@@ -265,8 +265,6 @@
         Note que o conteúdo é criado por aplicações de terceiros e podem ser indesejadas.</string>
     <string name="button_download_content_on">Activar</string>
     <string name="button_download_content_off">Desactivar</string>
-    <string name="button_mosaik_enabled">Plugins Mosaik activados</string>
-    <string name="button_mosaik_disabled">Plugins Mosaik desactivados</string>
 
     <!-- Mosaik view -->
     <string name="title_mosaik">Applicações</string>

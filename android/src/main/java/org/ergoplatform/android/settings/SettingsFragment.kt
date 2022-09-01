@@ -78,27 +78,12 @@ class SettingsFragment : Fragment() {
             preferences.downloadNftContent = !preferences.downloadNftContent
             setButtonDownloadContentText()
         }
-
-        setButtonMosaikEnabledText()
-        binding.buttonMosaikEnabled.setOnClickListener {
-            val preferences = Preferences(requireContext())
-            preferences.mosaikEnabled = !preferences.mosaikEnabled
-            setButtonMosaikEnabledText()
-            (requireActivity() as? MainActivity)?.setMosaikButtonVisibility()
-        }
     }
 
     private fun setButtonDownloadContentText() {
         binding.buttonDownloadContent.setText(
             if (Preferences(requireContext()).downloadNftContent) R.string.button_download_content_off
             else R.string.button_download_content_on
-        )
-    }
-
-    private fun setButtonMosaikEnabledText() {
-        binding.buttonMosaikEnabled.setText(
-            if (Preferences(requireContext()).mosaikEnabled) R.string.button_mosaik_enabled
-            else R.string.button_mosaik_disabled
         )
     }
 

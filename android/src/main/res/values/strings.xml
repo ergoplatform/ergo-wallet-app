@@ -291,8 +291,6 @@
         Please be aware that this content is created by third parties and might be unwanted.</string>
     <string name="button_download_content_on">Activate</string>
     <string name="button_download_content_off">Deactivate</string>
-    <string name="button_mosaik_enabled">Mosaik plugins enabled</string>
-    <string name="button_mosaik_disabled">Mosaik plugins disabled</string>
 
     <!-- Mosaik view -->
     <string name="title_mosaik">dApps</string>
@@ -300,7 +298,7 @@
     <string name="desc_mosaik">You can use and add dApps that support wallet integration here.
         Decentralized applications (dApps) are third-party plug-ins that connect your wallet to smart
         contracts. They may collect the information you give on their screens. Before adding a dApp,
-        please confirm theApp URL, and review its terms of use and privacy policies. dApps are not
+        please confirm the app URL, and review its terms of use and privacy policies. dApps are not
         affiliated with Ergo Wallet. Use at your discretion.</string>
     <string name="error_loading_mosaik_app">Could not load app.\nReason:\n%1$s</string>
     <string name="title_last_visited">Last visited</string>
