@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.push
+import com.arkivanov.essenty.lifecycle.doOnResume
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.Application
 import org.ergoplatform.WalletStateSyncManager
@@ -56,6 +57,16 @@ class WalletDetailsComponent(
         setUpWalletStateFlowCollector(Application.database, walletConfig.id)
     }
 
+    init {
+        lifecycle.doOnResume {
+            startRefreshWhenNeeded()
+        }
+    }
+
+    private fun startRefreshWhenNeeded() {
+        uiLogic.refreshWhenNeeded(Application.prefs, Application.database)
+    }
+
     private val chooseAddressDialog = mutableStateOf(false)
 
     @Composable
@@ -69,8 +80,7 @@ class WalletDetailsComponent(
 
         uiLogic.wallet?.let { wallet ->
             WalletDetailsScreen(
-                wallet,
-                uiLogic.walletAddress,
+                uiLogic,
                 onChooseAddressClicked = { chooseAddressDialog.value = true },
                 onScanClicked = {
                     router.push(ScreenConfig.QrCodeScanner { qrCode -> handleQrCode(qrCode) })
@@ -152,7 +162,7 @@ class WalletDetailsComponent(
                 return
             }
 
-            // TODO refresh
+            startRefreshWhenNeeded()
         }
 
         override fun onNewTokenInfoGathered(tokenInformation: TokenInformation) {
