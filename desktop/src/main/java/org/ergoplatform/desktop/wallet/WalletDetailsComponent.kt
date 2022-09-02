@@ -16,8 +16,11 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.push
+import com.arkivanov.essenty.lifecycle.doOnPause
 import com.arkivanov.essenty.lifecycle.doOnResume
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
 import org.ergoplatform.WalletStateSyncManager
@@ -58,9 +61,26 @@ class WalletDetailsComponent(
         setUpWalletStateFlowCollector(Application.database, walletConfig.id)
     }
 
+    private var collectConfigChanges: Job? = null
+
     init {
         lifecycle.doOnResume {
             startRefreshWhenNeeded()
+            collectConfigChanges = componentScope().launch {
+                // walletWithStateByIdAsFlow does not observe state and tokens, so we need observe
+                // WalletStateSyncManager here too
+                WalletStateSyncManager.getInstance().isRefreshing.collect { isRefreshing ->
+                    if (!isRefreshing && uiLogic.wallet != null) {
+                        uiLogic.onWalletStateChanged(
+                            Application.database.walletDbProvider.loadWalletWithStateById(walletConfig.id),
+                            Application.database.tokenDbProvider
+                        )
+                    }
+                }
+            }
+        }
+        lifecycle.doOnPause {
+            collectConfigChanges?.cancel()
         }
     }
 

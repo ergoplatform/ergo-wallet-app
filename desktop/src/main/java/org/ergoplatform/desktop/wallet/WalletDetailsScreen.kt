@@ -7,6 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -239,31 +240,33 @@ private fun WalletTokensLayout(uiLogic: WalletDetailsUiLogic) {
 
             uiLogic.tokensList.forEach { walletToken ->
 
-                val data = TokenEntryViewData(walletToken, true, Application.texts)
-                data.bind(uiLogic.tokenInformation[walletToken.tokenId])
+                key(walletToken) {
+                    val data = TokenEntryViewData(walletToken, true, Application.texts)
+                    data.bind(uiLogic.tokenInformation[walletToken.tokenId])
 
-                Column(Modifier.fillMaxWidth().padding(top = defaultPadding)) {
-                    // TODO TokenInfo clickable
+                    Column(Modifier.fillMaxWidth().padding(top = defaultPadding)) {
+                        // TODO TokenInfo clickable
 
-                    TokenLabel(
-                        data,
-                        Modifier.align(Alignment.CenterHorizontally),
-                        labelStyle = LabelStyle.BODY1BOLD,
-                    )
-
-                    data.displayedId?.let {
-                        MiddleEllipsisText(
-                            it,
+                        TokenLabel(
+                            data,
                             Modifier.align(Alignment.CenterHorizontally),
-                            color = MosaikStyleConfig.secondaryLabelColor
+                            labelStyle = LabelStyle.BODY1BOLD,
                         )
-                    }
 
-                    data.price?.let {
-                        Text(
-                            it, Modifier.align(Alignment.CenterHorizontally),
-                            color = MosaikStyleConfig.secondaryLabelColor
-                        )
+                        data.displayedId?.let {
+                            MiddleEllipsisText(
+                                it,
+                                Modifier.align(Alignment.CenterHorizontally),
+                                color = MosaikStyleConfig.secondaryLabelColor
+                            )
+                        }
+
+                        data.price?.let {
+                            Text(
+                                it, Modifier.align(Alignment.CenterHorizontally),
+                                color = MosaikStyleConfig.secondaryLabelColor
+                            )
+                        }
                     }
                 }
             }
