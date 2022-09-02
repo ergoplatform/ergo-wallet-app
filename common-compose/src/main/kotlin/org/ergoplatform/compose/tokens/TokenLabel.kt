@@ -31,6 +31,10 @@ import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.uilogic.STRING_LABEL_UNNAMED_TOKEN
 import org.ergoplatform.uilogic.StringProvider
 
+/**
+ * TokenLabel shows a decorated token label with logo/preview pic and genuine information.
+ * For simpler amount token labels, use TokenEntryView
+ */
 @Composable
 fun TokenLabel(
     tokenData: TokenEntryViewData,

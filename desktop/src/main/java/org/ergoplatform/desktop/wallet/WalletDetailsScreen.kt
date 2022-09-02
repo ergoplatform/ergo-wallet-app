@@ -1,17 +1,17 @@
 package org.ergoplatform.desktop.wallet
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.WalletStateSyncManager
@@ -20,23 +20,21 @@ import org.ergoplatform.compose.settings.mediumIconSize
 import org.ergoplatform.compose.settings.smallIconSize
 import org.ergoplatform.compose.tokens.TokenEntryViewData
 import org.ergoplatform.compose.tokens.TokenLabel
-import org.ergoplatform.desktop.ui.AppScrollingLayout
-import org.ergoplatform.desktop.ui.defaultMaxWidth
-import org.ergoplatform.desktop.ui.defaultPadding
-import org.ergoplatform.desktop.ui.uiErgoColor
+import org.ergoplatform.desktop.tokens.TokenEntryView
+import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressButton
 import org.ergoplatform.mosaik.MiddleEllipsisText
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.tokens.getTokenErgoValueSum
-import org.ergoplatform.uilogic.STRING_LABEL_ERG_AMOUNT
-import org.ergoplatform.uilogic.STRING_LABEL_TOKENS
-import org.ergoplatform.uilogic.STRING_TITLE_WALLET_ADDRESS
-import org.ergoplatform.uilogic.STRING_TITLE_WALLET_BALANCE
+import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
+import org.ergoplatform.uilogic.transactions.getTransactionStateString
 import org.ergoplatform.uilogic.wallet.WalletDetailsUiLogic
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.utils.formatTokenPriceToString
+import org.ergoplatform.utils.millisecondsToLocalTime
 
 @Composable
 fun WalletDetailsScreen(
@@ -68,6 +66,8 @@ fun WalletDetailsScreen(
             if (uiLogic.tokensList.isNotEmpty()) {
                 WalletTokensLayout(uiLogic)
             }
+
+            TransactionsLayout(informationVersion, uiLogic)
         }
     }
 }
@@ -273,3 +273,122 @@ private fun WalletTokensLayout(uiLogic: WalletDetailsUiLogic) {
         }
     }
 }
+
+@Composable
+private fun TransactionsLayout(
+    informationVersion: Int,
+    uiLogic: WalletDetailsUiLogic
+) {
+    AppCard(Modifier.padding(defaultPadding)) {
+        Column {
+
+            // HEADER
+            Row(Modifier.padding(defaultPadding)) {
+                Icon(
+                    Icons.Default.CompareArrows, null,
+                    Modifier.requiredSize(mediumIconSize)
+                )
+
+                Text(
+                    remember { Application.texts.getString(STRING_TITLE_TRANSACTIONS) },
+                    Modifier.padding(start = defaultPadding)
+                        .align(Alignment.CenterVertically).weight(1f),
+                    style = labelStyle(LabelStyle.BODY1BOLD),
+                    color = uiErgoColor,
+                )
+            }
+
+            val transactionList =
+                remember { mutableStateOf(emptyList<AddressTransactionWithTokens>()) }
+            LaunchedEffect(informationVersion) {
+                transactionList.value = uiLogic.loadTransactionsToShow(
+                    Application.database.transactionDbProvider
+                )
+            }
+
+            if (transactionList.value.isEmpty()) {
+                Divider()
+
+                Text(
+                    remember { Application.texts.getString(STRING_TRANSACTIONS_NONE_YET) },
+                    Modifier.padding(defaultPadding).fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            transactionList.value.forEach { transaction ->
+                Divider()
+
+                key(transaction) { AddressTransactionInfo(transaction) }
+            }
+
+            if (transactionList.value.size == uiLogic.maxTransactionsToShow) {
+                Divider()
+
+                Text(
+                    remember { Application.texts.getString(STRING_TRANSACTIONS_VIEW_MORE) },
+                    Modifier.padding(defaultPadding).fillMaxWidth(),
+                    style = labelStyle(LabelStyle.BODY1BOLD),
+                    textAlign = TextAlign.Center,
+                    color = MosaikStyleConfig.secondaryLabelColor // TODO Transaction list
+                )
+
+            }
+
+        }
+    }
+}
+
+@Composable
+private fun AddressTransactionInfo(transaction: AddressTransactionWithTokens) {
+
+    Column(Modifier.padding(defaultPadding)) {
+        // TODO clicklistener transaction info
+
+        Row {
+            val txHeader = transaction.addressTransaction
+            Text(
+                txHeader.getTransactionStateString(Application.texts),
+                style = labelStyle(LabelStyle.BODY1BOLD),
+                color = uiErgoColor
+            )
+
+            if (txHeader.timestamp > 0) {
+                Text(
+                    millisecondsToLocalTime(txHeader.timestamp),
+                    Modifier.padding(start = defaultPadding).weight(1f),
+                    textAlign = TextAlign.End,
+                )
+            }
+        }
+
+        Row(Modifier.padding(top = defaultPadding / 2)) {
+            val txHeader = transaction.addressTransaction
+            Text(
+                txHeader.ergAmount.toComposableText(trimTrailingZeros = true),
+                Modifier.align(Alignment.Top).padding(start = defaultPadding),
+                style = labelStyle(LabelStyle.BODY1BOLD),
+            )
+
+            txHeader.message?.let {
+                Text(
+                    it,
+                    Modifier.padding(start = defaultPadding).weight(1f).align(Alignment.Top),
+                )
+            }
+        }
+
+        transaction.tokens.forEach { token ->
+            // TODO clicklistener token info
+
+            TokenEntryView(
+                token.tokenAmount.toStringUsFormatted(),
+                token.name,
+                Modifier.fillMaxWidth().padding(start = defaultPadding)
+            )
+
+        }
+
+    }
+}
+

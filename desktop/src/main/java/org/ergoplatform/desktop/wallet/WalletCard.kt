@@ -18,10 +18,7 @@ import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.primaryButtonColors
 import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.desktop.tokens.TokenEntryView
-import org.ergoplatform.desktop.ui.bigIconSize
-import org.ergoplatform.desktop.ui.defaultMaxWidth
-import org.ergoplatform.desktop.ui.defaultPadding
-import org.ergoplatform.desktop.ui.uiErgoColor
+import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
@@ -86,9 +83,8 @@ fun WalletCard(
                         val unconfirmed = wallet.getUnconfirmedBalanceForAllAddresses() != 0L
 
                         Text(
-                            text = Application.texts.getString(
-                                STRING_LABEL_ERG_AMOUNT, balanceErgoAmount.toStringRoundToDecimals()
-                            ) + (if (unconfirmed) "*" else ""),
+                            text = balanceErgoAmount.toComposableText()
+                                    + (if (unconfirmed) "*" else ""),
                             style = labelStyle(LabelStyle.HEADLINE1)
                         )
 
