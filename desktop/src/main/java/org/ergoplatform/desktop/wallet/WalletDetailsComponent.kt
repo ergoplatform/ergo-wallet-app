@@ -72,7 +72,9 @@ class WalletDetailsComponent(
                 WalletStateSyncManager.getInstance().isRefreshing.collect { isRefreshing ->
                     if (!isRefreshing && uiLogic.wallet != null) {
                         uiLogic.onWalletStateChanged(
-                            Application.database.walletDbProvider.loadWalletWithStateById(walletConfig.id),
+                            Application.database.walletDbProvider.loadWalletWithStateById(
+                                walletConfig.id
+                            ),
                             Application.database.tokenDbProvider
                         )
                     }
@@ -100,6 +102,7 @@ class WalletDetailsComponent(
             WalletDetailsScreen(
                 uiLogic,
                 informationVersionState.value,
+                downloadingTransactionsState.value,
                 onChooseAddressClicked = { chooseAddressDialog.value = true },
                 onScanClicked = {
                     router.push(ScreenConfig.QrCodeScanner { qrCode -> handleQrCode(qrCode) })
@@ -118,6 +121,11 @@ class WalletDetailsComponent(
                     )
                 },
                 onAddressesClicked = { router.push(ScreenConfig.WalletAddressesList(walletConfig)) },
+                onViewTransactionsClicked = {
+                    router.push(
+                        ScreenConfig.AddressTransactions(walletConfig, uiLogic.addressIdx ?: 0)
+                    )
+                }
             )
         }
 

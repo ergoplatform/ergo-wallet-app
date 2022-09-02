@@ -23,6 +23,7 @@ sealed class ScreenConfig : Parcelable {
     data class ColdSigning(val walletId: Int, val signingRequest: String) : ScreenConfig()
     data class ReceiveToWallet(val walletConfig: WalletConfig, val addressIdx: Int = 0) : ScreenConfig()
     data class WalletDetails(val walletConfig: WalletConfig) : ScreenConfig()
+    data class AddressTransactions(val walletConfig: WalletConfig, val addressIdx: Int = 0) : ScreenConfig()
     data class WalletConfiguration(val walletConfig: WalletConfig) : ScreenConfig()
     data class WalletAddressesList(val walletConfig: WalletConfig) : ScreenConfig()
     data class QrCodeScanner(val callback: (String) -> Unit) : ScreenConfig()

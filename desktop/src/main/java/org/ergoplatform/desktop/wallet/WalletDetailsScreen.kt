@@ -1,5 +1,6 @@
 package org.ergoplatform.desktop.wallet
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -40,11 +41,13 @@ import org.ergoplatform.utils.millisecondsToLocalTime
 fun WalletDetailsScreen(
     uiLogic: WalletDetailsUiLogic,
     informationVersion: Int,
+    downloadingTransactions: Boolean,
     onScanClicked: () -> Unit,
     onChooseAddressClicked: () -> Unit,
     onReceiveClicked: () -> Unit,
     onSendClicked: () -> Unit,
     onAddressesClicked: () -> Unit,
+    onViewTransactionsClicked: () -> Unit,
 ) {
     AppScrollingLayout {
         Column(
@@ -67,7 +70,12 @@ fun WalletDetailsScreen(
                 WalletTokensLayout(uiLogic)
             }
 
-            TransactionsLayout(informationVersion, uiLogic)
+            TransactionsLayout(
+                informationVersion,
+                downloadingTransactions,
+                uiLogic,
+                onViewTransactionsClicked
+            )
         }
     }
 }
@@ -277,7 +285,9 @@ private fun WalletTokensLayout(uiLogic: WalletDetailsUiLogic) {
 @Composable
 private fun TransactionsLayout(
     informationVersion: Int,
-    uiLogic: WalletDetailsUiLogic
+    downloadingTransactions: Boolean,
+    uiLogic: WalletDetailsUiLogic,
+    onViewTransactionsClicked: () -> Unit,
 ) {
     AppCard(Modifier.padding(defaultPadding)) {
         Column {
@@ -300,7 +310,7 @@ private fun TransactionsLayout(
 
             val transactionList =
                 remember { mutableStateOf(emptyList<AddressTransactionWithTokens>()) }
-            LaunchedEffect(informationVersion) {
+            LaunchedEffect(informationVersion, downloadingTransactions) {
                 transactionList.value = uiLogic.loadTransactionsToShow(
                     Application.database.transactionDbProvider
                 )
@@ -327,10 +337,11 @@ private fun TransactionsLayout(
 
                 Text(
                     remember { Application.texts.getString(STRING_TRANSACTIONS_VIEW_MORE) },
-                    Modifier.padding(defaultPadding).fillMaxWidth(),
+                    Modifier.clickable { onViewTransactionsClicked() }.padding(defaultPadding)
+                        .fillMaxWidth(),
                     style = labelStyle(LabelStyle.BODY1BOLD),
                     textAlign = TextAlign.Center,
-                    color = MosaikStyleConfig.secondaryLabelColor // TODO Transaction list
+                    color = uiErgoColor,
                 )
 
             }
@@ -340,7 +351,7 @@ private fun TransactionsLayout(
 }
 
 @Composable
-private fun AddressTransactionInfo(transaction: AddressTransactionWithTokens) {
+fun AddressTransactionInfo(transaction: AddressTransactionWithTokens) {
 
     Column(Modifier.padding(defaultPadding)) {
         // TODO clicklistener transaction info
