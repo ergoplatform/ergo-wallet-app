@@ -9,10 +9,7 @@ import org.ergoplatform.restapi.client.PeersApi
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
-import org.ergoplatform.uilogic.STRING_ERROR_BALANCE_ERG
-import org.ergoplatform.uilogic.STRING_ERROR_CHANGEBOX_AMOUNT
-import org.ergoplatform.uilogic.STRING_ERROR_PROVER_CANT_SIGN
-import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
@@ -32,6 +29,7 @@ const val URL_FORGOT_PASSWORD_HELP =
 
 const val ERG_BASE_COST = 0
 const val ERG_MAX_BLOCK_COST = 1000000
+private const val MAX_NUM_INPUT_BOXES = 100
 
 var isErgoMainNet: Boolean = true
 
@@ -144,7 +142,10 @@ fun sendErgoTx(
         }
     } catch (t: Throwable) {
         LogUtils.logDebug("sendErgoTx", "Error caught", t)
-        return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
+        return SendTransactionResult(
+            false,
+            errorMsg = getErrorMessage(t, texts, amountToSend)
+        )
     }
 }
 
@@ -163,6 +164,7 @@ private fun buildUnsignedTx(
         .withInputBoxesLoader(
             ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
         )
+        .withMaxInputBoxesToSelect(MAX_NUM_INPUT_BOXES)
         .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
 }
 
@@ -232,7 +234,10 @@ fun prepareSerializedErgoTx(
         }
     } catch (t: Throwable) {
         LogUtils.logDebug("prepareSerializedErgoTx", "Error caught", t)
-        return PromptSigningResult(false, errorMsg = getErrorMessage(t, texts))
+        return PromptSigningResult(
+            false,
+            errorMsg = getErrorMessage(t, texts, amountToSend)
+        )
     }
 }
 
@@ -364,7 +369,7 @@ fun sendSignedErgoTx(
     }
 }
 
-fun getErrorMessage(t: Throwable, texts: StringProvider): String {
+fun getErrorMessage(t: Throwable, texts: StringProvider, amountToSend: Long? = null): String {
     return if (t is InputBoxesSelectionException.NotEnoughErgsException) {
         texts.getString(
             STRING_ERROR_BALANCE_ERG,
@@ -374,6 +379,14 @@ fun getErrorMessage(t: Throwable, texts: StringProvider): String {
         texts.getString(
             STRING_ERROR_CHANGEBOX_AMOUNT
         )
+    } else if (t is InputBoxesSelectionException.InputBoxLimitExceededException) {
+        if (t.remainingTokens.isEmpty() && amountToSend != null)
+            texts.getString(
+                STRING_ERROR_TOO_MANY_INPUT_BOXES_LESS_ERG,
+                ErgoAmount(amountToSend - t.remainingAmount).toStringTrimTrailingZeros()
+            )
+        else
+            texts.getString(STRING_ERROR_TOO_MANY_INPUT_BOXES_GENERIC)
     } else if (t is AssertionError && t.message?.contains("Tree root should be real") == true) {
         // ProverInterpreter.scala
         texts.getString(STRING_ERROR_PROVER_CANT_SIGN)

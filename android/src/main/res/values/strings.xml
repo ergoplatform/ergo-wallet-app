@@ -223,6 +223,10 @@
     <string name="error_request_token_not_found">Could not add token \'%1$s\'</string>
     <string name="error_request_token_amount">Could not set requested amount for token \'%1$s\'</string>
     <string name="error_request_token_but_no_erg">Tokens requested, but no ERG amount. A default amount will be sent.</string>
+    <string name="error_too_many_input_boxes_less_erg">The transaction requested exceeds the input boxes limit. Please reduce the
+        amount to %1$s ERG or less and try again.</string>
+    <string name="error_too_many_input_boxes_generic">The transaction requested exceeds the input boxes limit.
+        Please reduce the amounts to send and try again.</string>
 
     <!-- Send funds fee chooser -->
     <string name="label_fee_custom">Fee amount</string>
