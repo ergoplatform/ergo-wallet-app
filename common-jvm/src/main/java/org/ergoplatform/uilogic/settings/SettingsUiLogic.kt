@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.api.tokenjay.TokenJayApiClient
+import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.refreshNodeList
 import org.ergoplatform.restapi.client.InfoApi
@@ -43,7 +44,7 @@ class SettingsUiLogic {
 
         knownNodesList = knownNodesList.map { it.trimEnd('/') }
 
-        if (knownNodesList.size < maxNumToConnectTo && coroutineContext.isActive) {
+        if (knownNodesList.size < maxNumToConnectTo && coroutineContext.isActive && isErgoMainNet) {
             try {
                 val peers = TokenJayApiClient().getDetectedNodePeers()
                 val highestBlockHeight = peers.firstOrNull()?.blockHeight ?: 0
