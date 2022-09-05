@@ -50,11 +50,7 @@ fun WalletDetailsScreen(
     onViewTransactionsClicked: () -> Unit,
 ) {
     AppScrollingLayout {
-        Column(
-            Modifier.align(Alignment.TopCenter)
-                .widthIn(min = 400.dp, max = defaultMaxWidth)
-        ) {
-
+        val firstColumnContent = @Composable {
             SelectAddressLayout(
                 uiLogic,
                 onChooseAddressClicked,
@@ -69,13 +65,32 @@ fun WalletDetailsScreen(
             if (uiLogic.tokensList.isNotEmpty()) {
                 WalletTokensLayout(uiLogic)
             }
-
+        }
+        val secondColumnContent = @Composable {
             TransactionsLayout(
                 informationVersion,
                 downloadingTransactions,
                 uiLogic,
                 onViewTransactionsClicked
             )
+        }
+
+        BoxWithConstraints(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+            if (maxWidth < 900.dp) {
+                Column(Modifier.widthIn(min = 400.dp, max = defaultMaxWidth)) {
+                    firstColumnContent()
+                    secondColumnContent()
+                }
+            } else {
+                Row(Modifier.widthIn(max = defaultMaxWidth * 2)) {
+                    Column(Modifier.align(Alignment.Top).weight(1f)) {
+                        firstColumnContent()
+                    }
+                    Column(Modifier.align(Alignment.Top).weight(1f)) {
+                        secondColumnContent()
+                    }
+                }
+            }
         }
     }
 }
