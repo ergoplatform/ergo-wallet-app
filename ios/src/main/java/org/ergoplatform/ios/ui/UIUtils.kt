@@ -82,6 +82,8 @@ fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(
 @Suppress("DEPRECATION")
 fun openUrlInBrowser(url: String) = UIApplication.getSharedApplication().openURL(NSURL(url))
 
+fun openStorePage() = openUrlInBrowser("https://itunes.apple.com/app/id1643137927")
+
 fun UIViewController.shareText(text: String, uiBarButtonItem: UIBarButtonItem) {
     shareText(text, uiBarButtonItem.keyValueCoder.getValue("view") as UIView)
 }

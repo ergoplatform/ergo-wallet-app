@@ -206,8 +206,10 @@ class ErgoPaySigningViewController(
 
     private inner class StateDoneContainer : CardView() {
         private var descLabel: Body1Label? = null
+        private var rateLabel: Body1Label? = null
         private var image: UIImageView? = null
         private var dismissButton: PrimaryButton? = null
+        private var rateButton: TextButton? = null
         private var dismissShouldRetry = false
 
         fun showDoneInfo() {
@@ -233,6 +235,15 @@ class ErgoPaySigningViewController(
                 doneButtonContainer.addSubview(dismissButton)
                 dismissButton.centerHorizontal().topToSuperview().bottomToSuperview().fixedWidth(150.0)
 
+                rateLabel = Body1Label().apply {
+                    text = texts.get(STRING_DESC_PLEASE_RATE)
+                    textAlignment = NSTextAlignment.Center
+                }
+                rateButton = TextButton(texts.get(STRING_BUTTON_PLEASE_RATE))
+                rateButton?.addOnTouchUpInsideListener { _, _ ->
+                    openStorePage()
+                }
+
                 val txDoneStack = UIStackView().apply {
                     axis = UILayoutConstraintAxis.Vertical
                     spacing = DEFAULT_MARGIN * 3
@@ -240,6 +251,9 @@ class ErgoPaySigningViewController(
                     addArrangedSubview(image)
                     addArrangedSubview(descLabel)
                     addArrangedSubview(doneButtonContainer)
+                    addArrangedSubview(rateLabel)
+                    addArrangedSubview(rateButton)
+                    setCustomSpacing(0.0, rateLabel)
                 }
 
                 contentView.addSubview(txDoneStack)
@@ -261,6 +275,9 @@ class ErgoPaySigningViewController(
                 texts.get(if (dismissShouldRetry) STRING_BUTTON_RETRY else STRING_LABEL_DISMISS),
                 UIControlState.Normal
             )
+            val showRatingPrompt = uiLogic.showRatingPrompt()
+            rateLabel?.isHidden = !showRatingPrompt
+            rateButton?.isHidden = !showRatingPrompt
         }
     }
 
