@@ -227,6 +227,8 @@
         amount to %1$s ERG or less and try again.</string>
     <string name="error_too_many_input_boxes_generic">The transaction requested exceeds the input boxes limit.
         Please reduce the amounts to send and try again.</string>
+    <string name="desc_please_rate">If you like this app, please leave a rating on the store for others to see.</string>
+    <string name="button_please_rate">Rate on store</string>
 
     <!-- Send funds fee chooser -->
     <string name="label_fee_custom">Fee amount</string>
