@@ -10,7 +10,14 @@ The terms used in this Privacy Policy have the same meanings as in our Terms and
 
 #### Information Collection and Use
 
-There is no data collected. We don't track you. We don't profile you.
+There is no data collected by us. We don't track you. We don't profile you.
+
+If you enable dApp plugins within the app, third-party providers will get the following information to improve your experience:
+
+* A random, anonymous universal ID to help the services store preferences for you. The ID is different for each third-party provider.
+* Your application language, platform and version as well as your device form factor.
+
+Please note that third-party providers might store and collect the information you give on the dApp plugin pages. Please contact the app provider for further questions.
 
 #### Log Data
 

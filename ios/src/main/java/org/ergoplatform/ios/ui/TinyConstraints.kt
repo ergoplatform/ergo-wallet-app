@@ -308,7 +308,7 @@ fun UIView.centerInSuperviewWhenSmaller(useSafeArea: Boolean = false, multiplier
 
 fun UIView.superViewWrapsHeight(
     useSafeArea: Boolean = false, multiplier: Double = 1.0, constant: Double = 0.0
-) {
+): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
     val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
@@ -327,6 +327,8 @@ fun UIView.superViewWrapsHeight(
             bottomConstraint,
         )
     )
+
+    return this
 }
 
 fun UIView.centerVertical(): UIView {

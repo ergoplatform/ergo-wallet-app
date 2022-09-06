@@ -148,8 +148,6 @@
     <string name="error_password_empty">Lütfen geçerli bir parola girin</string>
     <string name="error_password_wrong">Yanlış parola</string>
     <string name="desc_transaction_send">İşlem başarıyla gönderildi ve onay bekliyor. İşlem Kimliği:</string>
-    <string name="desc_prompt_signing">Anlaşmanız hazırlandı. Devam etmek için bu QR kodunu imzalama cihazınızla tarayın.\n\nMevcut olduğunda, imzalanan işlemin QR kodunu tarayarak ağa gönderin.</string>
-    <string name="desc_prompt_signing_multiple">Anlaşmanız hazırlandı. Devam etmek için bu QR kodlarını imzalama cihazınızla tarayın.</string>
     <string name="button_scan_signed_tx">İmzalı işlemi tara</string>
     <string name="button_next">Sonraki</string>
     <string name="title_authenticate">Kimlik doğrulaması gerekli</string>

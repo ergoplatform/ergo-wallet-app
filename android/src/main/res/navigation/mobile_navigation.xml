@@ -142,16 +142,6 @@
 
     </fragment>
 
-    <fragment
-        android:id="@+id/navigation_settings"
-        android:name="org.ergoplatform.android.settings.SettingsFragment"
-        android:label="@string/title_settings"
-        tools:layout="@layout/fragment_settings">
-        <action
-            android:id="@+id/action_navigation_settings_to_connectionSettingsDialogFragment"
-            app:destination="@id/connectionSettingsDialogFragment" />
-    </fragment>
-
     <dialog
         android:id="@+id/addWalletChooserFragment"
         android:name="org.ergoplatform.android.wallet.AddWalletChooserFragmentDialog"
@@ -307,9 +297,6 @@
             android:id="@+id/action_walletAddressesFragment_to_walletAddressDetailsDialog"
             app:destination="@id/walletAddressDetailsDialog" />
     </fragment>
-    <dialog
-        android:id="@+id/connectionSettingsDialogFragment"
-        android:name="org.ergoplatform.android.settings.ConnectionSettingsDialogFragment" />
     <dialog
         android:id="@+id/walletAddressDetailsDialog"
         android:name="org.ergoplatform.android.wallet.addresses.WalletAddressDetailsDialog"
@@ -475,4 +462,20 @@
             app:popEnterAnim="@anim/slide_in_from_left"
             app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
+    <navigation android:id="@+id/navigation_settings"
+        android:label="@string/title_settings"
+        app:startDestination="@id/settings_main">
+        <fragment
+            android:id="@+id/settings_main"
+            android:name="org.ergoplatform.android.settings.SettingsFragment"
+            android:label="@string/title_settings"
+            tools:layout="@layout/fragment_settings">
+            <action
+                android:id="@+id/action_navigation_settings_to_connectionSettingsDialogFragment"
+                app:destination="@id/connectionSettingsDialogFragment" />
+        </fragment>
+        <dialog
+            android:id="@+id/connectionSettingsDialogFragment"
+            android:name="org.ergoplatform.android.settings.ConnectionSettingsDialogFragment" />
+    </navigation>
 </navigation>

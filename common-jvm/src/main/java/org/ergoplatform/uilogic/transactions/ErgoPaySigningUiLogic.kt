@@ -328,6 +328,10 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         if (lastMessage == null && txId != null) MessageSeverity.INFORMATION else
             lastMessage?.let { lastMessageSeverity } ?: MessageSeverity.ERROR
 
+    fun showRatingPrompt(): Boolean =
+        txId != null && getDoneSeverity() != MessageSeverity.ERROR
+
+
     enum class State { WAIT_FOR_WALLET, WAIT_FOR_ADDRESS, FETCH_DATA, WAIT_FOR_CONFIRMATION, DONE }
 
     /**

@@ -30,14 +30,15 @@ abstract class AppMosaikRuntime(
 ) : MosaikRuntime(
     OkHttpBackendConnector(
         OkHttpSingleton.getInstance().newBuilder(),
-        { url ->
+        getContextFor = { url ->
             MosaikContext(
                 MosaikContext.LIBRARY_MOSAIK_VERSION,
                 guidManager.getGuidForHost(getHostname(url)),
                 Locale.getDefault().language,
                 appName,
                 appVersionName,
-                platformType()
+                platformType(),
+                (TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 60000),
             )
         }
     )
@@ -48,6 +49,10 @@ abstract class AppMosaikRuntime(
     var preferencesProvider: PreferencesProvider? = null
 
     init {
+        MosaikLogger.logger = { severity, msg, throwable ->
+            LogUtils.logDebug("Mosaik", "$severity: $msg", throwable)
+        }
+
         appLoaded = { manifest ->
             coroutineScope.launch {
                 saveVisitToDb(manifest)

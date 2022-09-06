@@ -138,11 +138,6 @@
     <string name="error_password_empty">Por favor insira uma senha válida</string>
     <string name="error_password_wrong">Senha incorreta</string>
     <string name="desc_transaction_send">Transação foi enviada com sucesso e aguarda confirmação. ID da transação:</string>
-    <string name="desc_prompt_signing">Sua transação foi preparada. Escaneie este código QR
-       com seu aparelho assinado para prosseguir.\n\nQuando estiver disponível, escaneie o código QR da transação assinada para
-        enviá-la para a rede.</string>
-    <string name="desc_prompt_signing_multiple">Sua transação está preparada. Escaneie estes códigos QR
-       com seu aparelho assinado para prosseguir.</string>
     <string name="button_scan_signed_tx">Escaneie transação assinada</string>
     <string name="button_next">Próximo</string>
     <string name="title_authenticate">Autenticação requerida</string>

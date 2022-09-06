@@ -5,7 +5,7 @@ buildscript {
     ext.robovm_version = "2.3.18"
     ext.sqldelight_version = "1.5.3"
     ext.coroutines_version = "1.6.0"
-    ext.mosaik_version = "24b19785f3" // 1.0.2
+    ext.mosaik_version = "1.0.3"
     ext.compose_version = "1.1.0"
     ext.mockito_version = "4.0.0"
     ext.junit_version = "4.13.2"
@@ -25,6 +25,7 @@ buildscript {
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version")
         classpath "com.mobidevelop.robovm:robovm-gradle-plugin:$robovm_version"
         classpath "com.squareup.sqldelight:gradle-plugin:$sqldelight_version"
+        classpath("com.guardsquare:proguard-gradle:7.2.1")
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }

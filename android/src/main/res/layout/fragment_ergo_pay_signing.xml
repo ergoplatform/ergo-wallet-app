@@ -149,11 +149,11 @@
                         style="?attr/materialButtonStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:visibility="gone"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="@dimen/activity_horizontal_margin"
                         android:minWidth="120dp"
-                        android:text="@string/button_retry" />
+                        android:text="@string/button_retry"
+                        android:visibility="gone" />
 
                     <Button
                         android:id="@+id/button_dismiss"
@@ -164,6 +164,28 @@
                         android:layout_marginTop="@dimen/activity_horizontal_margin"
                         android:minWidth="120dp"
                         android:text="@string/label_dismiss" />
+
+                    <TextView
+                        android:id="@+id/tv_rate"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:paddingTop="@dimen/margin_and_half"
+                        android:text="@string/desc_please_rate"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <Button
+                        android:id="@+id/button_rate"
+                        style="@style/Widget.App.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:minWidth="120dp"
+                        android:text="@string/button_please_rate"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
                 </LinearLayout>
 

@@ -131,6 +131,9 @@ class SendFundsFragment : SubmitTransactionFragment() {
                 findNavController().navigate(R.id.navigation_wallet)
             }
         }
+        binding.buttonRate.setOnClickListener {
+            openStorePage(requireContext())
+        }
 
         binding.buttonSend.setOnClickListener {
             startPayment()
@@ -262,7 +265,6 @@ class SendFundsFragment : SubmitTransactionFragment() {
                         itemBinding.inputTokenAmount.visibility = View.GONE
                         itemBinding.labelTokenBalance.visibility = View.GONE
                         itemBinding.labelBalanceValue.visibility = View.GONE
-                        itemBinding.labelTokenBalance.visibility = View.GONE
                     } else {
                         itemBinding.labelTokenBalance.text =
                             tokenDbEntity.toTokenAmount().toStringPrettified()

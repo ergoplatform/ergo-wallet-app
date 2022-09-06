@@ -5,7 +5,7 @@
 Official Ergo Wallet App ([official announcement](https://ergoplatform.org/en/blog/2021-07-29-ergo-for-android-released/))
 
 <a href="https://play.google.com/store/apps/details?id=org.ergoplatform.android"><img alt="Get it on Google Play" src="https://user-images.githubusercontent.com/11427267/75923897-483f3b00-5e66-11ea-8ec7-e86887afea51.png"></a>
-<a href="https://testflight.apple.com/join/MRyG2qfm"><img alt="Download App Store" src="https://user-images.githubusercontent.com/11427267/75923896-47a6a480-5e66-11ea-87c1-3ec73ebcf7a5.png"></a>
+<a href="https://apps.apple.com/app/terminus-wallet-ergo/id1643137927"><img alt="Download App Store" src="https://user-images.githubusercontent.com/11427267/75923896-47a6a480-5e66-11ea-87c1-3ec73ebcf7a5.png"></a>
 
 Features:
 * generating wallets, restoring wallets in a way compatible to Yoroi and Ergo node
@@ -18,8 +18,11 @@ Features:
 * Show wallet balance, configurable comparison fiat currency
 * Cold wallet capable ([more information](https://github.com/ergoplatform/ergo-wallet-app/wiki/Cold-wallet))
 * ErgoPay support
+* ErgoAuth support
 
 You need at least Android 7 or iOS 13 to run Ergo Wallet.
+
+On Linux and MacOS, you need Java 11 or 17 to run Ergo Wallet. [More information](desktop/RUN.md)
 
 Visit the [Ergo Discord](https://discord.gg/kj7s7nb) to give feedback.
 
@@ -44,6 +47,7 @@ The APK file can be installed on your Android device. If you sideload for the fi
 
 * [Android](android/BUILD.md)
 * [iOS](ios/BUILD.md)
+* [Desktop](desktop/BUILD.md)
 
 ### Translations
 

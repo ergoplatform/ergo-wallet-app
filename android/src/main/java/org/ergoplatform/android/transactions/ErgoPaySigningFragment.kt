@@ -15,6 +15,7 @@ import org.ergoplatform.android.databinding.FragmentErgoPaySigningBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.getSeverityDrawableResId
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.android.ui.openStorePage
 import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
 import org.ergoplatform.android.wallet.WalletChooserCallback
 import org.ergoplatform.persistance.WalletConfig
@@ -118,6 +119,9 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
         binding.buttonChooseAddress.setOnClickListener {
             showAddressOrWalletChooser()
         }
+        binding.buttonRate.setOnClickListener {
+            openStorePage(requireContext())
+        }
 
         if (args.closeApp) {
             requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
@@ -210,6 +214,9 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
             (uiLogic.getDoneSeverity() == MessageSeverity.ERROR && uiLogic.canReloadFromDapp())
         binding.buttonDismiss.visibility = if (!shouldReload) View.VISIBLE else View.GONE
         binding.buttonRetry.visibility = if (shouldReload) View.VISIBLE else View.GONE
+        val showRatingPrompt = uiLogic.showRatingPrompt()
+        binding.buttonRate.visibility = if (showRatingPrompt) View.VISIBLE else View.GONE
+        binding.tvRate.visibility = if (showRatingPrompt) View.VISIBLE else View.GONE
 
         viewModel.uiLogic.txId?.let {
             parentFragmentManager.setFragmentResult(
