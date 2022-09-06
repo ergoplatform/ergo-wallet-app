@@ -1,6 +1,7 @@
 package org.ergoplatform.ios.mosaik
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.ergoplatform.ios.CrashHandler
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.AppMosaikRuntime
@@ -10,12 +11,16 @@ import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoAuthAction
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
 import org.ergoplatform.uilogic.STRING_BUTTON_BACK
+import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
 class MosaikViewController(
     private val appUrl: String,
     private val appName: String?,
 ) : ViewControllerWithKeyboardLayoutGuide() {
+
+    private lateinit var mosaikView: MosaikView
+    private lateinit var waitingView: UIView
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +38,16 @@ class MosaikViewController(
             loadUrlEnteredByUser(this@MosaikViewController.appUrl)
         }
 
+        mosaikView = MosaikView(mosaikRuntime)
+        val scrollView = mosaikView.wrapInVerticalScrollView()
+        view.addSubview(scrollView)
+        scrollView.edgesToSuperview(true)
+        waitingView = WaitingView().apply {
+            isHidden = true
+        }
+        view.addSubview(waitingView)
+        waitingView.edgesToSuperview(true)
+
         navigationItem.setHidesBackButton(true)
         val backButton = UIBarButtonItem(appDelegate.texts.get(STRING_BUTTON_BACK), UIBarButtonItemStyle.Plain)
         navigationItem.leftBarButtonItem = backButton
@@ -46,6 +61,20 @@ class MosaikViewController(
 
     override fun viewDidAppear(animated: Boolean) {
         super.viewDidAppear(animated)
+        viewControllerScope.launch {
+            mosaikRuntime.viewTree.contentState.collect {
+                runOnMainThread {
+                    mosaikView.updateView()
+                }
+            }
+        }
+        viewControllerScope.launch {
+            mosaikRuntime.viewTree.uiLockedState.collect { locked ->
+                if (waitingView.isHidden == locked) runOnMainThread {
+                    waitingView.isHidden = !locked
+                }
+            }
+        }
         onResume()
     }
 
@@ -59,7 +88,7 @@ class MosaikViewController(
         CrashHandler.getAppVersion() ?: "",
         { org.ergoplatform.mosaik.model.MosaikContext.Platform.PHONE }, // TODO iPad
         MosaikGuidManager().apply {
-            appDatabase = org.ergoplatform.ios.ui.getAppDelegate().database
+            appDatabase = getAppDelegate().database
         }
     ) {
         override fun onAppNavigated(manifest: MosaikManifest) {
@@ -117,7 +146,7 @@ class MosaikViewController(
             dialog.negativeButtonText?.let { buttonText ->
                 uac.addAction(
                     UIAlertAction(
-                        dialog.negativeButtonText,
+                        buttonText,
                         UIAlertActionStyle.Default
                     ) {
                         dialog.negativeButtonClicked?.invoke()
@@ -138,5 +167,19 @@ class MosaikViewController(
             TODO("Not yet implemented")
         }
 
+    }
+
+    class WaitingView : UIView(CGRect.Zero()) {
+        init {
+            backgroundColor = UIColor.black().addAlpha(0.5)
+
+            val progressIndicator = UIActivityIndicatorView()
+            progressIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Large
+
+            addSubview(progressIndicator)
+            progressIndicator.centerVertical().centerHorizontal()
+
+            progressIndicator.startAnimating()
+        }
     }
 }

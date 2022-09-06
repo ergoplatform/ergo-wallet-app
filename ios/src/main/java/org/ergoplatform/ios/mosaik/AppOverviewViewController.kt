@@ -26,6 +26,8 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
             returnKeyType = UIReturnKeyType.Continue
             placeholder = texts.get(STRING_HINT_APP_URL)
             textContentType = UITextContentType.URL
+            autocapitalizationType = UITextAutocapitalizationType.None
+            autocorrectionType = UITextAutocorrectionType.No
 
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
