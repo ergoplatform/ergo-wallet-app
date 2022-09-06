@@ -16,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import org.ergoplatform.Application
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.compose.settings.AppProgressIndicator
 import org.ergoplatform.desktop.ui.AppDialog
-import org.ergoplatform.desktop.ui.AppProgressIndicator
 import org.ergoplatform.desktop.ui.AppScrollbar
 import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.mosaik.labelStyle

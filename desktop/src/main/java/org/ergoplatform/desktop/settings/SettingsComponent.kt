@@ -10,6 +10,8 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.Chil
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.Direction
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.slide
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.ergoplatform.Application
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.desktop.ui.canRegisterUriScheme
@@ -67,7 +69,18 @@ class SettingsComponent(
                     currencyButtonTextState.value = getCurrencyButtonText()
                 }
             )
-            DialogToShow.ConnectionSettings -> ConnectionSettingsDialog { dialogState.value = DialogToShow.None }
+            DialogToShow.ConnectionSettings -> ConnectionSettingsDialog(
+                uiLogic,
+                onStartNodeDetection = {
+                    componentScope().launch(Dispatchers.IO) {
+                        uiLogic.checkAvailableNodes(
+                            Application.prefs
+                        )
+                    }
+                },
+                onDismissRequest = {
+                    dialogState.value = DialogToShow.None
+                })
         }
     }
 

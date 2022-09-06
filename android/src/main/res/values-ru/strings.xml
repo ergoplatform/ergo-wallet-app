@@ -190,11 +190,6 @@
     <string name="error_password_empty">Введите пожалуйста действительный пароль</string>
     <string name="error_password_wrong">Неправильный пароль</string>
     <string name="desc_transaction_send">Транзакция была успешно отправлена и ожидает подтверждения. Идентификатор транзакции:</string>
-    <string name="desc_prompt_signing">Ваша транзакция была подготовлена. Отсканируйте этот QR-код
-с помощью вашего устройства для подписи платежа, чтобы продолжить.\n\nПри наличии, отсканируйте QR-код подписанной транзакции, чтобы
-отправить его в сеть.</string>
-    <string name="desc_prompt_signing_multiple">Ваша транзакция была подготовлена. Сканируйте эти QR-коды
-с помощью вашего устройства подписи платежа, чтобы продолжить.</string>
     <string name="button_scan_signed_tx">Сканировать подписанную транзакцию</string>
     <string name="button_next">Далее</string>
     <string name="title_authenticate">Требуется авторизация</string>

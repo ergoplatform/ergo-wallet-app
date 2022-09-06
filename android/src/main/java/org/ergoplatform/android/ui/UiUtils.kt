@@ -65,6 +65,13 @@ fun openUrlWithBrowser(context: Context, url: String): Boolean {
     }
 }
 
+fun openStorePage(context: Context) {
+    openUrlWithBrowser(
+        context,
+        "http://play.google.com/store/apps/details?id=org.ergoplatform.android"
+    )
+}
+
 /**
  * Copies address to system clipboard and shows a Snackbar on given view
  */

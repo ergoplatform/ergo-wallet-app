@@ -192,11 +192,6 @@
     <string name="error_password_empty">Por favor introduza uma password válida</string>
     <string name="error_password_wrong">Password errada</string>
     <string name="desc_transaction_send">A transacção foi enviada com sucesso e aguarda confirmação. O ID da transacção:</string>
-    <string name="desc_prompt_signing">A sua transacção foi preparada. Realizar o scan deste código QR
-       com o seu dispositivo assinatura para avançar.\n\nQuando apresentado, realizar o scan da transacção assinada através do código QR para
-        envia-la para a Rede Ergo.</string>
-    <string name="desc_prompt_signing_multiple">A sua transacção está preparada. Realizar o scan destes códigos QR
-       com o seu dispositivo assinatura para avançar.</string>
     <string name="button_scan_signed_tx">Realize o scan da transacção assinada</string>
     <string name="button_next">Próximo</string>
     <string name="title_authenticate">Autenticação necessária</string>
@@ -270,8 +265,6 @@
         Note que o conteúdo é criado por aplicações de terceiros e podem ser indesejadas.</string>
     <string name="button_download_content_on">Activar</string>
     <string name="button_download_content_off">Desactivar</string>
-    <string name="button_mosaik_enabled">Plugins Mosaik activados</string>
-    <string name="button_mosaik_disabled">Plugins Mosaik desactivados</string>
 
     <!-- Mosaik view -->
     <string name="title_mosaik">Applicações</string>

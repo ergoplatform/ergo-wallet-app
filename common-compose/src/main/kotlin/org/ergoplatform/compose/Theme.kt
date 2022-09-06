@@ -1,17 +1,22 @@
 package org.ergoplatform.compose.settings
 
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.mosaik.MosaikStyleConfig
 
 val defaultPadding = 16.dp
 val defaultMaxWidth = 600.dp
 val bigIconSize = 58.dp
+val mediumIconSize = 36.dp
 val smallIconSize = 24.dp
 val minIconSize = 18.dp
 
@@ -67,4 +72,17 @@ fun AppCard(modifier: Modifier, content: @Composable () -> Unit) {
     ) {
         content()
     }
+}
+
+@Composable
+fun BoxScope.AppProgressIndicator() {
+    AppProgressIndicator(Modifier.align(Alignment.Center))
+}
+
+@Composable
+fun AppProgressIndicator(modifier: Modifier = Modifier, size: Dp = smallIconSize * 2f) {
+    CircularProgressIndicator(
+        modifier.size(size),
+        color = MosaikStyleConfig.primaryLabelColor,
+    )
 }

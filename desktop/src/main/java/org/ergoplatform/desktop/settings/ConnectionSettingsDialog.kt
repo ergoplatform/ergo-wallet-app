@@ -1,9 +1,8 @@
 package org.ergoplatform.desktop.settings
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -15,15 +14,22 @@ import androidx.compose.ui.Modifier
 import org.ergoplatform.Application
 import org.ergoplatform.compose.settings.ConnectionSettingsLayout
 import org.ergoplatform.desktop.ui.AppDialog
+import org.ergoplatform.desktop.ui.AppScrollbar
 import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.uilogic.STRING_BUTTON_CONNECTION_SETTINGS
+import org.ergoplatform.uilogic.settings.SettingsUiLogic
 
 @Composable
-fun ConnectionSettingsDialog(onDismissRequest: () -> Unit) {
+fun ConnectionSettingsDialog(
+    uiLogic: SettingsUiLogic,
+    onStartNodeDetection: () -> Unit,
+    onDismissRequest: () -> Unit
+) {
     AppDialog({}) {
-        Column(Modifier.fillMaxWidth().padding(defaultPadding)) {
+        val scrollState = rememberScrollState()
+        Column(Modifier.fillMaxWidth().padding(defaultPadding).verticalScroll(scrollState)) {
             Row(Modifier.padding(bottom = defaultPadding).fillMaxWidth()) {
                 Text(
                     Application.texts.getString(STRING_BUTTON_CONNECTION_SETTINGS),
@@ -35,7 +41,13 @@ fun ConnectionSettingsDialog(onDismissRequest: () -> Unit) {
                 }
             }
 
-            ConnectionSettingsLayout(Application.prefs, Application.texts, onDismissRequest)
+            ConnectionSettingsLayout(
+                uiLogic,
+                onStartNodeDetection,
+                Application.prefs,
+                Application.texts,
+                onDismissRequest
+            )
         }
     }
 }

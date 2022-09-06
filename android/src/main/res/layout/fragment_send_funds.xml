@@ -332,6 +332,27 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/label_tx_id" />
 
+                    <TextView
+                        android:id="@+id/tv_rate"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:paddingTop="@dimen/margin_and_half"
+                        android:text="@string/desc_please_rate"
+                        app:layout_constraintTop_toBottomOf="@id/button_dismiss" />
+
+                    <Button
+                        android:id="@+id/button_rate"
+                        style="@style/Widget.App.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="120dp"
+                        android:text="@string/button_please_rate"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_rate" />
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 

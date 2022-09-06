@@ -48,12 +48,6 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             handleIntent(navController)
         }
-
-        setMosaikButtonVisibility(navView)
-    }
-
-    fun setMosaikButtonVisibility(navView: BottomNavigationView = findViewById(R.id.nav_view)) {
-        navView.menu.findItem(R.id.navigation_mosaik).isVisible = Preferences(this).mosaikEnabled
     }
 
     fun scanQrCode() {

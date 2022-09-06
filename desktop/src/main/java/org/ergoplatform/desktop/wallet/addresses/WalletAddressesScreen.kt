@@ -9,6 +9,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -47,11 +48,13 @@ fun WalletAddressesScreen(
         ) {
             items(addressList.size + 1) { index ->
                 if (index < addressList.size)
-                    WalletAddressCard(
-                        addressList[index],
-                        wallet,
-                        onOpenDetails,
-                    )
+                    key(addressList[index]) {
+                        WalletAddressCard(
+                            addressList[index],
+                            wallet,
+                            onOpenDetails,
+                        )
+                    }
                 else
                     AddAddressCard(onDeriveAddresses = onDeriveAddresses)
             }

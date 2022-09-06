@@ -1,32 +1,35 @@
 package org.ergoplatform.compose.settings
 
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixHigh
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.getDefaultExplorerApiUrl
+import org.ergoplatform.mosaik.MosaikStyleConfig
+import org.ergoplatform.mosaik.foregroundColor
+import org.ergoplatform.mosaik.labelStyle
+import org.ergoplatform.mosaik.model.ui.ForegroundColor
+import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.settings.SettingsUiLogic
 
 @Composable
 fun ColumnScope.ConnectionSettingsLayout(
+    uiLogic: SettingsUiLogic,
+    onStartNodeDetection: () -> Unit,
     preferences: PreferencesProvider,
     stringProvider: StringProvider,
     onDismissRequest: () -> Unit
@@ -54,13 +57,49 @@ fun ColumnScope.ConnectionSettingsLayout(
 
     ConnectionTextField(explorerApiUrl, stringProvider, STRING_LABEL_EXPLORER_API_URL)
 
-    ConnectionTextField(nodeApiUrl, stringProvider, STRING_LABEL_NODE_URL, trailingIcon = {
-        IconButton(onClick = {
-            preferences.knownNodesList.randomOrNull()?.let { nodeApiUrl.value = TextFieldValue(it) }
-        }) {
-            Icon(Icons.Default.AutoFixHigh, null)
+    val checkNodesState = uiLogic.checkNodesState.collectAsState()
+    val showList = remember { mutableStateOf(checkNodesState.value != SettingsUiLogic.CheckNodesState.Waiting) }
+
+    if (checkNodesState.value == SettingsUiLogic.CheckNodesState.Waiting) {
+
+        ConnectionTextField(nodeApiUrl, stringProvider, STRING_LABEL_NODE_URL, trailingIcon = {
+            IconButton(onClick = {
+                onStartNodeDetection()
+                showList.value = true
+            }) {
+                Icon(Icons.Default.AutoFixHigh, null)
+            }
+        })
+
+        if (uiLogic.lastNodeList.isNotEmpty() && showList.value) {
+
+            Column(
+                Modifier.align(Alignment.CenterHorizontally)
+                    .padding(horizontal = defaultPadding * 2)
+                    .padding(bottom = defaultPadding)
+            ) {
+                Text(remember { stringProvider.getString(STRING_LABEL_NODE_ALTERNATIVES) })
+
+                uiLogic.lastNodeList.forEach { nodeInfo ->
+                    NodeInfoEntry(onChooseNode = {
+                        nodeApiUrl.value = TextFieldValue(nodeInfo.nodeUrl)
+                        showList.value = false
+                    }, nodeInfo, stringProvider)
+                }
+            }
+
+        } else if (showList.value) {
+            Row(Modifier.padding(bottom = defaultPadding).padding(horizontal = defaultPadding)) {
+
+                Icon(Icons.Default.Error, null, tint = MosaikStyleConfig.primaryLabelColor)
+
+                Text(remember { stringProvider.getString(STRING_LABEL_NODE_NONE_FOUND) }, Modifier.padding(start = defaultPadding / 2))
+
+            }
         }
-    })
+    } else {
+        CheckNodeStateView(checkNodesState, stringProvider)
+    }
 
     ConnectionTextField(tokenVerificationUrl, stringProvider, STRING_LABEL_TOKEN_VERIFICATION_URL)
 
@@ -91,6 +130,70 @@ fun ColumnScope.ConnectionSettingsLayout(
             colors = primaryButtonColors(),
         ) {
             Text(remember { stringProvider.getString(STRING_BUTTON_APPLY) })
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.CheckNodeStateView(
+    checkNodesState: State<SettingsUiLogic.CheckNodesState>,
+    stringProvider: StringProvider
+) {
+    Row(
+        Modifier.padding(horizontal = defaultPadding).padding(bottom = defaultPadding)
+            .align(Alignment.CenterHorizontally).heightIn(min = bigIconSize)
+    ) {
+        AppProgressIndicator(
+            Modifier.align(Alignment.CenterVertically).padding(end = defaultPadding / 2),
+            smallIconSize
+        )
+        when (val checkNodeCurrentState = checkNodesState.value) {
+            SettingsUiLogic.CheckNodesState.FetchingNodes ->
+                Text(
+                    remember { stringProvider.getString(STRING_LABEL_FETCHING_NODE_LIST) },
+                    Modifier.align(Alignment.CenterVertically),
+                    style = labelStyle(LabelStyle.BODY1LINK),
+                    color = foregroundColor(ForegroundColor.SECONDARY)
+                )
+            is SettingsUiLogic.CheckNodesState.TestingNode ->
+                Text(
+                    remember(checkNodeCurrentState.nodeUrl) {
+                        stringProvider.getString(
+                            STRING_LABEL_CHECKING_NODE,
+                            checkNodeCurrentState.nodeUrl
+                        )
+                    },
+                    Modifier.align(Alignment.CenterVertically),
+                    style = labelStyle(LabelStyle.BODY1),
+                    color = foregroundColor(ForegroundColor.SECONDARY)
+                )
+            SettingsUiLogic.CheckNodesState.Waiting -> {}
+        }
+    }
+}
+
+@Composable
+private fun NodeInfoEntry(
+    onChooseNode: () -> Unit,
+    nodeInfo: SettingsUiLogic.NodeInfo,
+    stringProvider: StringProvider
+) {
+    Surface(
+        Modifier.padding(vertical = defaultPadding / 4).fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(1.dp, MosaikStyleConfig.secondaryLabelColor)
+    ) {
+        Column(Modifier.clickable { onChooseNode() }.padding(defaultPadding / 2)) {
+            Text(nodeInfo.nodeUrl, style = labelStyle(LabelStyle.BODY1))
+            Text(
+                stringProvider.getString(
+                    STRING_LABEL_NODE_INFO,
+                    nodeInfo.blockHeight,
+                    nodeInfo.responseTime
+                ),
+                style = labelStyle(LabelStyle.BODY2),
+                color = foregroundColor(ForegroundColor.SECONDARY),
+            )
         }
     }
 }

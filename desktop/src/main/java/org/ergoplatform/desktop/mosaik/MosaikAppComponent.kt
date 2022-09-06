@@ -13,7 +13,9 @@ import com.arkivanov.decompose.router.push
 import com.arkivanov.essenty.lifecycle.doOnResume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
+import org.ergoplatform.compose.tokens.getAppMosaikTokenLabelBuilder
 import org.ergoplatform.desktop.appVersionString
 import org.ergoplatform.desktop.ui.copyToClipboard
 import org.ergoplatform.desktop.ui.getQrCodeImageBitmap
@@ -22,12 +24,14 @@ import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressesListDialog
-import org.ergoplatform.mosaik.*
+import org.ergoplatform.mosaik.AppMosaikRuntime
+import org.ergoplatform.mosaik.MosaikComposeConfig
+import org.ergoplatform.mosaik.MosaikDialog
+import org.ergoplatform.mosaik.MosaikGuidManager
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoAuthAction
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
-import org.ergoplatform.mosaik.model.actions.TokenInformationAction
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.transactions.isErgoPaySigningRequest
@@ -98,7 +102,11 @@ class MosaikAppComponent(
                 }
 
                 router.push(
-                    ScreenConfig.ErgoPay(action.url, null, null, onCompleted = runOnEpComplete ?: {})
+                    ScreenConfig.ErgoPay(
+                        action.url,
+                        null,
+                        null,
+                        onCompleted = runOnEpComplete ?: {})
                 )
             } else {
                 raiseError(IllegalArgumentException("ErgoPayAction without actual signing request: ${action.url}"))
@@ -155,7 +163,6 @@ class MosaikAppComponent(
         mosaikRuntime.stringProvider = Application.texts
         mosaikRuntime.preferencesProvider = Application.prefs
 
-        MosaikLogger.logger = MosaikLogger.DefaultLogger
         MosaikComposeConfig.apply {
             convertByteArrayToImageBitmap =
                 { imageBytes -> loadImageBitmap(imageBytes.inputStream()) }
@@ -176,6 +183,12 @@ class MosaikAppComponent(
             DropDownItem = { onClick, content ->
                 DropdownMenuItem(onClick = onClick, content = content)
             }
+
+            TokenLabel = getAppMosaikTokenLabelBuilder(
+                tokenDb = { Application.database.tokenDbProvider },
+                apiService = { ApiServiceManager.getOrInit(Application.prefs) },
+                stringResolver = { Application.texts }
+            )
         }
         mosaikRuntime.loadUrlEnteredByUser(appUrl)
     }

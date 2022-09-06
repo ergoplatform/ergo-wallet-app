@@ -160,6 +160,7 @@ class WalletListComponent(
             onSendClicked = { wallet -> navigateToSendScreen(wallet) },
             onReceiveClicked = { router.push(ScreenConfig.ReceiveToWallet(it)) },
             onSettingsClicked = { router.push(ScreenConfig.WalletConfiguration(it)) },
+            onDetailsClicked = { router.push(ScreenConfig.WalletDetails(it)) },
         )
 
         chooseWalletDialogState.value?.let { paymentRequestString ->

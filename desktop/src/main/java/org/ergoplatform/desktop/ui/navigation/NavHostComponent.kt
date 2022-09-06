@@ -21,10 +21,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.mosaik.MosaikAppComponent
 import org.ergoplatform.desktop.mosaik.MosaikOverviewComponent
 import org.ergoplatform.desktop.settings.SettingsComponent
-import org.ergoplatform.desktop.transactions.ColdWalletSigningComponent
-import org.ergoplatform.desktop.transactions.ErgoPaySigningComponent
-import org.ergoplatform.desktop.transactions.ReceiveToWalletComponent
-import org.ergoplatform.desktop.transactions.SendFundsComponent
+import org.ergoplatform.desktop.transactions.*
 import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.AppLockScreen
 import org.ergoplatform.desktop.ui.QrScannerComponent
@@ -67,6 +64,7 @@ class NavHostComponent(
     fun showSnackbar(message: String) {
         snackbarText.value = message
     }
+
     private val snackbarText = MutableStateFlow<String?>(null)
 
     val lockScreen = mutableStateOf(false)
@@ -110,6 +108,17 @@ class NavHostComponent(
                     screenConfig.fromRestore
                 )
 
+            is ScreenConfig.WalletDetails ->
+                WalletDetailsComponent(componentContext, this, screenConfig.walletConfig)
+
+            is ScreenConfig.AddressTransactions ->
+                AddressTransactionsComponent(
+                    componentContext,
+                    this,
+                    screenConfig.walletConfig,
+                    screenConfig.addressIdx
+                )
+
             is ScreenConfig.WalletConfiguration ->
                 WalletConfigComponent(componentContext, this, screenConfig.walletConfig)
 
@@ -137,11 +146,12 @@ class NavHostComponent(
             is ScreenConfig.SendFunds -> SendFundsComponent(
                 componentContext, this,
                 screenConfig.walletConfig,
+                screenConfig.derivationIndex ?: -1,
                 paymentRequest = screenConfig.paymentRequest,
             )
 
             is ScreenConfig.ReceiveToWallet -> ReceiveToWalletComponent(
-                componentContext, this, screenConfig.walletConfig
+                componentContext, this, screenConfig.walletConfig, screenConfig.addressIdx
             )
 
             is ScreenConfig.QrCodeScanner -> QrScannerComponent(

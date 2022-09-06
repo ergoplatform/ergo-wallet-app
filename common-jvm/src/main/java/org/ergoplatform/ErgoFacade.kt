@@ -9,17 +9,12 @@ import org.ergoplatform.restapi.client.PeersApi
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
-import org.ergoplatform.uilogic.STRING_ERROR_BALANCE_ERG
-import org.ergoplatform.uilogic.STRING_ERROR_CHANGEBOX_AMOUNT
-import org.ergoplatform.uilogic.STRING_ERROR_PROVER_CANT_SIGN
-import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
 import org.ergoplatform.wallet.secrets.ExtendedPublicKey
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import scala.collection.JavaConversions
 import sigmastate.interpreter.HintsBag
 import sigmastate.serialization.`SigmaSerializer$`
@@ -34,6 +29,7 @@ const val URL_FORGOT_PASSWORD_HELP =
 
 const val ERG_BASE_COST = 0
 const val ERG_MAX_BLOCK_COST = 1000000
+private const val MAX_NUM_INPUT_BOXES = 100
 
 var isErgoMainNet: Boolean = true
 
@@ -128,16 +124,15 @@ fun sendErgoTx(
         val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
             val prover = buildProver(ctx, signingSecrets, derivedKeyIndices)
+            val unsignedTx = buildUnsignedTx(
+                BoxOperations.createForEip3Prover(prover, ctx),
+                recipient,
+                amountToSend,
+                feeAmount,
+                tokensToSend,
+                message
+            )
 
-            val contract: ErgoContract = recipient.toErgoContract()
-            val unsignedTx =
-                BoxOperations.createForEip3Prover(prover, ctx).withAmountToSpend(amountToSend)
-                    .withFeeAmount(feeAmount)
-                    .withMessage(message)
-                    .withInputBoxesLoader(
-                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
-                    )
-                    .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
             val signed = prover.sign(unsignedTx)
             ctx.sendTransaction(signed)
 
@@ -147,8 +142,30 @@ fun sendErgoTx(
         }
     } catch (t: Throwable) {
         LogUtils.logDebug("sendErgoTx", "Error caught", t)
-        return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
+        return SendTransactionResult(
+            false,
+            errorMsg = getErrorMessage(t, texts, amountToSend)
+        )
     }
+}
+
+private fun buildUnsignedTx(
+    boxOperations: BoxOperations,
+    recipient: Address,
+    amountToSend: Long,
+    feeAmount: Long,
+    tokensToSend: List<ErgoToken>,
+    message: String?
+): UnsignedTransaction {
+    val contract: ErgoContract = recipient.toErgoContract()
+    return boxOperations.withAmountToSpend(amountToSend)
+        .withFeeAmount(feeAmount)
+        .withMessage(message)
+        .withInputBoxesLoader(
+            ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
+        )
+        .withMaxInputBoxesToSelect(MAX_NUM_INPUT_BOXES)
+        .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
 }
 
 fun buildPromptSigningResultFromErgoPayRequest(
@@ -193,15 +210,14 @@ fun prepareSerializedErgoTx(
     try {
         val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
-            val contract: ErgoContract = recipient.toErgoContract()
-            val unsigned =
-                BoxOperations.createForSenders(senderAddresses, ctx).withAmountToSpend(amountToSend)
-                    .withFeeAmount(feeAmount)
-                    .withMessage(message)
-                    .withInputBoxesLoader(
-                        ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
-                    )
-                    .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
+            val unsigned = buildUnsignedTx(
+                BoxOperations.createForSenders(senderAddresses, ctx),
+                recipient,
+                amountToSend,
+                feeAmount,
+                tokensToSend,
+                message
+            )
 
             val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
                 val ergoBox = box.box()
@@ -218,7 +234,10 @@ fun prepareSerializedErgoTx(
         }
     } catch (t: Throwable) {
         LogUtils.logDebug("prepareSerializedErgoTx", "Error caught", t)
-        return PromptSigningResult(false, errorMsg = getErrorMessage(t, texts))
+        return PromptSigningResult(
+            false,
+            errorMsg = getErrorMessage(t, texts, amountToSend)
+        )
     }
 }
 
@@ -296,30 +315,31 @@ private fun getRestErgoClient(prefs: PreferencesProvider): ErgoClient {
         prefs.prefExplorerApiUrl,
         OkHttpSingleton.getInstance().newBuilder()
     )
-    refreshNodeListWhenNeeded(prefs, nodeToConnectTo)
+    refreshNodeListWhenNeeded(prefs)
     return ergoClient
 }
 
-private fun refreshNodeListWhenNeeded(prefs: PreferencesProvider, nodeUrl: String) {
+private fun refreshNodeListWhenNeeded(prefs: PreferencesProvider) {
     if (System.currentTimeMillis() - prefs.lastNodeListRefreshMs > 1000L * 60 * 60 * 24) {
-        val retrofitNode = Retrofit.Builder()
-            .baseUrl(nodeUrl)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(OkHttpSingleton.getInstance())
-            .build()
-        val peersApi = retrofitNode.create(PeersApi::class.java)
+        refreshNodeList(prefs)
+    }
+}
 
-        try {
-            val peerUrlList = peersApi.connectedPeers.execute().body()!!.map { it.restApiUrl }
-            val openPeers = peerUrlList.filter { !it.isNullOrBlank() && it != nodeUrl }.distinct()
-            val peersStringList = openPeers.sortedBy { if (it.startsWith("https://")) 0 else 1 }.take(10)
+fun refreshNodeList(prefs: PreferencesProvider) {
+    val nodeUrl = prefs.prefNodeUrl
+    val peersApi = ApiServiceManager.buildRetrofitForNode(PeersApi::class.java, nodeUrl)
 
-            LogUtils.logDebug("PeersApi", "Found alternative nodes to connect to: $peersStringList")
-            if (peersStringList.isNotEmpty())
-                prefs.knownNodesList = peersStringList
-        } catch (t: Throwable) {
-            LogUtils.logDebug("PeersApi", "Could not fetch connected peers of $nodeUrl")
-        }
+    try {
+        val peerUrlList = peersApi.connectedPeers.execute().body()!!.map { it.restApiUrl }
+        val openPeers = peerUrlList.filter { !it.isNullOrBlank() && it != nodeUrl }.distinct()
+        val peersStringList =
+            openPeers.sortedBy { if (it.startsWith("https://")) 0 else 1 }.take(10)
+
+        LogUtils.logDebug("PeersApi", "Found alternative nodes to connect to: $peersStringList")
+        if (peersStringList.isNotEmpty())
+            prefs.knownNodesList = peersStringList
+    } catch (t: Throwable) {
+        LogUtils.logDebug("PeersApi", "Could not fetch connected peers of $nodeUrl")
     }
 }
 
@@ -349,7 +369,7 @@ fun sendSignedErgoTx(
     }
 }
 
-fun getErrorMessage(t: Throwable, texts: StringProvider): String {
+fun getErrorMessage(t: Throwable, texts: StringProvider, amountToSend: Long? = null): String {
     return if (t is InputBoxesSelectionException.NotEnoughErgsException) {
         texts.getString(
             STRING_ERROR_BALANCE_ERG,
@@ -359,6 +379,14 @@ fun getErrorMessage(t: Throwable, texts: StringProvider): String {
         texts.getString(
             STRING_ERROR_CHANGEBOX_AMOUNT
         )
+    } else if (t is InputBoxesSelectionException.InputBoxLimitExceededException) {
+        if (t.remainingTokens.isEmpty() && amountToSend != null)
+            texts.getString(
+                STRING_ERROR_TOO_MANY_INPUT_BOXES_LESS_ERG,
+                ErgoAmount(amountToSend - t.remainingAmount).toStringTrimTrailingZeros()
+            )
+        else
+            texts.getString(STRING_ERROR_TOO_MANY_INPUT_BOXES_GENERIC)
     } else if (t is AssertionError && t.message?.contains("Tree root should be real") == true) {
         // ProverInterpreter.scala
         texts.getString(STRING_ERROR_PROVER_CANT_SIGN)

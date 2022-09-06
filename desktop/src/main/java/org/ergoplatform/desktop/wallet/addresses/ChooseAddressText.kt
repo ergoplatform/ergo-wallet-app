@@ -27,6 +27,7 @@ fun ChooseAddressButton(
     wallet: Wallet? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    style: LabelStyle = LabelStyle.BODY1BOLD,
 ) {
     Row(modifier.clickable(onClick = onClick)) {
         Text(
@@ -37,7 +38,7 @@ fun ChooseAddressButton(
                         wallet?.getNumOfAddresses() ?: 0
                     )
             },
-            style = labelStyle(LabelStyle.BODY1BOLD),
+            style = labelStyle(style),
             color = uiErgoColor,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

@@ -233,6 +233,10 @@ abstract class WalletDetailsUiLogic {
         }
     }
 
+    /**
+     * returns true if the two lists given are not the same. use to determine if a rebinding of
+     * transaction lists needs to be done
+     */
     fun hasChangedNewTxList(
         newTransactionList: List<AddressTransactionWithTokens>,
         otherTxList: List<AddressTransactionWithTokens>?

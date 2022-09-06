@@ -478,9 +478,20 @@ class SendFundsViewController(
                 doneButtonContainer.addSubview(doneButton)
                 doneButton.centerHorizontal().topToSuperview().bottomToSuperview().fixedWidth(150.0)
 
-                val txDoneStack = UIStackView(NSArray(image, descLabel, txLabel, doneButtonContainer))
+                val rateLabel = Body1Label().apply {
+                    text = texts.get(STRING_DESC_PLEASE_RATE)
+                    textAlignment = NSTextAlignment.Center
+                }
+                val rateButton = TextButton(texts.get(STRING_BUTTON_PLEASE_RATE))
+                rateButton.addOnTouchUpInsideListener { _, _ ->
+                    openStorePage()
+                }
+
+                val txDoneStack =
+                    UIStackView(NSArray(image, descLabel, txLabel, doneButtonContainer, rateLabel, rateButton))
                 txDoneStack.axis = UILayoutConstraintAxis.Vertical
                 txDoneStack.spacing = DEFAULT_MARGIN * 3
+                txDoneStack.setCustomSpacing(0.0, rateLabel)
 
                 txDoneCardView.contentView.addSubview(txDoneStack)
                 txDoneStack.edgesToSuperview(inset = DEFAULT_MARGIN * 2)

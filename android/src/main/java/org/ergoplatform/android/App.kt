@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.NetworkType
 import org.ergoplatform.isErgoMainNet
-import org.ergoplatform.mosaik.MosaikLogger
 import org.ergoplatform.utils.LogUtils
 
 class App : Application() {
@@ -26,8 +25,5 @@ class App : Application() {
 
         LogUtils.stackTraceLogger = { lastStackTrace = it }
         LogUtils.logDebug = BuildConfig.DEBUG
-        MosaikLogger.logger = { severity, msg, throwable ->
-            LogUtils.logDebug("Mosaik", "$severity: $msg", throwable)
-        }
     }
 }

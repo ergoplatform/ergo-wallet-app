@@ -138,11 +138,6 @@
     <string name="error_password_empty">请输入有效密码</string>
     <string name="error_password_wrong">密码错误</string>
     <string name="desc_transaction_send">交易已成功发送并等待确认。 交易ID：</string>
-    <string name="desc_prompt_signing">您的交易已准备就绪。扫描此二维码
-       以便您的签名设备继续。\n\n如果存在，请扫描已签名交易的二维码以
-        将它发送到网络。</string>
-    <string name="desc_prompt_signing_multiple">您的交易已准备就绪。扫描这些二维码
-       以便您的签名设备继续。</string>
     <string name="button_scan_signed_tx">扫描已签名交易</string>
     <string name="button_next">下一步</string>
     <string name="title_authenticate">需要验证</string>

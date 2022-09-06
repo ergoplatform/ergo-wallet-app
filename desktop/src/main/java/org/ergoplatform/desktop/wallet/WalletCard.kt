@@ -41,6 +41,7 @@ fun WalletCard(
     fiatValue: Float,
     onSendClicked: (WalletConfig) -> Unit,
     onReceiveClicked: (WalletConfig) -> Unit,
+    onDetailsClicked: (WalletConfig) -> Unit,
     onSettingsClicked: (WalletConfig) -> Unit,
 ) {
     AppCard(
@@ -82,9 +83,8 @@ fun WalletCard(
                         val unconfirmed = wallet.getUnconfirmedBalanceForAllAddresses() != 0L
 
                         Text(
-                            text = Application.texts.getString(
-                                STRING_LABEL_ERG_AMOUNT, balanceErgoAmount.toStringRoundToDecimals()
-                            ) + (if (unconfirmed) "*" else ""),
+                            text = balanceErgoAmount.toComposableText()
+                                    + (if (unconfirmed) "*" else ""),
                             style = labelStyle(LabelStyle.HEADLINE1)
                         )
 
@@ -158,7 +158,7 @@ fun WalletCard(
                     }
                 }
                 OutlinedButton(
-                    onClick = { },
+                    onClick = { onDetailsClicked(wallet.walletConfig) },
                     Modifier.fillMaxWidth().padding(top = defaultPadding),
                     border = BorderStroke(
                         ButtonDefaults.OutlinedBorderSize, MosaikStyleConfig.secondaryButtonColor

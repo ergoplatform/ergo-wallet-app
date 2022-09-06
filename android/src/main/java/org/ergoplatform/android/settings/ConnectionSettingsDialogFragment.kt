@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
+import androidx.core.widget.NestedScrollView
+import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -27,12 +29,15 @@ import org.ergoplatform.mosaik.model.ui.text.LabelStyle
  */
 class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
 
+    private val viewModel: SettingsViewModel by navGraphViewModels(R.id.navigation_settings)
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        return ComposeView(requireContext()).apply {
+        val context = requireContext()
+        val nestedScroll = NestedScrollView(context)
+        nestedScroll.addView(ComposeView(context).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 AppComposeTheme {
@@ -45,13 +50,19 @@ class ConnectionSettingsDialogFragment : BottomSheetDialogFragment() {
                         )
 
                         ConnectionSettingsLayout(
-                            preferences = Preferences(requireContext()),
-                            stringProvider = AndroidStringProvider(requireContext()),
+                            viewModel.uiLogic,
+                            onStartNodeDetection = {
+                                viewModel.startNodeDetection(Preferences(context))
+                            },
+                            preferences = Preferences(context),
+                            stringProvider = AndroidStringProvider(context),
                             onDismissRequest = { dismiss() }
                         )
                     }
                 }
             }
-        }
+        })
+
+        return nestedScroll
     }
 }

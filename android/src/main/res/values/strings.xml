@@ -203,10 +203,10 @@
     <string name="error_password_wrong">Wrong password</string>
     <string name="desc_transaction_send">Transaction was sent successfully and awaits confirmation. Transaction ID:</string>
     <string name="desc_prompt_signing">Your transaction was prepared. Scan this QR code
-       with your signing device to proceed.\n\nWhen present, scan the signed transaction QR code to
-        sent it to the network.</string>
+       with your signing device to proceed. If you experience problems scanning, lower the resolution with the icon at the top.\n\n
+        When present, scan the signed transaction QR code to sent it to the network.</string>
     <string name="desc_prompt_signing_multiple">Your transaction was prepared. Scan these QR codes
-       with your signing device to proceed.</string>
+       with your signing device to proceed. If you experience problems scanning, lower the resolution with the icon at the top.</string>
     <string name="button_scan_signed_tx">Scan signed tx</string>
     <string name="button_next">Next</string>
     <string name="title_authenticate">Authentication required</string>
@@ -223,6 +223,12 @@
     <string name="error_request_token_not_found">Could not add token \'%1$s\'</string>
     <string name="error_request_token_amount">Could not set requested amount for token \'%1$s\'</string>
     <string name="error_request_token_but_no_erg">Tokens requested, but no ERG amount. A default amount will be sent.</string>
+    <string name="error_too_many_input_boxes_less_erg">The transaction requested exceeds the input boxes limit. Please reduce the
+        amount to %1$s ERG or less and try again.</string>
+    <string name="error_too_many_input_boxes_generic">The transaction requested exceeds the input boxes limit.
+        Please reduce the amounts to send and try again.</string>
+    <string name="desc_please_rate">If you like this app, please leave a rating on the store for others to see.</string>
+    <string name="button_please_rate">Rate on store</string>
 
     <!-- Send funds fee chooser -->
     <string name="label_fee_custom">Fee amount</string>
@@ -291,17 +297,15 @@
         Please be aware that this content is created by third parties and might be unwanted.</string>
     <string name="button_download_content_on">Activate</string>
     <string name="button_download_content_off">Deactivate</string>
-    <string name="button_mosaik_enabled">Mosaik plugins enabled</string>
-    <string name="button_mosaik_disabled">Mosaik plugins disabled</string>
 
     <!-- Mosaik view -->
     <string name="title_mosaik">dApps</string>
     <string name="hint_app_url">App URL</string>
     <string name="desc_mosaik">You can use and add dApps that support wallet integration here.
         Decentralized applications (dApps) are third-party plug-ins that connect your wallet to smart
-        contracts. They may collect personal information. Before adding a dApp, please confirm the
-        App URL, and review its terms of use and privacy policies. dApps are not affiliated with
-        Ergo Wallet. Use at your discretion.</string>
+        contracts. They may collect the information you give on their screens. Before adding a dApp,
+        please confirm the app URL, and review its terms of use and privacy policies. dApps are not
+        affiliated with Ergo Wallet. Use at your discretion.</string>
     <string name="error_loading_mosaik_app">Could not load app.\nReason:\n%1$s</string>
     <string name="title_last_visited">Last visited</string>
     <string name="title_favorites">Favorites</string>
@@ -334,6 +338,11 @@
     <string name="button_reset_defaults">Defaults</string>
     <string name="label_explorer_api_url">Explorer API URL</string>
     <string name="label_node_url">Node URL</string>
+    <string name="label_fetching_node_list">Fetching list of available nodes…</string>
+    <string name="label_checking_node">Checking %1$s…</string>
+    <string name="label_node_alternatives">Alternative nodes:</string>
+    <string name="label_node_info">Block %1$s, response time %2$s ms</string>
+    <string name="label_node_none_found">No node found. Please check your connection.</string>
     <string name="label_token_verification_url">Token verification service URL</string>
     <string name="button_show_debug_info">Show debug information</string>
     <string name="label_ipfs_http_gateway">IPFS HTTP gateway</string>

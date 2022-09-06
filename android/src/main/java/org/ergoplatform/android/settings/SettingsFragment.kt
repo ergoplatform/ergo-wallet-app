@@ -9,13 +9,13 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
 import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSettingsBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.enableLinks
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.showDialogWithCopyOption
-import org.ergoplatform.uilogic.settings.SettingsUiLogic
 
 class SettingsFragment : Fragment() {
 
@@ -24,7 +24,7 @@ class SettingsFragment : Fragment() {
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
-    private val uiLogic = SettingsUiLogic()
+    private val viewModel: SettingsViewModel by navGraphViewModels(R.id.navigation_settings)
 
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
@@ -78,27 +78,12 @@ class SettingsFragment : Fragment() {
             preferences.downloadNftContent = !preferences.downloadNftContent
             setButtonDownloadContentText()
         }
-
-        setButtonMosaikEnabledText()
-        binding.buttonMosaikEnabled.setOnClickListener {
-            val preferences = Preferences(requireContext())
-            preferences.mosaikEnabled = !preferences.mosaikEnabled
-            setButtonMosaikEnabledText()
-            (requireActivity() as? MainActivity)?.setMosaikButtonVisibility()
-        }
     }
 
     private fun setButtonDownloadContentText() {
         binding.buttonDownloadContent.setText(
             if (Preferences(requireContext()).downloadNftContent) R.string.button_download_content_off
             else R.string.button_download_content_on
-        )
-    }
-
-    private fun setButtonMosaikEnabledText() {
-        binding.buttonMosaikEnabled.setText(
-            if (Preferences(requireContext()).mosaikEnabled) R.string.button_mosaik_enabled
-            else R.string.button_mosaik_disabled
         )
     }
 
@@ -129,7 +114,7 @@ class SettingsFragment : Fragment() {
     }
 
     fun showDisplayCurrency() {
-        binding.displayCurrency.text = uiLogic.getFiatCurrencyButtonText(
+        binding.displayCurrency.text = viewModel.uiLogic.getFiatCurrencyButtonText(
             Preferences(requireContext()), AndroidStringProvider(requireContext())
         )
     }

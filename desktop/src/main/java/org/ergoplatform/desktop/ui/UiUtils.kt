@@ -58,10 +58,11 @@ fun showSensitiveDataCopyDialog(navHost: NavHostComponent, dataToCopy: String) {
 fun ergoLogo() = painterResource("symbol_bold__1080px__black.svg")
 
 @Composable
-fun ErgoAmount.toComposableText() = remember {
+fun ErgoAmount.toComposableText(trimTrailingZeros: Boolean = false) = remember(nanoErgs) {
     Application.texts.getString(
         STRING_LABEL_ERG_AMOUNT,
-        toStringRoundToDecimals()
+        if (trimTrailingZeros) toStringTrimTrailingZeros()
+        else toStringRoundToDecimals()
     )
 }
 

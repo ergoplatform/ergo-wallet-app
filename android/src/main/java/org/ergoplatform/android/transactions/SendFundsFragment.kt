@@ -131,6 +131,9 @@ class SendFundsFragment : SubmitTransactionFragment() {
                 findNavController().navigate(R.id.navigation_wallet)
             }
         }
+        binding.buttonRate.setOnClickListener {
+            openStorePage(requireContext())
+        }
 
         binding.buttonSend.setOnClickListener {
             startPayment()

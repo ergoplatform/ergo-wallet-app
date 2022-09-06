@@ -24,108 +24,133 @@
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <LinearLayout
-            style="@style/width_match_parent_max_500"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:orientation="vertical">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/desc_empty"
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/mosaik_app_overview"
+                style="@style/width_match_parent_max_500"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/activity_horizontal_margin"
-                android:text="@string/desc_mosaik"
-                android:textAlignment="center" />
+                android:orientation="vertical">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/input_app_url"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/hint_app_url"
-                app:boxBackgroundColor="@color/cardview_background"
-                app:endIconDrawable="@drawable/ic_arrow_forward_24"
-                app:endIconMode="custom">
-
-                <com.google.android.material.textfield.TextInputEditText
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/input_app_url"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:imeOptions="actionGo"
-                    android:inputType="textUri"
-                    android:maxLines="1" />
+                    android:hint="@string/hint_app_url"
+                    app:boxBackgroundColor="@color/cardview_background"
+                    app:endIconDrawable="@drawable/ic_arrow_forward_24"
+                    app:endIconMode="custom">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionGo"
+                        android:inputType="textUri"
+                        android:maxLines="1" />
 
-            <TextView
-                android:id="@+id/title_favorites"
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_and_half"
-                android:text="@string/title_favorites"
-                android:textColor="@color/primary"
-                android:textStyle="bold" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
-                android:id="@+id/desc_favorites_empty"
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/half_horizontal_margin"
-                android:text="@string/desc_none" />
+                <TextView
+                    android:id="@+id/title_favorites"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_and_half"
+                    android:text="@string/title_favorites"
+                    android:textColor="@color/primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/desc_favorites_empty"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/half_horizontal_margin"
+                    android:text="@string/desc_none" />
+
+                <LinearLayout
+                    android:id="@+id/layout_favorites"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:id="@+id/title_last_visited"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_and_half"
+                    android:text="@string/title_last_visited"
+                    android:textColor="@color/primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/desc_last_visited_empty"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/half_horizontal_margin"
+                    android:text="@string/desc_none" />
+
+                <LinearLayout
+                    android:id="@+id/layout_last_visited"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:id="@+id/title_suggestions"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_and_half"
+                    android:text="@string/title_suggestions"
+                    android:textColor="@color/primary"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <LinearLayout
+                    android:id="@+id/layout_suggestions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+            </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/layout_favorites"
-                android:layout_width="match_parent"
+                android:id="@+id/mosaik_accept_terms"
+                style="@style/width_match_parent_max_500"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
 
-            <TextView
-                android:id="@+id/title_last_visited"
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_and_half"
-                android:text="@string/title_last_visited"
-                android:textColor="@color/primary"
-                android:textStyle="bold" />
+                <TextView
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/activity_horizontal_margin"
+                    android:text="@string/desc_mosaik"
+                    android:textAlignment="center" />
 
-            <TextView
-                android:id="@+id/desc_last_visited_empty"
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/half_horizontal_margin"
-                android:text="@string/desc_none" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_accept"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:minWidth="120dp"
+                    android:text="@string/info_purpose_message_accept" />
 
-            <LinearLayout
-                android:id="@+id/layout_last_visited"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/title_suggestions"
-                style="@style/TextAppearance.App.Body1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_and_half"
-                android:text="@string/title_suggestions"
-                android:textColor="@color/primary"
-                android:textStyle="bold"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
-            <LinearLayout
-                android:id="@+id/layout_suggestions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-
-        </LinearLayout>
+        </FrameLayout>
     </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

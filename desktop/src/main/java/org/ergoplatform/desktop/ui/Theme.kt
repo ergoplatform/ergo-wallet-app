@@ -23,6 +23,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import com.arkivanov.decompose.router.Router
 import com.arkivanov.decompose.router.pop
 import org.ergoplatform.compose.settings.AppCard
+import org.ergoplatform.compose.settings.AppProgressIndicator
 import org.ergoplatform.compose.settings.defaultMaxWidth
 import org.ergoplatform.compose.settings.defaultPadding
 import org.ergoplatform.desktop.ui.navigation.Component
@@ -200,12 +201,4 @@ fun AppLockScreen(locked: Boolean) {
                 }) {
             AppProgressIndicator()
         }
-}
-
-@Composable
-fun BoxScope.AppProgressIndicator() {
-    CircularProgressIndicator(
-        Modifier.size(48.dp).align(Alignment.Center),
-        color = MosaikStyleConfig.primaryLabelColor,
-    )
 }

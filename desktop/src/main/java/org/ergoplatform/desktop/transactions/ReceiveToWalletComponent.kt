@@ -17,6 +17,7 @@ class ReceiveToWalletComponent(
     private val componentContext: ComponentContext,
     navHost: NavHostComponent,
     private val walletConfig: WalletConfig,
+    addressIdx: Int,
 ) : NavClientScreenComponent(navHost), ComponentContext by componentContext {
 
     override val appBarLabel: String
@@ -27,6 +28,8 @@ class ReceiveToWalletComponent(
     init {
         runBlocking { // TODO check if we can do better
             uiLogic.loadWallet(walletConfig.id, Application.database.walletDbProvider)
+            if (addressIdx != uiLogic.derivationIdx)
+                uiLogic.derivationIdx = addressIdx
         }
     }
 
@@ -47,9 +50,9 @@ class ReceiveToWalletComponent(
                 uiLogic.derivationIdx = it?.derivationIndex ?: 0
                 chooseAddressDialogState.value = false
             },
-            onDismiss = {
-                chooseAddressDialogState.value = false
-            })
+                onDismiss = {
+                    chooseAddressDialogState.value = false
+                })
         }
     }
 }

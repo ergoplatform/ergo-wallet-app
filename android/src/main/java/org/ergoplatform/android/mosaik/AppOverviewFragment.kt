@@ -13,6 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.databinding.FragmentAppOverviewBinding
 import org.ergoplatform.android.databinding.FragmentAppOverviewItemBinding
 import org.ergoplatform.android.persistence.AndroidCacheFiles
@@ -66,6 +67,19 @@ class AppOverviewFragment : Fragment() {
                 }
             }
         }
+
+        setTermsAndOverviewVisibility()
+
+        binding.buttonAccept.setOnClickListener {
+            Preferences(requireContext()).mosaikEnabled = true
+            setTermsAndOverviewVisibility()
+        }
+    }
+
+    private fun setTermsAndOverviewVisibility() {
+        val enabled = Preferences(requireContext()).mosaikEnabled
+        binding.mosaikAppOverview.visibility = if (enabled) View.VISIBLE else View.GONE
+        binding.mosaikAcceptTerms.visibility = if (enabled) View.GONE else View.VISIBLE
     }
 
     private fun refreshSuggestions(suggestions: List<MosaikAppSuggestion>) {
@@ -83,8 +97,6 @@ class AppOverviewFragment : Fragment() {
     }
 
     private fun refreshFavorites(favorites: List<MosaikAppEntry>) {
-        if (favorites.isNotEmpty())
-            binding.descEmpty.visibility = View.GONE
         binding.descFavoritesEmpty.visibility =
             if (favorites.isEmpty()) View.VISIBLE else View.GONE
 
