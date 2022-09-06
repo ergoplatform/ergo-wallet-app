@@ -71,9 +71,16 @@ class ViewWithTreeElement(
     fun updateView(
         newTreeElement: TreeElement,
     ) {
-        treeElement = newTreeElement
+        if (newTreeElement.createdAtContentVersion > treeElement.createdAtContentVersion) {
+            treeElement = newTreeElement
 
-        // TODO if the element changed, remove it from parent and readd the new one
+            // TODO if the element changed, remove it from parent and readd the new one
+        }
+
+        // resource bytes might have an update
+        treeElement.getResourceBytes?.let {
+            MosaikUiViewFactory.resourceBytesAvailable(uiView, it)
+        }
 
         updateChildren()
     }
@@ -95,7 +102,9 @@ class ViewWithTreeElement(
             // TODO room for improvement: swap a single element when only one has changed
         }
 
-        children.forEach { it.updateChildren() }
+        children.forEach {
+            it.updateView(it.treeElement)
+        }
     }
 
     fun removeAllChildren() {
