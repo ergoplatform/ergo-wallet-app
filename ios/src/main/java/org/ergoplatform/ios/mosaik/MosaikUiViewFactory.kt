@@ -9,8 +9,11 @@ import org.ergoplatform.mosaik.model.ui.layout.*
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.mosaik.model.ui.text.StyleableTextLabel
 import org.ergoplatform.mosaik.model.ui.text.TruncationType
+import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSData
 import org.robovm.apple.uikit.*
+
+const val debugModeColors = true
 
 object MosaikUiViewFactory {
     fun createUiViewForTreeElement(treeElement: TreeElement): UiViewHolder {
@@ -25,19 +28,20 @@ object MosaikUiViewFactory {
                         else UILayoutConstraintAxis.Horizontal
                     isLayoutMarginsRelativeArrangement = true
                     spacing = mosaikViewElement.spacing.toUiKitSize()
-                })
+                    if (debugModeColors) backgroundColor = UIColor.yellow()
+                }, treeElement)
             }
             is Box -> {
                 UiViewHolder(UIView().apply {
                     layoutMargins = UIEdgeInsets.Zero()
-                })
+                }, treeElement)
             }
             is Image -> buildMosaikImage(treeElement, mosaikViewElement)
             is StyleableTextLabel<*> -> buildMosaikLabelView(treeElement, mosaikViewElement)
             else -> {
                 UiViewHolder(Body1Label().apply {
                     text = "Unsupported element: ${mosaikViewElement.javaClass.simpleName}"
-                })
+                }, treeElement)
             }
         }
 
@@ -83,7 +87,7 @@ object MosaikUiViewFactory {
             fixedWidth(size)
         }
 
-        val viewHolder = UiViewHolder(uiImageView)
+        val viewHolder = UiViewHolder(uiImageView, treeElement)
 
         treeElement.getResourceBytes?.let { viewHolder.resourceBytesAvailable(it) }
 
@@ -102,6 +106,7 @@ object MosaikUiViewFactory {
         }
 
         labelView.apply {
+            if (debugModeColors) backgroundColor = UIColor.blue()
             text = LabelFormatter.getFormattedText(mosaikViewElement, treeElement)
             textColor = when (mosaikViewElement.textColor) {
                 ForegroundColor.PRIMARY -> uiColorErgo
@@ -125,20 +130,30 @@ object MosaikUiViewFactory {
             }
         }
 
-        return UiViewHolder(labelView)
+        return UiViewHolder(labelView, treeElement)
     }
 
 }
 
-open class UiViewHolder(val uiView: UIView) {
+open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) {
     open fun removeAllChildren() {
         uiView.subviews.forEach { it.removeFromSuperview() }
     }
 
     open fun addSubView(subviewHolder: UiViewHolder) {
         val viewToAdd = subviewHolder.uiView
+        addUiView(viewToAdd)
+    }
+
+    private fun addUiView(viewToAdd: UIView) {
         uiView.addSubview(viewToAdd)
         viewToAdd.centerHorizontal(true).topToSuperview().superViewWrapsHeight()
+    }
+
+    open fun replaceSubView(oldView: UiViewHolder, newView: UiViewHolder) {
+        oldView.uiView.removeFromSuperview()
+        addUiView(newView.uiView)
+        // TODO z-order
     }
 
     fun resourceBytesAvailable(bytes: ByteArray) {
@@ -153,13 +168,80 @@ open class UiViewHolder(val uiView: UIView) {
     }
 }
 
-class StackViewHolder(val uiStackView: UIStackView) : UiViewHolder(uiStackView) {
+class StackViewHolder(
+    val uiStackView: UIStackView,
+    treeElement: TreeElement
+) : UiViewHolder(uiStackView, treeElement) {
+
+    val linearLayout = treeElement.element as LinearLayout<*>
+    val weightList = linearLayout.children.map { linearLayout.getChildWeight(it) }
+    val weightSum = weightList.sum()
+    val allHaveWeights = weightList.all { it > 0 }
+
+    init {
+        uiStackView.distribution =
+            if (weightSum == 0 || allHaveWeights) {
+                // no weights set at all or all weights set: we fill proportionally
+                UIStackViewDistribution.FillProportionally
+            } else
+                UIStackViewDistribution.Fill
+    }
+
     override fun removeAllChildren() {
         uiStackView.clearArrangedSubviews()
     }
 
     override fun addSubView(subviewHolder: UiViewHolder) {
         // TODO different layouts, this is always JUSTIFY without weight
-        uiStackView.addArrangedSubview(subviewHolder.uiView)
+
+        // add a wrapper
+        val uiViewWrapper = UIView(CGRect.Zero())
+        uiViewWrapper.layoutMargins = UIEdgeInsets.Zero()
+        if (debugModeColors) uiViewWrapper.backgroundColor = UIColor.red()
+        uiStackView.addArrangedSubview(uiViewWrapper)
+        uiViewWrapper.addSubview(subviewHolder.uiView)
+
+        configureView(subviewHolder)
+
+    }
+
+    private fun configureView(uiViewHolder: UiViewHolder) {
+        val uiView = uiViewHolder.uiView
+        // configure our added view
+        val alignment = linearLayout.getChildAlignment(uiViewHolder.treeElement.element)
+        if (alignment is HAlignment) {
+            when (alignment) {
+                HAlignment.START -> uiView.topToSuperview().bottomToSuperview().leftToSuperview()
+                    .rightToSuperview(canBeLess = true)
+                HAlignment.CENTER -> uiView.centerHorizontal(true).topToSuperview().bottomToSuperview()
+                HAlignment.END -> uiView.topToSuperview().bottomToSuperview().rightToSuperview()
+                    .leftToSuperview(canBeMore = true)
+                HAlignment.JUSTIFY -> uiView.edgesToSuperview()
+            }
+        } else if (alignment is VAlignment) {
+            when (alignment) {
+                VAlignment.TOP -> uiView.topToSuperview().bottomToSuperview(canBeLess = true)
+                    .centerHorizontal(true)
+                VAlignment.CENTER -> uiView.centerVertical().superViewWrapsHeight().centerHorizontal(true)
+                VAlignment.BOTTOM -> uiView.superViewWrapsHeight().bottomToSuperview().centerHorizontal(true)
+            }
+        }
+
+        val weight = linearLayout.getChildWeight(uiViewHolder.treeElement.element)
+
+        if (weight == 0) {
+            uiView.setContentHuggingPriority(1000f, uiStackView.axis)
+            uiView.setContentCompressionResistancePriority(1000f, uiStackView.axis)
+        }
+    }
+
+    override fun replaceSubView(oldView: UiViewHolder, newView: UiViewHolder) {
+        // find oldview position
+        val wrapper = uiView.subviews.first { it.subviews.firstOrNull() == oldView.uiView }
+        wrapper.subviews.forEach { subview ->
+            subview.removeFromSuperview()
+        }
+        wrapper.addSubview(newView.uiView)
+        configureView(newView)
     }
 }

@@ -22,18 +22,23 @@ class MosaikView(
 
     fun updateView() {
         val rootElement = mosaikRuntime.viewTree.content
-
+        val setRootView: (UiViewHolder) -> Unit = { viewHolder ->
+            val uiView = viewHolder.uiView
+            addSubview(uiView)
+            uiView.centerHorizontal(true).topToSuperview().superViewWrapsHeight()
+        }
         if (rootElement == null) {
             root?.removeAllChildren()
             root = null
         } else if (root == null) {
             root = ViewWithTreeElement(rootElement)
-            val uiView = root!!.uiViewHolder.uiView
-            addSubview(uiView)
-            uiView.centerHorizontal(true).topToSuperview().superViewWrapsHeight()
+            setRootView(root!!.uiViewHolder)
             root?.updateChildren()
         } else {
-            root?.updateView(rootElement)
+            root?.updateView(rootElement, replaceOnParent = { oldViewHolder, newViewHolder ->
+                subviews.forEach { it.removeFromSuperview() }
+                setRootView(newViewHolder)
+            })
         }
 
     }
@@ -50,18 +55,18 @@ class ViewWithTreeElement(
         private set
     val children: MutableList<ViewWithTreeElement> = LinkedList<ViewWithTreeElement>()
 
-    fun addSubview(element: ViewWithTreeElement) {
-        this.uiViewHolder.addSubView(element.uiViewHolder)
-        children.add(element)
-    }
-
     fun updateView(
         newTreeElement: TreeElement,
+        replaceOnParent: (oldView: UiViewHolder, newView: UiViewHolder) -> Unit,
     ) {
         if (newTreeElement.createdAtContentVersion > treeElement.createdAtContentVersion) {
             treeElement = newTreeElement
 
-            // TODO if the element changed, remove it from parent and readd the new one
+            // if the element changed, remove it from parent and readd the new one
+            val newViewHolder = MosaikUiViewFactory.createUiViewForTreeElement(treeElement)
+            replaceOnParent(uiViewHolder, newViewHolder)
+
+            uiViewHolder = newViewHolder
         }
 
         // resource bytes might have an update
@@ -83,14 +88,15 @@ class ViewWithTreeElement(
             // then add the new elements
             treeElement.children.forEach {
                 val newElem = ViewWithTreeElement(it)
-                addSubview(newElem)
+                this.uiViewHolder.addSubView(newElem.uiViewHolder)
+                children.add(newElem)
             }
 
             // TODO room for improvement: swap a single element when only one has changed
         }
 
         children.forEach {
-            it.updateView(it.treeElement)
+            it.updateView(it.treeElement, uiViewHolder::replaceSubView)
         }
     }
 
