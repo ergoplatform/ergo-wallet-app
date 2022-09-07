@@ -13,33 +13,35 @@ import org.robovm.apple.foundation.NSData
 import org.robovm.apple.uikit.*
 
 object MosaikUiViewFactory {
-    fun createUiViewForTreeElement(treeElement: TreeElement): UIView {
+    fun createUiViewForTreeElement(treeElement: TreeElement): UiViewHolder {
         val mosaikViewElement = treeElement.element
         val runtime = treeElement.viewTree.mosaikRuntime
 
-        val uiView = when (mosaikViewElement) {
+        val uiViewHolder = when (mosaikViewElement) {
             is LinearLayout<*> -> {
-                UIStackView().apply {
+                StackViewHolder(UIStackView().apply {
                     axis =
                         if (mosaikViewElement is Column) UILayoutConstraintAxis.Vertical
                         else UILayoutConstraintAxis.Horizontal
                     isLayoutMarginsRelativeArrangement = true
                     spacing = mosaikViewElement.spacing.toUiKitSize()
-                }
+                })
             }
             is Box -> {
-                UIView().apply {
+                UiViewHolder(UIView().apply {
                     layoutMargins = UIEdgeInsets.Zero()
-                }
+                })
             }
             is Image -> buildMosaikImage(treeElement, mosaikViewElement)
             is StyleableTextLabel<*> -> buildMosaikLabelView(treeElement, mosaikViewElement)
             else -> {
-                Body1Label().apply {
+                UiViewHolder(Body1Label().apply {
                     text = "Unsupported element: ${mosaikViewElement.javaClass.simpleName}"
-                }
+                })
             }
         }
+
+        val uiView = uiViewHolder.uiView
 
         if (mosaikViewElement is LayoutElement) {
             val padding = mosaikViewElement.padding.toUiKitSize()
@@ -56,7 +58,7 @@ object MosaikUiViewFactory {
             })
         }
 
-        return uiView
+        return uiViewHolder
     }
 
     private fun Padding.toUiKitSize() =
@@ -69,22 +71,26 @@ object MosaikUiViewFactory {
             Padding.TWICE -> DEFAULT_MARGIN * 4
         }
 
-    private fun buildMosaikImage(treeElement: TreeElement, mosaikViewElement: Image): UIView {
+    private fun buildMosaikImage(treeElement: TreeElement, mosaikViewElement: Image): UiViewHolder {
         val size = when (mosaikViewElement.size) {
             Image.Size.SMALL -> 50.0
             Image.Size.MEDIUM -> 100.0
             Image.Size.LARGE -> 200.0
         }
-        return UIImageView().apply {
+        val uiImageView = UIImageView().apply {
             contentMode = UIViewContentMode.ScaleAspectFit
             fixedHeight(size)
             fixedWidth(size)
-
-            treeElement.getResourceBytes?.let { resourceBytesAvailable(this, it) }
         }
+
+        val viewHolder = UiViewHolder(uiImageView)
+
+        treeElement.getResourceBytes?.let { viewHolder.resourceBytesAvailable(it) }
+
+        return viewHolder
     }
 
-    private fun buildMosaikLabelView(treeElement: TreeElement, mosaikViewElement: StyleableTextLabel<*>): UIView {
+    private fun buildMosaikLabelView(treeElement: TreeElement, mosaikViewElement: StyleableTextLabel<*>): UiViewHolder {
         val labelView = when (mosaikViewElement.style) {
             LabelStyle.BODY1 -> Body1Label()
             LabelStyle.BODY1BOLD -> Body1BoldLabel()
@@ -119,10 +125,23 @@ object MosaikUiViewFactory {
             }
         }
 
-        return labelView
+        return UiViewHolder(labelView)
     }
 
-    fun resourceBytesAvailable(uiView: UIView, bytes: ByteArray) {
+}
+
+open class UiViewHolder(val uiView: UIView) {
+    open fun removeAllChildren() {
+        uiView.subviews.forEach { it.removeFromSuperview() }
+    }
+
+    open fun addSubView(subviewHolder: UiViewHolder) {
+        val viewToAdd = subviewHolder.uiView
+        uiView.addSubview(viewToAdd)
+        viewToAdd.centerHorizontal(true).topToSuperview().superViewWrapsHeight()
+    }
+
+    fun resourceBytesAvailable(bytes: ByteArray) {
         // if we have an image that is not set yet
         if (uiView is UIImageView && uiView.image == null) {
             try {
@@ -132,5 +151,15 @@ object MosaikUiViewFactory {
             }
         }
     }
+}
 
+class StackViewHolder(val uiStackView: UIStackView) : UiViewHolder(uiStackView) {
+    override fun removeAllChildren() {
+        uiStackView.clearArrangedSubviews()
+    }
+
+    override fun addSubView(subviewHolder: UiViewHolder) {
+        // TODO different layouts, this is always JUSTIFY without weight
+        uiStackView.addArrangedSubview(subviewHolder.uiView)
+    }
 }

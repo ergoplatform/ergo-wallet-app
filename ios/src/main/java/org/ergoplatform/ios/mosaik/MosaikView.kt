@@ -1,14 +1,12 @@
 package org.ergoplatform.ios.mosaik
 
 import org.ergoplatform.ios.ui.centerHorizontal
-import org.ergoplatform.ios.ui.clearArrangedSubviews
 import org.ergoplatform.ios.ui.superViewWrapsHeight
 import org.ergoplatform.ios.ui.topToSuperview
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.TreeElement
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.UIEdgeInsets
-import org.robovm.apple.uikit.UIStackView
 import org.robovm.apple.uikit.UIView
 import java.util.*
 
@@ -30,7 +28,7 @@ class MosaikView(
             root = null
         } else if (root == null) {
             root = ViewWithTreeElement(rootElement)
-            val uiView = root!!.uiView
+            val uiView = root!!.uiViewHolder.uiView
             addSubview(uiView)
             uiView.centerHorizontal(true).topToSuperview().superViewWrapsHeight()
             root?.updateChildren()
@@ -48,23 +46,12 @@ class ViewWithTreeElement(
 
     var treeElement = treeElement
         private set
-    var uiView: UIView = MosaikUiViewFactory.createUiViewForTreeElement(treeElement)
+    var uiViewHolder: UiViewHolder = MosaikUiViewFactory.createUiViewForTreeElement(treeElement)
         private set
     val children: MutableList<ViewWithTreeElement> = LinkedList<ViewWithTreeElement>()
 
     fun addSubview(element: ViewWithTreeElement) {
-        val viewToAdd = element.uiView
-
-        when (val thisView = this.uiView) {
-            is UIStackView -> {
-                // TODO different layouts, this is always JUSTIFY without weight
-                thisView.addArrangedSubview(viewToAdd)
-            }
-            else -> {
-                thisView.addSubview(viewToAdd)
-                viewToAdd.centerHorizontal(true).topToSuperview().superViewWrapsHeight()
-            }
-        }
+        this.uiViewHolder.addSubView(element.uiViewHolder)
         children.add(element)
     }
 
@@ -79,7 +66,7 @@ class ViewWithTreeElement(
 
         // resource bytes might have an update
         treeElement.getResourceBytes?.let {
-            MosaikUiViewFactory.resourceBytesAvailable(uiView, it)
+            uiViewHolder.resourceBytesAvailable(it)
         }
 
         updateChildren()
@@ -108,10 +95,7 @@ class ViewWithTreeElement(
     }
 
     fun removeAllChildren() {
-        when (val uiView = uiView) {
-            is UIStackView -> uiView.clearArrangedSubviews()
-            else -> uiView.subviews.forEach { it.removeFromSuperview() }
-        }
+        uiViewHolder.removeAllChildren()
         children.clear()
     }
 
