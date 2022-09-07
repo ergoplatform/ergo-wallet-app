@@ -1,8 +1,6 @@
 package org.ergoplatform.ios.mosaik
 
-import org.ergoplatform.ios.ui.centerHorizontal
-import org.ergoplatform.ios.ui.superViewWrapsHeight
-import org.ergoplatform.ios.ui.topToSuperview
+import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.TreeElement
 import org.robovm.apple.coregraphics.CGRect
@@ -25,7 +23,9 @@ class MosaikView(
         val setRootView: (UiViewHolder) -> Unit = { viewHolder ->
             val uiView = viewHolder.uiView
             addSubview(uiView)
-            uiView.centerHorizontal(true).topToSuperview().superViewWrapsHeight()
+            // TODO center when not column, restrict width when manifest wants it
+            uiView.widthMatchesSuperview().topToSuperview(canBeMore = true)
+                .bottomToSuperview(canBeLess = true)
         }
         if (rootElement == null) {
             root?.removeAllChildren()
@@ -65,6 +65,7 @@ class ViewWithTreeElement(
             // if the element changed, remove it from parent and readd the new one
             val newViewHolder = MosaikUiViewFactory.createUiViewForTreeElement(treeElement)
             replaceOnParent(uiViewHolder, newViewHolder)
+            newViewHolder.onAddedToSuperview()
 
             uiViewHolder = newViewHolder
         }
@@ -89,6 +90,7 @@ class ViewWithTreeElement(
             treeElement.children.forEach {
                 val newElem = ViewWithTreeElement(it)
                 this.uiViewHolder.addSubView(newElem.uiViewHolder)
+                newElem.uiViewHolder.onAddedToSuperview()
                 children.add(newElem)
             }
 

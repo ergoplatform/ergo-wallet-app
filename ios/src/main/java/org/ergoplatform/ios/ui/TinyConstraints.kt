@@ -47,14 +47,22 @@ private fun UIView.getSuperviewLayoutGuide(useSafeArea: Boolean) =
 fun UIView.topToSuperview(
     useSafeArea: Boolean = false,
     topInset: Double = 0.0,
-    priority: Int? = null
+    priority: Int? = null,
+    canBeMore: Boolean = false,
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
-    val topConstraint = this.topAnchor.equalTo(
-        getSuperviewLayoutGuide(useSafeArea).topAnchor,
-        topInset
-    )
+    val topConstraint =
+        if (canBeMore)
+            this.topAnchor.greaterThanOrEqualTo(
+                getSuperviewLayoutGuide(useSafeArea).topAnchor,
+                topInset
+            )
+        else
+            this.topAnchor.equalTo(
+                getSuperviewLayoutGuide(useSafeArea).topAnchor,
+                topInset
+            )
     priority?.let { topConstraint.priority = priority.toFloat() }
     NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
 

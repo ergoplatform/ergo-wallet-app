@@ -13,7 +13,7 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSData
 import org.robovm.apple.uikit.*
 
-const val debugModeColors = true
+const val debugModeColors = false
 
 object MosaikUiViewFactory {
     fun createUiViewForTreeElement(treeElement: TreeElement): UiViewHolder {
@@ -32,7 +32,7 @@ object MosaikUiViewFactory {
                 }, treeElement)
             }
             is Box -> {
-                UiViewHolder(UIView().apply {
+                BoxViewHolder(UIView().apply {
                     layoutMargins = UIEdgeInsets.Zero()
                 }, treeElement)
             }
@@ -68,11 +68,11 @@ object MosaikUiViewFactory {
     private fun Padding.toUiKitSize() =
         when (this) {
             Padding.NONE -> 0.0
-            Padding.QUARTER_DEFAULT -> DEFAULT_MARGIN / 2
-            Padding.HALF_DEFAULT -> DEFAULT_MARGIN
-            Padding.DEFAULT -> DEFAULT_MARGIN * 2
-            Padding.ONE_AND_A_HALF_DEFAULT -> DEFAULT_MARGIN * 3
-            Padding.TWICE -> DEFAULT_MARGIN * 4
+            Padding.QUARTER_DEFAULT -> DEFAULT_MARGIN * .75
+            Padding.HALF_DEFAULT -> DEFAULT_MARGIN * 1.5
+            Padding.DEFAULT -> DEFAULT_MARGIN * 3
+            Padding.ONE_AND_A_HALF_DEFAULT -> DEFAULT_MARGIN * 4.5
+            Padding.TWICE -> DEFAULT_MARGIN * 6
         }
 
     private fun buildMosaikImage(treeElement: TreeElement, mosaikViewElement: Image): UiViewHolder {
@@ -142,18 +142,18 @@ open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) {
 
     open fun addSubView(subviewHolder: UiViewHolder) {
         val viewToAdd = subviewHolder.uiView
-        addUiView(viewToAdd)
+        uiView.addSubview(viewToAdd)
+        configureUiView(viewToAdd)
     }
 
-    private fun addUiView(viewToAdd: UIView) {
-        uiView.addSubview(viewToAdd)
+    private fun configureUiView(viewToAdd: UIView) {
         viewToAdd.centerHorizontal(true).topToSuperview().superViewWrapsHeight()
     }
 
     open fun replaceSubView(oldView: UiViewHolder, newView: UiViewHolder) {
+        uiView.insertSubviewBelow(newView.uiView, oldView.uiView)
         oldView.uiView.removeFromSuperview()
-        addUiView(newView.uiView)
-        // TODO z-order
+        configureUiView(newView.uiView)
     }
 
     fun resourceBytesAvailable(bytes: ByteArray) {
@@ -166,6 +166,21 @@ open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) {
             }
         }
     }
+
+    open fun onAddedToSuperview() {
+        if (isFillMaxWidth()) {
+            uiView.widthMatchesSuperview()
+        }
+    }
+
+    open fun isFillMaxWidth(): Boolean = false
+}
+
+class BoxViewHolder(
+    outerView: UIView,
+    treeElement: TreeElement
+) : UiViewHolder(outerView, treeElement) {
+
 }
 
 class StackViewHolder(
@@ -180,11 +195,12 @@ class StackViewHolder(
 
     init {
         uiStackView.distribution =
-            if (weightSum == 0 || allHaveWeights) {
+            if (weightSum == 0 || !allHaveWeights) {
                 // no weights set at all or all weights set: we fill proportionally
                 UIStackViewDistribution.FillProportionally
             } else
-                UIStackViewDistribution.Fill
+                // some have weights: we fill
+                UIStackViewDistribution.Fill // TODO add weight constraints
     }
 
     override fun removeAllChildren() {
@@ -192,12 +208,11 @@ class StackViewHolder(
     }
 
     override fun addSubView(subviewHolder: UiViewHolder) {
-        // TODO different layouts, this is always JUSTIFY without weight
-
         // add a wrapper
-        val uiViewWrapper = UIView(CGRect.Zero())
+        val uiViewWrapper = UiViewWrapper()
         uiViewWrapper.layoutMargins = UIEdgeInsets.Zero()
-        if (debugModeColors) uiViewWrapper.backgroundColor = UIColor.red()
+        if (debugModeColors) uiViewWrapper.backgroundColor = if (uiStackView.axis == UILayoutConstraintAxis.Vertical)
+            UIColor.orange() else UIColor.red()
         uiStackView.addArrangedSubview(uiViewWrapper)
         uiViewWrapper.addSubview(subviewHolder.uiView)
 
@@ -208,6 +223,10 @@ class StackViewHolder(
     private fun configureView(uiViewHolder: UiViewHolder) {
         val uiView = uiViewHolder.uiView
         // configure our added view
+        val weight = linearLayout.getChildWeight(uiViewHolder.treeElement.element)
+
+        val enforceIntrinsicWidth = !allHaveWeights && weight == 0
+
         val alignment = linearLayout.getChildAlignment(uiViewHolder.treeElement.element)
         if (alignment is HAlignment) {
             when (alignment) {
@@ -221,17 +240,20 @@ class StackViewHolder(
         } else if (alignment is VAlignment) {
             when (alignment) {
                 VAlignment.TOP -> uiView.topToSuperview().bottomToSuperview(canBeLess = true)
-                    .centerHorizontal(true)
-                VAlignment.CENTER -> uiView.centerVertical().superViewWrapsHeight().centerHorizontal(true)
-                VAlignment.BOTTOM -> uiView.superViewWrapsHeight().bottomToSuperview().centerHorizontal(true)
+                    .widthMatchesSuperview()
+                VAlignment.CENTER -> uiView.centerVertical().widthMatchesSuperview()
+                    .topToSuperview(canBeMore = true).bottomToSuperview(canBeLess = true)
+                VAlignment.BOTTOM -> uiView.bottomToSuperview().widthMatchesSuperview()
+                    .topToSuperview(canBeMore = true)
             }
         }
 
-        val weight = linearLayout.getChildWeight(uiViewHolder.treeElement.element)
-
-        if (weight == 0) {
+        if (enforceIntrinsicWidth) {
             uiView.setContentHuggingPriority(1000f, uiStackView.axis)
             uiView.setContentCompressionResistancePriority(1000f, uiStackView.axis)
+        } else if (!allHaveWeights) {
+            // make the priority lower
+            uiView.setContentHuggingPriority(100f, uiStackView.axis)
         }
     }
 
@@ -243,5 +265,23 @@ class StackViewHolder(
         }
         wrapper.addSubview(newView.uiView)
         configureView(newView)
+    }
+
+    override fun isFillMaxWidth(): Boolean {
+        val element = treeElement.element
+        return element is Row && !element.isPacked
+    }
+
+    private class UiViewWrapper : UIView(CGRect.Zero()) {
+        override fun setBounds(v: CGRect) {
+            super.setBounds(v)
+
+            // set the preferred max text width to the bounds with to prevent
+            // unnecessary text wrapping
+            val innerView = subviews.firstOrNull()
+            if (innerView is UILabel) {
+                innerView.preferredMaxLayoutWidth = v.size.width
+            }
+        }
     }
 }
