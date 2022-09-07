@@ -5,6 +5,7 @@ import org.ergoplatform.mosaik.LabelFormatter
 import org.ergoplatform.mosaik.TreeElement
 import org.ergoplatform.mosaik.model.ui.ForegroundColor
 import org.ergoplatform.mosaik.model.ui.Image
+import org.ergoplatform.mosaik.model.ui.ViewElement
 import org.ergoplatform.mosaik.model.ui.layout.*
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.mosaik.model.ui.text.StyleableTextLabel
@@ -31,12 +32,11 @@ object MosaikUiViewFactory {
                     if (debugModeColors) backgroundColor = UIColor.yellow()
                 }, treeElement)
             }
-            is Box -> {
-                BoxViewHolder(UIView().apply {
-                    layoutMargins = UIEdgeInsets.Zero()
-                }, treeElement)
-            }
+
+            is Box -> buildMosaikBox(mosaikViewElement, treeElement)
+
             is Image -> buildMosaikImage(treeElement, mosaikViewElement)
+
             is StyleableTextLabel<*> -> buildMosaikLabelView(treeElement, mosaikViewElement)
             else -> {
                 UiViewHolder(Body1Label().apply {
@@ -64,6 +64,11 @@ object MosaikUiViewFactory {
 
         return uiViewHolder
     }
+
+    private fun buildMosaikBox(
+        mosaikViewElement: ViewElement,
+        treeElement: TreeElement
+    ) = BoxViewHolder(treeElement)
 
     private fun Padding.toUiKitSize() =
         when (this) {
@@ -136,13 +141,15 @@ object MosaikUiViewFactory {
 }
 
 open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) {
+    open val contentView: UIView get() = uiView
+
     open fun removeAllChildren() {
-        uiView.subviews.forEach { it.removeFromSuperview() }
+        contentView.subviews.forEach { it.removeFromSuperview() }
     }
 
     open fun addSubView(subviewHolder: UiViewHolder) {
         val viewToAdd = subviewHolder.uiView
-        uiView.addSubview(viewToAdd)
+        contentView.addSubview(viewToAdd)
         configureUiView(viewToAdd)
     }
 
@@ -151,7 +158,7 @@ open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) {
     }
 
     open fun replaceSubView(oldView: UiViewHolder, newView: UiViewHolder) {
-        uiView.insertSubviewBelow(newView.uiView, oldView.uiView)
+        contentView.insertSubviewBelow(newView.uiView, oldView.uiView)
         oldView.uiView.removeFromSuperview()
         configureUiView(newView.uiView)
     }
@@ -177,10 +184,31 @@ open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) {
 }
 
 class BoxViewHolder(
-    outerView: UIView,
     treeElement: TreeElement
-) : UiViewHolder(outerView, treeElement) {
+) : UiViewHolder(UIView().apply {
+    layoutMargins = UIEdgeInsets.Zero()
+    if (debugModeColors) backgroundColor = UIColor.green()
+}, treeElement) {
 
+    private val contentContainer =
+        if (treeElement.element is Card)
+        // for a card, we have an inner content container
+            UIView(CGRect.Zero()).apply {
+                uiView.addSubview(this)
+                this.layoutMargins = UIEdgeInsets.Zero()
+                this.widthMatchesSuperview().superViewWrapsHeight()
+
+                this.layer.setMasksToBounds(true)
+                this.layer.cornerRadius = 6.0
+                this.layer.borderWidth = 1.0
+                this.layer.borderColor = UIColor.systemGray().cgColor
+            }
+        else
+        // for a normal box, outer uiview holds the content as well
+            uiView
+
+    override val contentView: UIView
+        get() = contentContainer
 }
 
 class StackViewHolder(
