@@ -153,8 +153,15 @@ abstract class AppMosaikRuntime(
         )
     }
 
+    private var appNotLoadedUrl: String? = null
+
     override fun appNotLoadedError(appUrl: String, error: Throwable) {
+        appNotLoadedUrl = appUrl
         appNotLoaded(error)
+    }
+
+    fun retryLoadingLastAppNotLoaded() {
+        appNotLoadedUrl?.let { loadUrlEnteredByUser(it) }
     }
 
     private val normalizedAppUrl get() = appUrl?.let { normalizeUrl(it) }

@@ -207,7 +207,7 @@ class MosaikAppComponent(
             noAppLoadedErrorMessage,
             retryClicked = {
                 noAppLoadedErrorMessage.value = null
-                mosaikRuntime.loadMosaikApp(appUrl)
+                mosaikRuntime.retryLoadingLastAppNotLoaded()
             }
         )
 

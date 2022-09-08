@@ -140,9 +140,9 @@ class MosaikViewModel : ViewModel() {
         }
     }
 
-    fun retryLoading(appUrl: String) {
+    fun retryLoading() {
         noAppLiveData.postValue(null)
-        mosaikRuntime.loadUrlEnteredByUser(appUrl)
+        mosaikRuntime.retryLoadingLastAppNotLoaded()
     }
 
     /**
