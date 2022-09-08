@@ -167,7 +167,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
 
         // click listeners
         binding.buttonNoApp.setOnClickListener {
-            viewModel.retryLoading(args.url)
+            viewModel.retryLoading()
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.mosaikRuntime.viewTree.uiLockedState.collect { locked ->
