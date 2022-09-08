@@ -51,7 +51,7 @@ class ViewWithTreeElement(
 
     var treeElement = treeElement
         private set
-    var uiViewHolder: UiViewHolder = MosaikUiViewFactory.createUiViewForTreeElement(treeElement)
+    var uiViewHolder: UiViewHolder = MosaikViewCommon.buildUiViewHolder(treeElement)
         private set
     val children: MutableList<ViewWithTreeElement> = LinkedList<ViewWithTreeElement>()
 
@@ -63,7 +63,7 @@ class ViewWithTreeElement(
             treeElement = newTreeElement
 
             // if the element changed, remove it from parent and readd the new one
-            val newViewHolder = MosaikUiViewFactory.createUiViewForTreeElement(treeElement)
+            val newViewHolder = MosaikViewCommon.buildUiViewHolder(treeElement)
             replaceOnParent(uiViewHolder, newViewHolder)
             newViewHolder.onAddedToSuperview()
 
@@ -79,6 +79,8 @@ class ViewWithTreeElement(
     }
 
     fun updateChildren() {
+        val viewGroupHolder = uiViewHolder as? ViewGroupHolder ?: return
+
         if (treeElement.children.map { it.createdAtContentVersion } !=
             children.map { it.treeElement.createdAtContentVersion }) {
             // something changed
@@ -89,7 +91,7 @@ class ViewWithTreeElement(
             // then add the new elements
             treeElement.children.forEach {
                 val newElem = ViewWithTreeElement(it)
-                this.uiViewHolder.addSubView(newElem.uiViewHolder)
+                viewGroupHolder.addSubView(newElem.uiViewHolder)
                 newElem.uiViewHolder.onAddedToSuperview()
                 children.add(newElem)
             }
@@ -98,12 +100,12 @@ class ViewWithTreeElement(
         }
 
         children.forEach {
-            it.updateView(it.treeElement, uiViewHolder::replaceSubView)
+            it.updateView(it.treeElement, viewGroupHolder::replaceSubView)
         }
     }
 
     fun removeAllChildren() {
-        uiViewHolder.removeAllChildren()
+        (uiViewHolder as? ViewGroupHolder)?.removeAllChildren()
         children.clear()
     }
 
