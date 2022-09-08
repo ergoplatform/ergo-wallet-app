@@ -62,6 +62,7 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
 
     private fun navigateToApp() {
         navigateToApp(inputAddress.text, null)
+        inputAddress.text = ""
     }
 
     private fun navigateToApp(appUrl: String, appName: String?) {

@@ -1,11 +1,9 @@
 package org.ergoplatform.ios.mosaik
 
-import org.ergoplatform.ios.ui.bottomToSuperview
-import org.ergoplatform.ios.ui.centerVertical
-import org.ergoplatform.ios.ui.topToSuperview
-import org.ergoplatform.ios.ui.widthMatchesSuperview
+import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.TreeElement
+import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.ui.layout.Column
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.UIEdgeInsets
@@ -30,9 +28,21 @@ class MosaikView(
 
             val positionAtTop = (viewHolder.treeElement.element is Column)
 
-            uiView.widthMatchesSuperview()
+            val maxWidth = when (viewHolder.treeElement.viewTree.targetCanvasDimension) {
+                MosaikManifest.CanvasDimension.COMPACT_WIDTH -> 500.0
+                MosaikManifest.CanvasDimension.MEDIUM_WIDTH -> 720.0
+                else -> 0.0
+            }
+            uiView.widthMatchesSuperview(maxWidth = maxWidth)
                 .topToSuperview(canBeMore = !positionAtTop)
                 .bottomToSuperview(canBeLess = true)
+
+            if (maxWidth > 0)
+                // maxWidth lowers the priority of left and right to match outer edges; this means
+                // it can happen that the view stretches outside. We prevent this with additional
+                // constraints
+                uiView.leftToSuperview(canBeMore = true)
+                    .rightToSuperview(canBeLess = true)
 
             if (!positionAtTop)
                 uiView.centerVertical()
@@ -45,7 +55,7 @@ class MosaikView(
             setRootView(root!!.uiViewHolder)
             root?.updateChildren()
         } else {
-            root?.updateView(rootElement, replaceOnParent = { oldViewHolder, newViewHolder ->
+            root?.updateView(rootElement, replaceOnParent = { _, newViewHolder ->
                 subviews.forEach { it.removeFromSuperview() }
                 setRootView(newViewHolder)
             })
@@ -63,7 +73,7 @@ class ViewWithTreeElement(
         private set
     var uiViewHolder: UiViewHolder = MosaikViewCommon.buildUiViewHolder(treeElement)
         private set
-    val children: MutableList<ViewWithTreeElement> = LinkedList<ViewWithTreeElement>()
+    private val children: MutableList<ViewWithTreeElement> = LinkedList<ViewWithTreeElement>()
 
     fun updateView(
         newTreeElement: TreeElement,

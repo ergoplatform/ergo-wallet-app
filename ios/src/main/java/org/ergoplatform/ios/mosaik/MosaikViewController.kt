@@ -3,6 +3,7 @@ package org.ergoplatform.ios.mosaik
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.CrashHandler
+import org.ergoplatform.ios.IosCacheManager
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.MosaikDialog
@@ -11,6 +12,7 @@ import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoAuthAction
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
 import org.ergoplatform.uilogic.STRING_BUTTON_BACK
+import org.ergoplatform.uilogic.STRING_BUTTON_RETRY
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
@@ -22,6 +24,7 @@ class MosaikViewController(
     private lateinit var mosaikView: MosaikView
     private lateinit var waitingView: UIView
     private lateinit var scrollView: UIScrollView
+    private lateinit var noAppLoadedView: NoAppLoadedView
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +36,7 @@ class MosaikViewController(
         mosaikRuntime.apply {
             appDatabase = appDelegate.database
             guidManager.appDatabase = appDatabase
-            // TODO cacheFileManager =
+            cacheFileManager = IosCacheManager()
             stringProvider = IosStringProvider(appDelegate.texts)
             preferencesProvider = appDelegate.prefs
 
@@ -50,6 +53,10 @@ class MosaikViewController(
         }
         view.addSubview(waitingView)
         waitingView.topToSuperview(true).widthMatchesSuperview(true).bottomToKeyboard(this)
+
+        noAppLoadedView = NoAppLoadedView()
+        view.addSubview(noAppLoadedView)
+        noAppLoadedView.centerVertical().centerHorizontal(true)
 
         navigationItem.setHidesBackButton(true)
         val backButton = UIBarButtonItem(appDelegate.texts.get(STRING_BUTTON_BACK), UIBarButtonItemStyle.Plain)
@@ -103,7 +110,10 @@ class MosaikViewController(
         }
 
         override fun appNotLoaded(cause: Throwable) {
-            TODO("Not yet implemented")
+            runOnMainThread {
+                noAppLoadedView.errorLabel.text = getUserErrorMessage(cause)
+                noAppLoadedView.isHidden = false
+            }
         }
 
         override val coroutineScope: CoroutineScope
@@ -184,6 +194,33 @@ class MosaikViewController(
             progressIndicator.centerVertical().centerHorizontal()
 
             progressIndicator.startAnimating()
+        }
+    }
+
+    inner class NoAppLoadedView : UIStackView() {
+        val errorLabel = Body1Label()
+
+        init {
+            axis = UILayoutConstraintAxis.Vertical
+            spacing = DEFAULT_MARGIN * 3
+            alignment = UIStackViewAlignment.Center
+            isLayoutMarginsRelativeArrangement = true
+            layoutMargins = UIEdgeInsets(
+                DEFAULT_MARGIN * 3, DEFAULT_MARGIN * 3,
+                DEFAULT_MARGIN * 3, DEFAULT_MARGIN * 3
+            )
+
+            addArrangedSubview(errorLabel)
+            errorLabel.textAlignment = NSTextAlignment.Center
+
+            val retryButton = PrimaryButton(getAppDelegate().texts.get(STRING_BUTTON_RETRY))
+            retryButton.addOnTouchUpInsideListener { _, _ ->
+                this.isHidden = true
+                mosaikRuntime.retryLoadingLastAppNotLoaded()
+            }
+            addArrangedSubview(retryButton.fixedWidth(200.0))
+
+            isHidden = true
         }
     }
 }
