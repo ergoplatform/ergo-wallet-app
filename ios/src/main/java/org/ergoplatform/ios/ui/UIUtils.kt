@@ -327,6 +327,10 @@ fun UIScrollView.scrollToBottom(animated: Boolean = true) {
     )
 }
 
+fun UIScrollView.scrollToTop(animated: Boolean = true) {
+    setContentOffset(CGPoint(0.0, 0.0), animated)
+}
+
 fun UIImage.scaleToSize(scaleWidth: Double, scaleHeight: Double): UIImage? {
     val scaledImageSize = CGSize(scaleWidth, scaleHeight)
     val renderer = UIGraphicsImageRenderer(scaledImageSize)

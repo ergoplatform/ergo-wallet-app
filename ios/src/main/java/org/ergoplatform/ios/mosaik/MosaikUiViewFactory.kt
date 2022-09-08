@@ -50,6 +50,10 @@ object MosaikUiViewFactory {
         if (mosaikViewElement is LayoutElement) {
             val padding = mosaikViewElement.padding.toUiKitSize()
             uiView.layoutMargins = UIEdgeInsets(padding, padding, padding, padding)
+
+            if (padding > 0) {
+                uiView.minHeight(padding * 2).minWidth(padding * 2)
+            }
         }
 
         if (treeElement.respondsToClick) {
@@ -220,16 +224,6 @@ class StackViewHolder(
     val weightList = linearLayout.children.map { linearLayout.getChildWeight(it) }
     val weightSum = weightList.sum()
     val allHaveWeights = weightList.all { it > 0 }
-
-    init {
-        uiStackView.distribution =
-            if (weightSum == 0 || !allHaveWeights) {
-                // no weights set at all or all weights set: we fill proportionally
-                UIStackViewDistribution.FillProportionally
-            } else
-                // some have weights: we fill
-                UIStackViewDistribution.Fill // TODO add weight constraints
-    }
 
     override fun removeAllChildren() {
         uiStackView.clearArrangedSubviews()

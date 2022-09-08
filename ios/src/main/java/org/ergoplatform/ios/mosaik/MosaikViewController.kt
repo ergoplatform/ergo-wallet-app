@@ -21,11 +21,13 @@ class MosaikViewController(
 
     private lateinit var mosaikView: MosaikView
     private lateinit var waitingView: UIView
+    private lateinit var scrollView: UIScrollView
 
     override fun viewDidLoad() {
         super.viewDidLoad()
 
         title = appName ?: ""
+        view.backgroundColor = UIColor.systemBackground()
 
         val appDelegate = getAppDelegate()
         mosaikRuntime.apply {
@@ -39,7 +41,7 @@ class MosaikViewController(
         }
 
         mosaikView = MosaikView(mosaikRuntime)
-        val scrollView = mosaikView.wrapInVerticalScrollView()
+        scrollView = mosaikView.wrapInVerticalScrollView()
         view.addSubview(scrollView)
         scrollView.edgesToSuperview(true)
         waitingView = WaitingView().apply {
@@ -95,6 +97,7 @@ class MosaikViewController(
             runOnMainThread {
                 title = manifest.appName
                 // TODO favorite button
+                scrollView.scrollToTop(false)
             }
         }
 
