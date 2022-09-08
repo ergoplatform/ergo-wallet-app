@@ -96,7 +96,15 @@ class MosaikViewController(
     private val mosaikRuntime = object : AppMosaikRuntime(
         "Ergo Wallet App (iOS)",
         CrashHandler.getAppVersion() ?: "",
-        { org.ergoplatform.mosaik.model.MosaikContext.Platform.PHONE }, // TODO iPad
+        platformType = {
+            when (UIDevice.getCurrentDevice().userInterfaceIdiom) {
+                UIUserInterfaceIdiom.Phone ->
+                    org.ergoplatform.mosaik.model.MosaikContext.Platform.PHONE
+                UIUserInterfaceIdiom.Pad ->
+                    org.ergoplatform.mosaik.model.MosaikContext.Platform.TABLET
+                else -> org.ergoplatform.mosaik.model.MosaikContext.Platform.DESKTOP
+            }
+        },
         MosaikGuidManager().apply {
             appDatabase = getAppDelegate().database
         }
