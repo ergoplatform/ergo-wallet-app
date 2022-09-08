@@ -339,10 +339,10 @@ fun UIView.superViewWrapsHeight(
     return this
 }
 
-fun UIView.centerVertical(): UIView {
+fun UIView.centerVertical(priority: Float = 1000f): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
     val centerConstraint = this.centerYAnchor.equalTo(superview.centerYAnchor)
-    centerConstraint.priority = 1000f
+    centerConstraint.priority = priority
     NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
     return this
 }
@@ -427,7 +427,7 @@ fun UIView.addSubviews(viewsToAdd: List<UIView>) {
     viewsToAdd.forEach { this.addSubview(it) }
 }
 
-fun UIView.wrapInVerticalScrollView(): UIScrollView {
+fun UIView.wrapInVerticalScrollView(centerContent: Boolean = false): UIScrollView {
     val scrollView = UIScrollView(CGRect.Zero())
     scrollView.addSubview(this)
     this.setTranslatesAutoresizingMaskIntoConstraints(false)
@@ -440,6 +440,10 @@ fun UIView.wrapInVerticalScrollView(): UIScrollView {
             this.bottomAnchor.equalTo(scrollView.bottomAnchor),
         )
     )
+
+    if (centerContent) {
+        this.centerVertical(250f)
+    }
 
     return scrollView
 }

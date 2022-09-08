@@ -41,14 +41,15 @@ class MosaikViewController(
         }
 
         mosaikView = MosaikView(mosaikRuntime)
-        scrollView = mosaikView.wrapInVerticalScrollView()
+        scrollView = mosaikView.wrapInVerticalScrollView(centerContent = true)
+
         view.addSubview(scrollView)
-        scrollView.edgesToSuperview(true)
+        scrollView.topToSuperview(true).widthMatchesSuperview(true).bottomToKeyboard(this)
         waitingView = WaitingView().apply {
             isHidden = true
         }
         view.addSubview(waitingView)
-        waitingView.edgesToSuperview(true)
+        waitingView.topToSuperview(true).widthMatchesSuperview(true).bottomToKeyboard(this)
 
         navigationItem.setHidesBackButton(true)
         val backButton = UIBarButtonItem(appDelegate.texts.get(STRING_BUTTON_BACK), UIBarButtonItemStyle.Plain)
