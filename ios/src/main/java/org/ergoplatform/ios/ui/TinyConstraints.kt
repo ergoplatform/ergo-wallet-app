@@ -19,9 +19,10 @@ const val iosDefaultPriority = 1000f
 fun UIView.edgesToSuperview(
     useSafeArea: Boolean = false,
     inset: Double = 0.0,
-    maxWidth: Double = 0.0
+    maxWidth: Double = 0.0,
+    priority: Float = iosDefaultPriority
 ) {
-    widthMatchesSuperview(useSafeArea, inset, maxWidth)
+    widthMatchesSuperview(useSafeArea, inset, maxWidth, priority)
 
     val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
 
@@ -34,6 +35,9 @@ fun UIView.edgesToSuperview(
         layoutGuide.bottomAnchor,
         inset * -1.0
     )
+
+    topConstraint.priority = priority
+    bottomConstraint.priority = priority
 
     NSLayoutConstraint.activateConstraints(
         NSArray(
@@ -410,7 +414,8 @@ fun UIView.heightMatchesHeightOf(sibling: UIView, factor: Double): UIView {
 fun UIView.widthMatchesSuperview(
     useSafeArea: Boolean = false,
     inset: Double = 0.0,
-    maxWidth: Double = 0.0
+    maxWidth: Double = 0.0,
+    priority: Float = iosDefaultPriority
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
     val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
@@ -427,12 +432,15 @@ fun UIView.widthMatchesSuperview(
 
     if (maxWidth > 0) {
         val widthConstraint = this.widthAnchor.lessThanOrEqualTo(maxWidth)
-        widthConstraint.priority = 1000f
-        leadingConstraint.priority = 950f
-        trailingConstraint.priority = 950f
+        widthConstraint.priority = priority
+        leadingConstraint.priority = priority - 50f
+        trailingConstraint.priority = priority - 50f
         val centerConstraint = this.centerXAnchor.equalTo(superview.centerXAnchor)
-        centerConstraint.priority = 999f
+        centerConstraint.priority = priority - 1f
         NSLayoutConstraint.activateConstraints(NSArray(widthConstraint, centerConstraint))
+    } else {
+        leadingConstraint.priority = priority
+        trailingConstraint.priority = priority
     }
 
     NSLayoutConstraint.activateConstraints(

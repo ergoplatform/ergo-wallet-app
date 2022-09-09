@@ -54,14 +54,15 @@ class IconImageViewHolder(
     init {
         val mosaikViewElement = treeElement.element as Icon
         val size = when (mosaikViewElement.iconSize) {
-            Icon.Size.SMALL -> WIDTH_ICONS
-            Icon.Size.MEDIUM -> WIDTH_ICONS * 2
-            Icon.Size.LARGE -> WIDTH_ICONS * 4
+            Icon.Size.SMALL -> WIDTH_ICONS * .75f
+            Icon.Size.MEDIUM -> WIDTH_ICONS * 1.5f
+            Icon.Size.LARGE -> WIDTH_ICONS * 3f
         }
         uiImageView.apply {
             contentMode = UIViewContentMode.ScaleAspectFit
             fixedHeight(size)
             fixedWidth(size)
+            enforceKeepIntrinsicWidth()
             tintColor = when (mosaikViewElement.tintColor) {
                 ForegroundColor.PRIMARY -> uiColorErgo
                 ForegroundColor.DEFAULT -> UIColor.label()

@@ -69,6 +69,9 @@ class BoxViewHolder(
                 .bottomToSuperview(canBeLess = true)
             VAlignment.BOTTOM -> uiView.topToSuperview(canBeMore = true).bottomToSuperview()
         }
+
+        // try to pack the box around the inner views whenever possible
+        uiView.edgesToSuperview(priority = 100f)
     }
 
     override fun replaceSubView(oldView: UiViewHolder, newView: UiViewHolder) {
