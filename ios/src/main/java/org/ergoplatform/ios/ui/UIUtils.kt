@@ -64,6 +64,8 @@ const val IMAGE_EDIT_CIRCLE = "pencil.circle"
 const val IMAGE_AUTO_FIX = "wand.and.stars"
 const val IMAGE_MOSAIK = "square.grid.2x2"
 const val IMAGE_ARROW_RIGHT = "arrow.right"
+const val IMAGE_STAR_OUTLINED = "star"
+const val IMAGE_STAR_FILLED = "star.fill"
 
 
 const val FONT_SIZE_BODY1 = 18.0

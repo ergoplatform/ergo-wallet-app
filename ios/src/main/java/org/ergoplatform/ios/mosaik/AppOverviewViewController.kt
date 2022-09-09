@@ -3,11 +3,15 @@ package org.ergoplatform.ios.mosaik
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.ergoplatform.ios.IosCacheManager
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.wallet.WIDTH_ICONS
 import org.ergoplatform.mosaik.MosaikAppEntry
 import org.ergoplatform.mosaik.MosaikAppOverviewUiLogic
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.foundation.NSData
 import org.robovm.apple.uikit.*
 
 class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
@@ -103,7 +107,9 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        uiLogic.init(getAppDelegate().database)
+        val db = getAppDelegate().database
+        val setupFlows = uiLogic.init(db)
+        if (!setupFlows) uiLogic.setupDbFlows(db)
         viewControllerScope.launch {
             uiLogic.favoritesFlow.collectLatest {
                 runOnMainThread {
@@ -152,18 +158,24 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
     inner class AppItem : CardView() {
         private val title = Body1BoldLabel()
         private val descLabel = Body2Label()
+        private val appIconImage = UIImageView()
         private var appEntry: MosaikAppEntry? = null
 
         init {
             layoutMargins = UIEdgeInsets.Zero()
             title.textColor = uiColorErgo
+            appIconImage.contentMode = UIViewContentMode.ScaleAspectFit
 
             addSubview(title)
             addSubview(descLabel)
+            addSubview(appIconImage)
 
-            // TODO icon
-
-            title.topToSuperview(topInset = DEFAULT_MARGIN).widthMatchesSuperview(inset = DEFAULT_MARGIN)
+            appIconImage.centerVertical().topToSuperview(topInset = DEFAULT_MARGIN, canBeMore = true)
+                .bottomToSuperview(bottomInset = DEFAULT_MARGIN, canBeLess = true)
+                .leftToSuperview(inset = DEFAULT_MARGIN)
+                .fixedWidth(WIDTH_ICONS).fixedHeight(WIDTH_ICONS)
+            title.topToSuperview(topInset = DEFAULT_MARGIN).leftToRightOf(appIconImage, DEFAULT_MARGIN)
+                .rightToSuperview(inset = DEFAULT_MARGIN)
             descLabel.topToBottomOf(title).bottomToSuperview(bottomInset = DEFAULT_MARGIN).leftToLeftOf(title)
                 .rightToRightOf(title)
 
@@ -175,10 +187,23 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
             })
         }
 
-        fun bind(appEntry: MosaikAppEntry): CardView {
-            title.text = appEntry.name
-            descLabel.text = appEntry.description
-            this.appEntry = appEntry
+        fun bind(mosaikApp: MosaikAppEntry): CardView {
+            title.text = mosaikApp.name
+            descLabel.text = if (mosaikApp.description.isNullOrBlank()) mosaikApp.url else mosaikApp.description
+            descLabel.numberOfLines = if (mosaikApp.description.isNullOrBlank()) 1 else 3
+            this.appEntry = mosaikApp
+
+            val uiImage = try {
+                mosaikApp.iconFile?.let { fileId ->
+                    IosCacheManager().readFileContent(fileId)?.let { bytes -> UIImage(NSData(bytes)) }
+                }
+            } catch (t: Throwable) {
+                LogUtils.logDebug("MosaikOverview", "Error accessing icon file", t)
+                null
+            }
+
+            appIconImage.image = uiImage ?: getIosSystemImage(IMAGE_MOSAIK, UIImageSymbolScale.Medium)
+            appIconImage.tintColor = if (uiImage == null) UIColor.label() else null
 
             return this
         }

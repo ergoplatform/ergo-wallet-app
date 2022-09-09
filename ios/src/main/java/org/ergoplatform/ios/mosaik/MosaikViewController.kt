@@ -25,6 +25,9 @@ class MosaikViewController(
     private lateinit var waitingView: UIView
     private lateinit var scrollView: UIScrollView
     private lateinit var noAppLoadedView: NoAppLoadedView
+    private lateinit var favoriteButton: UIBarButtonItem
+    private lateinit var imageNoFavorite: UIImage
+    private lateinit var imageFavorite: UIImage
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -67,6 +70,17 @@ class MosaikViewController(
             else
                 navigationController.popViewController(true)
         }
+
+        imageFavorite = getIosSystemImage(IMAGE_STAR_FILLED, UIImageSymbolScale.Small)!!
+        imageNoFavorite = getIosSystemImage(IMAGE_STAR_OUTLINED, UIImageSymbolScale.Small)!!
+        favoriteButton = UIBarButtonItem(imageNoFavorite, UIBarButtonItemStyle.Plain)
+        favoriteButton.isEnabled = false
+        favoriteButton.setOnClickListener {
+            mosaikRuntime.switchFavorite()
+        }
+        navigationController.topViewController.navigationItem.rightBarButtonItem = favoriteButton
+
+
     }
 
     override fun viewDidAppear(animated: Boolean) {
@@ -112,8 +126,9 @@ class MosaikViewController(
         override fun onAppNavigated(manifest: MosaikManifest) {
             runOnMainThread {
                 title = manifest.appName
-                // TODO favorite button
                 scrollView.scrollToTop(false)
+                favoriteButton.isEnabled = true
+                favoriteButton.image = if (isFavoriteApp) imageFavorite else imageNoFavorite
             }
         }
 
@@ -121,6 +136,8 @@ class MosaikViewController(
             runOnMainThread {
                 noAppLoadedView.errorLabel.text = getUserErrorMessage(cause)
                 noAppLoadedView.isHidden = false
+                scrollView.isHidden = true
+                favoriteButton.isEnabled = false
             }
         }
 
@@ -224,6 +241,7 @@ class MosaikViewController(
             val retryButton = PrimaryButton(getAppDelegate().texts.get(STRING_BUTTON_RETRY))
             retryButton.addOnTouchUpInsideListener { _, _ ->
                 this.isHidden = true
+                scrollView.isHidden = false
                 mosaikRuntime.retryLoadingLastAppNotLoaded()
             }
             addArrangedSubview(retryButton.fixedWidth(200.0))
