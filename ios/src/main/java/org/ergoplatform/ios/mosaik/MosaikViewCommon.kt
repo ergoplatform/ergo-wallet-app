@@ -44,7 +44,9 @@ object MosaikViewCommon {
 
             if (padding > 0) {
                 if (mosaikViewElement.children.isEmpty())
-                    uiView.fixedHeight(padding * 2).fixedWidth(padding * 2)
+                    // set a low priority on the fixed height so that justified views get enlarged
+                    uiView.fixedHeight(padding * 2, iosDefaultPriority - 500)
+                        .fixedWidth(padding * 2, iosDefaultPriority - 500)
                 else
                     uiView.minHeight(padding * 2).minWidth(padding * 2)
             }

@@ -9,6 +9,8 @@ import org.robovm.apple.uikit.UIView
 
 // https://github.com/roberthein/TinyConstraints
 
+const val iosDefaultPriority = 1000f
+
 /**
  * sizes the view to the superview (match_parent, match_parent)
  * If you want to wrap the content vertically, use topToSuperView().bottomToSuperView() concatenation
@@ -339,7 +341,7 @@ fun UIView.superViewWrapsHeight(
     return this
 }
 
-fun UIView.centerVertical(priority: Float = 1000f): UIView {
+fun UIView.centerVertical(priority: Float = iosDefaultPriority): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
     val centerConstraint = this.centerYAnchor.equalTo(superview.centerYAnchor)
     centerConstraint.priority = priority
@@ -350,10 +352,10 @@ fun UIView.centerVertical(priority: Float = 1000f): UIView {
 fun UIView.centerHorizontal(superViewRestrictsWidth: Boolean = false): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
     val centerConstraint = this.centerXAnchor.equalTo(superview.centerXAnchor)
-    centerConstraint.priority = 1000f
+    centerConstraint.priority = iosDefaultPriority
     if (superViewRestrictsWidth) {
         val widthConstraint = this.widthAnchor.lessThanOrEqual(superview.layoutMarginsGuide.widthAnchor)
-        widthConstraint.priority = 1000f
+        widthConstraint.priority = iosDefaultPriority
         NSLayoutConstraint.activateConstraints(NSArray(centerConstraint, widthConstraint))
     } else {
         NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
@@ -361,15 +363,19 @@ fun UIView.centerHorizontal(superViewRestrictsWidth: Boolean = false): UIView {
     return this
 }
 
-fun UIView.fixedWidth(c: Double): UIView {
+fun UIView.fixedWidth(c: Double, priority: Float? = null): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
-    NSLayoutConstraint.activateConstraints(NSArray(this.widthAnchor.equalTo(c)))
+    val widthConstraint = this.widthAnchor.equalTo(c)
+    priority?.let { widthConstraint.priority = priority }
+    NSLayoutConstraint.activateConstraints(NSArray(widthConstraint))
     return this
 }
 
-fun UIView.fixedHeight(c: Double): UIView {
+fun UIView.fixedHeight(c: Double, priority: Float? = null): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
-    NSLayoutConstraint.activateConstraints(NSArray(this.heightAnchor.equalTo(c)))
+    val heightConstraint = this.heightAnchor.equalTo(c)
+    priority?.let { heightConstraint.priority = priority }
+    NSLayoutConstraint.activateConstraints(NSArray(heightConstraint))
     return this
 }
 

@@ -9,27 +9,12 @@ import org.robovm.apple.uikit.*
 abstract class ViewGroupHolder(
     uiView: UIView, treeElement: TreeElement
 ) : UiViewHolder(uiView, treeElement) {
-    open val contentView: UIView get() = uiView
 
-    open fun removeAllChildren() {
-        contentView.subviews.forEach { it.removeFromSuperview() }
-    }
+    abstract fun removeAllChildren()
 
-    open fun addSubView(subviewHolder: UiViewHolder) {
-        val viewToAdd = subviewHolder.uiView
-        contentView.addSubview(viewToAdd)
-        configureUiView(viewToAdd)
-    }
+    abstract fun addSubView(subviewHolder: UiViewHolder)
 
-    private fun configureUiView(viewToAdd: UIView) {
-        viewToAdd.centerHorizontal(true).topToSuperview().superViewWrapsHeight()
-    }
-
-    open fun replaceSubView(oldView: UiViewHolder, newView: UiViewHolder) {
-        contentView.insertSubviewBelow(newView.uiView, oldView.uiView)
-        oldView.uiView.removeFromSuperview()
-        configureUiView(newView.uiView)
-    }
+    abstract fun replaceSubView(oldView: UiViewHolder, newView: UiViewHolder)
 }
 
 class BoxViewHolder(
@@ -56,8 +41,25 @@ class BoxViewHolder(
         // for a normal box, outer uiview holds the content as well
             uiView
 
-    override val contentView: UIView
-        get() = contentContainer
+    override fun removeAllChildren() {
+        contentContainer.subviews.forEach { it.removeFromSuperview() }
+    }
+
+    override fun addSubView(subviewHolder: UiViewHolder) {
+        val viewToAdd = subviewHolder.uiView
+        contentContainer.addSubview(viewToAdd)
+        configureUiView(viewToAdd)
+    }
+
+    private fun configureUiView(viewToAdd: UIView) {
+        viewToAdd.centerHorizontal(true).topToSuperview().superViewWrapsHeight()
+    }
+
+    override fun replaceSubView(oldView: UiViewHolder, newView: UiViewHolder) {
+        contentContainer.insertSubviewBelow(newView.uiView, oldView.uiView)
+        oldView.uiView.removeFromSuperview()
+        configureUiView(newView.uiView)
+    }
 }
 
 class StackViewHolder(
