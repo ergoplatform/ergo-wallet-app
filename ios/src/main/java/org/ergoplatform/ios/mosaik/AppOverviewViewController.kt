@@ -8,6 +8,7 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WIDTH_ICONS
 import org.ergoplatform.mosaik.MosaikAppEntry
 import org.ergoplatform.mosaik.MosaikAppOverviewUiLogic
+import org.ergoplatform.mosaik.MosaikAppSuggestion
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.coregraphics.CGRect
@@ -20,6 +21,8 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
     private lateinit var inputAddress: UITextField
     private lateinit var favoritesList: AppItemStackView
     private lateinit var lastVisitedList: AppItemStackView
+    private lateinit var suggestionsList: AppItemStackView
+    private lateinit var suggestionsLabel: UILabel
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -80,9 +83,19 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
         container.addSubview(lastVisitedList)
         lastVisitedList.topToBottomOf(lastVisitedLabel).leftToLeftOf(favoritesList).rightToRightOf(favoritesList)
 
-        // TODO suggestions
-
-        lastVisitedList.bottomToSuperview() // TODO
+        suggestionsLabel = Body1BoldLabel().apply {
+            text = texts.get(STRING_TITLE_SUGGESTIONS)
+            textColor = uiColorErgo
+            isHidden = true
+        }
+        container.addSubview(suggestionsLabel)
+        suggestionsLabel.topToBottomOf(lastVisitedList, DEFAULT_MARGIN * 3).leftToLeftOf(favoritesLabel)
+            .rightToRightOf(favoritesLabel)
+        suggestionsList = AppItemStackView()
+        container.addSubview(suggestionsList)
+        suggestionsList.topToBottomOf(suggestionsLabel).leftToLeftOf(favoritesList).rightToRightOf(favoritesList)
+        suggestionsList.bottomToSuperview()
+        suggestionsList.isHidden = true
 
         // TODO disclaimer, opt in
 
@@ -124,6 +137,15 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
                 }
             }
         }
+        viewControllerScope.launch {
+            uiLogic.suggestionFlow.collectLatest {
+                runOnMainThread {
+                    suggestionsList.updateList(it)
+                    suggestionsList.isHidden = it.isEmpty()
+                    suggestionsLabel.isHidden = it.isEmpty()
+                }
+            }
+        }
     }
 
     private inner class IosMosaikAppOverviewUiLogic : MosaikAppOverviewUiLogic() {
@@ -137,7 +159,7 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
             spacing = DEFAULT_MARGIN
         }
 
-        fun updateList(list: List<MosaikAppEntry>) {
+        fun updateList(list: List<Any>) {
             this.clearArrangedSubviews()
 
             if (list.isEmpty()) {
@@ -146,27 +168,29 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
                 })
             }
 
-            list.forEach {
-                addArrangedSubview(AppItem().bind(it))
-
-
+            list.forEach { appEntry ->
+                if (appEntry is MosaikAppEntry)
+                    addArrangedSubview(AppItem().bind(appEntry))
+                else if (appEntry is MosaikAppSuggestion)
+                    addArrangedSubview(AppItem().bind(appEntry))
             }
         }
 
     }
 
     inner class AppItem : CardView() {
-        private val title = Body1BoldLabel()
+        private val titleLabel = Body1BoldLabel()
         private val descLabel = Body2Label()
         private val appIconImage = UIImageView()
-        private var appEntry: MosaikAppEntry? = null
+        private var appUrl: String? = null
+        private var appName: String? = null
 
         init {
             layoutMargins = UIEdgeInsets.Zero()
-            title.textColor = uiColorErgo
+            titleLabel.textColor = uiColorErgo
             appIconImage.contentMode = UIViewContentMode.ScaleAspectFit
 
-            addSubview(title)
+            addSubview(titleLabel)
             addSubview(descLabel)
             addSubview(appIconImage)
 
@@ -174,38 +198,55 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
                 .bottomToSuperview(bottomInset = DEFAULT_MARGIN, canBeLess = true)
                 .leftToSuperview(inset = DEFAULT_MARGIN)
                 .fixedWidth(WIDTH_ICONS).fixedHeight(WIDTH_ICONS)
-            title.topToSuperview(topInset = DEFAULT_MARGIN).leftToRightOf(appIconImage, DEFAULT_MARGIN)
+            titleLabel.topToSuperview(topInset = DEFAULT_MARGIN).leftToRightOf(appIconImage, DEFAULT_MARGIN)
                 .rightToSuperview(inset = DEFAULT_MARGIN)
-            descLabel.topToBottomOf(title).bottomToSuperview(bottomInset = DEFAULT_MARGIN).leftToLeftOf(title)
-                .rightToRightOf(title)
+            descLabel.topToBottomOf(titleLabel).bottomToSuperview(bottomInset = DEFAULT_MARGIN).leftToLeftOf(titleLabel)
+                .rightToRightOf(titleLabel)
 
             isUserInteractionEnabled = true
             addGestureRecognizer(UITapGestureRecognizer {
-                appEntry?.let {
-                    navigateToApp(it.url, it.name)
+                appUrl?.let {
+                    navigateToApp(appUrl!!, appName)
                 }
             })
         }
 
         fun bind(mosaikApp: MosaikAppEntry): CardView {
-            title.text = mosaikApp.name
-            descLabel.text = if (mosaikApp.description.isNullOrBlank()) mosaikApp.url else mosaikApp.description
-            descLabel.numberOfLines = if (mosaikApp.description.isNullOrBlank()) 1 else 3
-            this.appEntry = mosaikApp
-
-            val uiImage = try {
-                mosaikApp.iconFile?.let { fileId ->
-                    IosCacheManager().readFileContent(fileId)?.let { bytes -> UIImage(NSData(bytes)) }
+            bind(
+                mosaikApp.name,
+                (if (mosaikApp.description.isNullOrBlank()) mosaikApp.url else mosaikApp.description)!!,
+                mosaikApp.url,
+                try {
+                    mosaikApp.iconFile?.let { fileId ->
+                        IosCacheManager().readFileContent(fileId)?.let { bytes -> UIImage(NSData(bytes)) }
+                    }
+                } catch (t: Throwable) {
+                    LogUtils.logDebug("MosaikOverview", "Error accessing icon file", t)
+                    null
                 }
-            } catch (t: Throwable) {
-                LogUtils.logDebug("MosaikOverview", "Error accessing icon file", t)
-                null
-            }
-
-            appIconImage.image = uiImage ?: getIosSystemImage(IMAGE_MOSAIK, UIImageSymbolScale.Medium)
-            appIconImage.tintColor = if (uiImage == null) UIColor.label() else null
-
+            )
             return this
+        }
+
+        fun bind(mosaikAppSuggestion: MosaikAppSuggestion): CardView {
+            bind(
+                mosaikAppSuggestion.appName,
+                mosaikAppSuggestion.appDescription,
+                mosaikAppSuggestion.appUrl,
+                image = null
+            )
+            return this
+        }
+
+        fun bind(title: String, description: String, url: String, image: UIImage?) {
+            titleLabel.text = title
+            descLabel.text = description
+            this.appName = title
+            this.appUrl = url
+            descLabel.numberOfLines = if (url == description) 1 else 3
+
+            appIconImage.image = image ?: getIosSystemImage(IMAGE_MOSAIK, UIImageSymbolScale.Medium)
+            appIconImage.tintColor = if (image == null) UIColor.label() else null
         }
     }
 }
