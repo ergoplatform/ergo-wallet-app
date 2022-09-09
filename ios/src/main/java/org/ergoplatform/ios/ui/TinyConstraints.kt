@@ -385,6 +385,22 @@ fun UIView.minWidth(c: Double): UIView {
     return this
 }
 
+fun UIView.widthMatchesWidthOf(sibling: UIView, factor: Double): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+    NSLayoutConstraint.activateConstraints(
+        NSArray(this.widthAnchor.equalTo(sibling.widthAnchor, factor))
+    )
+    return this
+}
+
+fun UIView.heightMatchesHeightOf(sibling: UIView, factor: Double): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+    NSLayoutConstraint.activateConstraints(
+        NSArray(this.heightAnchor.equalTo(sibling.heightAnchor, factor))
+    )
+    return this
+}
+
 fun UIView.widthMatchesSuperview(
     useSafeArea: Boolean = false,
     inset: Double = 0.0,

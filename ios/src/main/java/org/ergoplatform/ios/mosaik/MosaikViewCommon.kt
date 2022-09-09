@@ -43,7 +43,10 @@ object MosaikViewCommon {
             uiView.layoutMargins = UIEdgeInsets(padding, padding, padding, padding)
 
             if (padding > 0) {
-                uiView.minHeight(padding * 2).minWidth(padding * 2)
+                if (mosaikViewElement.children.isEmpty())
+                    uiView.fixedHeight(padding * 2).fixedWidth(padding * 2)
+                else
+                    uiView.minHeight(padding * 2).minWidth(padding * 2)
             }
         }
 

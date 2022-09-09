@@ -76,9 +76,11 @@ class StackViewHolder(
     val weightList = linearLayout.children.map { linearLayout.getChildWeight(it) }
     val weightSum = weightList.sum()
     val allHaveWeights = weightList.all { it > 0 }
+    private var firstElementWidthWeight: Pair<UiViewWrapper, Int>? = null
 
     override fun removeAllChildren() {
         uiStackView.clearArrangedSubviews()
+        firstElementWidthWeight = null
     }
 
     override fun addSubView(subviewHolder: UiViewHolder) {
@@ -90,11 +92,30 @@ class StackViewHolder(
         uiStackView.addArrangedSubview(uiViewWrapper)
         uiViewWrapper.addSubview(subviewHolder.uiView)
 
-        configureView(subviewHolder)
+        configureSubView(subviewHolder)
 
+        val weight = linearLayout.getChildWeight(subviewHolder.treeElement.element)
+        if (weight > 0) {
+            // configure weight in relation to other elements with a weight
+            val firstElementWidthWeight = this.firstElementWidthWeight
+
+            if (firstElementWidthWeight == null) {
+                this.firstElementWidthWeight = Pair(uiViewWrapper, weight)
+            } else if (uiStackView.axis == UILayoutConstraintAxis.Horizontal) {
+                uiViewWrapper.widthMatchesWidthOf(
+                    firstElementWidthWeight.first,
+                    weight.toDouble() / firstElementWidthWeight.second
+                )
+            } else if (uiStackView.axis == UILayoutConstraintAxis.Vertical) {
+                uiViewWrapper.heightMatchesHeightOf(
+                    firstElementWidthWeight.first,
+                    weight.toDouble() / firstElementWidthWeight.second
+                )
+            }
+        }
     }
 
-    private fun configureView(uiViewHolder: UiViewHolder) {
+    private fun configureSubView(uiViewHolder: UiViewHolder) {
         val uiView = uiViewHolder.uiView
         // configure our added view
         val weight = linearLayout.getChildWeight(uiViewHolder.treeElement.element)
@@ -138,7 +159,7 @@ class StackViewHolder(
             subview.removeFromSuperview()
         }
         wrapper.addSubview(newView.uiView)
-        configureView(newView)
+        configureSubView(newView)
     }
 
     override fun isFillMaxWidth(): Boolean {

@@ -124,7 +124,7 @@ class MosaikViewController(
         }
     ) {
         override fun onAppNavigated(manifest: MosaikManifest) {
-            runOnMainThread {
+            org.ergoplatform.ios.ui.runOnMainThread {
                 title = manifest.appName
                 scrollView.scrollToTop(false)
                 favoriteButton.isEnabled = true
@@ -133,7 +133,7 @@ class MosaikViewController(
         }
 
         override fun appNotLoaded(cause: Throwable) {
-            runOnMainThread {
+            org.ergoplatform.ios.ui.runOnMainThread {
                 noAppLoadedView.errorLabel.text = getUserErrorMessage(cause)
                 noAppLoadedView.isHidden = false
                 scrollView.isHidden = true
@@ -153,7 +153,7 @@ class MosaikViewController(
         }
 
         override fun pasteToClipboard(text: String) {
-            pasteToClipboard(text)
+            shareText(text, mosaikView)
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {
@@ -193,7 +193,7 @@ class MosaikViewController(
                 )
             }
 
-            runOnMainThread {
+            org.ergoplatform.ios.ui.runOnMainThread {
                 presentViewController(uac, true) {}
             }
         }
@@ -206,6 +206,11 @@ class MosaikViewController(
             TODO("Not yet implemented")
         }
 
+        override suspend fun runOnMainThread(method: () -> Unit) {
+            org.ergoplatform.ios.ui.runOnMainThread {
+                method()
+            }
+        }
     }
 
     class WaitingView : UIView(CGRect.Zero()) {
