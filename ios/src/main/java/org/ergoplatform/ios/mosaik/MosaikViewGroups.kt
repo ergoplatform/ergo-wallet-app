@@ -24,6 +24,8 @@ class BoxViewHolder(
     if (debugModeColors) backgroundColor = UIColor.green()
 }, treeElement) {
 
+    private val box = treeElement.element as Box
+
     private val contentContainer =
         if (treeElement.element is Card)
         // for a card, we have an inner content container
@@ -48,17 +50,31 @@ class BoxViewHolder(
     override fun addSubView(subviewHolder: UiViewHolder) {
         val viewToAdd = subviewHolder.uiView
         contentContainer.addSubview(viewToAdd)
-        configureUiView(viewToAdd)
+        configureUiView(subviewHolder)
     }
 
-    private fun configureUiView(viewToAdd: UIView) {
-        viewToAdd.centerHorizontal(true).topToSuperview().superViewWrapsHeight()
+    private fun configureUiView(viewToAdd: UiViewHolder) {
+        val uiView = viewToAdd.uiView
+
+        when (box.getChildHAlignment(viewToAdd.treeElement.element)) {
+            HAlignment.START -> uiView.leftToSuperview().rightToSuperview(canBeLess = true)
+            HAlignment.CENTER -> uiView.centerHorizontal(true)
+            HAlignment.END -> uiView.leftToSuperview(canBeMore = true).rightToSuperview()
+            HAlignment.JUSTIFY -> uiView.widthMatchesSuperview()
+        }
+
+        when (box.getChildVAlignment(viewToAdd.treeElement.element)) {
+            VAlignment.TOP -> uiView.topToSuperview().bottomToSuperview(canBeLess = true)
+            VAlignment.CENTER -> uiView.centerVertical().topToSuperview(canBeMore = true)
+                .bottomToSuperview(canBeLess = true)
+            VAlignment.BOTTOM -> uiView.topToSuperview(canBeMore = true).bottomToSuperview()
+        }
     }
 
     override fun replaceSubView(oldView: UiViewHolder, newView: UiViewHolder) {
         contentContainer.insertSubviewBelow(newView.uiView, oldView.uiView)
         oldView.uiView.removeFromSuperview()
-        configureUiView(newView.uiView)
+        configureUiView(newView)
     }
 }
 

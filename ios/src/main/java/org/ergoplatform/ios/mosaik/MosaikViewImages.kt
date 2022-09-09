@@ -18,9 +18,9 @@ class ImageViewHolder(
     init {
         val mosaikViewElement = treeElement.element as Image
         val size = when (mosaikViewElement.size) {
-            Image.Size.SMALL -> 70.0
-            Image.Size.MEDIUM -> 140.0
-            Image.Size.LARGE -> 280.0
+            Image.Size.SMALL -> 50.0
+            Image.Size.MEDIUM -> 120.0
+            Image.Size.LARGE -> 250.0
         }
         uiImageView.apply {
             contentMode = UIViewContentMode.ScaleAspectFit
