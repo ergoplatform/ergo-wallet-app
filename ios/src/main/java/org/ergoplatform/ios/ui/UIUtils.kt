@@ -48,6 +48,7 @@ val IMAGE_ADDRESS = if (Foundation.getMajorSystemVersion() >= 14) "arrow.triangl
 const val IMAGE_TRANSACTIONS = "arrow.right.arrow.left"
 const val IMAGE_ADDRESS_LIST = "list.number"
 const val IMAGE_CHEVRON_DOWN = "chevron.down"
+const val IMAGE_CHEVRON_LEFT = "chevron.left"
 const val IMAGE_CHEVRON_UP = "chevron.up"
 val IMAGE_SWITCH_RESOLUTION = if (Foundation.getMajorSystemVersion() >= 14)
     "arrow.up.left.and.down.right.magnifyingglass" else "1.magnifyingglass"

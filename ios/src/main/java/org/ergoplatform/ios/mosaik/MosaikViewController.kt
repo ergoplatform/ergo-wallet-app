@@ -62,7 +62,8 @@ class MosaikViewController(
         noAppLoadedView.centerVertical().centerHorizontal(true)
 
         navigationItem.setHidesBackButton(true)
-        val backButton = UIBarButtonItem(appDelegate.texts.get(STRING_BUTTON_BACK), UIBarButtonItemStyle.Plain)
+        val backButton = UIBarButtonItem(getIosSystemImage(IMAGE_CHEVRON_LEFT, UIImageSymbolScale.Small),
+            UIBarButtonItemStyle.Plain)
         navigationItem.leftBarButtonItem = backButton
         backButton.setOnClickListener {
             if (mosaikRuntime.canNavigateBack())

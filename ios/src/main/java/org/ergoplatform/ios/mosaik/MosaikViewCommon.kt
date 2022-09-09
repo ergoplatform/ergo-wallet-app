@@ -2,6 +2,7 @@ package org.ergoplatform.ios.mosaik
 
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.TreeElement
+import org.ergoplatform.mosaik.model.ui.Icon
 import org.ergoplatform.mosaik.model.ui.Image
 import org.ergoplatform.mosaik.model.ui.layout.Box
 import org.ergoplatform.mosaik.model.ui.layout.LayoutElement
@@ -26,6 +27,8 @@ object MosaikViewCommon {
             is Box -> BoxViewHolder(treeElement)
 
             is Image -> ImageViewHolder(treeElement)
+
+            is Icon -> IconImageViewHolder(treeElement)
 
             is StyleableTextLabel<*> -> LabelViewHolder(treeElement, mosaikViewElement)
 
