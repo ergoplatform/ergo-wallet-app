@@ -9,10 +9,7 @@ import org.ergoplatform.mosaik.model.ui.layout.LayoutElement
 import org.ergoplatform.mosaik.model.ui.layout.LinearLayout
 import org.ergoplatform.mosaik.model.ui.layout.Padding
 import org.ergoplatform.mosaik.model.ui.text.StyleableTextLabel
-import org.robovm.apple.uikit.UIEdgeInsets
-import org.robovm.apple.uikit.UILongPressGestureRecognizer
-import org.robovm.apple.uikit.UITapGestureRecognizer
-import org.robovm.apple.uikit.UIView
+import org.robovm.apple.uikit.*
 
 const val debugModeColors = false
 
@@ -64,6 +61,9 @@ object MosaikViewCommon {
                 treeElement.clicked()
             })
         }
+
+        if (debugModeColors && uiView.backgroundColor == null)
+            uiView.backgroundColor = UIColor.blue()
 
         return uiViewHolder
     }

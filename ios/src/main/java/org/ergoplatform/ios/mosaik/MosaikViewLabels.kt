@@ -25,7 +25,6 @@ fun LabelViewHolder(treeElement: TreeElement, mosaikViewElement: StyleableTextLa
     }
 
     labelView.apply {
-        if (debugModeColors) backgroundColor = UIColor.blue()
         text = LabelFormatter.getFormattedText(mosaikViewElement, treeElement)
         textColor = when (mosaikViewElement.textColor) {
             ForegroundColor.PRIMARY -> uiColorErgo
