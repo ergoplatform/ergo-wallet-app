@@ -8,6 +8,7 @@ import org.ergoplatform.mosaik.model.ui.layout.Box
 import org.ergoplatform.mosaik.model.ui.layout.LayoutElement
 import org.ergoplatform.mosaik.model.ui.layout.LinearLayout
 import org.ergoplatform.mosaik.model.ui.layout.Padding
+import org.ergoplatform.mosaik.model.ui.text.Button
 import org.ergoplatform.mosaik.model.ui.text.StyleableTextLabel
 import org.robovm.apple.uikit.*
 
@@ -26,6 +27,8 @@ object MosaikViewCommon {
             is Image -> ImageViewHolder(treeElement)
 
             is Icon -> IconImageViewHolder(treeElement)
+
+            is Button -> ButtonHolder(treeElement)
 
             is StyleableTextLabel<*> -> LabelViewHolder(treeElement, mosaikViewElement)
 
@@ -52,7 +55,7 @@ object MosaikViewCommon {
             }
         }
 
-        if (treeElement.respondsToClick) {
+        if (!uiViewHolder.handlesClicks && treeElement.respondsToClick) {
             uiView.isUserInteractionEnabled = true
             uiView.addGestureRecognizer(UILongPressGestureRecognizer {
                 treeElement.longPressed()
@@ -81,6 +84,8 @@ open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) {
     }
 
     open fun isFillMaxWidth(): Boolean = false
+
+    open val handlesClicks: Boolean = false
 }
 
 fun Padding.toUiKitSize() =

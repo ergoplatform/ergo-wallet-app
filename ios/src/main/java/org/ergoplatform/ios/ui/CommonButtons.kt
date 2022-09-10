@@ -7,7 +7,7 @@ open class CommonButton(caption: String, image: UIImage? = null) :
 
     init {
         contentEdgeInsets = UIEdgeInsets(8.0, 8.0, 8.0, 8.0)
-        layer.cornerRadius = 18.0
+        layer.cornerRadius = 12.0
         layer.setMasksToBounds(false)
 
         setTitleColor(UIColor.label(), UIControlState.Normal)
