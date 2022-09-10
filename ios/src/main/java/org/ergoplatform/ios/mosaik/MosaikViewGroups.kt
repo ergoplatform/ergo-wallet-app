@@ -201,3 +201,26 @@ class StackViewHolder(
         }
     }
 }
+
+class SeparatorHolder(
+    treeElement: TreeElement,
+): UiViewHolder(
+    UIView(CGRect.Zero()),
+    treeElement
+) {
+
+    init {
+        val separator = treeElement.element as HorizontalRule
+
+        val padding = separator.getvPadding().toUiKitSize()
+        uiView.layoutMargins = UIEdgeInsets(padding, 0.0, padding, 0.0)
+
+        val separatorView = createHorizontalSeparator()
+        uiView.addSubview(separatorView)
+        separatorView.edgesToSuperview()
+    }
+
+    override fun isFillMaxWidth(): Boolean {
+        return true
+    }
+}
