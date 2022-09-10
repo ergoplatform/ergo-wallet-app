@@ -6,6 +6,8 @@ import org.ergoplatform.mosaik.TreeElement
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.ui.layout.Column
 import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.foundation.NSArray
+import org.robovm.apple.uikit.NSLayoutConstraint
 import org.robovm.apple.uikit.UIEdgeInsets
 import org.robovm.apple.uikit.UIView
 import java.util.*
@@ -33,16 +35,16 @@ class MosaikView(
                 MosaikManifest.CanvasDimension.MEDIUM_WIDTH -> 720.0
                 else -> 0.0
             }
-            uiView.widthMatchesSuperview(maxWidth = maxWidth)
+            uiView.centerHorizontal(true)
                 .topToSuperview(canBeMore = !positionAtTop)
                 .bottomToSuperview(canBeLess = true)
 
             if (maxWidth > 0)
-                // maxWidth lowers the priority of left and right to match outer edges; this means
-                // it can happen that the view stretches outside. We prevent this with additional
-                // constraints
-                uiView.leftToSuperview(canBeMore = true)
-                    .rightToSuperview(canBeLess = true)
+                NSLayoutConstraint.activateConstraints(
+                    NSArray(
+                        uiView.widthAnchor.lessThanOrEqualTo(maxWidth)
+                    )
+                )
 
             if (!positionAtTop)
                 uiView.centerVertical()
