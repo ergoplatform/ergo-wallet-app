@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.CrashHandler
 import org.ergoplatform.ios.IosCacheManager
+import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.MosaikDialog
@@ -62,8 +63,10 @@ class MosaikViewController(
         noAppLoadedView.centerVertical().centerHorizontal(true)
 
         navigationItem.setHidesBackButton(true)
-        val backButton = UIBarButtonItem(getIosSystemImage(IMAGE_CHEVRON_LEFT, UIImageSymbolScale.Small),
-            UIBarButtonItemStyle.Plain)
+        val backButton = UIBarButtonItem(
+            getIosSystemImage(IMAGE_CHEVRON_LEFT, UIImageSymbolScale.Small),
+            UIBarButtonItemStyle.Plain
+        )
         navigationItem.leftBarButtonItem = backButton
         backButton.setOnClickListener {
             if (mosaikRuntime.canNavigateBack())
@@ -166,7 +169,7 @@ class MosaikViewController(
         }
 
         override fun runTokenInformationAction(tokenId: String) {
-            TODO("Not yet implemented")
+            presentViewController(TokenInformationViewController(tokenId, null), true) {}
         }
 
         override fun scanQrCode(actionId: String) {
