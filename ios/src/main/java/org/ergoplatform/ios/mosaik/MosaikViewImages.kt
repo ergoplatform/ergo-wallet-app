@@ -67,36 +67,38 @@ class IconImageViewHolder(
                 ForegroundColor.SECONDARY -> UIColor.secondaryLabel()
             }
 
-            image = getIosSystemImage(
-                when (mosaikViewElement.iconType) {
-                    IconType.INFO -> IMAGE_INFORMATION
-                    IconType.WARN -> IMAGE_WARNING
-                    IconType.ERROR -> IMAGE_ERROR
-                    IconType.CONFIG -> IMAGE_SETTINGS
-                    IconType.ADD -> IMAGE_PLUS
-                    IconType.EDIT -> IMAGE_EDIT_CIRCLE
-                    IconType.REFRESH -> IMAGE_RELOAD
-                    IconType.DELETE -> "xmark.circle"
-                    IconType.CROSS -> "xmark"
-                    IconType.WALLET -> IMAGE_WALLET
-                    IconType.SEND -> IMAGE_SEND
-                    IconType.RECEIVE -> IMAGE_RECEIVE
-                    IconType.MORE -> IMAGE_MORE_ACTION
-                    IconType.OPENLIST -> IMAGE_OPEN_LIST
-                    IconType.CHEVRON_UP -> IMAGE_CHEVRON_UP
-                    IconType.CHEVRON_DOWN -> IMAGE_CHEVRON_DOWN
-                    IconType.COPY -> "doc.on.doc"
-                    IconType.BACK -> IMAGE_CHEVRON_LEFT
-                    IconType.FORWARD -> "chevron.right"
-                    IconType.SWITCH -> "arrow.left.and.right.circle"
-                    IconType.QR_CODE -> IMAGE_QR_CODE
-                    IconType.QR_SCAN -> IMAGE_QR_SCAN
-                },
-                UIImageSymbolScale.Small
-            )
+            image = mosaikViewElement.iconType.getUiImage()
         }
     }
 }
+
+fun IconType.getUiImage() = getIosSystemImage(
+    when (this) {
+        IconType.INFO -> IMAGE_INFORMATION
+        IconType.WARN -> IMAGE_WARNING
+        IconType.ERROR -> IMAGE_ERROR
+        IconType.CONFIG -> IMAGE_SETTINGS
+        IconType.ADD -> IMAGE_PLUS
+        IconType.EDIT -> IMAGE_EDIT_CIRCLE
+        IconType.REFRESH -> IMAGE_RELOAD
+        IconType.DELETE -> "xmark.circle"
+        IconType.CROSS -> "xmark"
+        IconType.WALLET -> IMAGE_WALLET
+        IconType.SEND -> IMAGE_SEND
+        IconType.RECEIVE -> IMAGE_RECEIVE
+        IconType.MORE -> IMAGE_MORE_ACTION
+        IconType.OPENLIST -> IMAGE_OPEN_LIST
+        IconType.CHEVRON_UP -> IMAGE_CHEVRON_UP
+        IconType.CHEVRON_DOWN -> IMAGE_CHEVRON_DOWN
+        IconType.COPY -> "doc.on.doc"
+        IconType.BACK -> IMAGE_CHEVRON_LEFT
+        IconType.FORWARD -> "chevron.right"
+        IconType.SWITCH -> "arrow.left.and.right.circle"
+        IconType.QR_CODE -> IMAGE_QR_CODE
+        IconType.QR_SCAN -> IMAGE_QR_SCAN
+    },
+    UIImageSymbolScale.Small
+)
 
 class LoadingIndicatorHolder(
     treeElement: TreeElement,

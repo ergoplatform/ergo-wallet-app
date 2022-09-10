@@ -173,7 +173,9 @@ class MosaikViewController(
         }
 
         override fun scanQrCode(actionId: String) {
-            TODO("Not yet implemented")
+            presentViewController(QrScannerViewController(true, true) {
+                qrCodeScanned(actionId, it)
+            }, true) {}
         }
 
         override fun showDialog(dialog: MosaikDialog) {

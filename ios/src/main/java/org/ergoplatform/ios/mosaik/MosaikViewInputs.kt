@@ -77,7 +77,14 @@ class TextFieldViewHolder(treeElement: TreeElement) :
                 setHasError(!treeElement.changeValueFromInput(text.ifEmpty { null }))
             }
 
-            // TODO EndIcon and handle clicked
+            mosaikElement.endIcon?.getUiImage()?.let { endIcon ->
+                setCustomActionField(
+                    endIcon,
+                    action = {
+                        mosaikElement.onEndIconClicked?.let { runtime.runAction(it) }
+                    }
+                )
+            }
         }
 
         labelView.text = mosaikElement.placeholder
