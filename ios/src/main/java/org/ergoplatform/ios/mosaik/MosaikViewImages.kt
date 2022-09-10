@@ -132,3 +132,23 @@ class LoadingIndicatorHolder(
         indicatorView.startAnimating()
     }
 }
+
+class QrCodeViewHolder(
+    treeElement: TreeElement
+): UiViewHolder(UIImageView(), treeElement) {
+
+    val uiImageView = uiView as UIImageView
+
+    init {
+        val mosaikViewElement = treeElement.element as QrCode
+        val size = DEFAULT_QR_CODE_SIZE
+        uiImageView.apply {
+            contentMode = UIViewContentMode.ScaleAspectFit
+            fixedHeight(size)
+            fixedWidth(size)
+
+            setQrCode(mosaikViewElement.content, DEFAULT_QR_CODE_SIZE)
+        }
+    }
+}
+

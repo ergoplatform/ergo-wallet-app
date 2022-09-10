@@ -5,6 +5,7 @@ import org.ergoplatform.mosaik.TreeElement
 import org.ergoplatform.mosaik.model.ui.Icon
 import org.ergoplatform.mosaik.model.ui.Image
 import org.ergoplatform.mosaik.model.ui.LoadingIndicator
+import org.ergoplatform.mosaik.model.ui.QrCode
 import org.ergoplatform.mosaik.model.ui.layout.*
 import org.ergoplatform.mosaik.model.ui.text.Button
 import org.ergoplatform.mosaik.model.ui.text.StyleableTextLabel
@@ -33,6 +34,8 @@ object MosaikViewCommon {
             is HorizontalRule -> SeparatorHolder(treeElement)
 
             is LoadingIndicator -> LoadingIndicatorHolder(treeElement)
+
+            is QrCode -> QrCodeViewHolder(treeElement)
 
             else -> {
                 UiViewHolder(Body1Label().apply {
