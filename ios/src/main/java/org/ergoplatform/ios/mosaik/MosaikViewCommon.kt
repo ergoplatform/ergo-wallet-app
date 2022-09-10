@@ -4,6 +4,7 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.TreeElement
 import org.ergoplatform.mosaik.model.ui.Icon
 import org.ergoplatform.mosaik.model.ui.Image
+import org.ergoplatform.mosaik.model.ui.LoadingIndicator
 import org.ergoplatform.mosaik.model.ui.layout.*
 import org.ergoplatform.mosaik.model.ui.text.Button
 import org.ergoplatform.mosaik.model.ui.text.StyleableTextLabel
@@ -30,6 +31,8 @@ object MosaikViewCommon {
             is StyleableTextLabel<*> -> LabelViewHolder(treeElement, mosaikViewElement)
 
             is HorizontalRule -> SeparatorHolder(treeElement)
+
+            is LoadingIndicator -> LoadingIndicatorHolder(treeElement)
 
             else -> {
                 UiViewHolder(Body1Label().apply {
@@ -63,6 +66,8 @@ object MosaikViewCommon {
                 treeElement.clicked()
             })
         }
+
+        uiView.isHidden = !mosaikViewElement.isVisible
 
         if (debugModeColors && uiView.backgroundColor == null)
             uiView.backgroundColor = UIColor.blue()

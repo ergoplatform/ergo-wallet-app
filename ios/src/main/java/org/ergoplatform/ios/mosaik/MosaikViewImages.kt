@@ -3,10 +3,8 @@ package org.ergoplatform.ios.mosaik
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WIDTH_ICONS
 import org.ergoplatform.mosaik.TreeElement
-import org.ergoplatform.mosaik.model.ui.ForegroundColor
-import org.ergoplatform.mosaik.model.ui.Icon
-import org.ergoplatform.mosaik.model.ui.IconType
-import org.ergoplatform.mosaik.model.ui.Image
+import org.ergoplatform.mosaik.model.ui.*
+import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSData
 import org.robovm.apple.uikit.*
 
@@ -97,5 +95,40 @@ class IconImageViewHolder(
                 UIImageSymbolScale.Small
             )
         }
+    }
+}
+
+class LoadingIndicatorHolder(
+    treeElement: TreeElement,
+): UiViewHolder(
+    UIView(CGRect.Zero()),
+    treeElement
+) {
+
+    private val indicatorView: UIActivityIndicatorView
+
+    init {
+        val indicatorElement = treeElement.element as LoadingIndicator
+
+        val size = when (indicatorElement.size) {
+            LoadingIndicator.Size.SMALL -> WIDTH_ICONS
+            LoadingIndicator.Size.MEDIUM -> WIDTH_ICONS * 2
+        }
+        uiView.layoutMargins = UIEdgeInsets.Zero()
+
+        indicatorView = UIActivityIndicatorView(
+            when (indicatorElement.size) {
+                LoadingIndicator.Size.SMALL -> UIActivityIndicatorViewStyle.Medium
+                LoadingIndicator.Size.MEDIUM -> UIActivityIndicatorViewStyle.Large
+            }
+        )
+        uiView.addSubview(indicatorView)
+        indicatorView.centerHorizontal().centerVertical()
+        uiView.fixedWidth(size).fixedHeight(size)
+    }
+
+    override fun onAddedToSuperview() {
+        super.onAddedToSuperview()
+        indicatorView.startAnimating()
     }
 }
