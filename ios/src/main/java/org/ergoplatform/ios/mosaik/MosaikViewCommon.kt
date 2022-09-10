@@ -6,6 +6,7 @@ import org.ergoplatform.mosaik.model.ui.Icon
 import org.ergoplatform.mosaik.model.ui.Image
 import org.ergoplatform.mosaik.model.ui.LoadingIndicator
 import org.ergoplatform.mosaik.model.ui.QrCode
+import org.ergoplatform.mosaik.model.ui.input.TextField
 import org.ergoplatform.mosaik.model.ui.layout.*
 import org.ergoplatform.mosaik.model.ui.text.Button
 import org.ergoplatform.mosaik.model.ui.text.StyleableTextLabel
@@ -19,23 +20,38 @@ object MosaikViewCommon {
         val runtime = treeElement.viewTree.mosaikRuntime
 
         val uiViewHolder = when (mosaikViewElement) {
-            is LinearLayout<*> -> StackViewHolder(mosaikViewElement, treeElement)
 
             is Box -> BoxViewHolder(treeElement)
 
-            is Image -> ImageViewHolder(treeElement)
-
-            is Icon -> IconImageViewHolder(treeElement)
-
-            is Button -> ButtonHolder(treeElement)
+            // TODO is CheckboxLabel -> MosaikCheckboxLabel(treeElement, newModifier)
 
             is StyleableTextLabel<*> -> LabelViewHolder(treeElement, mosaikViewElement)
 
-            is HorizontalRule -> SeparatorHolder(treeElement)
+            // TODO is TokenLabel -> MosaikTokenLabel(treeElement, newModifier)
+
+            is LinearLayout<*> -> StackViewHolder(mosaikViewElement, treeElement)
+
+            is Button -> ButtonHolder(treeElement)
+
+            // TODO is ErgAmountInputField -> MosaikErgAmountInputLayout(treeElement, newModifier)
+
+            is TextField<*> -> TextFieldViewHolder(treeElement)
+
+            // TODO is DropDownList -> MosaikDropDownList(treeElement, newModifier)
 
             is LoadingIndicator -> LoadingIndicatorHolder(treeElement)
 
+            is Icon -> IconImageViewHolder(treeElement)
+
+            is Image -> ImageViewHolder(treeElement)
+
             is QrCode -> QrCodeViewHolder(treeElement)
+
+            // TODO is StyleableInputButton<*> -> MosaikInputButton(treeElement, newModifier)
+
+            is HorizontalRule -> SeparatorHolder(treeElement)
+
+            // TODO is MarkDown -> MosaikMarkDown(treeElement, newModifier)
 
             else -> {
                 UiViewHolder(Body1Label().apply {
