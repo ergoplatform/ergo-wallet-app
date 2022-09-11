@@ -2,6 +2,7 @@ package org.ergoplatform.ios.mosaik
 
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.KeyboardType
+import org.ergoplatform.mosaik.StringConstant
 import org.ergoplatform.mosaik.TreeElement
 import org.ergoplatform.mosaik.model.ui.input.DropDownList
 import org.ergoplatform.mosaik.model.ui.input.TextField
@@ -108,6 +109,7 @@ class DropDownViewHolder(treeElement: TreeElement) :
     private val entriesList = mosaikElement.entries.map { Pair(it.key, it.value) }
 
     private var currentSelectedInPicker = -1
+    private val isActionController = entriesList.size < 5
 
     init {
         val stackView = uiView as UIStackView
@@ -131,10 +133,30 @@ class DropDownViewHolder(treeElement: TreeElement) :
                 ): Boolean = false
 
                 override fun shouldBeginEditing(textField: UITextField?): Boolean {
-                    if (currentSelectedInPicker >= 0)
-                        pickerView.selectRow(currentSelectedInPicker.toLong(), 0L, false)
+                    return if (isActionController) {
+                        val mosaikRuntime = treeElement.viewTree.mosaikRuntime as MosaikViewController.IosMosaikRuntime
+                        val uac = UIAlertController(
+                            mosaikRuntime.formatString(StringConstant.PleaseChoose),
+                            "", UIAlertControllerStyle.ActionSheet
+                        )
+                        entriesList.forEachIndexed { idx, (key, title) ->
+                            uac.addAction(UIAlertAction(title, UIAlertActionStyle.Default) {
+                                println("Clicked $idx")
+                                currentSelectedInPicker = idx
+                                elementSelected()
+                            })
+                        }
 
-                    return super.shouldBeginEditing(textField)
+                        uac.popoverPresentationController?.sourceView = textFieldView
+                        mosaikRuntime.viewController.presentViewController(uac, true) {}
+
+                        false
+                    } else {
+                        if (currentSelectedInPicker >= 0)
+                            pickerView.selectRow(currentSelectedInPicker.toLong(), 0L, false)
+
+                        super.shouldBeginEditing(textField)
+                    }
                 }
             }
 
@@ -143,7 +165,8 @@ class DropDownViewHolder(treeElement: TreeElement) :
             })
         }
 
-        setupPicker()
+        if (!isActionController)
+            setupPicker()
     }
 
     private fun setupPicker() {
@@ -158,13 +181,17 @@ class DropDownViewHolder(treeElement: TreeElement) :
         toolbar.sizeToFit()
         val button = UIBarButtonItem(UIBarButtonSystemItem.Done)
         button.setOnClickListener {
-            treeElement.changeValueFromInput(entriesList.getOrNull(currentSelectedInPicker)?.first)
-            textFieldView.text = treeElement.currentValueAsString
+            elementSelected()
             textFieldView.endEditing(true)
         }
         toolbar.items = NSArray(button)
         toolbar.isUserInteractionEnabled = true
         textFieldView.inputAccessoryView = toolbar
+    }
+
+    private fun elementSelected() {
+        treeElement.changeValueFromInput(entriesList.getOrNull(currentSelectedInPicker)?.first)
+        textFieldView.text = treeElement.currentValueAsString
     }
 
     override fun isFillMaxWidth(): Boolean = true

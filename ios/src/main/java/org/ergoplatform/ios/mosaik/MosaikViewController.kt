@@ -111,7 +111,9 @@ class MosaikViewController(
         mosaikRuntime.checkViewTreeValidity()
     }
 
-    private val mosaikRuntime = object : AppMosaikRuntime(
+    private val mosaikRuntime = IosMosaikRuntime()
+
+    inner class IosMosaikRuntime : AppMosaikRuntime(
         "Ergo Wallet App (iOS)",
         CrashHandler.getAppVersion() ?: "",
         platformType = {
@@ -217,6 +219,8 @@ class MosaikViewController(
                 method()
             }
         }
+
+        val viewController get() = this@MosaikViewController
     }
 
     class WaitingView : UIView(CGRect.Zero()) {
