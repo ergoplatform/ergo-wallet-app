@@ -4,6 +4,7 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.KeyboardType
 import org.ergoplatform.mosaik.StringConstant
 import org.ergoplatform.mosaik.TreeElement
+import org.ergoplatform.mosaik.model.ui.input.CheckboxLabel
 import org.ergoplatform.mosaik.model.ui.input.DropDownList
 import org.ergoplatform.mosaik.model.ui.input.TextField
 import org.robovm.apple.coregraphics.CGRect
@@ -97,7 +98,6 @@ class TextFieldViewHolder(treeElement: TreeElement) :
     override fun isFillMaxWidth(): Boolean = true
 }
 
-// TODO alertview with action for less than 5 elements
 class DropDownViewHolder(treeElement: TreeElement) :
     UiViewHolder(UIStackView(CGRect.Zero()), treeElement) {
 
@@ -216,4 +216,30 @@ class DropDownViewHolder(treeElement: TreeElement) :
             return entriesList.size.toLong()
         }
     }
+}
+
+class CheckboxViewHolder(treeElement: TreeElement) :
+    UiViewHolder(UIView(CGRect.Zero()), treeElement) {
+
+    init {
+        val mosaikElement = treeElement.element as CheckboxLabel
+
+        // build the label using the normal holder
+        val labelView = LabelViewHolder(treeElement, mosaikElement).uiView as ThemedLabel
+        val confirmationCheck = UISwitch(CGRect.Zero()).apply {
+            isOn = mosaikElement.value == true
+            addOnValueChangedListener {
+                treeElement.valueChanged(isOn)
+            }
+        }
+
+        uiView.addSubview(labelView)
+        uiView.addSubview(confirmationCheck)
+        labelView.rightToSuperview().bottomToSuperview().topToSuperview()
+        confirmationCheck.leftToSuperview().centerVertical().rightToLeftOf(labelView, DEFAULT_MARGIN * 2)
+            .fixedWidth(50.0)
+        uiView.minHeight(50.0)
+        uiView.layoutMargins = UIEdgeInsets.Zero()
+    }
+
 }

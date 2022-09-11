@@ -6,6 +6,7 @@ import org.ergoplatform.mosaik.model.ui.Icon
 import org.ergoplatform.mosaik.model.ui.Image
 import org.ergoplatform.mosaik.model.ui.LoadingIndicator
 import org.ergoplatform.mosaik.model.ui.QrCode
+import org.ergoplatform.mosaik.model.ui.input.CheckboxLabel
 import org.ergoplatform.mosaik.model.ui.input.DropDownList
 import org.ergoplatform.mosaik.model.ui.input.TextField
 import org.ergoplatform.mosaik.model.ui.layout.*
@@ -24,7 +25,7 @@ object MosaikViewCommon {
 
             is Box -> BoxViewHolder(treeElement)
 
-            // TODO is CheckboxLabel -> MosaikCheckboxLabel(treeElement, newModifier)
+            is CheckboxLabel -> CheckboxViewHolder(treeElement)
 
             is StyleableTextLabel<*> -> LabelViewHolder(treeElement, mosaikViewElement)
 
