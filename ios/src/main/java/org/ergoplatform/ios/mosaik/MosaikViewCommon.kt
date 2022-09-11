@@ -6,6 +6,7 @@ import org.ergoplatform.mosaik.model.ui.Icon
 import org.ergoplatform.mosaik.model.ui.Image
 import org.ergoplatform.mosaik.model.ui.LoadingIndicator
 import org.ergoplatform.mosaik.model.ui.QrCode
+import org.ergoplatform.mosaik.model.ui.input.DropDownList
 import org.ergoplatform.mosaik.model.ui.input.TextField
 import org.ergoplatform.mosaik.model.ui.layout.*
 import org.ergoplatform.mosaik.model.ui.text.Button
@@ -37,7 +38,7 @@ object MosaikViewCommon {
 
             is TextField<*> -> TextFieldViewHolder(treeElement)
 
-            // TODO is DropDownList -> MosaikDropDownList(treeElement, newModifier)
+            is DropDownList -> DropDownViewHolder(treeElement)
 
             is LoadingIndicator -> LoadingIndicatorHolder(treeElement)
 
