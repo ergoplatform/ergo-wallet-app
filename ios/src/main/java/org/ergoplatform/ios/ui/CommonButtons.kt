@@ -6,7 +6,7 @@ open class CommonButton(caption: String, image: UIImage? = null) :
     TextButton(caption, false, FONT_SIZE_BODY1) {
 
     init {
-        contentEdgeInsets = UIEdgeInsets(8.0, 8.0, 8.0, 8.0)
+        contentEdgeInsets = UIEdgeInsets(8.0, 12.0, 8.0, 12.0)
         layer.cornerRadius = 12.0
         layer.setMasksToBounds(false)
 
