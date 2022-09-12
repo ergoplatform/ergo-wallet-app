@@ -12,7 +12,6 @@ import org.ergoplatform.mosaik.MosaikGuidManager
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoAuthAction
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
-import org.ergoplatform.uilogic.STRING_BUTTON_BACK
 import org.ergoplatform.uilogic.STRING_BUTTON_RETRY
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
@@ -56,7 +55,7 @@ class MosaikViewController(
             isHidden = true
         }
         view.addSubview(waitingView)
-        waitingView.topToSuperview(true).widthMatchesSuperview(true).bottomToKeyboard(this)
+        waitingView.edgesToSuperview(true)
 
         noAppLoadedView = NoAppLoadedView()
         view.addSubview(noAppLoadedView)
@@ -100,6 +99,8 @@ class MosaikViewController(
             mosaikRuntime.viewTree.uiLockedState.collect { locked ->
                 if (waitingView.isHidden == locked) runOnMainThread {
                     waitingView.isHidden = !locked
+                    if (locked)
+                        view.endEditing(true)
                 }
             }
         }

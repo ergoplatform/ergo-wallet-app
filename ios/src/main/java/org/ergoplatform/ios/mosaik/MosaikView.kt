@@ -16,7 +16,7 @@ class MosaikView(
     private val mosaikRuntime: AppMosaikRuntime
 ) : UIView(CGRect.Zero()) {
 
-    private var root: ViewWithTreeElement? = null
+    private var root: ViewHolderWithChildren? = null
 
     init {
         layoutMargins = UIEdgeInsets.Zero()
@@ -53,9 +53,9 @@ class MosaikView(
             root?.removeAllChildren()
             root = null
         } else if (root == null) {
-            root = ViewWithTreeElement(rootElement)
+            root = ViewHolderWithChildren(rootElement)
             setRootView(root!!.uiViewHolder)
-            root?.updateChildren()
+            root?.updateChildren(true)
         } else {
             root?.updateView(rootElement, replaceOnParent = { _, newViewHolder ->
                 subviews.forEach { it.removeFromSuperview() }
@@ -67,7 +67,10 @@ class MosaikView(
 
 }
 
-class ViewWithTreeElement(
+/**
+ * This class holds the UiViewHolder and its children and manages the updates to the view tree
+ */
+class ViewHolderWithChildren(
     treeElement: TreeElement
 ) {
 
@@ -75,13 +78,13 @@ class ViewWithTreeElement(
         private set
     var uiViewHolder: UiViewHolder = MosaikViewCommon.buildUiViewHolder(treeElement)
         private set
-    private val children: MutableList<ViewWithTreeElement> = LinkedList<ViewWithTreeElement>()
+    private val children: MutableList<ViewHolderWithChildren> = LinkedList<ViewHolderWithChildren>()
 
     fun updateView(
         newTreeElement: TreeElement,
         replaceOnParent: (oldView: UiViewHolder, newView: UiViewHolder) -> Unit,
     ) {
-        if (newTreeElement.createdAtContentVersion > treeElement.createdAtContentVersion) {
+        val elementChanged = if (newTreeElement.createdAtContentVersion > treeElement.createdAtContentVersion) {
             treeElement = newTreeElement
 
             // if the element changed, remove it from parent and readd the new one
@@ -90,39 +93,43 @@ class ViewWithTreeElement(
             newViewHolder.onAddedToSuperview()
 
             uiViewHolder = newViewHolder
-        }
+            true
+        } else false
 
         // resource bytes might have an update
         treeElement.getResourceBytes?.let {
             uiViewHolder.resourceBytesAvailable(it)
         }
 
-        updateChildren()
+        updateChildren(elementChanged)
     }
 
-    fun updateChildren() {
+    fun updateChildren(parentChanged: Boolean) {
         val viewGroupHolder = uiViewHolder as? ViewGroupHolder ?: return
+        val newChildren = treeElement.children
 
-        if (treeElement.children.map { it.createdAtContentVersion } !=
-            children.map { it.treeElement.createdAtContentVersion }) {
-            // something changed
+        // check if a children are to be added or removed
+        // this is the case when the parent was changed or children aren't initialized yet
+        val childAddedOrRemoved = parentChanged || newChildren.size != children.size
 
+        if (childAddedOrRemoved) {
             // remove all children
             removeAllChildren()
 
             // then add the new elements
-            treeElement.children.forEach {
-                val newElem = ViewWithTreeElement(it)
+            newChildren.forEach {
+                val newElem = ViewHolderWithChildren(it)
                 viewGroupHolder.addSubView(newElem.uiViewHolder)
                 newElem.uiViewHolder.onAddedToSuperview()
                 children.add(newElem)
             }
-
-            // TODO room for improvement: swap a single element when only one has changed
         }
 
-        children.forEach {
-            it.updateView(it.treeElement, viewGroupHolder::replaceSubView)
+        children.zip(newChildren).forEach { (childViewHolder, newChild) ->
+            childViewHolder.updateView(
+                newChild, // might be the old child, updateview will check
+                viewGroupHolder::replaceSubView
+            )
         }
     }
 
