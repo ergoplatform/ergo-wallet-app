@@ -1,11 +1,14 @@
 package org.ergoplatform.ios.mosaik
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.CrashHandler
 import org.ergoplatform.ios.IosCacheManager
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.wallet.ChooseWalletViewController
+import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.mosaik.MosaikGuidManager
@@ -207,12 +210,25 @@ class MosaikViewController(
             }
         }
 
-        override fun showErgoAddressChooser(valueId: String) {
-            TODO("Not yet implemented")
+        override fun startWalletChooser() {
+            presentViewController(
+                ChooseWalletViewController { walletConfig ->
+                    viewControllerScope.launch(Dispatchers.IO) {
+                        val wallet = getAppDelegate().database.walletDbProvider.loadWalletWithStateById(walletConfig.id)
+                        runOnMainThread {
+                            onWalletChosen(wallet!!)
+                        }
+                    }
+                }, true
+            ) {}
         }
 
-        override fun showErgoWalletChooser(valueId: String) {
-            TODO("Not yet implemented")
+        override fun startAddressChooser() {
+            presentViewController(
+                ChooseAddressListDialogViewController(walletForAddressChooser!!.walletConfig.id, false) {
+                    onAddressChosen(it!!)
+                }, true
+            ) {}
         }
 
         override suspend fun runOnMainThread(method: () -> Unit) {

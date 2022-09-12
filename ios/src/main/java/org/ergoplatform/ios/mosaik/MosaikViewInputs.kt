@@ -1,5 +1,8 @@
 package org.ergoplatform.ios.mosaik
 
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WIDTH_ICONS
 import org.ergoplatform.mosaik.KeyboardType
@@ -258,24 +261,25 @@ class InputButtonHolder(treeElement: TreeElement) :
         StyleableInputButton.InputButtonStyle.ICON_SECONDARY -> false
     }
 
+    private var valueWatchJob: Job? = null
+    private var lastWatchedValue: Any? = null
+
     init {
 
         if (isButtonStyle) {
-            // TODO observe state change
             uiView.minWidth(100.0)
             uiView.maxWidth(200.0)
 
-            val text = treeElement.currentValueAsString
-
             val uiButton = when (mosaikElement.style) {
-                StyleableInputButton.InputButtonStyle.BUTTON_PRIMARY -> PrimaryButton(text)
-                StyleableInputButton.InputButtonStyle.BUTTON_SECONDARY -> CommonButton(text)
+                StyleableInputButton.InputButtonStyle.BUTTON_PRIMARY -> PrimaryButton("")
+                StyleableInputButton.InputButtonStyle.BUTTON_SECONDARY -> CommonButton("")
                 StyleableInputButton.InputButtonStyle.ICON_PRIMARY,
                 StyleableInputButton.InputButtonStyle.ICON_SECONDARY -> throw IllegalStateException()
             }.apply {
                 val padding = DEFAULT_MARGIN / 2
                 layoutMargins = UIEdgeInsets(padding, padding, padding, padding)
                 titleLabel.setAdjustsFontSizeToFitWidth(false)
+                titleLabel.lineBreakMode = NSLineBreakMode.TruncatingTail
                 isEnabled = mosaikElement.isEnabled
                 addOnTouchUpInsideListener { _, _ ->
                     treeElement.clicked()
@@ -288,11 +292,25 @@ class InputButtonHolder(treeElement: TreeElement) :
             val padding = DEFAULT_MARGIN / 2
             uiView.layoutMargins = UIEdgeInsets(padding, padding, padding, padding)
             uiButton.edgesToSuperview()
+
+            valueWatchJob =
+                (treeElement.viewTree.mosaikRuntime as MosaikViewController.IosMosaikRuntime).viewController.viewControllerScope.launch {
+                    treeElement.viewTree.valueState.collectLatest {
+                        val currentValue = treeElement.currentValue
+
+                        if (currentValue == null || currentValue != lastWatchedValue) {
+                            runOnMainThread {
+                                uiButton.setTitle(treeElement.currentValueAsString, UIControlState.Normal)
+                            }
+                            lastWatchedValue = currentValue
+                        }
+                    }
+                }
         } else {
             val uiImageView = UIImageView().apply {
                 contentMode = UIViewContentMode.ScaleAspectFit
-                fixedHeight(WIDTH_ICONS * 1.5f)
-                fixedWidth(WIDTH_ICONS * 1.5f)
+                fixedHeight(WIDTH_ICONS)
+                fixedWidth(WIDTH_ICONS)
                 enforceKeepIntrinsicWidth()
                 tintColor =
                     if (!mosaikElement.isEnabled)
@@ -307,6 +325,11 @@ class InputButtonHolder(treeElement: TreeElement) :
             uiView.addSubview(uiImageView)
             uiImageView.edgesToSuperview()
         }
+    }
+
+    override fun onRemovedFromSuperview() {
+        super.onRemovedFromSuperview()
+        valueWatchJob?.cancel()
     }
 
     override val handlesClicks: Boolean get() = isButtonStyle
