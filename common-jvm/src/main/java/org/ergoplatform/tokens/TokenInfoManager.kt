@@ -139,6 +139,11 @@ class TokenInfoManager {
         apiService: ErgoExplorerApi,
         tokenId: String
     ): TokenInformation {
+        LogUtils.logDebug(
+            "TokenInfoManager",
+            "Load information for token $tokenId from API"
+        )
+
         val tokenApiResponse = apiService.getTokenInformation(tokenId).execute()
 
         if (!tokenApiResponse.isSuccessful) {
