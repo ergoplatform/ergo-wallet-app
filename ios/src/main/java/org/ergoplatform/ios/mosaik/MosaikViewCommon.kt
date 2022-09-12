@@ -8,6 +8,7 @@ import org.ergoplatform.mosaik.model.ui.LoadingIndicator
 import org.ergoplatform.mosaik.model.ui.QrCode
 import org.ergoplatform.mosaik.model.ui.input.CheckboxLabel
 import org.ergoplatform.mosaik.model.ui.input.DropDownList
+import org.ergoplatform.mosaik.model.ui.input.StyleableInputButton
 import org.ergoplatform.mosaik.model.ui.input.TextField
 import org.ergoplatform.mosaik.model.ui.layout.*
 import org.ergoplatform.mosaik.model.ui.text.Button
@@ -19,7 +20,6 @@ const val debugModeColors = false
 object MosaikViewCommon {
     fun buildUiViewHolder(treeElement: TreeElement): UiViewHolder {
         val mosaikViewElement = treeElement.element
-        val runtime = treeElement.viewTree.mosaikRuntime
 
         val uiViewHolder = when (mosaikViewElement) {
 
@@ -49,7 +49,7 @@ object MosaikViewCommon {
 
             is QrCode -> QrCodeViewHolder(treeElement)
 
-            // TODO is StyleableInputButton<*> -> MosaikInputButton(treeElement, newModifier)
+            is StyleableInputButton<*> -> InputButtonHolder(treeElement)
 
             is HorizontalRule -> SeparatorHolder(treeElement)
 

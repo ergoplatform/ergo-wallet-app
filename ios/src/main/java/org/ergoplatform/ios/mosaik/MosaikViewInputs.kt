@@ -1,11 +1,14 @@
 package org.ergoplatform.ios.mosaik
 
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.wallet.WIDTH_ICONS
 import org.ergoplatform.mosaik.KeyboardType
 import org.ergoplatform.mosaik.StringConstant
 import org.ergoplatform.mosaik.TreeElement
+import org.ergoplatform.mosaik.model.ui.IconType
 import org.ergoplatform.mosaik.model.ui.input.CheckboxLabel
 import org.ergoplatform.mosaik.model.ui.input.DropDownList
+import org.ergoplatform.mosaik.model.ui.input.StyleableInputButton
 import org.ergoplatform.mosaik.model.ui.input.TextField
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
@@ -242,4 +245,69 @@ class CheckboxViewHolder(treeElement: TreeElement) :
         uiView.layoutMargins = UIEdgeInsets.Zero()
     }
 
+}
+
+class InputButtonHolder(treeElement: TreeElement) :
+    UiViewHolder(UIView(CGRect.Zero()), treeElement) {
+
+    private val mosaikElement = treeElement.element as StyleableInputButton<*>
+    private val isButtonStyle = when (mosaikElement.style) {
+        StyleableInputButton.InputButtonStyle.BUTTON_PRIMARY,
+        StyleableInputButton.InputButtonStyle.BUTTON_SECONDARY -> true
+        StyleableInputButton.InputButtonStyle.ICON_PRIMARY,
+        StyleableInputButton.InputButtonStyle.ICON_SECONDARY -> false
+    }
+
+    init {
+
+        if (isButtonStyle) {
+            // TODO observe state change
+            uiView.minWidth(100.0)
+            uiView.maxWidth(200.0)
+
+            val text = treeElement.currentValueAsString
+
+            val uiButton = when (mosaikElement.style) {
+                StyleableInputButton.InputButtonStyle.BUTTON_PRIMARY -> PrimaryButton(text)
+                StyleableInputButton.InputButtonStyle.BUTTON_SECONDARY -> CommonButton(text)
+                StyleableInputButton.InputButtonStyle.ICON_PRIMARY,
+                StyleableInputButton.InputButtonStyle.ICON_SECONDARY -> throw IllegalStateException()
+            }.apply {
+                val padding = DEFAULT_MARGIN / 2
+                layoutMargins = UIEdgeInsets(padding, padding, padding, padding)
+                titleLabel.setAdjustsFontSizeToFitWidth(false)
+                isEnabled = mosaikElement.isEnabled
+                addOnTouchUpInsideListener { _, _ ->
+                    treeElement.clicked()
+                }
+            }
+
+            // the actual button is wrapped in an outer view to have a little padding
+            // like on other platforms
+            uiView.addSubview(uiButton)
+            val padding = DEFAULT_MARGIN / 2
+            uiView.layoutMargins = UIEdgeInsets(padding, padding, padding, padding)
+            uiButton.edgesToSuperview()
+        } else {
+            val uiImageView = UIImageView().apply {
+                contentMode = UIViewContentMode.ScaleAspectFit
+                fixedHeight(WIDTH_ICONS * 1.5f)
+                fixedWidth(WIDTH_ICONS * 1.5f)
+                enforceKeepIntrinsicWidth()
+                tintColor =
+                    if (!mosaikElement.isEnabled)
+                        UIColor.secondaryLabel()
+                    else if (mosaikElement.style == StyleableInputButton.InputButtonStyle.ICON_PRIMARY)
+                        uiColorErgo
+                    else
+                        UIColor.label()
+
+                image = IconType.WALLET.getUiImage()
+            }
+            uiView.addSubview(uiImageView)
+            uiImageView.edgesToSuperview()
+        }
+    }
+
+    override val handlesClicks: Boolean get() = isButtonStyle
 }
