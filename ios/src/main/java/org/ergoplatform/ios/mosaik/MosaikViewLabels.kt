@@ -1,5 +1,11 @@
 package org.ergoplatform.ios.mosaik
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.TokenAmount
+import org.ergoplatform.ios.tokens.GenuineImageContainer
+import org.ergoplatform.ios.tokens.ThumbnailContainer
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.LabelFormatter
 import org.ergoplatform.mosaik.TreeElement
@@ -7,6 +13,11 @@ import org.ergoplatform.mosaik.model.ui.ForegroundColor
 import org.ergoplatform.mosaik.model.ui.MarkDown
 import org.ergoplatform.mosaik.model.ui.layout.HAlignment
 import org.ergoplatform.mosaik.model.ui.text.*
+import org.ergoplatform.persistance.GENUINE_UNKNOWN
+import org.ergoplatform.persistance.THUMBNAIL_TYPE_NONE
+import org.ergoplatform.persistance.TokenInformation
+import org.ergoplatform.tokens.TokenInfoManager
+import org.ergoplatform.uilogic.STRING_LABEL_UNNAMED_TOKEN
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.html.HtmlGenerator
 import org.intellij.markdown.parser.MarkdownParser
@@ -14,7 +25,27 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
 fun LabelViewHolder(treeElement: TreeElement, mosaikViewElement: StyleableTextLabel<*>): UiViewHolder {
-    val labelView = when (mosaikViewElement.style) {
+    val labelView = mosaikViewElement.style.toUiLabelView()
+
+    labelView.apply {
+        text = LabelFormatter.getFormattedText(mosaikViewElement, treeElement)
+        textColor = mosaikViewElement.textColor.toTextUiColor()
+        setTextLabelProperties(mosaikViewElement)
+
+    }
+
+    return UiViewHolder(labelView, treeElement)
+}
+
+private fun ForegroundColor.toTextUiColor() =
+    when (this) {
+        ForegroundColor.PRIMARY -> uiColorErgo
+        ForegroundColor.DEFAULT -> UIColor.label()
+        ForegroundColor.SECONDARY -> UIColor.secondaryLabel()
+    }
+
+private fun LabelStyle.toUiLabelView() =
+    when (this) {
         LabelStyle.BODY1 -> Body1Label()
         LabelStyle.BODY1BOLD -> Body1BoldLabel()
         LabelStyle.BODY1LINK -> Body1Label() // TODO
@@ -23,20 +54,6 @@ fun LabelViewHolder(treeElement: TreeElement, mosaikViewElement: StyleableTextLa
         LabelStyle.HEADLINE1 -> Headline1Label()
         LabelStyle.HEADLINE2 -> Headline2Label()
     }
-
-    labelView.apply {
-        text = LabelFormatter.getFormattedText(mosaikViewElement, treeElement)
-        textColor = when (mosaikViewElement.textColor) {
-            ForegroundColor.PRIMARY -> uiColorErgo
-            ForegroundColor.DEFAULT -> UIColor.label()
-            ForegroundColor.SECONDARY -> UIColor.secondaryLabel()
-        }
-        setTextLabelProperties(mosaikViewElement)
-
-    }
-
-    return UiViewHolder(labelView, treeElement)
-}
 
 private fun UILabel.setTextLabelProperties(mosaikViewElement: TextLabel<*>) {
     numberOfLines = mosaikViewElement.maxLines.toLong()
@@ -127,6 +144,65 @@ class MarkDownHolder(treeElement: TreeElement) : UiViewHolder(UITextView(CGRect.
             font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
             setHtmlText("<span style=\"font-family: '-apple-system', 'HelveticaNeue'; font-size: ${font.pointSize}\">$htmlContent</span>")
             textAlignment = mosaikViewElement.contentAlignment.toTextAlignment()
+        }
+    }
+}
+
+class TokenLabelHolder(treeElement: TreeElement) : UiViewHolder(UIStackView(), treeElement) {
+
+    private val genuineImageContainer = GenuineImageContainer()
+    private val thumbnailContainer = ThumbnailContainer(22.0)
+
+    private val valAndName: ThemedLabel
+    private val stackView = uiView as UIStackView
+    private var tokenInfo: TokenInformation? = null
+    private val mosaikElement = treeElement.element as TokenLabel
+    private val decorated = mosaikElement.isDecorated
+
+    init {
+        stackView.alignment = UIStackViewAlignment.Center
+
+        valAndName = mosaikElement.style.toUiLabelView().apply {
+            numberOfLines = 1
+            enforceKeepIntrinsicWidth()
+        }
+
+        if (decorated)
+            stackView.addArrangedSubview(thumbnailContainer)
+        stackView.addArrangedSubview(valAndName)
+        if (decorated)
+            stackView.addArrangedSubview(genuineImageContainer)
+
+        treeElement.viewTree.registerJobFor(treeElement) {
+            val appDelegate = getAppDelegate()
+            withContext(Dispatchers.IO) {
+                TokenInfoManager.getInstance().getTokenInformationFlow(
+                    mosaikElement.tokenId,
+                    appDelegate.database.tokenDbProvider,
+                    ApiServiceManager.getOrInit(appDelegate.prefs)
+                ).collect {
+                    tokenInfo = it
+                    runOnMainThread { refresh() }
+                }
+            }
+        }
+
+        refresh()
+    }
+
+    private fun refresh() {
+        val amountText = mosaikElement.amount?.let {
+            TokenAmount(it, tokenInfo?.decimals ?: mosaikElement.decimals).toString()
+        }
+        val tokenName = tokenInfo?.displayName ?: mosaikElement.tokenName ?: getAppDelegate().texts.get(
+            STRING_LABEL_UNNAMED_TOKEN
+        )
+
+        valAndName.text = if (!amountText.isNullOrBlank()) amountText + " " + tokenName else tokenName
+
+        if (decorated) {
+            genuineImageContainer.setGenuineFlag(tokenInfo?.genuineFlag ?: GENUINE_UNKNOWN)
+            thumbnailContainer.setThumbnail(tokenInfo?.thumbnailType ?: THUMBNAIL_TYPE_NONE)
         }
     }
 }

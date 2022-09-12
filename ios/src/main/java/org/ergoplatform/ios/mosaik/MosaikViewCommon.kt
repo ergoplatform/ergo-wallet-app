@@ -10,6 +10,7 @@ import org.ergoplatform.mosaik.model.ui.input.TextField
 import org.ergoplatform.mosaik.model.ui.layout.*
 import org.ergoplatform.mosaik.model.ui.text.Button
 import org.ergoplatform.mosaik.model.ui.text.StyleableTextLabel
+import org.ergoplatform.mosaik.model.ui.text.TokenLabel
 import org.robovm.apple.uikit.*
 
 const val debugModeColors = false
@@ -26,7 +27,7 @@ object MosaikViewCommon {
 
             is StyleableTextLabel<*> -> LabelViewHolder(treeElement, mosaikViewElement)
 
-            // TODO is TokenLabel -> MosaikTokenLabel(treeElement, newModifier)
+            is TokenLabel -> TokenLabelHolder(treeElement)
 
             is LinearLayout<*> -> StackViewHolder(mosaikViewElement, treeElement)
 
