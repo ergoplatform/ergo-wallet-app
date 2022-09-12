@@ -5,7 +5,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.CrashHandler
 import org.ergoplatform.ios.IosCacheManager
+import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
 import org.ergoplatform.ios.tokens.TokenInformationViewController
+import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.ChooseWalletViewController
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
@@ -89,6 +91,8 @@ class MosaikViewController(
 
     }
 
+    private var actionToRunOnAppearance: String? = null
+
     override fun viewDidAppear(animated: Boolean) {
         super.viewDidAppear(animated)
         viewControllerScope.launch {
@@ -107,6 +111,8 @@ class MosaikViewController(
                 }
             }
         }
+        actionToRunOnAppearance?.let { mosaikRuntime.runAction(it) }
+        actionToRunOnAppearance = null
         onResume()
     }
 
@@ -167,11 +173,19 @@ class MosaikViewController(
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {
-            TODO("Not yet implemented")
+            navigationController.pushViewController(
+                ErgoAuthenticationViewController(action.url, null,
+                    doOnComplete = { actionToRunOnAppearance = action.onFinished }),
+                true
+            )
         }
 
         override fun runErgoPayAction(action: ErgoPayAction) {
-            TODO("Not yet implemented")
+            navigationController.pushViewController(
+                ErgoPaySigningViewController(action.url,
+                    doOnComplete = { actionToRunOnAppearance = action.onFinished }),
+                true
+            )
         }
 
         override fun runTokenInformationAction(tokenId: String) {
