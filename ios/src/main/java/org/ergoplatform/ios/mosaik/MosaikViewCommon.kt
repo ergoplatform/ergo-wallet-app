@@ -108,6 +108,9 @@ open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) {
         }
     }
 
+    open fun onRemovedFromSuperview() {
+    }
+
     open fun isFillMaxWidth(): Boolean = false
 
     open val handlesClicks: Boolean = false

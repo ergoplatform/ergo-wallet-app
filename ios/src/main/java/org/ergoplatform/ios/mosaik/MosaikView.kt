@@ -53,7 +53,7 @@ class MosaikView(
             root?.removeAllChildren()
             root = null
         } else if (root == null) {
-            root = ViewHolderWithChildren(rootElement)
+            root = ViewHolderWithChildren(rootElement, MosaikViewCommon::buildUiViewHolder)
             setRootView(root!!.uiViewHolder)
             root?.updateChildren(true)
         } else {
@@ -71,12 +71,13 @@ class MosaikView(
  * This class holds the UiViewHolder and its children and manages the updates to the view tree
  */
 class ViewHolderWithChildren(
-    treeElement: TreeElement
+    treeElement: TreeElement,
+    private val viewHolderBuilder: (TreeElement) -> UiViewHolder
 ) {
 
     var treeElement = treeElement
         private set
-    var uiViewHolder: UiViewHolder = MosaikViewCommon.buildUiViewHolder(treeElement)
+    var uiViewHolder: UiViewHolder = viewHolderBuilder(treeElement)
         private set
     private val children: MutableList<ViewHolderWithChildren> = LinkedList<ViewHolderWithChildren>()
 
@@ -90,6 +91,8 @@ class ViewHolderWithChildren(
             // if the element changed, remove it from parent and readd the new one
             val newViewHolder = MosaikViewCommon.buildUiViewHolder(treeElement)
             replaceOnParent(uiViewHolder, newViewHolder)
+            removeAllChildren()
+            uiViewHolder.onRemovedFromSuperview()
             newViewHolder.onAddedToSuperview()
 
             uiViewHolder = newViewHolder
@@ -118,7 +121,7 @@ class ViewHolderWithChildren(
 
             // then add the new elements
             newChildren.forEach {
-                val newElem = ViewHolderWithChildren(it)
+                val newElem = ViewHolderWithChildren(it, viewHolderBuilder)
                 viewGroupHolder.addSubView(newElem.uiViewHolder)
                 newElem.uiViewHolder.onAddedToSuperview()
                 children.add(newElem)
@@ -135,6 +138,10 @@ class ViewHolderWithChildren(
 
     fun removeAllChildren() {
         (uiViewHolder as? ViewGroupHolder)?.removeAllChildren()
+        children.forEach {
+            it.removeAllChildren()
+            it.uiViewHolder.onRemovedFromSuperview()
+        }
         children.clear()
     }
 
