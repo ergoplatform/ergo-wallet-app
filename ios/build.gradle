@@ -123,4 +123,6 @@ dependencies {
     implementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
     implementation "com.mobidevelop.robovm:robovm-rt:${robovm_version}"
     implementation "com.mobidevelop.robovm:robovm-cocoatouch:${robovm_version}"
+
+    implementation "org.jetbrains:markdown-jvm:0.3.1"
 }

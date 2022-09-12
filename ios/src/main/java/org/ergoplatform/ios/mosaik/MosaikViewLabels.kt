@@ -4,8 +4,12 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.LabelFormatter
 import org.ergoplatform.mosaik.TreeElement
 import org.ergoplatform.mosaik.model.ui.ForegroundColor
+import org.ergoplatform.mosaik.model.ui.MarkDown
 import org.ergoplatform.mosaik.model.ui.layout.HAlignment
 import org.ergoplatform.mosaik.model.ui.text.*
+import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
+import org.intellij.markdown.html.HtmlGenerator
+import org.intellij.markdown.parser.MarkdownParser
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
@@ -42,13 +46,16 @@ private fun UILabel.setTextLabelProperties(mosaikViewElement: TextLabel<*>) {
     else
         NSLineBreakMode.WordWrapping
 
-    textAlignment = when (mosaikViewElement.textAlignment) {
+    textAlignment = mosaikViewElement.textAlignment.toTextAlignment()
+}
+
+private fun HAlignment.toTextAlignment() =
+    when (this) {
         HAlignment.START -> NSTextAlignment.Left
         HAlignment.CENTER -> NSTextAlignment.Center
         HAlignment.END -> NSTextAlignment.Right
         HAlignment.JUSTIFY -> NSTextAlignment.Justified
     }
-}
 
 private fun TruncationType.toUiViewLineBreakMode() =
     when (this) {
@@ -102,4 +109,24 @@ class ButtonHolder(treeElement: TreeElement) : UiViewHolder(
     }
 
     override val handlesClicks: Boolean get() = true
+}
+
+class MarkDownHolder(treeElement: TreeElement) : UiViewHolder(UITextView(CGRect.Zero()), treeElement) {
+    init {
+        val mosaikViewElement = treeElement.element as MarkDown
+
+        val flavour = CommonMarkFlavourDescriptor()
+        val markDownContent = mosaikViewElement.content
+        val htmlContent = HtmlGenerator(
+            markDownContent,
+            MarkdownParser(flavour).buildMarkdownTreeFromString(markDownContent),
+            flavour
+        ).generateHtml()
+
+        (uiView as UITextView).apply {
+            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+            setHtmlText("<span style=\"font-family: '-apple-system', 'HelveticaNeue'; font-size: ${font.pointSize}\">$htmlContent</span>")
+            textAlignment = mosaikViewElement.contentAlignment.toTextAlignment()
+        }
+    }
 }

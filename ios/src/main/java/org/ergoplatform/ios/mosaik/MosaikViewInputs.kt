@@ -293,6 +293,9 @@ class InputButtonHolder(treeElement: TreeElement) :
             uiView.layoutMargins = UIEdgeInsets(padding, padding, padding, padding)
             uiButton.edgesToSuperview()
 
+            // we don't use viewtree's registerJobFor here as it is meant to be used for
+            // completable jobs only, while the observer here runs as long as the element
+            // exists
             valueWatchJob =
                 (treeElement.viewTree.mosaikRuntime as MosaikViewController.IosMosaikRuntime).viewController.viewControllerScope.launch {
                     treeElement.viewTree.valueState.collectLatest {

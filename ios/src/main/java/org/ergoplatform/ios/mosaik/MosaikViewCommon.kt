@@ -2,10 +2,7 @@ package org.ergoplatform.ios.mosaik
 
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.TreeElement
-import org.ergoplatform.mosaik.model.ui.Icon
-import org.ergoplatform.mosaik.model.ui.Image
-import org.ergoplatform.mosaik.model.ui.LoadingIndicator
-import org.ergoplatform.mosaik.model.ui.QrCode
+import org.ergoplatform.mosaik.model.ui.*
 import org.ergoplatform.mosaik.model.ui.input.CheckboxLabel
 import org.ergoplatform.mosaik.model.ui.input.DropDownList
 import org.ergoplatform.mosaik.model.ui.input.StyleableInputButton
@@ -53,7 +50,7 @@ object MosaikViewCommon {
 
             is HorizontalRule -> SeparatorHolder(treeElement)
 
-            // TODO is MarkDown -> MosaikMarkDown(treeElement, newModifier)
+            is MarkDown -> MarkDownHolder(treeElement)
 
             else -> {
                 UiViewHolder(Body1Label().apply {
