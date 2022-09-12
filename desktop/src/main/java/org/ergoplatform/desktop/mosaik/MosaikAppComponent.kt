@@ -33,10 +33,8 @@ import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoAuthAction
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
 import org.ergoplatform.persistance.Wallet
-import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_LABEL_COPIED
-import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 class MosaikAppComponent(
     private val appTitle: String?,
@@ -128,18 +126,6 @@ class MosaikAppComponent(
             navHost.dialogHandler.showDialog(dialog)
         }
 
-        override fun showErgoAddressChooser(valueId: String) {
-            valueIdAddressChosen = valueId
-            valueIdWalletChosen = null
-            startWalletChooser()
-        }
-
-        override fun showErgoWalletChooser(valueId: String) {
-            valueIdWalletChosen = valueId
-            valueIdAddressChosen = null
-            startWalletChooser()
-        }
-
         override fun onAppNavigated(manifest: MosaikManifest) {
             manifestState.value = manifest
             isFavoriteState.value = isFavoriteApp
@@ -147,6 +133,17 @@ class MosaikAppComponent(
 
         override fun appNotLoaded(cause: Throwable) {
             noAppLoadedErrorMessage.value = getUserErrorMessage(cause)
+        }
+
+        override fun startWalletChooser() {
+            componentScope().launch {
+                chooseWalletDialog.value =
+                    Application.database.walletDbProvider.getWalletsWithStates()
+            }
+        }
+
+        override fun startAddressChooser() {
+            chooseAddressDialog.value = walletForAddressChooser
         }
     }
 
@@ -195,8 +192,6 @@ class MosaikAppComponent(
 
     private val noAppLoadedErrorMessage = mutableStateOf<String?>(null)
     private val manifestState = mutableStateOf<MosaikManifest?>(null)
-    private var valueIdWalletChosen: String? = null
-    private var valueIdAddressChosen: String? = null
     private val chooseWalletDialog = mutableStateOf<List<Wallet>?>(null)
     private val chooseAddressDialog = mutableStateOf<Wallet?>(null)
 
@@ -218,7 +213,7 @@ class MosaikAppComponent(
                 onWalletChosen = { walletConfig ->
                     val walletChosen = walletList.first { walletConfig == it.walletConfig }
                     chooseWalletDialog.value = null
-                    onWalletChosen(walletChosen)
+                    mosaikRuntime.onWalletChosen(walletChosen)
                 },
                 onDismiss = { chooseWalletDialog.value = null },
             )
@@ -230,45 +225,11 @@ class MosaikAppComponent(
                 withAllAddresses = false,
                 onAddressChosen = { walletAddress ->
                     chooseAddressDialog.value = null
-                    mosaikRuntime.setValue(valueIdAddressChosen!!, walletAddress!!.publicAddress)
+                    mosaikRuntime.onAddressChosen(walletAddress!!.derivationIndex)
                 },
                 onDismiss = { chooseAddressDialog.value = null },
             )
         }
-
-    }
-
-    private fun startWalletChooser() {
-        componentScope().launch {
-            chooseWalletDialog.value =
-                Application.database.walletDbProvider.getWalletsWithStates()
-        }
-    }
-
-    private fun onWalletChosen(walletChosen: Wallet) {
-        valueIdWalletChosen?.let { valueId ->
-            mosaikRuntime.setValue(
-                valueId,
-                walletChosen.getSortedDerivedAddressesList().map { it.publicAddress })
-            valueIdWalletChosen = null
-        }
-
-        valueIdAddressChosen?.let {
-            val addresses = walletChosen.getSortedDerivedAddressesList()
-            if (addresses.size == 1)
-                onAddressChosen(addresses.first())
-            else
-                chooseAddressDialog.value = walletChosen
-        }
-
-    }
-
-    private fun onAddressChosen(walletAddress: WalletAddress) {
-        mosaikRuntime.setValue(
-            valueIdAddressChosen!!,
-            walletAddress.publicAddress
-        )
-        valueIdAddressChosen = null
 
     }
 
