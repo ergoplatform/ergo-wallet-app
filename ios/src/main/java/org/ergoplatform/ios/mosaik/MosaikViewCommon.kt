@@ -3,10 +3,7 @@ package org.ergoplatform.ios.mosaik
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.TreeElement
 import org.ergoplatform.mosaik.model.ui.*
-import org.ergoplatform.mosaik.model.ui.input.CheckboxLabel
-import org.ergoplatform.mosaik.model.ui.input.DropDownList
-import org.ergoplatform.mosaik.model.ui.input.StyleableInputButton
-import org.ergoplatform.mosaik.model.ui.input.TextField
+import org.ergoplatform.mosaik.model.ui.input.*
 import org.ergoplatform.mosaik.model.ui.layout.*
 import org.ergoplatform.mosaik.model.ui.text.Button
 import org.ergoplatform.mosaik.model.ui.text.StyleableTextLabel
@@ -33,7 +30,7 @@ object MosaikViewCommon {
 
             is Button -> ButtonHolder(treeElement)
 
-            // TODO is ErgAmountInputField -> MosaikErgAmountInputLayout(treeElement, newModifier)
+            is ErgAmountInputField -> ErgAmountInputHolder(treeElement)
 
             is TextField<*> -> TextFieldViewHolder(treeElement)
 

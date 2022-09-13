@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WIDTH_ICONS
+import org.ergoplatform.mosaik.FiatOrErgTextInputHandler
 import org.ergoplatform.mosaik.KeyboardType
 import org.ergoplatform.mosaik.StringConstant
 import org.ergoplatform.mosaik.TreeElement
@@ -18,17 +19,18 @@ import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSRange
 import org.robovm.apple.uikit.*
 
-class TextFieldViewHolder(treeElement: TreeElement) :
+open class TextFieldViewHolder(treeElement: TreeElement) :
     UiViewHolder(UIStackView(CGRect.Zero()), treeElement) {
 
-    private val textFieldView = EndIconTextField()
+    protected val textFieldView = EndIconTextField()
     private val labelView = Body2Label()
     private val errorView = Body2Label().apply {
         textColor = uiColorErgo
     }
 
+    protected val stackView = uiView as UIStackView
+
     init {
-        val stackView = uiView as UIStackView
         val mosaikElement = treeElement.element as TextField<*>
         val runtime = treeElement.viewTree.mosaikRuntime
 
@@ -85,6 +87,7 @@ class TextFieldViewHolder(treeElement: TreeElement) :
 
             addOnEditingChangedListener {
                 setHasError(!treeElement.changeValueFromInput(text.ifEmpty { null }))
+                onChangedText()
             }
 
             mosaikElement.endIcon?.getUiImage()?.let { endIcon ->
@@ -101,7 +104,49 @@ class TextFieldViewHolder(treeElement: TreeElement) :
         errorView.text = mosaikElement.errorMessage ?: ""
     }
 
+    protected open fun onChangedText() {
+
+    }
+
     override fun isFillMaxWidth(): Boolean = true
+}
+
+class ErgAmountInputHolder(treeElement: TreeElement) : TextFieldViewHolder(treeElement) {
+    private val mosaikRuntime = treeElement.viewTree.mosaikRuntime
+    private val hasFiatValue = mosaikRuntime.fiatRate != null
+    private val fiatOrErgInputHandler = treeElement.inputValueHandler as FiatOrErgTextInputHandler
+
+    private val secondCurrencyLabel = Body1Label().apply {
+        textColor = UIColor.secondaryLabel()
+        textAlignment = NSTextAlignment.Right
+    }
+
+    private val secondCurrencyContainer = if (fiatOrErgInputHandler.canChangeInputMode())
+        secondCurrencyLabel.wrapWithTrailingImage(
+            getIosSystemImage(IMAGE_EDIT_CIRCLE, UIImageSymbolScale.Small, 20.0)!!,
+            keepWidth = true
+        ) else secondCurrencyLabel
+
+    init {
+        stackView.addArrangedSubview(secondCurrencyContainer)
+        secondCurrencyContainer.isHidden = !hasFiatValue
+        onChangedText()
+
+        if (fiatOrErgInputHandler.canChangeInputMode())
+            secondCurrencyContainer.apply {
+                isUserInteractionEnabled = true
+                addGestureRecognizer(UITapGestureRecognizer {
+                    fiatOrErgInputHandler.switchInputAmountMode()
+                    textFieldView.text = treeElement.currentValueAsString
+                    onChangedText()
+                })
+            }
+    }
+
+    override fun onChangedText() {
+        super.onChangedText()
+        secondCurrencyLabel.text = fiatOrErgInputHandler.getSecondLabelString((treeElement.currentValue as? Long) ?: 0)
+    }
 }
 
 class DropDownViewHolder(treeElement: TreeElement) :
@@ -145,7 +190,7 @@ class DropDownViewHolder(treeElement: TreeElement) :
                             mosaikRuntime.formatString(StringConstant.PleaseChoose),
                             "", UIAlertControllerStyle.ActionSheet
                         )
-                        entriesList.forEachIndexed { idx, (key, title) ->
+                        entriesList.forEachIndexed { idx, (_, title) ->
                             uac.addAction(UIAlertAction(title, UIAlertActionStyle.Default) {
                                 currentSelectedInPicker = idx
                                 elementSelected()

@@ -126,6 +126,8 @@ class ButtonHolder(treeElement: TreeElement) : UiViewHolder(
 
         uiButton.titleLabel.setTextLabelProperties(buttonElement)
         uiButton.titleLabel.setAdjustsFontSizeToFitWidth(false)
+        uiButton.titleLabel.numberOfLines = 1 // TODO, but does not work on web either
+        // how to implement multiline buttons: http://stackoverflow.com/a/34228276/7487013
 
         uiButton.contentHorizontalAlignment = when (buttonElement.textAlignment) {
             HAlignment.START -> UIControlContentHorizontalAlignment.Left
