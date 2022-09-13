@@ -105,6 +105,13 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
             .widthMatchesSuperview()
             .bottomToKeyboard(this, DEFAULT_MARGIN)
         scrollView.setDelaysContentTouches(false)
+
+        if (!getAppDelegate().prefs.mosaikEnabled) {
+            scrollView.isHidden = true
+            val disclaimerView = DisclaimerView(scrollView)
+            view.addSubview(disclaimerView)
+            disclaimerView.widthMatchesSuperview(inset = DEFAULT_MARGIN * 3, maxWidth = MAX_WIDTH).centerVertical()
+        }
     }
 
     private fun navigateToApp() {
@@ -247,6 +254,35 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
 
             appIconImage.image = image ?: getIosSystemImage(IMAGE_MOSAIK, UIImageSymbolScale.Medium)
             appIconImage.tintColor = if (image == null) UIColor.label() else null
+        }
+    }
+
+    inner class DisclaimerView(private val viewToShow: UIView) : UIStackView() {
+        val disclaimerLabel = Body1Label()
+
+        init {
+            axis = UILayoutConstraintAxis.Vertical
+            spacing = DEFAULT_MARGIN * 3
+            alignment = UIStackViewAlignment.Center
+            isLayoutMarginsRelativeArrangement = true
+            layoutMargins = UIEdgeInsets(
+                DEFAULT_MARGIN * 3, DEFAULT_MARGIN * 3,
+                DEFAULT_MARGIN * 3, DEFAULT_MARGIN * 3
+            )
+
+            addArrangedSubview(disclaimerLabel)
+
+            val texts = getAppDelegate().texts
+            disclaimerLabel.textAlignment = NSTextAlignment.Center
+            disclaimerLabel.text = texts.get(STRING_DESC_MOSAIK)
+
+            val optInButton = PrimaryButton(texts.get(STRING_INFO_PURPOSE_MESSAGE_ACCEPT))
+            optInButton.addOnTouchUpInsideListener { _, _ ->
+                this.isHidden = true
+                viewToShow.isHidden = false
+                getAppDelegate().prefs.mosaikEnabled = true
+            }
+            addArrangedSubview(optInButton.fixedWidth(200.0))
         }
     }
 }
