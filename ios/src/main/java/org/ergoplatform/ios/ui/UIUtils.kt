@@ -48,6 +48,7 @@ val IMAGE_ADDRESS = if (Foundation.getMajorSystemVersion() >= 14) "arrow.triangl
 const val IMAGE_TRANSACTIONS = "arrow.right.arrow.left"
 const val IMAGE_ADDRESS_LIST = "list.number"
 const val IMAGE_CHEVRON_DOWN = "chevron.down"
+const val IMAGE_CHEVRON_LEFT = "chevron.left"
 const val IMAGE_CHEVRON_UP = "chevron.up"
 val IMAGE_SWITCH_RESOLUTION = if (Foundation.getMajorSystemVersion() >= 14)
     "arrow.up.left.and.down.right.magnifyingglass" else "1.magnifyingglass"
@@ -62,6 +63,10 @@ const val IMAGE_MUSIC_NOTE = "music.note"
 const val IMAGE_OPEN_BROWSER = "arrow.up.right.square"
 const val IMAGE_EDIT_CIRCLE = "pencil.circle"
 const val IMAGE_AUTO_FIX = "wand.and.stars"
+const val IMAGE_MOSAIK = "square.grid.2x2"
+const val IMAGE_ARROW_RIGHT = "arrow.right"
+const val IMAGE_STAR_OUTLINED = "star"
+const val IMAGE_STAR_FILLED = "star.fill"
 
 
 const val FONT_SIZE_BODY1 = 18.0
@@ -323,6 +328,10 @@ fun UIScrollView.scrollToBottom(animated: Boolean = true) {
         CGPoint(0.0, contentSize.height - bounds.size.height + contentInset.bottom),
         animated
     )
+}
+
+fun UIScrollView.scrollToTop(animated: Boolean = true) {
+    setContentOffset(CGPoint(0.0, 0.0), animated)
 }
 
 fun UIImage.scaleToSize(scaleWidth: Double, scaleHeight: Double): UIImage? {
