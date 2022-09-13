@@ -34,6 +34,8 @@ fun LabelViewHolder(treeElement: TreeElement, mosaikViewElement: StyleableTextLa
 
     }
 
+    // TODO implement expandableelement
+
     return UiViewHolder(labelView, treeElement)
 }
 
@@ -139,6 +141,8 @@ class MarkDownHolder(treeElement: TreeElement) : UiViewHolder(UITextView(CGRect.
             MarkdownParser(flavour).buildMarkdownTreeFromString(markDownContent),
             flavour
         ).generateHtml()
+
+        // TODO too much space below the text
 
         (uiView as UITextView).apply {
             font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)

@@ -147,7 +147,6 @@ class DropDownViewHolder(treeElement: TreeElement) :
                         )
                         entriesList.forEachIndexed { idx, (key, title) ->
                             uac.addAction(UIAlertAction(title, UIAlertActionStyle.Default) {
-                                println("Clicked $idx")
                                 currentSelectedInPicker = idx
                                 elementSelected()
                             })

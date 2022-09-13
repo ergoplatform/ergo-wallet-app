@@ -117,9 +117,9 @@ open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) {
 fun Padding.toUiKitSize() =
     when (this) {
         Padding.NONE -> 0.0
-        Padding.QUARTER_DEFAULT -> DEFAULT_MARGIN * .75
-        Padding.HALF_DEFAULT -> DEFAULT_MARGIN * 1.5
-        Padding.DEFAULT -> DEFAULT_MARGIN * 3
-        Padding.ONE_AND_A_HALF_DEFAULT -> DEFAULT_MARGIN * 4.5
-        Padding.TWICE -> DEFAULT_MARGIN * 6
+        Padding.QUARTER_DEFAULT -> DEFAULT_MARGIN * .5
+        Padding.HALF_DEFAULT -> DEFAULT_MARGIN * 1
+        Padding.DEFAULT -> DEFAULT_MARGIN * 2
+        Padding.ONE_AND_A_HALF_DEFAULT -> DEFAULT_MARGIN * 3
+        Padding.TWICE -> DEFAULT_MARGIN * 4
     }
