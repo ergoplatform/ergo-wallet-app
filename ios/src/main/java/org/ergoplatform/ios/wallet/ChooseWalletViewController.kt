@@ -4,6 +4,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.ios.transactions.ChooseSpendingWalletViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.uilogic.STRING_ERROR_NO_WALLET
 import org.ergoplatform.uilogic.StringProvider
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
@@ -54,6 +55,15 @@ class ChooseWalletViewController(
                                 dismissViewController(true) {}
                             })
                         })
+                }
+
+                if (wallets.isEmpty()) {
+                    val errorLabel = Body1Label().apply {
+                        text = texts.getString(STRING_ERROR_NO_WALLET)
+                        textAlignment = NSTextAlignment.Center
+                    }
+                    view.addSubview(errorLabel)
+                    errorLabel.widthMatchesSuperview(inset = DEFAULT_MARGIN * 3, maxWidth = MAX_WIDTH).centerVertical()
                 }
             }
         }
