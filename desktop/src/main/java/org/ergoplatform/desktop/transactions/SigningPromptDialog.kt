@@ -147,7 +147,7 @@ fun PagedQrContainer(
 
         if (qrPages.size > 1)
             Text(
-                remember(page) {
+                remember(page, qrPages) {
                     Application.texts.getString(STRING_LABEL_QR_PAGES_INFO, page + 1, qrPages.size)
                 },
                 Modifier.align(Alignment.CenterHorizontally).padding(defaultPadding / 2),
