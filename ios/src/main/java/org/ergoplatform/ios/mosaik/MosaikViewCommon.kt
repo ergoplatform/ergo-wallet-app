@@ -1,6 +1,7 @@
 package org.ergoplatform.ios.mosaik
 
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.mosaik.MosaikViewHolder
 import org.ergoplatform.mosaik.TreeElement
 import org.ergoplatform.mosaik.model.ui.*
 import org.ergoplatform.mosaik.model.ui.input.*
@@ -93,17 +94,17 @@ object MosaikViewCommon {
 
 }
 
-open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) {
-    open fun resourceBytesAvailable(bytes: ByteArray) {
+open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement): MosaikViewHolder {
+    override fun resourceBytesAvailable(bytes: ByteArray) {
     }
 
-    open fun onAddedToSuperview() {
+    override fun onAddedToSuperview() {
         if (isFillMaxWidth()) {
             uiView.widthMatchesSuperview()
         }
     }
 
-    open fun onRemovedFromSuperview() {
+    override fun onRemovedFromSuperview() {
     }
 
     open fun isFillMaxWidth(): Boolean = false

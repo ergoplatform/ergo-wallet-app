@@ -1,28 +1,18 @@
 package org.ergoplatform.ios.mosaik
 
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.mosaik.MosaikViewGroupHolder
 import org.ergoplatform.mosaik.TreeElement
 import org.ergoplatform.mosaik.model.ui.layout.*
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
-abstract class ViewGroupHolder(
-    uiView: UIView, treeElement: TreeElement
-) : UiViewHolder(uiView, treeElement) {
-
-    abstract fun removeAllChildren()
-
-    abstract fun addSubView(subviewHolder: UiViewHolder)
-
-    abstract fun replaceSubView(oldView: UiViewHolder, newView: UiViewHolder)
-}
-
 class BoxViewHolder(
     treeElement: TreeElement
-) : ViewGroupHolder(UIView().apply {
+) : UiViewHolder(UIView().apply {
     layoutMargins = UIEdgeInsets.Zero()
     if (debugModeColors) backgroundColor = UIColor.green()
-}, treeElement) {
+}, treeElement), MosaikViewGroupHolder<UiViewHolder> {
 
     private val box = treeElement.element as Box
 
@@ -84,14 +74,14 @@ class BoxViewHolder(
 class StackViewHolder(
     val linearLayout: LinearLayout<*>,
     treeElement: TreeElement
-) : ViewGroupHolder(UIStackView().apply {
+) : UiViewHolder(UIStackView().apply {
     axis =
         if (linearLayout is Column) UILayoutConstraintAxis.Vertical
         else UILayoutConstraintAxis.Horizontal
     isLayoutMarginsRelativeArrangement = true
     spacing = linearLayout.spacing.toUiKitSize()
     if (debugModeColors) backgroundColor = UIColor.yellow()
-}, treeElement) {
+}, treeElement), MosaikViewGroupHolder<UiViewHolder> {
 
     val uiStackView = uiView as UIStackView
     val weightList = linearLayout.children.map { linearLayout.getChildWeight(it) }

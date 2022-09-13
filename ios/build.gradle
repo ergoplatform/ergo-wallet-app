@@ -124,5 +124,7 @@ dependencies {
     implementation "com.mobidevelop.robovm:robovm-rt:${robovm_version}"
     implementation "com.mobidevelop.robovm:robovm-cocoatouch:${robovm_version}"
 
+    // Mosaik
+    implementation "com.github.MrStahlfelge.mosaik:common-abstractui:$mosaik_version"
     implementation "org.jetbrains:markdown-jvm:0.3.1"
 }
