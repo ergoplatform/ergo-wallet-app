@@ -24,19 +24,40 @@ import org.intellij.markdown.parser.MarkdownParser
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
-fun LabelViewHolder(treeElement: TreeElement, mosaikViewElement: StyleableTextLabel<*>): UiViewHolder {
-    val labelView = mosaikViewElement.style.toUiLabelView()
+class LabelViewHolder(treeElement: TreeElement, mosaikViewElement: StyleableTextLabel<*>) : UiViewHolder(
+    mosaikViewElement.style.toUiLabelView(), treeElement
+) {
+    private val labelView = uiView as ThemedLabel
+    private val isExpandable = (mosaikViewElement is ExpandableElement && mosaikViewElement.isExpandOnClick)
+    private var isExpanded = false
 
-    labelView.apply {
-        text = LabelFormatter.getFormattedText(mosaikViewElement, treeElement)
-        textColor = mosaikViewElement.textColor.toTextUiColor()
-        setTextLabelProperties(mosaikViewElement)
+    init {
+        labelView.apply {
+            text = LabelFormatter.getFormattedText(mosaikViewElement, treeElement)
+            textColor = mosaikViewElement.textColor.toTextUiColor()
+            setTextLabelProperties(mosaikViewElement)
 
+            if (isExpandable) {
+                isUserInteractionEnabled = true
+                addGestureRecognizer(UILongPressGestureRecognizer {
+                    treeElement.longPressed()
+                })
+                addGestureRecognizer(UITapGestureRecognizer {
+                    isExpanded = !isExpanded
+                    setMaxLines()
+                })
+                setMaxLines()
+            }
+        }
     }
 
-    // TODO implement expandableelement
+    private fun setMaxLines() {
+        labelView.numberOfLines = if (isExpandable && !isExpanded) 1
+        else (treeElement.element as StyleableTextLabel<*>).maxLines.toLong()
+    }
 
-    return UiViewHolder(labelView, treeElement)
+    override val handlesClicks: Boolean
+        get() = isExpandable || super.handlesClicks
 }
 
 private fun ForegroundColor.toTextUiColor() =
@@ -136,17 +157,22 @@ class MarkDownHolder(treeElement: TreeElement) : UiViewHolder(UITextView(CGRect.
 
         val flavour = CommonMarkFlavourDescriptor()
         val markDownContent = mosaikViewElement.content
-        val htmlContent = HtmlGenerator(
+        val generatedHtmlContent = HtmlGenerator(
             markDownContent,
             MarkdownParser(flavour).buildMarkdownTreeFromString(markDownContent),
             flavour
         ).generateHtml()
 
-        // TODO too much space below the text
-
         (uiView as UITextView).apply {
             font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
-            setHtmlText("<span style=\"font-family: '-apple-system', 'HelveticaNeue'; font-size: ${font.pointSize}\">$htmlContent</span>")
+
+            // html is generated with <body><p>...</p></body> frame
+            // we have to change to <span ...>...</span> to not render unnecessary vertical space
+            val htmlContent = generatedHtmlContent.substringAfter("<body><p>").substringBeforeLast("</p></body>")
+            val renderHtmlContent =
+                "<span style=\"font-family: '-apple-system', 'HelveticaNeue'; font-size: ${font.pointSize}\">$htmlContent</span>"
+
+            setHtmlText(renderHtmlContent)
             textAlignment = mosaikViewElement.contentAlignment.toTextAlignment()
         }
     }
