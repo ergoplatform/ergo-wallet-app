@@ -9,6 +9,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.persistance.GENUINE_UNKNOWN
+import org.ergoplatform.persistance.THUMBNAIL_TYPE_NONE
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.uilogic.STRING_LABEL_ADD_TOKEN
 import org.ergoplatform.uilogic.tokens.TokenInformationLayoutLogic
@@ -38,6 +39,7 @@ class TokenInformationComponent(
             tokenInfoState.value,
             tokenInfoLoading.value,
             downloadState.value,
+            startDownload = { uiLogic.downloadContent(Application.prefs) }
         )
     }
 
@@ -52,9 +54,11 @@ class TokenInformationComponent(
             }
             tokenInfoState.value = infoLayoutLogic
             tokenInfoLoading.value = false
+            this@TokenInformationComponent.downloadState.value = downloadState
         }
 
         override fun onDownloadStateUpdated() {
+            tokenInfoState.value?.updateNftPreview(uiLogic)
             this@TokenInformationComponent.downloadState.value = downloadState
         }
     }
@@ -72,6 +76,15 @@ class TokenInformationComponent(
         var supplyAmount: String? = null
 
         var tokenGenuineFlag: Int = GENUINE_UNKNOWN
+
+        var nftLayoutVisible = false
+        var nftContentLink: String? = null
+        var nftContentHash: String? = null
+        var nftThumnailType: Int = THUMBNAIL_TYPE_NONE
+
+        var nftHashValidated: Boolean? = null
+        var nftDownloadPercent: Float = 0f
+        var nftDownloadContent: ByteArray? = null
 
         override fun setTokenTextFields(displayName: String, tokenId: String, description: String) {
             this.displayName = displayName
@@ -93,19 +106,19 @@ class TokenInformationComponent(
         }
 
         override fun setContentLinkText(linkText: String) {
-
+            nftContentLink = linkText
         }
 
         override fun setNftLayoutVisibility(visible: Boolean) {
-
+            nftLayoutVisible = visible
         }
 
         override fun setContentHashText(hashText: String) {
-
+            nftContentHash = hashText
         }
 
         override fun setThumbnail(thumbnailType: Int) {
-
+            nftThumnailType = thumbnailType
         }
 
         override fun showNftPreview(
@@ -113,11 +126,12 @@ class TokenInformationComponent(
             downloadPercent: Float,
             content: ByteArray?
         ) {
-
+            nftDownloadContent = content
+            nftDownloadPercent = downloadPercent
         }
 
         override fun showNftHashValidation(hashValid: Boolean?) {
-
+            nftHashValidated = hashValid
         }
 
     }
