@@ -26,6 +26,7 @@ sealed class ScreenConfig : Parcelable {
     data class AddressTransactions(val walletConfig: WalletConfig, val addressIdx: Int = 0) : ScreenConfig()
     data class WalletConfiguration(val walletConfig: WalletConfig) : ScreenConfig()
     data class WalletAddressesList(val walletConfig: WalletConfig) : ScreenConfig()
+    data class TokenInformation(val tokenId: String, val balance: Long? = null) : ScreenConfig()
     data class QrCodeScanner(val callback: (String) -> Unit) : ScreenConfig()
 
     data class ErgoPay(

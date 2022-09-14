@@ -112,8 +112,7 @@ class MosaikAppComponent(
         }
 
         override fun runTokenInformationAction(tokenId: String) {
-            // TODO tokenInfo
-            navHost.showErrorDialog("TokenInfo not available yet")
+            router.push(ScreenConfig.TokenInformation(tokenId))
         }
 
         override fun scanQrCode(actionId: String) {

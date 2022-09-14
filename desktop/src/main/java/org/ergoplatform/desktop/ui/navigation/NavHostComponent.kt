@@ -21,6 +21,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.mosaik.MosaikAppComponent
 import org.ergoplatform.desktop.mosaik.MosaikOverviewComponent
 import org.ergoplatform.desktop.settings.SettingsComponent
+import org.ergoplatform.desktop.tokens.TokenInformationComponent
 import org.ergoplatform.desktop.transactions.*
 import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.AppLockScreen
@@ -152,6 +153,10 @@ class NavHostComponent(
 
             is ScreenConfig.ReceiveToWallet -> ReceiveToWalletComponent(
                 componentContext, this, screenConfig.walletConfig, screenConfig.addressIdx
+            )
+
+            is ScreenConfig.TokenInformation -> TokenInformationComponent(
+                componentContext, this, screenConfig.tokenId, screenConfig.balance
             )
 
             is ScreenConfig.QrCodeScanner -> QrScannerComponent(
