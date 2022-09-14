@@ -70,6 +70,8 @@ class QrScannerViewController(
         previewLayer!!.videoGravity = AVLayerVideoGravity.ResizeAspectFill
         view.layer.addSublayer(previewLayer)
 
+        addCloseButton()
+
         captureSession.startRunning()
     }
 
