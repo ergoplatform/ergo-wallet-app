@@ -179,7 +179,7 @@ class WalletDetailsComponent(
                 )
             },
             navigateToAuthentication = { authRequest ->
-                // TODO ErgoAuth
+                router.push(ScreenConfig.ErgoAuth(authRequest, walletConfig.id))
             },
             showErrorMessage = { message -> navHost.showErrorDialog(message) }
         )

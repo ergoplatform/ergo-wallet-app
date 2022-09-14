@@ -199,8 +199,8 @@ class WalletListComponent(
             navigateToErgoPay = { paymentRequest ->
                 router.push(ScreenConfig.ErgoPay(paymentRequest, null, null))
             },
-            navigateToAuthentication = {
-                // TODO ErgoAUth
+            navigateToAuthentication = { authRequest ->
+                router.push(ScreenConfig.ErgoAuth(authRequest, null))
             },
             presentUserMessage = { message ->
                 navHost.showErrorDialog(message)

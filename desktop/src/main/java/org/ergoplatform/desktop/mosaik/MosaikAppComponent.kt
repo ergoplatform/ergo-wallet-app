@@ -24,6 +24,7 @@ import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressesListDialog
+import org.ergoplatform.ergoauth.isErgoAuthRequest
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.MosaikComposeConfig
 import org.ergoplatform.mosaik.MosaikDialog
@@ -89,8 +90,16 @@ class MosaikAppComponent(
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {
-            // TODO ErgoAuth
-            navHost.showErrorDialog("ErgoAuth not available yet")
+            if (isErgoAuthRequest(action.url)) {
+                val runOnEaComplete: (() -> Unit)? = action.onFinished?.let { onFinishedAction ->
+                    { runOnResume = { runAction(onFinishedAction) } }
+                }
+                router.push(
+                    ScreenConfig.ErgoAuth(action.url, null, onCompleted = runOnEaComplete ?: {})
+                )
+            } else {
+                raiseError(IllegalArgumentException("ErgoAuthAction without actual authentication request: ${action.url}"))
+            }
         }
 
         override fun runErgoPayAction(action: ErgoPayAction) {

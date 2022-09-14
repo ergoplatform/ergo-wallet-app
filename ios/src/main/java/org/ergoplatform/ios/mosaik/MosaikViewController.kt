@@ -3,6 +3,7 @@ package org.ergoplatform.ios.mosaik
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.ergoplatform.ergoauth.isErgoAuthRequest
 import org.ergoplatform.ios.CrashHandler
 import org.ergoplatform.ios.IosCacheManager
 import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
@@ -17,6 +18,7 @@ import org.ergoplatform.mosaik.MosaikGuidManager
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoAuthAction
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
+import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_BUTTON_RETRY
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
@@ -173,19 +175,27 @@ class MosaikViewController(
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {
-            navigationController.pushViewController(
-                ErgoAuthenticationViewController(action.url, null,
-                    doOnComplete = { actionToRunOnAppearance = action.onFinished }),
-                true
-            )
+            if (isErgoAuthRequest(action.url)) {
+                navigationController.pushViewController(
+                    ErgoAuthenticationViewController(action.url, null,
+                        doOnComplete = { actionToRunOnAppearance = action.onFinished }),
+                    true
+                )
+            } else {
+                raiseError(IllegalArgumentException("ErgoAuthAction without actual authentication request: ${action.url}"))
+            }
         }
 
         override fun runErgoPayAction(action: ErgoPayAction) {
-            navigationController.pushViewController(
-                ErgoPaySigningViewController(action.url,
-                    doOnComplete = { actionToRunOnAppearance = action.onFinished }),
-                true
-            )
+            if (isErgoPaySigningRequest(action.url)) {
+                navigationController.pushViewController(
+                    ErgoPaySigningViewController(action.url,
+                        doOnComplete = { actionToRunOnAppearance = action.onFinished }),
+                    true
+                )
+            } else {
+                raiseError(IllegalArgumentException("ErgoPayAction without actual signing request: ${action.url}"))
+            }
         }
 
         override fun runTokenInformationAction(tokenId: String) {

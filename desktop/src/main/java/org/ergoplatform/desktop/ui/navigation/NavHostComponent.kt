@@ -18,6 +18,7 @@ import com.arkivanov.decompose.router.navigate
 import com.arkivanov.decompose.router.router
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.ergoplatform.Application
+import org.ergoplatform.desktop.ergoauth.ErgoAuthComponent
 import org.ergoplatform.desktop.mosaik.MosaikAppComponent
 import org.ergoplatform.desktop.mosaik.MosaikOverviewComponent
 import org.ergoplatform.desktop.settings.SettingsComponent
@@ -139,6 +140,15 @@ class NavHostComponent(
                     screenConfig.request,
                     screenConfig.walletId,
                     screenConfig.derivationIndex,
+                    screenConfig.onCompleted,
+                    componentContext,
+                    this
+                )
+
+            is ScreenConfig.ErgoAuth ->
+                ErgoAuthComponent(
+                    screenConfig.request,
+                    screenConfig.walletId,
                     screenConfig.onCompleted,
                     componentContext,
                     this

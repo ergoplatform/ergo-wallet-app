@@ -36,4 +36,10 @@ sealed class ScreenConfig : Parcelable {
         val onCompleted: (() -> Unit) = {}
     ) : ScreenConfig()
 
+    data class ErgoAuth(
+        val request: String,
+        val walletId: Int?,
+        val onCompleted: (() -> Unit) = {}
+    ) : ScreenConfig()
+
 }
