@@ -89,7 +89,11 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             if (uiRefreshControl.isRefreshing) {
                 uiRefreshControl.endRefreshing()
                 val appDelegate = getAppDelegate()
-                uiLogic.refreshByUser(appDelegate.prefs, appDelegate.database)
+                uiLogic.refreshByUser(
+                    appDelegate.prefs,
+                    appDelegate.database,
+                    rescheduleRefreshJob = null
+                )
             }
         }
 
@@ -127,7 +131,11 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
 
     private fun startRefreshWhenNeeded() {
         val appDelegate = getAppDelegate()
-        uiLogic.refreshWhenNeeded(appDelegate.prefs, appDelegate.database)
+        uiLogic.refreshWhenNeeded(
+            appDelegate.prefs,
+            appDelegate.database,
+            rescheduleRefreshJob = null
+        )
     }
 
     private fun updateRefreshState() {

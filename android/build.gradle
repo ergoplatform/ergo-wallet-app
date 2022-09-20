@@ -101,6 +101,10 @@ dependencies {
     implementation("androidx.room:room-ktx:$room_version")
     kapt "androidx.room:room-compiler:$room_version"
 
+    def work_version = "2.7.1"
+    implementation "androidx.work:work-runtime:$work_version"
+    implementation "androidx.work:work-runtime-ktx:$work_version"
+
     implementation('com.journeyapps:zxing-android-embedded:4.2.0')
 
     // newer okhttp version than pulled from dependencies to avoid StrictMode policy violation

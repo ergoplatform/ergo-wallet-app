@@ -43,7 +43,12 @@ class WalletDetailsComponent(
 
     override val actions: @Composable RowScope.() -> Unit
         get() = {
-            IconButton({ uiLogic.refreshByUser(Application.prefs, Application.database) }) {
+            IconButton({
+                uiLogic.refreshByUser(
+                    Application.prefs, Application.database,
+                    rescheduleRefreshJob = null
+                )
+            }) {
                 Icon(Icons.Default.Refresh, null)
             }
 
@@ -87,7 +92,11 @@ class WalletDetailsComponent(
     }
 
     private fun startRefreshWhenNeeded() {
-        uiLogic.refreshWhenNeeded(Application.prefs, Application.database)
+        uiLogic.refreshWhenNeeded(
+            Application.prefs,
+            Application.database,
+            rescheduleRefreshJob = null
+        )
     }
 
     private val chooseAddressDialog = mutableStateOf(false)

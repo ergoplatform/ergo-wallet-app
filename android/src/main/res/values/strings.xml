@@ -348,4 +348,10 @@
     <string name="label_ipfs_http_gateway">IPFS HTTP gateway</string>
     <string name="desc_register_handler">You can register this application to handle Ergo specific protocols like ErgoPay and ErgoAuth.</string>
     <string name="button_register_handler">Register as Ergo protocol handler</string>
+    <string name="title_balance_notification">Changed balance notification</string>
+    <string name="desc_balance_notif_set">Check balance and notify on changes</string>
+    <string name="button_balance_notif_never">Never</string>
+    <string name="button_balance_notif_hourly">Every hour</string>
+    <string name="button_balance_notif_xhourly">Every %1$s hours</string>
+    <string name="desc_balance_notification">Your wallet balance changed</string>
 </resources>

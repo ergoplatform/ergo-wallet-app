@@ -9,9 +9,7 @@ import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.refreshNodeList
 import org.ergoplatform.restapi.client.InfoApi
-import org.ergoplatform.uilogic.STRING_BUTTON_DISPLAY_CURRENCY
-import org.ergoplatform.uilogic.STRING_LABEL_NONE
-import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import java.util.*
 import kotlin.coroutines.coroutineContext
@@ -27,6 +25,25 @@ class SettingsUiLogic {
             if (displayCurrency.isNotEmpty()) displayCurrency else texts.getString(STRING_LABEL_NONE)
         )
     }
+
+    fun changeBalanceSyncInterval(prefs: PreferencesProvider) {
+        prefs.balanceSyncInterval = when (prefs.balanceSyncInterval) {
+            0L -> 1L
+            1L -> 2
+            2L -> 4
+            4L -> 6
+            6L -> 12
+            12L -> 24
+            else -> 0
+        }
+    }
+
+    fun getBalanceSyncButtonText(prefs: PreferencesProvider, texts: StringProvider): String =
+        when (val setting = prefs.balanceSyncInterval) {
+            0L -> texts.getString(STRING_BUTTON_BALANCE_NOTIF_NEVER)
+            1L -> texts.getString(STRING_BUTTON_BALANCE_NOTIF_HOURLY)
+            else -> texts.getString(STRING_BUTTON_BALANCE_NOTIF_XHOURLY, setting.toString())
+        }
 
     val checkNodesState: StateFlow<CheckNodesState> get() = _checkNodesState
     private val _checkNodesState = MutableStateFlow<CheckNodesState>(CheckNodesState.Waiting)
