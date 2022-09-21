@@ -20,6 +20,7 @@ class ImageViewHolder(
             Image.Size.SMALL -> 50.0
             Image.Size.MEDIUM -> 120.0
             Image.Size.LARGE -> 250.0
+            Image.Size.XXL -> 500.0
         }
         uiImageView.apply {
             contentMode = UIViewContentMode.ScaleAspectFit
