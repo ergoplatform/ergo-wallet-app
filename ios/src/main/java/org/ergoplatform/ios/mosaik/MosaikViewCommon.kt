@@ -51,6 +51,8 @@ object MosaikViewCommon {
 
             is MarkDown -> MarkDownHolder(treeElement)
 
+            is Grid -> GridViewHolder(treeElement)
+
             else -> {
                 UiViewHolder(Body1Label().apply {
                     text = "Unsupported element: ${mosaikViewElement.javaClass.simpleName}"
