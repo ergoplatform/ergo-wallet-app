@@ -94,13 +94,14 @@ object MosaikViewCommon {
 
 }
 
-open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement): MosaikViewHolder {
+open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) : MosaikViewHolder {
     override fun resourceBytesAvailable(bytes: ByteArray) {
     }
 
     override fun onAddedToSuperview() {
         if (isFillMaxWidth()) {
-            uiView.widthMatchesSuperview()
+            // lower priority to not overrule max width constraints
+            uiView.widthMatchesSuperview(priority = iosDefaultPriority - 1)
         }
     }
 
