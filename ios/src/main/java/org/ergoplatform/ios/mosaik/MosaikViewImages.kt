@@ -10,9 +10,10 @@ import org.robovm.apple.uikit.*
 
 class ImageViewHolder(
     treeElement: TreeElement
-): UiViewHolder(UIImageView(), treeElement) {
+) : UiViewHolder(UIImageView(), treeElement) {
 
-    val uiImageView = uiView as UIImageView
+    private val uiImageView = uiView as UIImageView
+    private val activityIndicator: UIActivityIndicatorView?
 
     init {
         val mosaikViewElement = treeElement.element as Image
@@ -28,25 +29,48 @@ class ImageViewHolder(
             fixedWidth(size)
         }
 
-        treeElement.getResourceBytes?.let { resourceBytesAvailable(it) }
+        val hasImage = treeElement.getResourceBytes?.let {
+            resourceBytesAvailable(it)
+            true
+        } ?: false
+
+        activityIndicator = if (!hasImage) {
+            UIActivityIndicatorView(UIActivityIndicatorViewStyle.Medium).apply {
+                uiView.addSubview(this)
+                centerHorizontal().centerVertical()
+                startAnimating()
+            }
+        } else null
     }
 
     override fun resourceBytesAvailable(bytes: ByteArray) {
         super.resourceBytesAvailable(bytes)
         // if we have an image that is not set yet
         if (uiImageView.image == null) {
-            try {
-                uiImageView.image = UIImage(NSData(bytes))
+            val image = try {
+                if (bytes.isNotEmpty())
+                    UIImage(NSData(bytes))
+                else null
             } catch (t: Throwable) {
-
+                null
             }
+
+            if (image == null) {
+                uiImageView.image = getIosSystemImage(IMAGE_ERROR, UIImageSymbolScale.Small)
+                uiImageView.tintColor = uiColorErgo
+                uiImageView.contentMode = UIViewContentMode.Center
+            } else {
+                uiImageView.image = image
+            }
+
         }
+        activityIndicator?.removeFromSuperview()
     }
 }
 
 class IconImageViewHolder(
     treeElement: TreeElement
-): UiViewHolder(UIImageView(), treeElement) {
+) : UiViewHolder(UIImageView(), treeElement) {
 
     val uiImageView = uiView as UIImageView
 
@@ -103,7 +127,7 @@ fun IconType.getUiImage() = getIosSystemImage(
 
 class LoadingIndicatorHolder(
     treeElement: TreeElement,
-): UiViewHolder(
+) : UiViewHolder(
     UIView(CGRect.Zero()),
     treeElement
 ) {
@@ -138,7 +162,7 @@ class LoadingIndicatorHolder(
 
 class QrCodeViewHolder(
     treeElement: TreeElement
-): UiViewHolder(UIImageView(), treeElement) {
+) : UiViewHolder(UIImageView(), treeElement) {
 
     val uiImageView = uiView as UIImageView
 
