@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.ChooseWalletViewController
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 import org.ergoplatform.wallet.isReadOnly
@@ -14,6 +15,7 @@ import org.robovm.apple.uikit.*
 class ErgoAuthenticationViewController(
     private val request: String,
     private val walletId: Int?,
+    private val doOnComplete: (() -> Unit)? = null,
 ) : CoroutineViewController() {
 
     private val uiLogic = IosUiLogic()
@@ -205,6 +207,10 @@ class ErgoAuthenticationViewController(
 
                 if (newState == State.DONE) {
                     showDoneInfo()
+
+                    if (getDoneSeverity() != MessageSeverity.ERROR) {
+                        doOnComplete?.invoke()
+                    }
                 } else if (newState == State.WAIT_FOR_AUTH) {
                     authRequestContainer.showRequestInfo()
                 }

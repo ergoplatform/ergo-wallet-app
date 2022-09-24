@@ -20,7 +20,8 @@ import org.robovm.apple.uikit.*
 class ErgoPaySigningViewController(
     private val request: String,
     private val walletId: Int = -1,
-    private val derivationIndex: Int = -1
+    private val derivationIndex: Int = -1,
+    private val doOnComplete: (() -> Unit)? = null
 ) : SubmitTransactionViewController() {
 
     override val uiLogic = IosErgoPaySigningUiLogic()
@@ -354,6 +355,10 @@ class ErgoPaySigningViewController(
         override fun notifyStateChanged(newState: State) {
             runOnMainThread {
                 refreshUserInterface(newState)
+
+                if (newState == State.DONE && txId != null) {
+                    doOnComplete?.invoke()
+                }
             }
         }
 

@@ -40,6 +40,8 @@ class ChooseWalletListBottomSheetDialog : BottomSheetDialogFragment() {
                     wallets,
                     true
                 ) { walletConfig -> onChooseWallet(walletConfig) }
+
+                binding.emptyView.visibility = if (wallets.isEmpty()) View.VISIBLE else View.GONE
             }
     }
 

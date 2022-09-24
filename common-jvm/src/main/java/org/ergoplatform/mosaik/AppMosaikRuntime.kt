@@ -8,16 +8,15 @@ import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.isValidErgoAddress
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
-import org.ergoplatform.persistance.CacheFileManager
-import org.ergoplatform.persistance.IAppDatabase
-import org.ergoplatform.persistance.PreferencesProvider
-import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.persistance.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.utils.getHostname
 import org.ergoplatform.utils.normalizeUrl
 import org.ergoplatform.wallet.addresses.getAddressLabel
+import org.ergoplatform.wallet.getDerivedAddress
+import org.ergoplatform.wallet.getSortedDerivedAddressesList
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
@@ -153,8 +152,15 @@ abstract class AppMosaikRuntime(
         )
     }
 
+    private var appNotLoadedUrl: String? = null
+
     override fun appNotLoadedError(appUrl: String, error: Throwable) {
+        appNotLoadedUrl = appUrl
         appNotLoaded(error)
+    }
+
+    fun retryLoadingLastAppNotLoaded() {
+        appNotLoadedUrl?.let { loadUrlEnteredByUser(it) }
     }
 
     private val normalizedAppUrl get() = appUrl?.let { normalizeUrl(it) }
@@ -243,6 +249,52 @@ abstract class AppMosaikRuntime(
                     errorCause.javaClass.simpleName + " " + errorCause.message
                 )
         }
+    }
+
+    private var valueIdWalletChosen: String? = null
+    private var valueIdAddressChosen: String? = null
+
+    override fun showErgoAddressChooser(valueId: String) {
+        valueIdAddressChosen = valueId
+        valueIdWalletChosen = null
+        startWalletChooser()
+    }
+
+    override fun showErgoWalletChooser(valueId: String) {
+        valueIdWalletChosen = valueId
+        valueIdAddressChosen = null
+        startWalletChooser()
+    }
+
+    abstract fun startWalletChooser()
+
+    var walletForAddressChooser: Wallet? = null
+        private set
+
+    abstract fun startAddressChooser()
+
+    fun onWalletChosen(wallet: Wallet) {
+        valueIdWalletChosen?.let { valueId ->
+            setValue(
+                valueId,
+                wallet.getSortedDerivedAddressesList().map { it.publicAddress })
+            valueIdWalletChosen = null
+        }
+
+        valueIdAddressChosen?.let {
+            val addresses = wallet.getSortedDerivedAddressesList()
+            walletForAddressChooser = wallet
+            if (addresses.size == 1)
+                onAddressChosen(addresses.first().derivationIndex)
+            else {
+                startAddressChooser()
+            }
+        }
+    }
+
+    fun onAddressChosen(addressIdx: Int) {
+        setValue(valueIdAddressChosen!!, walletForAddressChooser!!.getDerivedAddress(addressIdx))
+        valueIdAddressChosen = null
     }
 }
 

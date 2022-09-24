@@ -15,20 +15,17 @@ import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoAuthAction
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
-import org.ergoplatform.mosaik.model.actions.TokenInformationAction
 import org.ergoplatform.persistance.CacheFileManager
 import org.ergoplatform.persistance.PreferencesProvider
-import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.StringProvider
-import org.ergoplatform.wallet.getDerivedAddress
-import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 class MosaikViewModel : ViewModel() {
     val browserEvent = SingleLiveEvent<String?>()
     val pasteToClipboardEvent = SingleLiveEvent<String?>()
     val showDialogEvent = SingleLiveEvent<MosaikDialog?>()
-    val showWalletOrAddressChooserEvent = SingleLiveEvent<String?>()
+    val showWalletChooserEvent = SingleLiveEvent<Long?>()
+    val showAddressChooserEvent = SingleLiveEvent<Long?>()
     val ergoPayActionEvent = SingleLiveEvent<ErgoPayAction?>()
     val ergoAuthActionEvent = SingleLiveEvent<ErgoAuthAction?>()
     val scanQrCodeEvent = SingleLiveEvent<String?>()
@@ -38,9 +35,6 @@ class MosaikViewModel : ViewModel() {
 
     private var initialized = false
 
-    private var valueIdForWalletChooser: String? = null
-    private var valueIdForAddressChooser: String? = null
-    private var walletForAddressChooser: Wallet? = null
     private var ergoPayOnFinishedActionId: String? = null
     private var ergoAuthOnFinishedActionId: String? = null
     private var scanQrCodeActionId: String? = null
@@ -101,20 +95,16 @@ class MosaikViewModel : ViewModel() {
             scanQrCodeEvent.postValue(actionId)
         }
 
-        override fun showErgoAddressChooser(valueId: String) {
-            valueIdForAddressChooser = valueId
-            valueIdForWalletChooser = null
-            showWalletOrAddressChooserEvent.postValue(valueId)
-        }
-
-        override fun showErgoWalletChooser(valueId: String) {
-            valueIdForWalletChooser = valueId
-            valueIdForAddressChooser = null
-            showWalletOrAddressChooserEvent.postValue(valueId)
-        }
-
         override fun runTokenInformationAction(tokenId: String) {
             showTokenInfoEvent.postValue(tokenId)
+        }
+
+        override fun startWalletChooser() {
+            showWalletChooserEvent.postValue(System.currentTimeMillis())
+        }
+
+        override fun startAddressChooser() {
+            showAddressChooserEvent.postValue(System.currentTimeMillis())
         }
     }
 
@@ -140,40 +130,9 @@ class MosaikViewModel : ViewModel() {
         }
     }
 
-    fun retryLoading(appUrl: String) {
+    fun retryLoading() {
         noAppLiveData.postValue(null)
-        mosaikRuntime.loadUrlEnteredByUser(appUrl)
-    }
-
-    /**
-     * return true when we are done
-     */
-    fun onWalletChosen(wallet: Wallet?): Boolean {
-        return if (valueIdForWalletChooser != null && wallet != null) {
-            // wallet should be chosen
-            val valueId = valueIdForWalletChooser
-            valueIdForWalletChooser = null
-            valueId?.let {
-                mosaikRuntime.setValue(
-                    valueId,
-                    wallet.getSortedDerivedAddressesList().map { it.publicAddress })
-            }
-            true
-        } else {
-            // address should be choosen
-            walletForAddressChooser = wallet
-            false
-        }
-    }
-
-    fun onAddressChosen(addressDerivationIdx: Int) {
-        val valueId = valueIdForAddressChooser ?: return
-        val wallet = walletForAddressChooser ?: return
-
-        valueIdForAddressChooser = null
-        walletForAddressChooser = null
-
-        mosaikRuntime.setValue(valueId, wallet.getDerivedAddress(addressDerivationIdx))
+        mosaikRuntime.retryLoadingLastAppNotLoaded()
     }
 
     fun ergoPayActionCompleted() {

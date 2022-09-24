@@ -48,6 +48,7 @@ fun WalletDetailsScreen(
     onSendClicked: () -> Unit,
     onAddressesClicked: () -> Unit,
     onViewTransactionsClicked: () -> Unit,
+    onTokenClicked: (String, Long?) -> Unit,
 ) {
     AppScrollingLayout {
         val firstColumnContent = @Composable {
@@ -63,7 +64,7 @@ fun WalletDetailsScreen(
             ErgoBalanceLayout(uiLogic)
 
             if (uiLogic.tokensList.isNotEmpty()) {
-                WalletTokensLayout(uiLogic)
+                WalletTokensLayout(uiLogic, onTokenClicked)
             }
         }
         val secondColumnContent = @Composable {
@@ -71,7 +72,8 @@ fun WalletDetailsScreen(
                 informationVersion,
                 downloadingTransactions,
                 uiLogic,
-                onViewTransactionsClicked
+                onViewTransactionsClicked,
+                onTokenClicked = { onTokenClicked(it, null) }
             )
         }
 
@@ -213,7 +215,10 @@ private fun ErgoBalanceLayout(uiLogic: WalletDetailsUiLogic) {
 }
 
 @Composable
-private fun WalletTokensLayout(uiLogic: WalletDetailsUiLogic) {
+private fun WalletTokensLayout(
+    uiLogic: WalletDetailsUiLogic,
+    onTokenClicked: (String, Long?) -> Unit,
+) {
     AppCard(Modifier.padding(defaultPadding)) {
         Column(Modifier.padding(defaultPadding)) {
 
@@ -267,8 +272,9 @@ private fun WalletTokensLayout(uiLogic: WalletDetailsUiLogic) {
                     val data = TokenEntryViewData(walletToken, true, Application.texts)
                     data.bind(uiLogic.tokenInformation[walletToken.tokenId])
 
-                    Column(Modifier.fillMaxWidth().padding(top = defaultPadding)) {
-                        // TODO TokenInfo clickable
+                    Column(Modifier.fillMaxWidth().padding(top = defaultPadding).clickable {
+                        onTokenClicked(walletToken.tokenId!!, walletToken.amount)
+                    }) {
 
                         TokenLabel(
                             data,
@@ -303,6 +309,7 @@ private fun TransactionsLayout(
     downloadingTransactions: Boolean,
     uiLogic: WalletDetailsUiLogic,
     onViewTransactionsClicked: () -> Unit,
+    onTokenClicked: (String) -> Unit,
 ) {
     AppCard(Modifier.padding(defaultPadding)) {
         Column {
@@ -344,7 +351,7 @@ private fun TransactionsLayout(
             transactionList.value.forEach { transaction ->
                 Divider()
 
-                key(transaction) { AddressTransactionInfo(transaction) }
+                key(transaction) { AddressTransactionInfo(transaction, onTokenClicked) }
             }
 
             if (transactionList.value.size == uiLogic.maxTransactionsToShow) {
@@ -366,7 +373,10 @@ private fun TransactionsLayout(
 }
 
 @Composable
-fun AddressTransactionInfo(transaction: AddressTransactionWithTokens) {
+fun AddressTransactionInfo(
+    transaction: AddressTransactionWithTokens,
+    onTokenClicked: (String) -> Unit,
+) {
 
     Column(Modifier.padding(defaultPadding)) {
         // TODO clicklistener transaction info
@@ -405,12 +415,11 @@ fun AddressTransactionInfo(transaction: AddressTransactionWithTokens) {
         }
 
         transaction.tokens.forEach { token ->
-            // TODO clicklistener token info
-
             TokenEntryView(
                 token.tokenAmount.toStringUsFormatted(),
                 token.name,
-                Modifier.fillMaxWidth().padding(start = defaultPadding)
+                Modifier.fillMaxWidth().clickable { onTokenClicked(token.tokenId) }
+                    .padding(start = defaultPadding)
             )
 
         }

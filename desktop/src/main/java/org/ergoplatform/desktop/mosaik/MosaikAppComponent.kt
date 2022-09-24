@@ -24,6 +24,7 @@ import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressesListDialog
+import org.ergoplatform.ergoauth.isErgoAuthRequest
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.MosaikComposeConfig
 import org.ergoplatform.mosaik.MosaikDialog
@@ -33,10 +34,8 @@ import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoAuthAction
 import org.ergoplatform.mosaik.model.actions.ErgoPayAction
 import org.ergoplatform.persistance.Wallet
-import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_LABEL_COPIED
-import org.ergoplatform.wallet.getSortedDerivedAddressesList
 
 class MosaikAppComponent(
     private val appTitle: String?,
@@ -91,8 +90,16 @@ class MosaikAppComponent(
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {
-            // TODO ErgoAuth
-            navHost.showErrorDialog("ErgoAuth not available yet")
+            if (isErgoAuthRequest(action.url)) {
+                val runOnEaComplete: (() -> Unit)? = action.onFinished?.let { onFinishedAction ->
+                    { runOnResume = { runAction(onFinishedAction) } }
+                }
+                router.push(
+                    ScreenConfig.ErgoAuth(action.url, null, onCompleted = runOnEaComplete ?: {})
+                )
+            } else {
+                raiseError(IllegalArgumentException("ErgoAuthAction without actual authentication request: ${action.url}"))
+            }
         }
 
         override fun runErgoPayAction(action: ErgoPayAction) {
@@ -114,8 +121,7 @@ class MosaikAppComponent(
         }
 
         override fun runTokenInformationAction(tokenId: String) {
-            // TODO tokenInfo
-            navHost.showErrorDialog("TokenInfo not available yet")
+            router.push(ScreenConfig.TokenInformation(tokenId))
         }
 
         override fun scanQrCode(actionId: String) {
@@ -128,18 +134,6 @@ class MosaikAppComponent(
             navHost.dialogHandler.showDialog(dialog)
         }
 
-        override fun showErgoAddressChooser(valueId: String) {
-            valueIdAddressChosen = valueId
-            valueIdWalletChosen = null
-            startWalletChooser()
-        }
-
-        override fun showErgoWalletChooser(valueId: String) {
-            valueIdWalletChosen = valueId
-            valueIdAddressChosen = null
-            startWalletChooser()
-        }
-
         override fun onAppNavigated(manifest: MosaikManifest) {
             manifestState.value = manifest
             isFavoriteState.value = isFavoriteApp
@@ -147,6 +141,17 @@ class MosaikAppComponent(
 
         override fun appNotLoaded(cause: Throwable) {
             noAppLoadedErrorMessage.value = getUserErrorMessage(cause)
+        }
+
+        override fun startWalletChooser() {
+            componentScope().launch {
+                chooseWalletDialog.value =
+                    Application.database.walletDbProvider.getWalletsWithStates()
+            }
+        }
+
+        override fun startAddressChooser() {
+            chooseAddressDialog.value = walletForAddressChooser
         }
     }
 
@@ -195,8 +200,6 @@ class MosaikAppComponent(
 
     private val noAppLoadedErrorMessage = mutableStateOf<String?>(null)
     private val manifestState = mutableStateOf<MosaikManifest?>(null)
-    private var valueIdWalletChosen: String? = null
-    private var valueIdAddressChosen: String? = null
     private val chooseWalletDialog = mutableStateOf<List<Wallet>?>(null)
     private val chooseAddressDialog = mutableStateOf<Wallet?>(null)
 
@@ -207,7 +210,7 @@ class MosaikAppComponent(
             noAppLoadedErrorMessage,
             retryClicked = {
                 noAppLoadedErrorMessage.value = null
-                mosaikRuntime.loadMosaikApp(appUrl)
+                mosaikRuntime.retryLoadingLastAppNotLoaded()
             }
         )
 
@@ -218,7 +221,7 @@ class MosaikAppComponent(
                 onWalletChosen = { walletConfig ->
                     val walletChosen = walletList.first { walletConfig == it.walletConfig }
                     chooseWalletDialog.value = null
-                    onWalletChosen(walletChosen)
+                    mosaikRuntime.onWalletChosen(walletChosen)
                 },
                 onDismiss = { chooseWalletDialog.value = null },
             )
@@ -230,45 +233,11 @@ class MosaikAppComponent(
                 withAllAddresses = false,
                 onAddressChosen = { walletAddress ->
                     chooseAddressDialog.value = null
-                    mosaikRuntime.setValue(valueIdAddressChosen!!, walletAddress!!.publicAddress)
+                    mosaikRuntime.onAddressChosen(walletAddress!!.derivationIndex)
                 },
                 onDismiss = { chooseAddressDialog.value = null },
             )
         }
-
-    }
-
-    private fun startWalletChooser() {
-        componentScope().launch {
-            chooseWalletDialog.value =
-                Application.database.walletDbProvider.getWalletsWithStates()
-        }
-    }
-
-    private fun onWalletChosen(walletChosen: Wallet) {
-        valueIdWalletChosen?.let { valueId ->
-            mosaikRuntime.setValue(
-                valueId,
-                walletChosen.getSortedDerivedAddressesList().map { it.publicAddress })
-            valueIdWalletChosen = null
-        }
-
-        valueIdAddressChosen?.let {
-            val addresses = walletChosen.getSortedDerivedAddressesList()
-            if (addresses.size == 1)
-                onAddressChosen(addresses.first())
-            else
-                chooseAddressDialog.value = walletChosen
-        }
-
-    }
-
-    private fun onAddressChosen(walletAddress: WalletAddress) {
-        mosaikRuntime.setValue(
-            valueIdAddressChosen!!,
-            walletAddress.publicAddress
-        )
-        valueIdAddressChosen = null
 
     }
 

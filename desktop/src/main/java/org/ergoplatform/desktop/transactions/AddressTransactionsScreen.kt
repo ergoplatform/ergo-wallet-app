@@ -35,6 +35,7 @@ import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 fun AddressTransactionsScreen(
     wallet: Wallet,
     walletAddress: WalletAddress,
+    onTokenClicked: (String) -> Unit,
     onChooseAddressClicked: () -> Unit
 ) {
     val progressState = TransactionListManager.downloadProgress.collectAsState()
@@ -89,7 +90,7 @@ fun AddressTransactionsScreen(
                                             .widthIn(min = 400.dp, max = defaultMaxWidth)
                                             .align(Alignment.Center)
                                     ) {
-                                        AddressTransactionInfo(transactionWithTokens)
+                                        AddressTransactionInfo(transactionWithTokens, onTokenClicked)
                                     }
                                 }
                             }

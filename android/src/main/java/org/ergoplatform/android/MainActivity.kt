@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -48,6 +49,13 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             handleIntent(navController)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // removes pending notifications from system bar
+        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_SYNC)
     }
 
     fun scanQrCode() {

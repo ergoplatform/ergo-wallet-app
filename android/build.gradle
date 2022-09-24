@@ -13,8 +13,8 @@ android {
         applicationId "org.ergoplatform.android"
         minSdkVersion 24
         targetSdkVersion 31
-        versionCode 2217
-        versionName "2.0.2217"
+        versionCode 2218
+        versionName "2.1.2218"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -100,6 +100,10 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     implementation("androidx.room:room-ktx:$room_version")
     kapt "androidx.room:room-compiler:$room_version"
+
+    def work_version = "2.7.1"
+    implementation "androidx.work:work-runtime:$work_version"
+    implementation "androidx.work:work-runtime-ktx:$work_version"
 
     implementation('com.journeyapps:zxing-android-embedded:4.2.0')
 

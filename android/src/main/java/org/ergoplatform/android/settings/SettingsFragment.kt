@@ -54,6 +54,15 @@ class SettingsFragment : Fragment() {
             DisplayCurrencyListDialogFragment().show(childFragmentManager, null)
         }
 
+        setBalanceNotifButtonTitle()
+        binding.balanceNotification.setOnClickListener {
+            val context = requireContext()
+            val prefs = Preferences(context)
+            viewModel.uiLogic.changeBalanceSyncInterval(prefs)
+            BackgroundSync.rescheduleJob(context)
+            setBalanceNotifButtonTitle()
+        }
+
         setDayNightModeButtonColor(AppCompatDelegate.getDefaultNightMode())
         binding.darkModeSystem.setOnClickListener { changeDayNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) }
         binding.darkModeDay.setOnClickListener { changeDayNightMode(AppCompatDelegate.MODE_NIGHT_NO) }
@@ -84,6 +93,14 @@ class SettingsFragment : Fragment() {
         binding.buttonDownloadContent.setText(
             if (Preferences(requireContext()).downloadNftContent) R.string.button_download_content_off
             else R.string.button_download_content_on
+        )
+    }
+
+    private fun setBalanceNotifButtonTitle() {
+        val context = requireContext()
+        binding.balanceNotification.text = viewModel.uiLogic.getBalanceSyncButtonText(
+            Preferences(context),
+            AndroidStringProvider(context)
         )
     }
 

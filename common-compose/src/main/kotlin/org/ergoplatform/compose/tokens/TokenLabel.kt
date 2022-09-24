@@ -1,9 +1,6 @@
 package org.ergoplatform.compose.tokens
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -171,10 +168,11 @@ fun TokenThumbnail(
     size: Dp,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier.size(size)) {
+    Box(modifier.requiredSize(size)) {
         Icon(
             ComposePlatformUtils.getDrawablePainter(ComposePlatformUtils.Drawable.Octagon),
             null,
+            Modifier.fillMaxSize(),
             tint = MosaikStyleConfig.secondaryLabelColor
         )
 

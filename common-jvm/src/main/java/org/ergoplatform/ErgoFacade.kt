@@ -178,11 +178,10 @@ fun buildPromptSigningResultFromErgoPayRequest(
     try {
         return getRestErgoClient(prefs).execute { ctx ->
             val reducedTx = ctx.parseReducedTransaction(serializedTx)
-            val inputs =
-                ctx.getBoxesById(*reducedTx.inputBoxesIds.toTypedArray())
-                    .map { inputBox ->
-                        (inputBox as InputBoxImpl).ergoBox.bytes()
-                    }
+            val dataSource = ctx.dataSource
+            val inputs = reducedTx.inputBoxesIds.map { boxId ->
+                (dataSource.getBoxByIdWithMemPool(boxId) as InputBoxImpl).ergoBox.bytes()
+            }
 
             return@execute PromptSigningResult(
                 true, serializedTx,

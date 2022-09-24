@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.*
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import java.util.regex.Pattern
 
@@ -21,7 +22,8 @@ fun LinkifyText(
     modifier: Modifier = Modifier,
     style: TextStyle,
     linkColor: Color = uiErgoColor,
-    isHtml: Boolean = false
+    isHtml: Boolean = false,
+    textAlignment: TextAlign? = null
 ) {
     val layoutResult = remember {
         mutableStateOf<TextLayoutResult?>(null)
@@ -121,6 +123,7 @@ fun LinkifyText(
                 }
             }
         },
+        textAlign = textAlignment,
         onTextLayout = { layoutResult.value = it }
     )
 }
