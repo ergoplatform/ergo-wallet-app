@@ -14,7 +14,7 @@ dependencies {
     api(compose.runtime)
     api(compose.foundation)
     api(compose.material)
-    api("com.github.MrStahlfelge.mosaik:common-compose:453e1ca6fa")
+    api("com.github.MrStahlfelge.mosaik:common-compose:3697f0cdcc")
     implementation(compose.materialIconsExtended)
     // Needed only for preview.
     implementation(compose.preview)

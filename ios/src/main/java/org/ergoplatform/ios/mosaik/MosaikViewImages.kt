@@ -121,6 +121,7 @@ fun IconType.getUiImage() = getIosSystemImage(
         IconType.SWITCH -> "arrow.left.and.right.circle"
         IconType.QR_CODE -> IMAGE_QR_CODE
         IconType.QR_SCAN -> IMAGE_QR_SCAN
+        IconType.SEARCH -> IMAGE_SEARCH
     },
     UIImageSymbolScale.Small
 )
