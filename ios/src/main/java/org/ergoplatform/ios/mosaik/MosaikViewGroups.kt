@@ -177,7 +177,7 @@ class StackViewHolder(
 
     override fun isFillMaxWidth(): Boolean {
         val element = treeElement.element
-        return element is Row && !element.isPacked && weightSum > 0
+        return element is Row && !element.isPacked && weightSum > 0 || super.isFillMaxWidth()
     }
 
     private class UiViewWrapper : UIView(CGRect.Zero()) {

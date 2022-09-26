@@ -94,6 +94,13 @@ object MosaikViewCommon {
         return uiViewHolder
     }
 
+    /**
+     * returns true if the element is not only to be maximized within its parent, but should
+     * make its parent maximize in its parent and so on
+     */
+    fun shouldExpandElement(element: ViewElement): Boolean =
+        element is Grid
+                || element is ViewGroup && element.children.find { shouldExpandElement(it) } != null
 }
 
 open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) : MosaikViewHolder {
@@ -110,7 +117,7 @@ open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) : Mosa
     override fun onRemovedFromSuperview() {
     }
 
-    open fun isFillMaxWidth(): Boolean = false
+    open fun isFillMaxWidth(): Boolean = MosaikViewCommon.shouldExpandElement(treeElement.element)
 
     open val handlesClicks: Boolean = false
 }
