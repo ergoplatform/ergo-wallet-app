@@ -341,7 +341,7 @@ class InputButtonHolder(treeElement: TreeElement) :
             // completable jobs only, while the observer here runs as long as the element
             // exists
             valueWatchJob =
-                (treeElement.viewTree.mosaikRuntime as MosaikViewController.IosMosaikRuntime).viewController.viewControllerScope.launch {
+                viewCoroutineScope().launch {
                     treeElement.viewTree.valueState.collectLatest {
                         val currentValue = treeElement.currentValue
 

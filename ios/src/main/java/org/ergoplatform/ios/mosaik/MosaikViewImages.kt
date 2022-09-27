@@ -1,7 +1,10 @@
 package org.ergoplatform.ios.mosaik
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WIDTH_ICONS
+import org.ergoplatform.mosaik.MosaikLogger
 import org.ergoplatform.mosaik.TreeElement
 import org.ergoplatform.mosaik.model.ui.*
 import org.robovm.apple.coregraphics.CGRect
@@ -14,15 +17,16 @@ class ImageViewHolder(
 
     private val uiImageView = uiView as UIImageView
     private val activityIndicator: UIActivityIndicatorView?
+    private val mosaikViewElement = treeElement.element as Image
+    private val size = when (mosaikViewElement.size) {
+        Image.Size.SMALL -> 50.0
+        Image.Size.MEDIUM -> 120.0
+        Image.Size.LARGE -> 250.0
+        Image.Size.XXL -> 500.0
+    }
+    private var bytesProcessed: ByteArray? = null
 
     init {
-        val mosaikViewElement = treeElement.element as Image
-        val size = when (mosaikViewElement.size) {
-            Image.Size.SMALL -> 50.0
-            Image.Size.MEDIUM -> 120.0
-            Image.Size.LARGE -> 250.0
-            Image.Size.XXL -> 500.0
-        }
         uiImageView.apply {
             contentMode = UIViewContentMode.ScaleAspectFit
             fixedHeight(size)
@@ -46,24 +50,27 @@ class ImageViewHolder(
     override fun resourceBytesAvailable(bytes: ByteArray) {
         super.resourceBytesAvailable(bytes)
         // if we have an image that is not set yet
-        if (uiImageView.image == null) {
+        if (bytes != bytesProcessed) viewCoroutineScope().launch(Dispatchers.IO) {
             val image = try {
                 if (bytes.isNotEmpty())
-                    UIImage(NSData(bytes))
+                    UIImage(NSData(bytes)).scaleToSize(size, size)
                 else null
             } catch (t: Throwable) {
+                MosaikLogger.logDebug("Error decoding picture", t)
                 null
             }
 
-            if (image == null) {
-                uiImageView.image = getIosSystemImage(IMAGE_ERROR, UIImageSymbolScale.Small)
-                uiImageView.tintColor = uiColorErgo
-                uiImageView.contentMode = UIViewContentMode.Center
-            } else {
-                uiImageView.image = image
+            runOnMainThread {
+                if (image == null) {
+                    uiImageView.image = getIosSystemImage(IMAGE_ERROR, UIImageSymbolScale.Small)
+                    uiImageView.tintColor = uiColorErgo
+                    uiImageView.contentMode = UIViewContentMode.Center
+                } else {
+                    uiImageView.image = image
+                }
             }
-
         }
+        bytesProcessed = bytes
         activityIndicator?.removeFromSuperview()
     }
 }

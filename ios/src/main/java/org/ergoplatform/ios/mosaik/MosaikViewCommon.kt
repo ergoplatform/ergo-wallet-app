@@ -104,6 +104,9 @@ object MosaikViewCommon {
 }
 
 open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) : MosaikViewHolder {
+    protected fun viewCoroutineScope() =
+        (treeElement.viewTree.mosaikRuntime as MosaikViewController.IosMosaikRuntime).viewController.viewControllerScope
+
     override fun resourceBytesAvailable(bytes: ByteArray) {
     }
 
