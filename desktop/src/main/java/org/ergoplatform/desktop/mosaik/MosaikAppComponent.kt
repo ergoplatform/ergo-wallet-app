@@ -170,7 +170,10 @@ class MosaikAppComponent(
 
         MosaikComposeConfig.apply {
             convertByteArrayToImageBitmap =
-                { imageBytes -> loadImageBitmap(imageBytes.inputStream()) }
+                { imageBytes, pixels ->
+                    // TODO resize bitmap
+                    loadImageBitmap(imageBytes.inputStream())
+                }
             convertQrCodeContentToImageBitmap = ::getQrCodeImageBitmap
             interceptReturnForImeAction = true
             DropDownMenu = { expanded,
