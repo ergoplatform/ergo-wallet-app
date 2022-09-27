@@ -34,20 +34,24 @@ object CrashHandler {
     }
 
     fun writeToDebugFile(exceptionAsString: String) {
-        val file = getCrashFile()
+        try {
+            val file = getCrashFile()
 
-        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ", Locale.US)
-        val nowAsString: String = df.format(Date())
-        val osVersion = UIDevice.getCurrentDevice().systemVersion
-        val device = UIDevice.getCurrentDevice().name
+            val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ", Locale.US)
+            val nowAsString: String = df.format(Date())
+            val osVersion = UIDevice.getCurrentDevice().systemVersion
+            val device = UIDevice.getCurrentDevice().name
 
-        file.writeText(
-            "$nowAsString\n" +
-                    "App: ${getAppVersion()}\n" +
-                    "OS: $osVersion\n" +
-                    "Device: $device\n\n" +
-                    exceptionAsString
-        )
+            file.writeText(
+                "$nowAsString\n" +
+                        "App: ${getAppVersion()}\n" +
+                        "OS: $osVersion\n" +
+                        "Device: $device\n\n" +
+                        exceptionAsString
+            )
+        } catch (t: Throwable) {
+            // ignore
+        }
     }
 
     private fun getCrashFile(): File {
