@@ -194,7 +194,10 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
 
         init {
             layoutMargins = UIEdgeInsets.Zero()
-            titleLabel.textColor = uiColorErgo
+            titleLabel.apply {
+                textColor = uiColorErgo
+                numberOfLines = 1
+            }
             appIconImage.contentMode = UIViewContentMode.ScaleAspectFit
 
             addSubview(titleLabel)
