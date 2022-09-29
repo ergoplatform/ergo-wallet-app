@@ -25,10 +25,7 @@ import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressesListDialog
 import org.ergoplatform.ergoauth.isErgoAuthRequest
-import org.ergoplatform.mosaik.AppMosaikRuntime
-import org.ergoplatform.mosaik.MosaikComposeConfig
-import org.ergoplatform.mosaik.MosaikDialog
-import org.ergoplatform.mosaik.MosaikGuidManager
+import org.ergoplatform.mosaik.*
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
 import org.ergoplatform.mosaik.model.actions.ErgoAuthAction
@@ -169,11 +166,7 @@ class MosaikAppComponent(
         mosaikRuntime.preferencesProvider = Application.prefs
 
         MosaikComposeConfig.apply {
-            convertByteArrayToImageBitmap =
-                { imageBytes, pixels ->
-                    // TODO resize bitmap
-                    loadImageBitmap(imageBytes.inputStream())
-                }
+            convertByteArrayToImageBitmap = DesktopImageLoader::loadAndScaleImage
             convertQrCodeContentToImageBitmap = ::getQrCodeImageBitmap
             interceptReturnForImeAction = true
             DropDownMenu = { expanded,
