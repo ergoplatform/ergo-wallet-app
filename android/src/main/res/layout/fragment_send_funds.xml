@@ -349,6 +349,7 @@
                         android:layout_height="wrap_content"
                         android:minWidth="120dp"
                         android:text="@string/button_please_rate"
+                        android:textColor="@color/primary"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/tv_rate" />

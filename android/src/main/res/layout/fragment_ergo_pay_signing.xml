@@ -184,6 +184,7 @@
                         android:layout_gravity="center_horizontal"
                         android:minWidth="120dp"
                         android:text="@string/button_please_rate"
+                        android:textColor="@color/primary"
                         android:visibility="gone"
                         tools:visibility="visible" />
 
