@@ -70,6 +70,9 @@
                 android:name="derivation_idx"
                 android:defaultValue="-1" />
         </action>
+        <action
+            android:id="@+id/action_navigation_wallet_to_mosaikFragment"
+            app:destination="@id/mosaikFragment" />
 
     </fragment>
 
@@ -462,7 +465,8 @@
             app:popEnterAnim="@anim/slide_in_from_left"
             app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
-    <navigation android:id="@+id/navigation_settings"
+    <navigation
+        android:id="@+id/navigation_settings"
         android:label="@string/title_settings"
         app:startDestination="@id/settings_main">
         <fragment

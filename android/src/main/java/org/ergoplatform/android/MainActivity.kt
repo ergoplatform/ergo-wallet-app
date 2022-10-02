@@ -102,6 +102,11 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
             },
+            navigateToMosaikApp = { url ->
+                navController.navigate(
+                    WalletFragmentDirections.actionNavigationWalletToMosaikFragment(url, null)
+                )
+            },
             presentUserMessage = {
                 MaterialAlertDialogBuilder(this)
                     .setMessage(it)
