@@ -50,6 +50,7 @@ fun SendFundsScreen(
     onChooseAddressClicked: () -> Unit,
     onChooseToken: () -> Unit,
     onSendClicked: () -> Unit,
+    onChooseFeeClicked: () -> Unit,
 ) {
     AppScrollingLayout {
         Card(
@@ -177,10 +178,11 @@ fun SendFundsScreen(
                         )
                     }
 
-                // TODO choose fee amount
                 Text(
                     remember(amountsChangedCount) { uiLogic.getFeeDescriptionLabel(Application.texts) },
-                    Modifier.padding(vertical = defaultPadding / 2),
+                    Modifier.padding(vertical = defaultPadding / 2).clickable {
+                        onChooseFeeClicked()
+                    },
                     style = labelStyle(LabelStyle.BODY1),
                 )
 
