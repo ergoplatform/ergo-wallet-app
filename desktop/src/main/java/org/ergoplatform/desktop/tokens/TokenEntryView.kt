@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
 import org.ergoplatform.TokenAmount
 import org.ergoplatform.mosaik.labelStyle
@@ -37,5 +38,7 @@ fun TokenEntryView(displayAmount: String, displayName: String, modifier: Modifie
         },
         style = labelStyle(LabelStyle.BODY1),
         modifier = modifier,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
     )
 }

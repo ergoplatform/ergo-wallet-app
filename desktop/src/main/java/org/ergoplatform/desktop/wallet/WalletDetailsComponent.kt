@@ -133,6 +133,9 @@ class WalletDetailsComponent(
                 onTokenClicked = { tokenId, balance ->
                     router.push(ScreenConfig.TokenInformation(tokenId, balance))
                 },
+                onTransactionClicked = { txId, address ->
+                    router.push(ScreenConfig.TransactionInfo(txId, address))
+                },
                 onViewTransactionsClicked = {
                     router.push(
                         ScreenConfig.AddressTransactions(walletConfig, uiLogic.addressIdx ?: 0)

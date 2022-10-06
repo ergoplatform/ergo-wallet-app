@@ -165,6 +165,10 @@ class NavHostComponent(
                 componentContext, this, screenConfig.walletConfig, screenConfig.addressIdx
             )
 
+            is ScreenConfig.TransactionInfo -> TransactionInfoComponent(
+                screenConfig.txId, screenConfig.address, componentContext, this
+            )
+
             is ScreenConfig.TokenInformation -> TokenInformationComponent(
                 componentContext, this, screenConfig.tokenId, screenConfig.balance
             )

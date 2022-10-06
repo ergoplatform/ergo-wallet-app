@@ -47,6 +47,7 @@ fun WalletDetailsScreen(
     onReceiveClicked: () -> Unit,
     onSendClicked: () -> Unit,
     onAddressesClicked: () -> Unit,
+    onTransactionClicked: (String, String) -> Unit,
     onViewTransactionsClicked: () -> Unit,
     onTokenClicked: (String, Long?) -> Unit,
 ) {
@@ -73,6 +74,7 @@ fun WalletDetailsScreen(
                 downloadingTransactions,
                 uiLogic,
                 onViewTransactionsClicked,
+                onTransactionClicked,
                 onTokenClicked = { onTokenClicked(it, null) }
             )
         }
@@ -309,6 +311,7 @@ private fun TransactionsLayout(
     downloadingTransactions: Boolean,
     uiLogic: WalletDetailsUiLogic,
     onViewTransactionsClicked: () -> Unit,
+    onTransactionClicked: (String, String) -> Unit,
     onTokenClicked: (String) -> Unit,
 ) {
     AppCard(Modifier.padding(defaultPadding)) {
@@ -351,7 +354,18 @@ private fun TransactionsLayout(
             transactionList.value.forEach { transaction ->
                 Divider()
 
-                key(transaction) { AddressTransactionInfo(transaction, onTokenClicked) }
+                key(transaction) {
+                    AddressTransactionInfo(
+                        transaction,
+                        onTransactionClicked = {
+                            onTransactionClicked(
+                                transaction.addressTransaction.txId,
+                                transaction.addressTransaction.address
+                            )
+                        },
+                        onTokenClicked
+                    )
+                }
             }
 
             if (transactionList.value.size == uiLogic.maxTransactionsToShow) {
@@ -375,11 +389,11 @@ private fun TransactionsLayout(
 @Composable
 fun AddressTransactionInfo(
     transaction: AddressTransactionWithTokens,
+    onTransactionClicked: () -> Unit,
     onTokenClicked: (String) -> Unit,
 ) {
 
-    Column(Modifier.padding(defaultPadding)) {
-        // TODO clicklistener transaction info
+    Column(Modifier.clickable { onTransactionClicked() }.padding(defaultPadding)) {
 
         Row {
             val txHeader = transaction.addressTransaction
@@ -418,8 +432,8 @@ fun AddressTransactionInfo(
             TokenEntryView(
                 token.tokenAmount.toStringUsFormatted(),
                 token.name,
-                Modifier.fillMaxWidth().clickable { onTokenClicked(token.tokenId) }
-                    .padding(start = defaultPadding)
+                Modifier.padding(horizontal = defaultPadding)
+                    .clickable { onTokenClicked(token.tokenId) }
             )
 
         }

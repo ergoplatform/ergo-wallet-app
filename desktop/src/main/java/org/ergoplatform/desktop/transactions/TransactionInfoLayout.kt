@@ -23,14 +23,16 @@ import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.desktop.ui.toComposableText
 import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
+import org.ergoplatform.mosaik.MiddleEllipsisText
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.transactions.TransactionInfoUiLogic
 
 @Composable
-fun TransactionInfoLayout(
+fun SignTransactionInfoLayout(
     modifier: Modifier,
     transactionInfo: TransactionInfo,
     onConfirm: () -> Unit,
@@ -109,6 +111,101 @@ fun TransactionInfoLayout(
                 .widthIn(min = 120.dp)
         ) {
             Text(remember { Application.texts.getString(STRING_LABEL_CONFIRM) })
+        }
+    }
+
+}
+
+@Composable
+fun TransactionInfoLayout(
+    modifier: Modifier,
+    uiLogic: TransactionInfoUiLogic,
+    transactionInfo: TransactionInfo,
+    onTxIdClicked: () -> Unit,
+    onTokenClick: ((String) -> Unit)?
+) {
+
+    Column(modifier) {
+
+        MiddleEllipsisText(
+            transactionInfo.id,
+            Modifier.fillMaxWidth().clickable { onTxIdClicked() },
+            textAlign = TextAlign.Center,
+            style = labelStyle(LabelStyle.BODY1BOLD),
+            color = uiErgoColor,
+        )
+
+        uiLogic.transactionPurpose?.let { purpose ->
+            Text(
+                purpose,
+                Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                style = labelStyle(LabelStyle.BODY2),
+            )
+        }
+
+        Text(
+            uiLogic.getTransactionExecutionState(Application.texts),
+            Modifier.fillMaxWidth().padding(top = defaultPadding),
+            textAlign = TextAlign.Center,
+            style = labelStyle(LabelStyle.BODY2BOLD),
+        )
+
+        Divider(
+            Modifier.padding(vertical = defaultPadding / 2),
+            color = MosaikStyleConfig.secondaryLabelColor
+        )
+
+        Text(
+            remember { Application.texts.getString(STRING_TITLE_INBOXES) },
+            style = labelStyle(LabelStyle.BODY1BOLD),
+            color = uiErgoColor,
+        )
+
+        Text(
+            remember { Application.texts.getString(STRING_DESC_TRANSACTION_INBOXES) },
+            style = labelStyle(LabelStyle.BODY2),
+        )
+
+        // Inboxes
+        Column(Modifier.padding(defaultPadding / 2)) {
+            transactionInfo.inputs.forEach { input ->
+                TransactionInfoBox(
+                    input.value,
+                    input.address,
+                    input.assets,
+                    onTokenClick,
+                )
+            }
+        }
+
+        Divider(
+            Modifier.padding(vertical = defaultPadding / 2),
+            color = MosaikStyleConfig.secondaryLabelColor
+        )
+
+        Text(
+            remember { Application.texts.getString(STRING_TITLE_OUTBOXES) },
+            style = labelStyle(LabelStyle.BODY1BOLD),
+            color = uiErgoColor,
+        )
+
+        Text(
+            remember { Application.texts.getString(STRING_DESC_TRANSACTION_OUTBOXES) },
+            style = labelStyle(LabelStyle.BODY2),
+        )
+
+        // Outboxes
+        Column(Modifier.padding(defaultPadding / 2)) {
+            transactionInfo.outputs.forEach { output ->
+                TransactionInfoBox(
+                    output.value,
+                    output.address,
+                    output.assets,
+                    onTokenClick,
+                )
+            }
+
         }
     }
 

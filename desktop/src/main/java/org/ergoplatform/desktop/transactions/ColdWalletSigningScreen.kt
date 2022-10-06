@@ -161,7 +161,7 @@ private fun ColdSigningTransactionInfoLayout(
     onConfirm: () -> Unit
 ) {
     AppCard(modifier.fillMaxWidth()) {
-        TransactionInfoLayout(
+        SignTransactionInfoLayout(
             Modifier.padding(defaultPadding),
             txInfoState.value!!,
             onConfirm = onConfirm,
