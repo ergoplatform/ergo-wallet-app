@@ -112,6 +112,7 @@ dependencies {
     }
 
     // TODO remove when appkit is updated with PR 189
+    // FIXME
     implementation ('org.scorexfoundation:sigma-state_2.11:4.0.6-3-f601122c-SNAPSHOT') {
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
         exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'

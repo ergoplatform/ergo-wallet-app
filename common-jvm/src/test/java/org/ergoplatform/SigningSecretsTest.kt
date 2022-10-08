@@ -20,5 +20,8 @@ class SigningSecretsTest {
         val newSerializationVersion = "mnemonic✅".toByteArray()
         val signingSecrets = SigningSecrets.fromBytes(newSerializationVersion)
         assertEquals(signingSecretsDeprecated, signingSecrets)
+
+        val notDeprecatedSerialization = "\tmnemonic".toByteArray()
+        assertEquals(signingSecretsPast1627, SigningSecrets.fromBytes(notDeprecatedSerialization))
     }
 }

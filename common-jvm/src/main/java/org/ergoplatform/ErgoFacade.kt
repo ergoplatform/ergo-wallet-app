@@ -278,7 +278,7 @@ private fun buildProver(
         .withMnemonic(
             signingSecrets.mnemonic,
             signingSecrets.password,
-            // TODO BIP-32 fix signingSecrets.deprecatedDerivation
+            signingSecrets.deprecatedDerivation
         )
     derivedKeyIndices.forEach {
         proverBuilder.withEip3Secret(it)
