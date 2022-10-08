@@ -1,13 +1,11 @@
 package org.ergoplatform.tokens
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.ergoplatform.ErgoApi
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.api.ErgoExplorerApi
+import org.ergoplatform.api.TokenCheckResponse
 import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.explorer.client.model.OutputInfo
@@ -22,7 +20,7 @@ class TokenInfoManager {
     fun getTokenInformationFlow(
         tokenId: String,
         tokenDbProvider: TokenDbProvider,
-        apiService: ErgoApiService
+        apiService: ApiServiceManager
     ): Flow<TokenInformation?> {
         return flow {
             val emittedToken = withContext(Dispatchers.IO) {
@@ -35,7 +33,7 @@ class TokenInfoManager {
             // if necessary, update token information and emit again
             emittedToken?.let {
                 withContext(Dispatchers.IO) {
-                    updateTokenInformationWhenNecessary(emittedToken, tokenDbProvider)
+                    updateTokenInformationWhenNecessary(emittedToken, apiService, tokenDbProvider)
                 }?.let { emit(it) }
             }
         }
@@ -47,11 +45,11 @@ class TokenInfoManager {
     suspend fun getTokenInformation(
         tokenId: String,
         tokenDbProvider: TokenDbProvider,
-        apiService: ErgoApi
+        apiService: ApiServiceManager
     ): TokenInformation? {
         return withContext(Dispatchers.IO) {
             val fromDB = loadTokenFromDbOrApi(tokenDbProvider, tokenId, apiService)
-            val updated = fromDB?.let { updateTokenInformationWhenNecessary(it, tokenDbProvider) }
+            val updated = fromDB?.let { updateTokenInformationWhenNecessary(it, apiService, tokenDbProvider) }
 
             return@withContext updated ?: fromDB
         }
@@ -63,7 +61,7 @@ class TokenInfoManager {
     private suspend fun loadTokenFromDbOrApi(
         tokenDbProvider: TokenDbProvider,
         tokenId: String,
-        apiService: ErgoApi
+        apiService: ErgoExplorerApi
     ) = tokenDbProvider.loadTokenInformation(tokenId) ?: try {
         val tokenFromApi = fetchTokenInformationFromApi(apiService, tokenId)
         tokenDbProvider.insertOrReplaceTokenInformation(tokenFromApi)
@@ -77,19 +75,27 @@ class TokenInfoManager {
         null
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun updateTokenInformationWhenNecessary(
         token: TokenInformation,
+        apiService: ApiServiceManager,
         tokenDbProvider: TokenDbProvider
     ): TokenInformation? {
         return if (System.currentTimeMillis() - token.updatedMs > 1000L * 60 * 60) {
 
             // check if genuine
-            val genuineToken = TokenVerifier.checkTokenGenuine(token.tokenId, token.displayName)
-
-            val tokenGenuine = when {
-                genuineToken == null -> GENUINE_UNKNOWN
-                genuineToken.tokenId == token.tokenId -> GENUINE_VERIFIED
-                else -> GENUINE_SUSPICIOUS
+            val tokenVerifyResponse = try {
+                val checkTokenCall = apiService.checkToken(token.tokenId, token.displayName).execute()
+                if (!checkTokenCall.isSuccessful)
+                    throw IllegalStateException(checkTokenCall.errorBody()!!.string())
+                checkTokenCall.body()!!
+            } catch (t: Throwable) {
+                LogUtils.logDebug(
+                    this.javaClass.simpleName,
+                    "Error verifying token: ${t.message}",
+                    t
+                )
+                TokenCheckResponse(GENUINE_UNKNOWN, null)
             }
 
             // check for NFT
@@ -113,8 +119,8 @@ class TokenInfoManager {
             val timeNow = System.currentTimeMillis()
             val newToken = TokenInformation(
                 token,
-                tokenGenuine,
-                if (tokenGenuine == GENUINE_VERIFIED) genuineToken!!.issuer else null,
+                tokenVerifyResponse.genuine,
+                if (tokenVerifyResponse.genuine == GENUINE_VERIFIED) tokenVerifyResponse.token?.issuer else null,
                 token.thumbnailBytes,
                 thumbnailType,
                 timeNow
@@ -130,9 +136,14 @@ class TokenInfoManager {
     }
 
     private fun fetchTokenInformationFromApi(
-        apiService: ErgoApi,
+        apiService: ErgoExplorerApi,
         tokenId: String
     ): TokenInformation {
+        LogUtils.logDebug(
+            "TokenInfoManager",
+            "Load information for token $tokenId from API"
+        )
+
         val tokenApiResponse = apiService.getTokenInformation(tokenId).execute()
 
         if (!tokenApiResponse.isSuccessful) {
@@ -141,7 +152,7 @@ class TokenInfoManager {
 
         val issuingBoxId = tokenApiResponse.body()!!.boxId
 
-        val boxInfo: OutputInfo = apiService.getBoxInformation(issuingBoxId).execute().body()!!
+        val boxInfo: OutputInfo = apiService.getExplorerBoxInformation(issuingBoxId).execute().body()!!
 
         val tokenInfo = boxInfo.assets.find { it.tokenId == tokenId }!!
 

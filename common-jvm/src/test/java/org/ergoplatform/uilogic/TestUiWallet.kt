@@ -1,5 +1,6 @@
 package org.ergoplatform.uilogic
 
+import org.ergoplatform.mosaik.MosaikDbProvider
 import org.ergoplatform.persistance.*
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -25,7 +26,7 @@ object TestUiWallet {
         0,
         "nft"
     )
-    private val singleAddressWallet = Wallet(
+    internal val singleAddressWallet = Wallet(
         WalletConfig(1, "test", firstAddress, 0, null, false, null),
         listOf(WalletState(firstAddress, firstAddress, 1000L * 1000 * 1000, 0)),
         listOf(token, singularToken),
@@ -33,7 +34,7 @@ object TestUiWallet {
     )
 
     private val firstDerivedAddress = WalletAddress(1, firstAddress, 1, secondAddress, null)
-    private val twoAddressesWallet = Wallet(
+    internal val twoAddressesWallet = Wallet(
         WalletConfig(1, "test", firstAddress, 0, null, false, null),
         listOf(WalletState(firstAddress, firstAddress, 1000L * 1000 * 1000, 0)),
         listOf(token, singularToken),
@@ -44,13 +45,21 @@ object TestUiWallet {
         val walletDbProvider = mock<WalletDbProvider> {
         }
         whenever(walletDbProvider.loadWalletWithStateById(walletId)).thenReturn(singleAddressWallet)
+        //whenever(walletDbProvider.getAllWalletConfigsSynchronous()).thenReturn(listOf(
+        //singleAddressWallet.walletConfig)) <- this will break ErgoPaySigningUiLogicTest because it relies on
+        // this not having implemented. If it is needed, test will fail expectedly
+        whenever(walletDbProvider.loadWalletByFirstAddress(firstAddress)).thenReturn(
+            singleAddressWallet.walletConfig
+        )
         return object : IAppDatabase {
             override val walletDbProvider: WalletDbProvider
                 get() = walletDbProvider
             override val tokenDbProvider: TokenDbProvider
-                get() = mock<TokenDbProvider> {}
+                get() = mock {}
             override val transactionDbProvider: TransactionDbProvider
-                get() = mock<TransactionDbProvider> {}
+                get() = mock {}
+            override val mosaikDbProvider: MosaikDbProvider
+                get() = mock {}
         }
     }
 
@@ -58,6 +67,9 @@ object TestUiWallet {
         val walletDbProvider = mock<WalletDbProvider> {
         }
         whenever(walletDbProvider.loadWalletWithStateById(walletId)).thenReturn(twoAddressesWallet)
+        whenever(walletDbProvider.loadWalletByFirstAddress(firstAddress)).thenReturn(
+            twoAddressesWallet.walletConfig
+        )
         return walletDbProvider
     }
 }

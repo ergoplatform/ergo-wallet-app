@@ -25,12 +25,12 @@
     <string name="label_dismiss">Rinuncia</string>
     <string name="label_remove">Rimuovi</string>
     <string name="label_confirm">Conferma</string>
-    <string name="label_erg_amount">%1s ERG</string>
+    <string name="label_erg_amount">%1$s ERG</string>
     <string name="label_time_span_just_now">proprio ora</string>
     <string name="label_time_span_moments_ago">poco fa</string>
-    <string name="label_time_span_minutes_ago">%1s minuti fa</string>
-    <string name="label_time_span_hours_ago">%1s ore fa</string>
-    <string name="label_time_span_days_ago">%1s giorni fa</string>
+    <string name="label_time_span_minutes_ago">%1$s minuti fa</string>
+    <string name="label_time_span_hours_ago">%1$s ore fa</string>
+    <string name="label_time_span_days_ago">%1$s giorni fa</string>
     <string name="error_camera">Errore inizializzazione camera. Per favore, controlla le impostazioni sulla privacy.</string>
 
     <!-- Wallet -->
@@ -39,10 +39,10 @@
     <string name="label_unconfirmed">non confermato</string>
     <string name="button_receive">Ricevi</string>
     <string name="button_send">Invia</string>
-    <string name="button_display_currency">Display currency: %1s</string>
-    <string name="label_last_sync">Sincronizzato %1s</string>
+    <string name="button_display_currency">Display currency: %1$s</string>
+    <string name="label_last_sync">Sincronizzato %1$s</string>
     <string name="label_erg_price">1 ERG ≈</string>
-    <string name="label_fiat_amount">≈ %1s</string>
+    <string name="label_fiat_amount">≈ %1$s</string>
     <string name="label_wallet_default">Il mio portafoglio</string>
 
     <!-- add wallet -->
@@ -66,7 +66,7 @@
     <string name="intro_confirm_create_wallet">Per confermare che il tuo mnemonico scritto a mano sia corretto, inserisci ora due parole della frase:</string>
     <string name="check_confirm_create_wallet">Comprendo di essere responsabile della conservazione del mio mnemonico in un luogo sicuro.
         È l\'unico modo per accedere al mio portafoglio se le chiavi memorizzate su questo dispositivo vengono perse o diventano inaccessibili.</string>
-    <string name="label_word_confirm_create_wallet">Word %1s</string>
+    <string name="label_word_confirm_create_wallet">Word %1$s</string>
     <string name="error_word_confirm_create_wallet">Word not correct</string>
 
     <!-- Restore wallet -->
@@ -75,7 +75,7 @@
         <a href="https://github.com/ergoplatform/ergo/blob/master/ergo-wallet/src/main/resources/wordlist/english.txt">Dai un\'occhiata all\'elenco delle parole</a>
             and compare.</string>
     <string name="button_restore">Ripristina il portafoglio</string>
-    <string name="mnemonic_length_not_enough">Mancano alcune parole dal tuo mnemonico. Aggiungi almeno %1s in più.</string>
+    <string name="mnemonic_length_not_enough">Mancano alcune parole dal tuo mnemonico. Aggiungi almeno %1$s in più.</string>
     <string name="mnemonic_unknown_words">Il mnemonico contiene parole non valide. Controlla gli errori di battitura.</string>
     <string name="mnemonic_invalid">Convalida mnemonica non riuscita. Se sei sicuro di averlo inserito correttamente, puoi toccare di nuovo per procedere.</string>
 
@@ -86,7 +86,7 @@
     <string name="button_save_password_encrypted">Save password-encrypted</string>
     <string name="desc_save_password_encrypted">Inserisci una frase-password che dovrai reinserire ogni volta che desideri inviare fondi.</string>
     <string name="button_save_device_encrypted">Salva crittografato dal dispositivo</string>
-    <string name="desc_save_device_encrypted">Autenticati sul tuo dispositivo per salvare il portafoglio e inviare fondi.\nMetodo di autenticazione attuale: %1s</string>
+    <string name="desc_save_device_encrypted">Autenticati sul tuo dispositivo per salvare il portafoglio e inviare fondi.\nMetodo di autenticazione attuale: %1$s</string>
     <string name="button_save_keychain">Salva nel portachiavi</string>
     <string name="desc_save_keychain">Autenticati sul tuo dispositivo per inviare fondi.</string>
     <string name="device_enc_security_none">Nessuno</string>
@@ -104,17 +104,17 @@
 
     <!-- Wallet details -->
     <string name="title_wallet_balance">Saldo</string>
-    <string name="label_all_addresses">Tutti gli indirizzi %1d</string>
+    <string name="label_all_addresses">Tutti gli indirizzi %1$d</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Indirizzi</string>
     <string name="title_wallet_address">Mostra contenuto per</string>
     <string name="label_wallet_main_address">Indirizzo principale</string>
-    <string name="label_wallet_address_derived">Indirizzo derivato %1s</string>
-    <string name="label_wallet_token_balance">gettoni %1s</string>
+    <string name="label_wallet_address_derived">Indirizzo derivato %1$s</string>
+    <string name="label_wallet_token_balance">gettoni %1$s</string>
     <string name="desc_wallet_addresses">Un portafoglio può avere più indirizzi pubblici derivati dall\'indirizzo principale.</string>
     <string name="button_add_address">Aggiungi indirizzo</string>
-    <string name="button_add_addresses">Aggiungi %1d indirizzi</string>
+    <string name="button_add_addresses">Aggiungi %1$d indirizzi</string>
     <string name="desc_wallet_addr_label">Imposta un\'etichetta descrittiva (visibile solo a te) per questo indirizzo:</string>
     <string name="hint_wallet_addr_label">Etichetta descrittiva (opzionale)</string>
     <string name="desc_wallet_addr_remove">Puoi rimuovere questo indirizzo dalla visualizzazione di questa app. È ancora disponibile
@@ -126,11 +126,11 @@
     <string name="label_to">a</string>
     <string name="hint_read_only">Questo è un portafoglio di sola lettura. Per inviare fondi, è necessario un dispositivo aggiuntivo per firmare la transazione.<a href="">Learn more.</a></string>
     <string name="desc_send_funds">Inserisci l\'indirizzo del destinatario e l\'importo da inviare o scansiona un codice QR.</string>
-    <string name="label_send_from">Da: %1s</string>
-    <string name="label_wallet_balance">Saldo: %1s ERG</string>
+    <string name="label_send_from">Da: %1$s</string>
+    <string name="label_wallet_balance">Saldo: %1$s ERG</string>
     <string name="label_receiver_address">Indirizzo del destinatario</string>
     <string name="label_scan_qr">Scansiona il codice QR</string>
-    <string name="desc_fee">Tassa: %1s ERG</string>
+    <string name="desc_fee">Tassa: %1$s ERG</string>
     <string name="error_receiver_address">Si prega di inserire un indirizzo ERG valido</string>
     <string name="error_amount">Si prega di inserire un importo valido</string>
     <string name="error_send_transaction">Impossibile inviare la transazione</string>
@@ -138,22 +138,16 @@
     <string name="error_password_empty">per favore inserisci una password valida</string>
     <string name="error_password_wrong">Password errata</string>
     <string name="desc_transaction_send">La transazione è stata inviata con successo ed è in attesa di conferma. ID transazione:</string>
-    <string name="desc_prompt_signing">La tua transazione è stata preparata. Scansiona questo codice QR
-        con il tuo dispositivo di firma per procedere.\n\nSe presente, scansiona il codice QR della transazione firmata su
-         inviato alla rete.</string>
-    <string name="desc_prompt_signing_multiple">La tua transazione è stata preparata. Scansiona questi codici QR
-        con il dispositivo di firma per procedere.</string>
     <string name="button_scan_signed_tx">Scansione tx firmato</string>
     <string name="button_next">Prossimo</string>
     <string name="title_authenticate">Autenticazione richiesta</string>
-    <string name="error_device_security">Errore di sicurezza: %1s</string>
     <string name="label_add_token">Gettone</string>
     <string name="label_send_all">Invia tutto</string>
     <string name="title_add_token">Scegli il gettone da inviare</string>
     <string name="error_token_amount">Inserisci importi di gettoni validi o rimuovi le voci di gettoni non valide</string>
-    <string name="error_balance_erg">Non c\'è abbastanza saldo per inviare l\'importo specificato: solo %1s ERG disponibile.</string>
-    <string name="error_request_token_not_found">Impossibile aggiungere il token\'%1s\'</string>
-    <string name="error_request_token_amount">Impossibile impostare l\'importo richiesto per il token \'%1s\'</string>
+    <string name="error_balance_erg">Non c\'è abbastanza saldo per inviare l\'importo specificato: solo %1$s ERG disponibile.</string>
+    <string name="error_request_token_not_found">Impossibile aggiungere il token\'%1$s\'</string>
+    <string name="error_request_token_amount">Impossibile impostare l\'importo richiesto per il token \'%1$s\'</string>
     <string name="error_request_token_but_no_erg">Gettoni richiesti, ma nessun importo ERG. Verrà inviato un importo predefinito.</string>
 
     <!-- Cold wallet signing request screen -->
@@ -162,7 +156,7 @@
     <string name="title_inboxes">Importi da spendere</string>
     <string name="desc_inboxes">Questi importi verranno spesi al momento dell\'elaborazione della transazione.</string>
     <string name="title_outboxes">Importi in uscita</string>
-    <string name="label_qr_pages_info">%1s di %2s</string>
+    <string name="label_qr_pages_info">%1$s di %2$s</string>
     <string name="desc_outboxes">Tali importi verranno inviati al momento dell\'elaborazione della transazione.</string>
     <string name="desc_show_signed">La transazione è stata firmata e deve essere inviata alla rete.
          Scansiona questo codice QR per procedere.</string>
@@ -170,7 +164,7 @@
          Scansiona questi codici QR per procedere.</string>
 
     <!-- Settings -->
-    <string name="desc_about">Presentato da Benjamin Schulte, %1s</string>
+    <string name="desc_about">Presentato da Benjamin Schulte, %1$s</string>
     <string name="desc_about_moreinfo">Concesso in licenza sotto <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Apache 2 License</a>\n
         Questo progetto è <a href="https://github.com/ergoplatform/ergo-wallet-app">open source software</a>\n
    Trova aiuto su <a href="https://discord.gg/kj7s7nb">Discord</a> or <a href="https://t.me/ErgoWalletApp">Telegram</a></string>

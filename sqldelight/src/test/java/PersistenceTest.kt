@@ -148,7 +148,8 @@ class PersistenceTest {
 
         runBlocking {
             db.walletDbProvider.insertWalletConfig(WalletConfig(0, "Test2", "3Wwxnaem5ojTfp91qfLw3Y4Sr7ZWVcLPvYSzTsZ4LKGcoxujbxd3", 0, null, false, null))
-            WalletStateSyncManager.getInstance().refreshByUser(prefs, db)
+            WalletStateSyncManager.getInstance()
+                .refreshByUser(prefs, db, rescheduleRefreshJob = null)
             delay(10000)
         }
     }

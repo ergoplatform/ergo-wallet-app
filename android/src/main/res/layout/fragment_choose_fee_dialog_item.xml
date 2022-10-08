@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/half_horizontal_margin"
+    android:background="@drawable/background_group"
+    android:orientation="vertical"
+    android:padding="@dimen/half_horizontal_margin">
+
+    <TextView
+        android:id="@+id/label_fee_execution_speed"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/primary"
+        android:textStyle="bold"
+        tools:text="@string/label_fee_fast" />
+
+    <TextView
+        android:id="@+id/label_fee_amount"
+        style="@style/TextAppearance.App.Body2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        tools:text="0.0010 ERG ≈ 0.02 USD" />
+
+    <TextView
+        android:id="@+id/label_fee_execution_time"
+        style="@style/TextAppearance.App.Body2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textStyle="bold"
+        tools:text="@string/label_fee_execution_time" />
+
+</LinearLayout>
+

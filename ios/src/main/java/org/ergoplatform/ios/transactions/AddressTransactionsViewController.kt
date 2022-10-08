@@ -2,7 +2,7 @@ package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.getExplorerAddressUrl
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.ui.*
@@ -80,7 +80,7 @@ class AddressTransactionsViewController(
         val appDelegate = getAppDelegate()
         TransactionListManager.downloadTransactionListForAddress(
             shownAddress!!.publicAddress,
-            ErgoApiService.getOrInit(appDelegate.prefs),
+            ApiServiceManager.getOrInit(appDelegate.prefs),
             appDelegate.database
         )
     }
@@ -144,7 +144,7 @@ class AddressTransactionsViewController(
     private fun resetShownData() {
         nextPageToLoad = 0
         finishedLoading = false
-        shownData.clear()
+        synchronized(shownData) { shownData.clear() }
     }
 
     private fun fetchNextChunkFromDb() {
@@ -206,20 +206,22 @@ class AddressTransactionsViewController(
         }
 
         override fun getCellForRow(p0: UITableView, p1: NSIndexPath): UITableViewCell {
-            if (shownData.isEmpty()) {
-                return p0.dequeueReusableCell(emptyCellId)
-            } else {
-                val cell = p0.dequeueReusableCell(transactionCellId)
-                val itemIndex = p1.row
-                val isLastItem = itemIndex == shownData.size - 1
-                (cell as? AddressTransactionCell)?.bind(
-                    shownData[itemIndex], this@AddressTransactionsViewController,
-                    isLastItem && finishedLoading
-                )
-                if (isLastItem) {
-                    fetchNextChunkFromDb()
+            synchronized(shownData) {
+                if (shownData.isEmpty()) {
+                    return p0.dequeueReusableCell(emptyCellId)
+                } else {
+                    val cell = p0.dequeueReusableCell(transactionCellId)
+                    val itemIndex = p1.row
+                    val isLastItem = itemIndex == shownData.size - 1
+                    (cell as? AddressTransactionCell)?.bind(
+                        shownData[itemIndex], this@AddressTransactionsViewController,
+                        isLastItem && finishedLoading
+                    )
+                    if (isLastItem) {
+                        fetchNextChunkFromDb()
+                    }
+                    return cell
                 }
-                return cell
             }
         }
 
@@ -308,7 +310,7 @@ class AddressTransactionsViewController(
                 val appDelegate = getAppDelegate()
                 if (TransactionListManager.startDownloadAllAddressTransactions(
                         vc!!.shownAddress!!.publicAddress,
-                        ErgoApiService.getOrInit(appDelegate.prefs), appDelegate.database
+                        ApiServiceManager.getOrInit(appDelegate.prefs), appDelegate.database
                     )
                 ) {
                     vc!!.resetShownData()
@@ -332,7 +334,10 @@ class AddressTransactionsViewController(
                 isUserInteractionEnabled = true
                 addGestureRecognizer(UITapGestureRecognizer {
                     vc!!.navigationController.pushViewController(
-                        TransactionInfoViewController(tx!!.addressTransaction.txId), true
+                        TransactionInfoViewController(
+                            tx!!.addressTransaction.txId,
+                            tx!!.addressTransaction.address
+                        ), true
                     )
                 })
 

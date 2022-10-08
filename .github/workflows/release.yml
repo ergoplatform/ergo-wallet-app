@@ -10,11 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
+      - uses: actions/checkout@v3
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
         with:
-          java-version: 1.8
+          java-version: '11'
+          distribution: 'adopt'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Setup Android build environment
@@ -27,21 +28,54 @@ jobs:
         run: mv debug.keystore ~/.android/debug.keystore
       - name: Build Android debug apks
         run: ./gradlew clean android:assembleDebug
-      - name: Release mainnet artifact
-        uses: actions/upload-release-asset@v1
+      - name: Build desktop macos-x64
+        run: ./gradlew desktop:build -Posarch=macos-x64
+      - name: Build desktop windows-x64
+        run: ./gradlew desktop:build -Posarch=windows-x64
+      - name: Build desktop linux-arm64
+        run: ./gradlew desktop:build -Posarch=linux-arm64
+      - name: Build desktop linux-x64
+        run: ./gradlew desktop:build -Posarch=linux-x64
+      - name: Upload release binaries
+        uses: alexellis/upload-assets@0.2.2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: android/build/outputs/apk/ergomainnet/debug/android-ergomainnet-debug.apk
-          asset_name: ergowallet-mainnet-debug.apk
-          asset_content_type: application/zip
-      - name: Release testnet artifact
-        uses: actions/upload-release-asset@v1
+          asset_paths: '["desktop/build/libs/ergo-wallet-app*64.jar", "android/build/outputs/apk/ergotestnet/debug/android-ergotestnet-debug.apk", "android/build/outputs/apk/ergomainnet/debug/android-ergomainnet-debug.apk"]'
+      - name: Upload windows artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-jar
+          path: desktop/build/libs/ergo-wallet-app*windows-x64.jar
+          retention-days: 1
+
+  build-windows-installer:
+    name: Build Installer on Windows
+    runs-on: windows-latest
+    needs: [build]
+    steps:
+
+      - id: checkout-code
+        name: Checkout code
+        uses: actions/checkout@v2
+      - id: setup-jdk
+        name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Download windows build
+        uses: actions/download-artifact@v2.0.5
+        with:
+          name: windows-jar
+          path: desktop/build/libs
+      - id: build
+        name: Build distribution
+        run: |
+          jpackage --verbose "@desktop/deploy/jpackage.cfg" "@desktop/deploy/jpackage-windows.cfg"
+      - name: Upload release binaries
+        uses: alexellis/upload-assets@0.2.2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: android/build/outputs/apk/ergotestnet/debug/android-ergotestnet-debug.apk
-          asset_name: ergowallet-testnet-debug.apk
-          asset_content_type: application/zip
+          asset_paths: '["desktop/build/windows/*"]'

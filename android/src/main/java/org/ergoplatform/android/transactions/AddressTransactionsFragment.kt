@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -120,7 +120,7 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
             val context = requireContext()
             TransactionListManager.downloadTransactionListForAddress(
                 it.publicAddress,
-                ErgoApiService.getOrInit(Preferences(context)),
+                ApiServiceManager.getOrInit(Preferences(context)),
                 AppDatabase.getInstance(context)
             )
         }
@@ -240,14 +240,15 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
                         val context = requireContext()
                         TransactionListManager.startDownloadAllAddressTransactions(
                             viewModel.derivedAddress!!.publicAddress,
-                            ErgoApiService.getOrInit(Preferences(context)),
+                            ApiServiceManager.getOrInit(Preferences(context)),
                             AppDatabase.getInstance(context)
                         )
                     }
                 binding.entryAddress.layoutTransactionInfo.setOnClickListener {
                     findNavController().navigateSafe(
                         AddressTransactionsFragmentDirections.actionAddressTransactionsFragmentToTransactionInfoFragment(
-                            item.addressTransaction.txId
+                            item.addressTransaction.txId,
+                            item.addressTransaction.address
                         )
                     )
                 }
@@ -265,6 +266,8 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
             oldItem: AddressTransactionWithTokens,
             newItem: AddressTransactionWithTokens
         ) = (oldItem.addressTransaction.state == newItem.addressTransaction.state)
+        // every time the address transaction's contents change, a state change is also made -
+        // so it is enough to check this field to know if the item changed
 
     }
 }

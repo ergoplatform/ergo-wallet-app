@@ -61,7 +61,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
         // - Use a static variable to store the mnemonic in a SecretString
         //   Drawback: It is completely out of control when static variables get reset and the
         //             variable might leak into a process reusing the JVM
-        viewModel.init(SecretString.create(args.mnemonic), args.fromRestore)
+        viewModel.init(SecretString.create(args.mnemonic), args.fromRestore, requireContext())
 
         viewModel.publicAddress.observe(viewLifecycleOwner) {
             val context = requireContext()
@@ -84,6 +84,14 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
                     binding.buttonAltAddress.visibility =
                         if (uiLogic.hasAlternativeAddress) View.VISIBLE else View.GONE
                 }
+            }
+
+            viewModel.derivedAddressNum.observe(viewLifecycleOwner) { addrNum ->
+                binding.introAdditionalAddresses.text =
+                    if (addrNum == 0) getString(R.string.intro_save_wallet2) else getString(
+                        R.string.intro_save_wallet_derived_addresses_num,
+                        (addrNum + 1).toString()
+                    )
             }
         }
 
@@ -119,7 +127,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
             showBiometricPrompt()
         }
         binding.buttonAltAddress.setOnClickListener {
-            viewModel.switchAddress()
+            viewModel.switchAddress(requireContext())
         }
     }
 
@@ -136,7 +144,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 try {
                     val secretStorage = AndroidEncryptionManager.encryptDataOnDevice(
-                        viewModel.uiLogic!!.signingSecrets.toJson().toByteArray()
+                        viewModel.uiLogic!!.signingSecrets.toBytes()
                     )
                     saveToDbAndNavigateToWallet(
                         ENC_TYPE_DEVICE, secretStorage
@@ -180,7 +188,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
             .navigateSafe(SaveWalletFragmentDialogDirections.actionSaveWalletFragmentDialogToNavigationWallet())
     }
 
-    override fun onPasswordEntered(password: String?): String? {
+    override fun onPasswordEntered(password: SecretString?): String? {
         return if (viewModel.uiLogic!!.isPasswordWeak(password)) {
             getString(R.string.err_password)
         } else {
@@ -188,7 +196,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
                 ENC_TYPE_PASSWORD,
                 AesEncryptionManager.encryptData(
                     password,
-                    viewModel.uiLogic!!.signingSecrets.toJson().toByteArray()
+                    viewModel.uiLogic!!.signingSecrets.toBytes()
                 )
             )
             null

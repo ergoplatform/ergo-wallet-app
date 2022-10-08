@@ -9,6 +9,8 @@ import org.robovm.apple.uikit.UIView
 
 // https://github.com/roberthein/TinyConstraints
 
+const val iosDefaultPriority = 1000f
+
 /**
  * sizes the view to the superview (match_parent, match_parent)
  * If you want to wrap the content vertically, use topToSuperView().bottomToSuperView() concatenation
@@ -17,9 +19,10 @@ import org.robovm.apple.uikit.UIView
 fun UIView.edgesToSuperview(
     useSafeArea: Boolean = false,
     inset: Double = 0.0,
-    maxWidth: Double = 0.0
+    maxWidth: Double = 0.0,
+    priority: Float = iosDefaultPriority
 ) {
-    widthMatchesSuperview(useSafeArea, inset, maxWidth)
+    widthMatchesSuperview(useSafeArea, inset, maxWidth, priority)
 
     val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
 
@@ -32,6 +35,9 @@ fun UIView.edgesToSuperview(
         layoutGuide.bottomAnchor,
         inset * -1.0
     )
+
+    topConstraint.priority = priority
+    bottomConstraint.priority = priority
 
     NSLayoutConstraint.activateConstraints(
         NSArray(
@@ -47,14 +53,22 @@ private fun UIView.getSuperviewLayoutGuide(useSafeArea: Boolean) =
 fun UIView.topToSuperview(
     useSafeArea: Boolean = false,
     topInset: Double = 0.0,
-    priority: Int? = null
+    priority: Int? = null,
+    canBeMore: Boolean = false,
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
-    val topConstraint = this.topAnchor.equalTo(
-        getSuperviewLayoutGuide(useSafeArea).topAnchor,
-        topInset
-    )
+    val topConstraint =
+        if (canBeMore)
+            this.topAnchor.greaterThanOrEqualTo(
+                getSuperviewLayoutGuide(useSafeArea).topAnchor,
+                topInset
+            )
+        else
+            this.topAnchor.equalTo(
+                getSuperviewLayoutGuide(useSafeArea).topAnchor,
+                topInset
+            )
     priority?.let { topConstraint.priority = priority.toFloat() }
     NSLayoutConstraint.activateConstraints(NSArray(topConstraint))
 
@@ -308,7 +322,7 @@ fun UIView.centerInSuperviewWhenSmaller(useSafeArea: Boolean = false, multiplier
 
 fun UIView.superViewWrapsHeight(
     useSafeArea: Boolean = false, multiplier: Double = 1.0, constant: Double = 0.0
-) {
+): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
 
     val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
@@ -327,12 +341,14 @@ fun UIView.superViewWrapsHeight(
             bottomConstraint,
         )
     )
+
+    return this
 }
 
-fun UIView.centerVertical(): UIView {
+fun UIView.centerVertical(priority: Float = iosDefaultPriority): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
     val centerConstraint = this.centerYAnchor.equalTo(superview.centerYAnchor)
-    centerConstraint.priority = 1000f
+    centerConstraint.priority = priority
     NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
     return this
 }
@@ -340,10 +356,10 @@ fun UIView.centerVertical(): UIView {
 fun UIView.centerHorizontal(superViewRestrictsWidth: Boolean = false): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
     val centerConstraint = this.centerXAnchor.equalTo(superview.centerXAnchor)
-    centerConstraint.priority = 1000f
+    centerConstraint.priority = iosDefaultPriority
     if (superViewRestrictsWidth) {
         val widthConstraint = this.widthAnchor.lessThanOrEqual(superview.layoutMarginsGuide.widthAnchor)
-        widthConstraint.priority = 1000f
+        widthConstraint.priority = iosDefaultPriority
         NSLayoutConstraint.activateConstraints(NSArray(centerConstraint, widthConstraint))
     } else {
         NSLayoutConstraint.activateConstraints(NSArray(centerConstraint))
@@ -351,15 +367,19 @@ fun UIView.centerHorizontal(superViewRestrictsWidth: Boolean = false): UIView {
     return this
 }
 
-fun UIView.fixedWidth(c: Double): UIView {
+fun UIView.fixedWidth(c: Double, priority: Float? = null): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
-    NSLayoutConstraint.activateConstraints(NSArray(this.widthAnchor.equalTo(c)))
+    val widthConstraint = this.widthAnchor.equalTo(c)
+    priority?.let { widthConstraint.priority = priority }
+    NSLayoutConstraint.activateConstraints(NSArray(widthConstraint))
     return this
 }
 
-fun UIView.fixedHeight(c: Double): UIView {
+fun UIView.fixedHeight(c: Double, priority: Float? = null): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
-    NSLayoutConstraint.activateConstraints(NSArray(this.heightAnchor.equalTo(c)))
+    val heightConstraint = this.heightAnchor.equalTo(c)
+    priority?.let { heightConstraint.priority = priority }
+    NSLayoutConstraint.activateConstraints(NSArray(heightConstraint))
     return this
 }
 
@@ -369,10 +389,39 @@ fun UIView.minHeight(c: Double): UIView {
     return this
 }
 
+fun UIView.minWidth(c: Double): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+    NSLayoutConstraint.activateConstraints(NSArray(this.widthAnchor.greaterThanOrEqualTo(c)))
+    return this
+}
+
+fun UIView.maxWidth(c: Double): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+    NSLayoutConstraint.activateConstraints(NSArray(this.widthAnchor.lessThanOrEqualTo(c)))
+    return this
+}
+
+fun UIView.widthMatchesWidthOf(sibling: UIView, factor: Double): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+    NSLayoutConstraint.activateConstraints(
+        NSArray(this.widthAnchor.equalTo(sibling.widthAnchor, factor))
+    )
+    return this
+}
+
+fun UIView.heightMatchesHeightOf(sibling: UIView, factor: Double): UIView {
+    setTranslatesAutoresizingMaskIntoConstraints(false)
+    NSLayoutConstraint.activateConstraints(
+        NSArray(this.heightAnchor.equalTo(sibling.heightAnchor, factor))
+    )
+    return this
+}
+
 fun UIView.widthMatchesSuperview(
     useSafeArea: Boolean = false,
     inset: Double = 0.0,
-    maxWidth: Double = 0.0
+    maxWidth: Double = 0.0,
+    priority: Float = iosDefaultPriority
 ): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
     val layoutGuide = getSuperviewLayoutGuide(useSafeArea)
@@ -389,12 +438,15 @@ fun UIView.widthMatchesSuperview(
 
     if (maxWidth > 0) {
         val widthConstraint = this.widthAnchor.lessThanOrEqualTo(maxWidth)
-        widthConstraint.priority = 1000f
-        leadingConstraint.priority = 950f
-        trailingConstraint.priority = 950f
+        widthConstraint.priority = priority
+        leadingConstraint.priority = priority - 50f
+        trailingConstraint.priority = priority - 50f
         val centerConstraint = this.centerXAnchor.equalTo(superview.centerXAnchor)
-        centerConstraint.priority = 999f
+        centerConstraint.priority = priority - 1f
         NSLayoutConstraint.activateConstraints(NSArray(widthConstraint, centerConstraint))
+    } else {
+        leadingConstraint.priority = priority
+        trailingConstraint.priority = priority
     }
 
     NSLayoutConstraint.activateConstraints(
@@ -411,7 +463,7 @@ fun UIView.addSubviews(viewsToAdd: List<UIView>) {
     viewsToAdd.forEach { this.addSubview(it) }
 }
 
-fun UIView.wrapInVerticalScrollView(): UIScrollView {
+fun UIView.wrapInVerticalScrollView(centerContent: Boolean = false): UIScrollView {
     val scrollView = UIScrollView(CGRect.Zero())
     scrollView.addSubview(this)
     this.setTranslatesAutoresizingMaskIntoConstraints(false)
@@ -424,6 +476,10 @@ fun UIView.wrapInVerticalScrollView(): UIScrollView {
             this.bottomAnchor.equalTo(scrollView.bottomAnchor),
         )
     )
+
+    if (centerContent) {
+        this.centerVertical(250f)
+    }
 
     return scrollView
 }

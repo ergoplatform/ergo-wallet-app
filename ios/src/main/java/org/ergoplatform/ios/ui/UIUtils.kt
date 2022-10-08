@@ -3,11 +3,16 @@ package org.ergoplatform.ios.ui
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.Main
 import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewController
-import org.ergoplatform.uilogic.*
-import org.robovm.apple.coregraphics.CGAffineTransform
+import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.uilogic.STRING_BUTTON_COPY_SENSITIVE_DATA
+import org.ergoplatform.uilogic.STRING_DESC_COPY_SENSITIVE_DATA
+import org.ergoplatform.uilogic.STRING_LABEL_CANCEL
+import org.ergoplatform.uilogic.STRING_ZXING_BUTTON_OK
+import org.robovm.apple.coreanimation.CAFilter
 import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.coregraphics.CGSize
+import org.robovm.apple.coreimage.CIContext
 import org.robovm.apple.coreimage.CIFilter
 import org.robovm.apple.foundation.*
 import org.robovm.apple.uikit.*
@@ -24,7 +29,9 @@ val IMAGE_SETTINGS = if (Foundation.getMajorSystemVersion() >= 14) "gearshape" e
 val IMAGE_TX_DONE = if (Foundation.getMajorSystemVersion() >= 15) "clock.badge.checkmark" else "checkmark.seal"
 const val IMAGE_CREATE_WALLET = "folder.badge.plus"
 const val IMAGE_RESTORE_WALLET = "arrow.clockwise"
+const val IMAGE_RELOAD = "arrow.clockwise"
 const val IMAGE_READONLY_WALLET = "magnifyingglass"
+const val IMAGE_SEARCH = "magnifyingglass"
 const val IMAGE_EXCLAMATION_MARK_FILLED = "exclamationmark.circle.fill"
 const val IMAGE_NO_CONNECTION = "icloud.slash"
 const val IMAGE_SEND = "paperplane"
@@ -42,6 +49,7 @@ val IMAGE_ADDRESS = if (Foundation.getMajorSystemVersion() >= 14) "arrow.triangl
 const val IMAGE_TRANSACTIONS = "arrow.right.arrow.left"
 const val IMAGE_ADDRESS_LIST = "list.number"
 const val IMAGE_CHEVRON_DOWN = "chevron.down"
+const val IMAGE_CHEVRON_LEFT = "chevron.left"
 const val IMAGE_CHEVRON_UP = "chevron.up"
 val IMAGE_SWITCH_RESOLUTION = if (Foundation.getMajorSystemVersion() >= 14)
     "arrow.up.left.and.down.right.magnifyingglass" else "1.magnifyingglass"
@@ -54,6 +62,12 @@ const val IMAGE_PHOTO_CAMERA = "camera.fill"
 const val IMAGE_VIDEO_PLAY = "play.fill"
 const val IMAGE_MUSIC_NOTE = "music.note"
 const val IMAGE_OPEN_BROWSER = "arrow.up.right.square"
+const val IMAGE_EDIT_CIRCLE = "pencil.circle"
+const val IMAGE_AUTO_FIX = "wand.and.stars"
+const val IMAGE_MOSAIK = "square.grid.2x2"
+const val IMAGE_ARROW_RIGHT = "arrow.right"
+const val IMAGE_STAR_OUTLINED = "star"
+const val IMAGE_STAR_FILLED = "star.fill"
 
 
 const val FONT_SIZE_BODY1 = 18.0
@@ -74,6 +88,8 @@ fun runOnMainThread(r: Runnable) = NSOperationQueue.getMainQueue().addOperation(
 @Suppress("DEPRECATION")
 fun openUrlInBrowser(url: String) = UIApplication.getSharedApplication().openURL(NSURL(url))
 
+fun openStorePage() = openUrlInBrowser("https://itunes.apple.com/app/id1643137927")
+
 fun UIViewController.shareText(text: String, uiBarButtonItem: UIBarButtonItem) {
     shareText(text, uiBarButtonItem.keyValueCoder.getValue("view") as UIView)
 }
@@ -90,17 +106,29 @@ fun UIImageView.setQrCode(data: String, size: Double) {
     val nsString = NSString(data).toData(NSStringEncoding.ASCII)
     val filter = CIFilter("CIQRCodeGenerator")
     filter.keyValueCoder.setValue("inputMessage", nsString)
-    val unscaledOutput = filter.outputImage
+    val outputWithoutQuietZone = filter.outputImage
 
-    unscaledOutput?.let {
-        val scaleX = size / it.extent.size.width
-        val scaleY = size / it.extent.size.height
-        val transform = CGAffineTransform.createScale(scaleX, scaleY)
+    outputWithoutQuietZone?.let { image ->
+        val cgImage = CIContext().createCGImage(image, image.extent)
+        val qrImage = UIImage(cgImage)
+        val quietZonePixels = 5.0
+        val widthWithQuietZone = qrImage.size.width + quietZonePixels * 2
+        val sizeWithQuietZone = CGSize(widthWithQuietZone, widthWithQuietZone)
 
-        val output = unscaledOutput.newImageByApplyingTransform(transform)
-        val image = UIImage(output)
-        setImage(image)
+        UIGraphics.beginImageContext(sizeWithQuietZone, false, qrImage.scale)
+        val imageWithZone = UIGraphics.getCurrentContext()?.let { ctx ->
+            ctx.setFillColor(UIColor.white().cgColor)
+            val container = CGRect(CGPoint.Zero(), sizeWithQuietZone)
+            ctx.fillRect(container)
+            qrImage.draw(CGRect(CGPoint(quietZonePixels, quietZonePixels), qrImage.size))
+            UIGraphics.getImageFromCurrentImageContext()
+        }
+        UIGraphics.endImageContext()
+
+        setImage(imageWithZone ?: qrImage)
     }
+        layer.magnificationFilter = CAFilter.Nearest
+        layer.setShouldRasterize(true)
 }
 
 fun UITextView.setHtmlText(html: String) {
@@ -135,7 +163,7 @@ fun UIView.wrapWithTrailingImage(
     image: UIImage,
     fixedWith: Double = 0.0,
     fixedHeight: Double = 0.0,
-    keepWidth: Boolean = false
+    keepWidth: Boolean = false // determines if the right boundary is fixed or flexible
 ): TrailingImageView<UIView> {
     val imageView = UIImageView(image)
     imageView.tintColor = (this as? UILabel)?.textColor ?: this.tintColor
@@ -200,52 +228,6 @@ fun createTextview(): UITextView {
 
 fun UITextView.setHasError(hasError: Boolean) {
     layer.borderColor = (if (hasError) UIColor.systemRed() else UIColor.systemGray()).cgColor
-}
-
-fun createTextField(): UITextField {
-    val textField = UITextField(CGRect.Zero())
-    textField.font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
-    textField.layer.borderWidth = 1.0
-    textField.layer.cornerRadius = 4.0
-    textField.layer.borderColor = UIColor.systemGray().cgColor
-    val padding = UIView(CGRect(0.0, 0.0, 5.0, 10.0))
-    textField.leftView = padding
-    textField.leftViewMode = UITextFieldViewMode.Always
-    textField.fixedHeight(DEFAULT_TEXT_FIELD_HEIGHT)
-    return textField
-}
-
-fun UITextField.setHasError(hasError: Boolean) {
-    layer.borderColor = (if (hasError) UIColor.systemRed() else UIColor.systemGray()).cgColor
-    if (hasError) {
-        val errorView = prepareTextFieldImageContainer(
-            getIosSystemImage(IMAGE_EXCLAMATION_MARK_FILLED, UIImageSymbolScale.Small)!!,
-            UIColor.systemRed()
-        )
-        rightView = errorView
-        rightViewMode = UITextFieldViewMode.Always
-    } else {
-        rightView = null
-    }
-}
-
-private fun prepareTextFieldImageContainer(image: UIImage, tintColor: UIColor = UIColor.label()): UIView {
-    val customIcon = UIImageView(image)
-    customIcon.tintColor = tintColor
-    customIcon.contentMode = UIViewContentMode.Center
-    val iconContainer = UIView(CGRect(0.0, 0.0, 35.0, 30.0))
-    iconContainer.addSubview(customIcon)
-    return iconContainer
-}
-
-fun UITextField.setCustomActionField(image: UIImage, action: Runnable) {
-    val iconContainer = prepareTextFieldImageContainer(image)
-    rightView = iconContainer
-    rightViewMode = UITextFieldViewMode.Always
-    iconContainer.isUserInteractionEnabled = true
-    iconContainer.addGestureRecognizer(UITapGestureRecognizer {
-        action.run()
-    })
 }
 
 fun getIosSystemImage(name: String, scale: UIImageSymbolScale, pointSize: Double = 30.0): UIImage? {
@@ -349,10 +331,23 @@ fun UIScrollView.scrollToBottom(animated: Boolean = true) {
     )
 }
 
+fun UIScrollView.scrollToTop(animated: Boolean = true) {
+    setContentOffset(CGPoint(0.0, 0.0), animated)
+}
+
 fun UIImage.scaleToSize(scaleWidth: Double, scaleHeight: Double): UIImage? {
     val scaledImageSize = CGSize(scaleWidth, scaleHeight)
     val renderer = UIGraphicsImageRenderer(scaledImageSize)
     return renderer.toImage {
         this.draw(CGRect(CGPoint.Zero(), scaledImageSize))
+    }
+}
+
+fun MessageSeverity.getImage(): String? {
+    return when (this) {
+        MessageSeverity.NONE -> null
+        MessageSeverity.INFORMATION -> IMAGE_INFORMATION
+        MessageSeverity.WARNING -> IMAGE_WARNING
+        MessageSeverity.ERROR -> IMAGE_ERROR
     }
 }

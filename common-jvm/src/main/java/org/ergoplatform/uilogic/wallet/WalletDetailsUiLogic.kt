@@ -2,10 +2,12 @@ package org.ergoplatform.uilogic.wallet
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.ergoauth.isErgoAuthRequest
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.*
 import org.ergoplatform.tokens.TokenInfoManager
@@ -13,6 +15,7 @@ import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
+import org.ergoplatform.uilogic.STRING_HINT_READONLY_SIGNING_REQUEST
 import org.ergoplatform.uilogic.STRING_LABEL_ALL_ADDRESSES
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
@@ -34,9 +37,22 @@ abstract class WalletDetailsUiLogic {
     private var tokenInformationJob: Job? = null
     val tokenInformation: HashMap<String, TokenInformation> = HashMap()
 
+    private var initialized = false
+
     abstract val coroutineScope: CoroutineScope
 
-    fun setUpWalletStateFlowCollector(database: IAppDatabase, walletId: Int) {
+    fun setUpWalletStateFlowCollector(
+        database: IAppDatabase,
+        walletId: Int,
+        addressIdx: Int? = null
+    ) {
+        if (initialized)
+            return
+
+        initialized = true
+
+        addressIdx?.let { this.addressIdx = addressIdx }
+
         coroutineScope.launch {
             database.walletDbProvider.walletWithStateByIdAsFlow(walletId).collect {
                 // called every time something changes in the DB
@@ -94,7 +110,7 @@ abstract class WalletDetailsUiLogic {
         addressesToRefresh?.forEach {
             TransactionListManager.downloadTransactionListForAddress(
                 it.publicAddress,
-                ErgoApiService.getOrInit(prefs),
+                ApiServiceManager.getOrInit(prefs),
                 db
             )
         }
@@ -105,21 +121,25 @@ abstract class WalletDetailsUiLogic {
      */
     fun refreshWhenNeeded(
         prefs: PreferencesProvider,
-        database: IAppDatabase
+        database: IAppDatabase,
+        rescheduleRefreshJob: (() -> Unit)?
     ) {
-        WalletStateSyncManager.getInstance().refreshWhenNeeded(prefs, database)
+        WalletStateSyncManager.getInstance()
+            .refreshWhenNeeded(prefs, database, rescheduleRefreshJob)
         refreshAddressTransactionsWhenNeeded(prefs, database)
     }
 
     fun refreshByUser(
         prefs: PreferencesProvider,
-        database: IAppDatabase
+        database: IAppDatabase,
+        rescheduleRefreshJob: (() -> Unit)?
     ): Boolean {
         refreshAddressTransactionsWhenNeeded(prefs, database)
-        return WalletStateSyncManager.getInstance().refreshByUser(prefs, database)
+        return WalletStateSyncManager.getInstance()
+            .refreshByUser(prefs, database, rescheduleRefreshJob)
     }
 
-    fun gatherTokenInformation(tokenDbProvider: TokenDbProvider, apiService: ErgoApiService) {
+    fun gatherTokenInformation(tokenDbProvider: TokenDbProvider, apiService: ApiServiceManager) {
 
         // cancel former Jobs, if any
         tokenInformationJob?.cancel()
@@ -131,15 +151,16 @@ abstract class WalletDetailsUiLogic {
         if (tokensList.isNotEmpty()) {
             tokenInformationJob = coroutineScope.launch {
                 tokensList.forEach {
-                    TokenInfoManager.getInstance()
-                        .getTokenInformation(it.tokenId!!, tokenDbProvider, apiService)
-                        ?.let {
-                            synchronized(tokenInformation) {
-                                tokenInformation[it.tokenId] = it
-                                onNewTokenInfoGathered(it)
+                    if (isActive) {
+                        TokenInfoManager.getInstance()
+                            .getTokenInformation(it.tokenId!!, tokenDbProvider, apiService)
+                            ?.let {
+                                synchronized(tokenInformation) {
+                                    tokenInformation[it.tokenId] = it
+                                    onNewTokenInfoGathered(it)
+                                }
                             }
-                        }
-
+                    }
                 }
             }
         }
@@ -167,12 +188,18 @@ abstract class WalletDetailsUiLogic {
         navigateToColdWalletSigning: ((signingData: String) -> Unit),
         navigateToErgoPaySigning: ((ergoPayRequest: String) -> Unit),
         navigateToSendFundsScreen: ((requestData: String) -> Unit),
+        navigateToAuthentication: (String) -> Unit,
         showErrorMessage: ((errorMessage: String) -> Unit)
     ) {
-        if (wallet?.walletConfig?.secretStorage != null && isColdSigningRequestChunk(qrCodeData)) {
-            navigateToColdWalletSigning.invoke(qrCodeData)
+        if (isColdSigningRequestChunk(qrCodeData)) {
+            if (wallet?.walletConfig?.isReadOnly() == false)
+                navigateToColdWalletSigning.invoke(qrCodeData)
+            else
+                showErrorMessage(stringProvider.getString(STRING_HINT_READONLY_SIGNING_REQUEST))
         } else if (isErgoPaySigningRequest(qrCodeData)) {
             navigateToErgoPaySigning.invoke(qrCodeData)
+        } else if (isErgoAuthRequest(qrCodeData)) {
+            navigateToAuthentication(qrCodeData)
         } else {
             val content = parsePaymentRequest(qrCodeData)
             content?.let {
@@ -189,12 +216,20 @@ abstract class WalletDetailsUiLogic {
         val addresses = getSelectedAddresses()?.map { it.publicAddress }
 
         return if (addresses?.size == 1) {
-            transactionDbProvider.loadAddressTransactionsWithTokens(addresses.first(), maxTransactionsToShow, 0)
+            transactionDbProvider.loadAddressTransactionsWithTokens(
+                addresses.first(),
+                maxTransactionsToShow,
+                page = 0
+            )
         } else {
             val returnedTransactions = mutableListOf<AddressTransactionWithTokens>()
             addresses?.forEach { address ->
                 returnedTransactions.addAll(
-                    transactionDbProvider.loadAddressTransactionsWithTokens(address, maxTransactionsToShow, 0)
+                    transactionDbProvider.loadAddressTransactionsWithTokens(
+                        address,
+                        maxTransactionsToShow,
+                        0
+                    )
                 )
             }
             returnedTransactions.sortedByDescending { it.addressTransaction.inclusionHeight }
@@ -202,6 +237,10 @@ abstract class WalletDetailsUiLogic {
         }
     }
 
+    /**
+     * returns true if the two lists given are not the same. use to determine if a rebinding of
+     * transaction lists needs to be done
+     */
     fun hasChangedNewTxList(
         newTransactionList: List<AddressTransactionWithTokens>,
         otherTxList: List<AddressTransactionWithTokens>?

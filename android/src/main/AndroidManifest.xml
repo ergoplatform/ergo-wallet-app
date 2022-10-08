@@ -35,6 +35,8 @@
                 <!-- PaymentRequest.PAYMENT_URI_SCHEME -->
                 <data android:scheme="ergo" />
                 <data android:scheme="ergopay" />
+                <data android:scheme="ergoauth" />
+                <data android:scheme="mosaikapp" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

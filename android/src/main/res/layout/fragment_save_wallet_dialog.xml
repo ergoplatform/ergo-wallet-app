@@ -61,11 +61,13 @@
                     tools:visibility="visible" />
 
                 <TextView
+                    android:id="@+id/intro_additional_addresses"
                     style="@style/TextAppearance.App.Body1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/margin_and_half"
-                    android:text="@string/intro_save_wallet2" />
+                    android:text="@string/intro_save_wallet2"
+                    android:textAlignment="center" />
 
                 <TextView
                     style="@style/TextAppearance.App.Body1"
@@ -85,7 +87,6 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="top"
                         android:imeOptions="actionDone"
                         android:inputType="text"
                         android:maxLines="1"

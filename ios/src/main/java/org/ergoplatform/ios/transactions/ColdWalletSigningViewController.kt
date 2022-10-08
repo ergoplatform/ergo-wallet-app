@@ -17,7 +17,7 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
     val texts = getAppDelegate().texts
 
     private val scanningContainer = ScanningContainer()
-    private val transactionContainer = SigningTransactionContainer(texts) {
+    private val transactionContainer = SigningTransactionContainer(texts, this) {
         startAuthFlow(uiLogic.wallet!!.walletConfig) { mnemonic ->
             uiLogic.signTxWithMnemonicAsync(mnemonic, IosStringProvider(texts))
         }
@@ -117,7 +117,12 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         }
     }
 
-    inner class SignedQrCodeContainer : PagedQrCodeContainer(texts, texts.get(STRING_LABEL_DISMISS)) {
+    inner class SignedQrCodeContainer : PagedQrCodeContainer(
+        texts,
+        STRING_LABEL_DISMISS,
+        descriptionLabel = STRING_DESC_SHOW_SIGNED_MULTIPLE,
+        lastPageDescriptionLabel = STRING_DESC_SHOW_SIGNED,
+    ) {
         override fun calcChunksFromRawData(rawData: String, limit: Int): List<String> {
             return coldSigningResponseToQrChunks(rawData, limit)
         }

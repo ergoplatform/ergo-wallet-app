@@ -23,18 +23,18 @@ private val explorerPaymentUrlPrefix
         else "https://testnet.ergoplatform.com/payment-request?"
 
 /**
- * referenced in AndroidManifest.xml and Info.plist.xml
+ * referenced in AndroidManifest.xml PlatformUtils.kt and Info.plist.xml
  */
 private val PAYMENT_URI_SCHEME = "ergo:"
 
 fun getExplorerPaymentRequestAddress(
     address: String,
-    amount: Double = 0.0,
+    amount: ErgoAmount = ErgoAmount.ZERO,
     description: String = ""
 ): String {
     return explorerPaymentUrlPrefix + RECIPIENT_PARAM_PREFIX +
             URLEncoder.encode(address, URI_ENCODING) +
-            (if (amount > 0) PARAM_DELIMITER + AMOUNT_PARAM_PREFIX +
+            (if (amount.nanoErgs > 0) PARAM_DELIMITER + AMOUNT_PARAM_PREFIX +
                     URLEncoder.encode(amount.toString(), URI_ENCODING) else "") +
             PARAM_DELIMITER + DESCRIPTION_PARAM_PREFIX +
             URLEncoder.encode(description, URI_ENCODING)
@@ -82,16 +82,12 @@ private fun parsePaymentRequestFromQuery(query: String): PaymentRequest? {
         } else if (it.startsWith(DESCRIPTION_PARAM_PREFIX)) {
             description =
                 URLDecoder.decode(it.substring(DESCRIPTION_PARAM_PREFIX.length), URI_ENCODING)
-        } else if (it.contains('=')) {
+        } else if (it.startsWith(TOKEN_PARAM_PREFIX) && it.contains('=')) {
             // this could be a token
-            // we accept token params without token-prefix to not break compatibility with
-            // auction house for now.
-            // TODO Q2/2022 remove backwards compatiblity
-            val keyVal = it.split('=')
+            val keyVal = it.substring(TOKEN_PARAM_PREFIX.length).split('=')
             try {
-                val tokenId = keyVal.get(0)
-                    .let { if (it.startsWith(TOKEN_PARAM_PREFIX)) it.substring(TOKEN_PARAM_PREFIX.length) else it }
-                val tokenAmount = keyVal.get(1)
+                val tokenId = keyVal[0]
+                val tokenAmount = keyVal[1]
                 // throws exception when it is not numeric
                 tokenAmount.toDouble()
                 tokenMap.put(tokenId, tokenAmount)

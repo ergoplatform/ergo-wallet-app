@@ -3,6 +3,8 @@ package org.ergoplatform.android.transactions
 import android.os.Bundle
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
+import org.ergoplatform.SigningSecrets
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
@@ -13,6 +15,7 @@ import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.wallet.isReadOnly
 
 abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
     AddressChooserCallback {
@@ -23,34 +26,36 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
         super.onViewCreated(view, savedInstanceState)
 
         val viewModel = this.viewModel
-        viewModel.lockInterface.observe(viewLifecycleOwner, {
-            if (it)
+        viewModel.lockInterface.observe(viewLifecycleOwner) { locked ->
+            if (locked)
                 ProgressBottomSheetDialogFragment.showProgressDialog(childFragmentManager)
             else
                 ProgressBottomSheetDialogFragment.dismissProgressDialog(childFragmentManager)
-        })
-        viewModel.txWorkDoneLiveData.observe(viewLifecycleOwner, {
-            if (!it.success) {
-                val snackbar = Snackbar.make(
-                    requireView(),
-                    if (it is PromptSigningResult)
-                        R.string.error_prepare_transaction
-                    else R.string.error_send_transaction,
-                    Snackbar.LENGTH_LONG
-                )
-                it.errorMsg?.let { errorMsg ->
-                    snackbar.setAction(
-                        R.string.label_details
-                    ) {
-                        showDialogWithCopyOption(requireContext(), errorMsg)
-                    }
+        }
+        viewModel.txWorkDoneLiveData.observe(viewLifecycleOwner) { result ->
+            if (!result.success) {
+                val errorMsgPrefix = if (result is PromptSigningResult)
+                    R.string.error_prepare_transaction
+                else R.string.error_send_transaction
+
+                if (result.errorMsg != null) {
+                    showDialogWithCopyOption(
+                        requireContext(),
+                        getString(errorMsgPrefix) + "\n\n" + result.errorMsg
+                                + "\n\n" + getString(R.string.error_use_other_node)
+                    )
+                } else {
+                    Snackbar.make(
+                        requireView(),
+                        errorMsgPrefix,
+                        Snackbar.LENGTH_LONG
+                    ).setAnchorView(R.id.nav_view).show()
                 }
-                snackbar.setAnchorView(R.id.nav_view).show()
-            } else if (it is PromptSigningResult) {
+            } else if (result is PromptSigningResult) {
                 // if this is a prompt signing result, switch to prompt signing dialog
                 SigningPromptDialogFragment().show(childFragmentManager, null)
             }
-        })
+        }
 
     }
 
@@ -66,8 +71,11 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
         viewModel.uiLogic.derivedAddressIdx = addressDerivationIdx
     }
 
-    override fun startAuthFlow(walletConfig: WalletConfig) {
-        if (walletConfig.secretStorage == null) {
+    override val authenticationWalletConfig: WalletConfig?
+        get() = viewModel.uiLogic.wallet?.walletConfig
+
+    override fun startAuthFlow() {
+        if (authenticationWalletConfig?.isReadOnly() != false) {
             // we have a read only wallet here, let's go to cold wallet support mode
             val context = requireContext()
             viewModel.uiLogic.startColdWalletPayment(
@@ -75,15 +83,17 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
                 AndroidStringProvider(context)
             )
         } else {
-            super.startAuthFlow(walletConfig)
+            super.startAuthFlow()
         }
     }
 
-    override fun proceedAuthFlowWithPassword(password: String): Boolean {
-        return viewModel.startPaymentWithPassword(password, requireContext())
-    }
-
-    override fun proceedAuthFlowFromBiometrics() {
-        context?.let { viewModel.startPaymentUserAuth(it) }
+    override fun proceedFromAuthFlow(secrets: SigningSecrets) {
+        val context = requireContext()
+        viewModel.uiLogic.startPaymentWithMnemonicAsync(
+            secrets,
+            Preferences(context),
+            AndroidStringProvider(context),
+            AppDatabase.getInstance(context)
+        )
     }
 }

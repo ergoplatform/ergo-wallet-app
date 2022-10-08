@@ -1,5 +1,6 @@
 package org.ergoplatform
 
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -8,9 +9,11 @@ import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.api.TokenPriceApi
 import org.ergoplatform.api.coingecko.CoinGeckoApi
 import org.ergoplatform.api.ergodex.ErgoDexPriceApi
+import org.ergoplatform.api.tokenjay.TokenJayApiClient
 import org.ergoplatform.persistance.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.addresses.ensureWalletAddressListHasFirstAddress
+import org.ergoplatform.wallet.getStateForAddress
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -29,12 +32,16 @@ class WalletStateSyncManager {
         private set
     var fiatCurrency: String = ""
         private set
+    val hasFiatValue get() = fiatValue.value > 0f && fiatCurrency.isNotEmpty()
     private val coinGeckoApi: CoinGeckoApi
 
-    val tokenPrices: HashMap<String, TokenPrice> = HashMap()
-    private val TOKEN_PRICE_REFRESH_DURATION_MS = 1000L * 60
+    private val tokenPrices: HashMap<String, TokenPrice> = HashMap()
+    private val tokenPriceRefreshDurationMs = 1000L * 60
     private var lastTokenPriceRefreshMs: Long = 0
-    private val tokenPriceApi: TokenPriceApi = ErgoDexPriceApi()
+    private val tokenPriceSources: List<TokenPriceApi> = listOf(
+        ErgoDexPriceApi(),
+        TokenJayApiClient()
+    )
 
     init {
         val retrofitCoinGecko = Retrofit.Builder().baseUrl("https://api.coingecko.com/")
@@ -49,24 +56,45 @@ class WalletStateSyncManager {
         if (resetFiatValue) fiatValue.value = 0.0f
     }
 
-
-    fun refreshByUser(preferences: PreferencesProvider, database: IAppDatabase): Boolean {
-        if (System.currentTimeMillis() - lastRefreshMs > 1000L * 10) {
-            refreshNow(preferences, database)
-            return true
-        } else
-            return false
-    }
-
-    fun refreshWhenNeeded(preferences: PreferencesProvider, database: IAppDatabase) {
-        if (System.currentTimeMillis() - lastRefreshMs > 1000L * 60) {
-            refreshNow(preferences, database)
+    fun getTokenPrice(tokenId: String?): TokenPrice? {
+        return tokenId?.let {
+            synchronized(tokenPrices) {
+                tokenPrices[tokenId]
+            }
         }
     }
 
-    private fun refreshNow(preferences: PreferencesProvider, database: IAppDatabase) {
+    fun refreshByUser(
+        preferences: PreferencesProvider, database: IAppDatabase,
+        rescheduleRefreshJob: (() -> Unit)?
+    ): Boolean {
+        return if (System.currentTimeMillis() - lastRefreshMs > 1000L * 10) {
+            refreshNow(preferences, database, rescheduleRefreshJob)
+            true
+        } else
+            false
+    }
+
+    fun refreshWhenNeeded(
+        preferences: PreferencesProvider,
+        database: IAppDatabase,
+        rescheduleRefreshJob: (() -> Unit)?
+    ) {
+        if (System.currentTimeMillis() - lastRefreshMs > 1000L * 60) {
+            refreshNow(preferences, database, rescheduleRefreshJob)
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun refreshNow(
+        preferences: PreferencesProvider,
+        database: IAppDatabase,
+        rescheduleRefreshJob: (() -> Unit)?
+    ) {
         if (!(isRefreshing.value)) {
             isRefreshing.value = true
+            // we reschedule any waiting background refresh job so that it does not fire now
+            rescheduleRefreshJob?.invoke()
             GlobalScope.launch(Dispatchers.IO) {
                 var hadError = false
                 var didSync = false
@@ -77,16 +105,20 @@ class WalletStateSyncManager {
                 }
 
                 val refreshTokenPriceJob =
-                    if (System.currentTimeMillis() - lastTokenPriceRefreshMs > TOKEN_PRICE_REFRESH_DURATION_MS)
+                    if (System.currentTimeMillis() - lastTokenPriceRefreshMs > tokenPriceRefreshDurationMs)
                         launch { refreshTokenPrices(database.tokenDbProvider) }
                     else null
 
                 // Refresh wallet states
                 try {
-                    val statesSaved = refreshWalletStates(preferences, database.walletDbProvider)
-                    didSync = statesSaved.isNotEmpty()
+                    val refreshResult = refreshWalletStates(preferences, database.walletDbProvider)
+                    didSync = refreshResult != RefreshResult.NoSync
                 } catch (t: Throwable) {
-                    LogUtils.logDebug("NodeConnector", "Error: " + t.message, t)
+                    LogUtils.logDebug(
+                        this.javaClass.simpleName,
+                        "refreshWalletStates error: " + t.message,
+                        t
+                    )
                     t.printStackTrace()
                     // TODO report to user
                     hadError = true
@@ -99,7 +131,7 @@ class WalletStateSyncManager {
                     lastRefreshMs = System.currentTimeMillis()
                     preferences.lastRefreshMs = lastRefreshMs
                 }
-                LogUtils.logDebug("NodeConnector", "Refresh done, errors: $hadError")
+                LogUtils.logDebug(this.javaClass.simpleName, "Refresh done, errors: $hadError")
                 lastHadError = hadError
                 isRefreshing.value = false
             }
@@ -107,25 +139,33 @@ class WalletStateSyncManager {
     }
 
     private suspend fun refreshTokenPrices(tokenDbProvider: TokenDbProvider) {
-        try {
-            val tokensFromPriceApi = tokenPriceApi.getTokenPrices()
+        val tokenPriceList = tokenPriceSources.map { tokenPriceApi ->
+            try {
+                tokenPriceApi.getTokenPrices()
+            } catch (t: Throwable) {
+                LogUtils.logDebug(
+                    this.javaClass.simpleName,
+                    "refreshTokenPrices error: " + t.message,
+                    t
+                )
+                null
+            } ?: emptyList()
+        }.flatten().sortedBy { it.second.ordinal }.map { it.first }
 
-            tokensFromPriceApi?.let {
-                fillTokenPriceHashMap(it)
-                lastTokenPriceRefreshMs = System.currentTimeMillis()
-                tokenDbProvider.updateTokenPrices(it)
-            }
-        } catch (t: Throwable) {
-            LogUtils.logDebug("TokenPrices", "Error: " + t.message, t)
+        if (tokenPriceList.isNotEmpty()) {
+            val pricesInMap = fillTokenPriceHashMap(tokenPriceList)
+            lastTokenPriceRefreshMs = System.currentTimeMillis()
+            tokenDbProvider.updateTokenPrices(pricesInMap.toList())
         }
     }
 
-    private fun fillTokenPriceHashMap(tokenPrices: List<TokenPrice>) {
-        synchronized(this.tokenPrices) {
+    private fun fillTokenPriceHashMap(tokenPrices: List<TokenPrice>): Collection<TokenPrice> {
+        return synchronized(this.tokenPrices) {
             this.tokenPrices.clear()
             tokenPrices.forEach {
                 this.tokenPrices[it.tokenId] = it
             }
+            this.tokenPrices.values
         }
     }
 
@@ -134,13 +174,17 @@ class WalletStateSyncManager {
 
         var fFiatValue = fiatValue.value
         if (fiatCurrency.isNotEmpty()) {
-            LogUtils.logDebug("NodeConnector", "Refresh fiat value")
+            LogUtils.logDebug(this.javaClass.simpleName, "Refresh fiat value")
             try {
                 val currencyGetPrice =
                     coinGeckoApi.currencyGetPrice(fiatCurrency).execute().body()
                 fFiatValue = currencyGetPrice?.ergoPrice?.get(fiatCurrency) ?: 0f
             } catch (t: Throwable) {
-                LogUtils.logDebug("NodeConnector", "Error: " + t.message, t)
+                LogUtils.logDebug(
+                    this.javaClass.simpleName,
+                    "refreshErgFiatValue error: " + t.message,
+                    t
+                )
                 // don't set to zero here, keep last value in case of connection error
             }
         } else {
@@ -150,6 +194,7 @@ class WalletStateSyncManager {
         fiatValue.value = fFiatValue
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun refreshSingleAddresses(
         preferences: PreferencesProvider,
         database: WalletDbProvider,
@@ -158,8 +203,8 @@ class WalletStateSyncManager {
         if (addresses.isNotEmpty()) {
             GlobalScope.launch(Dispatchers.IO) {
                 try {
-                    val statesSaved = refreshWalletStates(preferences, database, addresses)
-                    if (statesSaved.isNotEmpty()) {
+                    val refreshResult = refreshWalletStates(preferences, database, addresses)
+                    if (refreshResult != RefreshResult.NoSync) {
                         singleAddressRefresh.value = System.currentTimeMillis()
                     }
                 } catch (t: Throwable) {
@@ -169,18 +214,24 @@ class WalletStateSyncManager {
         }
     }
 
-    private suspend fun refreshWalletStates(
+    enum class RefreshResult {
+        NoSync, DidSyncNoChange, DidSyncHasChange
+    }
+
+    suspend fun refreshWalletStates(
         preferences: PreferencesProvider,
         database: WalletDbProvider,
         addressFilter: List<String> = emptyList()
-    ): List<WalletState> {
+    ): RefreshResult {
         val statesToSave = mutableListOf<WalletState>()
         val tokenAddressesToDelete = mutableListOf<String>()
         val tokensToSave = mutableListOf<WalletToken>()
+        var hasChange = false
         database.getAllWalletConfigsSynchronous().forEach { walletConfig ->
             walletConfig.firstAddress?.let { firstAddress ->
+                val walletState = database.loadWalletWithStateById(walletConfig.id)!!
                 val allAddresses = ensureWalletAddressListHasFirstAddress(
-                    database.loadWalletAddresses(firstAddress), firstAddress
+                    walletState.addresses, firstAddress
                 )
 
                 val refreshAddresses =
@@ -188,8 +239,13 @@ class WalletStateSyncManager {
                     else allAddresses.filter { addressFilter.contains(it.publicAddress) }
 
                 refreshAddresses.forEach { address ->
+                    LogUtils.logDebug(
+                        this.javaClass.simpleName,
+                        "Refreshing ${address.publicAddress}..."
+                    )
+
                     val balanceInfoCall =
-                        ErgoApiService.getOrInit(preferences).getTotalBalanceForAddress(
+                        ApiServiceManager.getOrInit(preferences).getTotalBalanceForAddress(
                             address.publicAddress
                         ).execute()
 
@@ -201,6 +257,9 @@ class WalletStateSyncManager {
                             balanceInfo.confirmed?.nanoErgs,
                             balanceInfo.unconfirmed?.nanoErgs
                         )
+                        hasChange = hasChange || (newState.balance ?: 0) !=
+                                (walletState.getStateForAddress(address.publicAddress)?.balance
+                                    ?: 0)
 
                         statesToSave.add(newState)
                         tokenAddressesToDelete.add(address.publicAddress)
@@ -225,16 +284,24 @@ class WalletStateSyncManager {
 
         database.withTransaction {
             LogUtils.logDebug(
-                "NodeConnector",
+                this.javaClass.simpleName,
                 "Persisting ${statesToSave.size} wallet states to db"
             )
             database.insertWalletStates(statesToSave)
             tokenAddressesToDelete.forEach { database.deleteTokensByAddress(it) }
             database.insertWalletTokens(tokensToSave)
         }
-        return statesToSave
+
+        LogUtils.logDebug(
+            this.javaClass.simpleName,
+            "refreshWalletStates completed, hasChange: $hasChange"
+        )
+        return if (hasChange) RefreshResult.DidSyncHasChange else
+            if (statesToSave.isNotEmpty()) RefreshResult.DidSyncNoChange
+            else RefreshResult.NoSync
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun fetchCurrencies() {
         // do this only once per session, won't change often
         if (currencies.value == null || currencies.value!!.isEmpty()) {
@@ -250,11 +317,12 @@ class WalletStateSyncManager {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun loadPreferenceValues(preferences: PreferencesProvider, appDatabase: IAppDatabase) {
         lastRefreshMs = preferences.lastRefreshMs
         fiatCurrency = preferences.prefDisplayCurrency
         fiatValue.value = preferences.lastFiatValue
-        LogUtils.logDebug("NodeConnector", "Initialized preferences.")
+        LogUtils.logDebug(this.javaClass.simpleName, "Initialized preferences.")
 
         GlobalScope.launch {
             fillTokenPriceHashMap(appDatabase.tokenDbProvider.loadTokenPrices())

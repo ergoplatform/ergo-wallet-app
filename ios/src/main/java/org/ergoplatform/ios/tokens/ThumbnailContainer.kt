@@ -25,6 +25,7 @@ class ThumbnailContainer(private val baseSize: Double = 24.0) : UIView(CGRect.Ze
         addSubview(thumbnailPicture)
         thumbnailPicture.centerVertical().centerHorizontallyTo(backGround)
         layoutMargins = UIEdgeInsets(0.0, 0.0, 0.0, DEFAULT_MARGIN)
+        isHidden = true
     }
 
     fun setThumbnail(thumbnailType: Int) {

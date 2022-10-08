@@ -13,6 +13,7 @@ import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.wallet.WalletConfigUiLogic
+import org.ergoplatform.wallet.isReadOnly
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -45,7 +46,7 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
         val nameInputLabel = Body1Label()
         nameInputLabel.text = texts.get(STRING_LABEL_WALLET_NAME)
 
-        nameInputField = createTextField()
+        nameInputField = EndIconTextField()
         nameInputField.returnKeyType = UIReturnKeyType.Done
         nameInputField.clearButtonMode = UITextFieldViewMode.Always
         nameInputField.delegate = object : UITextFieldDelegateAdapter() {
@@ -153,8 +154,10 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
 
     private fun onDisplayXpubClicked() {
         uiLogic.wallet?.secretStorage?.let {
-            startAuthFlow(uiLogic.wallet!!) { mnemonic ->
-                displayXpub(getSerializedXpubKeyFromMnemonic(mnemonic))
+            startAuthFlow(uiLogic.wallet!!) { signingSecrets ->
+                val xpubkey = getSerializedXpubKeyFromMnemonic(signingSecrets)
+                signingSecrets.clearMemory()
+                displayXpub(xpubkey)
             }
         } ?: uiLogic.wallet?.extendedPublicKey?.let {
             displayXpub(it)
@@ -220,9 +223,9 @@ class WalletConfigViewController(private val walletId: Int) : ViewControllerWith
                     nameInputField.text = walletConfig.displayName
                     addressLabel.text = walletConfig.firstAddress
                     nameChangeApplyButton.isEnabled = false
-                    displaySecretsButton.isEnabled = walletConfig.secretStorage != null
+                    displaySecretsButton.isEnabled = !walletConfig.isReadOnly()
                     displayXpubButton.isEnabled =
-                        walletConfig.extendedPublicKey != null || walletConfig.secretStorage != null
+                        walletConfig.extendedPublicKey != null || !walletConfig.isReadOnly()
                 }
             }
         }

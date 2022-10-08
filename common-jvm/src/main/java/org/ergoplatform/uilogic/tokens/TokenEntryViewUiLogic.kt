@@ -9,7 +9,10 @@ import org.ergoplatform.uilogic.STRING_LABEL_UNNAMED_TOKEN
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.formatTokenPriceToString
 
-abstract class TokenEntryViewUiLogic(val walletToken: WalletToken) {
+abstract class TokenEntryViewUiLogic(
+    val walletToken: WalletToken,
+    private val noIdWhenPriceAvail: Boolean
+) {
     abstract val texts: StringProvider
 
     private var tokenInformation: TokenInformation? = null
@@ -38,12 +41,11 @@ abstract class TokenEntryViewUiLogic(val walletToken: WalletToken) {
             )
         )
         setGenuineFlag(genuineFlag)
-        setDisplayedTokenId(if (genuineFlag == GENUINE_VERIFIED) null else walletToken.tokenId)
         setDisplayedBalance(if (singularToken) null else balanceAmount.toStringPrettified())
 
-        setDisplayedPrice(if (!singularToken) {
+        val price = if (!singularToken) {
             val walletSyncManager = WalletStateSyncManager.getInstance()
-            val tokenPrice = walletSyncManager.tokenPrices[tokenId]
+            val tokenPrice = walletSyncManager.getTokenPrice(tokenId)
             tokenPrice?.let {
                 formatTokenPriceToString(
                     balanceAmount,
@@ -52,7 +54,10 @@ abstract class TokenEntryViewUiLogic(val walletToken: WalletToken) {
                     textProvider
                 ) + " [${it.priceSource}]"
             }
-        } else null)
+        } else null
+        setDisplayedPrice(price)
+        setDisplayedTokenId(if (genuineFlag == GENUINE_VERIFIED || noIdWhenPriceAvail && price != null)
+            null else walletToken.tokenId)
 
         setThumbnail(tokenInformation?.thumbnailType ?: THUMBNAIL_TYPE_NONE)
     }

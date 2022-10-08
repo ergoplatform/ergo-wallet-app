@@ -9,16 +9,13 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import org.ergoplatform.android.App
-import org.ergoplatform.android.BuildConfig
-import org.ergoplatform.android.Preferences
-import org.ergoplatform.android.R
+import androidx.navigation.navGraphViewModels
+import org.ergoplatform.android.*
 import org.ergoplatform.android.databinding.FragmentSettingsBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.enableLinks
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.showDialogWithCopyOption
-import org.ergoplatform.uilogic.settings.SettingsUiLogic
 
 class SettingsFragment : Fragment() {
 
@@ -27,7 +24,7 @@ class SettingsFragment : Fragment() {
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
-    private val uiLogic = SettingsUiLogic()
+    private val viewModel: SettingsViewModel by navGraphViewModels(R.id.navigation_settings)
 
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
@@ -49,11 +46,21 @@ class SettingsFragment : Fragment() {
         // makes the links clickable
         binding.labelMoreInfo.enableLinks()
         binding.labelCoingecko.enableLinks()
+        binding.labelTokenVerification.enableLinks()
 
         showDisplayCurrency()
 
         binding.displayCurrency.setOnClickListener {
             DisplayCurrencyListDialogFragment().show(childFragmentManager, null)
+        }
+
+        setBalanceNotifButtonTitle()
+        binding.balanceNotification.setOnClickListener {
+            val context = requireContext()
+            val prefs = Preferences(context)
+            viewModel.uiLogic.changeBalanceSyncInterval(prefs)
+            BackgroundSync.rescheduleJob(context)
+            setBalanceNotifButtonTitle()
         }
 
         setDayNightModeButtonColor(AppCompatDelegate.getDefaultNightMode())
@@ -89,6 +96,14 @@ class SettingsFragment : Fragment() {
         )
     }
 
+    private fun setBalanceNotifButtonTitle() {
+        val context = requireContext()
+        binding.balanceNotification.text = viewModel.uiLogic.getBalanceSyncButtonText(
+            Preferences(context),
+            AndroidStringProvider(context)
+        )
+    }
+
     private fun changeDayNightMode(mode: Int) {
         Preferences(requireContext()).dayNightMode = mode
         setDayNightModeButtonColor(mode)
@@ -116,7 +131,7 @@ class SettingsFragment : Fragment() {
     }
 
     fun showDisplayCurrency() {
-        binding.displayCurrency.text = uiLogic.getFiatCurrencyButtonText(
+        binding.displayCurrency.text = viewModel.uiLogic.getFiatCurrencyButtonText(
             Preferences(requireContext()), AndroidStringProvider(requireContext())
         )
     }

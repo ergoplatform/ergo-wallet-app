@@ -4,6 +4,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.api.IosAuthentication
@@ -29,6 +30,7 @@ class SaveWalletViewController(
     private lateinit var labelDisplayName: Body1BoldLabel
     private lateinit var buttonAltAddress: UIButton
     private lateinit var uiLogic: SaveWalletUiLogic
+    private lateinit var addressInfoLabel: UILabel
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -49,7 +51,7 @@ class SaveWalletViewController(
 
         addressLabel = Headline2Label()
 
-        val addressInfoLabel = Body1Label()
+        addressInfoLabel = Body1Label()
         addressInfoLabel.text = texts.get(STRING_INTRO_SAVE_WALLET2)
         val saveInfoLabel = Body1Label().apply {
             text = texts.get(STRING_INTRO_SAVE_WALLET3)
@@ -59,7 +61,7 @@ class SaveWalletViewController(
             textColor = uiColorErgo
             text = texts.get(STRING_LABEL_WALLET_NAME)
         }
-        nameInputField = createTextField().apply {
+        nameInputField = EndIconTextField().apply {
             clearButtonMode = UITextFieldViewMode.Always
             returnKeyType = UIReturnKeyType.Done
             delegate = object : UITextFieldDelegateAdapter() {
@@ -89,7 +91,7 @@ class SaveWalletViewController(
 
                     val encrypted = AesEncryptionManager.encryptData(
                         password,
-                        uiLogic.signingSecrets.toJson().toByteArray()
+                        uiLogic.signingSecrets.toBytes()
                     )
 
                     saveToDbAndDismissController(ENC_TYPE_PASSWORD, encrypted)
@@ -110,7 +112,7 @@ class SaveWalletViewController(
                     override fun onAuthenticationSucceeded(context: LAContext) {
                         try {
                             val encrypted = IosEncryptionManager.encryptDataWithKeychain(
-                                uiLogic.signingSecrets.toJson().toByteArray(),
+                                uiLogic.signingSecrets.toBytes(),
                                 context
                             )
 
@@ -203,7 +205,9 @@ class SaveWalletViewController(
                 encType, secretStorage
             )
         }
-        navigationController.dismissViewController(true) {}
+        navigationController.dismissViewController(true) {
+            uiLogic.eraseSecrets()
+        }
     }
 
     override fun viewWillAppear(animated: Boolean) {
@@ -223,9 +227,10 @@ class SaveWalletViewController(
 
     private suspend fun refreshAddressInfo() {
         val publicErgoAddressFromMnemonic = uiLogic.publicAddress
-        val db = getAppDelegate().database.walletDbProvider
+        val appDelegate = getAppDelegate()
+        val db = appDelegate.database.walletDbProvider
         val walletDisplayName =
-            uiLogic.getSuggestedDisplayName(db, IosStringProvider(getAppDelegate().texts))
+            uiLogic.getSuggestedDisplayName(db, IosStringProvider(appDelegate.texts))
         val showDisplayName = uiLogic.showSuggestedDisplayName(db)
 
         runOnMainThread {
@@ -236,6 +241,16 @@ class SaveWalletViewController(
             progressIndicator.isHidden = true
             scrollView.isHidden = false
             buttonAltAddress.isHidden = !uiLogic.hasAlternativeAddress
+        }
+
+        uiLogic.startDerivedAddressesSearch(
+            ApiServiceManager.getOrInit(appDelegate.prefs),
+            db
+        ) { num ->
+            runOnMainThread {
+                addressInfoLabel.text = if (num == 0) appDelegate.texts.get(STRING_INTRO_SAVE_WALLET2)
+                else appDelegate.texts.format(STRING_INTRO_SAVE_WALLET_DERIVED_ADDRESSES_NUM, (num + 1).toString())
+            }
         }
     }
 }

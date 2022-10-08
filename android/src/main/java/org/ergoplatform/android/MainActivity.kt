@@ -2,8 +2,10 @@ package org.ergoplatform.android
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -16,6 +18,7 @@ import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.android.transactions.ChooseSpendingWalletFragmentDialog
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.postDelayed
+import org.ergoplatform.android.wallet.WalletFragmentDirections
 import org.ergoplatform.uilogic.MainAppUiLogic
 
 class MainActivity : AppCompatActivity() {
@@ -31,7 +34,9 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_wallet, R.id.navigation_settings
+                R.id.navigation_wallet,
+                R.id.navigation_mosaik,
+                R.id.navigation_settings
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -44,6 +49,13 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             handleIntent(navController)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // removes pending notifications from system bar
+        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_SYNC)
     }
 
     fun scanQrCode() {
@@ -69,17 +81,38 @@ class MainActivity : AppCompatActivity() {
     ) {
         val navController = optNavController ?: findNavController(R.id.nav_host_fragment)
 
-        MainAppUiLogic.handleRequests(data, fromQrCode, AndroidStringProvider(this), {
-            navController.navigate(
-                R.id.chooseSpendingWalletFragmentDialog,
-                ChooseSpendingWalletFragmentDialog.buildArgs(it)
-            )
-        }, {
-            MaterialAlertDialogBuilder(this)
-                .setMessage(it)
-                .setPositiveButton(R.string.zxing_button_ok, null)
-                .show()
-        })
+        MainAppUiLogic.handleRequests(data, fromQrCode, AndroidStringProvider(this),
+            navigateToChooseWalletDialog = {
+                navController.navigate(
+                    R.id.chooseSpendingWalletFragmentDialog,
+                    ChooseSpendingWalletFragmentDialog.buildArgs(it)
+                )
+            },
+            navigateToErgoPay = {
+                navController.navigate(
+                    WalletFragmentDirections.actionNavigationWalletToErgoPaySigningFragment(
+                        it
+                    ).setCloseApp(!fromQrCode)
+                )
+            },
+            navigateToAuthentication = {
+                navController.navigate(
+                    WalletFragmentDirections.actionNavigationWalletToErgoAuthFragment(
+                        it
+                    )
+                )
+            },
+            navigateToMosaikApp = { url ->
+                navController.navigate(
+                    WalletFragmentDirections.actionNavigationWalletToMosaikFragment(url, null)
+                )
+            },
+            presentUserMessage = {
+                MaterialAlertDialogBuilder(this)
+                    .setMessage(it)
+                    .setPositiveButton(R.string.zxing_button_ok, null)
+                    .show()
+            })
     }
 
     private fun handleIntent(navController: NavController? = null) {
@@ -88,8 +121,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        return findNavController(R.id.nav_host_fragment).navigateUp() || super.onSupportNavigateUp()
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            onBackPressed()
+            return true
+        }
+        return false
     }
 
     override fun onNewIntent(intent: Intent?) {

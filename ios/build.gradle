@@ -15,10 +15,10 @@ task convertStrings {
     def dest2 = '../common-jvm/src/main/java/org/ergoplatform/uilogic/StringResources.kt'
 
     ext.changePlaceHolders = { stringText ->
-        return stringText.replace("%1d", "{0}").replace("%1s", "{0}")
-                .replace("%2d", "{1}").replace("%2s", "{1}")
-                .replace("%3d", "{2}").replace("%3s", "{2}")
-                .replace("%4d", "{3}").replace("%4s", "{3}")
+        return stringText.replace("%1\$d", "{0}").replace("%1\$s", "{0}")
+                .replace("%2\$d", "{1}").replace("%2\$s", "{1}")
+                .replace("%3\$d", "{2}").replace("%3\$s", "{2}")
+                .replace("%4\$d", "{3}").replace("%4\$s", "{3}")
     }
 
     ext.addEndLineChar = { line ->
@@ -99,6 +99,7 @@ task convertStrings {
         convertFile("pt_PT")
         convertFile("it")
         convertFile("tr")
+        convertFile("ru")
     }
 }
 
@@ -106,12 +107,24 @@ dependencies {
     implementation(project(path: ':common-jvm')){
         // normal compile no change iOS: 90 sec
         // exclude kiama, sigma-state, ergo-wallet: 20 sec
-        //exclude group: 'org.scorexfoundation', module: 'sigma-state_2.11'
+        exclude group: 'org.scorexfoundation', module: 'sigma-state_2.11'
         //exclude group: 'org.ergoplatform', module: 'ergo-wallet_2.11'
     }
+
+    // TODO remove when appkit is updated with PR 189
+    implementation ('org.scorexfoundation:sigma-state_2.11:4.0.6-3-f601122c-SNAPSHOT') {
+        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
+        exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
+        exclude group: 'com.google.guava', module: 'guava'
+    }
+
     implementation project(path: ':sqldelight')
 
     implementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
     implementation "com.mobidevelop.robovm:robovm-rt:${robovm_version}"
     implementation "com.mobidevelop.robovm:robovm-cocoatouch:${robovm_version}"
+
+    // Mosaik
+    implementation "com.github.MrStahlfelge.mosaik:common-abstractui:$mosaik_version"
+    implementation "org.jetbrains:markdown-jvm:0.3.1"
 }

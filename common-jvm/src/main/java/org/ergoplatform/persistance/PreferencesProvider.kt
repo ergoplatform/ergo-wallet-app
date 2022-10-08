@@ -7,13 +7,21 @@ const val NAME_SHAREDPREFS = "ergowallet"
 const val KEY_FIAT_CURRENCY = "fiatCurrency"
 const val KEY_FIAT_VALUE = "fiatValue"
 const val KEY_NODE_URL = "nodeUrl"
+const val KEY_NODE_LIST = "nodeList"
 const val KEY_EXPLORER_API_URL = "explorerApiUrl"
 const val KEY_IPFS_GATEWAY_URL = "ipfsGatewayUrl"
+const val KEY_TOKEN_VERIFY_URL = "tokenVerificationUrl"
 const val KEY_DOWNLOAD_NFT_CONTENT = "downloadNftContent"
+const val KEY_SEND_TX_MESSAGES = "sendTxMessages"
+const val KEY_INPUT_FIAT_AMOUNT = "inputFiatAmount"
 const val KEY_LASTREFRESH = "lastRefreshMs"
+const val KEY_LASTNODELISTREFRESH = "lastNodeListRefresh"
+const val KEY_MOSAIK_ENABLED = "enableMosaik"
+const val KEY_BALANCE_SYNC_INTERVAL = "balanceCheckInterval"
 const val FIAT_CURRENCY_DEFAULT = "usd"
 
 private const val DEFAULT_IPFS_GATEWAY = "https://cloudflare-ipfs.com/"
+private const val DEFAULT_TOKEN_VERIFY_URL = "https://api.tokenjay.app/"
 
 abstract class PreferencesProvider {
 
@@ -23,6 +31,13 @@ abstract class PreferencesProvider {
     abstract fun saveLong(key: String, value: Long)
     abstract fun getFloat(key: String, default: Float): Float
     abstract fun saveFloat(key: String, value: Float)
+
+    protected fun getBoolean(key: String, default: Boolean): Boolean =
+        getLong(key, if (default) 1 else 0) != 0L
+
+    protected fun saveBoolean(key: String, value: Boolean) {
+        saveLong(key, if (value) 1L else 0L)
+    }
 
     var prefDisplayCurrency: String
         get() {
@@ -46,8 +61,15 @@ abstract class PreferencesProvider {
             saveString(KEY_NODE_URL, savedNodeUrl)
         }
 
+    var knownNodesList: List<String>
+        get() = getString(KEY_NODE_LIST, "").split(',').filterNot { it.isBlank() }
+        set(value) {
+            saveString(KEY_NODE_LIST, value.joinToString(","))
+            saveLong(KEY_LASTNODELISTREFRESH, System.currentTimeMillis())
+        }
+
     fun getDefaultNodeApiUrl() =
-        if (isErgoMainNet) "http://213.239.193.208:9053/"
+        if (isErgoMainNet) "http://159.65.11.55:9053/"
         else "http://213.239.193.208:9052/"
 
     var prefExplorerApiUrl: String
@@ -80,9 +102,36 @@ abstract class PreferencesProvider {
         }
 
     var downloadNftContent: Boolean
-        get() = getLong(KEY_DOWNLOAD_NFT_CONTENT, 0) != 0L
+        get() = getBoolean(KEY_DOWNLOAD_NFT_CONTENT, false)
         set(value) {
-            saveLong(KEY_DOWNLOAD_NFT_CONTENT, if (value) 1L else 0L)
+            saveBoolean(KEY_DOWNLOAD_NFT_CONTENT, value)
+        }
+
+    var mosaikEnabled: Boolean
+        get() = getBoolean(KEY_MOSAIK_ENABLED, false)
+        set(value) {
+            saveBoolean(KEY_MOSAIK_ENABLED, value)
+        }
+
+    var sendTxMessages: Boolean
+        get() = getBoolean(KEY_SEND_TX_MESSAGES, false)
+        set(value) {
+            saveBoolean(KEY_SEND_TX_MESSAGES, value)
+        }
+
+    val defaultTokenVerificationUrl = DEFAULT_TOKEN_VERIFY_URL
+
+    var prefTokenVerificationUrl: String
+        get() = getString(KEY_TOKEN_VERIFY_URL, DEFAULT_TOKEN_VERIFY_URL)
+        set(value) {
+            var tokenVerificationUrl = value
+            if (tokenVerificationUrl.isEmpty()) {
+                tokenVerificationUrl = DEFAULT_TOKEN_VERIFY_URL
+            } else if (!tokenVerificationUrl.endsWith("/")) {
+                tokenVerificationUrl += "/"
+            }
+
+            saveString(KEY_TOKEN_VERIFY_URL, tokenVerificationUrl)
         }
 
     var lastRefreshMs: Long
@@ -91,9 +140,24 @@ abstract class PreferencesProvider {
             saveLong(KEY_LASTREFRESH, time)
         }
 
+    val lastNodeListRefreshMs: Long
+        get() = getLong(KEY_LASTNODELISTREFRESH, 0)
+
     var lastFiatValue: Float
         get() = getFloat(KEY_FIAT_VALUE, 0f)
         set(value) {
             saveFloat(KEY_FIAT_VALUE, value)
+        }
+
+    var isSendInputFiatAmount: Boolean
+        get() = getBoolean(KEY_INPUT_FIAT_AMOUNT, false)
+        set(value) {
+            saveBoolean(KEY_INPUT_FIAT_AMOUNT, value)
+        }
+
+    var balanceSyncInterval: Long
+        get() = getLong(KEY_BALANCE_SYNC_INTERVAL, 24)
+        set(value) {
+            saveLong(KEY_BALANCE_SYNC_INTERVAL, value)
         }
 }

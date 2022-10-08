@@ -1,17 +1,16 @@
 package org.ergoplatform.persistance
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+class SqlDelightTokenDbProvider(private val sqlDelightAppDb: SqlDelightAppDb) : TokenDbProvider {
+    private val appDatabase = sqlDelightAppDb.appDatabase
 
-class SqlDelightTokenDbProvider(private val appDatabase: AppDatabase) : TokenDbProvider {
     override suspend fun loadTokenPrices(): List<TokenPrice> {
-        return withContext(Dispatchers.IO) {
+        return sqlDelightAppDb.useIoContext {
             appDatabase.tokenPriceQueries.loadAll().executeAsList().map { it.toModel() }
         }
     }
 
     override suspend fun updateTokenPrices(priceList: List<TokenPrice>) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             appDatabase.transaction {
                 appDatabase.tokenPriceQueries.deletAll()
                 priceList.forEach {
@@ -22,19 +21,19 @@ class SqlDelightTokenDbProvider(private val appDatabase: AppDatabase) : TokenDbP
     }
 
     override suspend fun loadTokenInformation(tokenId: String): TokenInformation? {
-        return withContext(Dispatchers.IO) {
+        return sqlDelightAppDb.useIoContext {
             appDatabase.tokenInfoQueries.loadById(tokenId).executeAsOneOrNull()?.toModel()
         }
     }
 
     override suspend fun insertOrReplaceTokenInformation(tokenInfo: TokenInformation) {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             appDatabase.tokenInfoQueries.insertOrReplace(tokenInfo.toDbEntity())
         }
     }
 
     override suspend fun pruneUnusedTokenInformation() {
-        withContext(Dispatchers.IO) {
+        sqlDelightAppDb.useIoContext {
             appDatabase.tokenInfoQueries.pruneUnused(System.currentTimeMillis() - TOKEN_INFO_MS_OUTDATED)
         }
     }

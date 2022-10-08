@@ -97,6 +97,7 @@
                         style="@style/Widget.App.Button.TextButton"
                         android:layout_width="40dp"
                         android:layout_height="wrap_content"
+                        android:background="?android:selectableItemBackgroundBorderless"
                         android:contentDescription="@string/button_copy"
                         android:src="@drawable/ic_copy_24"
                         app:layout_constraintBottom_toBottomOf="@id/public_address"
@@ -114,7 +115,6 @@
                         <com.google.android.material.textfield.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="top"
                             android:imeOptions="actionNext"
                             android:inputType="numberDecimal" />
 
@@ -125,7 +125,10 @@
                         style="@style/TextAppearance.App.Fiat"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:background="?android:selectableItemBackground"
+                        android:drawablePadding="4dp"
                         android:visibility="gone"
+                        app:drawableEndCompat="@drawable/ic_edit_note_24"
                         app:layout_constraintEnd_toEndOf="@id/amount"
                         app:layout_constraintTop_toBottomOf="@id/amount"
                         tools:text="@string/label_fiat_amount"
@@ -143,7 +146,6 @@
                         <com.google.android.material.textfield.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="top"
                             android:imeOptions="actionDone"
                             android:inputType="text"
                             android:maxLines="1" />

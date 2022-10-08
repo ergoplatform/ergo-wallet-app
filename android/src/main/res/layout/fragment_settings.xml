@@ -126,6 +126,35 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/half_horizontal_margin"
+                        android:gravity="center"
+                        android:text="@string/desc_balance_notif_set" />
+
+                    <Button
+                        android:id="@+id/balance_notification"
+                        style="@style/Widget.App.Button.PrimaryTint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/activity_vertical_margin"
+                        tools:text="@string/button_balance_notif_never" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_vertical_margin">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/activity_vertical_margin"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/half_horizontal_margin"
                         android:autoLink="web"
                         android:gravity="center"
                         android:text="@string/desc_dark_mode" />
@@ -179,6 +208,32 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:layout_marginBottom="@dimen/activity_vertical_margin"
+                        android:gravity="center"
+                        android:text="@string/desc_token_settings"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/label_token_verification"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="@dimen/activity_vertical_margin"
+                        android:gravity="center"
+                        android:text="@string/desc_token_verification" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginBottom="@dimen/activity_vertical_margin"
+                        android:background="@color/lightgrey" />
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         android:gravity="center"
                         android:text="@string/desc_download_content" />
 
@@ -196,7 +251,8 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/activity_vertical_margin">
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginBottom="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -219,6 +275,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/activity_vertical_margin"
                         android:text="@string/button_connection_settings" />
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

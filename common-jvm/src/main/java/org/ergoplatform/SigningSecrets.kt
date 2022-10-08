@@ -1,12 +1,13 @@
 package org.ergoplatform
 
-import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.appkit.SecretString
+import java.nio.ByteBuffer
+import java.nio.CharBuffer
+import java.util.*
 
 private const val KEY_MNEMONIC = "mnemonic"
-private const val KEY_DEPRECATED_DERIVATION = "pre1627"
 
 data class SigningSecrets(
     val mnemonic: SecretString,
@@ -19,29 +20,63 @@ data class SigningSecrets(
         deprecatedDerivation: Boolean
     ) : this(SecretString.create(mnemonic), deprecatedDerivation)
 
-    fun toJson(): String {
-        val gson = Gson()
-        val root = JsonObject()
-        root.addProperty(KEY_MNEMONIC, mnemonic.toStringUnsecure())
-        root.addProperty(KEY_DEPRECATED_DERIVATION, deprecatedDerivation)
-        return gson.toJson(root)
+    fun toBytes(): ByteArray {
+        return mnemonic.toBytesSecure()
+    }
+
+    fun clearMemory() {
+        mnemonic.erase()
     }
 
     companion object {
-        fun fromJson(json: String): SigningSecrets? {
+        fun fromBytes(bytes: ByteArray): SigningSecrets? {
+            return if (bytes.isNotEmpty() && bytes[0] == '{'.code.toByte()
+                && bytes.last() == '}'.code.toByte()
+            ) {
+                // backwards compatibility: old, unsecure json call
+                fromJson(String(bytes))
+            } else {
+                try {
+                    val mnemonic = bytes.toSecretStringSecure()
+                    Arrays.fill(bytes, 0)
+                    SigningSecrets(mnemonic, true)
+                } catch (t: Throwable) {
+                    Arrays.fill(bytes, 0)
+                    null
+                }
+            }
+        }
 
+        private fun fromJson(json: String): SigningSecrets? {
             try {
                 val jsonTree = JsonParser().parse(json) as JsonObject
 
                 val mnemonic =
                     SecretString.create(jsonTree.get(KEY_MNEMONIC)?.asString)
-                val deprecatedDerivation =
-                    jsonTree.get(KEY_DEPRECATED_DERIVATION)?.asBoolean ?: true
 
-                return SigningSecrets(mnemonic, deprecatedDerivation)
+                return SigningSecrets(mnemonic, true)
             } catch (t: Throwable) {
                 return null
             }
         }
     }
+}
+
+private fun SecretString.toBytesSecure(): ByteArray {
+    val charBuffer = CharBuffer.wrap(this.data)
+    val byteBuffer = Charsets.UTF_8.encode(charBuffer)
+    val bytes: ByteArray = Arrays.copyOfRange(
+        byteBuffer.array(),
+        byteBuffer.position(), byteBuffer.limit()
+    )
+    Arrays.fill(byteBuffer.array(), 0) // clear sensitive data
+    return bytes
+}
+
+private fun ByteArray.toSecretStringSecure(): SecretString {
+    val byteBuffer = ByteBuffer.wrap(this)
+    val charBuffer = Charsets.UTF_8.decode(byteBuffer)
+    val chars = Arrays.copyOfRange(charBuffer.array(), charBuffer.position(), charBuffer.limit())
+    Arrays.fill(charBuffer.array(), ' ')
+    return SecretString.create(chars)
 }

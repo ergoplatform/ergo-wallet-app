@@ -6,12 +6,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ErgoAmount
-import org.ergoplatform.ErgoApiService
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
+import org.ergoplatform.uilogic.transactions.SuggestedFee
 
 /**
  * Holding state of the send funds screen (thus to be expected to get complicated)
@@ -27,6 +28,8 @@ class SendFundsViewModel : SubmitTransactionViewModel() {
         value = ErgoAmount.ZERO
     }
     val grossAmount: LiveData<ErgoAmount> = _grossAmount
+    private val _suggestedFeeData = MutableLiveData<List<SuggestedFee>>(emptyList())
+    val suggestedFees: LiveData<List<SuggestedFee>> get() = _suggestedFeeData
     private val _txId = MutableLiveData<String?>()
     val txId: LiveData<String?> = _txId
 
@@ -40,7 +43,7 @@ class SendFundsViewModel : SubmitTransactionViewModel() {
     fun initWallet(ctx: Context, walletId: Int, derivationIdx: Int, paymentRequest: String?) {
         uiLogic.initWallet(
             AppDatabase.getInstance(ctx),
-            ErgoApiService.getOrInit(Preferences(ctx)),
+            ApiServiceManager.getOrInit(Preferences(ctx)),
             walletId,
             derivationIdx,
             paymentRequest
@@ -67,6 +70,10 @@ class SendFundsViewModel : SubmitTransactionViewModel() {
 
         override fun notifyAmountsChanged() {
             _grossAmount.postValue(grossAmount)
+        }
+
+        override fun onNotifySuggestedFees() {
+            _suggestedFeeData.postValue(uiLogic.suggestedFeeItems)
         }
 
         override fun notifyTokensChosenChanged() {

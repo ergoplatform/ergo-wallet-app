@@ -112,6 +112,27 @@
                         app:layout_constraintTop_toBottomOf="@id/hint_readonly" />
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/ti_message"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_purpose"
+                        android:visibility="gone"
+                        app:endIconDrawable="@drawable/ic_info_24"
+                        app:endIconMode="custom"
+                        app:layout_constraintEnd_toEndOf="@id/tv_receiver"
+                        app:layout_constraintStart_toStartOf="@id/tv_receiver"
+                        app:layout_constraintTop_toBottomOf="@id/tv_receiver">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:imeOptions="actionNext"
+                            android:inputType="text"
+                            android:maxLength="1000" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/amount"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -126,7 +147,6 @@
                         <com.google.android.material.textfield.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="top"
                             android:imeOptions="actionDone"
                             android:inputType="numberDecimal" />
 
@@ -145,7 +165,6 @@
                         <com.google.android.material.textfield.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="top"
                             android:imeOptions="actionNext"
                             android:inputType="text"
                             android:maxLines="1" />
@@ -157,8 +176,10 @@
                         style="@style/TextAppearance.App.Fiat"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:drawablePadding="4dp"
                         android:gravity="end"
                         android:visibility="gone"
+                        app:drawableEndCompat="@drawable/ic_edit_note_24"
                         app:layout_constraintEnd_toEndOf="@id/amount"
                         app:layout_constraintTop_toBottomOf="@id/amount"
                         tools:text="@string/label_fiat_amount"
@@ -167,9 +188,10 @@
                     <TextView
                         android:id="@+id/tv_fee"
                         style="@style/TextAppearance.App.Body1"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginVertical="@dimen/half_horizontal_margin"
+                        app:layout_constraintEnd_toEndOf="@id/amount"
                         app:layout_constraintStart_toStartOf="@id/amount"
                         app:layout_constraintTop_toBottomOf="@id/tv_fiat"
                         tools:text="@string/desc_fee" />
@@ -309,6 +331,28 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/label_tx_id" />
+
+                    <TextView
+                        android:id="@+id/tv_rate"
+                        style="@style/TextAppearance.App.Body1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:paddingTop="@dimen/margin_and_half"
+                        android:text="@string/desc_please_rate"
+                        app:layout_constraintTop_toBottomOf="@id/button_dismiss" />
+
+                    <Button
+                        android:id="@+id/button_rate"
+                        style="@style/Widget.App.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="120dp"
+                        android:text="@string/button_please_rate"
+                        android:textColor="@color/primary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_rate" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>

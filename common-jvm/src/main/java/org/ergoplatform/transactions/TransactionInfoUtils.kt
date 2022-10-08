@@ -2,14 +2,16 @@ package org.ergoplatform.transactions
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.ergoplatform.ErgoApi
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.appkit.*
+import org.ergoplatform.appkit.impl.BoxAttachmentBuilder
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.InputInfo
 import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.getErgoNetworkType
 import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.restapi.client.ErgoTransactionOutput
 import kotlin.math.min
 
 /**
@@ -37,12 +39,21 @@ data class TransactionInfoBox(
  * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
  * use within an applicable try/catch phrase
  */
-suspend fun Transaction.buildTransactionInfo(ergoApiService: ErgoApi): TransactionInfo {
+suspend fun Transaction.buildTransactionInfo(ergoApiService: ApiServiceManager): TransactionInfo {
     return withContext(Dispatchers.IO) {
         val inputsMap = HashMap<String, TransactionInfoBox>()
-        inputBoxesIds.forEach {
-            val boxInfo = ergoApiService.getBoxInformation(it).execute().body()!!
-            inputsMap[boxInfo.boxId] = boxInfo.toTransactionInfoBox()
+        inputBoxesIds.forEach { boxId ->
+            val boxInfo = ergoApiService.getExplorerBoxInformation(boxId).execute().body()
+
+            val transactionInfoBox = boxInfo?.toTransactionInfoBox()
+            // explorer does not return information for unconfirmed boxes, check again if available on node
+                ?: ergoApiService.getNodeUnspentBoxInformation(boxId).execute()
+                    .body()?.toTransactionInfoBox()
+
+            if (transactionInfoBox == null)
+                throw IllegalStateException("Could not retrieve information for box $boxId")
+            else
+                inputsMap[transactionInfoBox.boxId] = transactionInfoBox
         }
         buildTransactionInfo(inputsMap)
     }
@@ -170,6 +181,21 @@ fun OutputInfo.toTransactionInfoBox(): TransactionInfoBox {
     return TransactionInfoBox(boxId, address, value, assets)
 }
 
+/**
+ * converts Node API's box information into [TransactionInfoBox]
+ */
+fun ErgoTransactionOutput.toTransactionInfoBox(): TransactionInfoBox =
+    TransactionInfoBox(
+        boxId,
+        Address.fromErgoTree(JavaHelpers.decodeStringToErgoTree(ergoTree), getErgoNetworkType())
+            .toString(),
+        value,
+        assets.map { nodeAsset -> AssetInstanceInfo().apply {
+            amount = nodeAsset.amount
+            tokenId = nodeAsset.tokenId
+        } }
+    )
+
 private fun getAssetInstanceInfosFromErgoBoxToken(tokens: List<ErgoToken>): List<AssetInstanceInfo> {
     return tokens.map {
         val tokenInfo = AssetInstanceInfo()
@@ -280,5 +306,5 @@ fun combineTokens(tokens: List<AssetInstanceInfo>): List<AssetInstanceInfo> {
 }
 
 fun OutputInfo.getAttachmentText(): String? = additionalRegisters?.let { registers ->
-    null // TODO EIP-29 purpose text (Eip29AttachmentBuilder.buildFromAdditionalRegisters(registers) as? Eip29Attachment.PlainTextAttachment)?.text
+    (BoxAttachmentBuilder.buildFromAdditionalRegisters(registers) as? BoxAttachmentPlainText)?.text
 }

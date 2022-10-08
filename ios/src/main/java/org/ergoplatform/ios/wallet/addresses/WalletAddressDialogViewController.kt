@@ -45,7 +45,7 @@ class WalletAddressDialogViewController(val address: WalletAddress) : ViewContro
         val nameDescription = Body1Label()
         nameDescription.text = texts.get(STRING_DESC_WALLET_ADDR_LABEL)
 
-        nameInputField = createTextField().apply {
+        nameInputField = EndIconTextField().apply {
             returnKeyType = UIReturnKeyType.Done
             clearButtonMode = UITextFieldViewMode.Always
             placeholder = texts.get(STRING_HINT_WALLET_ADDR_LABEL)
