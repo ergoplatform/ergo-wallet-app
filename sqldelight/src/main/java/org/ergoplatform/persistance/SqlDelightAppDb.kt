@@ -32,4 +32,6 @@ class SqlDelightAppDb(
         get() = SqlDelightTransactionDbProvider(this)
     override val mosaikDbProvider: MosaikDbProvider
         get() = SqlDelightMosaikDbProvider(this)
+    override val addressBookDbProvider: AddressBookDbProvider
+        get() = SqlDelightAddressBookDbProvider(this)
 }

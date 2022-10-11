@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `address_book` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `label` TEXT NOT NULL,
+    `address` TEXT NOT NULL,
+    `signed_data` BLOB
+);
+
+selectAll:
+SELECT * FROM address_book;
+
+loadAddressBookEntryById:
+SELECT * FROM address_book WHERE id = ?;
+
+insertOrReplace:
+INSERT OR REPLACE INTO `address_book` (
+    `id`,`label`,`address`,`signed_data`
+) VALUES (?,?,?,?);
+
+deleteAddressById:
+DELETE FROM address_book WHERE id = ?;

@@ -158,3 +158,9 @@ fun MosaikAppHost.toDbEntity() =
 
 fun Mosaik_host.toModel() =
     MosaikAppHost(hostName, guid)
+
+fun Address_book.toModel() =
+    AddressBookEntry(id.toInt(), label, address, signed_data)
+
+fun AddressBookEntry.toDbEntity() =
+    Address_book(id.toLong(), label, address, signedData)
