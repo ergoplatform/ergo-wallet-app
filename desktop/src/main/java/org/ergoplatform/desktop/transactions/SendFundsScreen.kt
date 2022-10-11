@@ -5,10 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowCircleDown
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.key
@@ -51,6 +48,7 @@ fun SendFundsScreen(
     onChooseToken: () -> Unit,
     onSendClicked: () -> Unit,
     onChooseFeeClicked: () -> Unit,
+    onChooseRecipientAddress: () -> Unit,
 ) {
     AppScrollingLayout {
         Card(
@@ -121,6 +119,11 @@ fun SendFundsScreen(
                     isError = recipientError.value,
                     label = { Text(Application.texts.getString(STRING_LABEL_RECEIVER_ADDRESS)) },
                     colors = appTextFieldColors(),
+                    trailingIcon = {
+                        IconButton(onClick = onChooseRecipientAddress) {
+                            Icon(Icons.Default.PermContactCalendar, null)
+                        }
+                    },
                 )
 
                 OutlinedTextField(

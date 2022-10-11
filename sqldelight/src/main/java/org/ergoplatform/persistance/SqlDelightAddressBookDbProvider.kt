@@ -1,5 +1,10 @@
 package org.ergoplatform.persistance
 
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
 class SqlDelightAddressBookDbProvider(
     private val sqlDelightAppDb: SqlDelightAppDb
 ) : AddressBookDbProvider {
@@ -29,10 +34,9 @@ class SqlDelightAddressBookDbProvider(
         }
     }
 
-    override suspend fun getAllAddressEntries(): List<AddressBookEntry> {
-        return sqlDelightAppDb.useIoContext {
-            appDb.addressBookQueries.selectAll().executeAsList().map { it.toModel() }
-        }
+    override fun getAllAddressEntries(): Flow<List<AddressBookEntry>> {
+        return appDb.addressBookQueries.selectAll().asFlow().mapToList()
+            .map { flow -> flow.map { it.toModel() } }
     }
 
     override suspend fun findAddressEntry(address: String): AddressBookEntry? {

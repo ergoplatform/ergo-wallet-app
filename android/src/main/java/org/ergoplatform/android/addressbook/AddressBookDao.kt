@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AddressBookDao {
@@ -20,5 +21,5 @@ interface AddressBookDao {
     suspend fun findByAddress(address: String): AddressBookEntryEntity?
 
     @Query("SELECT * FROM address_book")
-    suspend fun getAllAddressEntries(): List<AddressBookEntryEntity>
+    fun getAllAddressEntries(): Flow<List<AddressBookEntryEntity>>
 }
