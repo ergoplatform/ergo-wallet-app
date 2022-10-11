@@ -34,4 +34,10 @@ class SqlDelightAddressBookDbProvider(
             appDb.addressBookQueries.selectAll().executeAsList().map { it.toModel() }
         }
     }
+
+    override suspend fun findAddressEntry(address: String): AddressBookEntry? {
+        return sqlDelightAppDb.useIoContext {
+            appDb.addressBookQueries.findAddressBookEntry(address).executeAsOneOrNull()?.toModel()
+        }
+    }
 }

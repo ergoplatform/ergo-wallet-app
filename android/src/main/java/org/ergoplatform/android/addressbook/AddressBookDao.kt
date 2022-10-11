@@ -16,6 +16,9 @@ interface AddressBookDao {
     @Query("SELECT * FROM address_book WHERE id = :id")
     suspend fun loadAddressEntryById(id: Int): AddressBookEntryEntity?
 
+    @Query("SELECT * FROM address_book WHERE address = :address")
+    suspend fun findByAddress(address: String): AddressBookEntryEntity?
+
     @Query("SELECT * FROM address_book")
     suspend fun getAllAddressEntries(): List<AddressBookEntryEntity>
 }

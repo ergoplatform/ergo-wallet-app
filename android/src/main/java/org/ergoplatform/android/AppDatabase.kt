@@ -363,4 +363,6 @@ class RoomAddressBookProvider(private val database: AppDatabase) : AddressBookDb
     override suspend fun getAllAddressEntries(): List<AddressBookEntry> =
         database.addressBookDao().getAllAddressEntries().map { it.toModel() }
 
+    override suspend fun findAddressEntry(address: String): AddressBookEntry? =
+        database.addressBookDao().findByAddress(address)?.toModel()
 }

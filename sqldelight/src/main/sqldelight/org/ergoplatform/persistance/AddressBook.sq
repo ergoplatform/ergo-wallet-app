@@ -11,6 +11,9 @@ SELECT * FROM address_book;
 loadAddressBookEntryById:
 SELECT * FROM address_book WHERE id = ?;
 
+findAddressBookEntry:
+SELECT * FROM address_book WHERE address = ?;
+
 insertOrReplace:
 INSERT OR REPLACE INTO `address_book` (
     `id`,`label`,`address`,`signed_data`
