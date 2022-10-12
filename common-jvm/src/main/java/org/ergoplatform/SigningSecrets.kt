@@ -22,8 +22,12 @@ data class SigningSecrets(
 
     fun toBytes(): ByteArray {
         val bytes = mnemonic.toBytesSecure()
-        return if (deprecatedDerivation) bytes else ByteArray(bytes.size + 1) { i ->
-            if (i == 0) prefixNewMethod else bytes[i - 1]
+        return if (deprecatedDerivation) bytes else {
+            val bytesWithPrefix = ByteArray(bytes.size + 1) { i ->
+                if (i == 0) prefixNewMethod else bytes[i - 1]
+            }
+            Arrays.fill(bytes, 0)
+            bytesWithPrefix
         }
     }
 
