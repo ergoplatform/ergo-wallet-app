@@ -2,7 +2,12 @@ package org.ergoplatform.persistance
 
 data class AddressBookEntry(
     val id: Int,
-    val label: String,
-    val address: String,
+    override val label: String,
+    override val address: String,
     val signedData: ByteArray?,
-)
+) : IAddressWithLabel
+
+interface IAddressWithLabel {
+    val address: String
+    val label: String?
+}

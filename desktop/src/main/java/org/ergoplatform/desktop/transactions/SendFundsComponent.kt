@@ -109,7 +109,12 @@ class SendFundsComponent(
 
             if (chooseRecipientAddressDialog.value) {
                 ChooseAddressDialog(
-                    onChooseEntry = {}, // TODO
+                    onChooseEntry = { addressWithLabel ->
+                        chooseRecipientAddressDialog.value = false
+                        recipientAddress.value = TextFieldValue(addressWithLabel.address)
+                        uiLogic.receiverAddress = addressWithLabel.address
+                        recipientError.value = false
+                    },
                     onEditEntry = {}, // TODO
                     onDismissRequest = { chooseRecipientAddressDialog.value = false }
                 )

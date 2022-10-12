@@ -10,10 +10,11 @@ import org.ergoplatform.Application
 import org.ergoplatform.compose.addressbook.ChooseAddressLayout
 import org.ergoplatform.desktop.ui.AppDialog
 import org.ergoplatform.persistance.AddressBookEntry
+import org.ergoplatform.persistance.IAddressWithLabel
 
 @Composable
 fun ChooseAddressDialog(
-    onChooseEntry: (AddressBookEntry) -> Unit,
+    onChooseEntry: (IAddressWithLabel) -> Unit,
     onEditEntry: (AddressBookEntry?) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
@@ -21,14 +22,18 @@ fun ChooseAddressDialog(
         Application.database.addressBookDbProvider.getAllAddressEntries()
             .collectAsState(emptyList())
 
+    val walletsWithStates =
+        Application.database.walletDbProvider.getWalletsWithStatesFlow()
+            .collectAsState(emptyList())
+
     AppDialog(onDismissRequest) {
         val scrollState = rememberScrollState()
         Box(Modifier.verticalScroll(scrollState)) {
             ChooseAddressLayout(
+                walletsWithStates.value,
                 addressesList.value,
                 onChooseEntry,
                 onEditEntry,
-                onDismissRequest,
                 Application.texts
             )
         }

@@ -319,6 +319,8 @@
     <string name="error_no_mosaik_app">No wallet app plugin found at given address %1$s. Please check for misspellings.</string>
 
     <!-- Address book -->
+    <string name="label_own_addresses">Your addresses</string>
+    <string name="label_saved_addresses">Saved addresses</string>
     <string name="button_add_address_entry">Add new address entry…</string>
     <string name="label_no_entries">No entries yet</string>
 
