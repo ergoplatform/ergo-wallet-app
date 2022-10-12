@@ -20,9 +20,12 @@ import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.*
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
+import org.ergoplatform.android.addressbook.ChooseAddressDialogCallback
+import org.ergoplatform.android.addressbook.ChooseAddressDialogFragment
 import org.ergoplatform.android.databinding.FragmentSendFundsBinding
 import org.ergoplatform.android.databinding.FragmentSendFundsTokenItemBinding
 import org.ergoplatform.android.ui.*
+import org.ergoplatform.persistance.IAddressWithLabel
 import org.ergoplatform.persistance.TokenPrice
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.tokens.isSingularToken
@@ -35,7 +38,7 @@ import org.ergoplatform.wallet.isReadOnly
 /**
  * Here's the place to send transactions
  */
-class SendFundsFragment : SubmitTransactionFragment() {
+class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallback {
     private var _binding: FragmentSendFundsBinding? = null
     private val binding get() = _binding!!
     override lateinit var viewModel: SendFundsViewModel
@@ -141,6 +144,9 @@ class SendFundsFragment : SubmitTransactionFragment() {
 
         binding.buttonAddToken.setOnClickListener {
             ChooseTokenListDialogFragment().show(childFragmentManager, null)
+        }
+        binding.tvReceiver.setEndIconOnClickListener {
+            ChooseAddressDialogFragment().show(childFragmentManager, null)
         }
         binding.amount.setEndIconOnClickListener {
             setAmountEdittext(viewModel.uiLogic.getMaxPossibleAmountToSend())
@@ -400,6 +406,10 @@ class SendFundsFragment : SubmitTransactionFragment() {
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
+    }
+
+    override fun onAddressChosen(address: IAddressWithLabel) {
+        binding.tvReceiver.editText?.setText(address.address)
     }
 
     private fun qrCodeScanned(qrCode: String) {
