@@ -121,6 +121,7 @@ dependencies {
     implementation "androidx.compose.foundation:foundation:$compose_version"
     implementation "androidx.compose.foundation:foundation-layout:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
+    implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
     implementation "com.github.MrStahlfelge.mosaik:common-compose:$mosaik_version"
 
     testImplementation 'junit:junit:4.13.2'

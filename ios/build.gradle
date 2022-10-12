@@ -107,15 +107,8 @@ dependencies {
     implementation(project(path: ':common-jvm')){
         // normal compile no change iOS: 90 sec
         // exclude kiama, sigma-state, ergo-wallet: 20 sec
-        exclude group: 'org.scorexfoundation', module: 'sigma-state_2.11'
+        // exclude group: 'org.scorexfoundation', module: 'sigma-state_2.11'
         //exclude group: 'org.ergoplatform', module: 'ergo-wallet_2.11'
-    }
-
-    // TODO remove when appkit is updated with PR 189
-    implementation ('org.scorexfoundation:sigma-state_2.11:4.0.6-3-f601122c-SNAPSHOT') {
-        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
-        exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
-        exclude group: 'com.google.guava', module: 'guava'
     }
 
     implementation project(path: ':sqldelight')
