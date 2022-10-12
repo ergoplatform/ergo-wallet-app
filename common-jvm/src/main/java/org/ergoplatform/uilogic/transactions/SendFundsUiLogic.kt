@@ -120,7 +120,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 ergoApiService.getExpectedWaitTime(
                     feeAmount.nanoErgs,
                     feeTxSize
-                ).execute().body()
+                ).execute().body()?.toInt()
             } catch (t: Throwable) {
                 LogUtils.logDebug(
                     this.javaClass.simpleName,
