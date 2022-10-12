@@ -19,7 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.compose.settings.defaultPadding
-import org.ergoplatform.compose.settings.minIconSize
+import org.ergoplatform.compose.settings.smallIconSize
 import org.ergoplatform.mosaik.MiddleEllipsisText
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
@@ -50,7 +50,7 @@ fun ChooseAddressLayout(
 
         Text(
             remember { stringProvider.getString(STRING_LABEL_OWN_ADDRESSES) },
-            Modifier.padding(top = defaultPadding),
+            Modifier.padding(top = defaultPadding, bottom = defaultPadding / 2),
             style = labelStyle(LabelStyle.BODY1BOLD),
             color = MosaikStyleConfig.primaryLabelColor,
         )
@@ -61,7 +61,7 @@ fun ChooseAddressLayout(
             }
         }
 
-        Divider(Modifier.padding(vertical = defaultPadding * 2))
+        Divider(Modifier.padding(vertical = defaultPadding))
 
         Text(
             remember { stringProvider.getString(STRING_LABEL_SAVED_ADDRESSES) },
@@ -81,7 +81,7 @@ fun ChooseAddressLayout(
                     Modifier.combinedClickable(
                         onClick = { onChooseEntry(addressEntry) },
                         onLongClick = { onEditEntry(addressEntry) },
-                    ).padding(defaultPadding), addressEntry
+                    ).padding(defaultPadding / 2), addressEntry
                 )
             }
         }
@@ -134,30 +134,33 @@ fun WalletAddressesEntry(
 
     if (allAdresses.size == 1) {
         AddressEntry(
-            Modifier.clickable { onChooseEntry(allAdresses.first()) }.padding(defaultPadding),
+            Modifier.clickable { onChooseEntry(allAdresses.first()) }.padding(defaultPadding / 2),
             allAdresses.first(),
             wallet.walletConfig.displayName,
         )
     } else {
         Column(
-            Modifier.clickable {
-                expanded.value = !expanded.value
-            }.fillMaxWidth().padding(defaultPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                Modifier.clickable { expanded.value = !expanded.value }
+                    .fillMaxWidth().padding(defaultPadding / 2),
             ) {
-                Text(
-                    wallet.walletConfig.displayName ?: "",
-                    style = labelStyle(LabelStyle.BODY1BOLD),
-                    maxLines = 1
-                )
-                Icon(
-                    if (!expanded.value) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
-                    null,
-                    Modifier.requiredSize(minIconSize)
-                )
+                Row(
+                    Modifier.align(Alignment.Center),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        wallet.walletConfig.displayName ?: "",
+                        style = labelStyle(LabelStyle.BODY1BOLD),
+                        maxLines = 1
+                    )
+                    Icon(
+                        if (!expanded.value) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
+                        null,
+                        Modifier.requiredSize(smallIconSize).padding(start = defaultPadding / 4)
+                    )
+                }
             }
 
             AnimatedVisibility(expanded.value) {
