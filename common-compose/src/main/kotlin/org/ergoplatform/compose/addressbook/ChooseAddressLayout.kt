@@ -15,9 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import org.ergoplatform.addressbook.sortedByLabel
 import org.ergoplatform.compose.settings.defaultPadding
 import org.ergoplatform.compose.settings.smallIconSize
 import org.ergoplatform.mosaik.MiddleEllipsisText
@@ -42,6 +44,7 @@ fun ChooseAddressLayout(
     stringProvider: StringProvider,
 ) {
     val walletListSorted = remember(walletList) { walletList.sortedByDisplayName() }
+    val addressesListSorted = remember(addressesList) { addressesList.sortedByLabel() }
 
     Column(
         Modifier.fillMaxWidth().padding(defaultPadding),
@@ -75,7 +78,7 @@ fun ChooseAddressLayout(
             style = labelStyle(LabelStyle.BODY1BOLD),
         )
 
-        addressesList.forEach { addressEntry ->
+        addressesListSorted.forEach { addressEntry ->
             key(addressEntry.id) {
                 AddressEntry(
                     Modifier.combinedClickable(
@@ -129,7 +132,7 @@ fun WalletAddressesEntry(
     onChooseEntry: (IAddressWithLabel) -> Unit,
     stringProvider: StringProvider,
 ) {
-    val expanded = remember { mutableStateOf(false) }
+    val expanded = rememberSaveable { mutableStateOf(false) }
     val allAdresses = remember(wallet) { wallet.getSortedDerivedAddressesList() }
 
     if (allAdresses.size == 1) {
