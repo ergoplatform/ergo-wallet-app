@@ -5,9 +5,12 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.addressbook.getAddressLabel
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -80,7 +83,18 @@ class TransactionInfoFragment : Fragment() {
                             )
                         )
                     },
-                    layoutInflater
+                    layoutInflater,
+                    addressLabelHandler = { address, callback ->
+                        getContext()?.let { context ->
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                getAddressLabel(
+                                    AppDatabase.getInstance(context),
+                                    address,
+                                    AndroidStringProvider(context)
+                                )?.let { callback(it) }
+                            }
+                        }
+                    }
                 )
 
                 binding.layoutTxinfo.layoutTransition = LayoutTransition()
