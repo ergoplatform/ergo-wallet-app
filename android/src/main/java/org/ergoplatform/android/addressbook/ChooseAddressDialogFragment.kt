@@ -32,7 +32,9 @@ class ChooseAddressDialogFragment : AbstractComposeBottomSheetDialogFragment() {
                 (parentFragment as? ChooseAddressDialogCallback)?.onAddressChosen(it)
                 dismiss()
             },
-            onEditEntry = {},
+            onEditEntry = {
+                EditAddressDialogFragment.newInstance(it?.id ?: 0).show(parentFragmentManager, null)
+            },
             stringProvider = remember { AndroidStringProvider(context) }
         )
     }
