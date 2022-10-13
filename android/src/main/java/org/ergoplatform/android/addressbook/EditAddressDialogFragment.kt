@@ -31,7 +31,8 @@ class EditAddressDialogFragment : AbstractComposeBottomSheetDialogFragment() {
             viewModel.addressLiveData.observeAsState().value!!,
             stringProvider = remember { AndroidStringProvider(context) },
             viewModel.uiLogic,
-            onSaved = { dismiss() }
+            onDismiss = { dismiss() },
+            getAppDB = { AppDatabase.getInstance(context).addressBookDbProvider }
         )
     }
 

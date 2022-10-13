@@ -1,6 +1,8 @@
 package org.ergoplatform.uilogic.addressbook
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.isValidErgoAddress
 import org.ergoplatform.persistance.AddressBookDbProvider
@@ -14,6 +16,10 @@ abstract class EditAddressEntryUiLogic {
             notifyNewValue(value)
         }
 
+    val isAddressReadOnly: Boolean get() = addressEntry.id > 0
+
+    val canDeleteAddress: Boolean get() = addressEntry.id > 0
+
     fun init(addressId: Int, dbProvider: AddressBookDbProvider) {
         if (!initialized) {
             initialized = true
@@ -24,17 +30,41 @@ abstract class EditAddressEntryUiLogic {
         }
     }
 
-    fun saveAddressEntry(newLabel: String, newAddress: String): CheckCanSaveResponse {
+    @OptIn(DelicateCoroutinesApi::class)
+    fun saveAddressEntry(
+        newLabel: String,
+        newAddress: String,
+        dbProvider: AddressBookDbProvider
+    ): CheckCanSaveResponse {
         val addressOk = isValidErgoAddress(newAddress)
         val labelOk = newLabel.isNotBlank()
         val canSave = addressOk && labelOk
 
         if (canSave) {
-            // TODO save in db
-            // TODO check if already in AB, overwrite existing entry then
+            GlobalScope.launch {
+                val existingEntry =
+                    if (!isAddressReadOnly) dbProvider.findAddressEntry(newAddress) else null
+                val addressBookEntry = existingEntry ?: addressEntry
+
+                val toSave = AddressBookEntry(
+                    addressBookEntry.id,
+                    newLabel,
+                    newAddress,
+                    null
+                )
+
+                dbProvider.updateAddressEntry(toSave)
+            }
         }
 
         return CheckCanSaveResponse(canSave, !addressOk, !labelOk)
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun deleteAddress(dbProvider: AddressBookDbProvider) {
+        GlobalScope.launch {
+            dbProvider.deleteAddressEntry(addressEntry.id)
+        }
     }
 
     abstract fun coroutineScope(): CoroutineScope

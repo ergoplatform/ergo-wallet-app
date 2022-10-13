@@ -18,12 +18,15 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.addressbook.ChooseAddressDialog
+import org.ergoplatform.desktop.addressbook.DesktopEditEntryUiLogic
+import org.ergoplatform.desktop.addressbook.EditAddressDialog
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
+import org.ergoplatform.uilogic.addressbook.EditAddressEntryUiLogic
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.uilogic.transactions.SuggestedFee
 
@@ -61,6 +64,7 @@ class SendFundsComponent(
     private val tokensError = mutableStateOf(false)
     private val editFeeDialogState = mutableStateOf(false)
     private val chooseRecipientAddressDialog = mutableStateOf(false)
+    private val editAddressDialog = mutableStateOf<DesktopEditEntryUiLogic?>(null)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -107,7 +111,12 @@ class SendFundsComponent(
                 )
             }
 
-            if (chooseRecipientAddressDialog.value) {
+            if (editAddressDialog.value != null) {
+                EditAddressDialog(
+                    editAddressDialog.value!!,
+                    onDismissRequest = { editAddressDialog.value = null }
+                )
+            } else if (chooseRecipientAddressDialog.value) {
                 ChooseAddressDialog(
                     onChooseEntry = { addressWithLabel ->
                         chooseRecipientAddressDialog.value = false
@@ -115,7 +124,10 @@ class SendFundsComponent(
                         uiLogic.receiverAddress = addressWithLabel.address
                         recipientError.value = false
                     },
-                    onEditEntry = {}, // TODO
+                    onEditEntry = {
+                        editAddressDialog.value =
+                            DesktopEditEntryUiLogic(it) { componentScope() }
+                    },
                     onDismissRequest = { chooseRecipientAddressDialog.value = false }
                 )
             }
