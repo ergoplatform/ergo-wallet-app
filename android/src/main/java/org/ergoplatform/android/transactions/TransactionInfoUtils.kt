@@ -23,9 +23,10 @@ import org.ergoplatform.utils.millisecondsToLocalTime
 fun CardTransactionInfoBinding.bindTransactionInfo(
     ti: TransactionInfo,
     tokenClickListener: ((String) -> Unit)?,
-    layoutInflater: LayoutInflater
+    layoutInflater: LayoutInflater,
+    addressLabelHandler: ((String, ((String) -> Unit)) -> Unit)? = null
 ) =
-    bindTransactionInfo(ti, layoutInboxes, layoutOutboxes, tokenClickListener, layoutInflater)
+    bindTransactionInfo(ti, layoutInboxes, layoutOutboxes, tokenClickListener, layoutInflater, addressLabelHandler)
 
 fun bindTransactionInfo(
     ti: TransactionInfo,
