@@ -146,7 +146,9 @@ private fun MosaikAppList(
 
                         Text(
                             if (mosaikApp.description.isNullOrBlank()) mosaikApp.url else mosaikApp.description!!,
-                            style = labelStyle(LabelStyle.BODY1)
+                            style = labelStyle(LabelStyle.BODY1),
+                            maxLines = if (mosaikApp.description.isNullOrBlank()) 1 else 3,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }

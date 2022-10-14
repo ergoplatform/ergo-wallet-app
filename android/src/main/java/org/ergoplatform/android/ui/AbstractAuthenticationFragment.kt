@@ -2,7 +2,7 @@ package org.ergoplatform.android.ui
 
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.Fragment
-import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.R
 import org.ergoplatform.api.AesEncryptionManager
@@ -46,28 +46,23 @@ abstract class AbstractAuthenticationFragment : Fragment(), PasswordDialogCallba
                 try {
                     proceedAuthFlowFromBiometrics()
                 } catch (t: Throwable) {
-                    view?.let {
-                        Snackbar.make(
-                            it,
-                            getString(R.string.error_device_security, t.message),
-                            Snackbar.LENGTH_LONG
-                        ).show()
-                    }
+                    showBiometricPromptError(t.message ?: t.javaClass.simpleName)
                 }
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                view?.let {
-                    Snackbar.make(
-                        it,
-                        getString(R.string.error_device_security, errString),
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                }
+                showBiometricPromptError(errString.toString())
             }
         }
 
         BiometricPrompt(this, callback).authenticate(promptInfo)
+    }
+
+    private fun showBiometricPromptError(errorMessage: String) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage(getString(R.string.error_device_security, errorMessage))
+            .setPositiveButton(R.string.zxing_button_ok, null)
+            .show()
     }
 
     /**

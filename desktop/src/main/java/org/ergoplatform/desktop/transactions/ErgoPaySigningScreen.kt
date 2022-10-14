@@ -85,7 +85,7 @@ private fun BoxScope.ErgoPayTransactionInfoLayout(
         }
 
         AppCard(Modifier.fillMaxWidth()) {
-            TransactionInfoLayout(Modifier.padding(defaultPadding),
+            SignTransactionInfoLayout(Modifier.padding(defaultPadding),
                 uiLogic.transactionInfo!!.reduceBoxes(),
                 onConfirm = onConfirm,
                 onTokenClick = onTokenClick)

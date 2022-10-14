@@ -30,14 +30,13 @@ import org.ergoplatform.getExplorerTokenUrl
 import org.ergoplatform.getExplorerTxUrl
 import org.ergoplatform.mosaik.*
 import org.ergoplatform.mosaik.model.ui.ForegroundColor
-import org.ergoplatform.mosaik.model.ui.IconType
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.tokens.TokenInformationModelLogic
 
 @Composable
 fun TokenInformationScreen(
-    tokenInformation: TokenInformationComponent.DesktopTokenInformationLayoutLogic?,
+    tokenLayoutLogic: TokenInformationComponent.DesktopTokenInformationLayoutLogic?,
     infoLoading: Boolean,
     downloadState: TokenInformationModelLogic.StateDownload,
     startDownload: () -> Unit,
@@ -46,7 +45,7 @@ fun TokenInformationScreen(
         if (infoLoading) {
             AppProgressIndicator()
 
-        } else if (tokenInformation == null) {
+        } else if (tokenLayoutLogic == null || tokenLayoutLogic.tokenInformation == null) {
             Text(
                 remember { Application.texts.getString(STRING_LABEL_ERROR_FETCHING) },
                 Modifier.align(Alignment.Center).padding(horizontal = defaultPadding)
@@ -55,7 +54,7 @@ fun TokenInformationScreen(
         } else {
 
             TokenInfoLayout(
-                tokenInformation,
+                tokenLayoutLogic,
                 downloadState,
                 startDownload,
             )

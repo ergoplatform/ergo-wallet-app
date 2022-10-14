@@ -4,8 +4,10 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.MosaikViewGroupHolder
 import org.ergoplatform.mosaik.TreeElement
 import org.ergoplatform.mosaik.model.ui.layout.*
+import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
+import kotlin.math.max
 
 class BoxViewHolder(
     treeElement: TreeElement
@@ -175,7 +177,7 @@ class StackViewHolder(
 
     override fun isFillMaxWidth(): Boolean {
         val element = treeElement.element
-        return element is Row && !element.isPacked && weightSum > 0
+        return element is Row && !element.isPacked && weightSum > 0 || super.isFillMaxWidth()
     }
 
     private class UiViewWrapper : UIView(CGRect.Zero()) {
@@ -192,9 +194,121 @@ class StackViewHolder(
     }
 }
 
+class GridViewHolder(
+    treeElement: TreeElement
+) : UiViewHolder(GridWrapperStack(), treeElement), MosaikViewGroupHolder<UiViewHolder> {
+
+    private val verticalStack = uiView as GridWrapperStack
+    private val minColumnWidth = when ((treeElement.element as Grid).elementSize) {
+        Grid.ElementSize.MIN -> 180.0
+        Grid.ElementSize.SMALL -> 300.0
+        Grid.ElementSize.MEDIUM -> 420.0
+        Grid.ElementSize.LARGE -> 520.0
+    }
+
+    private var numColumns = 1
+    private val children = ArrayList<UiViewHolder>()
+    private val rowStacks = ArrayList<UIStackView>()
+
+    private fun changedWidth(width: Double) {
+        val newColumnCount = max(1, (width / minColumnWidth).toInt())
+        if (newColumnCount != numColumns) {
+            numColumns = newColumnCount
+            relayout()
+        }
+    }
+
+    private fun relayout() {
+        LogUtils.logDebug(this.javaClass.simpleName, "Relayouting $numColumns columns")
+        // remove everything
+        clearRows()
+
+        // add all children to their row
+        children.forEachIndexed { idx, child ->
+            val uiViewToAdd = child.uiView
+            if (numColumns > 1) {
+                val row = idx / numColumns
+                while (rowStacks.size <= row)
+                    addNewRow()
+
+                val rowStack = rowStacks[row]
+                rowStack.addArrangedSubview(uiViewToAdd)
+            } else {
+                verticalStack.addArrangedSubview(uiViewToAdd)
+            }
+        }
+
+        // add empty views in last row
+        val lastLineElementNum = children.size % numColumns
+        if (lastLineElementNum > 0) {
+            for (i in 1..numColumns - lastLineElementNum) {
+                rowStacks[rowStacks.size - 1].addArrangedSubview(UIView(CGRect.Zero()))
+            }
+        }
+    }
+
+    private fun addNewRow() {
+        val newStack = UIStackView().apply {
+            axis = UILayoutConstraintAxis.Horizontal
+            distribution = UIStackViewDistribution.FillEqually
+        }
+        verticalStack.addArrangedSubview(newStack)
+        rowStacks.add(newStack)
+    }
+
+    override fun addSubView(subviewHolder: UiViewHolder) {
+        children.add(subviewHolder)
+        if (children.size == treeElement.children.size)
+            relayout()
+    }
+
+    override fun removeAllChildren() {
+        clearRows()
+        children.clear()
+    }
+
+    private fun clearRows() {
+        rowStacks.forEach { it.clearArrangedSubviews() }
+        verticalStack.clearArrangedSubviews()
+        rowStacks.clear()
+    }
+
+    override fun replaceSubView(oldView: UiViewHolder, newView: UiViewHolder) {
+        val idx = children.indexOf(oldView)
+        if (idx >= 0) {
+            children[idx] = newView
+            relayout()
+        }
+    }
+
+    override fun isFillMaxWidth(): Boolean = true
+
+    override fun onAddedToSuperview() {
+        super.onAddedToSuperview()
+        verticalStack.parentHolder = this
+    }
+
+    private class GridWrapperStack : UIStackView(CGRect.Zero()) {
+        init {
+            if (debugModeColors) backgroundColor = UIColor.green()
+            layoutMargins = UIEdgeInsets.Zero()
+            axis = UILayoutConstraintAxis.Vertical
+            isLayoutMarginsRelativeArrangement = true
+        }
+
+        var parentHolder: GridViewHolder? = null
+
+        override fun setBounds(v: CGRect) {
+            super.setBounds(v)
+
+            parentHolder?.changedWidth(v.size.width)
+        }
+    }
+}
+
 class SeparatorHolder(
     treeElement: TreeElement,
-): UiViewHolder(
+) : UiViewHolder(
     UIView(CGRect.Zero()),
     treeElement
 ) {

@@ -1,9 +1,6 @@
 package org.ergoplatform.ios.mosaik
 
-import org.ergoplatform.ios.ui.bottomToSuperview
-import org.ergoplatform.ios.ui.centerHorizontal
-import org.ergoplatform.ios.ui.centerVertical
-import org.ergoplatform.ios.ui.topToSuperview
+import org.ergoplatform.ios.ui.*
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.MosaikViewHolderManager
 import org.ergoplatform.mosaik.model.MosaikManifest
@@ -56,7 +53,9 @@ class MosaikView(
             rootViewHolderManager = null
         } else if (rootViewHolderManager == null) {
             rootViewHolderManager = MosaikViewHolderManager(rootElement, MosaikViewCommon::buildUiViewHolder)
-            setRootView(rootViewHolderManager!!.mosaikViewHolder)
+            val mosaikViewHolder = rootViewHolderManager!!.mosaikViewHolder
+            setRootView(mosaikViewHolder)
+            mosaikViewHolder.onAddedToSuperview()
             rootViewHolderManager?.updateChildren(true)
         } else {
             rootViewHolderManager?.updateView(rootElement, replaceOnParent = { _, newViewHolder ->

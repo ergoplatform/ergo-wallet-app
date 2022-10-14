@@ -51,6 +51,8 @@ object MosaikViewCommon {
 
             is MarkDown -> MarkDownHolder(treeElement)
 
+            is Grid -> GridViewHolder(treeElement)
+
             else -> {
                 UiViewHolder(Body1Label().apply {
                     text = "Unsupported element: ${mosaikViewElement.javaClass.simpleName}"
@@ -92,22 +94,33 @@ object MosaikViewCommon {
         return uiViewHolder
     }
 
+    /**
+     * returns true if the element is not only to be maximized within its parent, but should
+     * make its parent maximize in its parent and so on
+     */
+    fun shouldExpandElement(element: ViewElement): Boolean =
+        element is Grid
+                || element is ViewGroup && element.children.find { shouldExpandElement(it) } != null
 }
 
-open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement): MosaikViewHolder {
+open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) : MosaikViewHolder {
+    protected fun viewCoroutineScope() =
+        (treeElement.viewTree.mosaikRuntime as MosaikViewController.IosMosaikRuntime).viewController.viewControllerScope
+
     override fun resourceBytesAvailable(bytes: ByteArray) {
     }
 
     override fun onAddedToSuperview() {
         if (isFillMaxWidth()) {
-            uiView.widthMatchesSuperview()
+            // lower priority to not overrule max width constraints
+            uiView.widthMatchesSuperview(priority = iosDefaultPriority - 1)
         }
     }
 
     override fun onRemovedFromSuperview() {
     }
 
-    open fun isFillMaxWidth(): Boolean = false
+    open fun isFillMaxWidth(): Boolean = MosaikViewCommon.shouldExpandElement(treeElement.element)
 
     open val handlesClicks: Boolean = false
 }

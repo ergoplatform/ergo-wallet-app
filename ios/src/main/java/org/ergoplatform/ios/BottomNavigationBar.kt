@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
 import org.ergoplatform.ios.mosaik.AppOverviewViewController
+import org.ergoplatform.ios.mosaik.MosaikViewController
 import org.ergoplatform.ios.settings.SettingsViewController
 import org.ergoplatform.ios.transactions.ChooseSpendingWalletViewController
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
@@ -124,6 +125,10 @@ class BottomNavigationBar : UITabBarController() {
             navigateToAuthentication = { request ->
                 navigateToWalletListAndPushVc(ErgoAuthenticationViewController(request, null), true)
             },
+            navigateToMosaikApp = { url ->
+                selectedViewController = viewControllers[1]
+                popToRootAndPushVc(MosaikViewController(url, null), true)
+            },
             presentUserMessage = { message ->
                 presentViewController(buildSimpleAlertController("", message, texts), true) {}
             })
@@ -133,6 +138,10 @@ class BottomNavigationBar : UITabBarController() {
         // set view to first controller (wallet list), go back to its root and switch to the
         // wallet's send funds screen
         selectedViewController = viewControllers.first()
+        popToRootAndPushVc(vc, animated)
+    }
+
+    private fun popToRootAndPushVc(vc: UIViewController, animated: Boolean) {
         (selectedViewController as? UINavigationController)?.apply {
             popToRootViewController(false)
             pushViewController(vc, animated)

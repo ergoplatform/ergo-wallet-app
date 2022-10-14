@@ -77,6 +77,9 @@ class AddressTransactionsComponent(
             wallet!!,
             shownAddress!!,
             onChooseAddressClicked = { chooseAddressDialog.value = true },
+            onTransactionClicked = { addressTx ->
+                router.push(ScreenConfig.TransactionInfo(addressTx.txId, addressTx.address))
+            },
             onTokenClicked = { router.push(ScreenConfig.TokenInformation(it)) }
         )
 

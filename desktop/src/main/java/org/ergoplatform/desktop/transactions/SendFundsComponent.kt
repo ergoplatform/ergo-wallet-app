@@ -7,6 +7,7 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.TextFieldValue
@@ -23,6 +24,7 @@ import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
+import org.ergoplatform.uilogic.transactions.SuggestedFee
 
 class SendFundsComponent(
     componentContext: ComponentContext,
@@ -56,6 +58,7 @@ class SendFundsComponent(
     private val addTokenDialogState = mutableStateOf(false)
     private val tokensChosenState = mutableStateOf(emptyList<String>())
     private val tokensError = mutableStateOf(false)
+    private val editFeeDialogState = mutableStateOf(false)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -78,6 +81,10 @@ class SendFundsComponent(
                 },
                 onSendClicked = { checkAndStartPayment() },
                 onChooseAddressClicked = { startChooseAddress(true) },
+                onChooseFeeClicked = {
+                    editFeeDialogState.value = true
+                    uiLogic.fetchSuggestedFeeData(ApiServiceManager.getOrInit(Application.prefs))
+                },
             )
 
             if (addTokenDialogState.value) {
@@ -86,6 +93,14 @@ class SendFundsComponent(
                     uiLogic.tokensInfo,
                     onTokenChosen = { uiLogic.newTokenChosen(it.tokenId!!) },
                     onDismissRequest = { addTokenDialogState.value = false }
+                )
+            }
+
+            if (editFeeDialogState.value) {
+                ChooseFeeDialog(
+                    uiLogic,
+                    editableFeeList.value,
+                    onDismissRequest = { editFeeDialogState.value = false }
                 )
             }
 
@@ -149,7 +164,7 @@ class SendFundsComponent(
         }
 
         override fun onNotifySuggestedFees() {
-            TODO("Editable fee not implemented")
+            editableFeeList.value = suggestedFeeItems
         }
 
         override val coroutineScope: CoroutineScope
@@ -190,6 +205,8 @@ class SendFundsComponent(
 
     private val amountToSend = mutableStateOf(TextFieldValue(uiLogic.inputAmountString))
     private val recipientAddress = mutableStateOf(TextFieldValue(uiLogic.receiverAddress))
+    private val editableFeeList: MutableState<List<SuggestedFee>> =
+        mutableStateOf(uiLogic.suggestedFeeItems)
 
 }
 

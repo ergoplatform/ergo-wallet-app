@@ -184,13 +184,12 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
         // set up Compose view
         MosaikComposeConfig.apply {
             val dpToPx = binding.root.resources.displayMetrics.density
-            val minPixelSize = (300 * dpToPx).toInt()
             scrollMinAlpha = 0f
-            convertByteArrayToImageBitmap = { byteArray ->
+            convertByteArrayToImageBitmap = { byteArray, pixelSize ->
                 decodeSampledBitmapFromByteArray(
                     byteArray,
-                    minPixelSize,
-                    minPixelSize
+                    pixelSize,
+                    pixelSize
                 ).asImageBitmap()
             }
             qrCodeSize = 250.dp

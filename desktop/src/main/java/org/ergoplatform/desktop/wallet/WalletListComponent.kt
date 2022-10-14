@@ -210,6 +210,9 @@ class WalletListComponent(
             navigateToAuthentication = { authRequest ->
                 router.push(ScreenConfig.ErgoAuth(authRequest, null))
             },
+            navigateToMosaikApp = { url ->
+                router.push(ScreenConfig.MosaikApp(null, url))
+            },
             presentUserMessage = { message ->
                 navHost.showErrorDialog(message)
             }
