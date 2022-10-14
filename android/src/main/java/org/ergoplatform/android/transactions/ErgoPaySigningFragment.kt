@@ -9,7 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.launch
-import org.ergoplatform.addressbook.getAddressLabel
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -243,7 +243,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
             layoutInflater,
             addressLabelHandler = { address, callback ->
                 viewLifecycleOwner.lifecycleScope.launch {
-                    getAddressLabel(
+                    getAddressLabelFromDatabase(
                         AppDatabase.getInstance(context),
                         address,
                         AndroidStringProvider(context)

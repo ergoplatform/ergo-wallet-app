@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TokenAmount
-import org.ergoplatform.addressbook.getAddressLabel
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.desktop.tokens.TokenEntryView
 import org.ergoplatform.desktop.ui.ErgoAddressText
 import org.ergoplatform.desktop.ui.defaultPadding
@@ -224,7 +224,7 @@ fun TransactionInfoBox(
 ) {
     val addressLabelState = remember(address) { mutableStateOf<String?>(null) }
     LaunchedEffect(address) {
-        getAddressLabel(Application.database, address, Application.texts)?.let {
+        getAddressLabelFromDatabase(Application.database, address, Application.texts)?.let {
             addressLabelState.value = it
         }
     }

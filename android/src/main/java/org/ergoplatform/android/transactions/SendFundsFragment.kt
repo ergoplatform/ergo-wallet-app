@@ -20,7 +20,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.*
-import org.ergoplatform.addressbook.getAddressLabel
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -414,7 +414,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
         if (recipientAddress.isNotBlank()) {
             viewLifecycleOwner.lifecycleScope.launch {
                 val context = requireContext()
-                getAddressLabel(
+                getAddressLabelFromDatabase(
                     AppDatabase.getInstance(context),
                     recipientAddress,
                     AndroidStringProvider(context)

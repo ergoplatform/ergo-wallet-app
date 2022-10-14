@@ -10,7 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
-import org.ergoplatform.addressbook.getAddressLabel
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -87,7 +87,7 @@ class TransactionInfoFragment : Fragment() {
                     addressLabelHandler = { address, callback ->
                         getContext()?.let { context ->
                             viewLifecycleOwner.lifecycleScope.launch {
-                                getAddressLabel(
+                                getAddressLabelFromDatabase(
                                     AppDatabase.getInstance(context),
                                     address,
                                     AndroidStringProvider(context)

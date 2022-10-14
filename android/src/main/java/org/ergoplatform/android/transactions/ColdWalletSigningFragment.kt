@@ -14,7 +14,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.launch
 import org.ergoplatform.SigningSecrets
-import org.ergoplatform.addressbook.getAddressLabel
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
@@ -171,7 +171,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             binding.transactionInfo.bindTransactionInfo(it, null, layoutInflater,
                 addressLabelHandler = { address, callback ->
                     viewLifecycleOwner.lifecycleScope.launch {
-                        getAddressLabel(
+                        getAddressLabelFromDatabase(
                             AppDatabase.getInstance(context),
                             address,
                             AndroidStringProvider(context)

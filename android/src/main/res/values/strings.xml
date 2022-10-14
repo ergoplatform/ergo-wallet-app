@@ -327,6 +327,7 @@
     <string name="label_descriptive_address_name">Descriptive address name</string>
     <string name="label_erg_address">Ergo address</string>
     <string name="button_save">Save</string>
+    <string name="label_address_tx_fee">Transaction fee</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>

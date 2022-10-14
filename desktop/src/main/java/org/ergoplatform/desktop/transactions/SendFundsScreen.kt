@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.URL_COLD_WALLET_HELP
 import org.ergoplatform.WalletStateSyncManager
-import org.ergoplatform.addressbook.getAddressLabel
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.compose.settings.appTextFieldColors
 import org.ergoplatform.compose.settings.primaryButtonColors
 import org.ergoplatform.compose.settings.secondaryButtonColors
@@ -110,7 +110,7 @@ fun SendFundsScreen(
                     mutableStateOf<String?>(null)
                 }
                 LaunchedEffect(recipientAddressString) {
-                    getAddressLabel(
+                    getAddressLabelFromDatabase(
                         Application.database,
                         recipientAddressString,
                         Application.texts
