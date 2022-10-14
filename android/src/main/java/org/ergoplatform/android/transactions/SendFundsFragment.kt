@@ -10,14 +10,18 @@ import android.view.*
 import android.widget.EditText
 import androidx.core.view.descendants
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
+import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.*
+import org.ergoplatform.addressbook.getAddressLabel
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.addressbook.ChooseAddressDialogCallback
@@ -97,7 +101,8 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
             binding.tvFee.text =
                 viewModel.uiLogic.getFeeDescriptionLabel(AndroidStringProvider(requireContext()))
             binding.grossAmount.setAmount(grossAmount.toBigDecimal())
-            val otherCurrency = viewModel.uiLogic.getOtherCurrencyLabel(AndroidStringProvider(requireContext()))
+            val otherCurrency =
+                viewModel.uiLogic.getOtherCurrencyLabel(AndroidStringProvider(requireContext()))
             binding.tvFiat.visibility =
                 if (otherCurrency != null) View.VISIBLE else View.GONE
             binding.tvFiat.setText(otherCurrency)
@@ -146,7 +151,10 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
             ChooseTokenListDialogFragment().show(childFragmentManager, null)
         }
         binding.tvReceiver.setEndIconOnClickListener {
-            ChooseAddressDialogFragment().show(childFragmentManager, null)
+            if (!tvReceiverShowsLabel)
+                ChooseAddressDialogFragment().show(childFragmentManager, null)
+            else
+                setReceiverText("")
         }
         binding.amount.setEndIconOnClickListener {
             setAmountEdittext(viewModel.uiLogic.getMaxPossibleAmountToSend())
@@ -180,7 +188,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
         }
 
         // Init other stuff
-        binding.tvReceiver.editText?.setText(viewModel.uiLogic.receiverAddress)
+        setReceiverText(viewModel.uiLogic.receiverAddress)
         binding.tiMessage.editText?.setText(viewModel.uiLogic.message)
 
         if (Preferences(requireContext()).isSendInputFiatAmount != viewModel.uiLogic.inputIsFiat) {
@@ -386,9 +394,46 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
         else getString(R.string.label_amount)
     }
 
+    private var tvReceiverShowsLabel = false
+        set(value) {
+            field = value
+            binding.tvReceiver.editText?.isEnabled = !value
+            binding.tvReceiver.setEndIconDrawable(
+                if (value) R.drawable.ic_close_24 else R.drawable.ic_perm_contact_24
+            )
+        }
+
+    private fun setReceiverText(recipientAddress: String) {
+        tvReceiverShowsLabel = false
+        binding.tvReceiver.editText?.setText(recipientAddress)
+        checkRecipientLabel()
+    }
+
+    private fun checkRecipientLabel() {
+        val recipientAddress = viewModel.uiLogic.receiverAddress
+        if (recipientAddress.isNotBlank()) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val context = requireContext()
+                getAddressLabel(
+                    AppDatabase.getInstance(context),
+                    recipientAddress,
+                    AndroidStringProvider(context)
+                )?.let {
+                    if (viewModel.uiLogic.receiverAddress == recipientAddress) {
+                        tvReceiverShowsLabel = true
+                        binding.tvReceiver.editText?.setText(it)
+                    }
+                }
+            }
+        }
+    }
+
     private fun inputChangesToViewModel() {
         val uiLogic = viewModel.uiLogic
-        uiLogic.receiverAddress = binding.tvReceiver.editText?.text?.toString() ?: ""
+        if (!tvReceiverShowsLabel) {
+            uiLogic.receiverAddress = binding.tvReceiver.editText?.text?.toString() ?: ""
+            checkRecipientLabel()
+        }
         uiLogic.message = binding.tiMessage.editText?.text?.toString() ?: ""
 
         val input = binding.amount.editText?.text.toString()
@@ -409,7 +454,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
     }
 
     override fun onAddressChosen(address: IAddressWithLabel) {
-        binding.tvReceiver.editText?.setText(address.address)
+        setReceiverText(address.address)
     }
 
     private fun qrCodeScanned(qrCode: String) {
@@ -433,7 +478,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
                 )
             },
             setPaymentRequestDataToUi = { address, amount, message ->
-                binding.tvReceiver.editText?.setText(address)
+                setReceiverText(address)
                 amount?.let { setAmountEdittext(amount) }
                 message?.let { binding.tiMessage.editText?.setText(message) }
             })
