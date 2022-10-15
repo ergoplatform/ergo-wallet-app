@@ -38,6 +38,7 @@ class MosaikViewModel : ViewModel() {
     private var ergoPayOnFinishedActionId: String? = null
     private var ergoAuthOnFinishedActionId: String? = null
     private var scanQrCodeActionId: String? = null
+    var chooseAddressFromAddressbookId: String? = null
 
     val mosaikRuntime = object : AppMosaikRuntime(
         "Ergo Wallet App (Android)",
@@ -103,7 +104,7 @@ class MosaikViewModel : ViewModel() {
             showWalletChooserEvent.postValue(System.currentTimeMillis())
         }
 
-        override fun startAddressChooser() {
+        override fun startAddressIdxChooser() {
             showAddressChooserEvent.postValue(System.currentTimeMillis())
         }
     }

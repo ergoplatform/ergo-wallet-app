@@ -247,7 +247,7 @@ class MosaikViewController(
             ) {}
         }
 
-        override fun startAddressChooser() {
+        override fun startAddressIdxChooser() {
             presentViewController(
                 ChooseAddressListDialogViewController(walletForAddressChooser!!.walletConfig.id, false) {
                     onAddressChosen(it!!)

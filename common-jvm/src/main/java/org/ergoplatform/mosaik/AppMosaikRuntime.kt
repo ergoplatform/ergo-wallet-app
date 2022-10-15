@@ -4,17 +4,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.isValidErgoAddress
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
-import org.ergoplatform.persistance.*
+import org.ergoplatform.persistance.CacheFileManager
+import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.utils.getHostname
 import org.ergoplatform.utils.normalizeUrl
-import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getDerivedAddress
 import org.ergoplatform.wallet.getSortedDerivedAddressesList
 import java.math.BigDecimal
@@ -209,23 +212,8 @@ abstract class AppMosaikRuntime(
             walletConfig?.displayName
         }
 
-    override fun getErgoAddressLabel(ergoAddress: String): String? =
-    // TODO Mosaik runblocking here works because db is fast and Compose implementation
-        //  remembers - but used addresses should be cached or loaded beforehand
-        runBlocking {
-            val derivedAddress =
-                guidManager.appDatabase.walletDbProvider.loadWalletAddress(ergoAddress)
-
-            val walletConfig = guidManager.appDatabase.walletDbProvider.loadWalletByFirstAddress(
-                derivedAddress?.walletFirstAddress ?: ergoAddress
-            )
-
-            walletConfig?.let {
-                (walletConfig.displayName?.let { "$it - " } ?: "") +
-                        (derivedAddress ?: WalletAddress(0, ergoAddress, 0, ergoAddress, null))
-                            .getAddressLabel(stringProvider)
-            }
-        }
+    override suspend fun getErgoAddressLabel(ergoAddress: String): String? =
+        getAddressLabelFromDatabase(guidManager.appDatabase, ergoAddress, stringProvider)
 
     override fun isErgoAddressValid(ergoAddress: String): Boolean =
         isValidErgoAddress(ergoAddress)
@@ -271,7 +259,7 @@ abstract class AppMosaikRuntime(
     var walletForAddressChooser: Wallet? = null
         private set
 
-    abstract fun startAddressChooser()
+    abstract fun startAddressIdxChooser()
 
     fun onWalletChosen(wallet: Wallet) {
         valueIdWalletChosen?.let { valueId ->
@@ -287,7 +275,7 @@ abstract class AppMosaikRuntime(
             if (addresses.size == 1)
                 onAddressChosen(addresses.first().derivationIndex)
             else {
-                startAddressChooser()
+                startAddressIdxChooser()
             }
         }
     }
