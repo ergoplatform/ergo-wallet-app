@@ -63,8 +63,7 @@ open class ApiServiceManager(
         limit: Int,
         offset: Int
     ): Call<Items<TransactionInfo>> =
-        // TODO concise should be true when https://github.com/ergoplatform/explorer-backend/issues/193 is fixed
-        defaultApi.getApiV1AddressesP1Transactions(publicAddress, offset, limit, false)
+        defaultApi.getApiV1AddressesP1Transactions(publicAddress, offset, limit, true)
 
     override fun checkToken(tokenId: String, tokenName: String): Call<TokenCheckResponse> =
         tokenVerificationApi.checkToken(tokenId, tokenName.replace("/", "-").replace("|", "-"))
