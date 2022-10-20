@@ -2,6 +2,7 @@ package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.*
+import org.ergoplatform.ios.addressbook.ChooseAddressDialogViewController
 import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.TransactionResult
@@ -70,8 +71,7 @@ class SendFundsViewController(
                         ), true
                     )
                 }, { address, amount, message ->
-                    inputReceiver.text = address
-                    inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
+                    setReceiverText(address)
                     amount?.let { setInputAmount(amount) }
                     message?.let {
                         inputMessage.text = message
@@ -116,6 +116,18 @@ class SendFundsViewController(
                 setHasError(false)
                 uiLogic.receiverAddress = text
             }
+
+            setCustomActionField(
+                getIosSystemImage(
+                    IMAGE_ADDRESSBOOK,
+                    UIImageSymbolScale.Small
+                )!!
+            ) {
+                presentViewController(ChooseAddressDialogViewController { addressWithLabel ->
+                    setReceiverText(addressWithLabel.address)
+                }, true) {}
+            }
+
         }
 
         inputMessage = EndIconTextField().apply {
@@ -277,6 +289,11 @@ class SendFundsViewController(
             uiLogic.switchInputAmountMode()
         }
         setInputAmountLabel()
+    }
+
+    private fun setReceiverText(address: String) {
+        inputReceiver.text = address
+        inputReceiver.sendControlEventsActions(UIControlEvents.EditingChanged)
     }
 
     private fun showPurposeMessageInfoDialog(startPayment: Boolean = false) {
