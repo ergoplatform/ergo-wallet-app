@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,6 +17,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
+import org.ergoplatform.compose.settings.AppButton
 import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.secondaryButtonColors
 import org.ergoplatform.desktop.appVersionString
@@ -97,6 +100,60 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Text(currencyButtonTextState.value)
+                        }
+                    }
+
+                }
+
+                // NFT settings
+                AppCard(
+                    Modifier.widthIn(max = defaultMaxWidth).align(Alignment.CenterHorizontally)
+                        .padding(top = defaultPadding)
+                ) {
+                    Column(Modifier.padding(defaultPadding)) {
+                        Text(
+                            remember { Application.texts.getString(STRING_DESC_TOKEN_SETTINGS) },
+                            Modifier.align(Alignment.CenterHorizontally)
+                                .padding(bottom = defaultPadding),
+                            style = labelStyle(LabelStyle.BODY1BOLD),
+                        )
+
+                        LinkifyText(
+                            Application.texts.getString(STRING_DESC_TOKEN_VERIFICATION),
+                            Modifier.padding(defaultPadding / 2)
+                                .align(Alignment.CenterHorizontally),
+                            style = labelStyle(LabelStyle.BODY1),
+                            textAlignment = TextAlign.Center,
+                            isHtml = true
+                        )
+
+                        Divider(
+                            Modifier.padding(vertical = defaultPadding),
+                            color = MosaikStyleConfig.secondaryLabelColor
+                        )
+
+                        Text(
+                            remember { Application.texts.getString(STRING_DESC_DOWNLOAD_CONTENT) },
+                            Modifier.fillMaxWidth().padding(defaultPadding / 2),
+                            textAlign = TextAlign.Center
+                        )
+
+                        val isDownloadContentState =
+                            remember { mutableStateOf(Application.prefs.downloadNftContent) }
+                        AppButton(
+                            {
+                                isDownloadContentState.value = !isDownloadContentState.value
+                                Application.prefs.downloadNftContent = isDownloadContentState.value
+                            },
+                            Modifier.align(Alignment.CenterHorizontally),
+                            colors = secondaryButtonColors(),
+                        ) {
+                            Text(
+                                Application.texts.getString(
+                                    if (isDownloadContentState.value) STRING_BUTTON_DOWNLOAD_CONTENT_OFF
+                                    else STRING_BUTTON_DOWNLOAD_CONTENT_ON
+                                )
+                            )
                         }
                     }
 

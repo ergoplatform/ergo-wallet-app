@@ -18,9 +18,11 @@ import com.arkivanov.decompose.router.navigate
 import com.arkivanov.decompose.router.router
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.ergoplatform.Application
+import org.ergoplatform.desktop.ergoauth.ErgoAuthComponent
 import org.ergoplatform.desktop.mosaik.MosaikAppComponent
 import org.ergoplatform.desktop.mosaik.MosaikOverviewComponent
 import org.ergoplatform.desktop.settings.SettingsComponent
+import org.ergoplatform.desktop.tokens.TokenInformationComponent
 import org.ergoplatform.desktop.transactions.*
 import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.AppLockScreen
@@ -143,6 +145,15 @@ class NavHostComponent(
                     this
                 )
 
+            is ScreenConfig.ErgoAuth ->
+                ErgoAuthComponent(
+                    screenConfig.request,
+                    screenConfig.walletId,
+                    screenConfig.onCompleted,
+                    componentContext,
+                    this
+                )
+
             is ScreenConfig.SendFunds -> SendFundsComponent(
                 componentContext, this,
                 screenConfig.walletConfig,
@@ -152,6 +163,14 @@ class NavHostComponent(
 
             is ScreenConfig.ReceiveToWallet -> ReceiveToWalletComponent(
                 componentContext, this, screenConfig.walletConfig, screenConfig.addressIdx
+            )
+
+            is ScreenConfig.TransactionInfo -> TransactionInfoComponent(
+                screenConfig.txId, screenConfig.address, componentContext, this
+            )
+
+            is ScreenConfig.TokenInformation -> TokenInformationComponent(
+                componentContext, this, screenConfig.tokenId, screenConfig.balance
             )
 
             is ScreenConfig.QrCodeScanner -> QrScannerComponent(

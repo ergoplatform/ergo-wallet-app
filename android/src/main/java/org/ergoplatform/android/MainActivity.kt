@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -50,6 +51,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        // removes pending notifications from system bar
+        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_SYNC)
+    }
+
     fun scanQrCode() {
         IntentIntegrator(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
     }
@@ -92,6 +100,11 @@ class MainActivity : AppCompatActivity() {
                     WalletFragmentDirections.actionNavigationWalletToErgoAuthFragment(
                         it
                     )
+                )
+            },
+            navigateToMosaikApp = { url ->
+                navController.navigate(
+                    WalletFragmentDirections.actionNavigationWalletToMosaikFragment(url, null)
                 )
             },
             presentUserMessage = {

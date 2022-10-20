@@ -42,7 +42,7 @@ class EndIconTextField: UITextField(CGRect.Zero()) {
         val customIcon = UIImageView(image)
         customIcon.tintColor = tintColor
         customIcon.contentMode = UIViewContentMode.Center
-        val iconContainer = UIView(CGRect(0.0, 0.0, 35.0, 30.0))
+        val iconContainer = UIView(CGRect(0.0, 0.0, 5.0 + image.size.width, image.size.height))
         iconContainer.addSubview(customIcon)
         return iconContainer
     }

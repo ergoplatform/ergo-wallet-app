@@ -60,11 +60,12 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
 
             if (state == ErgoAuthUiLogic.State.DONE) {
                 refreshDoneScreen()
-                parentFragmentManager.setFragmentResult(
-                    ergoAuthActionRequestKey, bundleOf(
-                        ergoAuthActionCompletedBundleKey to true
+                if (viewModel.uiLogic.getDoneSeverity() != MessageSeverity.ERROR)
+                    parentFragmentManager.setFragmentResult(
+                        ergoAuthActionRequestKey, bundleOf(
+                            ergoAuthActionCompletedBundleKey to true
+                        )
                     )
-                )
             } else if (state == ErgoAuthUiLogic.State.WAIT_FOR_AUTH)
                 refreshAuthPrompt()
         }

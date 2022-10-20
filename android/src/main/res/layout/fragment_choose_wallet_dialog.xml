@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     tools:background="?attr/colorSurface">
 
     <androidx.core.widget.NestedScrollView
@@ -19,4 +18,16 @@
             android:orientation="vertical"
             android:showDividers="middle" />
     </androidx.core.widget.NestedScrollView>
-</LinearLayout>
+
+    <TextView
+        android:id="@+id/empty_view"
+        style="@style/TextAppearance.App.Body1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="@dimen/margin_and_half"
+        android:layout_marginVertical="40dp"
+        android:text="@string/error_no_wallet"
+        android:textAlignment="center"
+        android:visibility="gone" />
+</FrameLayout>

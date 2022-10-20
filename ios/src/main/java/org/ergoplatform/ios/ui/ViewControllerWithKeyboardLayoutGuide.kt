@@ -14,7 +14,7 @@ open class ViewControllerWithKeyboardLayoutGuide : CoroutineViewController() {
         keyboardLayoutGuide = UILayoutGuide()
         keyboardHeightConstraint = keyboardLayoutGuide.heightAnchor.equalTo(0.0)
 
-        container = UIView()
+        container = UIView().apply { layoutMargins = UIEdgeInsets.Zero() }
         view.addSubview(container)
         container.edgesToSuperview()
         container.addLayoutGuide(keyboardLayoutGuide)

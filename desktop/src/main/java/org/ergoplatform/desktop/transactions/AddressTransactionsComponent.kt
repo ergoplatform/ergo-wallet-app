@@ -9,12 +9,14 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.push
 import com.arkivanov.essenty.lifecycle.doOnResume
 import kotlinx.coroutines.runBlocking
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressesListDialog
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
@@ -75,6 +77,10 @@ class AddressTransactionsComponent(
             wallet!!,
             shownAddress!!,
             onChooseAddressClicked = { chooseAddressDialog.value = true },
+            onTransactionClicked = { addressTx ->
+                router.push(ScreenConfig.TransactionInfo(addressTx.txId, addressTx.address))
+            },
+            onTokenClicked = { router.push(ScreenConfig.TokenInformation(it)) }
         )
 
         if (chooseAddressDialog.value) {

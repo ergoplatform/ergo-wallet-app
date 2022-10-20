@@ -37,7 +37,6 @@ import org.ergoplatform.mosaik.MosaikComposeConfig
 import org.ergoplatform.mosaik.MosaikViewTree
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.persistance.WalletConfig
-import org.ergoplatform.wallet.getNumOfAddresses
 
 class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback {
     private var _binding: FragmentMosaikBinding? = null
@@ -126,9 +125,15 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 binding.textNoApp.text = viewModel.mosaikRuntime.getUserErrorMessage(errorCause)
             }
         }
-        viewModel.showWalletOrAddressChooserEvent.observe(viewLifecycleOwner) { valueId ->
+        viewModel.showWalletChooserEvent.observe(viewLifecycleOwner) { valueId ->
             valueId?.let {
                 ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
+            }
+        }
+        viewModel.showAddressChooserEvent.observe(viewLifecycleOwner) { valueId ->
+            valueId?.let {
+                ChooseAddressListDialogFragment.newInstance(viewModel.mosaikRuntime.walletForAddressChooser!!.walletConfig.id)
+                    .show(childFragmentManager, null)
             }
         }
         viewModel.ergoPayActionEvent.observe(viewLifecycleOwner) { ergoPayAction ->
@@ -167,7 +172,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
 
         // click listeners
         binding.buttonNoApp.setOnClickListener {
-            viewModel.retryLoading(args.url)
+            viewModel.retryLoading()
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.mosaikRuntime.viewTree.uiLockedState.collect { locked ->
@@ -179,13 +184,12 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
         // set up Compose view
         MosaikComposeConfig.apply {
             val dpToPx = binding.root.resources.displayMetrics.density
-            val minPixelSize = (300 * dpToPx).toInt()
             scrollMinAlpha = 0f
-            convertByteArrayToImageBitmap = { byteArray ->
+            convertByteArrayToImageBitmap = { byteArray, pixelSize ->
                 decodeSampledBitmapFromByteArray(
                     byteArray,
-                    minPixelSize,
-                    minPixelSize
+                    pixelSize,
+                    pixelSize
                 ).asImageBitmap()
             }
             qrCodeSize = 250.dp
@@ -276,21 +280,12 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 AppDatabase.getInstance(requireContext())
                     .walletDbProvider.loadWalletWithStateById(walletConfig.id)
             }
-            val done = viewModel.onWalletChosen(wallet)
-            if (!done) {
-                // we need to choose an address
-                if (wallet?.getNumOfAddresses() == 1) {
-                    viewModel.onAddressChosen(0)
-                } else {
-                    ChooseAddressListDialogFragment.newInstance(walletConfig.id)
-                        .show(childFragmentManager, null)
-                }
-            }
+            viewModel.mosaikRuntime.onWalletChosen(wallet!!)
         }
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
-        viewModel.onAddressChosen(addressDerivationIdx!!)
+        viewModel.mosaikRuntime.onAddressChosen(addressDerivationIdx!!)
     }
 
     private fun getPlatformType(): MosaikContext.Platform {

@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.PaymentRequest
@@ -19,10 +20,7 @@ import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletConfig
-import org.ergoplatform.uilogic.STRING_BUTTON_SEND
-import org.ergoplatform.uilogic.STRING_DESC_CHOOSE_WALLET
-import org.ergoplatform.uilogic.STRING_LABEL_TO
-import org.ergoplatform.uilogic.STRING_LABEL_WALLET_TOKEN_BALANCE
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
 
@@ -36,18 +34,27 @@ fun ChooseWalletListDialog(
 ) {
     AppDialog(onDismiss, verticalPadding = defaultPadding * 6) {
 
-        Box(Modifier.fillMaxWidth()) {
+        if (wallets.isNotEmpty())
+            Box(Modifier.fillMaxWidth()) {
 
-            val scrollState = rememberScrollState()
-            Column(
-                Modifier.fillMaxWidth().verticalScroll(scrollState)
-            ) {
-                header?.invoke()
+                val scrollState = rememberScrollState()
+                Column(
+                    Modifier.fillMaxWidth().verticalScroll(scrollState)
+                ) {
+                    header?.invoke()
 
-                WalletChooserList(wallets, showTokenNum, onWalletChosen)
+                    WalletChooserList(wallets, showTokenNum, onWalletChosen)
+                }
+                AppScrollbar(scrollState)
             }
-            AppScrollbar(scrollState)
-        }
+        else
+            Box(Modifier.fillMaxWidth().heightIn(300.dp)) {
+                Text(
+                    remember { Application.texts.getString(STRING_ERROR_NO_WALLET) },
+                    Modifier.align(Alignment.Center)
+                )
+            }
+
     }
 }
 

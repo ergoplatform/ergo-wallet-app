@@ -63,7 +63,11 @@ class WalletListComponent(
                 val refreshState = syncManager.isRefreshing.collectAsState(false)
                 val lastRefreshMs = syncManager.lastRefreshMs
                 val refreshClick: () -> Unit = {
-                    syncManager.refreshByUser(Application.prefs, Application.database)
+                    syncManager.refreshByUser(
+                        Application.prefs,
+                        Application.database,
+                        rescheduleRefreshJob = null
+                    )
                 }
                 if (!refreshState.value && lastRefreshMs > 0) {
                     val textLastRefresh = remember(lastRefreshMs) { mutableStateOf("") }
@@ -111,7 +115,11 @@ class WalletListComponent(
             componentScope().launch {
                 delay(300) // we wait a little before doing the refresh to give DB some time
                 WalletStateSyncManager.getInstance()
-                    .refreshWhenNeeded(Application.prefs, Application.database)
+                    .refreshWhenNeeded(
+                        Application.prefs,
+                        Application.database,
+                        rescheduleRefreshJob = null
+                    )
                 processStartUpArguments()
             }
         }
@@ -199,8 +207,11 @@ class WalletListComponent(
             navigateToErgoPay = { paymentRequest ->
                 router.push(ScreenConfig.ErgoPay(paymentRequest, null, null))
             },
-            navigateToAuthentication = {
-                // TODO ErgoAUth
+            navigateToAuthentication = { authRequest ->
+                router.push(ScreenConfig.ErgoAuth(authRequest, null))
+            },
+            navigateToMosaikApp = { url ->
+                router.push(ScreenConfig.MosaikApp(null, url))
             },
             presentUserMessage = { message ->
                 navHost.showErrorDialog(message)

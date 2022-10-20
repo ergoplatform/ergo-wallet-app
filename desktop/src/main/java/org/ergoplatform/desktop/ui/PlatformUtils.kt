@@ -50,7 +50,10 @@ fun registerUriSchemes() {
     try {
         if (isWindows()) {
             val applicationPath = ProcessHandle.current().getCommandLineWindows().insertFullJvmDir()
-            registerUriSchemesWindows(applicationPath, listOf("ergopay", "ergo", "ergoauth"))
+            registerUriSchemesWindows(
+                applicationPath,
+                listOf("ergopay", "ergo", "ergoauth", "mosaikapp")
+            )
         } else {
             // val applicationPath = ProcessHandle.current().info().commandLine().get()
         }

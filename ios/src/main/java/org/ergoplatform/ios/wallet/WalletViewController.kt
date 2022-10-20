@@ -68,7 +68,11 @@ class WalletViewController : CoroutineViewController() {
             if (uiRefreshControl.isRefreshing) {
                 uiRefreshControl.endRefreshing()
                 val appDelegate = getAppDelegate()
-                WalletStateSyncManager.getInstance().refreshByUser(appDelegate.prefs, appDelegate.database)
+                WalletStateSyncManager.getInstance().refreshByUser(
+                    appDelegate.prefs,
+                    appDelegate.database,
+                    rescheduleRefreshJob = null
+                )
             }
         }
         tableView.registerReusableCellClass(WalletCell::class.java, WALLET_CELL)
@@ -154,7 +158,8 @@ class WalletViewController : CoroutineViewController() {
         val appDelegate = getAppDelegate()
         WalletStateSyncManager.getInstance().refreshWhenNeeded(
             appDelegate.prefs,
-            appDelegate.database
+            appDelegate.database,
+            rescheduleRefreshJob = null
         )
     }
 

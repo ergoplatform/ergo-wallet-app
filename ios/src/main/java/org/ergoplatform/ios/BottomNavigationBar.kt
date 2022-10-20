@@ -4,6 +4,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
+import org.ergoplatform.ios.mosaik.AppOverviewViewController
+import org.ergoplatform.ios.mosaik.MosaikViewController
 import org.ergoplatform.ios.settings.SettingsViewController
 import org.ergoplatform.ios.transactions.ChooseSpendingWalletViewController
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
@@ -12,6 +14,7 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WalletViewController
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.MainAppUiLogic
+import org.ergoplatform.uilogic.STRING_TITLE_MOSAIK
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
 import org.robovm.apple.foundation.Foundation
@@ -31,6 +34,11 @@ class BottomNavigationBar : UITabBarController() {
                         WalletViewController(),
                         appDelegate.texts.get(STRING_TITLE_WALLETS),
                         UIImage.systemImageNamed(IMAGE_WALLET)
+                    ),
+                    createNavController(
+                        AppOverviewViewController(),
+                        appDelegate.texts.get(STRING_TITLE_MOSAIK),
+                        UIImage.systemImageNamed(IMAGE_MOSAIK)
                     ),
                     createNavController(
                         SettingsViewController(),
@@ -117,6 +125,10 @@ class BottomNavigationBar : UITabBarController() {
             navigateToAuthentication = { request ->
                 navigateToWalletListAndPushVc(ErgoAuthenticationViewController(request, null), true)
             },
+            navigateToMosaikApp = { url ->
+                selectedViewController = viewControllers[1]
+                popToRootAndPushVc(MosaikViewController(url, null), true)
+            },
             presentUserMessage = { message ->
                 presentViewController(buildSimpleAlertController("", message, texts), true) {}
             })
@@ -126,6 +138,10 @@ class BottomNavigationBar : UITabBarController() {
         // set view to first controller (wallet list), go back to its root and switch to the
         // wallet's send funds screen
         selectedViewController = viewControllers.first()
+        popToRootAndPushVc(vc, animated)
+    }
+
+    private fun popToRootAndPushVc(vc: UIViewController, animated: Boolean) {
         (selectedViewController as? UINavigationController)?.apply {
             popToRootViewController(false)
             pushViewController(vc, animated)

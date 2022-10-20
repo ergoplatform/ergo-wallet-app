@@ -10,10 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
+import com.arkivanov.decompose.router.push
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.TransactionResult
@@ -89,6 +91,7 @@ class ErgoPaySigningComponent(
                 }
             },
             onConfirm = ::startPayment,
+            onTokenClick = { tokenId -> router.push(ScreenConfig.TokenInformation(tokenId)) },
             onDismiss = router::pop,
         )
         if (chooseWalletDialog.value != null)

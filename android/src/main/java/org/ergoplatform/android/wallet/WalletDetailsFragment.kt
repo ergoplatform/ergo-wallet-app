@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.BackgroundSync
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.EntryWalletTokenDetailsBinding
@@ -70,9 +71,11 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val nodeConnector = WalletStateSyncManager.getInstance()
         binding.swipeRefreshLayout.setOnRefreshListener {
+            val context = requireContext()
             if (!walletDetailsViewModel.uiLogic.refreshByUser(
-                    Preferences(requireContext()),
-                    AppDatabase.getInstance(requireContext())
+                    Preferences(context),
+                    AppDatabase.getInstance(context),
+                    rescheduleRefreshJob = { BackgroundSync.rescheduleJob(context) }
                 )
             ) {
                 binding.swipeRefreshLayout.isRefreshing = false
@@ -380,7 +383,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         val context = requireContext()
         walletDetailsViewModel.uiLogic.refreshWhenNeeded(
             Preferences(context),
-            AppDatabase.getInstance(context)
+            AppDatabase.getInstance(context),
+            rescheduleRefreshJob = { BackgroundSync.rescheduleJob(context) }
         )
     }
 

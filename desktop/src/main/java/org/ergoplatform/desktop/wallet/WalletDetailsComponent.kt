@@ -43,7 +43,12 @@ class WalletDetailsComponent(
 
     override val actions: @Composable RowScope.() -> Unit
         get() = {
-            IconButton({ uiLogic.refreshByUser(Application.prefs, Application.database) }) {
+            IconButton({
+                uiLogic.refreshByUser(
+                    Application.prefs, Application.database,
+                    rescheduleRefreshJob = null
+                )
+            }) {
                 Icon(Icons.Default.Refresh, null)
             }
 
@@ -87,7 +92,11 @@ class WalletDetailsComponent(
     }
 
     private fun startRefreshWhenNeeded() {
-        uiLogic.refreshWhenNeeded(Application.prefs, Application.database)
+        uiLogic.refreshWhenNeeded(
+            Application.prefs,
+            Application.database,
+            rescheduleRefreshJob = null
+        )
     }
 
     private val chooseAddressDialog = mutableStateOf(false)
@@ -121,6 +130,12 @@ class WalletDetailsComponent(
                     )
                 },
                 onAddressesClicked = { router.push(ScreenConfig.WalletAddressesList(walletConfig)) },
+                onTokenClicked = { tokenId, balance ->
+                    router.push(ScreenConfig.TokenInformation(tokenId, balance))
+                },
+                onTransactionClicked = { txId, address ->
+                    router.push(ScreenConfig.TransactionInfo(txId, address))
+                },
                 onViewTransactionsClicked = {
                     router.push(
                         ScreenConfig.AddressTransactions(walletConfig, uiLogic.addressIdx ?: 0)
@@ -176,7 +191,7 @@ class WalletDetailsComponent(
                 )
             },
             navigateToAuthentication = { authRequest ->
-                // TODO ErgoAuth
+                router.push(ScreenConfig.ErgoAuth(authRequest, walletConfig.id))
             },
             showErrorMessage = { message -> navHost.showErrorDialog(message) }
         )

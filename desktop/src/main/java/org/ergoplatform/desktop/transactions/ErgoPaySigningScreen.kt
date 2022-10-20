@@ -28,6 +28,7 @@ fun ErgoPaySigningScreen(
     uiLogic: ErgoPaySigningUiLogic,
     onReload: () -> Unit,
     onChooseAddress: () -> Unit,
+    onTokenClick: (String) -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -45,6 +46,7 @@ fun ErgoPaySigningScreen(
 
             ErgoPaySigningUiLogic.State.WAIT_FOR_CONFIRMATION -> ErgoPayTransactionInfoLayout(
                 uiLogic,
+                onTokenClick,
                 onConfirm
             )
             ErgoPaySigningUiLogic.State.DONE -> ErgoPayDoneLayout(uiLogic, onReload, onDismiss)
@@ -55,6 +57,7 @@ fun ErgoPaySigningScreen(
 @Composable
 private fun BoxScope.ErgoPayTransactionInfoLayout(
     uiLogic: ErgoPaySigningUiLogic,
+    onTokenClick: (String) -> Unit,
     onConfirm: () -> Unit
 ) {
     Column(
@@ -82,12 +85,10 @@ private fun BoxScope.ErgoPayTransactionInfoLayout(
         }
 
         AppCard(Modifier.fillMaxWidth()) {
-            TransactionInfoLayout(Modifier.padding(defaultPadding),
+            SignTransactionInfoLayout(Modifier.padding(defaultPadding),
                 uiLogic.transactionInfo!!.reduceBoxes(),
                 onConfirm = onConfirm,
-                onTokenClick = { tokenId ->
-                    // TODO token info
-                })
+                onTokenClick = onTokenClick)
         }
     }
 

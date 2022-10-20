@@ -3,6 +3,8 @@ package org.ergoplatform.uilogic
 import org.ergoplatform.ergoauth.isErgoAuthRequest
 import org.ergoplatform.isPaymentRequestUrl
 import org.ergoplatform.isValidErgoAddress
+import org.ergoplatform.mosaik.getMosaikAppHttpUrl
+import org.ergoplatform.mosaik.isMosaikAppUri
 import org.ergoplatform.transactions.getColdSignedTxChunk
 import org.ergoplatform.transactions.isColdSigningRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
@@ -16,6 +18,7 @@ object MainAppUiLogic {
         navigateToChooseWalletDialog: (String) -> Unit,
         navigateToErgoPay: (String) -> Unit,
         navigateToAuthentication: (String) -> Unit,
+        navigateToMosaikApp: (String) -> Unit,
         presentUserMessage: (String) -> Unit
     ) {
         if (isPaymentRequestUrl(data)) {
@@ -27,6 +30,8 @@ object MainAppUiLogic {
             presentUserMessage.invoke(stringProvider.getString(STRING_HINT_SIGNING_REQUEST))
         } else if (isErgoAuthRequest(data)) {
             navigateToAuthentication.invoke(data)
+        } else if (isMosaikAppUri(data)) {
+            navigateToMosaikApp.invoke(getMosaikAppHttpUrl(data))
         } else if (fromQrCode && isValidErgoAddress(data)) {
             // simply an ERG address
             navigateToChooseWalletDialog.invoke(data)

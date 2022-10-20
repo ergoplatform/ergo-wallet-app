@@ -22,6 +22,7 @@ import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.desktop.wallet.AddressTransactionInfo
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressButton
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
+import org.ergoplatform.persistance.AddressTransaction
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.transactions.TransactionListManager
@@ -35,6 +36,8 @@ import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 fun AddressTransactionsScreen(
     wallet: Wallet,
     walletAddress: WalletAddress,
+    onTransactionClicked: (AddressTransaction) -> Unit,
+    onTokenClicked: (String) -> Unit,
     onChooseAddressClicked: () -> Unit
 ) {
     val progressState = TransactionListManager.downloadProgress.collectAsState()
@@ -89,7 +92,13 @@ fun AddressTransactionsScreen(
                                             .widthIn(min = 400.dp, max = defaultMaxWidth)
                                             .align(Alignment.Center)
                                     ) {
-                                        AddressTransactionInfo(transactionWithTokens)
+                                        AddressTransactionInfo(
+                                            transactionWithTokens,
+                                            onTransactionClicked = {
+                                                onTransactionClicked(transactionWithTokens.addressTransaction)
+                                            },
+                                            onTokenClicked
+                                        )
                                     }
                                 }
                             }

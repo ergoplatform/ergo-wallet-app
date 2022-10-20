@@ -22,12 +22,27 @@ abstract class MosaikAppOverviewUiLogic {
 
     private var initialized = false
 
-    fun init(db: IAppDatabase) {
+    fun init(db: IAppDatabase): Boolean {
         if (initialized)
-            return
+            return false
 
         initialized = true
 
+        setupDbFlows(db)
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                downloadedAppSuggestions = getSuggestionRetrofit().getAppSuggestions().execute().body()!!
+                filterAppSuggestions()
+            } catch (t: Throwable) {
+                // swallow
+            }
+
+        }
+
+        return true
+    }
+
+    fun setupDbFlows(db: IAppDatabase) {
         coroutineScope.launch(Dispatchers.IO) {
             db.mosaikDbProvider.getAllAppsByLastVisited(5).collect { lastVisited ->
                 lastVisited.lastOrNull()?.lastVisited?.let { oldestShownEntry ->
@@ -43,15 +58,6 @@ abstract class MosaikAppOverviewUiLogic {
                 favoritesFlow.value = favorites
                 filterAppSuggestions()
             }
-        }
-        coroutineScope.launch(Dispatchers.IO) {
-            try {
-                downloadedAppSuggestions = getSuggestionRetrofit().getAppSuggestions().execute().body()!!
-                filterAppSuggestions()
-            } catch (t: Throwable) {
-                // swallow
-            }
-
         }
     }
 

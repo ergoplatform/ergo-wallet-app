@@ -17,6 +17,7 @@ const val KEY_INPUT_FIAT_AMOUNT = "inputFiatAmount"
 const val KEY_LASTREFRESH = "lastRefreshMs"
 const val KEY_LASTNODELISTREFRESH = "lastNodeListRefresh"
 const val KEY_MOSAIK_ENABLED = "enableMosaik"
+const val KEY_BALANCE_SYNC_INTERVAL = "balanceCheckInterval"
 const val FIAT_CURRENCY_DEFAULT = "usd"
 
 private const val DEFAULT_IPFS_GATEWAY = "https://cloudflare-ipfs.com/"
@@ -152,5 +153,11 @@ abstract class PreferencesProvider {
         get() = getBoolean(KEY_INPUT_FIAT_AMOUNT, false)
         set(value) {
             saveBoolean(KEY_INPUT_FIAT_AMOUNT, value)
+        }
+
+    var balanceSyncInterval: Long
+        get() = getLong(KEY_BALANCE_SYNC_INTERVAL, 24)
+        set(value) {
+            saveLong(KEY_BALANCE_SYNC_INTERVAL, value)
         }
 }

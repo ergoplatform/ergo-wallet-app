@@ -61,6 +61,7 @@ private fun prepareMosaikConfig() {
         secondaryButtonColor = colorResource(id = R.color.secondary)
         textButtonTextColor = colorResource(id = R.color.primary)
         textButtonColorDisabled = secondaryLabelColor
+        textFieldBackgroundColor = colorResource(id = R.color.cardview_background)
         cardShapeRadius = 10.dp
         buttonShapeRadius = 16.dp
         buttonPadding = PaddingValues(defaultPadding, 10.dp)

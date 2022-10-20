@@ -112,6 +112,7 @@ fun main(args: Array<String>) {
         defaultLabelColor = secondaryButtonColor
         secondaryLabelColor = Color(0xFFBBBBBB)
         cardShapeRadius = 8.dp
+        textFieldBackgroundColor = Color.Transparent
     }
 
     application {
