@@ -1,7 +1,9 @@
 package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.ergoplatform.*
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.ios.addressbook.ChooseAddressDialogViewController
 import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
@@ -38,6 +40,12 @@ class SendFundsViewController(
     private lateinit var addTokenButton: UIButton
 
     private lateinit var inputReceiver: EndIconTextField
+    private var inputReceiverShowsLabel = false
+        set(value) {
+            field = value
+            inputReceiver.clearButtonMode = if (value) UITextFieldViewMode.Always else UITextFieldViewMode.Never
+            inputReceiver.rightViewMode = if (value) UITextFieldViewMode.Never else UITextFieldViewMode.Always
+        }
     private lateinit var inputMessage: EndIconTextField
     private lateinit var inputAmount: EndIconTextField
 
@@ -110,11 +118,33 @@ class SendFundsViewController(
                     inputAmount.becomeFirstResponder() // TODO node 5.0 inputMessage.becomeFirstResponder()
                     return true
                 }
+
+                override fun shouldBeginEditing(textField: UITextField?): Boolean {
+                    return !inputReceiverShowsLabel && super.shouldBeginEditing(textField)
+                }
             }
 
             addOnEditingChangedListener {
                 setHasError(false)
                 uiLogic.receiverAddress = text
+                if (text.isBlank())
+                    inputReceiverShowsLabel = false
+                else
+                    viewControllerScope.launch {
+                        val recipient = text
+                        val appDelegate = getAppDelegate()
+                        getAddressLabelFromDatabase(
+                            appDelegate.database,
+                            recipient,
+                            IosStringProvider(appDelegate.texts)
+                        )?.let {
+                            if (text == recipient) runOnMainThread {
+                                inputReceiverShowsLabel = true
+                                text = it
+                                endEditing(true)
+                            }
+                        }
+                    }
             }
 
             setCustomActionField(
@@ -127,7 +157,6 @@ class SendFundsViewController(
                     setReceiverText(addressWithLabel.address)
                 }, true) {}
             }
-
         }
 
         inputMessage = EndIconTextField().apply {
@@ -353,6 +382,9 @@ class SendFundsViewController(
         val checkResponse = uiLogic.checkCanMakePayment(getAppDelegate().prefs)
 
         inputReceiver.setHasError(checkResponse.receiverError)
+        // this might have messed with a label, restore
+        if (inputReceiverShowsLabel)
+            inputReceiver.rightViewMode = UITextFieldViewMode.Never
         inputAmount.setHasError(checkResponse.amountError)
         inputMessage.setHasError(checkResponse.messageError)
         if (checkResponse.receiverError) {
