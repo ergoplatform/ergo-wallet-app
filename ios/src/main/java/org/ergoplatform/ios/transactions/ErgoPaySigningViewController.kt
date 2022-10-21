@@ -1,6 +1,8 @@
 package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.ChooseWalletViewController
@@ -309,6 +311,15 @@ class ErgoPaySigningViewController(
             bindTransaction(uiLogic.transactionInfo!!.reduceBoxes(),
                 tokenClickListener = { tokenId ->
                     presentViewController(TokenInformationViewController(tokenId, null), true) {}
+                },
+                addressLabelHandler = { address, callback ->
+                    viewControllerScope.launch {
+                        val appDelegate = getAppDelegate()
+                        getAddressLabelFromDatabase(
+                            appDelegate.database, address,
+                            IosStringProvider(appDelegate.texts)
+                        )?.let { runOnMainThread { callback(it) } }
+                    }
                 })
 
             cardView.isHidden = uiLogic.epsr?.message?.let {
