@@ -79,9 +79,11 @@ object MosaikViewCommon {
         if (!uiViewHolder.handlesClicks && treeElement.respondsToClick) {
             uiView.isUserInteractionEnabled = true
             uiView.addGestureRecognizer(UILongPressGestureRecognizer {
+                uiViewHolder.mosaikViewController.lastViewInteracted = uiView
                 treeElement.longPressed()
             })
             uiView.addGestureRecognizer(UITapGestureRecognizer {
+                uiViewHolder.mosaikViewController.lastViewInteracted = uiView
                 treeElement.clicked()
             })
         }
@@ -104,8 +106,10 @@ object MosaikViewCommon {
 }
 
 open class UiViewHolder(val uiView: UIView, val treeElement: TreeElement) : MosaikViewHolder {
-    protected fun viewCoroutineScope() =
-        (treeElement.viewTree.mosaikRuntime as MosaikViewController.IosMosaikRuntime).viewController.viewControllerScope
+    protected fun viewCoroutineScope() = mosaikViewController.viewControllerScope
+
+    val mosaikViewController
+        get() = (treeElement.viewTree.mosaikRuntime as MosaikViewController.IosMosaikRuntime).viewController
 
     override fun resourceBytesAvailable(bytes: ByteArray) {
     }

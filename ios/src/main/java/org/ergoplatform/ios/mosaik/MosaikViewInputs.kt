@@ -326,6 +326,7 @@ class InputButtonHolder(treeElement: TreeElement) :
                 titleLabel.lineBreakMode = NSLineBreakMode.TruncatingTail
                 isEnabled = mosaikElement.isEnabled
                 addOnTouchUpInsideListener { _, _ ->
+                    mosaikViewController.lastViewInteracted = this
                     treeElement.clicked()
                 }
             }

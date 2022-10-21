@@ -100,6 +100,7 @@ class MosaikViewController(
         viewControllerScope.launch {
             mosaikRuntime.viewTree.contentState.collect {
                 runOnMainThread {
+                    lastViewInteracted = null
                     mosaikView.updateView()
                 }
             }
@@ -124,6 +125,8 @@ class MosaikViewController(
     }
 
     private val mosaikRuntime = IosMosaikRuntime()
+
+    internal var lastViewInteracted: UIView? = null
 
     inner class IosMosaikRuntime : AppMosaikRuntime(
         "Ergo Wallet App (iOS)",
@@ -171,7 +174,7 @@ class MosaikViewController(
         }
 
         override fun pasteToClipboard(text: String) {
-            shareText(text, mosaikView)
+            shareText(text, lastViewInteracted ?: mosaikView)
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {

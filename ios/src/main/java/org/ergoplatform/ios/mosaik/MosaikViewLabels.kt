@@ -40,9 +40,11 @@ class LabelViewHolder(treeElement: TreeElement, mosaikViewElement: StyleableText
             if (isExpandable) {
                 isUserInteractionEnabled = true
                 addGestureRecognizer(UILongPressGestureRecognizer {
+                    mosaikViewController.lastViewInteracted = this
                     treeElement.longPressed()
                 })
                 addGestureRecognizer(UITapGestureRecognizer {
+                    mosaikViewController.lastViewInteracted = this
                     isExpanded = !isExpanded
                     setMaxLines()
                 })
@@ -139,6 +141,7 @@ class ButtonHolder(treeElement: TreeElement) : UiViewHolder(
         uiButton.isEnabled = buttonElement.isEnabled
 
         uiButton.addOnTouchUpInsideListener { _, _ ->
+            mosaikViewController.lastViewInteracted = uiButton
             treeElement.clicked()
         }
 
