@@ -89,7 +89,7 @@ class ChooseAddressDialogViewController(
     }
 
     private fun onEditEntry(addressBookEntry: AddressBookEntry?) {
-        // TODO
+        presentViewController(EditAddressDialogViewController(addressBookEntry), true) {}
     }
 
     override fun viewWillAppear(animated: Boolean) {
@@ -122,8 +122,16 @@ class ChooseAddressDialogViewController(
                 }
             )
 
-        } else {
-            // TODO
+        } else addressBookEntries.forEach { abEntry ->
+            val entryView = AddressEntry(abEntry)
+            entryView.isUserInteractionEnabled = true
+            entryView.addGestureRecognizer(UITapGestureRecognizer {
+                addressChosen(abEntry)
+            })
+            entryView.addGestureRecognizer(UILongPressGestureRecognizer {
+                onEditEntry(abEntry)
+            })
+            addressBookStack.addArrangedSubview(entryView)
         }
     }
 
@@ -149,7 +157,10 @@ class ChooseAddressDialogViewController(
         dismissViewController(true) { onChooseEntry(address) }
     }
 
-    inner class AddressEntry(addressEntry: IAddressWithLabel, fallBackLabel: String?) : UIStackView() {
+    inner class AddressEntry(
+        addressEntry: IAddressWithLabel,
+        fallBackLabel: String? = null
+    ) : UIStackView() {
         init {
             axis = UILayoutConstraintAxis.Vertical
             isLayoutMarginsRelativeArrangement = true
