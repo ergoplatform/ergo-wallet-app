@@ -7,7 +7,9 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.AddressBookEntry
 import org.ergoplatform.persistance.IAddressWithLabel
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getSortedDerivedAddressesList
 import org.ergoplatform.wallet.sortedByDisplayName
 import org.robovm.apple.coregraphics.CGRect
@@ -124,10 +126,6 @@ class ChooseAddressDialogViewController(
 
         } else addressBookEntries.forEach { abEntry ->
             val entryView = AddressEntry(abEntry)
-            entryView.isUserInteractionEnabled = true
-            entryView.addGestureRecognizer(UITapGestureRecognizer {
-                addressChosen(abEntry)
-            })
             entryView.addGestureRecognizer(UILongPressGestureRecognizer {
                 onEditEntry(abEntry)
             })
@@ -142,13 +140,10 @@ class ChooseAddressDialogViewController(
 
             if (addresses.size == 1) {
                 val entry = AddressEntry(addresses.first(), wallet.walletConfig.displayName)
-                entry.isUserInteractionEnabled = true
-                entry.addGestureRecognizer(UITapGestureRecognizer {
-                    addressChosen(addresses.first())
-                })
                 ownAddressesStack.addArrangedSubview(entry)
             } else {
-                // TODO
+                val walletContainer = WalletAddressesContainer(wallet, addresses)
+                ownAddressesStack.addArrangedSubview(walletContainer)
             }
         }
     }
@@ -157,14 +152,73 @@ class ChooseAddressDialogViewController(
         dismissViewController(true) { onChooseEntry(address) }
     }
 
+    inner class WalletAddressesContainer(
+        wallet: Wallet,
+        sortedAddresses: List<WalletAddress>
+    ) : UIStackView() {
+        private val walletTitleLabel = Body1BoldLabel().apply {
+            text = wallet.walletConfig.displayName
+            textAlignment = NSTextAlignment.Center
+            lineBreakMode = NSLineBreakMode.TruncatingTail
+            numberOfLines = 1
+        }
+        private val expandImageView = UIImageView().apply {
+            tintColor = UIColor.label()
+        }
+        private val titleContainer = UIView(CGRect.Zero())
+        private var expanded = false
+
+        init {
+            axis = UILayoutConstraintAxis.Vertical
+            titleContainer.addSubview(expandImageView)
+            titleContainer.addSubview(walletTitleLabel)
+            walletTitleLabel.superViewWrapsHeight().leftToSuperview()
+            expandImageView.centerVerticallyTo(walletTitleLabel).rightToSuperview()
+                .leftToRightOf(walletTitleLabel).enforceKeepIntrinsicWidth()
+            titleContainer.isUserInteractionEnabled = true
+            titleContainer.addGestureRecognizer(UITapGestureRecognizer {
+                expanded = !expanded
+                animateLayoutChanges {
+                    arrangedSubviews.forEach {
+                        it.isHidden = !expanded && !(it === titleContainer)
+                    }
+                    setImage()
+                }
+            })
+
+            addArrangedSubview(titleContainer)
+
+            val stringProvider = IosStringProvider(getAppDelegate().texts)
+            sortedAddresses.forEach {
+                val entryView = AddressEntry(
+                    it, it.getAddressLabel(stringProvider),
+                    horizontalMargins = DEFAULT_MARGIN * 4
+                )
+                entryView.isHidden = true
+                addArrangedSubview(entryView)
+            }
+
+            setImage()
+        }
+
+        private fun setImage() {
+            expandImageView.image = getIosSystemImage(
+                if (expanded) IMAGE_CHEVRON_UP else IMAGE_CHEVRON_DOWN,
+                UIImageSymbolScale.Small,
+                20.0
+            )
+        }
+    }
+
     inner class AddressEntry(
         addressEntry: IAddressWithLabel,
-        fallBackLabel: String? = null
+        fallBackLabel: String? = null,
+        horizontalMargins: Double = DEFAULT_MARGIN,
     ) : UIStackView() {
         init {
             axis = UILayoutConstraintAxis.Vertical
             isLayoutMarginsRelativeArrangement = true
-            layoutMargins = UIEdgeInsets(DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN)
+            layoutMargins = UIEdgeInsets(DEFAULT_MARGIN, horizontalMargins, DEFAULT_MARGIN, horizontalMargins)
 
             (addressEntry.label ?: fallBackLabel)?.let { label ->
 
@@ -183,6 +237,12 @@ class ChooseAddressDialogViewController(
                 text = addressEntry.address
                 textAlignment = NSTextAlignment.Center
             })
+
+            isUserInteractionEnabled = true
+            addGestureRecognizer(UITapGestureRecognizer {
+                addressChosen(addressEntry)
+            })
+
         }
     }
 }
