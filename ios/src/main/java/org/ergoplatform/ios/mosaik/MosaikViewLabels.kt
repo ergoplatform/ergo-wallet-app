@@ -1,6 +1,7 @@
 package org.ergoplatform.ios.mosaik
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.TokenAmount
@@ -49,6 +50,18 @@ class LabelViewHolder(treeElement: TreeElement, mosaikViewElement: StyleableText
                     setMaxLines()
                 })
                 setMaxLines()
+            }
+        }
+
+        if (LabelFormatter.hasAlternativeText(mosaikViewElement, treeElement)) {
+            viewCoroutineScope().launch {
+                LabelFormatter.getAlternativeText(mosaikViewElement, treeElement)?.let { alternativeText ->
+                    runOnMainThread {
+                        labelView.text = alternativeText
+                        if (mosaikViewElement.maxLines > 0)
+                            labelView.lineBreakMode = NSLineBreakMode.TruncatingTail
+                    }
+                }
             }
         }
     }
