@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS `address_book` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `label` TEXT NOT NULL,
+    `address` TEXT NOT NULL,
+    `signed_data` BLOB
+);

@@ -8,6 +8,7 @@ import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
+import org.ergoplatform.wallet.sortedByDisplayName
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
@@ -90,7 +91,7 @@ class ChooseSpendingWalletViewController(
 
             runOnMainThread {
                 walletsStackView.clearArrangedSubviews()
-                wallets.sortedBy { it.walletConfig.displayName?.lowercase() }.forEach { wallet ->
+                wallets.sortedByDisplayName().forEach { wallet ->
                     walletsStackView.addArrangedSubview(ChooseWalletItem(wallet, texts).apply {
                         isUserInteractionEnabled = true
                         addGestureRecognizer(UITapGestureRecognizer {

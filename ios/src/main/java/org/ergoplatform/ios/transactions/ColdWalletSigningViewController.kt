@@ -1,6 +1,8 @@
 package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.SigningResult
 import org.ergoplatform.transactions.coldSigningResponseToQrChunks
@@ -65,7 +67,16 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         scanningContainer.errorText.text = uiLogic.lastErrorMessage ?: ""
 
         uiLogic.transactionInfo?.reduceBoxes()?.let {
-            transactionContainer.bindTransaction(it, null)
+            transactionContainer.bindTransaction(it, null,
+                addressLabelHandler = { address, callback ->
+                    viewControllerScope.launch {
+                        val appDelegate = getAppDelegate()
+                        getAddressLabelFromDatabase(
+                            appDelegate.database, address,
+                            IosStringProvider(appDelegate.texts)
+                        )?.let { runOnMainThread { callback(it) } }
+                    }
+                })
         }
 
         refreshUiState()

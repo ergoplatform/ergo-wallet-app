@@ -6,12 +6,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
+import kotlinx.coroutines.launch
 import org.ergoplatform.SigningSecrets
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
+import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
 import org.ergoplatform.android.ui.*
@@ -163,7 +167,18 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             binding.transactionInfo.root.visibility = View.VISIBLE
             binding.cardScanMore.visibility = View.GONE
 
-            binding.transactionInfo.bindTransactionInfo(it, null, layoutInflater)
+            val context = requireContext()
+            binding.transactionInfo.bindTransactionInfo(it, null, layoutInflater,
+                addressLabelHandler = { address, callback ->
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        getAddressLabelFromDatabase(
+                            AppDatabase.getInstance(context),
+                            address,
+                            AndroidStringProvider(context)
+                        )?.let { callback(it) }
+                    }
+                }
+            )
         }
     }
 

@@ -5,8 +5,11 @@ import android.view.*
 import androidx.activity.addCallback
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import kotlinx.coroutines.launch
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
@@ -229,6 +232,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
 
     private fun showTransactionInfo() {
         val uiLogic = viewModel.uiLogic
+        val context = requireContext()
         binding.transactionInfo.bindTransactionInfo(
             uiLogic.transactionInfo!!.reduceBoxes(),
             { tokenId ->
@@ -236,7 +240,16 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
                     ErgoPaySigningFragmentDirections.actionErgoPaySigningToTokenInformation(tokenId)
                 )
             },
-            layoutInflater
+            layoutInflater,
+            addressLabelHandler = { address, callback ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    getAddressLabelFromDatabase(
+                        AppDatabase.getInstance(context),
+                        address,
+                        AndroidStringProvider(context)
+                    )?.let { callback(it) }
+                }
+            }
         )
         binding.layoutTiMessage.visibility = uiLogic.epsr?.message?.let {
             binding.tvTiMessage.text = getString(R.string.label_message_from_dapp, it)

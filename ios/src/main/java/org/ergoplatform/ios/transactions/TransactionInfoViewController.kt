@@ -1,7 +1,9 @@
 package org.ergoplatform.ios.transactions
 
 import com.badlogic.gdx.utils.I18NBundle
+import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.getExplorerTxUrl
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.ui.*
@@ -70,9 +72,19 @@ class TransactionInfoViewController(
                 activityView.stopAnimating()
                 ti?.let {
                     infoContainer.isHidden = false
-                    infoContainer.bindTransaction(ti, tokenClickListener = { tokenId ->
-                        presentViewController(TokenInformationViewController(tokenId, null), true) {}
-                    })
+                    infoContainer.bindTransaction(ti,
+                        tokenClickListener = { tokenId ->
+                            presentViewController(TokenInformationViewController(tokenId, null), true) {}
+                        },
+                        addressLabelHandler = { address, callback ->
+                            viewControllerScope.launch {
+                                val appDelegate = getAppDelegate()
+                                getAddressLabelFromDatabase(
+                                    appDelegate.database, address,
+                                    IosStringProvider(appDelegate.texts)
+                                )?.let { runOnMainThread { callback(it) } }
+                            }
+                        })
                 } ?: run {
                     val errorView = UIImageView(getIosSystemImage(IMAGE_WARNING, UIImageSymbolScale.Large)).apply {
                         contentMode = UIViewContentMode.ScaleAspectFit
@@ -132,8 +144,12 @@ class TransactionInfoViewController(
             insertArrangedSubview(introContainer, 0)
         }
 
-        override fun bindTransaction(transactionInfo: TransactionInfo, tokenClickListener: ((String) -> Unit)?) {
-            super.bindTransaction(transactionInfo, tokenClickListener)
+        override fun bindTransaction(
+            transactionInfo: TransactionInfo,
+            tokenClickListener: ((String) -> Unit)?,
+            addressLabelHandler: ((String, (String) -> Unit) -> Unit)?
+        ) {
+            super.bindTransaction(transactionInfo, tokenClickListener, addressLabelHandler)
 
             txIdLabel.text = transactionInfo.id
             purposeLabel.text = uiLogic.transactionPurpose

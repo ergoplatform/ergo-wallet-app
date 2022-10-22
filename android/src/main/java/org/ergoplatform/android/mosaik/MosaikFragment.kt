@@ -6,6 +6,8 @@ import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PermContactCalendar
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
@@ -23,6 +25,8 @@ import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
+import org.ergoplatform.android.addressbook.ChooseAddressDialogCallback
+import org.ergoplatform.android.addressbook.ChooseAddressDialogFragment
 import org.ergoplatform.android.databinding.FragmentMosaikBinding
 import org.ergoplatform.android.ergoauth.ErgoAuthenticationFragment
 import org.ergoplatform.android.persistence.AndroidCacheFiles
@@ -36,9 +40,12 @@ import org.ergoplatform.compose.tokens.getAppMosaikTokenLabelBuilder
 import org.ergoplatform.mosaik.MosaikComposeConfig
 import org.ergoplatform.mosaik.MosaikViewTree
 import org.ergoplatform.mosaik.model.MosaikContext
+import org.ergoplatform.mosaik.model.ui.input.ErgAddressInputField
+import org.ergoplatform.persistance.IAddressWithLabel
 import org.ergoplatform.persistance.WalletConfig
 
-class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback {
+class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback,
+    ChooseAddressDialogCallback {
     private var _binding: FragmentMosaikBinding? = null
     private val binding get() = _binding!!
 
@@ -219,6 +226,16 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 apiService = { ApiServiceManager.getOrInit(Preferences(requireContext())) },
                 stringResolver = { AndroidStringProvider(requireContext()) }
             )
+
+            getTextFieldTrailingIcon = { element ->
+                if (element is ErgAddressInputField && element.isEnabled && !element.isReadOnly) {
+                    Pair(Icons.Default.PermContactCalendar) {
+                        viewModel.chooseAddressFromAddressbookId = element.id
+                        ChooseAddressDialogFragment().show(childFragmentManager, null)
+                    }
+                } else
+                    null
+            }
         }
         binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         binding.composeView.setContent {
@@ -285,7 +302,15 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
+        // from wallet address chooser
         viewModel.mosaikRuntime.onAddressChosen(addressDerivationIdx!!)
+    }
+
+    override fun onAddressChosen(address: IAddressWithLabel) {
+        // from wallet and address book chooser
+        viewModel.chooseAddressFromAddressbookId?.let { id ->
+            viewModel.mosaikRuntime.setValue(id, address.address, updateInView = true)
+        }
     }
 
     private fun getPlatformType(): MosaikContext.Platform {
@@ -301,8 +326,12 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        // TokenLabel references this fragment (requireContext Call), so we set it as a DisposableEffect that is cleaned up
-        MosaikComposeConfig.TokenLabel = { properties, modifier, content -> }
+        MosaikComposeConfig.apply {
+            // TokenLabel references this fragment (requireContext Call), so we set it as a DisposableEffect that is cleaned up
+            TokenLabel = { properties, modifier, content -> }
+            // references this fragment (viewModel, fragment manager)
+            getTextFieldTrailingIcon = { null }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

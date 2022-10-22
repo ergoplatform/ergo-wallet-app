@@ -3,17 +3,12 @@ package org.ergoplatform.ios.mosaik
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.ergoplatform.ios.addressbook.ChooseAddressDialogViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WIDTH_ICONS
-import org.ergoplatform.mosaik.FiatOrErgTextInputHandler
-import org.ergoplatform.mosaik.KeyboardType
-import org.ergoplatform.mosaik.StringConstant
-import org.ergoplatform.mosaik.TreeElement
+import org.ergoplatform.mosaik.*
 import org.ergoplatform.mosaik.model.ui.IconType
-import org.ergoplatform.mosaik.model.ui.input.CheckboxLabel
-import org.ergoplatform.mosaik.model.ui.input.DropDownList
-import org.ergoplatform.mosaik.model.ui.input.StyleableInputButton
-import org.ergoplatform.mosaik.model.ui.input.TextField
+import org.ergoplatform.mosaik.model.ui.input.*
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSRange
@@ -30,8 +25,20 @@ open class TextFieldViewHolder(treeElement: TreeElement) :
 
     protected val stackView = uiView as UIStackView
 
+    private val mosaikElement = treeElement.element as TextField<*>
+
+    private var showsAlternativeText = false
+        set(value) {
+            field = value
+            if (value && mosaikElement.isEnabled && !mosaikElement.isReadOnly) {
+                textFieldView.rightViewMode = UITextFieldViewMode.Never
+                textFieldView.clearButtonMode = UITextFieldViewMode.Always
+            } else {
+                textFieldView.clearButtonMode = UITextFieldViewMode.Never
+            }
+        }
+
     init {
-        val mosaikElement = treeElement.element as TextField<*>
         val runtime = treeElement.viewTree.mosaikRuntime
 
         stackView.apply {
@@ -63,7 +70,7 @@ open class TextFieldViewHolder(treeElement: TreeElement) :
 
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldBeginEditing(textField: UITextField?): Boolean {
-                    return if (mosaikElement.isReadOnly)
+                    return if (mosaikElement.isReadOnly || showsAlternativeText)
                         false
                     else super.shouldBeginEditing(textField)
                 }
@@ -86,17 +93,31 @@ open class TextFieldViewHolder(treeElement: TreeElement) :
             }
 
             addOnEditingChangedListener {
-                setHasError(!treeElement.changeValueFromInput(text.ifEmpty { null }))
-                onChangedText()
+                if (text.isNullOrEmpty())
+                    showsAlternativeText = false
+
+                if (!showsAlternativeText) {
+                    setHasError(!treeElement.changeValueFromInput(text.ifEmpty { null }))
+                    onChangedText()
+                }
             }
 
-            mosaikElement.endIcon?.getUiImage()?.let { endIcon ->
-                setCustomActionField(
-                    endIcon,
-                    action = {
-                        mosaikElement.onEndIconClicked?.let { runtime.runAction(it) }
-                    }
-                )
+            if (mosaikElement.endIcon != null)
+                mosaikElement.endIcon?.getUiImage()?.let { endIcon ->
+                    setCustomActionField(
+                        endIcon,
+                        action = {
+                            mosaikElement.onEndIconClicked?.let { runtime.runAction(it) }
+                        }
+                    )
+                }
+            else if (!mosaikElement.isReadOnly && mosaikElement.isEnabled && mosaikElement is ErgAddressInputField) {
+                setCustomActionField(getIosSystemImage(IMAGE_ADDRESSBOOK, UIImageSymbolScale.Small)!!) {
+                    mosaikViewController.presentViewController(ChooseAddressDialogViewController { addressWithLabel ->
+                        text = addressWithLabel.address
+                        sendControlEventsActions(UIControlEvents.EditingChanged)
+                    }, true) {}
+                }
             }
         }
 
@@ -105,7 +126,22 @@ open class TextFieldViewHolder(treeElement: TreeElement) :
     }
 
     protected open fun onChangedText() {
+        if (LabelFormatter.hasAlternativeText(mosaikElement, treeElement)) {
+            val inputText = textFieldView.text
+            viewCoroutineScope().launch {
+                LabelFormatter.getAlternativeText(mosaikElement, treeElement)?.let {
+                    if (inputText == textFieldView.text) runOnMainThread {
+                        showsAlternativeText = true
+                        textFieldView.text = it
+                    }
+                }
+            }
+        }
+    }
 
+    override fun onAddedToSuperview() {
+        super.onAddedToSuperview()
+        onChangedText()
     }
 
     override fun isFillMaxWidth(): Boolean = true
@@ -130,7 +166,6 @@ class ErgAmountInputHolder(treeElement: TreeElement) : TextFieldViewHolder(treeE
     init {
         stackView.addArrangedSubview(secondCurrencyContainer)
         secondCurrencyContainer.isHidden = !hasFiatValue
-        onChangedText()
 
         if (fiatOrErgInputHandler.canChangeInputMode())
             secondCurrencyContainer.apply {
@@ -326,6 +361,7 @@ class InputButtonHolder(treeElement: TreeElement) :
                 titleLabel.lineBreakMode = NSLineBreakMode.TruncatingTail
                 isEnabled = mosaikElement.isEnabled
                 addOnTouchUpInsideListener { _, _ ->
+                    mosaikViewController.lastViewInteracted = this
                     treeElement.clicked()
                 }
             }

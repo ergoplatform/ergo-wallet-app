@@ -9,14 +9,18 @@ import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TokenAmount
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.desktop.tokens.TokenEntryView
 import org.ergoplatform.desktop.ui.ErgoAddressText
 import org.ergoplatform.desktop.ui.defaultPadding
@@ -218,9 +222,24 @@ fun TransactionInfoBox(
     assets: List<AssetInstanceInfo>?,
     tokenClickListener: ((String) -> Unit)?,
 ) {
+    val addressLabelState = remember(address) { mutableStateOf<String?>(null) }
+    LaunchedEffect(address) {
+        getAddressLabelFromDatabase(Application.database, address, Application.texts)?.let {
+            addressLabelState.value = it
+        }
+    }
 
     Column(Modifier.padding(vertical = defaultPadding / 2)) {
-        ErgoAddressText(address, style = labelStyle(LabelStyle.BODY1BOLD), color = uiErgoColor)
+        if (addressLabelState.value != null)
+            Text(
+                addressLabelState.value!!,
+                style = labelStyle(LabelStyle.BODY1BOLD),
+                color = uiErgoColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        else
+            ErgoAddressText(address, style = labelStyle(LabelStyle.BODY1BOLD), color = uiErgoColor)
 
         val nanoErgs = value ?: 0
         if (nanoErgs > 0)

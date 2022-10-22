@@ -318,6 +318,17 @@
     <string name="error_mosaik_connection">Could not load application.\nCheck your connection and try again.</string>
     <string name="error_no_mosaik_app">No wallet app plugin found at given address %1$s. Please check for misspellings.</string>
 
+    <!-- Address book -->
+    <string name="label_own_addresses">Your addresses</string>
+    <string name="label_saved_addresses">Saved addresses</string>
+    <string name="button_add_address_entry">Add new address entry</string>
+    <string name="button_edit_address_entry">Edit address entry</string>
+    <string name="label_no_entries">No entries yet</string>
+    <string name="label_descriptive_address_name">Descriptive address name</string>
+    <string name="label_erg_address">Ergo address</string>
+    <string name="button_save">Save</string>
+    <string name="label_address_tx_fee">Transaction fee</string>
+
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>
     <string name="about_year" translatable="false">2022</string>
