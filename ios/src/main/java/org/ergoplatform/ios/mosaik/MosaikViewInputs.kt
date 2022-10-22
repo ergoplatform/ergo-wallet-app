@@ -3,14 +3,12 @@ package org.ergoplatform.ios.mosaik
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.ergoplatform.ios.addressbook.ChooseAddressDialogViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WIDTH_ICONS
 import org.ergoplatform.mosaik.*
 import org.ergoplatform.mosaik.model.ui.IconType
-import org.ergoplatform.mosaik.model.ui.input.CheckboxLabel
-import org.ergoplatform.mosaik.model.ui.input.DropDownList
-import org.ergoplatform.mosaik.model.ui.input.StyleableInputButton
-import org.ergoplatform.mosaik.model.ui.input.TextField
+import org.ergoplatform.mosaik.model.ui.input.*
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSRange
@@ -104,16 +102,23 @@ open class TextFieldViewHolder(treeElement: TreeElement) :
                 }
             }
 
-            mosaikElement.endIcon?.getUiImage()?.let { endIcon ->
-                setCustomActionField(
-                    endIcon,
-                    action = {
-                        mosaikElement.onEndIconClicked?.let { runtime.runAction(it) }
-                    }
-                )
+            if (mosaikElement.endIcon != null)
+                mosaikElement.endIcon?.getUiImage()?.let { endIcon ->
+                    setCustomActionField(
+                        endIcon,
+                        action = {
+                            mosaikElement.onEndIconClicked?.let { runtime.runAction(it) }
+                        }
+                    )
+                }
+            else if (!mosaikElement.isReadOnly && mosaikElement.isEnabled && mosaikElement is ErgAddressInputField) {
+                setCustomActionField(getIosSystemImage(IMAGE_ADDRESSBOOK, UIImageSymbolScale.Small)!!) {
+                    mosaikViewController.presentViewController(ChooseAddressDialogViewController { addressWithLabel ->
+                        text = addressWithLabel.address
+                        sendControlEventsActions(UIControlEvents.EditingChanged)
+                    }, true) {}
+                }
             }
-
-            // TODO else if !readonly && enabled -> address book
         }
 
         labelView.text = mosaikElement.placeholder
