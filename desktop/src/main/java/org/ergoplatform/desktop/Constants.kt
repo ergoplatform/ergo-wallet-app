@@ -1,3 +1,3 @@
 package org.ergoplatform.desktop
 
-const val appVersionString = "2.1.2219"
+const val appVersionString = "2.2.2220"
