@@ -16,15 +16,17 @@ import org.ergoplatform.desktop.ui.proceedAuthFlowWithPassword
 import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.uilogic.STRING_ERROR_WALLET_TYPE_ERGOAUTH_NOT_AVAIL
 import org.ergoplatform.uilogic.STRING_TITLE_ERGO_AUTH_REQUEST
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
+import org.ergoplatform.wallet.isReadOnly
 
 class ErgoAuthComponent(
     private val request: String,
     private val walletId: Int?,
     private val doOnComplete: (() -> Unit)? = null,
     private val componentContext: ComponentContext,
-    navHost: NavHostComponent,
+    private val navHost: NavHostComponent,
 ) : NavClientScreenComponent(navHost), ComponentContext by componentContext {
 
     override val appBarLabel: String
@@ -49,7 +51,12 @@ class ErgoAuthComponent(
                         Application.database.walletDbProvider.getWalletsWithStates()
                 }
             },
-            onAuthenticate = { passwordDialog.value = true },
+            onAuthenticate = {
+                if (uiLogic.walletConfig?.isReadOnly() == false)
+                    passwordDialog.value = true
+                else
+                    navHost.showErrorDialog(Application.texts.getString(STRING_ERROR_WALLET_TYPE_ERGOAUTH_NOT_AVAIL))
+            },
             onDismiss = router::pop,
         )
 
