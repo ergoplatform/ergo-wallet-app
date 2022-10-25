@@ -4,7 +4,8 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
-val generatedSourceDir = "build/generated/src/java"
+val generatedDir = "build/generated"
+val generatedSourceDir = "$generatedDir/src/java"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -56,7 +57,7 @@ compose.desktop {
     }
 }
 
-project.version = "2.2.2220" // TODO inject to jpackage.cfg
+project.version = "2.2.2220"
 
 tasks {
     processResources {
@@ -121,5 +122,14 @@ obfuscate.configure {
 tasks {
     build {
         dependsOn(obfuscate)
+    }
+}
+
+tasks.register("prepareJpackage") {
+    doFirst {
+        val newContent = project.file("deploy/jpackage.cfg").readText()
+            .replace("\${version}", project.version.toString())
+        project.file(generatedDir).mkdirs()
+        project.file("$generatedDir/jpackage.cfg").writeText(newContent)
     }
 }
