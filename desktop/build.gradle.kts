@@ -59,7 +59,7 @@ compose.desktop {
 project.version = "2.2.2220" // TODO inject to jpackage.cfg
 
 tasks {
-    processResources {
+    compileKotlin {
         doFirst {
             copy {
                 from("../ios/resources/i18n")
