@@ -1,12 +1,12 @@
 package org.ergoplatform.ios.transactions
 
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.transactions.QrCodePagesCollector
 import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.uilogic.STRING_BUTTON_SCAN_SIGNED_TX
 import org.ergoplatform.uilogic.STRING_DESC_PROMPT_SIGNING
 import org.ergoplatform.uilogic.STRING_DESC_PROMPT_SIGNING_MULTIPLE
 import org.ergoplatform.uilogic.STRING_LABEL_QR_PAGES_INFO
-import org.ergoplatform.uilogic.transactions.SubmitTransactionUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.UIColor
 import org.robovm.apple.uikit.UIScrollView
@@ -19,7 +19,12 @@ import org.robovm.apple.uikit.UIViewController
  */
 class SigningPromptViewController(
     private val signingPrompt: String,
-    private val uiLogic: SubmitTransactionUiLogic
+    private val responsePagesCollector: () -> QrCodePagesCollector?,
+    private val onSigningPromptResponseScanComplete: () -> Unit,
+    private val signingRequestToChunks: (String, Int) -> List<String>,
+    private val lastPageButtonLabel: String = STRING_BUTTON_SCAN_SIGNED_TX,
+    private val descriptionLabel: String = STRING_DESC_PROMPT_SIGNING_MULTIPLE,
+    private val lastPageDescriptionLabel: String = STRING_DESC_PROMPT_SIGNING,
 ) : UIViewController() {
     private lateinit var qrPresenter: PagedQrCodeContainer
 
@@ -53,7 +58,7 @@ class SigningPromptViewController(
     }
 
     fun refreshPagesInfo() {
-        scannedPagesLabel.text = uiLogic.signedTxQrCodePagesCollector?.let {
+        scannedPagesLabel.text = responsePagesCollector()?.let {
             if (it.pagesAdded > 0) texts.format(
                 STRING_LABEL_QR_PAGES_INFO,
                 it.pagesAdded, it.pagesCount
@@ -64,29 +69,22 @@ class SigningPromptViewController(
     inner class QrCodeContainer :
         PagedQrCodeContainer(
             texts,
-            STRING_BUTTON_SCAN_SIGNED_TX,
-            lastPageDescriptionLabel = STRING_DESC_PROMPT_SIGNING,
-            descriptionLabel = STRING_DESC_PROMPT_SIGNING_MULTIPLE
+            lastPageButtonLabel,
+            lastPageDescriptionLabel = lastPageDescriptionLabel,
+            descriptionLabel = descriptionLabel
         ) {
         override fun calcChunksFromRawData(rawData: String, limit: Int): List<String> {
-            return coldSigningRequestToQrChunks(
-                rawData, limit
-            )
+            return signingRequestToChunks(rawData, limit)
         }
 
         override fun continueButtonPressed() {
             presentViewController(
                 QrScannerViewController(dismissAnimated = false) { qrCode ->
-                    uiLogic.signedTxQrCodePagesCollector?.let {
+                    responsePagesCollector()?.let {
                         it.addPage(qrCode)
                         if (it.hasAllPages()) {
                             dismissViewController(false) {
-                                val delegate = getAppDelegate()
-                                uiLogic.sendColdWalletSignedTx(
-                                    delegate.prefs,
-                                    IosStringProvider(delegate.texts),
-                                    delegate.database
-                                )
+                                onSigningPromptResponseScanComplete()
                             }
                         } else {
                             refreshPagesInfo()

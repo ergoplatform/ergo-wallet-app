@@ -2,9 +2,11 @@ package org.ergoplatform.ios.ergoauth
 
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
+import org.ergoplatform.ios.transactions.SigningPromptViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.ChooseWalletViewController
 import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.transactions.ergoAuthRequestToQrChunks
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 import org.ergoplatform.wallet.isReadOnly
@@ -74,7 +76,11 @@ class ErgoAuthenticationViewController(
             descLabel.textAlignment = NSTextAlignment.Center
 
             val dismissButton = PrimaryButton(texts.getString(STRING_BUTTON_DONE))
-            dismissButton.addOnTouchUpInsideListener { _, _ -> navigationController.popViewController(true) }
+            dismissButton.addOnTouchUpInsideListener { _, _ ->
+                navigationController.popViewController(
+                    true
+                )
+            }
             val doneButtonContainer = UIView()
             doneButtonContainer.addSubview(dismissButton)
             dismissButton.centerHorizontal().topToSuperview().bottomToSuperview().fixedWidth(150.0)
@@ -152,10 +158,14 @@ class ErgoAuthenticationViewController(
                         }
                     } else {
                         presentViewController(
-                            buildSimpleAlertController(
-                                "",
-                                texts.getString(STRING_ERROR_WALLET_TYPE_ERGOAUTH_NOT_AVAIL),
-                                texts.i18NBundle
+                            SigningPromptViewController(
+                                uiLogic.ergAuthRequest!!.toColdAuthRequest(),
+                                responsePagesCollector = { null }, // TODO
+                                onSigningPromptResponseScanComplete = { TODO() },
+                                signingRequestToChunks = ::ergoAuthRequestToQrChunks,
+                                lastPageButtonLabel = STRING_BUTTON_SCAN_SIGNED_MSG,
+                                descriptionLabel = STRING_DESC_PROMPT_COLD_AUTH_MULTIPLE,
+                                lastPageDescriptionLabel = STRING_DESC_PROMPT_COLD_AUTH,
                             ), true
                         ) {}
                     }
@@ -186,7 +196,8 @@ class ErgoAuthenticationViewController(
 
             descLabel.topToSuperview().widthMatchesSuperview()
             walletChooseButton.topToBottomOf(descLabel).centerHorizontal(true)
-            authButton.topToBottomOf(walletNameLabel, inset = DEFAULT_MARGIN * 2).bottomToSuperview()
+            authButton.topToBottomOf(walletNameLabel, inset = DEFAULT_MARGIN * 2)
+                .bottomToSuperview()
                 .centerHorizontal().fixedWidth(200.0)
         }
 

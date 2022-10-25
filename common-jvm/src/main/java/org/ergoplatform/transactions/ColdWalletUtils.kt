@@ -6,6 +6,9 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.deserializeErgobox
 import org.ergoplatform.deserializeUnsignedTxOffline
+import org.ergoplatform.ergoauth.ErgoAuthRequest
+import org.ergoplatform.ergoauth.ErgoAuthResponse
+import org.ergoplatform.ergoauth.parseErgoAuthRequestFromJson
 import org.ergoplatform.utils.Base64Coder
 
 private const val JSON_FIELD_REDUCED_TX = "reducedTx"
@@ -88,6 +91,8 @@ const val QR_DATA_LENGTH_LIMIT = 2000
 const val QR_DATA_LENGTH_LOW_RES = 400
 private const val QR_PROPERTY_COLD_SIGNING_REQUEST = "CSR"
 private const val QR_PROPERTY_COLD_SIGNED_TX = "CSTX"
+private const val QR_PROPERTY_ERGO_AUTH_REQUEST = "EARQ"
+private const val QR_PROPERTY_ERGO_AUTH_RESPONSE = "EARS"
 private const val QR_PROPERTY_INDEX = "p"
 private const val QR_PROPERTY_PAGES = "n"
 
@@ -99,6 +104,14 @@ fun coldSigningRequestToQrChunks(serializedSigningRequest: String, sizeLimit: In
 
 fun coldSigningResponseToQrChunks(serializedSigningRequest: String, sizeLimit: Int): List<String> {
     return buildQrChunks(QR_PROPERTY_COLD_SIGNED_TX, sizeLimit, serializedSigningRequest)
+}
+
+fun ergoAuthRequestToQrChunks(serializedSigningRequest: String, sizeLimit: Int): List<String> {
+    return buildQrChunks(QR_PROPERTY_ERGO_AUTH_REQUEST, sizeLimit, serializedSigningRequest)
+}
+
+fun ergoAuthResponseToQrChunks(serializedSigningRequest: String, sizeLimit: Int): List<String> {
+    return buildQrChunks(QR_PROPERTY_ERGO_AUTH_RESPONSE, sizeLimit, serializedSigningRequest)
 }
 
 private fun buildQrChunks(

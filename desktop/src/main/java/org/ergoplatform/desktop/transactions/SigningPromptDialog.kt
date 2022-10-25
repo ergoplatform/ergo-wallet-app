@@ -35,6 +35,10 @@ fun SigningPromptDialog(
     pagesScanned: Int?,
     pagesToScan: Int?,
     onDismissRequest: () -> Unit,
+    signingRequestToChunks: (String, Int) -> List<String>,
+    lastPageButtonLabel: String = STRING_BUTTON_SCAN_SIGNED_TX,
+    descriptionLabel: String = STRING_DESC_PROMPT_SIGNING_MULTIPLE,
+    lastPageDescriptionLabel: String = STRING_DESC_PROMPT_SIGNING,
 ) {
     var lowRes by remember { mutableStateOf(false) }
 
@@ -50,14 +54,12 @@ fun SigningPromptDialog(
                     PagedQrContainer(
                         lowRes,
                         calcChunks = { limit ->
-                            coldSigningRequestToQrChunks(
-                                signingPrompt, limit
-                            )
+                            signingRequestToChunks(signingPrompt, limit)
                         },
                         onContinueClicked,
-                        lastPageButtonLabel = STRING_BUTTON_SCAN_SIGNED_TX,
-                        descriptionLabel = STRING_DESC_PROMPT_SIGNING_MULTIPLE,
-                        lastPageDescriptionLabel = STRING_DESC_PROMPT_SIGNING,
+                        lastPageButtonLabel = lastPageButtonLabel,
+                        descriptionLabel = descriptionLabel,
+                        lastPageDescriptionLabel = lastPageDescriptionLabel,
                     )
 
                     // shown when first pages are scanned
@@ -85,9 +87,10 @@ fun SigningPromptDialog(
                     Icon(Icons.Default.ArrowBack, null)
                 }
                 // TODO cold wallet save/load functionality
-                IconButton({ lowRes = !lowRes }, Modifier.align(Alignment.TopEnd)) {
-                    Icon(Icons.Default.BurstMode, null)
-                }
+                if (signingPrompt.length > QR_DATA_LENGTH_LOW_RES)
+                    IconButton({ lowRes = !lowRes }, Modifier.align(Alignment.TopEnd)) {
+                        Icon(Icons.Default.BurstMode, null)
+                    }
             }
             AppScrollbar(scrollState)
         }

@@ -3,18 +3,23 @@ package org.ergoplatform.desktop.ergoauth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.BurstMode
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
 import org.ergoplatform.compose.settings.*
+import org.ergoplatform.desktop.transactions.PagedQrContainer
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.desktop.ui.bigIconSize
 import org.ergoplatform.desktop.ui.defaultMaxWidth
@@ -22,6 +27,7 @@ import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 

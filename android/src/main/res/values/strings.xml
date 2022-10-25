@@ -281,8 +281,12 @@
     <string name="button_authenticate">Authenticate</string>
     <string name="desc_authentication_wallet">Wallet used for authentication:</string>
     <string name="desc_auth_response_send">Authentication was sent to dApp successfully.</string>
-    <string name="error_wallet_type_ergoauth_not_avail">ErgoAuth is not available for read-only wallets.
-        Please restore from mnemonic or use another wallet.</string>
+    <string name="desc_prompt_cold_auth">Scan this QR code
+       with your signing device to authenticate. If you experience problems scanning, lower the resolution with the icon at the top.\n\n
+        When present, scan the signed message QR code to sent it to the dApp.</string>
+    <string name="desc_prompt_cold_auth_multiple">Scan these QR codes
+       with your signing device to authenticate. If you experience problems scanning, lower the resolution with the icon at the top.</string>
+    <string name="button_scan_signed_msg">Scan signed message</string>
 
     <!-- Token information dialog -->
     <string name="label_minting_tx">Minting transaction</string>

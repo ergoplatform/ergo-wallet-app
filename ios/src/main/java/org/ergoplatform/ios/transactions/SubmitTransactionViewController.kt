@@ -7,6 +7,8 @@ import org.ergoplatform.ios.ui.getAppDelegate
 import org.ergoplatform.ios.ui.startAuthFlow
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.TransactionResult
+import org.ergoplatform.transactions.coldSigningRequestToQrChunks
+import org.ergoplatform.transactions.ergoAuthRequestToQrChunks
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SubmitTransactionUiLogic
 import org.robovm.apple.uikit.UIAlertAction
@@ -40,7 +42,20 @@ abstract class SubmitTransactionViewController : ViewControllerWithKeyboardLayou
 
     protected fun showSigningPromptVc(signingPrompt: String) {
         presentViewController(
-            SigningPromptViewController(signingPrompt, uiLogic), true
+            SigningPromptViewController(
+                signingPrompt,
+                responsePagesCollector = {
+                    uiLogic.signedTxQrCodePagesCollector
+                },
+                signingRequestToChunks = ::coldSigningRequestToQrChunks,
+                onSigningPromptResponseScanComplete = {
+                    val delegate = getAppDelegate()
+                    uiLogic.sendColdWalletSignedTx(
+                        delegate.prefs,
+                        IosStringProvider(delegate.texts),
+                        delegate.database
+                    )
+                }), true
         ) {}
     }
 

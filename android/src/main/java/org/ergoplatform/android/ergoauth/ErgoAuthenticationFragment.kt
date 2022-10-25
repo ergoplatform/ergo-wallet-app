@@ -8,11 +8,12 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentErgoAuthenticationBinding
+import org.ergoplatform.android.transactions.SigningPromptDialogDataSource
+import org.ergoplatform.android.transactions.SigningPromptDialogFragment
 import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.getSeverityDrawableResId
@@ -20,10 +21,13 @@ import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
 import org.ergoplatform.android.wallet.WalletChooserCallback
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.transactions.QrCodePagesCollector
+import org.ergoplatform.transactions.ergoAuthRequestToQrChunks
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 import org.ergoplatform.wallet.isReadOnly
 
-class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChooserCallback {
+class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChooserCallback,
+    SigningPromptDialogDataSource {
     private var _binding: FragmentErgoAuthenticationBinding? = null
     private val binding: FragmentErgoAuthenticationBinding get() = _binding!!
 
@@ -83,11 +87,7 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
 
     override fun startAuthFlow() {
         if (authenticationWalletConfig?.isReadOnly() != false) {
-            // read only wallet not supported (yet)
-            MaterialAlertDialogBuilder(requireContext())
-                .setMessage(R.string.error_wallet_type_ergoauth_not_avail)
-                .setPositiveButton(R.string.zxing_button_ok, null)
-                .show()
+            SigningPromptDialogFragment().show(childFragmentManager, null)
         } else {
             super.startAuthFlow()
         }
@@ -138,6 +138,29 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
         super.onDestroyView()
         _binding = null
     }
+
+    override val signingResponseQrCodePagesCollector: QrCodePagesCollector?
+        get() = null // TODO ergoauth cold
+
+    override fun onSigningPromptResponseScanComplete() {
+        TODO("Not yet implemented")
+    }
+
+    override val signingPromptData: String? by lazy {
+        viewModel.uiLogic.ergAuthRequest?.toColdAuthRequest()
+    }
+
+    override fun signingRequestToQrChunks(
+        serializedSigningRequest: String,
+        sizeLimit: Int
+    ): List<String> = ergoAuthRequestToQrChunks(serializedSigningRequest, sizeLimit)
+
+    override val lastPageButtonLabel: Int
+        get() = R.string.button_scan_signed_msg
+    override val descriptionLabel: Int
+        get() = super.descriptionLabel
+    override val lastPageDescriptionLabel: Int
+        get() = super.lastPageDescriptionLabel
 
     companion object {
         val ergoAuthActionRequestKey = "KEY_ERGOAUTH_FRAGMENT"

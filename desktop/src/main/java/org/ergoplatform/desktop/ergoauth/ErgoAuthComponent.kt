@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
 import org.ergoplatform.SigningSecrets
+import org.ergoplatform.desktop.transactions.SigningPromptDialog
 import org.ergoplatform.desktop.ui.PasswordDialog
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
@@ -16,7 +17,10 @@ import org.ergoplatform.desktop.ui.proceedAuthFlowWithPassword
 import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.MessageSeverity
-import org.ergoplatform.uilogic.STRING_ERROR_WALLET_TYPE_ERGOAUTH_NOT_AVAIL
+import org.ergoplatform.transactions.ergoAuthRequestToQrChunks
+import org.ergoplatform.uilogic.STRING_BUTTON_SCAN_SIGNED_MSG
+import org.ergoplatform.uilogic.STRING_DESC_PROMPT_COLD_AUTH
+import org.ergoplatform.uilogic.STRING_DESC_PROMPT_COLD_AUTH_MULTIPLE
 import org.ergoplatform.uilogic.STRING_TITLE_ERGO_AUTH_REQUEST
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 import org.ergoplatform.wallet.isReadOnly
@@ -39,6 +43,8 @@ class ErgoAuthComponent(
     private val authState = mutableStateOf(ErgoAuthUiLogic.State.FETCHING_DATA)
     private val chooseWalletDialog = mutableStateOf<List<Wallet>?>(null)
     private val passwordDialog = mutableStateOf(false)
+    private val signingPromptState = mutableStateOf<String?>(null)
+    private val signingPromptPagesScanned = mutableStateOf<Pair<Int, Int>?>(null)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -55,7 +61,7 @@ class ErgoAuthComponent(
                 if (uiLogic.walletConfig?.isReadOnly() == false)
                     passwordDialog.value = true
                 else
-                    navHost.showErrorDialog(Application.texts.getString(STRING_ERROR_WALLET_TYPE_ERGOAUTH_NOT_AVAIL))
+                    signingPromptState.value = uiLogic.ergAuthRequest?.toColdAuthRequest()
             },
             onDismiss = router::pop,
         )
@@ -82,6 +88,18 @@ class ErgoAuthComponent(
                         uiLogic::startResponse
                     )
                 }
+            )
+        }
+
+        if (signingPromptState.value != null) {
+            SigningPromptDialog(signingPromptState.value!!, onContinueClicked = {},
+                pagesScanned = signingPromptPagesScanned.value?.first,
+                pagesToScan = signingPromptPagesScanned.value?.second,
+                onDismissRequest = { signingPromptState.value = null },
+                signingRequestToChunks = ::ergoAuthRequestToQrChunks,
+                lastPageButtonLabel = STRING_BUTTON_SCAN_SIGNED_MSG,
+                descriptionLabel = STRING_DESC_PROMPT_COLD_AUTH_MULTIPLE,
+                lastPageDescriptionLabel = STRING_DESC_PROMPT_COLD_AUTH
             )
         }
     }

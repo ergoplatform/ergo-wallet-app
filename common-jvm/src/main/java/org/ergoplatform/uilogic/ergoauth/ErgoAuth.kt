@@ -72,7 +72,22 @@ data class ErgoAuthRequest(
     val replyToUrl: String? = null,
     val requestHost: String,
     val sslValidatedBy: String?
-)
+) {
+    fun toColdAuthRequest(): String {
+        val gson = GsonBuilder().disableHtmlEscaping().create()
+        val root = JsonObject()
+        signingMessage?.let { root.addProperty(JSON_KEY_SIGNINGMESSAGE, signingMessage) }
+        sigmaBoolean?.let {
+            root.addProperty(
+                JSON_KEY_SIGMABOOLEAN,
+                String(Base64Coder.encode(sigmaBoolean.toBytes()))
+            )
+        }
+        userMessage?.let { root.addProperty(JSON_KEY_USERMESSAGE, userMessage) }
+        root.addProperty(JSON_KEY_MESSAGE_SEVERITY, messageSeverity.toString())
+        return gson.toJson(root)
+    }
+}
 
 fun getErgoAuthReason(ergoAuthRequest: ErgoAuthRequest): String? {
     return try {
@@ -98,5 +113,15 @@ data class ErgoAuthResponse(
         root.addProperty(JSON_KEY_SIGNEDMESSAGE, signedMessage)
         root.addProperty(JSON_KEY_PROOF, String(Base64Coder.encode(proof)))
         return gson.toJson(root)
+    }
+
+    companion object {
+        fun fromJson(json: String): ErgoAuthResponse {
+            val jsonTree = JsonParser().parse(json) as JsonObject
+            return ErgoAuthResponse(
+                jsonTree.get(JSON_KEY_SIGNEDMESSAGE).asString,
+                Base64Coder.decode(jsonTree.get(JSON_KEY_PROOF).asString, false)
+            )
+        }
     }
 }
