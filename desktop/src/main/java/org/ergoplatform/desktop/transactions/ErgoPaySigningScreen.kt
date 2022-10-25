@@ -185,7 +185,7 @@ private fun BoxScope.ErgoPayDoneLayout(
                 Text(
                     Application.texts.getString(
                         if (dismissShouldRetry) STRING_BUTTON_RETRY
-                        else STRING_LABEL_DISMISS
+                        else STRING_BUTTON_DONE
                     )
                 )
             }

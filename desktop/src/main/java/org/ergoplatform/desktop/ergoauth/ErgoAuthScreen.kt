@@ -88,7 +88,7 @@ private fun AuthDoneLayout(
                 onDismiss,
                 Modifier.align(Alignment.CenterHorizontally).padding(top = defaultPadding),
             ) {
-                Text(remember { Application.texts.getString(STRING_LABEL_DISMISS) })
+                Text(remember { Application.texts.getString(STRING_BUTTON_DONE) })
             }
 
         }

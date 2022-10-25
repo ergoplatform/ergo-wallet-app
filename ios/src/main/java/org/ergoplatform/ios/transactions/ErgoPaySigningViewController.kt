@@ -226,7 +226,7 @@ class ErgoPaySigningViewController(
                 val descLabel = Body1Label()
                 descLabel.textAlignment = NSTextAlignment.Center
 
-                val dismissButton = PrimaryButton(texts.get(STRING_LABEL_DISMISS))
+                val dismissButton = PrimaryButton(texts.get(STRING_BUTTON_DONE))
                 dismissButton.addOnTouchUpInsideListener { _, _ ->
                     if (dismissShouldRetry) {
                         startReloadFromDapp()
@@ -275,7 +275,7 @@ class ErgoPaySigningViewController(
             }
             descLabel?.text = uiLogic.getDoneMessage(IosStringProvider(texts))
             dismissButton?.setTitle(
-                texts.get(if (dismissShouldRetry) STRING_BUTTON_RETRY else STRING_LABEL_DISMISS),
+                texts.get(if (dismissShouldRetry) STRING_BUTTON_RETRY else STRING_BUTTON_DONE),
                 UIControlState.Normal
             )
             val showRatingPrompt = uiLogic.showRatingPrompt()

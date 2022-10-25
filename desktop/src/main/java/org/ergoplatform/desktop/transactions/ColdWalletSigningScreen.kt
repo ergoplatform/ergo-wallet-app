@@ -82,7 +82,7 @@ fun ColdSigningResultLayout(
                     coldSigningResponseToQrChunks(uiLogic.signedQrCode!!, limit)
                 },
                 onDismiss,
-                lastPageButtonLabel = STRING_LABEL_DISMISS,
+                lastPageButtonLabel = STRING_BUTTON_DONE,
                 descriptionLabel = STRING_DESC_SHOW_SIGNED_MULTIPLE,
                 lastPageDescriptionLabel = STRING_DESC_SHOW_SIGNED,
                 modifier = Modifier.padding(top = defaultPadding * 1.5f)

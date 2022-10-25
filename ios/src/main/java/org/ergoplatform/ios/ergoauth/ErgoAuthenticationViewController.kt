@@ -73,7 +73,7 @@ class ErgoAuthenticationViewController(
             descLabel.text = uiLogic.getDoneMessage(texts)
             descLabel.textAlignment = NSTextAlignment.Center
 
-            val dismissButton = PrimaryButton(texts.getString(STRING_LABEL_DISMISS))
+            val dismissButton = PrimaryButton(texts.getString(STRING_BUTTON_DONE))
             dismissButton.addOnTouchUpInsideListener { _, _ -> navigationController.popViewController(true) }
             val doneButtonContainer = UIView()
             doneButtonContainer.addSubview(dismissButton)
