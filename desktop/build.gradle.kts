@@ -59,15 +59,18 @@ compose.desktop {
 project.version = "2.2.2220" // TODO inject to jpackage.cfg
 
 tasks {
-    compileKotlin {
+    processResources {
         doFirst {
             copy {
                 from("../ios/resources/i18n")
                 into("src/main/resources/i18n")
                 include("*.properties")
             }
+        }
+    }
+    compileKotlin {
+        doFirst {
             project.file(generatedSourceDir).mkdirs()
-            println("Make file")
             project.file("$generatedSourceDir/Constants.kt").writeText(
                 """
                 package org.ergoplatform.desktop
