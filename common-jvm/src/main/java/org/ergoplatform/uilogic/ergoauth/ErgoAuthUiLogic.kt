@@ -12,10 +12,7 @@ import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.signMessage
-import org.ergoplatform.transactions.MessageSeverity
-import org.ergoplatform.transactions.QrCodePagesCollector
-import org.ergoplatform.transactions.ergoAuthRequestFromQrChunks
-import org.ergoplatform.transactions.getErgoAuthRequestChunk
+import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
@@ -44,6 +41,9 @@ abstract class ErgoAuthUiLogic {
         private set
     var authResponse: String? = null
         private set
+
+    // the qr pages collector for scanning the request on the hot device
+    val responsePagesCollector = QrCodePagesCollector(::getErgoAuthResponseChunk)
 
     fun init(ergoAuthData: String, walletId: Int, texts: StringProvider, db: IAppDatabase) {
         if (requestJob == null) {
@@ -125,6 +125,28 @@ abstract class ErgoAuthUiLogic {
             lastMessage = ergoAuthRequest.userMessage
             lastMessageSeverity = ergoAuthRequest.messageSeverity
             notifyStateChanged(State.WAIT_FOR_AUTH)
+        }
+    }
+
+    fun startResponseFromCold(texts: StringProvider) {
+        val ergAuthRequest = this.ergAuthRequest!!
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                notifyStateChanged(State.FETCHING_DATA)
+                postErgoAuthResponse(
+                    ergAuthRequest.replyToUrl!!,
+                    ergoAuthResponseFromQrChunks(responsePagesCollector.getAllPages())
+                )
+
+                lastMessage = null
+                lastMessageSeverity = MessageSeverity.INFORMATION
+
+            } catch (t: Throwable) {
+                LogUtils.logDebug(this.javaClass.simpleName, "Error on auth response", t)
+                lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, getErrorMessage(t, texts))
+                lastMessageSeverity = MessageSeverity.ERROR
+            }
+            notifyStateChanged(State.DONE)
         }
     }
 

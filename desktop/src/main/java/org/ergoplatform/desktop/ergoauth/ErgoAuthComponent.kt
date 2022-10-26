@@ -107,7 +107,21 @@ class ErgoAuthComponent(
 
         if (signingPromptState.value != null) {
             SigningPromptDialog(
-                signingPromptState.value!!, onContinueClicked = {},
+                signingPromptState.value!!,
+                onContinueClicked = {
+                    router.push(ScreenConfig.QrCodeScanner { qrCode ->
+                        println(qrCode)
+                        uiLogic.responsePagesCollector.let {
+                            it.addPage(qrCode)
+                            if (it.hasAllPages()) {
+                                signingPromptState.value = null
+                                uiLogic.startResponseFromCold(Application.texts)
+                            } else {
+                                signingPromptPagesScanned.value = Pair(it.pagesAdded, it.pagesCount)
+                            }
+                        }
+                    })
+                },
                 pagesScanned = signingPromptPagesScanned.value?.first,
                 pagesToScan = signingPromptPagesScanned.value?.second,
                 onDismissRequest = { signingPromptState.value = null },

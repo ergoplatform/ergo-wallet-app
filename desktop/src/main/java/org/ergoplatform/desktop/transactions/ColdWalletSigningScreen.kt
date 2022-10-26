@@ -63,7 +63,7 @@ fun ColdWalletSigningScreen(
             )
 
             ColdWalletSigningUiLogic.State.PRESENT_RESULT -> ColdSigningResultLayout(
-                uiLogic.signedQrCode!!, modifier, onDismiss
+                uiLogic.signedQrCode!!, modifier, onDismiss, ::coldSigningResponseToQrChunks
             )
         }
     }
@@ -74,6 +74,7 @@ fun ColdSigningResultLayout(
     qrCodeData: String,
     modifier: Modifier,
     onDismiss: () -> Unit,
+    dataToChunks: (String, Int) -> List<String>,
     descriptionLabel: String = STRING_DESC_SHOW_SIGNED_MULTIPLE,
     lastPageDescriptionLabel: String = STRING_DESC_SHOW_SIGNED,
 ) {
@@ -83,9 +84,7 @@ fun ColdSigningResultLayout(
         Box(Modifier.padding(defaultPadding)) {
             PagedQrContainer(
                 lowRes,
-                calcChunks = { limit ->
-                    coldSigningResponseToQrChunks(qrCodeData, limit)
-                },
+                calcChunks = { limit -> dataToChunks(qrCodeData, limit) },
                 onDismiss,
                 lastPageButtonLabel = STRING_BUTTON_DONE,
                 descriptionLabel = descriptionLabel,

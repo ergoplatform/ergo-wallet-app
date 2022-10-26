@@ -216,6 +216,14 @@ fun getErgoAuthRequestChunk(chunk: String): QrChunk? {
     }
 }
 
+fun getErgoAuthResponseChunk(chunk: String): QrChunk? {
+    return try {
+        parseQrChunk(chunk, QR_PROPERTY_ERGO_AUTH_RESPONSE)
+    } catch (t: Throwable) {
+        null
+    }
+}
+
 private fun parseQrChunk(chunk: String, property: String): QrChunk {
     val jsonTree = JsonParser().parse(chunk) as JsonObject
     if (!jsonTree.has(property)) {

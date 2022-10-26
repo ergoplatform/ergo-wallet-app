@@ -28,6 +28,7 @@ import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.transactions.ergoAuthResponseToQrChunks
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 
@@ -72,6 +73,7 @@ fun ErgoAuthScreen(
                     if (uiLogic.isColdAuth && uiLogic.authResponse != null)
                         ColdSigningResultLayout(
                             uiLogic.authResponse!!, Modifier, onDismiss,
+                            ::ergoAuthResponseToQrChunks,
                             descriptionLabel = STRING_DESC_RESPONSE_COLD_AUTH_MULTIPLE,
                             lastPageDescriptionLabel = STRING_DESC_RESPONSE_COLD_AUTH
                         )
