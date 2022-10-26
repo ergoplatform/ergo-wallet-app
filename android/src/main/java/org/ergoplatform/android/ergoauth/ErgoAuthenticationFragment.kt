@@ -1,5 +1,6 @@
 package org.ergoplatform.android.ergoauth
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,21 +9,18 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentErgoAuthenticationBinding
 import org.ergoplatform.android.transactions.SigningPromptDialogDataSource
 import org.ergoplatform.android.transactions.SigningPromptDialogFragment
-import org.ergoplatform.android.ui.AbstractAuthenticationFragment
-import org.ergoplatform.android.ui.AndroidStringProvider
-import org.ergoplatform.android.ui.getSeverityDrawableResId
+import org.ergoplatform.android.ui.*
 import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
 import org.ergoplatform.android.wallet.WalletChooserCallback
 import org.ergoplatform.persistance.WalletConfig
-import org.ergoplatform.transactions.MessageSeverity
-import org.ergoplatform.transactions.QrCodePagesCollector
-import org.ergoplatform.transactions.ergoAuthRequestToQrChunks
+import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 import org.ergoplatform.wallet.isReadOnly
 
@@ -33,6 +31,8 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
 
     private val args: ErgoAuthenticationFragmentArgs by navArgs()
     private val viewModel: ErgoAuthenticationViewModel by viewModels()
+
+    private var scaleDown = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,9 +58,15 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
             binding.layoutProgress.visibility =
                 if (state == ErgoAuthUiLogic.State.FETCHING_DATA) View.VISIBLE else View.GONE
             binding.layoutDoneInfo.visibility =
-                if (state == ErgoAuthUiLogic.State.DONE) View.VISIBLE else View.GONE
+                if (state == ErgoAuthUiLogic.State.DONE && viewModel.uiLogic.authResponse == null)
+                    View.VISIBLE else View.GONE
+            binding.cardSigningResult.root.visibility =
+                if (state == ErgoAuthUiLogic.State.DONE && viewModel.uiLogic.authResponse != null)
+                    View.VISIBLE else View.GONE
             binding.layoutAuthenticate.visibility =
                 if (state == ErgoAuthUiLogic.State.WAIT_FOR_AUTH) View.VISIBLE else View.GONE
+            binding.cardScanMore.root.visibility =
+                if (state == ErgoAuthUiLogic.State.SCANNING) View.VISIBLE else View.GONE
 
             if (state == ErgoAuthUiLogic.State.DONE) {
                 refreshDoneScreen()
@@ -72,6 +78,12 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
                     )
             } else if (state == ErgoAuthUiLogic.State.WAIT_FOR_AUTH)
                 refreshAuthPrompt()
+            else if (state == ErgoAuthUiLogic.State.SCANNING)
+                refreshScanMoreCardInfo(
+                    binding.cardScanMore,
+                    viewModel.uiLogic.requestPagesCollector!!,
+                    viewModel.uiLogic.lastMessage
+                )
         }
 
         binding.buttonDismiss.setOnClickListener {
@@ -82,6 +94,32 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
         }
         binding.buttonAuthenticate.setOnClickListener {
             startAuthFlow()
+        }
+
+        setupSigningResultCardBinding(
+            binding.cardSigningResult,
+            onSwitchRes = {
+                scaleDown = !scaleDown
+                setResultQrCodeData()
+            },
+            lastPageDesc = R.string.desc_response_cold_auth,
+            pageDesc = R.string.desc_response_cold_auth_multiple,
+        )
+
+        binding.cardScanMore.buttonScanMore.setOnClickListener {
+            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+        }
+    }
+
+    private fun setResultQrCodeData() {
+        viewModel.uiLogic.authResponse?.let {
+            binding.cardSigningResult.qrCodePager.adapter = QrPagerAdapter(
+                ergoAuthResponseToQrChunks(
+                    it,
+                    if (scaleDown) QR_DATA_LENGTH_LOW_RES else QR_DATA_LENGTH_LIMIT
+                )
+            )
+            binding.cardSigningResult.refreshButtonState()
         }
     }
 
@@ -124,6 +162,7 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
             uiLogic.getDoneSeverity().getSeverityDrawableResId(),
             0, 0
         )
+        setResultQrCodeData()
     }
 
     private fun refreshWalletLabel() {
@@ -134,16 +173,27 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
         viewModel.uiLogic.startResponse(secrets, AndroidStringProvider(requireContext()))
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            result.contents?.let {
+                viewModel.uiLogic.addRequestQrPage(it, AndroidStringProvider(requireContext()))
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
-    override val signingResponseQrCodePagesCollector: QrCodePagesCollector?
-        get() = null // TODO ergoauth cold
+    override val signingResponseQrCodePagesCollector: QrCodePagesCollector
+        get() = viewModel.uiLogic.responsePagesCollector
 
     override fun onSigningPromptResponseScanComplete() {
-        TODO("Not yet implemented")
+        viewModel.uiLogic.startResponseFromCold(AndroidStringProvider(requireContext()))
     }
 
     override val signingPromptData: String? by lazy {

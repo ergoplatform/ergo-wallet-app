@@ -36,126 +36,14 @@
                 android:id="@+id/transaction_info"
                 layout="@layout/card_transaction_info" />
 
-            <androidx.cardview.widget.CardView
+            <include
                 android:id="@+id/card_signing_result"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="@dimen/activity_horizontal_margin"
-                android:visibility="gone"
-                tools:visibility="visible">
+                layout="@layout/card_present_signing_result" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:id="@+id/switch_resolution"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_margin="@dimen/activity_vertical_margin"
-                        android:contentDescription="@null"
-                        android:padding="@dimen/half_horizontal_margin"
-                        android:src="@drawable/ic_burst_mode_24" />
-
-                    <androidx.viewpager2.widget.ViewPager2
-                        android:id="@+id/qr_code_pager"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        tools:layout_height="325dp" />
-
-                    <TextView
-                        android:id="@+id/tv_scan_signed_desc"
-                        style="@style/TextAppearance.App.Body1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
-                        android:gravity="center"
-                        android:text="@string/desc_show_signed" />
-
-                    <Button
-                        android:id="@+id/button_scan_next_qr"
-                        style="?attr/materialButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="@dimen/activity_horizontal_margin"
-                        android:layout_marginBottom="24dp"
-                        android:text="@string/button_next"
-                        android:visibility="gone" />
-
-                    <Button
-                        android:id="@+id/button_dismiss"
-                        style="?attr/materialButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="@dimen/activity_horizontal_margin"
-                        android:layout_marginBottom="24dp"
-                        android:minWidth="120dp"
-                        android:text="@string/button_done" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
+            <include
                 android:id="@+id/card_scan_more"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="@dimen/activity_horizontal_margin"
-                android:visibility="gone"
-                tools:visibility="gone">
+                layout="@layout/card_scan_more" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:layout_marginVertical="@dimen/activity_vertical_margin"
-                        android:contentDescription="@string/label_qr_code"
-                        android:src="@drawable/ic_qr_code_24" />
-
-                    <TextView
-                        android:id="@+id/label_scanned_pages"
-                        style="@style/TextAppearance.App.Headline2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
-                        android:gravity="center"
-                        tools:text="1 of 2" />
-
-                    <TextView
-                        android:id="@+id/label_error_message"
-                        style="@style/TextAppearance.App.Body1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
-                        android:layout_marginTop="@dimen/half_horizontal_margin"
-                        android:gravity="center"
-                        android:textColor="@color/primary"
-                        android:textStyle="bold"
-                        android:visibility="gone"
-                        tools:text="Error message"
-                        tools:visibility="visible" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/button_scan_more"
-                        style="?attr/materialButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="@dimen/activity_horizontal_margin"
-                        android:layout_marginBottom="24dp"
-                        android:minWidth="120dp"
-                        android:text="@string/label_scan_qr"
-                        app:icon="@drawable/ic_qr_code_scanner_24" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
         </FrameLayout>
     </androidx.core.widget.NestedScrollView>
 

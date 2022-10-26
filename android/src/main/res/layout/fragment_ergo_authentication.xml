@@ -189,6 +189,14 @@
 
             </LinearLayout>
 
+            <include
+                android:id="@+id/card_signing_result"
+                layout="@layout/card_present_signing_result" />
+
+            <include
+                android:id="@+id/card_scan_more"
+                layout="@layout/card_scan_more" />
+
         </FrameLayout>
     </androidx.core.widget.NestedScrollView>
 

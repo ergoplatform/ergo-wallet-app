@@ -7,9 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.launch
@@ -67,15 +65,15 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
         viewModel.signingResult.observe(viewLifecycleOwner, {
             if (it?.success == true && viewModel.signedQrCode != null) {
                 binding.transactionInfo.root.visibility = View.GONE
-                binding.cardSigningResult.visibility = View.VISIBLE
-                binding.cardScanMore.visibility = View.GONE
+                binding.cardSigningResult.root.visibility = View.VISIBLE
+                binding.cardScanMore.root.visibility = View.GONE
 
-                binding.switchResolution.visibility =
+                binding.cardSigningResult.switchResolution.visibility =
                     if (viewModel.signedQrCode!!.length > QR_DATA_LENGTH_LOW_RES) View.VISIBLE else View.GONE
                 setQrData()
 
             } else {
-                binding.cardSigningResult.visibility = View.GONE
+                binding.cardSigningResult.root.visibility = View.GONE
 
                 it?.let {
                     val snackbar = Snackbar.make(
@@ -102,46 +100,38 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             }
         }
 
-        binding.buttonScanNextQr.setOnClickListener {
-            binding.qrCodePager.currentItem = binding.qrCodePager.currentItem + 1
-        }
-
-        binding.switchResolution.setOnClickListener {
-            scaleDown = !scaleDown
-            setQrData()
-        }
-
-        binding.buttonDismiss.setOnClickListener {
-            findNavController().popBackStack()
-        }
-
-        binding.buttonScanMore.setOnClickListener {
+        binding.cardScanMore.buttonScanMore.setOnClickListener {
             IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
         }
 
-        binding.qrCodePager.registerOnPageChangeCallback(object :
-            ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                refreshButtonState()
-            }
-        })
+        setupSigningResultCardBinding(
+            binding.cardSigningResult,
+            onSwitchRes = {
+                scaleDown = !scaleDown
+                setQrData()
+            },
+        )
     }
 
     private fun setQrData() {
         viewModel.signedQrCode?.let {
-            binding.qrCodePager.adapter = QrPagerAdapter(
+            binding.cardSigningResult.qrCodePager.adapter = QrPagerAdapter(
                 coldSigningResponseToQrChunks(
                     it,
                     if (scaleDown) QR_DATA_LENGTH_LOW_RES else QR_DATA_LENGTH_LIMIT
                 )
             )
-            refreshButtonState()
+            binding.cardSigningResult.refreshButtonState()
         }
     }
 
     private fun addQrCodeChunk(qrCode: String?) {
-        qrCode?.let { viewModel.uiLogic.addQrCodeChunk(qrCode, AndroidStringProvider(requireContext())) }
+        qrCode?.let {
+            viewModel.uiLogic.addQrCodeChunk(
+                qrCode,
+                AndroidStringProvider(requireContext())
+            )
+        }
 
         val transactionInfo = viewModel.uiLogic.transactionInfo
 
@@ -151,21 +141,16 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
 
         if (transactionInfo == null) {
             // refresh information on scanned codes
-            binding.labelScannedPages.text = getString(
-                R.string.label_qr_pages_info,
-                viewModel.uiLogic.qrPagesCollector.pagesAdded.toString(),
-                viewModel.uiLogic.qrPagesCollector.pagesCount.toString()
+            refreshScanMoreCardInfo(
+                binding.cardScanMore,
+                viewModel.uiLogic.qrPagesCollector,
+                viewModel.uiLogic.lastErrorMessage
             )
-            binding.cardScanMore.visibility = View.VISIBLE
-            val errorMessage = viewModel.uiLogic.lastErrorMessage
-            binding.labelErrorMessage.visibility =
-                if (errorMessage.isNullOrBlank()) View.GONE else View.VISIBLE
-            binding.labelErrorMessage.text = errorMessage
         }
 
         transactionInfo?.reduceBoxes()?.let {
             binding.transactionInfo.root.visibility = View.VISIBLE
-            binding.cardScanMore.visibility = View.GONE
+            binding.cardScanMore.root.visibility = View.GONE
 
             val context = requireContext()
             binding.transactionInfo.bindTransactionInfo(it, null, layoutInflater,
@@ -180,17 +165,6 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
                 }
             )
         }
-    }
-
-    private fun refreshButtonState() {
-        val lastPage =
-            binding.qrCodePager.currentItem + 1 == binding.qrCodePager.adapter!!.itemCount
-        binding.buttonDismiss.visibility = if (lastPage) View.VISIBLE else View.GONE
-        binding.buttonScanNextQr.visibility = if (!lastPage) View.VISIBLE else View.GONE
-        binding.tvScanSignedDesc.setText(
-            if (lastPage) R.string.desc_show_signed
-            else R.string.desc_show_signed_multiple
-        )
     }
 
     override val authenticationWalletConfig: WalletConfig?
