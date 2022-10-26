@@ -1,12 +1,15 @@
 package org.ergoplatform.ios.ergoauth
 
 import kotlinx.coroutines.CoroutineScope
+import org.ergoplatform.ios.transactions.ColdWalletSigningViewController
 import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
+import org.ergoplatform.ios.transactions.PagedQrCodeContainer
 import org.ergoplatform.ios.transactions.SigningPromptViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.ChooseWalletViewController
 import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.ergoAuthRequestToQrChunks
+import org.ergoplatform.transactions.ergoAuthResponseToQrChunks
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 import org.ergoplatform.wallet.isReadOnly
@@ -25,6 +28,9 @@ class ErgoAuthenticationViewController(
     private lateinit var fetchingContainer: ErgoPaySigningViewController.FetchDataContainer
     private lateinit var texts: IosStringProvider
     private val stateDoneContainer = CardView()
+    private val scanningContainer =
+        ColdWalletSigningViewController.ScanningContainer(::scanNextRequestChunk)
+    private val signedQrCodesContainer = SignedMsgQrCodeContainer()
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -47,9 +53,13 @@ class ErgoAuthenticationViewController(
         view.addSubview(fetchingContainer)
         view.addSubview(stateDoneContainer)
         scrollingContainer.addSubview(authRequestContainer)
+        scrollingContainer.addSubview(scanningContainer)
+        scrollingContainer.addSubview(signedQrCodesContainer)
 
         fetchingContainer.widthMatchesSuperview(maxWidth = MAX_WIDTH).centerVertical()
         authRequestContainer.edgesToSuperview(maxWidth = MAX_WIDTH)
+        scanningContainer.edgesToSuperview(maxWidth = MAX_WIDTH)
+        signedQrCodesContainer.edgesToSuperview(maxWidth = MAX_WIDTH)
         stateDoneContainer.centerVertical().widthMatchesSuperview(maxWidth = MAX_WIDTH)
         scrollView.edgesToSuperview()
 
@@ -62,7 +72,9 @@ class ErgoAuthenticationViewController(
     }
 
     private fun showDoneInfo() {
-        if (stateDoneContainer.contentView.subviews.isEmpty()) {
+        if (uiLogic.coldSerializedAuthResponse != null)
+            signedQrCodesContainer.rawData = uiLogic.coldSerializedAuthResponse
+        else if (stateDoneContainer.contentView.subviews.isEmpty()) {
             val image = uiLogic.getDoneSeverity().getImage()?.let {
                 UIImageView(getIosSystemImage(it, UIImageSymbolScale.Large)).apply {
                     contentMode = UIViewContentMode.ScaleAspectFit
@@ -160,8 +172,10 @@ class ErgoAuthenticationViewController(
                         presentViewController(
                             SigningPromptViewController(
                                 uiLogic.ergAuthRequest!!.toColdAuthRequest(),
-                                responsePagesCollector = { null }, // TODO
-                                onSigningPromptResponseScanComplete = { TODO() },
+                                responsePagesCollector = { uiLogic.responsePagesCollector },
+                                onSigningPromptResponseScanComplete = {
+                                    uiLogic.startResponseFromCold(texts)
+                                },
                                 signingRequestToChunks = ::ergoAuthRequestToQrChunks,
                                 lastPageButtonLabel = STRING_BUTTON_SCAN_SIGNED_MSG,
                                 descriptionLabel = STRING_DESC_PROMPT_COLD_AUTH_MULTIPLE,
@@ -206,15 +220,44 @@ class ErgoAuthenticationViewController(
         }
     }
 
+    private fun scanNextRequestChunk() {
+        presentViewController(QrScannerViewController(invokeAfterDismissal = false) {
+            uiLogic.addRequestQrPage(it, texts)
+            scanningContainer.refreshTexts(
+                uiLogic.requestPagesCollector!!,
+                uiLogic.lastMessage
+            )
+        }, true) {}
+    }
+
+    inner class SignedMsgQrCodeContainer : PagedQrCodeContainer(
+        texts.i18NBundle,
+        STRING_BUTTON_DONE,
+        descriptionLabel = STRING_DESC_RESPONSE_COLD_AUTH_MULTIPLE,
+        lastPageDescriptionLabel = STRING_DESC_RESPONSE_COLD_AUTH,
+    ) {
+        override fun calcChunksFromRawData(rawData: String, limit: Int): List<String> {
+            return ergoAuthResponseToQrChunks(rawData, limit)
+        }
+
+        override fun continueButtonPressed() {
+            navigationController.popViewController(true)
+        }
+    }
+
     inner class IosUiLogic : ErgoAuthUiLogic() {
         override val coroutineScope: CoroutineScope
             get() = viewControllerScope
 
         override fun notifyStateChanged(newState: State) {
             runOnMainThread {
-                stateDoneContainer.isHidden = newState != State.DONE
+                stateDoneContainer.isHidden =
+                    newState != State.DONE || uiLogic.coldSerializedAuthResponse != null
+                signedQrCodesContainer.isHidden =
+                    newState != State.DONE || uiLogic.coldSerializedAuthResponse == null
                 fetchingContainer.isHidden = newState != State.FETCHING_DATA
                 authRequestContainer.isHidden = newState != State.WAIT_FOR_AUTH
+                scanningContainer.isHidden = newState != State.SCANNING
 
                 if (newState == State.DONE) {
                     showDoneInfo()
@@ -224,6 +267,11 @@ class ErgoAuthenticationViewController(
                     }
                 } else if (newState == State.WAIT_FOR_AUTH) {
                     authRequestContainer.showRequestInfo()
+                } else if (newState == State.SCANNING) {
+                    scanningContainer.refreshTexts(
+                        uiLogic.requestPagesCollector!!,
+                        uiLogic.lastMessage
+                    )
                 }
             }
         }

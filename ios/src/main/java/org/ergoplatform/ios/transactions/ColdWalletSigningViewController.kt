@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.transactions.QrCodePagesCollector
 import org.ergoplatform.transactions.SigningResult
 import org.ergoplatform.transactions.coldSigningResponseToQrChunks
 import org.ergoplatform.transactions.reduceBoxes
@@ -12,13 +13,15 @@ import org.ergoplatform.uilogic.transactions.ColdWalletSigningUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
-class ColdWalletSigningViewController(private val signingRequestChunk: String, private val walletId: Int) :
-    CoroutineViewController() {
+class ColdWalletSigningViewController(
+    private val signingRequestChunk: String,
+    private val walletId: Int
+) : CoroutineViewController() {
 
     val uiLogic = IosUiLogic()
     val texts = getAppDelegate().texts
 
-    private val scanningContainer = ScanningContainer()
+    private val scanningContainer = ScanningContainer(::scanNext)
     private val transactionContainer = SigningTransactionContainer(texts, this) {
         startAuthFlow(uiLogic.wallet!!.walletConfig) { mnemonic ->
             uiLogic.signTxWithMnemonicAsync(mnemonic, IosStringProvider(texts))
@@ -58,13 +61,7 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
     private fun addQrCodeChunk(qrCodeChunk: String) {
         uiLogic.addQrCodeChunk(qrCodeChunk, IosStringProvider(texts))
 
-        scanningContainer.statusText.text =
-            texts.format(
-                STRING_LABEL_QR_PAGES_INFO,
-                uiLogic.qrPagesCollector.pagesAdded,
-                uiLogic.qrPagesCollector.pagesCount
-            )
-        scanningContainer.errorText.text = uiLogic.lastErrorMessage ?: ""
+        scanningContainer.refreshTexts(uiLogic.qrPagesCollector, uiLogic.lastErrorMessage)
 
         uiLogic.transactionInfo?.reduceBoxes()?.let {
             transactionContainer.bindTransaction(it, null,
@@ -84,8 +81,10 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
 
     private fun refreshUiState() {
         scanningContainer.isHidden = uiLogic.state != ColdWalletSigningUiLogic.State.SCANNING
-        transactionContainer.isHidden = uiLogic.state != ColdWalletSigningUiLogic.State.WAITING_TO_CONFIRM
-        signedQrCodesContainer.isHidden = uiLogic.state != ColdWalletSigningUiLogic.State.PRESENT_RESULT
+        transactionContainer.isHidden =
+            uiLogic.state != ColdWalletSigningUiLogic.State.WAITING_TO_CONFIRM
+        signedQrCodesContainer.isHidden =
+            uiLogic.state != ColdWalletSigningUiLogic.State.PRESENT_RESULT
     }
 
     private fun scanNext() {
@@ -94,7 +93,9 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         }, true) {}
     }
 
-    inner class ScanningContainer : UIView(CGRect.Zero()) {
+    class ScanningContainer(
+        onScanNext: () -> Unit
+    ) : UIView(CGRect.Zero()) {
         val statusText = Headline2Label().apply {
             textAlignment = NSTextAlignment.Center
         }
@@ -104,15 +105,17 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
         }
 
         init {
-            val image = UIImageView(getIosSystemImage(IMAGE_QR_CODE, UIImageSymbolScale.Large, 150.0)).apply {
+            val image = UIImageView(
+                getIosSystemImage(IMAGE_QR_CODE, UIImageSymbolScale.Large, 150.0)
+            ).apply {
                 contentMode = UIViewContentMode.Center
                 tintColor = UIColor.secondaryLabel()
             }
             val scanNextButton = PrimaryButton(
-                texts.get(STRING_LABEL_SCAN_QR),
+                getAppDelegate().texts.get(STRING_LABEL_SCAN_QR),
                 getIosSystemImage(IMAGE_QR_SCAN, UIImageSymbolScale.Small)
             ).apply {
-                addOnTouchUpInsideListener { _, _ -> scanNext() }
+                addOnTouchUpInsideListener { _, _ -> onScanNext() }
             }
 
             addSubview(image)
@@ -123,8 +126,19 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
             image.fixedHeight(200.0).topToSuperview().widthMatchesSuperview()
             statusText.topToBottomOf(image, DEFAULT_MARGIN * 2).widthMatchesSuperview()
             errorText.topToBottomOf(statusText, DEFAULT_MARGIN * 2).widthMatchesSuperview()
-            scanNextButton.topToBottomOf(errorText, DEFAULT_MARGIN * 2).bottomToSuperview(canBeLess = true)
+            scanNextButton.topToBottomOf(errorText, DEFAULT_MARGIN * 2)
+                .bottomToSuperview(canBeLess = true)
                 .fixedWidth(200.0).centerHorizontal()
+        }
+
+        fun refreshTexts(qrPagesCollector: QrCodePagesCollector, errorMessage: String?) {
+            statusText.text =
+                getAppDelegate().texts.format(
+                    STRING_LABEL_QR_PAGES_INFO,
+                    qrPagesCollector.pagesAdded,
+                    qrPagesCollector.pagesCount
+                )
+            errorText.text = errorMessage ?: ""
         }
     }
 

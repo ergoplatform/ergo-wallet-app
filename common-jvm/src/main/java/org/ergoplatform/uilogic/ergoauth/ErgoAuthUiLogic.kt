@@ -39,7 +39,7 @@ abstract class ErgoAuthUiLogic {
     // the qr pages collector for scanning the request on the cold device
     var requestPagesCollector: QrCodePagesCollector? = null
         private set
-    var authResponse: String? = null
+    var coldSerializedAuthResponse: String? = null
         private set
 
     // the qr pages collector for scanning the request on the hot device
@@ -170,7 +170,7 @@ abstract class ErgoAuthUiLogic {
                 val ergoAuthResponse = ErgoAuthResponse(signedMessage, signature)
 
                 if (isColdAuth) {
-                    authResponse = ergoAuthResponse.toJson()
+                    coldSerializedAuthResponse = ergoAuthResponse.toJson()
                 } else {
                     postErgoAuthResponse(ergAuthRequest.replyToUrl!!, ergoAuthResponse)
                 }

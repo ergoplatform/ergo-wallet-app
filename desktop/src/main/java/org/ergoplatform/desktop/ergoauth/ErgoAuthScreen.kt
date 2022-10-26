@@ -70,9 +70,9 @@ fun ErgoAuthScreen(
                     WaitForAuthLayout(uiLogic, onChangeWallet, onAuthenticate)
 
                 ErgoAuthUiLogic.State.DONE ->
-                    if (uiLogic.isColdAuth && uiLogic.authResponse != null)
+                    if (uiLogic.isColdAuth && uiLogic.coldSerializedAuthResponse != null)
                         ColdSigningResultLayout(
-                            uiLogic.authResponse!!, Modifier, onDismiss,
+                            uiLogic.coldSerializedAuthResponse!!, Modifier, onDismiss,
                             ::ergoAuthResponseToQrChunks,
                             descriptionLabel = STRING_DESC_RESPONSE_COLD_AUTH_MULTIPLE,
                             lastPageDescriptionLabel = STRING_DESC_RESPONSE_COLD_AUTH

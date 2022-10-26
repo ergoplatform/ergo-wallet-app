@@ -58,10 +58,10 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
             binding.layoutProgress.visibility =
                 if (state == ErgoAuthUiLogic.State.FETCHING_DATA) View.VISIBLE else View.GONE
             binding.layoutDoneInfo.visibility =
-                if (state == ErgoAuthUiLogic.State.DONE && viewModel.uiLogic.authResponse == null)
+                if (state == ErgoAuthUiLogic.State.DONE && viewModel.uiLogic.coldSerializedAuthResponse == null)
                     View.VISIBLE else View.GONE
             binding.cardSigningResult.root.visibility =
-                if (state == ErgoAuthUiLogic.State.DONE && viewModel.uiLogic.authResponse != null)
+                if (state == ErgoAuthUiLogic.State.DONE && viewModel.uiLogic.coldSerializedAuthResponse != null)
                     View.VISIBLE else View.GONE
             binding.layoutAuthenticate.visibility =
                 if (state == ErgoAuthUiLogic.State.WAIT_FOR_AUTH) View.VISIBLE else View.GONE
@@ -112,7 +112,7 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
     }
 
     private fun setResultQrCodeData() {
-        viewModel.uiLogic.authResponse?.let {
+        viewModel.uiLogic.coldSerializedAuthResponse?.let {
             binding.cardSigningResult.qrCodePager.adapter = QrPagerAdapter(
                 ergoAuthResponseToQrChunks(
                     it,
