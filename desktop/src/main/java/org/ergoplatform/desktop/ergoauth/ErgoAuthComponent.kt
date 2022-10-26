@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
+import com.arkivanov.decompose.router.push
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
@@ -13,6 +14,7 @@ import org.ergoplatform.desktop.transactions.SigningPromptDialog
 import org.ergoplatform.desktop.ui.PasswordDialog
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.ui.proceedAuthFlowWithPassword
 import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
 import org.ergoplatform.persistance.Wallet
@@ -43,8 +45,13 @@ class ErgoAuthComponent(
     private val authState = mutableStateOf(ErgoAuthUiLogic.State.FETCHING_DATA)
     private val chooseWalletDialog = mutableStateOf<List<Wallet>?>(null)
     private val passwordDialog = mutableStateOf(false)
+
+    // state on the hot device
     private val signingPromptState = mutableStateOf<String?>(null)
     private val signingPromptPagesScanned = mutableStateOf<Pair<Int, Int>?>(null)
+
+    // state on the cold device
+    private val scanningState = mutableStateOf(0)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -64,6 +71,13 @@ class ErgoAuthComponent(
                     signingPromptState.value = uiLogic.ergAuthRequest?.toColdAuthRequest()
             },
             onDismiss = router::pop,
+            scanningState = scanningState,
+            onScan = {
+                router.push(ScreenConfig.QrCodeScanner { qrCodeChunk ->
+                    uiLogic.addRequestQrPage(qrCodeChunk, Application.texts)
+                    scanningState.value = scanningState.value + 1
+                })
+            }
         )
 
         if (chooseWalletDialog.value != null) {
@@ -92,7 +106,8 @@ class ErgoAuthComponent(
         }
 
         if (signingPromptState.value != null) {
-            SigningPromptDialog(signingPromptState.value!!, onContinueClicked = {},
+            SigningPromptDialog(
+                signingPromptState.value!!, onContinueClicked = {},
                 pagesScanned = signingPromptPagesScanned.value?.first,
                 pagesToScan = signingPromptPagesScanned.value?.second,
                 onDismissRequest = { signingPromptState.value = null },

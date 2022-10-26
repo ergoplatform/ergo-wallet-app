@@ -7,12 +7,13 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
-import org.ergoplatform.ergoauth.isErgoAuthRequest
+import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.*
 import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.transactions.isColdSigningRequestChunk
+import org.ergoplatform.transactions.isErgoAuthRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
 import org.ergoplatform.uilogic.STRING_HINT_READONLY_SIGNING_REQUEST
@@ -198,7 +199,7 @@ abstract class WalletDetailsUiLogic {
                 showErrorMessage(stringProvider.getString(STRING_HINT_READONLY_SIGNING_REQUEST))
         } else if (isErgoPaySigningRequest(qrCodeData)) {
             navigateToErgoPaySigning.invoke(qrCodeData)
-        } else if (isErgoAuthRequest(qrCodeData)) {
+        } else if (isErgoAuthRequestUri(qrCodeData) || isErgoAuthRequestChunk(qrCodeData)) {
             navigateToAuthentication(qrCodeData)
         } else {
             val content = parsePaymentRequest(qrCodeData)

@@ -25,7 +25,7 @@ import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressesListDialog
-import org.ergoplatform.ergoauth.isErgoAuthRequest
+import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.mosaik.*
 import org.ergoplatform.mosaik.model.MosaikContext
 import org.ergoplatform.mosaik.model.MosaikManifest
@@ -89,7 +89,7 @@ class MosaikAppComponent(
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {
-            if (isErgoAuthRequest(action.url)) {
+            if (isErgoAuthRequestUri(action.url)) {
                 val runOnEaComplete: (() -> Unit)? = action.onFinished?.let { onFinishedAction ->
                     { runOnResume = { runAction(onFinishedAction) } }
                 }

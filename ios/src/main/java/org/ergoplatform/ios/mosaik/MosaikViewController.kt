@@ -3,7 +3,7 @@ package org.ergoplatform.ios.mosaik
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.ergoplatform.ergoauth.isErgoAuthRequest
+import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.ios.CrashHandler
 import org.ergoplatform.ios.IosCacheManager
 import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
@@ -178,7 +178,7 @@ class MosaikViewController(
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {
-            if (isErgoAuthRequest(action.url)) {
+            if (isErgoAuthRequestUri(action.url)) {
                 navigationController.pushViewController(
                     ErgoAuthenticationViewController(action.url, null,
                         doOnComplete = { actionToRunOnAppearance = action.onFinished }),

@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.BuildConfig
 import org.ergoplatform.android.ui.SingleLiveEvent
-import org.ergoplatform.ergoauth.isErgoAuthRequest
+import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.mosaik.MosaikGuidManager
@@ -83,7 +83,7 @@ class MosaikViewModel : ViewModel() {
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {
-            if (isErgoAuthRequest(action.url)) {
+            if (isErgoAuthRequestUri(action.url)) {
                 ergoAuthOnFinishedActionId = action.onFinished
                 ergoAuthActionEvent.postValue(action)
             } else {

@@ -141,7 +141,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
     }
 
     private fun addQrCodeChunk(qrCode: String?) {
-        qrCode?.let { viewModel.uiLogic.addQrCodeChunk(qrCode) }
+        qrCode?.let { viewModel.uiLogic.addQrCodeChunk(qrCode, AndroidStringProvider(requireContext())) }
 
         val transactionInfo = viewModel.uiLogic.transactionInfo
 

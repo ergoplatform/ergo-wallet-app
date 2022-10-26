@@ -56,7 +56,7 @@ class ColdWalletSigningViewController(private val signingRequestChunk: String, p
     }
 
     private fun addQrCodeChunk(qrCodeChunk: String) {
-        uiLogic.addQrCodeChunk(qrCodeChunk)
+        uiLogic.addQrCodeChunk(qrCodeChunk, IosStringProvider(texts))
 
         scanningContainer.statusText.text =
             texts.format(

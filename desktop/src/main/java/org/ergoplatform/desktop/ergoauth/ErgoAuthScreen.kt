@@ -3,31 +3,31 @@ package org.ergoplatform.desktop.ergoauth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.BurstMode
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
 import org.ergoplatform.compose.settings.*
-import org.ergoplatform.desktop.transactions.PagedQrContainer
-import org.ergoplatform.desktop.ui.*
+import org.ergoplatform.desktop.transactions.ColdSigningResultLayout
+import org.ergoplatform.desktop.transactions.ColdSigningScanLayout
+import org.ergoplatform.desktop.ui.AppScrollingLayout
 import org.ergoplatform.desktop.ui.bigIconSize
 import org.ergoplatform.desktop.ui.defaultMaxWidth
 import org.ergoplatform.desktop.ui.defaultPadding
+import org.ergoplatform.desktop.ui.ergoLogo
+import org.ergoplatform.desktop.ui.getSeverityIcon
+import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.transactions.MessageSeverity
-import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 
@@ -35,7 +35,9 @@ import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 fun ErgoAuthScreen(
     uiLogic: ErgoAuthUiLogic,
     authState: ErgoAuthUiLogic.State,
+    scanningState: MutableState<Int>,
     onChangeWallet: () -> Unit,
+    onScan: () -> Unit,
     onAuthenticate: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -57,11 +59,24 @@ fun ErgoAuthScreen(
                     )
                 }
 
+                ErgoAuthUiLogic.State.SCANNING ->
+                    ColdSigningScanLayout(
+                        uiLogic.requestPagesCollector!!, Modifier, scanningState,
+                        uiLogic.lastMessage, onScan
+                    )
+
                 ErgoAuthUiLogic.State.WAIT_FOR_AUTH ->
                     WaitForAuthLayout(uiLogic, onChangeWallet, onAuthenticate)
 
                 ErgoAuthUiLogic.State.DONE ->
-                    AuthDoneLayout(uiLogic, onDismiss)
+                    if (uiLogic.isColdAuth && uiLogic.authResponse != null)
+                        ColdSigningResultLayout(
+                            uiLogic.authResponse!!, Modifier, onDismiss,
+                            descriptionLabel = STRING_DESC_RESPONSE_COLD_AUTH_MULTIPLE,
+                            lastPageDescriptionLabel = STRING_DESC_RESPONSE_COLD_AUTH
+                        )
+                    else
+                        AuthDoneLayout(uiLogic, onDismiss)
             }
 
         }

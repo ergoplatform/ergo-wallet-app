@@ -163,6 +163,16 @@ fun coldSigningResponseFromQrChunks(qrChunks: Collection<String>): SigningResult
     }
 }
 
+fun ergoAuthRequestFromQrChunks(qrChunks: Collection<String>): ErgoAuthRequest {
+    val qrdata = joinQrCodeChunks(qrChunks, QR_PROPERTY_ERGO_AUTH_REQUEST)
+    return parseErgoAuthRequestFromJson(qrdata, "", null)
+}
+
+fun ergoAuthResponseFromQrChunks(qrChunks: Collection<String>): ErgoAuthResponse {
+    val qrdata = joinQrCodeChunks(qrChunks, QR_PROPERTY_ERGO_AUTH_RESPONSE)
+    return ErgoAuthResponse.fromJson(qrdata)
+}
+
 private fun joinQrCodeChunks(qrChunks: Collection<String>, property: String): String {
     val qrList = qrChunks.map { parseQrChunk(it, property) }
     val chunksSorted = qrList.sortedBy { it.index }.map {
@@ -189,6 +199,18 @@ fun getColdSigningRequestChunk(chunk: String): QrChunk? {
 fun getColdSignedTxChunk(chunk: String): QrChunk? {
     return try {
         parseQrChunk(chunk, QR_PROPERTY_COLD_SIGNED_TX)
+    } catch (t: Throwable) {
+        null
+    }
+}
+
+fun isErgoAuthRequestChunk(chunk: String): Boolean {
+    return getErgoAuthRequestChunk(chunk) != null
+}
+
+fun getErgoAuthRequestChunk(chunk: String): QrChunk? {
+    return try {
+        parseQrChunk(chunk, QR_PROPERTY_ERGO_AUTH_REQUEST)
     } catch (t: Throwable) {
         null
     }

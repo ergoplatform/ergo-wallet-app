@@ -274,6 +274,8 @@
     <!-- Ergo Auth Signing -->
     <string name="intro_auth_request">dApp on %1$s\nrequests your authentication to\n%2$s.\n\nAuthenticate
         only when you consent to this.</string>
+    <string name="intro_cold_auth_request">A dApp requests your authentication to\n%1$s.\n\nAuthenticate
+        only when you consent to this.</string>
     <string name="desc_secure_conn">Secure connection verified by %1$s</string>
     <string name="desc_insecure_conn">Secure connection failed!</string>
     <string name="title_ergo_auth_request">Authentication Request</string>
@@ -287,6 +289,11 @@
     <string name="desc_prompt_cold_auth_multiple">Scan these QR codes
        with your signing device to authenticate. If you experience problems scanning, lower the resolution with the icon at the top.</string>
     <string name="button_scan_signed_msg">Scan signed message</string>
+    <string name="error_cold_qr_code_does_not_fit">QR code does not belong to the formerly scanned codes</string>
+    <string name="desc_response_cold_auth">Your auth message was prepared and needs to be sent to the dApp.
+        Scan this QR code to proceed.</string>
+    <string name="desc_response_cold_auth_multiple">Your auth message was prepared and needs to be sent to the dApp.
+        Scan these QR codes to proceed.</string>
 
     <!-- Token information dialog -->
     <string name="label_minting_tx">Minting transaction</string>

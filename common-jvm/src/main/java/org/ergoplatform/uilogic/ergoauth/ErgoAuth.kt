@@ -9,7 +9,7 @@ import org.ergoplatform.utils.*
 
 private const val uriSchemePrefix = "ergoauth://"
 
-fun isErgoAuthRequest(uri: String) = uri.startsWith(uriSchemePrefix, true)
+fun isErgoAuthRequestUri(uri: String) = uri.startsWith(uriSchemePrefix, true)
 
 fun getErgoAuthRequest(ergoAuthUrl: String): ErgoAuthRequest {
     val httpProtocolPrefix = if (isLocalOrIpAddress(ergoAuthUrl)) "http://" else "https://"

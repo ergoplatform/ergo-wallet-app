@@ -9,6 +9,7 @@ import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.signSerializedErgoTx
 import org.ergoplatform.transactions.*
+import org.ergoplatform.uilogic.STRING_ERROR_COLD_QR_CODE_DOES_NOT_FIT
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
@@ -38,7 +39,7 @@ abstract class ColdWalletSigningUiLogic {
      * @return TransactionInfo when it could be built, null otherwise. In case no info is built there
      *         might be warnings or error messages available in lastErrorMessage.
      */
-    fun addQrCodeChunk(qrCodeChunk: String): TransactionInfo? {
+    fun addQrCodeChunk(qrCodeChunk: String, texts: StringProvider): TransactionInfo? {
 
         // are we are already done? => don't add
         if (transactionInfo != null) {
@@ -46,7 +47,8 @@ abstract class ColdWalletSigningUiLogic {
         }
 
         val added = qrPagesCollector.addPage(qrCodeChunk)
-        lastErrorMessage = if (added) null else "QR code does not belong to the formerly scanned codes"
+        lastErrorMessage =
+            if (added) null else texts.getString(STRING_ERROR_COLD_QR_CODE_DOES_NOT_FIT)
 
         transactionInfo = buildRequestWhenApplicable()
         transactionInfo?.let { state = State.WAITING_TO_CONFIRM }

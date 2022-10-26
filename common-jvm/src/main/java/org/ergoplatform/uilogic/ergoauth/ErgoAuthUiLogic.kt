@@ -13,6 +13,9 @@ import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.signMessage
 import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.transactions.QrCodePagesCollector
+import org.ergoplatform.transactions.ergoAuthRequestFromQrChunks
+import org.ergoplatform.transactions.getErgoAuthRequestChunk
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
@@ -32,7 +35,17 @@ abstract class ErgoAuthUiLogic {
     private var walletAddresses: List<WalletAddress> = emptyList()
     private var responseJob: Job? = null
 
-    fun init(ergoAuthUrl: String, walletId: Int, texts: StringProvider, db: IAppDatabase) {
+    // are we on the cold device
+    var isColdAuth: Boolean = false
+        private set
+
+    // the qr pages collector for scanning the request on the cold device
+    var requestPagesCollector: QrCodePagesCollector? = null
+        private set
+    var authResponse: String? = null
+        private set
+
+    fun init(ergoAuthData: String, walletId: Int, texts: StringProvider, db: IAppDatabase) {
         if (requestJob == null) {
             requestJob = coroutineScope.launch(Dispatchers.IO) {
                 try {
@@ -55,24 +68,15 @@ abstract class ErgoAuthUiLogic {
                         firstAddress
                     )
 
-                    val ergoAuthRequest = getErgoAuthRequest(ergoAuthUrl)
-
-                    if (ergoAuthRequest.sigmaBoolean == null || ergoAuthRequest.signingMessage == null
-                        || ergoAuthRequest.replyToUrl == null
-                    ) {
-                        lastMessage = ergoAuthRequest.userMessage?.let {
-                            texts.getString(
-                                STRING_LABEL_MESSAGE_FROM_DAPP, it
-                            )
-                        } ?: texts.getString(
-                            STRING_LABEL_ERROR_OCCURED,
-                            "-"
-                        )
-                        lastMessageSeverity = MessageSeverity.ERROR
+                    isColdAuth = !isErgoAuthRequestUri(ergoAuthData)
+                    if (isColdAuth) {
+                        requestPagesCollector = QrCodePagesCollector(::getErgoAuthRequestChunk)
+                        addRequestQrPage(ergoAuthData, texts)
+                        if (requestPagesCollector?.hasAllPages() == false)
+                            notifyStateChanged(State.SCANNING)
                     } else {
-                        ergAuthRequest = ergoAuthRequest
-                        lastMessage = ergoAuthRequest.userMessage
-                        lastMessageSeverity = ergoAuthRequest.messageSeverity
+                        val ergoAuthRequest = getErgoAuthRequest(ergoAuthData)
+                        onAuthRequestAvailable(ergoAuthRequest, texts)
                     }
 
                 } catch (t: Throwable) {
@@ -83,13 +87,44 @@ abstract class ErgoAuthUiLogic {
                     )
                     lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, t.getMessageOrName())
                     lastMessageSeverity = MessageSeverity.ERROR
+                    notifyStateChanged(State.DONE)
                 }
-
-                notifyStateChanged(
-                    if (ergAuthRequest == null) State.DONE
-                    else State.WAIT_FOR_AUTH
-                )
             }
+        }
+    }
+
+    fun addRequestQrPage(ergoAuthData: String, texts: StringProvider) {
+        val added = requestPagesCollector?.addPage(ergoAuthData) ?: false
+        lastMessage = if (added) null else texts.getString(STRING_ERROR_COLD_QR_CODE_DOES_NOT_FIT)
+
+        if (requestPagesCollector?.hasAllPages() == true) {
+            try {
+                onAuthRequestAvailable(
+                    ergoAuthRequestFromQrChunks(requestPagesCollector!!.getAllPages()),
+                    texts
+                )
+            } catch (t: Throwable) {
+                lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, t.getMessageOrName())
+                lastMessageSeverity = MessageSeverity.ERROR
+                notifyStateChanged(State.DONE)
+            }
+        }
+    }
+
+    private fun onAuthRequestAvailable(ergoAuthRequest: ErgoAuthRequest, texts: StringProvider) {
+        if (ergoAuthRequest.sigmaBoolean == null || ergoAuthRequest.signingMessage == null
+            || ergoAuthRequest.replyToUrl == null && !isColdAuth
+        ) {
+            lastMessage = ergoAuthRequest.userMessage?.let {
+                texts.getString(STRING_LABEL_MESSAGE_FROM_DAPP, it)
+            } ?: texts.getString(STRING_LABEL_ERROR_OCCURED, "-")
+            lastMessageSeverity = MessageSeverity.ERROR
+            notifyStateChanged(State.DONE)
+        } else {
+            ergAuthRequest = ergoAuthRequest
+            lastMessage = ergoAuthRequest.userMessage
+            lastMessageSeverity = ergoAuthRequest.messageSeverity
+            notifyStateChanged(State.WAIT_FOR_AUTH)
         }
     }
 
@@ -110,15 +145,19 @@ abstract class ErgoAuthUiLogic {
                     ergAuthRequest.sigmaBoolean!!,
                     signedMessage
                 )
+                val ergoAuthResponse = ErgoAuthResponse(signedMessage, signature)
 
-                postErgoAuthResponse(
-                    ergAuthRequest.replyToUrl!!,
-                    ErgoAuthResponse(signedMessage, signature)
-                )
+                if (isColdAuth) {
+                    authResponse = ergoAuthResponse.toJson()
+                } else {
+                    postErgoAuthResponse(ergAuthRequest.replyToUrl!!, ergoAuthResponse)
+                }
+
                 lastMessage = null
                 lastMessageSeverity = MessageSeverity.INFORMATION
 
             } catch (t: Throwable) {
+                LogUtils.logDebug(this.javaClass.simpleName, "Error on auth response", t)
                 lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, getErrorMessage(t, texts))
                 lastMessageSeverity = MessageSeverity.ERROR
             }
@@ -128,17 +167,22 @@ abstract class ErgoAuthUiLogic {
     }
 
     fun getAuthenticationMessage(texts: StringProvider): String {
-        val secConnectionMessage = ergAuthRequest?.sslValidatedBy?.let {
-            texts.getString(STRING_DESC_SECURE_CONN, it)
-        } ?: texts.getString(STRING_DESC_INSECURE_CONN)
-
-        return texts.getString(
-            STRING_INTRO_AUTH_REQUEST,
-            ergAuthRequest!!.requestHost + " ($secConnectionMessage)",
-            getErgoAuthReason(ergAuthRequest!!) ?: texts.getString(
-                STRING_ERROR_NO_AUTH_REASON
+        val authReason =
+            getErgoAuthReason(ergAuthRequest!!) ?: texts.getString(STRING_ERROR_NO_AUTH_REASON)
+        val introMessage = if (isColdAuth) {
+            texts.getString(STRING_INTRO_COLD_AUTH_REQUEST, authReason)
+        } else {
+            val secConnectionMessage = ergAuthRequest?.sslValidatedBy?.let {
+                texts.getString(STRING_DESC_SECURE_CONN, it)
+            } ?: texts.getString(STRING_DESC_INSECURE_CONN)
+            texts.getString(
+                STRING_INTRO_AUTH_REQUEST,
+                ergAuthRequest!!.requestHost + " ($secConnectionMessage)",
+                authReason
             )
-        ) + (ergAuthRequest?.userMessage?.let {
+        }
+
+        return introMessage + (ergAuthRequest?.userMessage?.let {
             "\n\n" + texts.getString(
                 STRING_LABEL_MESSAGE_FROM_DAPP,
                 it
@@ -155,6 +199,7 @@ abstract class ErgoAuthUiLogic {
 
     enum class State {
         FETCHING_DATA,
+        SCANNING, // on cold wallet only: waiting to scan more qr chunks
         WAIT_FOR_AUTH,
         DONE
     }
