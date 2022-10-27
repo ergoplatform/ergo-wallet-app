@@ -30,7 +30,7 @@ class ErgoAuthenticationViewController(
     private val stateDoneContainer = CardView()
     private val scanningContainer =
         ColdWalletSigningViewController.ScanningContainer(::scanNextRequestChunk)
-    private val signedQrCodesContainer = SignedMsgQrCodeContainer()
+    private val signedQrCodesContainer by lazy { SignedMsgQrCodeContainer() }
 
     override fun viewDidLoad() {
         super.viewDidLoad()
