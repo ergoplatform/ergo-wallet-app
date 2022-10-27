@@ -27,6 +27,7 @@ class ErgoAuthenticationViewController(
     private lateinit var authRequestContainer: AuthenticationRequestStack
     private lateinit var fetchingContainer: ErgoPaySigningViewController.FetchDataContainer
     private lateinit var texts: IosStringProvider
+    private lateinit var scrollView: UIScrollView
     private val stateDoneContainer = CardView()
     private val scanningContainer =
         ColdWalletSigningViewController.ScanningContainer(::scanNextRequestChunk)
@@ -47,7 +48,7 @@ class ErgoAuthenticationViewController(
         view.layoutMargins = UIEdgeInsets.Zero()
 
         val scrollingContainer = UIView(CGRect.Zero())
-        val scrollView = scrollingContainer.wrapInVerticalScrollView()
+        scrollView = scrollingContainer.wrapInVerticalScrollView()
 
         view.addSubview(scrollView)
         view.addSubview(fetchingContainer)
@@ -268,6 +269,8 @@ class ErgoAuthenticationViewController(
                         uiLogic.lastMessage
                     )
                 }
+
+                scrollView.scrollToTop()
             }
         }
     }
