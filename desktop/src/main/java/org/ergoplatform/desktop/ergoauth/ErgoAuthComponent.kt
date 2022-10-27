@@ -19,10 +19,6 @@ import org.ergoplatform.desktop.ui.proceedAuthFlowWithPassword
 import org.ergoplatform.desktop.wallet.ChooseWalletListDialog
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.MessageSeverity
-import org.ergoplatform.transactions.ergoAuthRequestToQrChunks
-import org.ergoplatform.uilogic.STRING_BUTTON_SCAN_SIGNED_MSG
-import org.ergoplatform.uilogic.STRING_DESC_PROMPT_COLD_AUTH
-import org.ergoplatform.uilogic.STRING_DESC_PROMPT_COLD_AUTH_MULTIPLE
 import org.ergoplatform.uilogic.STRING_TITLE_ERGO_AUTH_REQUEST
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 import org.ergoplatform.wallet.isReadOnly
@@ -107,11 +103,11 @@ class ErgoAuthComponent(
 
         if (signingPromptState.value != null) {
             SigningPromptDialog(
-                signingPromptState.value!!,
+                uiLogic.signingPromptDialogConfig,
                 onContinueClicked = {
                     router.push(ScreenConfig.QrCodeScanner { qrCode ->
                         println(qrCode)
-                        uiLogic.responsePagesCollector.let {
+                        uiLogic.signingPromptDialogConfig.responsePagesCollector.let {
                             it.addPage(qrCode)
                             if (it.hasAllPages()) {
                                 signingPromptState.value = null
@@ -125,10 +121,6 @@ class ErgoAuthComponent(
                 pagesScanned = signingPromptPagesScanned.value?.first,
                 pagesToScan = signingPromptPagesScanned.value?.second,
                 onDismissRequest = { signingPromptState.value = null },
-                signingRequestToChunks = ::ergoAuthRequestToQrChunks,
-                lastPageButtonLabel = STRING_BUTTON_SCAN_SIGNED_MSG,
-                descriptionLabel = STRING_DESC_PROMPT_COLD_AUTH_MULTIPLE,
-                lastPageDescriptionLabel = STRING_DESC_PROMPT_COLD_AUTH
             )
         }
     }

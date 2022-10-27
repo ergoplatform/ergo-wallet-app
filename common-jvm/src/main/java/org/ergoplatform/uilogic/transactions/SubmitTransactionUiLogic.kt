@@ -4,8 +4,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.ergoplatform.SigningSecrets
 import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.UnsignedTransaction
 import org.ergoplatform.persistance.*
@@ -28,7 +28,7 @@ abstract class SubmitTransactionUiLogic {
         }
     var derivedAddress: WalletAddress? = null
         private set
-    var signedTxQrCodePagesCollector: QrCodePagesCollector? = null
+    var signingPromptDialogConfig: SigningPromptDialogDataSource? = null
         private set
 
     protected suspend fun initWallet(
@@ -81,9 +81,9 @@ abstract class SubmitTransactionUiLogic {
     }
 
     fun startColdWalletPaymentPrompt(serializedTx: PromptSigningResult) {
-        signedTxQrCodePagesCollector = QrCodePagesCollector(::getColdSignedTxChunk)
         if (serializedTx.success) {
             buildColdSigningRequest(serializedTx)?.let {
+                signingPromptDialogConfig = SigningPromptConfig(it)
                 notifyHasSigningPromptData(it)
             }
         }
@@ -95,8 +95,8 @@ abstract class SubmitTransactionUiLogic {
         texts: StringProvider,
         db: IAppDatabase,
     ) {
-        val qrCodes = signedTxQrCodePagesCollector?.getAllPages()
-        signedTxQrCodePagesCollector = null
+        val qrCodes = signingPromptDialogConfig?.responsePagesCollector?.getAllPages()
+        signingPromptDialogConfig = null
 
         if (qrCodes.isNullOrEmpty()) return // should not happen
 
@@ -130,7 +130,9 @@ abstract class SubmitTransactionUiLogic {
             try {
                 // save submitted transaction to every address
                 val txInfoToSave = (transactionInfo
-                    ?: (ergoTxResult.sentTransaction as? UnsignedTransaction)?.buildTransactionInfo(wallet?.tokens)
+                    ?: (ergoTxResult.sentTransaction as? UnsignedTransaction)?.buildTransactionInfo(
+                        wallet?.tokens
+                    )
                     ?: ergoTxResult.sentTransaction?.buildTransactionInfo(
                         ApiServiceManager.getOrInit(preferences)
                     ))
@@ -163,4 +165,16 @@ abstract class SubmitTransactionUiLogic {
     abstract fun notifyHasTxId(txId: String)
     abstract fun notifyHasErgoTxResult(txResult: TransactionResult)
     abstract fun notifyHasSigningPromptData(signingPrompt: String)
+
+    private inner class SigningPromptConfig(override val signingPromptData: String) :
+        SigningPromptDialogDataSource {
+
+        override val responsePagesCollector: QrCodePagesCollector =
+            QrCodePagesCollector(::getColdSignedTxChunk)
+
+        override fun signingRequestToQrChunks(
+            serializedSigningRequest: String,
+            sizeLimit: Int
+        ): List<String> = coldSigningRequestToQrChunks(serializedSigningRequest, sizeLimit)
+    }
 }

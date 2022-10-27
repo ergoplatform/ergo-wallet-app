@@ -171,15 +171,10 @@ class ErgoAuthenticationViewController(
                     } else {
                         presentViewController(
                             SigningPromptViewController(
-                                uiLogic.ergAuthRequest!!.toColdAuthRequest(),
-                                responsePagesCollector = { uiLogic.responsePagesCollector },
+                                uiLogic.signingPromptDialogConfig,
                                 onSigningPromptResponseScanComplete = {
                                     uiLogic.startResponseFromCold(texts)
                                 },
-                                signingRequestToChunks = ::ergoAuthRequestToQrChunks,
-                                lastPageButtonLabel = STRING_BUTTON_SCAN_SIGNED_MSG,
-                                descriptionLabel = STRING_DESC_PROMPT_COLD_AUTH_MULTIPLE,
-                                lastPageDescriptionLabel = STRING_DESC_PROMPT_COLD_AUTH,
                             ), true
                         ) {}
                     }

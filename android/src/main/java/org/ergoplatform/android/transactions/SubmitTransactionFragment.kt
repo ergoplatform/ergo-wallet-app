@@ -15,12 +15,10 @@ import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.PromptSigningResult
-import org.ergoplatform.transactions.QrCodePagesCollector
-import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.wallet.isReadOnly
 
 abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
-    AddressChooserCallback, SigningPromptDialogDataSource {
+    AddressChooserCallback, ISigningPromptDialogParent {
 
     abstract val viewModel: SubmitTransactionViewModel
 
@@ -99,8 +97,7 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
         )
     }
 
-    override val signingResponseQrCodePagesCollector: QrCodePagesCollector?
-        get() = viewModel.uiLogic.signedTxQrCodePagesCollector
+    override val signingPromptDataSource get() = viewModel.uiLogic.signingPromptDialogConfig!!
 
     override fun onSigningPromptResponseScanComplete() {
         val context = requireContext()
@@ -110,12 +107,4 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
             AppDatabase.getInstance(context)
         )
     }
-
-    override val signingPromptData: String?
-        get() = viewModel.signingPromptData
-
-    override fun signingRequestToQrChunks(
-        serializedSigningRequest: String,
-        sizeLimit: Int
-    ): List<String> = coldSigningRequestToQrChunks(serializedSigningRequest, sizeLimit)
 }

@@ -14,18 +14,22 @@ import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentErgoAuthenticationBinding
-import org.ergoplatform.android.transactions.SigningPromptDialogDataSource
+import org.ergoplatform.android.transactions.ISigningPromptDialogParent
 import org.ergoplatform.android.transactions.SigningPromptDialogFragment
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
 import org.ergoplatform.android.wallet.WalletChooserCallback
 import org.ergoplatform.persistance.WalletConfig
-import org.ergoplatform.transactions.*
+import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
+import org.ergoplatform.transactions.ergoAuthResponseToQrChunks
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
+import org.ergoplatform.uilogic.transactions.SigningPromptDialogDataSource
 import org.ergoplatform.wallet.isReadOnly
 
 class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChooserCallback,
-    SigningPromptDialogDataSource {
+    ISigningPromptDialogParent {
     private var _binding: FragmentErgoAuthenticationBinding? = null
     private val binding: FragmentErgoAuthenticationBinding get() = _binding!!
 
@@ -189,28 +193,12 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
         _binding = null
     }
 
-    override val signingResponseQrCodePagesCollector: QrCodePagesCollector
-        get() = viewModel.uiLogic.responsePagesCollector
-
     override fun onSigningPromptResponseScanComplete() {
         viewModel.uiLogic.startResponseFromCold(AndroidStringProvider(requireContext()))
     }
 
-    override val signingPromptData: String? by lazy {
-        viewModel.uiLogic.ergAuthRequest?.toColdAuthRequest()
-    }
-
-    override fun signingRequestToQrChunks(
-        serializedSigningRequest: String,
-        sizeLimit: Int
-    ): List<String> = ergoAuthRequestToQrChunks(serializedSigningRequest, sizeLimit)
-
-    override val lastPageButtonLabel: Int
-        get() = R.string.button_scan_signed_msg
-    override val descriptionLabel: Int
-        get() = super.descriptionLabel
-    override val lastPageDescriptionLabel: Int
-        get() = super.lastPageDescriptionLabel
+    override val signingPromptDataSource: SigningPromptDialogDataSource
+        get() = viewModel.uiLogic.signingPromptDialogConfig
 
     companion object {
         val ergoAuthActionRequestKey = "KEY_ERGOAUTH_FRAGMENT"

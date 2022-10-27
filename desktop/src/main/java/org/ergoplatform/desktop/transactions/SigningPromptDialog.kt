@@ -20,25 +20,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.compose.settings.primaryButtonColors
-import org.ergoplatform.desktop.ui.*
+import org.ergoplatform.desktop.ui.AppDialog
+import org.ergoplatform.desktop.ui.AppScrollbar
+import org.ergoplatform.desktop.ui.defaultPadding
+import org.ergoplatform.desktop.ui.getQrCodeImageBitmap
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
-import org.ergoplatform.transactions.coldSigningRequestToQrChunks
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.transactions.SigningPromptDialogDataSource
 
 @Composable
 fun SigningPromptDialog(
-    signingPrompt: String,
+    dataSource: SigningPromptDialogDataSource,
     onContinueClicked: () -> Unit,
     pagesScanned: Int?,
     pagesToScan: Int?,
     onDismissRequest: () -> Unit,
-    signingRequestToChunks: (String, Int) -> List<String>,
-    lastPageButtonLabel: String = STRING_BUTTON_SCAN_SIGNED_TX,
-    descriptionLabel: String = STRING_DESC_PROMPT_SIGNING_MULTIPLE,
-    lastPageDescriptionLabel: String = STRING_DESC_PROMPT_SIGNING,
 ) {
     var lowRes by remember { mutableStateOf(false) }
 
@@ -54,12 +53,12 @@ fun SigningPromptDialog(
                     PagedQrContainer(
                         lowRes,
                         calcChunks = { limit ->
-                            signingRequestToChunks(signingPrompt, limit)
+                            dataSource.signingRequestToQrChunks(dataSource.signingPromptData, limit)
                         },
                         onContinueClicked,
-                        lastPageButtonLabel = lastPageButtonLabel,
-                        descriptionLabel = descriptionLabel,
-                        lastPageDescriptionLabel = lastPageDescriptionLabel,
+                        lastPageButtonLabel = dataSource.lastPageButtonLabel,
+                        descriptionLabel = dataSource.descriptionLabel,
+                        lastPageDescriptionLabel = dataSource.lastPageDescriptionLabel,
                     )
 
                     // shown when first pages are scanned
@@ -87,7 +86,7 @@ fun SigningPromptDialog(
                     Icon(Icons.Default.ArrowBack, null)
                 }
                 // TODO cold wallet save/load functionality
-                if (signingPrompt.length > QR_DATA_LENGTH_LOW_RES)
+                if (dataSource.signingPromptData.length > QR_DATA_LENGTH_LOW_RES)
                     IconButton({ lowRes = !lowRes }, Modifier.align(Alignment.TopEnd)) {
                         Icon(Icons.Default.BurstMode, null)
                     }

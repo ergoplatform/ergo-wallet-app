@@ -14,6 +14,7 @@ import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.signMessage
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.transactions.SigningPromptDialogDataSource
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
 import org.ergoplatform.wallet.addresses.ensureWalletAddressListHasFirstAddress
@@ -42,8 +43,9 @@ abstract class ErgoAuthUiLogic {
     var coldSerializedAuthResponse: String? = null
         private set
 
-    // the qr pages collector for scanning the request on the hot device
-    val responsePagesCollector = QrCodePagesCollector(::getErgoAuthResponseChunk)
+    val signingPromptDialogConfig: SigningPromptDialogDataSource by lazy {
+        SigningPromptConfig(ergAuthRequest!!.toColdAuthRequest())
+    }
 
     fun init(ergoAuthData: String, walletId: Int, texts: StringProvider, db: IAppDatabase) {
         if (requestJob == null) {
@@ -135,7 +137,7 @@ abstract class ErgoAuthUiLogic {
                 notifyStateChanged(State.FETCHING_DATA)
                 postErgoAuthResponse(
                     ergAuthRequest.replyToUrl!!,
-                    ergoAuthResponseFromQrChunks(responsePagesCollector.getAllPages())
+                    ergoAuthResponseFromQrChunks(signingPromptDialogConfig.responsePagesCollector.getAllPages())
                 )
 
                 lastMessage = null
@@ -224,5 +226,23 @@ abstract class ErgoAuthUiLogic {
         SCANNING, // on cold wallet only: waiting to scan more qr chunks
         WAIT_FOR_AUTH,
         DONE
+    }
+
+    private inner class SigningPromptConfig(override val signingPromptData: String) :
+        SigningPromptDialogDataSource {
+        // the qr pages collector for scanning the request on the hot device
+        override val responsePagesCollector = QrCodePagesCollector(::getErgoAuthResponseChunk)
+
+        override fun signingRequestToQrChunks(
+            serializedSigningRequest: String,
+            sizeLimit: Int
+        ): List<String> = ergoAuthRequestToQrChunks(serializedSigningRequest, sizeLimit)
+
+        override val lastPageButtonLabel: String
+            get() = STRING_BUTTON_SCAN_SIGNED_MSG
+        override val descriptionLabel: String
+            get() = STRING_DESC_PROMPT_COLD_AUTH_MULTIPLE
+        override val lastPageDescriptionLabel: String
+            get() = STRING_DESC_PROMPT_COLD_AUTH
     }
 }

@@ -10,12 +10,13 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPromptSigningDialogBinding
+import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.QrPagerAdapter
 import org.ergoplatform.android.ui.expandBottomSheetOnShow
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
 import org.ergoplatform.transactions.QrCodePagesCollector
-import org.ergoplatform.transactions.coldSigningRequestToQrChunks
+import org.ergoplatform.uilogic.transactions.SigningPromptDialogDataSource
 
 
 /**
@@ -64,14 +65,15 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
             }
         }
 
-        binding.buttonScanSignedTx.setText(dataSource.lastPageButtonLabel)
+        binding.buttonScanSignedTx.text =
+            AndroidStringProvider(requireContext()).getString(dataSource.lastPageButtonLabel)
 
-        refreshScannedPagesInfo(dataSource.signingResponseQrCodePagesCollector)
+        refreshScannedPagesInfo(dataSource.responsePagesCollector)
     }
 
     private fun refreshScannedPagesInfo(pagesCollector: QrCodePagesCollector?) {
         binding.qrScannedPagesInfo.visibility =
-            if (pagesCollector?.pagesAdded ?: 0 > 0) View.VISIBLE else View.INVISIBLE
+            if ((pagesCollector?.pagesAdded ?: 0) > 0) View.VISIBLE else View.INVISIBLE
 
         pagesCollector?.let {
             binding.qrScannedPagesInfo.text =
@@ -101,22 +103,26 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
         binding.buttonScanSignedTx.visibility = if (lastPage) View.VISIBLE else View.GONE
         binding.buttonScanNextQr.visibility = if (!lastPage) View.VISIBLE else View.GONE
         val dataSource = getDataSource()
-        binding.tvDesc.setText(if (lastPage) dataSource.lastPageDescriptionLabel else dataSource.descriptionLabel)
+        binding.tvDesc.text = AndroidStringProvider(requireContext()).getString(
+            if (lastPage) dataSource.lastPageDescriptionLabel else dataSource.descriptionLabel
+        )
     }
 
-    private fun getDataSource() = (parentFragment as SigningPromptDialogDataSource)
+    private fun getSigningPromptDialogParent() = (parentFragment as ISigningPromptDialogParent)
+    private fun getDataSource() =
+        getSigningPromptDialogParent().signingPromptDataSource
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
             result.contents?.let { qrCode ->
                 val dataSource = getDataSource()
-                dataSource.signingResponseQrCodePagesCollector?.addPage(qrCode)
-                if (dataSource.signingResponseQrCodePagesCollector?.hasAllPages() == true) {
-                    dataSource.onSigningPromptResponseScanComplete()
+                dataSource.responsePagesCollector?.addPage(qrCode)
+                if (dataSource.responsePagesCollector?.hasAllPages() == true) {
+                    getSigningPromptDialogParent().onSigningPromptResponseScanComplete()
                     dismiss()
                 } else {
-                    refreshScannedPagesInfo(dataSource.signingResponseQrCodePagesCollector)
+                    refreshScannedPagesInfo(dataSource.responsePagesCollector)
                 }
             }
         } else {
@@ -130,12 +136,7 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     }
 }
 
-interface SigningPromptDialogDataSource {
-    val signingResponseQrCodePagesCollector: QrCodePagesCollector?
+interface ISigningPromptDialogParent {
+    val signingPromptDataSource: SigningPromptDialogDataSource
     fun onSigningPromptResponseScanComplete()
-    val signingPromptData: String?
-    fun signingRequestToQrChunks(serializedSigningRequest: String, sizeLimit: Int): List<String>
-    val lastPageButtonLabel get() = R.string.button_scan_signed_tx
-    val descriptionLabel get() = R.string.desc_prompt_cold_auth_multiple
-    val lastPageDescriptionLabel get() = R.string.desc_prompt_cold_auth
 }

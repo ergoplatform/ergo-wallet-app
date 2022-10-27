@@ -14,8 +14,6 @@ import org.ergoplatform.desktop.ui.proceedAuthFlowWithPassword
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressesListDialog
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.TransactionResult
-import org.ergoplatform.transactions.coldSigningRequestToQrChunks
-import org.ergoplatform.transactions.ergoAuthRequestToQrChunks
 import org.ergoplatform.uilogic.STRING_ERROR_PREPARE_TRANSACTION
 import org.ergoplatform.uilogic.STRING_ERROR_SEND_TRANSACTION
 import org.ergoplatform.uilogic.STRING_ERROR_USE_OTHER_NODE
@@ -58,12 +56,12 @@ abstract class SubmitTransactionComponent(
             )
         }
         signingPromptDialog.value?.let { signingPrompt ->
-            SigningPromptDialog(signingPrompt,
+            SigningPromptDialog(
+                uiLogic.signingPromptDialogConfig!!,
                 onContinueClicked = ::doScanColdSigning,
                 pagesScanned = signingPromptPagesScanned.value?.first,
                 pagesToScan = signingPromptPagesScanned.value?.second,
                 onDismissRequest = { signingPromptDialog.value = null },
-                signingRequestToChunks = ::coldSigningRequestToQrChunks,
             )
         }
     }
@@ -74,7 +72,7 @@ abstract class SubmitTransactionComponent(
 
     private fun doScanColdSigning() {
         router.push(ScreenConfig.QrCodeScanner { qrCode ->
-            uiLogic.signedTxQrCodePagesCollector?.let {
+            uiLogic.signingPromptDialogConfig?.responsePagesCollector?.let {
                 it.addPage(qrCode)
                 if (it.hasAllPages()) {
                     signingPromptDialog.value = null
