@@ -147,9 +147,10 @@ class TransactionInfoViewController(
         override fun bindTransaction(
             transactionInfo: TransactionInfo,
             tokenClickListener: ((String) -> Unit)?,
-            addressLabelHandler: ((String, (String) -> Unit) -> Unit)?
+            addressLabelHandler: ((String, (String) -> Unit) -> Unit)?,
+            tokenLabelHandler: ((String, (String) -> Unit) -> Unit)?,
         ) {
-            super.bindTransaction(transactionInfo, tokenClickListener, addressLabelHandler)
+            super.bindTransaction(transactionInfo, tokenClickListener, addressLabelHandler, tokenLabelHandler)
 
             txIdLabel.text = transactionInfo.id
             purposeLabel.text = uiLogic.transactionPurpose

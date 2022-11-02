@@ -50,6 +50,7 @@ class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.
         assets: List<AssetInstanceInfo>?,
         tokenClickListener: ((String) -> Unit)?,
         addressLabelHandler: ((String, (String) -> Unit) -> Unit)?,
+        tokenLabelHandler: ((String, (String) -> Unit) -> Unit)?,
         texts: I18NBundle
     ): TransactionBoxEntryView {
         labelErgAmount.text = value?.let {
@@ -73,6 +74,9 @@ class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.
                     )
                     tokenClickListener?.let {
                         addGestureRecognizer(UITapGestureRecognizer { tokenClickListener(token.tokenId) })
+                    }
+                    if (token.name == null && tokenLabelHandler != null) {
+                        tokenLabelHandler.invoke(token.tokenId) { displayName -> setTokenName(displayName) }
                     }
                 })
             }

@@ -568,7 +568,14 @@ class SendFundsViewController(
         }
 
         override fun notifyHasPreparedTx(preparedTx: TransactionInfo) {
-            startPayment() // TODO #156 show confirmation dialog
+            runOnMainThread {
+                presentViewController(
+                    ConfirmSendFundsDialogViewController(preparedTx) {
+                        startPayment()
+                    },
+                    true
+                ) {}
+            }
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
