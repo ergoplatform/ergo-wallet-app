@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TokenAmount
 import org.ergoplatform.addressbook.getAddressLabelFromDatabase
+import org.ergoplatform.compose.settings.AppButton
 import org.ergoplatform.compose.settings.defaultPadding
 import org.ergoplatform.compose.toComposableText
 import org.ergoplatform.desktop.tokens.TokenEntryView
@@ -114,7 +114,7 @@ fun SignTransactionInfoLayout(
 
         }
 
-        Button(
+        AppButton(
             onConfirm,
             Modifier.align(Alignment.CenterHorizontally).padding(top = defaultPadding)
                 .widthIn(min = 120.dp)

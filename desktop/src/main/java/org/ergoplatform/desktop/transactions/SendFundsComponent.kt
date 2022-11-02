@@ -120,7 +120,7 @@ class SendFundsComponent(
             )
 
             preparedTransactionInfoState.value?.let {
-                ConfirmSendTransactionDialog(it,
+                ConfirmSendFundsDialog(it,
                     onDismissRequest = { preparedTransactionInfoState.value = null },
                     onConfirm = {
                         preparedTransactionInfoState.value = null

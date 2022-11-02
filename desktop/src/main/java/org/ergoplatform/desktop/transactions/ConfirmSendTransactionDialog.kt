@@ -12,7 +12,7 @@ import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.transactions.TransactionInfo
 
 @Composable
-fun ConfirmSendTransactionDialog(
+fun ConfirmSendFundsDialog(
     transactionInfo: TransactionInfo,
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,

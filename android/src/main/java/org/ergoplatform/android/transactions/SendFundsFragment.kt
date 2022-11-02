@@ -374,7 +374,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
 
     override fun receivedPromptSigningResult() {
         if (authenticationWalletConfig?.isReadOnly() == false)
-            startAuthFlow() // TODO #156 show confirmation dialog
+            ConfirmSendFundsDialogFragment().show(childFragmentManager, null)
         else
             super.receivedPromptSigningResult()
     }
