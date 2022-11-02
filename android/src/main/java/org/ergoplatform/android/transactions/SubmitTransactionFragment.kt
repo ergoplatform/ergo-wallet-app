@@ -52,11 +52,15 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
                     ).setAnchorView(R.id.nav_view).show()
                 }
             } else if (result is PromptSigningResult) {
-                // if this is a prompt signing result, switch to prompt signing dialog
-                SigningPromptDialogFragment().show(childFragmentManager, null)
+                receivedPromptSigningResult()
             }
         }
 
+    }
+
+    protected open fun receivedPromptSigningResult() {
+        // if this is a prompt signing result, switch to prompt signing dialog
+        SigningPromptDialogFragment().show(childFragmentManager, null)
     }
 
     fun showChooseAddressList(addShowAllEntry: Boolean) {

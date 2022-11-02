@@ -171,7 +171,9 @@ private fun ColdSigningTransactionInfoLayout(
             Modifier.padding(defaultPadding),
             txInfoState.value!!,
             onConfirm = onConfirm,
-            onTokenClick = null
+            onTokenClick = null,
+            Application.texts,
+            getDb = { Application.database },
         )
     }
 }

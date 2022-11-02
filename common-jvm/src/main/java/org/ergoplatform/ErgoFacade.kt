@@ -109,51 +109,6 @@ fun loadAppKitMnemonicWordList(): List<String> {
     return JavaConversions.seqAsJavaList(WordList.load(Mnemonic.LANGUAGE_ID_ENGLISH).get().words())
 }
 
-/**
- * Create and send transaction creating a box with the given amount using parameters from the given config file.
- *
- * @param amountToSend   amount of NanoErg to put into new box
- */
-fun sendErgoTx(
-    recipient: Address,
-    message: String?,
-    amountToSend: Long,
-    tokensToSend: List<ErgoToken>,
-    feeAmount: Long,
-    signingSecrets: SigningSecrets,
-    derivedKeyIndices: List<Int>,
-    prefs: PreferencesProvider,
-    texts: StringProvider
-): SendTransactionResult {
-    try {
-        val ergoClient = getRestErgoClient(prefs)
-        return ergoClient.execute { ctx: BlockchainContext ->
-            val prover = buildProver(ctx, signingSecrets, derivedKeyIndices)
-            val unsignedTx = buildUnsignedTx(
-                BoxOperations.createForEip3Prover(prover, ctx),
-                recipient,
-                amountToSend,
-                feeAmount,
-                tokensToSend,
-                message
-            )
-
-            val signed = prover.sign(unsignedTx)
-            ctx.sendTransaction(signed)
-
-            val txId = signed.id
-
-            SendTransactionResult(txId.isNotEmpty(), txId, unsignedTx)
-        }
-    } catch (t: Throwable) {
-        LogUtils.logDebug("sendErgoTx", "Error caught", t)
-        return SendTransactionResult(
-            false,
-            errorMsg = getErrorMessage(t, texts, amountToSend)
-        )
-    }
-}
-
 private fun buildUnsignedTx(
     boxOperations: BoxOperations,
     recipient: Address,
@@ -406,4 +361,3 @@ fun deserializeErgobox(input: ByteArray): InputBox? {
     val ergoBox = `ErgoBoxSerializer$`.`MODULE$`.parse(r)
     return ergoBox?.let { InputBoxImpl(it) }
 }
-

@@ -48,6 +48,8 @@ fun TransactionInfoScreen(
                     ti,
                     onTxIdClicked,
                     onTokenClick,
+                    Application.texts,
+                    getDb = { Application.database }
                 )
             }
         }

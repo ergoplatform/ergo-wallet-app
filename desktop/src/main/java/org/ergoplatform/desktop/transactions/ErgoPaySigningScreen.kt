@@ -88,7 +88,10 @@ private fun BoxScope.ErgoPayTransactionInfoLayout(
             SignTransactionInfoLayout(Modifier.padding(defaultPadding),
                 uiLogic.transactionInfo!!.reduceBoxes(),
                 onConfirm = onConfirm,
-                onTokenClick = onTokenClick)
+                onTokenClick = onTokenClick,
+                texts = Application.texts,
+                getDb = { Application.database }
+            )
         }
     }
 
