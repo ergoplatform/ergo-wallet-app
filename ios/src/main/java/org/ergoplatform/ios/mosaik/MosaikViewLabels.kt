@@ -23,6 +23,9 @@ import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.html.HtmlGenerator
 import org.intellij.markdown.parser.MarkdownParser
 import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.foundation.NSAttributedString
+import org.robovm.apple.foundation.NSDictionary
+import org.robovm.apple.foundation.NSNumber
 import org.robovm.apple.uikit.*
 
 class LabelViewHolder(treeElement: TreeElement, mosaikViewElement: StyleableTextLabel<*>) : UiViewHolder(
@@ -30,11 +33,13 @@ class LabelViewHolder(treeElement: TreeElement, mosaikViewElement: StyleableText
 ) {
     private val labelView = uiView as ThemedLabel
     private val isExpandable = (mosaikViewElement is ExpandableElement && mosaikViewElement.isExpandOnClick)
+    private val isUnderlined = mosaikViewElement.style == LabelStyle.BODY1LINK
+
     private var isExpanded = false
 
     init {
         labelView.apply {
-            text = LabelFormatter.getFormattedText(mosaikViewElement, treeElement)
+            setLabelText(LabelFormatter.getFormattedText(mosaikViewElement, treeElement))
             textColor = mosaikViewElement.textColor.toTextUiColor()
             setTextLabelProperties(mosaikViewElement)
 
@@ -57,13 +62,27 @@ class LabelViewHolder(treeElement: TreeElement, mosaikViewElement: StyleableText
             viewCoroutineScope().launch {
                 LabelFormatter.getAlternativeText(mosaikViewElement, treeElement)?.let { alternativeText ->
                     runOnMainThread {
-                        labelView.text = alternativeText
+                        setLabelText(alternativeText)
                         if (mosaikViewElement.maxLines > 0)
                             labelView.lineBreakMode = NSLineBreakMode.TruncatingTail
                     }
                 }
             }
         }
+    }
+
+    private fun setLabelText(text: String?) {
+        if (!isUnderlined)
+            labelView.text = text
+        else
+            labelView.attributedText = NSAttributedString(
+                text, NSAttributedStringAttributes(
+                    NSDictionary(
+                        NSAttributedStringAttribute.Values.UnderlineStyle(),
+                        NSNumber.valueOf(NSUnderlineStyle.Single.value())
+                    )
+                )
+            )
     }
 
     private fun setMaxLines() {
@@ -86,7 +105,7 @@ private fun LabelStyle.toUiLabelView() =
     when (this) {
         LabelStyle.BODY1 -> Body1Label()
         LabelStyle.BODY1BOLD -> Body1BoldLabel()
-        LabelStyle.BODY1LINK -> Body1Label() // TODO
+        LabelStyle.BODY1LINK -> Body1Label() // underline has to be done with attributed text
         LabelStyle.BODY2 -> Body2Label()
         LabelStyle.BODY2BOLD -> Body2BoldLabel()
         LabelStyle.HEADLINE1 -> Headline1Label()
