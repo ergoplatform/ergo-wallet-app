@@ -3,7 +3,7 @@ package org.ergoplatform.ios.mosaik
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.ergoplatform.ergoauth.isErgoAuthRequest
+import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.ios.CrashHandler
 import org.ergoplatform.ios.IosCacheManager
 import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
@@ -100,6 +100,7 @@ class MosaikViewController(
         viewControllerScope.launch {
             mosaikRuntime.viewTree.contentState.collect {
                 runOnMainThread {
+                    lastViewInteracted = null
                     mosaikView.updateView()
                 }
             }
@@ -124,6 +125,8 @@ class MosaikViewController(
     }
 
     private val mosaikRuntime = IosMosaikRuntime()
+
+    internal var lastViewInteracted: UIView? = null
 
     inner class IosMosaikRuntime : AppMosaikRuntime(
         "Ergo Wallet App (iOS)",
@@ -171,11 +174,11 @@ class MosaikViewController(
         }
 
         override fun pasteToClipboard(text: String) {
-            shareText(text, mosaikView)
+            shareText(text, lastViewInteracted ?: mosaikView)
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {
-            if (isErgoAuthRequest(action.url)) {
+            if (isErgoAuthRequestUri(action.url)) {
                 navigationController.pushViewController(
                     ErgoAuthenticationViewController(action.url, null,
                         doOnComplete = { actionToRunOnAppearance = action.onFinished }),
@@ -247,7 +250,7 @@ class MosaikViewController(
             ) {}
         }
 
-        override fun startAddressChooser() {
+        override fun startAddressIdxChooser() {
             presentViewController(
                 ChooseAddressListDialogViewController(walletForAddressChooser!!.walletConfig.id, false) {
                     onAddressChosen(it!!)

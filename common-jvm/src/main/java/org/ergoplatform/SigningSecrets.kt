@@ -21,7 +21,14 @@ data class SigningSecrets(
     ) : this(SecretString.create(mnemonic), deprecatedDerivation)
 
     fun toBytes(): ByteArray {
-        return mnemonic.toBytesSecure()
+        val bytes = mnemonic.toBytesSecure()
+        return if (deprecatedDerivation) bytes else {
+            val bytesWithPrefix = ByteArray(bytes.size + 1) { i ->
+                if (i == 0) prefixNewMethod else bytes[i - 1]
+            }
+            Arrays.fill(bytes, 0)
+            bytesWithPrefix
+        }
     }
 
     fun clearMemory() {
@@ -29,6 +36,9 @@ data class SigningSecrets(
     }
 
     companion object {
+        // if the byte array starts with a tab (code 9), the new derivation logic should be used
+        private const val prefixNewMethod: Byte = 9
+
         fun fromBytes(bytes: ByteArray): SigningSecrets? {
             return if (bytes.isNotEmpty() && bytes[0] == '{'.code.toByte()
                 && bytes.last() == '}'.code.toByte()
@@ -37,9 +47,19 @@ data class SigningSecrets(
                 fromJson(String(bytes))
             } else {
                 try {
-                    val mnemonic = bytes.toSecretStringSecure()
-                    Arrays.fill(bytes, 0)
-                    SigningSecrets(mnemonic, true)
+                    if (bytes[0] == prefixNewMethod) {
+                        val mnemonicBytes = ByteArray(bytes.size - 1) { i ->
+                            bytes[i + 1]
+                        }
+                        val mnemonic = mnemonicBytes.toSecretStringSecure()
+                        Arrays.fill(bytes, 0)
+                        Arrays.fill(mnemonicBytes, 0)
+                        SigningSecrets(mnemonic, false)
+                    } else {
+                        val mnemonic = bytes.toSecretStringSecure()
+                        Arrays.fill(bytes, 0)
+                        SigningSecrets(mnemonic, true)
+                    }
                 } catch (t: Throwable) {
                     Arrays.fill(bytes, 0)
                     null

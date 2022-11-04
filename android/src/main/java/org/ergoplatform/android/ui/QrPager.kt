@@ -3,9 +3,15 @@ package org.ergoplatform.android.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import org.ergoplatform.android.R
+import org.ergoplatform.android.databinding.CardPresentSigningResultBinding
+import org.ergoplatform.android.databinding.CardScanMoreBinding
 import org.ergoplatform.android.databinding.FragmentPromptSigningDialogQrPageBinding
+import org.ergoplatform.transactions.QrCodePagesCollector
 
 class QrPageHolder(val binding: FragmentPromptSigningDialogQrPageBinding) :
     RecyclerView.ViewHolder(binding.root) {
@@ -41,4 +47,59 @@ class QrPagerAdapter(val qrCodes: List<String>) : RecyclerView.Adapter<QrPageHol
         return qrCodes.size
     }
 
+}
+
+fun Fragment.refreshScanMoreCardInfo(
+    binding: CardScanMoreBinding,
+    qrPagesCollector: QrCodePagesCollector,
+    errorMessage: String?
+) {
+    binding.labelScannedPages.text = getString(
+        R.string.label_qr_pages_info,
+        qrPagesCollector.pagesAdded.toString(),
+        qrPagesCollector.pagesCount.toString()
+    )
+    binding.root.visibility = View.VISIBLE
+    binding.labelErrorMessage.visibility =
+        if (errorMessage.isNullOrBlank()) View.GONE else View.VISIBLE
+    binding.labelErrorMessage.text = errorMessage
+}
+
+fun Fragment.setupSigningResultCardBinding(
+    binding: CardPresentSigningResultBinding,
+    onSwitchRes: () -> Unit,
+    lastPageDesc: Int = R.string.desc_show_signed,
+    pageDesc: Int = R.string.desc_show_signed_multiple
+) {
+    binding.buttonScanNextQr.setOnClickListener {
+        binding.qrCodePager.currentItem = binding.qrCodePager.currentItem + 1
+    }
+
+    binding.switchResolution.setOnClickListener {
+        onSwitchRes()
+    }
+
+    binding.buttonDismiss.setOnClickListener {
+        findNavController().popBackStack()
+    }
+
+    binding.qrCodePager.registerOnPageChangeCallback(object :
+        ViewPager2.OnPageChangeCallback() {
+        override fun onPageSelected(position: Int) {
+            super.onPageSelected(position)
+            binding.refreshButtonState(lastPageDesc, pageDesc)
+        }
+    })
+}
+
+fun CardPresentSigningResultBinding.refreshButtonState(
+    lastPageDesc: Int = R.string.desc_show_signed,
+    pageDesc: Int = R.string.desc_show_signed_multiple
+) {
+    val lastPage = qrCodePager.currentItem + 1 == qrCodePager.adapter!!.itemCount
+    buttonDismiss.visibility = if (lastPage) View.VISIBLE else View.GONE
+    buttonScanNextQr.visibility = if (!lastPage) View.VISIBLE else View.GONE
+    tvScanSignedDesc.setText(
+        if (lastPage) lastPageDesc else pageDesc
+    )
 }

@@ -249,8 +249,6 @@
     <string name="button_authenticate">Realizar autenticação</string>
     <string name="desc_authentication_wallet">Carteira utilizada para autenticação:</string>
     <string name="desc_auth_response_send">A autenticação foi enviada com sucesso para a aplicação.</string>
-    <string name="error_wallet_type_ergoauth_not_avail">O ErgoAuth não está disponível para as carteiras em Modo Leitura.
-        Por favor restaure através da frase mnemónica ou utilize outra carteira.</string>
 
     <!-- Token information dialog -->
     <string name="label_minting_tx">Transacções Minting</string>

@@ -39,8 +39,10 @@ data class WalletAddress(
     val walletFirstAddress: String,
     val derivationIndex: Int,
     val publicAddress: String,
-    val label: String?,
-)
+    override val label: String?,
+) : IAddressWithLabel {
+    override val address: String get() = publicAddress
+}
 
 data class Wallet(
     val walletConfig: WalletConfig,

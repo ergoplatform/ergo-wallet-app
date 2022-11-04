@@ -1,5 +1,6 @@
 package org.ergoplatform.android.transactions
 
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,16 +23,18 @@ import org.ergoplatform.utils.millisecondsToLocalTime
 fun CardTransactionInfoBinding.bindTransactionInfo(
     ti: TransactionInfo,
     tokenClickListener: ((String) -> Unit)?,
-    layoutInflater: LayoutInflater
+    layoutInflater: LayoutInflater,
+    addressLabelHandler: ((String, ((String) -> Unit)) -> Unit)? = null
 ) =
-    bindTransactionInfo(ti, layoutInboxes, layoutOutboxes, tokenClickListener, layoutInflater)
+    bindTransactionInfo(ti, layoutInboxes, layoutOutboxes, tokenClickListener, layoutInflater, addressLabelHandler)
 
 fun bindTransactionInfo(
     ti: TransactionInfo,
     layoutInboxes: ViewGroup,
     layoutOutboxes: ViewGroup,
     tokenClickListener: ((String) -> Unit)?,
-    layoutInflater: LayoutInflater
+    layoutInflater: LayoutInflater,
+    addressLabelHandler: ((String, ((String) -> Unit)) -> Unit)? = null
 ) {
     layoutInboxes.apply {
         removeAllViews()
@@ -43,7 +46,8 @@ fun bindTransactionInfo(
                 input.address ?: input.boxId,
                 input.assets,
                 tokenClickListener,
-                layoutInflater
+                layoutInflater,
+                addressLabelHandler
             )
         }
     }
@@ -58,7 +62,8 @@ fun bindTransactionInfo(
                 output.address,
                 output.assets,
                 tokenClickListener,
-                layoutInflater
+                layoutInflater,
+                addressLabelHandler
             )
         }
     }
@@ -70,7 +75,8 @@ private fun bindBoxView(
     address: String,
     assets: List<AssetInstanceInfo>?,
     tokenClickListener: ((String) -> Unit)?,
-    layoutInflater: LayoutInflater
+    layoutInflater: LayoutInflater,
+    addressLabelHandler: ((String, ((String) -> Unit)) -> Unit)? = null
 ) {
     val boxBinding = EntryTransactionBoxBinding.inflate(layoutInflater, container, true)
     boxBinding.boxErgAmount.text = container.context.getString(
@@ -106,6 +112,11 @@ private fun bindBoxView(
                 tokenBinding.root.setOnClickListener { tokenClickListener(token.tokenId) }
             }
         }
+    }
+
+    addressLabelHandler?.invoke(address) { label ->
+        boxBinding.labelBoxAddress.text = label
+        boxBinding.labelBoxAddress.ellipsize = TextUtils.TruncateAt.END
     }
 }
 

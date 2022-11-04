@@ -17,6 +17,7 @@ import com.arkivanov.decompose.router.push
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
+import org.ergoplatform.desktop.addressbook.AddressBookDialogStateHandler
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.persistance.WalletAddress
@@ -59,6 +60,7 @@ class SendFundsComponent(
     private val tokensChosenState = mutableStateOf(emptyList<String>())
     private val tokensError = mutableStateOf(false)
     private val editFeeDialogState = mutableStateOf(false)
+    private val addressBookDialogState = AddressBookDialogStateHandler()
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -85,6 +87,7 @@ class SendFundsComponent(
                     editFeeDialogState.value = true
                     uiLogic.fetchSuggestedFeeData(ApiServiceManager.getOrInit(Application.prefs))
                 },
+                onChooseRecipientAddress = { addressBookDialogState.showChooseAddressDialog() },
             )
 
             if (addTokenDialogState.value) {
@@ -103,6 +106,15 @@ class SendFundsComponent(
                     onDismissRequest = { editFeeDialogState.value = false }
                 )
             }
+
+            addressBookDialogState.AddressBookDialogs(
+                onChooseEntry = { addressWithLabel ->
+                    recipientAddress.value = TextFieldValue(addressWithLabel.address)
+                    uiLogic.receiverAddress = addressWithLabel.address
+                    recipientError.value = false
+                },
+                componentScope()
+            )
 
             SubmitTransactionOverlays()
         }

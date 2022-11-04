@@ -11,6 +11,8 @@ import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
 class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.Zero()) {
+    private var address: String? = null
+
     private val labelBoxAddress = Body1BoldLabel().apply {
         numberOfLines = 1
         textColor = uiColorErgo
@@ -20,7 +22,7 @@ class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.
             numberOfLines = if (numberOfLines == 1L) 10 else 1
         })
         addGestureRecognizer(UILongPressGestureRecognizer {
-            vc.shareText(text, this)
+            address?.let { vc.shareText(it, this) }
         })
     }
     private val labelErgAmount = Body1BoldLabel().apply {
@@ -47,6 +49,7 @@ class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.
         address: String,
         assets: List<AssetInstanceInfo>?,
         tokenClickListener: ((String) -> Unit)?,
+        addressLabelHandler: ((String, (String) -> Unit) -> Unit)?,
         texts: I18NBundle
     ): TransactionBoxEntryView {
         labelErgAmount.text = value?.let {
@@ -55,6 +58,7 @@ class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.
                 ErgoAmount(value).toStringTrimTrailingZeros()
             ) else null
         } ?: ""
+        this.address = address
         labelBoxAddress.text = address
 
         tokensList.apply {
@@ -72,6 +76,11 @@ class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.
                     }
                 })
             }
+        }
+
+        addressLabelHandler?.invoke(address) { label ->
+            labelBoxAddress.text = label
+            labelBoxAddress.lineBreakMode = NSLineBreakMode.TruncatingTail
         }
 
         return this

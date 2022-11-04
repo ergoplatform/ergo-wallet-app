@@ -60,6 +60,8 @@ object TestUiWallet {
                 get() = mock {}
             override val mosaikDbProvider: MosaikDbProvider
                 get() = mock {}
+            override val addressBookDbProvider: AddressBookDbProvider
+                get() = mock {}
         }
     }
 

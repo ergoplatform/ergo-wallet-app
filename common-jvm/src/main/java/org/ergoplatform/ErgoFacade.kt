@@ -64,13 +64,18 @@ fun getAddressDerivationPath(index: Int): String {
     return "m/44'/429'/0'/0/$index"
 }
 
+fun getFeeAddressAsString() = if (isErgoMainNet)
+    "2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe"
+else
+    "Bf1X9JgQTUtgntaer91B24n6kP8L2kqEiQqNf1z97BKo9UbnW3WRP9VXu8BXd1LsYCiYbHJEdWKxkF5YNx5n7m31wsDjbEuB3B13ZMDVBWkepGmWfGa71otpFViHDCuvbw1uNicAQnfuWfnj8fbCa4"
+
 fun getPublicErgoAddressFromMnemonic(secrets: SigningSecrets, index: Int = 0): String {
     return Address.createEip3Address(
         index,
         getErgoNetworkType(),
         secrets.mnemonic,
         secrets.password,
-        // TODO BIP-32 fix secrets.deprecatedDerivation
+        secrets.deprecatedDerivation
     ).ergoAddress.toString()
 }
 
@@ -93,7 +98,7 @@ fun getSerializedXpubKeyFromMnemonic(signingSecrets: SigningSecrets) =
         JavaHelpers.seedToMasterKey(
             signingSecrets.mnemonic,
             signingSecrets.password,
-            // TODO BIP-32 fix signingSecrets.deprecatedDerivation
+            signingSecrets.deprecatedDerivation
         ), getErgoNetworkType()
     )
 
@@ -278,7 +283,7 @@ private fun buildProver(
         .withMnemonic(
             signingSecrets.mnemonic,
             signingSecrets.password,
-            // TODO BIP-32 fix signingSecrets.deprecatedDerivation
+            signingSecrets.deprecatedDerivation
         )
     derivedKeyIndices.forEach {
         proverBuilder.withEip3Secret(it)

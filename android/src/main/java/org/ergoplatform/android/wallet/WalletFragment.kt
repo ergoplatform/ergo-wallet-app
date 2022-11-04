@@ -30,10 +30,7 @@ import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.tokens.fillTokenOverview
 import org.ergoplatform.tokens.getTokenErgoValueSum
 import org.ergoplatform.utils.getTimeSpanString
-import org.ergoplatform.wallet.getBalanceForAllAddresses
-import org.ergoplatform.wallet.getTokensForAllAddresses
-import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
-import org.ergoplatform.wallet.isReadOnly
+import org.ergoplatform.wallet.*
 import java.util.*
 
 
@@ -72,11 +69,7 @@ class WalletFragment : Fragment() {
             .observe(viewLifecycleOwner,
                 {
                     val walletList = it.map { it.toModel() }
-                    walletAdapter.walletList = walletList.sortedBy {
-                        it.walletConfig.displayName?.lowercase(
-                            Locale.getDefault()
-                        )
-                    }
+                    walletAdapter.walletList = walletList.sortedByDisplayName()
                     lastWalletList = walletAdapter.walletList
 
                     binding.swipeRefreshLayout.visibility =

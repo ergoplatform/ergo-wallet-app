@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.BuildConfig
 import org.ergoplatform.android.ui.SingleLiveEvent
-import org.ergoplatform.ergoauth.isErgoAuthRequest
+import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.mosaik.AppMosaikRuntime
 import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.mosaik.MosaikGuidManager
@@ -38,6 +38,7 @@ class MosaikViewModel : ViewModel() {
     private var ergoPayOnFinishedActionId: String? = null
     private var ergoAuthOnFinishedActionId: String? = null
     private var scanQrCodeActionId: String? = null
+    var chooseAddressFromAddressbookId: String? = null
 
     val mosaikRuntime = object : AppMosaikRuntime(
         "Ergo Wallet App (Android)",
@@ -82,7 +83,7 @@ class MosaikViewModel : ViewModel() {
         }
 
         override fun runErgoAuthAction(action: ErgoAuthAction) {
-            if (isErgoAuthRequest(action.url)) {
+            if (isErgoAuthRequestUri(action.url)) {
                 ergoAuthOnFinishedActionId = action.onFinished
                 ergoAuthActionEvent.postValue(action)
             } else {
@@ -103,7 +104,7 @@ class MosaikViewModel : ViewModel() {
             showWalletChooserEvent.postValue(System.currentTimeMillis())
         }
 
-        override fun startAddressChooser() {
+        override fun startAddressIdxChooser() {
             showAddressChooserEvent.postValue(System.currentTimeMillis())
         }
     }

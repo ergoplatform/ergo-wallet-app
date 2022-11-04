@@ -240,8 +240,6 @@
     <string name="button_authenticate">Аутентификация</string>
     <string name="desc_authentication_wallet">Кошелек, используемый для аутентификации:</string>
     <string name="desc_auth_response_send">Аутентификация была успешно отправлена в DApp.</string>
-    <string name="error_wallet_type_ergoauth_not_avail">ErgoAuth недоступен для кошельков, доступных только для чтения.
-Пожалуйста, восстановите из мнемоники или используйте другой кошелек.</string>
 
     <!-- Token information dialog -->
     <string name="label_minting_tx">Транзакция создания</string>

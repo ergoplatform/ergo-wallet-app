@@ -9,6 +9,9 @@ import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.ergoplatform.android.addressbook.AddressBookDao
+import org.ergoplatform.android.addressbook.AddressBookEntryEntity
+import org.ergoplatform.android.addressbook.toDbEntitiy
 import org.ergoplatform.android.mosaik.MosaikAppDbEntity
 import org.ergoplatform.android.mosaik.MosaikDbDao
 import org.ergoplatform.android.mosaik.MosaikHostDbEntity
@@ -39,8 +42,9 @@ import org.ergoplatform.persistance.*
         TokenInformationDbEntity::class,
         MosaikAppDbEntity::class,
         MosaikHostDbEntity::class,
+        AddressBookEntryEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase(), IAppDatabase {
@@ -48,6 +52,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
     abstract fun tokenDao(): TokenDbDao
     abstract fun transactionDao(): TransactionDbDao
     abstract fun mosaikDao(): MosaikDbDao
+    abstract fun addressBookDao(): AddressBookDao
 
     companion object {
 
@@ -70,6 +75,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 .addMigrations(MIGRATION_5_6)
                 .addMigrations(MIGRATION_6_7)
                 .addMigrations(MIGRATION_7_8)
+                .addMigrations(MIGRATION_8_9)
                 .build()
         }
 
@@ -136,6 +142,12 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
             }
         }
 
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS `address_book` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `label` TEXT NOT NULL, `address` TEXT NOT NULL, `signed_data` BLOB)")
+            }
+        }
+
     }
 
     override val tokenDbProvider get() = RoomTokenDbProvider(this)
@@ -144,6 +156,8 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
         get() = RoomTransactionDbProvider(this)
     override val mosaikDbProvider: MosaikDbProvider
         get() = RoomMosaikDbProvider(this)
+    override val addressBookDbProvider: AddressBookDbProvider
+        get() = RoomAddressBookProvider(this)
 }
 
 class RoomWalletDbProvider(private val database: AppDatabase) : WalletDbProvider {
@@ -334,4 +348,21 @@ class RoomMosaikDbProvider(private val database: AppDatabase) : MosaikDbProvider
     override suspend fun getMosaikHostInfo(hostname: String): MosaikAppHost? =
         database.mosaikDao().getMosaikHostInfo(hostname)?.toModel()
 
+}
+
+class RoomAddressBookProvider(private val database: AppDatabase) : AddressBookDbProvider {
+    override suspend fun loadAddressEntryById(id: Int): AddressBookEntry? =
+        database.addressBookDao().loadAddressEntryById(id)?.toModel()
+
+    override suspend fun updateAddressEntry(addressBookEntry: AddressBookEntry) =
+        database.addressBookDao().insertAll(addressBookEntry.toDbEntitiy())
+
+    override suspend fun deleteAddressEntry(id: Int) =
+        database.addressBookDao().deleteAddressEntry(id)
+
+    override fun getAllAddressEntries(): Flow<List<AddressBookEntry>> =
+        database.addressBookDao().getAllAddressEntries().map { it.map { it.toModel() } }
+
+    override suspend fun findAddressEntry(address: String): AddressBookEntry? =
+        database.addressBookDao().findByAddress(address)?.toModel()
 }

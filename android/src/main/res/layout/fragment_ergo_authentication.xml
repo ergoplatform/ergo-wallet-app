@@ -86,7 +86,7 @@
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="@dimen/activity_horizontal_margin"
                         android:minWidth="120dp"
-                        android:text="@string/label_dismiss" />
+                        android:text="@string/button_done" />
 
                 </LinearLayout>
 
@@ -188,6 +188,14 @@
                 </androidx.cardview.widget.CardView>
 
             </LinearLayout>
+
+            <include
+                android:id="@+id/card_signing_result"
+                layout="@layout/card_present_signing_result" />
+
+            <include
+                android:id="@+id/card_scan_more"
+                layout="@layout/card_scan_more" />
 
         </FrameLayout>
     </androidx.core.widget.NestedScrollView>

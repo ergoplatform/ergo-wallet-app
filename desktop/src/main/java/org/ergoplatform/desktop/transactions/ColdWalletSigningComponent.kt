@@ -30,7 +30,7 @@ class ColdWalletSigningComponent(
 
     private val uiLogic = DesktopUiLogic().apply {
         setWalletId(walletId, Application.database.walletDbProvider)
-        addQrCodeChunk(signingRequestChunk)
+        addQrCodeChunk(signingRequestChunk, Application.texts)
     }
 
     private val scanningState = mutableStateOf(0)
@@ -67,7 +67,7 @@ class ColdWalletSigningComponent(
 
     private fun scanNextQr() {
         router.push(ScreenConfig.QrCodeScanner { qrCodeChunk ->
-            uiLogic.addQrCodeChunk(qrCodeChunk)
+            uiLogic.addQrCodeChunk(qrCodeChunk, Application.texts)
             scanningState.value = scanningState.value + 1
             uiLogic.transactionInfo?.let {
                 txInfoState.value = it.reduceBoxes()

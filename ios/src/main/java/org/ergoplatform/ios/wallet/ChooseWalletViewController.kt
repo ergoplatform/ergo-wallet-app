@@ -6,6 +6,7 @@ import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.STRING_ERROR_NO_WALLET
 import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.wallet.sortedByDisplayName
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
@@ -42,7 +43,7 @@ class ChooseWalletViewController(
 
             runOnMainThread {
                 walletsStackView.clearArrangedSubviews()
-                wallets.sortedBy { it.walletConfig.displayName?.lowercase() }.forEach { wallet ->
+                wallets.sortedByDisplayName().forEach { wallet ->
                     walletsStackView.addArrangedSubview(
                         ChooseSpendingWalletViewController.ChooseWalletItem(
                             wallet,

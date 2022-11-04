@@ -56,7 +56,11 @@ abstract class TransactionContainer(
         this.addArrangedSubview(outBoxesList)
     }
 
-    open fun bindTransaction(transactionInfo: TransactionInfo, tokenClickListener: ((String) -> Unit)?) {
+    open fun bindTransaction(
+        transactionInfo: TransactionInfo,
+        tokenClickListener: ((String) -> Unit)?,
+        addressLabelHandler: ((String, (String) -> Unit) -> Unit)? = null
+    ) {
         inboxesList.clearArrangedSubviews()
         transactionInfo.inputs.forEach { input ->
             inboxesList.addArrangedSubview(
@@ -65,6 +69,7 @@ abstract class TransactionContainer(
                     input.address,
                     input.assets,
                     tokenClickListener,
+                    addressLabelHandler,
                     texts
                 )
             )
@@ -77,6 +82,7 @@ abstract class TransactionContainer(
                     output.address,
                     output.assets,
                     tokenClickListener,
+                    addressLabelHandler,
                     texts
                 )
             )

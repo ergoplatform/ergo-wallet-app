@@ -93,7 +93,7 @@ class SendFundsViewModel : SubmitTransactionViewModel() {
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
-            _signingPromptData.postValue(signingPrompt)
+            signingPromptData = signingPrompt
         }
 
         override fun showErrorMessage(message: String) {
