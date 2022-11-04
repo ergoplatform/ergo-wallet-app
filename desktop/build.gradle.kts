@@ -4,9 +4,13 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
+val generatedDir = "build/generated"
+val generatedSourceDir = "$generatedDir/src/java"
+
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+    sourceSets["main"].java { srcDir(generatedSourceDir) } // add generated source dir to main source set
 }
 
 val osArch = if (project.hasProperty("osarch")) project.property("osarch") as? String else null
@@ -23,18 +27,18 @@ dependencies {
     } else {
         implementation(compose.desktop.currentOs)
     }
-    implementation(compose.materialIconsExtended)
 
     implementation("com.arkivanov.decompose:decompose:$decomposeVersion")
     implementation("com.arkivanov.decompose:extensions-compose-jetbrains:$decomposeVersion")
     implementation("net.harawata:appdirs:1.2.1") // https://github.com/harawata/appdirs
-    implementation ("io.github.sanyarnd:app-locker:1.1.2") // https://github.com/sanyarnd/applocker
+    implementation("io.github.sanyarnd:app-locker:1.1.2") // https://github.com/sanyarnd/applocker
 
     // https://levelup.gitconnected.com/qr-code-scanner-in-kotlin-e15dd9bfbb1f
-    arrayOf("core","kotlin","WebcamCapture").forEach()
-    { implementation("org.boofcv:boofcv-$it:0.40.1") {
-        exclude("org.boofcv", "boofcv-swing")
-    } }
+    arrayOf("core", "kotlin", "WebcamCapture").forEach() {
+        implementation("org.boofcv:boofcv-$it:0.40.1") {
+            exclude("org.boofcv", "boofcv-swing")
+        }
+    }
 }
 
 val mainClassName = "org.ergoplatform.MainKt"
@@ -53,6 +57,8 @@ compose.desktop {
     }
 }
 
+project.version = "2.2.2220"
+
 tasks {
     processResources {
         doFirst {
@@ -63,9 +69,18 @@ tasks {
             }
         }
     }
+    compileKotlin {
+        doFirst {
+            project.file(generatedSourceDir).mkdirs()
+            project.file("$generatedSourceDir/Constants.kt").writeText(
+                """
+                package org.ergoplatform.desktop
+                const val appVersionString = "${project.version}"
+            """.trimIndent()
+            )
+        }
+    }
 }
-
-project.version = "2.1.2219" // TODO inject to jpackage.cfg and Constants.kt
 
 val currentArch by lazy { System.getProperty("os.arch") }
 
@@ -107,5 +122,14 @@ obfuscate.configure {
 tasks {
     build {
         dependsOn(obfuscate)
+    }
+}
+
+tasks.register("prepareJpackage") {
+    doFirst {
+        val newContent = project.file("deploy/jpackage.cfg").readText()
+            .replace("\${version}", project.version.toString())
+        project.file(generatedDir).mkdirs()
+        project.file("$generatedDir/jpackage.cfg").writeText(newContent)
     }
 }

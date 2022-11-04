@@ -269,10 +269,12 @@
     <string name="label_ergo_pay_choose_address">Please choose an address to process the Ergo Pay Request.</string>
     <string name="label_ergo_pay_choose_wallet">Please choose a wallet to process the Ergo Pay Request.</string>
     <string name="title_choose_wallet">Choose a wallet</string>
-    <string name="error_prover_cant_sign">The transaction could not be signed with this wallet\'s keys.</string>
+    <string name="error_prover_cant_sign">The transaction or message could not be signed with this wallet\'s keys.</string>
 
     <!-- Ergo Auth Signing -->
     <string name="intro_auth_request">dApp on %1$s\nrequests your authentication to\n%2$s.\n\nAuthenticate
+        only when you consent to this.</string>
+    <string name="intro_cold_auth_request">A dApp requests your authentication to\n%1$s.\n\nAuthenticate
         only when you consent to this.</string>
     <string name="desc_secure_conn">Secure connection verified by %1$s</string>
     <string name="desc_insecure_conn">Secure connection failed!</string>
@@ -281,8 +283,17 @@
     <string name="button_authenticate">Authenticate</string>
     <string name="desc_authentication_wallet">Wallet used for authentication:</string>
     <string name="desc_auth_response_send">Authentication was sent to dApp successfully.</string>
-    <string name="error_wallet_type_ergoauth_not_avail">ErgoAuth is not available for read-only wallets.
-        Please restore from mnemonic or use another wallet.</string>
+    <string name="desc_prompt_cold_auth">Scan this QR code
+       with your signing device to authenticate. If you experience problems scanning, lower the resolution with the icon at the top.\n\n
+        When present, scan the signed message QR code to sent it to the dApp.</string>
+    <string name="desc_prompt_cold_auth_multiple">Scan these QR codes
+       with your signing device to authenticate. If you experience problems scanning, lower the resolution with the icon at the top.</string>
+    <string name="button_scan_signed_msg">Scan signed message</string>
+    <string name="error_cold_qr_code_does_not_fit">QR code does not belong to the formerly scanned codes</string>
+    <string name="desc_response_cold_auth">Your auth message was prepared and needs to be sent to the dApp.
+        Scan this QR code to proceed.</string>
+    <string name="desc_response_cold_auth_multiple">Your auth message was prepared and needs to be sent to the dApp.
+        Scan these QR codes to proceed.</string>
 
     <!-- Token information dialog -->
     <string name="label_minting_tx">Minting transaction</string>
@@ -317,6 +328,17 @@
     <string name="dropdown_choose_option">(please choose)</string>
     <string name="error_mosaik_connection">Could not load application.\nCheck your connection and try again.</string>
     <string name="error_no_mosaik_app">No wallet app plugin found at given address %1$s. Please check for misspellings.</string>
+
+    <!-- Address book -->
+    <string name="label_own_addresses">Your addresses</string>
+    <string name="label_saved_addresses">Saved addresses</string>
+    <string name="button_add_address_entry">Add new address entry</string>
+    <string name="button_edit_address_entry">Edit address entry</string>
+    <string name="label_no_entries">No entries yet</string>
+    <string name="label_descriptive_address_name">Descriptive address name</string>
+    <string name="label_erg_address">Ergo address</string>
+    <string name="button_save">Save</string>
+    <string name="label_address_tx_fee">Transaction fee</string>
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>

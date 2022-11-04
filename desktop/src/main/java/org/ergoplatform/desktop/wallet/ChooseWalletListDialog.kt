@@ -23,6 +23,7 @@ import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
+import org.ergoplatform.wallet.sortedByDisplayName
 
 @Composable
 fun ChooseWalletListDialog(
@@ -107,8 +108,10 @@ fun WalletChooserList(
     clickListener: (WalletConfig) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val walletListSorted = remember(wallets) { wallets.sortedByDisplayName() }
+
     Column(modifier) {
-        wallets.forEach { wallet ->
+        walletListSorted.forEach { wallet ->
             WalletChooserListItem(
                 wallet,
                 showTokenNum,

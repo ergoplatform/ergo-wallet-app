@@ -8,6 +8,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,13 +16,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import org.ergoplatform.Application
 import org.ergoplatform.compose.settings.*
-import org.ergoplatform.desktop.ui.*
+import org.ergoplatform.desktop.transactions.ColdSigningResultLayout
+import org.ergoplatform.desktop.transactions.ColdSigningScanLayout
+import org.ergoplatform.desktop.ui.AppScrollingLayout
 import org.ergoplatform.desktop.ui.bigIconSize
 import org.ergoplatform.desktop.ui.defaultMaxWidth
 import org.ergoplatform.desktop.ui.defaultPadding
+import org.ergoplatform.desktop.ui.ergoLogo
+import org.ergoplatform.desktop.ui.getSeverityIcon
+import org.ergoplatform.desktop.ui.uiErgoColor
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.transactions.MessageSeverity
+import org.ergoplatform.transactions.ergoAuthResponseToQrChunks
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 
@@ -29,7 +36,9 @@ import org.ergoplatform.uilogic.ergoauth.ErgoAuthUiLogic
 fun ErgoAuthScreen(
     uiLogic: ErgoAuthUiLogic,
     authState: ErgoAuthUiLogic.State,
+    scanningState: MutableState<Int>,
     onChangeWallet: () -> Unit,
+    onScan: () -> Unit,
     onAuthenticate: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -51,11 +60,25 @@ fun ErgoAuthScreen(
                     )
                 }
 
+                ErgoAuthUiLogic.State.SCANNING ->
+                    ColdSigningScanLayout(
+                        uiLogic.requestPagesCollector!!, Modifier, scanningState,
+                        uiLogic.lastMessage, onScan
+                    )
+
                 ErgoAuthUiLogic.State.WAIT_FOR_AUTH ->
                     WaitForAuthLayout(uiLogic, onChangeWallet, onAuthenticate)
 
                 ErgoAuthUiLogic.State.DONE ->
-                    AuthDoneLayout(uiLogic, onDismiss)
+                    if (uiLogic.isColdAuth && uiLogic.coldSerializedAuthResponse != null)
+                        ColdSigningResultLayout(
+                            uiLogic.coldSerializedAuthResponse!!, Modifier, onDismiss,
+                            ::ergoAuthResponseToQrChunks,
+                            descriptionLabel = STRING_DESC_RESPONSE_COLD_AUTH_MULTIPLE,
+                            lastPageDescriptionLabel = STRING_DESC_RESPONSE_COLD_AUTH
+                        )
+                    else
+                        AuthDoneLayout(uiLogic, onDismiss)
             }
 
         }
@@ -88,7 +111,7 @@ private fun AuthDoneLayout(
                 onDismiss,
                 Modifier.align(Alignment.CenterHorizontally).padding(top = defaultPadding),
             ) {
-                Text(remember { Application.texts.getString(STRING_LABEL_DISMISS) })
+                Text(remember { Application.texts.getString(STRING_BUTTON_DONE) })
             }
 
         }

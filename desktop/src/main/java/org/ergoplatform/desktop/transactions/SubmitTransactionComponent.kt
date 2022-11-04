@@ -56,11 +56,13 @@ abstract class SubmitTransactionComponent(
             )
         }
         signingPromptDialog.value?.let { signingPrompt ->
-            SigningPromptDialog(signingPrompt,
+            SigningPromptDialog(
+                uiLogic.signingPromptDialogConfig!!,
                 onContinueClicked = ::doScanColdSigning,
                 pagesScanned = signingPromptPagesScanned.value?.first,
                 pagesToScan = signingPromptPagesScanned.value?.second,
-                onDismissRequest = { signingPromptDialog.value = null })
+                onDismissRequest = { signingPromptDialog.value = null },
+            )
         }
     }
 
@@ -70,7 +72,7 @@ abstract class SubmitTransactionComponent(
 
     private fun doScanColdSigning() {
         router.push(ScreenConfig.QrCodeScanner { qrCode ->
-            uiLogic.signedTxQrCodePagesCollector?.let {
+            uiLogic.signingPromptDialogConfig?.responsePagesCollector?.let {
                 it.addPage(qrCode)
                 if (it.hasAllPages()) {
                     signingPromptDialog.value = null

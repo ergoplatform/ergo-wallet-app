@@ -5,14 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowCircleDown
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.SyncAlt
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
@@ -21,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.URL_COLD_WALLET_HELP
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.compose.settings.appTextFieldColors
 import org.ergoplatform.compose.settings.primaryButtonColors
 import org.ergoplatform.compose.settings.secondaryButtonColors
@@ -51,6 +46,7 @@ fun SendFundsScreen(
     onChooseToken: () -> Unit,
     onSendClicked: () -> Unit,
     onChooseFeeClicked: () -> Unit,
+    onChooseRecipientAddress: () -> Unit,
 ) {
     AppScrollingLayout {
         Card(
@@ -109,18 +105,48 @@ fun SendFundsScreen(
                     style = labelStyle(LabelStyle.BODY1),
                 )
 
+                val recipientAddressString = recipientAddress.value.text
+                val addressLabelState = remember(recipientAddressString) {
+                    mutableStateOf<String?>(null)
+                }
+                LaunchedEffect(recipientAddressString) {
+                    getAddressLabelFromDatabase(
+                        Application.database,
+                        recipientAddressString,
+                        Application.texts
+                    )?.let {
+                        addressLabelState.value = it
+                    }
+                }
+
+                val readOnly = addressLabelState.value != null
+
                 OutlinedTextField(
-                    recipientAddress.value,
+                    addressLabelState.value?.let { TextFieldValue(it) } ?: recipientAddress.value,
                     onValueChange = {
-                        recipientAddress.value = it
-                        recipientError.value = false
-                        uiLogic.receiverAddress = it.text
+                        if (!readOnly) {
+                            recipientAddress.value = it
+                            recipientError.value = false
+                            uiLogic.receiverAddress = it.text
+                        }
                     },
                     Modifier.fillMaxWidth().padding(top = defaultPadding / 2),
                     singleLine = true,
                     isError = recipientError.value,
                     label = { Text(Application.texts.getString(STRING_LABEL_RECEIVER_ADDRESS)) },
                     colors = appTextFieldColors(),
+                    trailingIcon = {
+                        if (readOnly)
+                            IconButton(onClick = {
+                                recipientAddress.value = TextFieldValue()
+                                uiLogic.receiverAddress = ""
+                            }) { Icon(Icons.Default.Close, null) }
+                        else
+                            IconButton(onClick = onChooseRecipientAddress) {
+                                Icon(Icons.Default.PermContactCalendar, null)
+                            }
+                    },
+                    readOnly = readOnly,
                 )
 
                 OutlinedTextField(

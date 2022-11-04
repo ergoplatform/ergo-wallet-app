@@ -10,6 +10,7 @@ import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.wallet.getBalanceForAllAddresses
 import org.ergoplatform.wallet.getTokensForAllAddresses
+import org.ergoplatform.wallet.sortedByDisplayName
 
 fun addWalletChooserItemBindings(
     layoutInflater: LayoutInflater,
@@ -18,7 +19,7 @@ fun addWalletChooserItemBindings(
     showTokenNum: Boolean,
     clickListener: (WalletConfig) -> Unit
 ) {
-    wallets.sortedBy { it.walletConfig.displayName?.lowercase() }.forEach { wallet ->
+    wallets.sortedByDisplayName().forEach { wallet ->
         val itemBinding = FragmentSendFundsWalletChooserItemBinding.inflate(
             layoutInflater, container, true
         )

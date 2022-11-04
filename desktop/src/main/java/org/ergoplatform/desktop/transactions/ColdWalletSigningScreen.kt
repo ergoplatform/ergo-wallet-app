@@ -18,6 +18,8 @@ import org.ergoplatform.compose.settings.primaryButtonColors
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
+import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
+import org.ergoplatform.transactions.QrCodePagesCollector
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.coldSigningResponseToQrChunks
 import org.ergoplatform.uilogic.*
@@ -44,9 +46,10 @@ fun ColdWalletSigningScreen(
             ColdWalletSigningUiLogic.State.SCANNING -> {
                 if (uiLogic.qrPagesCollector.pagesAdded < uiLogic.qrPagesCollector.pagesCount)
                     ColdSigningScanLayout(
-                        uiLogic,
+                        uiLogic.qrPagesCollector,
                         modifier,
                         scanningState,
+                        uiLogic.lastErrorMessage,
                         onScan
                     )
                 else
@@ -60,7 +63,7 @@ fun ColdWalletSigningScreen(
             )
 
             ColdWalletSigningUiLogic.State.PRESENT_RESULT -> ColdSigningResultLayout(
-                uiLogic, modifier, onDismiss
+                uiLogic.signedQrCode!!, modifier, onDismiss, ::coldSigningResponseToQrChunks
             )
         }
     }
@@ -68,9 +71,12 @@ fun ColdWalletSigningScreen(
 
 @Composable
 fun ColdSigningResultLayout(
-    uiLogic: ColdWalletSigningUiLogic,
+    qrCodeData: String,
     modifier: Modifier,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    dataToChunks: (String, Int) -> List<String>,
+    descriptionLabel: String = STRING_DESC_SHOW_SIGNED_MULTIPLE,
+    lastPageDescriptionLabel: String = STRING_DESC_SHOW_SIGNED,
 ) {
     var lowRes by remember { mutableStateOf(false) }
 
@@ -78,29 +84,29 @@ fun ColdSigningResultLayout(
         Box(Modifier.padding(defaultPadding)) {
             PagedQrContainer(
                 lowRes,
-                calcChunks = { limit ->
-                    coldSigningResponseToQrChunks(uiLogic.signedQrCode!!, limit)
-                },
+                calcChunks = { limit -> dataToChunks(qrCodeData, limit) },
                 onDismiss,
-                lastPageButtonLabel = STRING_LABEL_DISMISS,
-                descriptionLabel = STRING_DESC_SHOW_SIGNED_MULTIPLE,
-                lastPageDescriptionLabel = STRING_DESC_SHOW_SIGNED,
+                lastPageButtonLabel = STRING_BUTTON_DONE,
+                descriptionLabel = descriptionLabel,
+                lastPageDescriptionLabel = lastPageDescriptionLabel,
                 modifier = Modifier.padding(top = defaultPadding * 1.5f)
             )
 
             // TODO cold wallet save/load functionality
-            IconButton({ lowRes = !lowRes }, Modifier.align(Alignment.TopEnd)) {
-                Icon(Icons.Default.BurstMode, null)
-            }
+            if (qrCodeData.length > QR_DATA_LENGTH_LOW_RES)
+                IconButton({ lowRes = !lowRes }, Modifier.align(Alignment.TopEnd)) {
+                    Icon(Icons.Default.BurstMode, null)
+                }
         }
     }
 }
 
 @Composable
-private fun ColdSigningScanLayout(
-    uiLogic: ColdWalletSigningUiLogic,
+fun ColdSigningScanLayout(
+    qrPagesCollector: QrCodePagesCollector,
     modifier: Modifier,
     scanningState: MutableState<Int>,
+    errorMessage: String?,
     onScan: () -> Unit,
 ) {
 
@@ -117,8 +123,8 @@ private fun ColdSigningScanLayout(
                 remember(scanningState.value) {
                     Application.texts.getString(
                         STRING_LABEL_QR_PAGES_INFO,
-                        uiLogic.qrPagesCollector.pagesAdded,
-                        uiLogic.qrPagesCollector.pagesCount
+                        qrPagesCollector.pagesAdded,
+                        qrPagesCollector.pagesCount
                     )
                 },
                 Modifier.align(Alignment.CenterHorizontally)
@@ -126,7 +132,7 @@ private fun ColdSigningScanLayout(
                 style = labelStyle(LabelStyle.HEADLINE2),
             )
 
-            uiLogic.lastErrorMessage?.let { errorMsg ->
+            errorMessage?.let { errorMsg ->
                 Text(
                     errorMsg,
                     Modifier.fillMaxWidth().padding(horizontal = defaultPadding),

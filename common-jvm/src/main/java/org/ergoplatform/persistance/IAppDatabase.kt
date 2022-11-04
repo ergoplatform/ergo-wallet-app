@@ -12,4 +12,5 @@ interface IAppDatabase {
     val tokenDbProvider: TokenDbProvider
     val transactionDbProvider: TransactionDbProvider
     val mosaikDbProvider: MosaikDbProvider
+    val addressBookDbProvider: AddressBookDbProvider
 }

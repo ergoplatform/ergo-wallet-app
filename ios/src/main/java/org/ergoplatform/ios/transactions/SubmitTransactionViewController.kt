@@ -40,7 +40,16 @@ abstract class SubmitTransactionViewController : ViewControllerWithKeyboardLayou
 
     protected fun showSigningPromptVc(signingPrompt: String) {
         presentViewController(
-            SigningPromptViewController(signingPrompt, uiLogic), true
+            SigningPromptViewController(
+                uiLogic.signingPromptDialogConfig!!,
+                onSigningPromptResponseScanComplete = {
+                    val delegate = getAppDelegate()
+                    uiLogic.sendColdWalletSignedTx(
+                        delegate.prefs,
+                        IosStringProvider(delegate.texts),
+                        delegate.database
+                    )
+                }), true
         ) {}
     }
 

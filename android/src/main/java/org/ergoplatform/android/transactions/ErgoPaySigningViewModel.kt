@@ -38,7 +38,7 @@ class ErgoPaySigningViewModel: SubmitTransactionViewModel() {
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
-            _signingPromptData.postValue(signingPrompt)
+            signingPromptData = signingPrompt
         }
 
         override fun notifyStateChanged(newState: State) {

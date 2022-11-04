@@ -8,6 +8,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -68,8 +69,9 @@ fun SaveWalletScreen(
 
                 if (altAddressAvailable)
                     Text(
-                        newAddress,
-                        Modifier.padding(defaultPadding / 2).fillMaxWidth().clickable { onUseAltAddress() },
+                        remember { Application.texts.getString(STRING_BUTTON_ALT_ADDRESS) },
+                        Modifier.clickable { onUseAltAddress() }.padding(defaultPadding / 2)
+                            .align(Alignment.CenterHorizontally),
                         textAlign = TextAlign.Center,
                         style = labelStyle(LabelStyle.BODY1BOLD),
                         color = uiErgoColor,
@@ -83,7 +85,8 @@ fun SaveWalletScreen(
                         )
                     } else
                         Application.texts.getString(STRING_INTRO_SAVE_WALLET2),
-                    Modifier.padding(top = defaultPadding / 2, bottom = defaultPadding * 1.5f).fillMaxWidth(),
+                    Modifier.padding(top = defaultPadding / 2, bottom = defaultPadding * 1.5f)
+                        .fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     style = labelStyle(LabelStyle.BODY1),
                 )

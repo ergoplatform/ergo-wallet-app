@@ -64,15 +64,21 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Setup Android build environment
+        uses: android-actions/setup-android@v2.0.2
       - name: Download windows build
         uses: actions/download-artifact@v2.0.5
         with:
           name: windows-jar
           path: desktop/build/libs
+      - name: Prepare jpackage config
+        run: ./gradlew desktop:prepareJpackage
       - id: build
         name: Build distribution
         run: |
-          jpackage --verbose "@desktop/deploy/jpackage.cfg" "@desktop/deploy/jpackage-windows.cfg"
+          jpackage --verbose "@desktop/build/generated/jpackage.cfg" "@desktop/deploy/jpackage-windows.cfg"
       - name: Upload release binaries
         uses: alexellis/upload-assets@0.2.2
         env:

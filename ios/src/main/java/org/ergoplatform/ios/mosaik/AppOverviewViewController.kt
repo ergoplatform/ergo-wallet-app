@@ -97,8 +97,6 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
         suggestionsList.bottomToSuperview()
         suggestionsList.isHidden = true
 
-        // TODO disclaimer, opt in
-
         val scrollView = container.wrapInVerticalScrollView()
         view.addSubview(scrollView)
         scrollView.topToSuperview()
@@ -115,7 +113,9 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
     }
 
     private fun navigateToApp() {
-        navigateToApp(inputAddress.text, null)
+        val appUrl = inputAddress.text
+        if (appUrl.isNotBlank())
+            navigateToApp(appUrl, null)
         inputAddress.text = ""
     }
 

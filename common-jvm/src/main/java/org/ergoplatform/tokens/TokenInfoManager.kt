@@ -8,6 +8,7 @@ import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.api.TokenCheckResponse
 import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
+import org.ergoplatform.explorer.client.model.AdditionalRegisters
 import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.persistance.*
 import org.ergoplatform.utils.LogUtils
@@ -156,11 +157,22 @@ class TokenInfoManager {
 
         val tokenInfo = boxInfo.assets.find { it.tokenId == tokenId }!!
 
-        val eip4Token = Eip4TokenBuilder.buildFromAdditionalRegisters(
-            tokenId,
-            tokenInfo.amount,
-            boxInfo.additionalRegisters
-        )
+        val eip4Token = try {
+            Eip4TokenBuilder.buildFromAdditionalRegisters(
+                tokenId,
+                tokenInfo.amount,
+                boxInfo.additionalRegisters
+            )
+        } catch (iea: IllegalArgumentException) {
+            // IllegalArgumentException can be caused when R7+ are invalid, retry with R4-R6 only
+            Eip4TokenBuilder.buildFromAdditionalRegisters(
+                tokenId,
+                tokenInfo.amount,
+                AdditionalRegisters().apply {
+                    putAll(boxInfo.additionalRegisters.filter { listOf("R4", "R5", "R6").contains(it.key) })
+                }
+            )
+        }
 
         return TokenInformation(
             tokenId,

@@ -18,7 +18,7 @@ import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.wallet.isReadOnly
 
 abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
-    AddressChooserCallback {
+    AddressChooserCallback, ISigningPromptDialogParent {
 
     abstract val viewModel: SubmitTransactionViewModel
 
@@ -91,6 +91,17 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
         val context = requireContext()
         viewModel.uiLogic.startPaymentWithMnemonicAsync(
             secrets,
+            Preferences(context),
+            AndroidStringProvider(context),
+            AppDatabase.getInstance(context)
+        )
+    }
+
+    override val signingPromptDataSource get() = viewModel.uiLogic.signingPromptDialogConfig!!
+
+    override fun onSigningPromptResponseScanComplete() {
+        val context = requireContext()
+        viewModel.uiLogic.sendColdWalletSignedTx(
             Preferences(context),
             AndroidStringProvider(context),
             AppDatabase.getInstance(context)

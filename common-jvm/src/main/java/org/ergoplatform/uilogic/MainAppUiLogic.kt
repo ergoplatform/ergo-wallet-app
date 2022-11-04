@@ -1,12 +1,13 @@
 package org.ergoplatform.uilogic
 
-import org.ergoplatform.ergoauth.isErgoAuthRequest
+import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.isPaymentRequestUrl
 import org.ergoplatform.isValidErgoAddress
 import org.ergoplatform.mosaik.getMosaikAppHttpUrl
 import org.ergoplatform.mosaik.isMosaikAppUri
 import org.ergoplatform.transactions.getColdSignedTxChunk
 import org.ergoplatform.transactions.isColdSigningRequestChunk
+import org.ergoplatform.transactions.isErgoAuthRequestChunk
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 
 object MainAppUiLogic {
@@ -28,7 +29,7 @@ object MainAppUiLogic {
         } else if (fromQrCode && (isColdSigningRequestChunk(data) || getColdSignedTxChunk(data) != null)) {
             // present a hint to the user to go to send funds
             presentUserMessage.invoke(stringProvider.getString(STRING_HINT_SIGNING_REQUEST))
-        } else if (isErgoAuthRequest(data)) {
+        } else if (isErgoAuthRequestUri(data) || fromQrCode && (isErgoAuthRequestChunk(data))) {
             navigateToAuthentication.invoke(data)
         } else if (isMosaikAppUri(data)) {
             navigateToMosaikApp.invoke(getMosaikAppHttpUrl(data))
