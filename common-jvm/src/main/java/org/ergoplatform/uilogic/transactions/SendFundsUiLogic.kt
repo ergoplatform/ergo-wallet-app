@@ -376,6 +376,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 tokensChosen.values.toList(),
                 feeAmount.nanoErgs,
                 derivedAddresses.map { Address.create(it) },
+                consolidate = !wallet!!.isReadOnly(),
                 preferences, texts
             )
         }
