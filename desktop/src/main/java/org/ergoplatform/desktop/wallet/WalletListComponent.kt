@@ -40,6 +40,7 @@ import org.ergoplatform.uilogic.MainAppUiLogic
 import org.ergoplatform.uilogic.STRING_LABEL_LAST_SYNC
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
 import org.ergoplatform.utils.getTimeSpanString
+import org.ergoplatform.wallet.sortedByDisplayName
 
 class WalletListComponent(
     private val componentContext: ComponentContext,
@@ -129,6 +130,7 @@ class WalletListComponent(
                 WalletStateSyncManager.getInstance().isRefreshing.collect {
                     walletStates.value =
                         Application.database.walletDbProvider.getWalletsWithStates()
+                            .sortedByDisplayName()
 
                     if (!walletsInitialized) {
                         walletsInitialized = true
