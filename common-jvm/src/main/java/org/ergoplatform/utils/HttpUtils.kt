@@ -1,9 +1,6 @@
 package org.ergoplatform.utils
 
-import okhttp3.MediaType
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.ResponseBody
+import okhttp3.*
 import okio.*
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x500.style.BCStyle
@@ -43,11 +40,21 @@ fun normalizeUrl(url: String): String {
         lcHostname.trimEnd('/') else lcHostname
 }
 
-fun fetchHttpGetStringSync(httpUrl: String, timeout: Long = 10): String =
-    fetchHttpsGetStringSync(httpUrl, timeout).first
+fun fetchHttpGetStringSync(
+    httpUrl: String,
+    timeout: Long = 10,
+    headers: Map<String, String>? = null,
+): String =
+    fetchHttpsGetStringSync(httpUrl, timeout, headers).first
 
-fun fetchHttpsGetStringSync(httpUrl: String, timeout: Long = 10): Pair<String, List<Certificate>?> {
-    val request = Request.Builder().url(httpUrl).build()
+fun fetchHttpsGetStringSync(
+    httpUrl: String,
+    timeout: Long = 10,
+    headers: Map<String, String>? = null,
+): Pair<String, List<Certificate>?> {
+    val request = Request.Builder().url(httpUrl)
+        .apply { headers?.let { headers(Headers.of(headers)) } }
+        .build()
     val response =
         OkHttpSingleton.getInstance().newBuilder()
             .connectTimeout(timeout, TimeUnit.SECONDS)
@@ -79,11 +86,13 @@ fun httpPostStringSync(
     httpUrl: String,
     body: String,
     mediaType: String = MEDIA_TYPE_JSON,
-    timeout: Long = 10
+    timeout: Long = 10,
+    headers: Map<String, String>? = null,
 ): String {
     val request = Request.Builder()
         .url(httpUrl)
         .post(RequestBody.create(MediaType.parse(mediaType), body))
+        .apply { headers?.let { headers(Headers.of(headers)) } }
         .build()
 
     return OkHttpSingleton.getInstance().newBuilder()

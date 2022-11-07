@@ -50,7 +50,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 assertNotNull(epsr?.reducedTx)
                 assertNull(epsr?.message)
                 assertEquals(MessageSeverity.NONE, epsr?.messageSeverity)
-                assertNull(epsr?.p2pkAddress)
+                assertTrue(epsr!!.addressesToUse.isEmpty())
                 assertNull(epsr?.replyToUrl)
             }
 
@@ -110,7 +110,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 assertNotNull(epsr?.reducedTx)
                 assertNotNull(epsr?.message)
                 assertEquals(MessageSeverity.INFORMATION, epsr?.messageSeverity)
-                assertEquals(TestUiWallet.firstAddress, epsr?.p2pkAddress)
+                assertEquals(listOf(TestUiWallet.firstAddress), epsr?.addressesToUse)
                 assertNull(epsr?.replyToUrl)
 
             }
@@ -208,7 +208,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 assertNotNull(epsr?.reducedTx)
                 assertNotNull(epsr?.message)
                 assertEquals(MessageSeverity.INFORMATION, epsr?.messageSeverity)
-                assertEquals(TestUiWallet.firstAddress, epsr?.p2pkAddress)
+                assertEquals(listOf(TestUiWallet.firstAddress), epsr?.addressesToUse)
                 assertNull(epsr?.replyToUrl)
 
             }

@@ -187,13 +187,14 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
 
             state = State.DONE
         } else {
-            epsr?.p2pkAddress?.let { p2pkAddress ->
+            val p2pkAddresses = epsr?.addressesToUse
+            if (!p2pkAddresses.isNullOrEmpty()) {
                 // dApp sent info regarding address to use, lets see if we have this address
                 // and load it
                 if (wallet == null) {
-                    val walletDerivedAddress = database.loadWalletAddress(p2pkAddress)
+                    val walletDerivedAddress = database.loadWalletAddress(p2pkAddresses.first())
                     val walletConfig = database.loadWalletByFirstAddress(
-                        walletDerivedAddress?.walletFirstAddress ?: p2pkAddress
+                        walletDerivedAddress?.walletFirstAddress ?: p2pkAddresses.first()
                     )
 
                     walletConfig?.let {
@@ -205,18 +206,15 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                     }
                 }
 
-                // check if the address specified by dApp was chosen
-                val hasAddress = wallet?.let {
-                    getSigningDerivedAddresses().any {
-                        p2pkAddress.equals(it, true)
-                    }
-                } ?: false
+                // check if the address(es) specified by dApp fit to our current addresses
+                val walletAddresses = wallet?.let { getSigningDerivedAddresses() } ?: emptyList()
+                val notFittingAddresses = p2pkAddresses.filterNot { walletAddresses.contains(it) }
 
-                if (!hasAddress)
+                if (notFittingAddresses.isNotEmpty())
                     throw IllegalStateException(
                         texts.getString(
                             STRING_LABEL_ERGO_PAY_WRONG_ADDRESS,
-                            p2pkAddress
+                            notFittingAddresses.first()
                         )
                     )
             }

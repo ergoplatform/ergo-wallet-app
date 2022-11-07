@@ -29,7 +29,7 @@ class ErgoPayTest {
             assertNotNull(reducedTx)
             assertNull(message)
             assertNull(replyToUrl)
-            assertNull(p2pkAddress)
+            assertTrue(addressesToUse.isEmpty())
             assertEquals(MessageSeverity.NONE, messageSeverity)
 
             val parsedTx = deserializeUnsignedTxOffline(reducedTx!!)

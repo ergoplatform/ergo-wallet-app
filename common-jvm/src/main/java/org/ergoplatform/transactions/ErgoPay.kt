@@ -13,7 +13,7 @@ import org.ergoplatform.utils.*
  */
 data class ErgoPaySigningRequest(
     val reducedTx: ByteArray?,
-    val p2pkAddress: String? = null,
+    val addressesToUse: List<String> = emptyList(),
     val message: String? = null,
     val messageSeverity: MessageSeverity = MessageSeverity.NONE,
     val replyToUrl: String? = null
@@ -78,9 +78,9 @@ fun getErgoPaySigningRequest(
         val jsonResponse =
             if (multipleAddresses) {
                 val jsonBody = p2pkAddressList.map { "\"$it\"" }.joinToString(",", "[", "]")
-                httpPostStringSync(httpUrl, jsonBody)
+                httpPostStringSync(httpUrl, jsonBody, timeout = 30, headers = getErgoPayHeaders())
             } else
-                fetchHttpGetStringSync(httpUrl, 30)
+                fetchHttpGetStringSync(httpUrl, timeout = 30, headers = getErgoPayHeaders())
         parseErgoPaySigningRequestFromJson(jsonResponse)
     }
 
@@ -97,6 +97,7 @@ private fun ergoPayAddressRequestSetAddress(requestData: String, p2pkAddress: St
 
 private const val JSON_KEY_REDUCED_TX = "reducedTx"
 private const val JSON_KEY_ADDRESS = "address"
+private const val JSON_KEY_ADDRESSES = "addresses"
 private const val JSON_KEY_REPLY_TO = "replyTo"
 private const val JSON_KEY_MESSAGE = "message"
 private const val JSON_KEY_MESSAGE_SEVERITY = "messageSeverity"
@@ -116,8 +117,12 @@ fun parseErgoPaySigningRequestFromJson(jsonString: String): ErgoPaySigningReques
         Base64Coder.decode(it, true)
     }
 
+    val addressesList = if (jsonObject.has(JSON_KEY_ADDRESSES)) {
+        jsonObject.get(JSON_KEY_ADDRESSES).asJsonArray.toList()
+    } else jsonObject.get(JSON_KEY_ADDRESS)?.let { listOf(it) }
+
     return ErgoPaySigningRequest(
-        reducedTx, jsonObject.get(JSON_KEY_ADDRESS)?.asString,
+        reducedTx, addressesList?.map { it.asString } ?: emptyList(),
         jsonObject.get(JSON_KEY_MESSAGE)?.asString,
         jsonObject.get(JSON_KEY_MESSAGE_SEVERITY)?.asString?.let { MessageSeverity.valueOf(it) }
             ?: MessageSeverity.NONE,
@@ -158,7 +163,11 @@ fun canErgoPayAddressRequestHandleMultiple(ergoPayUrl: String): Boolean {
         val checkMultipleUrl =
             ergoPayAddressRequestSetAddress(ergoPayUrl, URL_CONST_MULTIPLE_ADDRESSES_CHECK)
         try {
-            httpPostStringSync(ergoPayUrlToHttpUrl(checkMultipleUrl), "")
+            httpPostStringSync(
+                ergoPayUrlToHttpUrl(checkMultipleUrl),
+                "",
+                headers = getErgoPayHeaders()
+            )
             LogUtils.logDebug(
                 "ErgoPay",
                 "canErgoPayAddressRequestHandleMultiple to $checkMultipleUrl succeeded"
@@ -181,6 +190,10 @@ private fun parseErgoPaySigningRequestFromUri(uri: String): ErgoPaySigningReques
 
     return ErgoPaySigningRequest(reducedTx)
 }
+
+private fun getErgoPayHeaders() = mapOf(
+    HEADER_KEY_MULTIPLE_ADDRESSES to HEADER_VALUE_SUPPORTED,
+)
 
 /**
  * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
