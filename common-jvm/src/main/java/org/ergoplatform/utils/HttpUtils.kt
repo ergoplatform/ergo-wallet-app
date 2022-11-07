@@ -75,15 +75,25 @@ fun Certificate.getIssuerOrg(): String? {
     }
 }
 
-fun httpPostStringSync(httpUrl: String, body: String, mediaType: String) {
+fun httpPostStringSync(
+    httpUrl: String,
+    body: String,
+    mediaType: String = MEDIA_TYPE_JSON,
+    timeout: Long = 10
+): String {
     val request = Request.Builder()
         .url(httpUrl)
         .post(RequestBody.create(MediaType.parse(mediaType), body))
         .build()
 
-    OkHttpSingleton.getInstance().newCall(request).execute().use { response ->
-        if (!response.isSuccessful) throw IOException("$httpUrl returned $response")
-    }
+    return OkHttpSingleton.getInstance().newBuilder()
+        .connectTimeout(timeout, TimeUnit.SECONDS)
+        .readTimeout(timeout, TimeUnit.SECONDS)
+        .writeTimeout(timeout, TimeUnit.SECONDS).build().newCall(request).execute()
+        .use { response ->
+            if (!response.isSuccessful) throw IOException("$httpUrl returned $response")
+            response.body()!!.string()
+        }
 }
 
 fun fetchHttpGetWithListener(url: String, progressListener: ProgressListener): ByteArray {

@@ -166,7 +166,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
     private fun showAddressOrWalletChooser() {
         val uiLogic = viewModel.uiLogic
         if (uiLogic.wallet != null) {
-            showChooseAddressList(false)
+            showChooseAddressList(addShowAllEntry = uiLogic.addressRequestCanHandleMultiple)
         } else {
             ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
         }

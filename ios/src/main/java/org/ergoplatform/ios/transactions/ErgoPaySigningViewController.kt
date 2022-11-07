@@ -203,7 +203,10 @@ class ErgoPaySigningViewController(
     private fun showAddressOrWalletChooser() {
         presentViewController(
             if (uiLogic.wallet != null) {
-                ChooseAddressListDialogViewController(uiLogic.wallet!!.walletConfig.id, false) {
+                ChooseAddressListDialogViewController(
+                    uiLogic.wallet!!.walletConfig.id,
+                    uiLogic.addressRequestCanHandleMultiple
+                ) {
                     onAddressChosen(it)
                 }
             } else {

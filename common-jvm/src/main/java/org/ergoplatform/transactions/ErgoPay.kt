@@ -48,39 +48,64 @@ fun isErgoPaySigningRequest(uri: String): Boolean {
  */
 fun getErgoPaySigningRequest(
     requestData: String,
-    p2pkAddress: String? = null
+    p2pkAddressList: List<String> = emptyList()
 ): ErgoPaySigningRequest {
     if (!isErgoPaySigningRequest(requestData)) {
         throw IllegalArgumentException("No ergopay URI provided.")
     }
 
-    // static request?
+
     val epsr = if (isErgoPayStaticRequest(requestData)) {
+        // static request
         parseErgoPaySigningRequestFromUri(requestData)
     } else {
-        val ergopayUrl = if (isErgoPayDynamicWithAddressRequest(requestData)) {
-            p2pkAddress?.let {
-                requestData.replace(placeHolderP2Pk, p2pkAddress)
-                    .replace(urlEncodedPlaceHolderP2Pk, p2pkAddress)
-            } ?: throw IllegalArgumentException("Ergo Pay address request, but no address given")
+        // dynamic request
+        val addressRequest = isErgoPayDynamicWithAddressRequest(requestData)
+        val multipleAddresses = addressRequest && p2pkAddressList.size > 1
+        val ergopayUrl = if (addressRequest) {
+            if (p2pkAddressList.isEmpty())
+                throw IllegalArgumentException("Ergo Pay address request, but no address given")
+
+            ergoPayAddressRequestSetAddress(
+                requestData,
+                if (multipleAddresses) URL_CONST_MULTIPLE_ADDRESSES else p2pkAddressList.first()
+            )
         } else requestData
 
         // use http for development purposes
-        val httpUrl = (if (isLocalOrIpAddress(requestData)) "http:" else "https:") +
-                ergopayUrl.substringAfter(uriSchemePrefix)
+        val httpUrl = ergoPayUrlToHttpUrl(ergopayUrl)
 
-        val jsonResponse = fetchHttpGetStringSync(httpUrl, 30)
+        val jsonResponse =
+            if (multipleAddresses) {
+                val jsonBody = p2pkAddressList.map { "\"$it\"" }.joinToString(",", "[", "]")
+                httpPostStringSync(httpUrl, jsonBody)
+            } else
+                fetchHttpGetStringSync(httpUrl, 30)
         parseErgoPaySigningRequestFromJson(jsonResponse)
     }
 
     return epsr
 }
 
+private fun ergoPayUrlToHttpUrl(ergopayUrl: String) =
+    (if (isLocalOrIpAddress(ergopayUrl)) "http:" else "https:") +
+            ergopayUrl.substringAfter(uriSchemePrefix)
+
+private fun ergoPayAddressRequestSetAddress(requestData: String, p2pkAddress: String) =
+    requestData.replace(placeHolderP2Pk, p2pkAddress)
+        .replace(urlEncodedPlaceHolderP2Pk, p2pkAddress)
+
 private const val JSON_KEY_REDUCED_TX = "reducedTx"
 private const val JSON_KEY_ADDRESS = "address"
 private const val JSON_KEY_REPLY_TO = "replyTo"
 private const val JSON_KEY_MESSAGE = "message"
 private const val JSON_KEY_MESSAGE_SEVERITY = "messageSeverity"
+
+private const val HEADER_KEY_MULTIPLE_TX = "ErgoPay-MultipleTx"
+private const val HEADER_KEY_MULTIPLE_ADDRESSES = "ErgoPay-CanSelectMultipleAddresses"
+private const val HEADER_VALUE_SUPPORTED = "supported"
+private const val URL_CONST_MULTIPLE_ADDRESSES_CHECK = "multiple_check"
+private const val URL_CONST_MULTIPLE_ADDRESSES = "multiple"
 
 /**
  * @return ErgoPaySigningRequest parsed from `jsonString`, may throw Exceptions
@@ -121,6 +146,34 @@ fun isErgoPayDynamicRequest(requestData: String) =
 fun isErgoPayDynamicWithAddressRequest(requestData: String) =
     isErgoPayDynamicRequest(requestData) &&
             (requestData.contains(placeHolderP2Pk) || requestData.contains(urlEncodedPlaceHolderP2Pk))
+
+/**
+ * @return true if given ergoPayUrl is a dynamic ergopay url with address request and the dApp
+ *          can handle multiple addresses with a post request.
+ */
+fun canErgoPayAddressRequestHandleMultiple(ergoPayUrl: String): Boolean {
+    return if (!isErgoPayDynamicWithAddressRequest(ergoPayUrl))
+        false
+    else {
+        val checkMultipleUrl =
+            ergoPayAddressRequestSetAddress(ergoPayUrl, URL_CONST_MULTIPLE_ADDRESSES_CHECK)
+        try {
+            httpPostStringSync(ergoPayUrlToHttpUrl(checkMultipleUrl), "")
+            LogUtils.logDebug(
+                "ErgoPay",
+                "canErgoPayAddressRequestHandleMultiple to $checkMultipleUrl succeeded"
+            )
+            true
+        } catch (t: Throwable) {
+            LogUtils.logDebug(
+                "ErgoPay",
+                "canErgoPayAddressRequestHandleMultiple to $checkMultipleUrl resolved to false",
+                t
+            )
+            false
+        }
+    }
+}
 
 private fun parseErgoPaySigningRequestFromUri(uri: String): ErgoPaySigningRequest {
     val uriWithoutPrefix = uri.substring(uriSchemePrefix.length)
