@@ -345,15 +345,16 @@ fun sendSignedErgoTx(
 }
 
 fun getErrorMessage(t: Throwable, texts: StringProvider, amountToSend: Long? = null): String {
+    val msgUseOtherNodeSuffix = "\n\n" + texts.getString(STRING_ERROR_USE_OTHER_NODE)
     return if (t is InputBoxesSelectionException.NotEnoughErgsException) {
         texts.getString(
             STRING_ERROR_BALANCE_ERG,
             ErgoAmount(t.balanceFound).toStringTrimTrailingZeros()
-        )
+        ) + msgUseOtherNodeSuffix
     } else if (t is InputBoxesSelectionException.NotEnoughCoinsForChangeException) {
         texts.getString(
             STRING_ERROR_CHANGEBOX_AMOUNT
-        )
+        ) + msgUseOtherNodeSuffix
     } else if (t is InputBoxesSelectionException.InputBoxLimitExceededException) {
         if (t.remainingTokens.isEmpty() && amountToSend != null)
             texts.getString(
@@ -366,7 +367,7 @@ fun getErrorMessage(t: Throwable, texts: StringProvider, amountToSend: Long? = n
         // ProverInterpreter.scala
         texts.getString(STRING_ERROR_PROVER_CANT_SIGN)
     } else {
-        t.getMessageOrName()
+        t.getMessageOrName() + msgUseOtherNodeSuffix
     }
 }
 
