@@ -85,7 +85,7 @@ class ErgoPaySigningComponent(
             },
             onChooseAddress = {
                 if (uiLogic.wallet != null) {
-                    startChooseAddress(false)
+                    startChooseAddress(withAllAddresses = ergoPayUiLogic.addressRequestCanHandleMultiple)
                 } else {
                     startChooseWallet()
                 }

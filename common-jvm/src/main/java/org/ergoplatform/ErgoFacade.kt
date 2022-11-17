@@ -109,68 +109,36 @@ fun loadAppKitMnemonicWordList(): List<String> {
     return JavaConversions.seqAsJavaList(WordList.load(Mnemonic.LANGUAGE_ID_ENGLISH).get().words())
 }
 
-/**
- * Create and send transaction creating a box with the given amount using parameters from the given config file.
- *
- * @param amountToSend   amount of NanoErg to put into new box
- */
-fun sendErgoTx(
-    recipient: Address,
-    message: String?,
-    amountToSend: Long,
-    tokensToSend: List<ErgoToken>,
-    feeAmount: Long,
-    signingSecrets: SigningSecrets,
-    derivedKeyIndices: List<Int>,
-    prefs: PreferencesProvider,
-    texts: StringProvider
-): SendTransactionResult {
-    try {
-        val ergoClient = getRestErgoClient(prefs)
-        return ergoClient.execute { ctx: BlockchainContext ->
-            val prover = buildProver(ctx, signingSecrets, derivedKeyIndices)
-            val unsignedTx = buildUnsignedTx(
-                BoxOperations.createForEip3Prover(prover, ctx),
-                recipient,
-                amountToSend,
-                feeAmount,
-                tokensToSend,
-                message
-            )
-
-            val signed = prover.sign(unsignedTx)
-            ctx.sendTransaction(signed)
-
-            val txId = signed.id
-
-            SendTransactionResult(txId.isNotEmpty(), txId, unsignedTx)
-        }
-    } catch (t: Throwable) {
-        LogUtils.logDebug("sendErgoTx", "Error caught", t)
-        return SendTransactionResult(
-            false,
-            errorMsg = getErrorMessage(t, texts, amountToSend)
-        )
-    }
-}
-
 private fun buildUnsignedTx(
     boxOperations: BoxOperations,
     recipient: Address,
-    amountToSend: Long,
-    feeAmount: Long,
-    tokensToSend: List<ErgoToken>,
-    message: String?
+    consolidate: Boolean,
 ): UnsignedTransaction {
-    val contract: ErgoContract = recipient.toErgoContract()
-    return boxOperations.withAmountToSpend(amountToSend)
-        .withFeeAmount(feeAmount)
-        .withMessage(message)
-        .withInputBoxesLoader(
-            ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
-        )
+    val boxesLoader = RecordingBoxesLoader().apply { withAllowChainedTx(true) }
+    return boxOperations
+        .withInputBoxesLoader(boxesLoader)
         .withMaxInputBoxesToSelect(MAX_NUM_INPUT_BOXES)
-        .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
+        .buildTxWithDefaultInputs { txB: UnsignedTransactionBuilder ->
+            val newBox = boxOperations.prepareOutBox(txB)
+                .contract(recipient.toErgoContract()).build()
+            txB.outputs(newBox)
+
+            if (consolidate) {
+                val addedInputs = txB.inputBoxes
+                if (addedInputs.size < MAX_NUM_INPUT_BOXES) {
+                    val firstSenderErgoTree =
+                        boxOperations.senders.first().toErgoContract().ergoTree
+                    val extraInputBoxes = boxesLoader.allBoxesLoaded.filter {
+                        it.ergoTree == firstSenderErgoTree && !addedInputs.contains(it)
+                    }.take(MAX_NUM_INPUT_BOXES - addedInputs.size)
+                    LogUtils.logDebug("buildUnsignedTx", "Added ${extraInputBoxes.size} extra boxes to consolidate")
+                    if (extraInputBoxes.isNotEmpty())
+                        txB.addInputs(*extraInputBoxes.toTypedArray())
+                }
+            }
+
+            txB
+        }
 }
 
 fun buildPromptSigningResultFromErgoPayRequest(
@@ -185,7 +153,7 @@ fun buildPromptSigningResultFromErgoPayRequest(
             val reducedTx = ctx.parseReducedTransaction(serializedTx)
             val dataSource = ctx.dataSource
             val inputs = reducedTx.inputBoxesIds.map { boxId ->
-                (dataSource.getBoxByIdWithMemPool(boxId) as InputBoxImpl).ergoBox.bytes()
+                (dataSource.getBoxById(boxId, true, false) as InputBoxImpl).ergoBox.bytes()
             }
 
             return@execute PromptSigningResult(
@@ -200,6 +168,7 @@ fun buildPromptSigningResultFromErgoPayRequest(
 
 /**
  * Prepares and serializes a transaction to be transferred to a cold wallet (EIP19)
+ * or used for signing
  */
 fun prepareSerializedErgoTx(
     recipient: Address,
@@ -208,6 +177,7 @@ fun prepareSerializedErgoTx(
     tokensToSend: List<ErgoToken>,
     feeAmount: Long,
     senderAddresses: List<Address>,
+    consolidate: Boolean,
     prefs: PreferencesProvider,
     texts: StringProvider
 ): PromptSigningResult {
@@ -215,12 +185,13 @@ fun prepareSerializedErgoTx(
         val ergoClient = getRestErgoClient(prefs)
         return ergoClient.execute { ctx: BlockchainContext ->
             val unsigned = buildUnsignedTx(
-                BoxOperations.createForSenders(senderAddresses, ctx),
+                BoxOperations.createForSenders(senderAddresses, ctx)
+                    .withAmountToSpend(amountToSend)
+                    .withFeeAmount(feeAmount)
+                    .withTokensToSpend(tokensToSend)
+                    .withMessage(message),
                 recipient,
-                amountToSend,
-                feeAmount,
-                tokensToSend,
-                message
+                consolidate,
             )
 
             val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
@@ -374,15 +345,16 @@ fun sendSignedErgoTx(
 }
 
 fun getErrorMessage(t: Throwable, texts: StringProvider, amountToSend: Long? = null): String {
+    val msgUseOtherNodeSuffix = "\n\n" + texts.getString(STRING_ERROR_USE_OTHER_NODE)
     return if (t is InputBoxesSelectionException.NotEnoughErgsException) {
         texts.getString(
             STRING_ERROR_BALANCE_ERG,
             ErgoAmount(t.balanceFound).toStringTrimTrailingZeros()
-        )
+        ) + msgUseOtherNodeSuffix
     } else if (t is InputBoxesSelectionException.NotEnoughCoinsForChangeException) {
         texts.getString(
             STRING_ERROR_CHANGEBOX_AMOUNT
-        )
+        ) + msgUseOtherNodeSuffix
     } else if (t is InputBoxesSelectionException.InputBoxLimitExceededException) {
         if (t.remainingTokens.isEmpty() && amountToSend != null)
             texts.getString(
@@ -395,7 +367,7 @@ fun getErrorMessage(t: Throwable, texts: StringProvider, amountToSend: Long? = n
         // ProverInterpreter.scala
         texts.getString(STRING_ERROR_PROVER_CANT_SIGN)
     } else {
-        t.getMessageOrName()
+        t.getMessageOrName() + msgUseOtherNodeSuffix
     }
 }
 
@@ -407,3 +379,20 @@ fun deserializeErgobox(input: ByteArray): InputBox? {
     return ergoBox?.let { InputBoxImpl(it) }
 }
 
+/**
+ * RecordingBoxesLoaded is an [ExplorerAndPoolUnspentBoxesLoader] that records all input boxes
+ * fetched
+ */
+private class RecordingBoxesLoader : ExplorerAndPoolUnspentBoxesLoader() {
+    val allBoxesLoaded = ArrayList<InputBox>()
+
+    override fun loadBoxesPage(
+        ctx: BlockchainContext,
+        sender: Address,
+        page: Int
+    ): MutableList<InputBox> {
+        val boxesLoaded = super.loadBoxesPage(ctx, sender, page)
+        allBoxesLoaded.addAll(boxesLoaded)
+        return boxesLoaded
+    }
+}

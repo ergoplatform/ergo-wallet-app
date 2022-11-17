@@ -285,8 +285,8 @@
                     <ImageView
                         android:id="@+id/logo"
                         android:layout_width="match_parent"
-                        android:layout_height="75dp"
-                        android:src="@drawable/ic_add_task_24"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_add_task_100"
                         app:layout_constraintTop_toTopOf="parent"
                         app:tint="@color/primary" />
 

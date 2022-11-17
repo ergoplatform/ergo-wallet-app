@@ -14,10 +14,7 @@ import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.tokens.isSingularToken
-import org.ergoplatform.transactions.PromptSigningResult
-import org.ergoplatform.transactions.SendTransactionResult
-import org.ergoplatform.transactions.isColdSigningRequestChunk
-import org.ergoplatform.transactions.isErgoPaySigningRequest
+import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
@@ -308,57 +305,82 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         )
     }
 
+    private var preparedTransaction: ByteArray? = null
+    fun prepareTransactionForSigning(preferences: PreferencesProvider, texts: StringProvider) {
+        preparedTransaction = null
+        wallet?.let { wallet ->
+            notifyUiLocked(true)
+            coroutineScope.launch {
+                val serializedTx = prepareSerializedTx(preferences, texts)
+                notifyUiLocked(false)
+                preparedTransaction = serializedTx.serializedTx
+                if (serializedTx.success)
+                    notifyHasPreparedTx(serializedTx.buildTransactionInfo().reduceBoxes())
+                notifyHasErgoTxResult(serializedTx)
+            }
+        }
+    }
+
     override fun startPaymentWithMnemonicAsync(
         signingSecrets: SigningSecrets,
         preferences: PreferencesProvider,
         texts: StringProvider,
         db: IAppDatabase,
     ) {
-        val derivedAddresses = getSigningDerivedAddressesIndices()
+        notifyUiLocked(true)
 
         coroutineScope.launch {
             val ergoTxResult: SendTransactionResult
             withContext(Dispatchers.IO) {
-                ergoTxResult = sendErgoTx(
-                    Address.create(receiverAddress),
-                    getActualMessageToSend(),
-                    getActualAmountToSendNanoErgs(),
-                    tokensChosen.values.toList(),
-                    feeAmount.nanoErgs,
-                    signingSecrets, derivedAddresses,
-                    preferences, texts
+                val signingResult = signSerializedErgoTx(
+                    preparedTransaction!!,
+                    signingSecrets, getSigningDerivedAddressesIndices(), texts
                 )
                 signingSecrets.clearMemory()
-                notifyUiLocked(false)
-                transactionSubmitted(ergoTxResult, db.transactionDbProvider, preferences)
+                preparedTransaction = null
+                if (!signingResult.success) {
+                    notifyUiLocked(false)
+                    notifyHasErgoTxResult(signingResult)
+                } else {
+                    ergoTxResult = sendSignedErgoTx(
+                        signingResult.serializedTx!!, preferences, texts
+                    )
+                    notifyUiLocked(false)
+                    transactionSubmitted(ergoTxResult, db.transactionDbProvider, preferences)
+                }
             }
         }
-
-        notifyUiLocked(true)
     }
 
     override fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
         wallet?.let { wallet ->
-            val derivedAddresses = getSigningDerivedAddresses()
-
             notifyUiLocked(true)
             coroutineScope.launch {
-                val serializedTx: PromptSigningResult
-                withContext(Dispatchers.IO) {
-                    serializedTx = prepareSerializedErgoTx(
-                        Address.create(receiverAddress),
-                        getActualMessageToSend(),
-                        getActualAmountToSendNanoErgs(),
-                        tokensChosen.values.toList(),
-                        feeAmount.nanoErgs,
-                        derivedAddresses.map { Address.create(it) },
-                        preferences, texts
-                    )
-                }
+                val serializedTx = prepareSerializedTx(preferences, texts)
                 notifyUiLocked(false)
                 startColdWalletPaymentPrompt(serializedTx)
             }
         }
+    }
+
+    private suspend fun prepareSerializedTx(
+        preferences: PreferencesProvider,
+        texts: StringProvider
+    ): PromptSigningResult {
+        val serializedTx = withContext(Dispatchers.IO) {
+            val derivedAddresses = getSigningDerivedAddresses()
+            prepareSerializedErgoTx(
+                Address.create(receiverAddress),
+                getActualMessageToSend(),
+                getActualAmountToSendNanoErgs(),
+                tokensChosen.values.toList(),
+                feeAmount.nanoErgs,
+                derivedAddresses.map { Address.create(it) },
+                consolidate = !wallet!!.isReadOnly(),
+                preferences, texts
+            )
+        }
+        return serializedTx
     }
 
     /**
@@ -499,6 +521,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     abstract fun notifyBalanceChanged()
     abstract fun showErrorMessage(message: String)
     abstract fun onNotifySuggestedFees()
+    abstract fun notifyHasPreparedTx(preparedTx: TransactionInfo)
 
     data class CheckCanPayResponse(
         val canPay: Boolean,

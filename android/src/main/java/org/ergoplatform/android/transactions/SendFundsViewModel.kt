@@ -10,6 +10,7 @@ import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.ui.SingleLiveEvent
+import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.uilogic.transactions.SuggestedFee
@@ -39,6 +40,9 @@ class SendFundsViewModel : SubmitTransactionViewModel() {
 
     private val _errorMessageLiveData = SingleLiveEvent<String>()
     val errorMessageLiveData: LiveData<String> = _errorMessageLiveData
+
+    var preparedTxInfo: TransactionInfo? = null
+        private set
 
     fun initWallet(ctx: Context, walletId: Int, derivationIdx: Int, paymentRequest: String?) {
         uiLogic.initWallet(
@@ -98,6 +102,10 @@ class SendFundsViewModel : SubmitTransactionViewModel() {
 
         override fun showErrorMessage(message: String) {
             _errorMessageLiveData.postValue(message)
+        }
+
+        override fun notifyHasPreparedTx(preparedTx: TransactionInfo) {
+            preparedTxInfo = preparedTx
         }
     }
 }

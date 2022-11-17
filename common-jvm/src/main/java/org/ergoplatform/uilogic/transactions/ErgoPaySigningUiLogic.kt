@@ -27,6 +27,8 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         private set
     var lastRequest: String? = null
         private set
+    var addressRequestCanHandleMultiple: Boolean = false
+        private set
     var state = State.FETCH_DATA
         private set(value) {
             field = value
@@ -58,31 +60,6 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                     if (allConfigs.size == 1) initWallet(database, allConfigs.first().id, -1)
                 }
             }
-
-            // uncomment this code to fake a request to a server URL. This will build an
-            // ergo pay signing request that sends 0.5 ERG from and to the first address of the
-            // current wallet
-//            withContext(Dispatchers.IO) {
-//                val serializedTx = prepareSerializedErgoTx(
-//                    Address.create(wallet!!.walletConfig.firstAddress), 1000L * 1000L * 500,
-//                    emptyList(),
-//                    listOf(Address.create(wallet!!.walletConfig.firstAddress)),
-//                    prefs, object : StringProvider {
-//                        override fun getString(stringId: String): String {
-//                            return stringId
-//                        }
-//
-//                        override fun getString(stringId: String, vararg formatArgs: Any): String {
-//                            return stringId
-//                        }
-//
-//                    }
-//                )
-//                hasNewRequest(
-//                    "ergopay:" + Base64.getUrlEncoder().encodeToString(serializedTx.serializedTx!!),
-//                    prefs
-//                )
-//            } ?:
 
             fetchErgoPaySigningRequest(request, prefs, texts, database)
         }
@@ -122,16 +99,22 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
             else if (derivedAddress != null) {
                 derivedAddressIdChanged(prefs, texts, database)
             } else {
-                state = State.WAIT_FOR_ADDRESS
+                changeToWaitForAddressState()
             }
         }
     }
+
+    // keep a marker that derived address idx was set: it can be null when uninitialized or
+    // when the user set it to "all addresses", so this marker can be used to distinguish these
+    // states
+    private var addressIdxSet = false
 
     fun derivedAddressIdChanged(
         prefs: PreferencesProvider,
         texts: StringProvider,
         database: WalletDbProvider
     ) {
+        addressIdxSet = true
         if (lastRequest != null && epsr == null) {
             fetchErgoPaySigningRequest(
                 lastRequest!!,
@@ -139,6 +122,16 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                 texts,
                 database,
             )
+        }
+    }
+
+    private suspend fun changeToWaitForAddressState() {
+        withContext(Dispatchers.IO) {// we need to fetch if multiple addresses are supported by dApp
+            lastRequest?.let {
+                state = State.FETCH_DATA
+                addressRequestCanHandleMultiple = canErgoPayAddressRequestHandleMultiple(it)
+            }
+            state = State.WAIT_FOR_ADDRESS
         }
     }
 
@@ -157,14 +150,18 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
 
         if (wallet == null && isErgoPayDynamicWithAddressRequest(request)) {
             state = State.WAIT_FOR_WALLET
-        } else if (derivedAddress == null && isErgoPayDynamicWithAddressRequest(request)) {
+        } else if (!addressIdxSet && derivedAddress == null
+            && isErgoPayDynamicWithAddressRequest(request)
+        ) {
             // if we have a address request but no address set, ask user to choose an address
-            state = State.WAIT_FOR_ADDRESS
+            coroutineScope.launch { changeToWaitForAddressState() }
         } else {
             state = State.FETCH_DATA
             coroutineScope.launch(Dispatchers.IO) {
                 try {
-                    epsr = getErgoPaySigningRequest(request, derivedAddress?.publicAddress)
+                    epsr = getErgoPaySigningRequest(
+                        request,
+                        wallet?.let { getSigningDerivedAddresses() } ?: emptyList())
                     transactionInfo = epsr?.buildTransactionInfo(getErgoApiService(prefs))
 
                     transitionToNextStep(texts, database)
@@ -190,13 +187,14 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
 
             state = State.DONE
         } else {
-            epsr?.p2pkAddress?.let { p2pkAddress ->
+            val p2pkAddresses = epsr?.addressesToUse
+            if (!p2pkAddresses.isNullOrEmpty()) {
                 // dApp sent info regarding address to use, lets see if we have this address
                 // and load it
                 if (wallet == null) {
-                    val walletDerivedAddress = database.loadWalletAddress(p2pkAddress)
+                    val walletDerivedAddress = database.loadWalletAddress(p2pkAddresses.first())
                     val walletConfig = database.loadWalletByFirstAddress(
-                        walletDerivedAddress?.walletFirstAddress ?: p2pkAddress
+                        walletDerivedAddress?.walletFirstAddress ?: p2pkAddresses.first()
                     )
 
                     walletConfig?.let {
@@ -208,18 +206,15 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                     }
                 }
 
-                // check if the address specified by dApp was chosen
-                val hasAddress = wallet?.let {
-                    getSigningDerivedAddresses().any {
-                        p2pkAddress.equals(it, true)
-                    }
-                } ?: false
+                // check if the address(es) specified by dApp fit to our current addresses
+                val walletAddresses = wallet?.let { getSigningDerivedAddresses() } ?: emptyList()
+                val notFittingAddresses = p2pkAddresses.filterNot { walletAddresses.contains(it) }
 
-                if (!hasAddress)
+                if (notFittingAddresses.isNotEmpty())
                     throw IllegalStateException(
                         texts.getString(
                             STRING_LABEL_ERGO_PAY_WRONG_ADDRESS,
-                            p2pkAddress
+                            notFittingAddresses.first()
                         )
                     )
             }

@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddTask
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,7 +68,7 @@ private fun BoxScope.ErgoPayTransactionInfoLayout(
         uiLogic.epsr?.message?.let { message ->
             AppCard(Modifier.fillMaxWidth().padding(bottom = defaultPadding)) {
                 Row(Modifier.padding(defaultPadding)) {
-                    uiLogic.getDoneSeverity().getSeverityIcon()?.let { icon ->
+                    (uiLogic.epsr?.messageSeverity ?: MessageSeverity.NONE).getSeverityIcon()?.let { icon ->
                         Icon(
                             icon,
                             null,
@@ -88,7 +90,10 @@ private fun BoxScope.ErgoPayTransactionInfoLayout(
             SignTransactionInfoLayout(Modifier.padding(defaultPadding),
                 uiLogic.transactionInfo!!.reduceBoxes(),
                 onConfirm = onConfirm,
-                onTokenClick = onTokenClick)
+                onTokenClick = onTokenClick,
+                texts = Application.texts,
+                getDb = { Application.database }
+            )
         }
     }
 
@@ -153,7 +158,13 @@ private fun BoxScope.ErgoPayDoneLayout(
         Modifier.align(Alignment.Center).widthIn(max = defaultMaxWidth).padding(defaultPadding)
     ) {
         Column(Modifier.padding(defaultPadding).fillMaxWidth()) {
-            uiLogic.getDoneSeverity().getSeverityIcon()?.let { icon ->
+            val doneSeverity = uiLogic.getDoneSeverity()
+            val icon = if (uiLogic.txId != null && doneSeverity == MessageSeverity.INFORMATION)
+                Icons.Default.AddTask
+            else
+                doneSeverity.getSeverityIcon()
+
+            icon?.let {
                 Icon(
                     icon,
                     null,
@@ -169,8 +180,7 @@ private fun BoxScope.ErgoPayDoneLayout(
                 style = labelStyle(LabelStyle.BODY1),
             )
 
-            val dismissShouldRetry =
-                uiLogic.getDoneSeverity() == MessageSeverity.ERROR && uiLogic.canReloadFromDapp()
+            val dismissShouldRetry = doneSeverity == MessageSeverity.ERROR && uiLogic.canReloadFromDapp()
             Button(
                 {
                     if (dismissShouldRetry) {

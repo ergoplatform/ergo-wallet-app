@@ -1,6 +1,9 @@
 package org.ergoplatform.ios.transactions
 
 import com.badlogic.gdx.utils.I18NBundle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.uilogic.*
@@ -59,7 +62,8 @@ abstract class TransactionContainer(
     open fun bindTransaction(
         transactionInfo: TransactionInfo,
         tokenClickListener: ((String) -> Unit)?,
-        addressLabelHandler: ((String, (String) -> Unit) -> Unit)? = null
+        addressLabelHandler: ((String, (String) -> Unit) -> Unit)? = null,
+        tokenLabelHandler: ((String, (String) -> Unit) -> Unit)? = null,
     ) {
         inboxesList.clearArrangedSubviews()
         transactionInfo.inputs.forEach { input ->
@@ -70,6 +74,7 @@ abstract class TransactionContainer(
                     input.assets,
                     tokenClickListener,
                     addressLabelHandler,
+                    tokenLabelHandler,
                     texts
                 )
             )
@@ -83,17 +88,37 @@ abstract class TransactionContainer(
                     output.assets,
                     tokenClickListener,
                     addressLabelHandler,
+                    tokenLabelHandler,
                     texts
                 )
             )
         }
     }
+
+    fun defaultAddressLabelHandler(coroutineScope: CoroutineScope): (String, (String) -> Unit) -> Unit =
+        { address, callback ->
+            coroutineScope.launch {
+                val appDelegate = getAppDelegate()
+                getAddressLabelFromDatabase(
+                    appDelegate.database, address,
+                    IosStringProvider(appDelegate.texts)
+                )?.let { runOnMainThread { callback(it) } }
+            }
+        }
+
+    fun defaultTokenLabelHandler(coroutineScope: CoroutineScope): (String, (String) -> Unit) -> Unit =
+        { tokenId, callback ->
+            coroutineScope.launch {
+                getAppDelegate().database.tokenDbProvider.loadTokenInformation(tokenId)?.displayName
+                    ?.let { runOnMainThread { callback(it) } }
+            }
+        }
 }
 
 open class SigningTransactionContainer(
     private val texts: I18NBundle,
     vc: UIViewController,
-    private val clickListener: Runnable
+    private val onConfirm: () -> Unit
 ) : TransactionContainer(texts, vc) {
 
     override val titleInboxes get() = STRING_TITLE_INBOXES
@@ -108,7 +133,7 @@ open class SigningTransactionContainer(
 
         val signButton = PrimaryButton(texts.get(STRING_LABEL_CONFIRM)).apply {
             addOnTouchUpInsideListener { _, _ ->
-                clickListener.run()
+                onConfirm()
             }
         }
         val buttonContainer = UIView(CGRect.Zero()).apply {

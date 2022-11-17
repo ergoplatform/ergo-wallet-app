@@ -50,7 +50,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 assertNotNull(epsr?.reducedTx)
                 assertNull(epsr?.message)
                 assertEquals(MessageSeverity.NONE, epsr?.messageSeverity)
-                assertNull(epsr?.p2pkAddress)
+                assertTrue(epsr!!.addressesToUse.isEmpty())
                 assertNull(epsr?.replyToUrl)
             }
 
@@ -89,6 +89,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
         server.enqueue(MockResponse().setBody("{\"message\":\"Here is your 1 ERG round trip.\",\"messageSeverity\":\"INFORMATION\",\"address\":\"someAddressNotHere\",\"reducedTx\":\"vAIBsY8KufROXCUQyk05e7UCm4hdh-afd4BXlhyy-i7xo8YAAAACUUCDoXD8c0BxwHdI_0RJQGBmVDF71RaGUSDtcClSqxuW1lsZOJnBVNdbw6VbLTwjEfCfArnW7S2skTyxDDgwgAOAlOvcAwAIzQKya10Oh0WJx8V1Smpq9AgIH___4xEYT0SiW4DH8rxitYSUCQAAwIQ9EAUEAAQADjYQAgSQAQjNAnm-Zn753LusVaBilc6HCwcCm_zbLc4o2VnygVsW-BeY6gLRkqOajMenAXMAcwEQAQIEAtGWgwMBk6OMx7KlcwAAAZPCsqVzAQB0cwJzA4MBCM3urJOxpXMEhJQJAADZptHA6wkACM0CsmtdDodFicfFdUpqavQICB___-MRGE9EoluAx_K8YrWElAkCAPgKAeC00S8AzQKya10Oh0WJx8V1Smpq9AgIH___4xEYT0SiW4DH8rxitZ1PrGY=\"}"))
         server.enqueue(MockResponse().setBody("{\"message\":\"Out of order. Please try again later.\",\"messageSeverity\":\"WARNING\"}"))
         server.enqueue(MockResponse().setBody(RESPONSE_SUCCESS))
+        server.enqueue(MockResponse().setBody("")) // <- address request supported
         server.enqueue(MockResponse().setBody(RESPONSE_SUCCESS))
         return server
     }
@@ -109,7 +110,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 assertNotNull(epsr?.reducedTx)
                 assertNotNull(epsr?.message)
                 assertEquals(MessageSeverity.INFORMATION, epsr?.messageSeverity)
-                assertEquals(TestUiWallet.firstAddress, epsr?.p2pkAddress)
+                assertEquals(listOf(TestUiWallet.firstAddress), epsr?.addressesToUse)
                 assertNull(epsr?.replyToUrl)
 
             }
@@ -207,7 +208,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
                 assertNotNull(epsr?.reducedTx)
                 assertNotNull(epsr?.message)
                 assertEquals(MessageSeverity.INFORMATION, epsr?.messageSeverity)
-                assertEquals(TestUiWallet.firstAddress, epsr?.p2pkAddress)
+                assertEquals(listOf(TestUiWallet.firstAddress), epsr?.addressesToUse)
                 assertNull(epsr?.replyToUrl)
 
             }

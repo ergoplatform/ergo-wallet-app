@@ -361,8 +361,22 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
         }
 
         if (checkResponse.canPay) {
-            startAuthFlow()
+            if (authenticationWalletConfig?.isReadOnly() == false) {
+                val context = requireContext()
+                viewModel.uiLogic.prepareTransactionForSigning(
+                    Preferences(context),
+                    AndroidStringProvider(context)
+                )
+            } else
+                startAuthFlow()
         }
+    }
+
+    override fun receivedPromptSigningResult() {
+        if (authenticationWalletConfig?.isReadOnly() == false)
+            ConfirmSendFundsDialogFragment().show(childFragmentManager, null)
+        else
+            super.receivedPromptSigningResult()
     }
 
     private fun showPurposeMessageInformation(startPayment: Boolean = false) {

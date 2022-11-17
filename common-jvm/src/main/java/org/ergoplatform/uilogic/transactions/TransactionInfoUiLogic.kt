@@ -22,6 +22,8 @@ abstract class TransactionInfoUiLogic {
 
     var txId: String? = null
         private set
+    var isLoading: Boolean = false
+        private set
     private var explorerTxInfo: org.ergoplatform.explorer.client.model.TransactionInfo? = null
     private var localDbInfo: AddressTransaction? = null
 
@@ -29,12 +31,14 @@ abstract class TransactionInfoUiLogic {
         txId: String,
         address: String?, // the address is used to fetch unconfirmed transactions, see below
         ergoApi: ErgoExplorerApi,
-        db: IAppDatabase? // when given and transaction is not found on Explorer, it is loaded from DB
+        db: IAppDatabase?, // when given and transaction is not found on Explorer, it is loaded from DB
+        forceReload: Boolean = false,
     ) {
-        if (this.txId != null)
+        if (this.txId != null && !forceReload || isLoading)
             return
 
         this.txId = txId
+        isLoading = true
         coroutineScope.launch(Dispatchers.IO) {
             try {
 
@@ -55,6 +59,8 @@ abstract class TransactionInfoUiLogic {
 
                 explorerTxInfo = txInfo
                 localDbInfo = null
+                isLoading = false
+
                 if (txInfo != null) {
                     onTransactionInformationFetched(
                         TransactionInfo(
@@ -90,6 +96,9 @@ abstract class TransactionInfoUiLogic {
                     "Error fetching transaction information: ${t.message}",
                     t
                 )
+                explorerTxInfo = null
+                localDbInfo = null
+                isLoading = false
                 onTransactionInformationFetched(null)
             }
         }
@@ -111,6 +120,9 @@ abstract class TransactionInfoUiLogic {
                 )
             else
                 stringProvider.getString(STRING_DESC_TRANSACTION_WAITING)
+
+    fun shouldOfferReloadButton() = !isLoading &&
+            explorerTxInfo == null || explorerTxInfo?.inclusionHeight == null
 
     abstract fun onTransactionInformationFetched(ti: TransactionInfo?)
 }

@@ -22,10 +22,12 @@ import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.uilogic.transactions.SuggestedFee
+import org.ergoplatform.wallet.isReadOnly
 
 class SendFundsComponent(
     componentContext: ComponentContext,
@@ -61,6 +63,7 @@ class SendFundsComponent(
     private val tokensError = mutableStateOf(false)
     private val editFeeDialogState = mutableStateOf(false)
     private val addressBookDialogState = AddressBookDialogStateHandler()
+    private val preparedTransactionInfoState = mutableStateOf<TransactionInfo?>(null)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -116,6 +119,16 @@ class SendFundsComponent(
                 componentScope()
             )
 
+            preparedTransactionInfoState.value?.let {
+                ConfirmSendFundsDialog(it,
+                    onDismissRequest = { preparedTransactionInfoState.value = null },
+                    onConfirm = {
+                        preparedTransactionInfoState.value = null
+                        startPayment()
+                    },
+                )
+            }
+
             SubmitTransactionOverlays()
         }
     }
@@ -150,7 +163,10 @@ class SendFundsComponent(
         }
 
         if (checkResponse.canPay) {
-            startPayment()
+            if (uiLogic.wallet?.walletConfig?.isReadOnly() == false)
+                uiLogic.prepareTransactionForSigning(Application.prefs, Application.texts)
+            else
+                startPayment()
         }
     }
 
@@ -208,6 +224,9 @@ class SendFundsComponent(
             showSigningPrompt(signingPrompt)
         }
 
+        override fun notifyHasPreparedTx(preparedTx: TransactionInfo) {
+            preparedTransactionInfoState.value = preparedTx
+        }
     }.apply {
         initWallet(
             Application.database, ApiServiceManager.getOrInit(Application.prefs),

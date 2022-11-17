@@ -60,11 +60,19 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
         }
         val qrCodeContainer = UIView()
         qrCodeContainer.addSubview(qrCode)
-        addressLabel = Headline2Label()
-        addressLabel.isUserInteractionEnabled = true
-        addressLabel.addGestureRecognizer(UITapGestureRecognizer {
-            shareText(addressLabel.text, addressLabel)
-        })
+        addressLabel = Headline2Label().apply {
+            textAlignment = NSTextAlignment.Center
+        }
+        val addressLabelWithImage =
+            addressLabel.wrapWithTrailingImage(
+                getIosSystemImage(IMAGE_SHARE, UIImageSymbolScale.Small)!!,
+                keepWidth = true, inset = DEFAULT_MARGIN * 1.5
+            ).apply {
+                isUserInteractionEnabled = true
+                addGestureRecognizer(UITapGestureRecognizer {
+                    shareText(addressLabel.text, addressLabel)
+                })
+            }
 
         inputAmount = EndIconTextField().apply {
             keyboardType = UIKeyboardType.NumbersAndPunctuation
@@ -107,7 +115,7 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
                 walletTitle,
                 addressNameContainer,
                 qrCodeContainer,
-                addressLabel,
+                addressLabelWithImage,
                 inputAmount,
                 otherCurrencyContainer
             )
@@ -115,7 +123,7 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
         stackView.axis = UILayoutConstraintAxis.Vertical
         stackView.setCustomSpacing(DEFAULT_MARGIN * 2, addressNameContainer)
         stackView.setCustomSpacing(DEFAULT_MARGIN * 2, qrCodeContainer)
-        stackView.setCustomSpacing(DEFAULT_MARGIN * 2, addressLabel)
+        stackView.setCustomSpacing(DEFAULT_MARGIN * 2, addressLabelWithImage)
         val scrollView = container.wrapInVerticalScrollView()
         qrCode.fixedWidth(DEFAULT_QR_CODE_SIZE).fixedHeight(DEFAULT_QR_CODE_SIZE).centerHorizontal().topToSuperview()
             .bottomToSuperview()

@@ -7,6 +7,7 @@ import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.ios.addressbook.ChooseAddressDialogViewController
 import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
@@ -401,7 +402,13 @@ class SendFundsViewController(
         }
 
         if (checkResponse.canPay) {
-            startPayment()
+            if (uiLogic.wallet!!.walletConfig.isReadOnly() == false)
+                uiLogic.prepareTransactionForSigning(
+                    getAppDelegate().prefs,
+                    IosStringProvider(texts)
+                )
+            else
+                startPayment()
         }
     }
 
@@ -522,7 +529,9 @@ class SendFundsViewController(
                 })
 
                 val doneButton = PrimaryButton(texts.get(STRING_BUTTON_DONE))
-                doneButton.addOnTouchUpInsideListener { _, _ -> navigationController.popViewController(true) }
+                doneButton.addOnTouchUpInsideListener { _, _ ->
+                    navigationController.popViewController(true)
+                }
                 val doneButtonContainer = UIView()
                 doneButtonContainer.addSubview(doneButton)
                 doneButton.centerHorizontal().topToSuperview().bottomToSuperview().fixedWidth(150.0)
@@ -555,6 +564,17 @@ class SendFundsViewController(
                 runOnMainThread {
                     showTxResultError(txResult)
                 }
+            }
+        }
+
+        override fun notifyHasPreparedTx(preparedTx: TransactionInfo) {
+            runOnMainThread {
+                presentViewController(
+                    ConfirmSendFundsDialogViewController(preparedTx) {
+                        startPayment()
+                    },
+                    true
+                ) {}
             }
         }
 

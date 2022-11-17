@@ -52,7 +52,10 @@ class ErgoPaySigningViewController(
         navigationController.navigationBar?.tintColor = UIColor.label()
 
         reloadNavBarItem =
-            UIBarButtonItem(getIosSystemImage(IMAGE_RELOAD, UIImageSymbolScale.Small, 20.0), UIBarButtonItemStyle.Plain)
+            UIBarButtonItem(
+                getIosSystemImage(IMAGE_RELOAD, UIImageSymbolScale.Small, 20.0),
+                UIBarButtonItemStyle.Plain
+            )
         navigationItem.rightBarButtonItem = reloadNavBarItem
         reloadNavBarItem.tintColor = UIColor.label()
         reloadNavBarItem.setOnClickListener {
@@ -64,7 +67,8 @@ class ErgoPaySigningViewController(
         view.addSubview(walletAddressLabel)
 
 
-        walletAddressLabel.topToSuperview(topInset = DEFAULT_MARGIN).widthMatchesSuperview(inset = DEFAULT_MARGIN)
+        walletAddressLabel.topToSuperview(topInset = DEFAULT_MARGIN)
+            .widthMatchesSuperview(inset = DEFAULT_MARGIN)
 
         val scrollingContainer = UIView(CGRect.Zero())
         val scrollView = scrollingContainer.wrapInVerticalScrollView()
@@ -79,7 +83,8 @@ class ErgoPaySigningViewController(
         fetchingContainer.widthMatchesSuperview(maxWidth = MAX_WIDTH).centerVertical()
         transactionContainer.edgesToSuperview(maxWidth = MAX_WIDTH)
         stateDoneContainer.centerVertical().widthMatchesSuperview(maxWidth = MAX_WIDTH)
-        scrollView.topToBottomOf(walletAddressLabel, DEFAULT_MARGIN).widthMatchesSuperview().bottomToSuperview()
+        scrollView.topToBottomOf(walletAddressLabel, DEFAULT_MARGIN).widthMatchesSuperview()
+            .bottomToSuperview()
 
         uiLogic.init(
             request,
@@ -198,7 +203,10 @@ class ErgoPaySigningViewController(
     private fun showAddressOrWalletChooser() {
         presentViewController(
             if (uiLogic.wallet != null) {
-                ChooseAddressListDialogViewController(uiLogic.wallet!!.walletConfig.id, false) {
+                ChooseAddressListDialogViewController(
+                    uiLogic.wallet!!.walletConfig.id,
+                    uiLogic.addressRequestCanHandleMultiple
+                ) {
                     onAddressChosen(it)
                 }
             } else {
@@ -236,7 +244,8 @@ class ErgoPaySigningViewController(
                 }
                 val doneButtonContainer = UIView()
                 doneButtonContainer.addSubview(dismissButton)
-                dismissButton.centerHorizontal().topToSuperview().bottomToSuperview().fixedWidth(150.0)
+                dismissButton.centerHorizontal().topToSuperview().bottomToSuperview()
+                    .fixedWidth(150.0)
 
                 rateLabel = Body1Label().apply {
                     text = texts.get(STRING_DESC_PLEASE_RATE)
@@ -267,8 +276,15 @@ class ErgoPaySigningViewController(
                 this.image = image
             }
 
-            dismissShouldRetry = uiLogic.getDoneSeverity() == MessageSeverity.ERROR && uiLogic.canReloadFromDapp()
-            val imageToShow = uiLogic.getDoneSeverity().getImage()
+            val doneSeverity = uiLogic.getDoneSeverity()
+            dismissShouldRetry =
+                doneSeverity == MessageSeverity.ERROR && uiLogic.canReloadFromDapp()
+            val imageToShow =
+                if (uiLogic.txId != null && doneSeverity == MessageSeverity.INFORMATION)
+                    IMAGE_TX_DONE
+                else
+                    doneSeverity.getImage()
+
             image?.isHidden = imageToShow == null
             imageToShow?.let {
                 image?.image = getIosSystemImage(it, UIImageSymbolScale.Large)
@@ -284,7 +300,8 @@ class ErgoPaySigningViewController(
         }
     }
 
-    inner class TransactionWithHeaderContainer : SigningTransactionContainer(texts, this, { startPayment() }) {
+    inner class TransactionWithHeaderContainer :
+        SigningTransactionContainer(texts, this, { startPayment() }) {
         private val messageFromDApp = Body1Label()
         private val messageIcon = UIImageView().apply {
             tintColor = UIColor.secondaryLabel()
@@ -349,7 +366,8 @@ class ErgoPaySigningViewController(
             addSubview(progressIndicator)
             addSubview(fetchDataLabel)
             progressIndicator.centerHorizontal().topToSuperview()
-            fetchDataLabel.widthMatchesSuperview().topToBottomOf(progressIndicator, DEFAULT_MARGIN * 2)
+            fetchDataLabel.widthMatchesSuperview()
+                .topToBottomOf(progressIndicator, DEFAULT_MARGIN * 2)
                 .bottomToSuperview()
             progressIndicator.startAnimating()
         }
@@ -385,7 +403,8 @@ class ErgoPaySigningViewController(
                         STRING_LABEL_ALL_ADDRESSES,
                         wallet?.getNumOfAddresses()
                     )
-                walletAddressLabel.text = texts.format(STRING_LABEL_SIGN_WITH, addressLabel, walletLabel)
+                walletAddressLabel.text =
+                    texts.format(STRING_LABEL_SIGN_WITH, addressLabel, walletLabel)
             }
         }
 

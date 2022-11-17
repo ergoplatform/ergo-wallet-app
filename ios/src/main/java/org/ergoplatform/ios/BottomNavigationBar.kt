@@ -86,10 +86,8 @@ class BottomNavigationBar : UITabBarController() {
     private fun setItemAppearance(itemAppearance: UITabBarItemAppearance) {
         itemAppearance.normal.iconColor = UIColor.label()
         val textAttributes = NSDictionary(
-            NSAttributedStringAttribute.Values.ForegroundColor(),
-            UIColor.label(),
-            NSAttributedStringAttribute.Values.ParagraphStyle(),
-            NSParagraphStyle.getDefaultParagraphStyle()
+            NSAttributedStringAttribute.Values.ForegroundColor(), UIColor.label(),
+            NSAttributedStringAttribute.Values.ParagraphStyle(), NSParagraphStyle.getDefaultParagraphStyle()
         )
         itemAppearance.normal.titleTextAttributes = textAttributes
         itemAppearance.selected.iconColor = UIColor.label()

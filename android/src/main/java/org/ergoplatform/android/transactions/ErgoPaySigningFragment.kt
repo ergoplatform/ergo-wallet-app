@@ -166,7 +166,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
     private fun showAddressOrWalletChooser() {
         val uiLogic = viewModel.uiLogic
         if (uiLogic.wallet != null) {
-            showChooseAddressList(false)
+            showChooseAddressList(addShowAllEntry = uiLogic.addressRequestCanHandleMultiple)
         } else {
             ChooseWalletListBottomSheetDialog().show(childFragmentManager, null)
         }
@@ -207,21 +207,26 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
     private fun showDoneInfo() {
         // use normal tx done message in case of success
         val uiLogic = viewModel.uiLogic
+        val hasSuccessFulTx = viewModel.uiLogic.txId != null
+
         binding.tvMessage.text = uiLogic.getDoneMessage(AndroidStringProvider(requireContext()))
+        val doneSeverity = uiLogic.getDoneSeverity()
         binding.tvMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(
             0,
-            uiLogic.getDoneSeverity().getSeverityDrawableResId(),
+            if (hasSuccessFulTx && doneSeverity == MessageSeverity.INFORMATION)
+                R.drawable.ic_add_task_100
+            else
+                doneSeverity.getSeverityDrawableResId(),
             0, 0
         )
-        val shouldReload =
-            (uiLogic.getDoneSeverity() == MessageSeverity.ERROR && uiLogic.canReloadFromDapp())
+        val shouldReload = (doneSeverity == MessageSeverity.ERROR && uiLogic.canReloadFromDapp())
         binding.buttonDismiss.visibility = if (!shouldReload) View.VISIBLE else View.GONE
         binding.buttonRetry.visibility = if (shouldReload) View.VISIBLE else View.GONE
         val showRatingPrompt = uiLogic.showRatingPrompt()
         binding.buttonRate.visibility = if (showRatingPrompt) View.VISIBLE else View.GONE
         binding.tvRate.visibility = if (showRatingPrompt) View.VISIBLE else View.GONE
 
-        viewModel.uiLogic.txId?.let {
+        if (hasSuccessFulTx) {
             parentFragmentManager.setFragmentResult(
                 ergoPayActionRequestKey, bundleOf(
                     ergoPayActionCompletedBundleKey to true
