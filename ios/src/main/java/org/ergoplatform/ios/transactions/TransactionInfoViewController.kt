@@ -20,6 +20,7 @@ class TransactionInfoViewController(
     private val uiLogic = IosTransactionInfoUiLogic()
     private lateinit var infoContainer: TransactionInfoContainer
     private lateinit var activityView: UIActivityIndicatorView
+    private lateinit var errorView: UIView
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -44,23 +45,49 @@ class TransactionInfoViewController(
         view.addSubview(activityView)
         activityView.centerVertical().centerHorizontal()
 
+        errorView = UIImageView(getIosSystemImage(IMAGE_WARNING, UIImageSymbolScale.Large)).apply {
+            contentMode = UIViewContentMode.ScaleAspectFit
+            tintColor = UIColor.secondaryLabel()
+            fixedHeight(100.0)
+        }
+        view.addSubview(errorView)
+        errorView.centerVertical().centerHorizontal()
+
         val scrollView = infoContainer.wrapInVerticalScrollView()
         view.addSubview(scrollView)
         scrollView.edgesToSuperview(true, maxWidth = MAX_WIDTH)
-
-        infoContainer.isHidden = true
     }
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
+        loadTx()
+    }
+
+    private fun loadTx(forceReload: Boolean = false) {
         val appDelegate = getAppDelegate()
         uiLogic.init(
             txId,
             address,
             ApiServiceManager.getOrInit(appDelegate.prefs),
-            appDelegate.database
+            appDelegate.database,
+            forceReload
         )
-        activityView.startAnimating()
+        if (uiLogic.isLoading)
+            refreshScreenState(null)
+    }
+
+    fun refreshScreenState(ti: TransactionInfo?) {
+        if (!uiLogic.isLoading) {
+            errorView.isHidden = ti != null
+            activityView.isHidden = true
+            activityView.stopAnimating()
+            infoContainer.isHidden = ti == null
+        } else {
+            errorView.isHidden = true
+            activityView.isHidden = false
+            activityView.startAnimating()
+            infoContainer.isHidden = true
+        }
     }
 
     inner class IosTransactionInfoUiLogic : TransactionInfoUiLogic() {
@@ -68,10 +95,8 @@ class TransactionInfoViewController(
 
         override fun onTransactionInformationFetched(ti: TransactionInfo?) {
             runOnMainThread {
-                activityView.isHidden = true
-                activityView.stopAnimating()
+                refreshScreenState(ti)
                 ti?.let {
-                    infoContainer.isHidden = false
                     infoContainer.bindTransaction(ti,
                         tokenClickListener = { tokenId ->
                             presentViewController(TokenInformationViewController(tokenId, null), true) {}
@@ -85,14 +110,6 @@ class TransactionInfoViewController(
                                 )?.let { runOnMainThread { callback(it) } }
                             }
                         })
-                } ?: run {
-                    val errorView = UIImageView(getIosSystemImage(IMAGE_WARNING, UIImageSymbolScale.Large)).apply {
-                        contentMode = UIViewContentMode.ScaleAspectFit
-                        tintColor = UIColor.secondaryLabel()
-                        fixedHeight(100.0)
-                    }
-                    view.addSubview(errorView)
-                    errorView.centerVertical().centerHorizontal()
                 }
             }
         }
@@ -126,6 +143,8 @@ class TransactionInfoViewController(
             textAlignment = NSTextAlignment.Center
         }
 
+        private val refreshButtonContainer = UIView(CGRect.Zero())
+
         init {
             val introContainer = UIView(CGRect.Zero())
 
@@ -141,7 +160,15 @@ class TransactionInfoViewController(
                     .bottomToSuperview()
             }
 
+            val reloadButton = PrimaryButton(texts.get(STRING_BUTTON_RELOAD))
+            refreshButtonContainer.addSubview(reloadButton)
+            reloadButton.centerHorizontal(true).topToSuperview().bottomToSuperview()
+            reloadButton.addOnTouchUpInsideListener { _, _ ->
+                loadTx(forceReload = true)
+            }
+
             insertArrangedSubview(introContainer, 0)
+            insertArrangedSubview(refreshButtonContainer, 1)
         }
 
         override fun bindTransaction(
@@ -155,6 +182,7 @@ class TransactionInfoViewController(
             txIdLabel.text = transactionInfo.id
             purposeLabel.text = uiLogic.transactionPurpose
             txTimestampLabel.text = uiLogic.getTransactionExecutionState(IosStringProvider(texts))
+            refreshButtonContainer.isHidden = !uiLogic.shouldOfferReloadButton()
         }
     }
 }
