@@ -6,6 +6,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
@@ -36,6 +37,14 @@ class TransactionInfoComponent(
 
     override val actions: @Composable RowScope.() -> Unit
         get() = {
+            if (canReloadButtonVisible.value && !loading.value) {
+                IconButton(uiLogic::loadTx) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        null,
+                    )
+                }
+            }
             IconButton({
                 openBrowser(getExplorerTxUrl(txId))
             }) {
@@ -47,22 +56,11 @@ class TransactionInfoComponent(
         }
 
     private val transactionInfoState = mutableStateOf<TransactionInfo?>(null)
+    private val canReloadButtonVisible = mutableStateOf(false)
     private val loading = mutableStateOf(true)
 
-    private val uiLogic = object : TransactionInfoUiLogic() {
-        override val coroutineScope: CoroutineScope get() = componentScope()
-
-        override fun onTransactionInformationFetched(ti: TransactionInfo?) {
-            loading.value = false
-            transactionInfoState.value = ti
-        }
-    }.apply {
-        init(
-            this@TransactionInfoComponent.txId,
-            address,
-            ApiServiceManager.getOrInit(Application.prefs),
-            Application.database
-        )
+    private val uiLogic = DesktopTransactionInfoUiLogic().apply {
+        loadTx()
     }
 
     @Composable
@@ -77,5 +75,26 @@ class TransactionInfoComponent(
             },
             onTokenClick = { tokenId -> router.push(ScreenConfig.TokenInformation(tokenId)) }
         )
+    }
+
+    private inner class DesktopTransactionInfoUiLogic : TransactionInfoUiLogic() {
+        override val coroutineScope: CoroutineScope get() = componentScope()
+
+        override fun onTransactionInformationFetched(ti: TransactionInfo?) {
+            loading.value = isLoading
+            transactionInfoState.value = ti
+            canReloadButtonVisible.value = shouldOfferReloadButton()
+        }
+
+        fun loadTx() {
+            init(
+                this@TransactionInfoComponent.txId,
+                address,
+                ApiServiceManager.getOrInit(Application.prefs),
+                Application.database,
+                forceReload = true,
+            )
+            loading.value = isLoading
+        }
     }
 }

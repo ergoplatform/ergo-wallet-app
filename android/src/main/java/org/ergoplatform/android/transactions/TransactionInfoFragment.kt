@@ -20,6 +20,7 @@ import org.ergoplatform.android.ui.copyStringToClipboard
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.shareText
 import org.ergoplatform.getExplorerTxUrl
+import org.ergoplatform.transactions.TransactionInfo
 
 /**
  * Shows all transaction information by fetching it from Explorer by its transactionId
@@ -48,18 +49,10 @@ class TransactionInfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val context = requireContext()
-        viewModel.uiLogic.init(
-            args.txId,
-            args.address,
-            ApiServiceManager.getOrInit(Preferences(context)),
-            AppDatabase.getInstance(context)
-        )
+        loadTxInfo()
 
         viewModel.txInfo.observe(viewLifecycleOwner) { txInfo ->
-            binding.progressCircular.visibility = View.GONE
-            binding.tvError.visibility = if (txInfo == null) View.VISIBLE else View.GONE
-            binding.layoutTxinfo.visibility = if (txInfo == null) View.GONE else View.VISIBLE
+            refreshScreenState(txInfo)
 
             txInfo?.let {
                 binding.labelTransactionId.text = txInfo.id
@@ -85,7 +78,7 @@ class TransactionInfoFragment : Fragment() {
                     },
                     layoutInflater,
                     addressLabelHandler = { address, callback ->
-                        getContext()?.let { context ->
+                        context?.let { context ->
                             viewLifecycleOwner.lifecycleScope.launch {
                                 getAddressLabelFromDatabase(
                                     AppDatabase.getInstance(context),
@@ -107,9 +100,38 @@ class TransactionInfoFragment : Fragment() {
         }
     }
 
+    private fun refreshScreenState(txInfo: TransactionInfo?) {
+        val isLoading = viewModel.uiLogic.isLoading
+        val isError = txInfo == null && !isLoading
+
+        binding.progressCircular.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.tvError.visibility = if (isError) View.VISIBLE else View.GONE
+        binding.layoutTxinfo.visibility =
+            if (isLoading || txInfo == null) View.GONE else View.VISIBLE
+
+        activity?.invalidateOptionsMenu()
+    }
+
+    private fun loadTxInfo(forceReload: Boolean = false) {
+        val context = requireContext()
+        viewModel.uiLogic.init(
+            args.txId,
+            args.address,
+            ApiServiceManager.getOrInit(Preferences(context)),
+            AppDatabase.getInstance(context),
+            forceReload
+        )
+        refreshScreenState(viewModel.txInfo.value)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.fragment_transaction_info, menu)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        menu.findItem(R.id.menu_reload).isVisible = viewModel.uiLogic.shouldOfferReloadButton()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -117,6 +139,9 @@ class TransactionInfoFragment : Fragment() {
             viewModel.uiLogic.txId?.let {
                 shareText(getExplorerTxUrl(it))
             }
+            true
+        } else if (item.itemId == R.id.menu_reload) {
+            loadTxInfo(forceReload = true)
             true
         } else
             super.onOptionsItemSelected(item)
