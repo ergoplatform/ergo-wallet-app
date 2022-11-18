@@ -28,7 +28,6 @@ const val URL_FORGOT_PASSWORD_HELP =
     "https://github.com/ergoplatform/ergo-wallet-app/wiki/FAQ#i-forgot-my-spending-password"
 
 const val ERG_BASE_COST = 0
-const val ERG_MAX_BLOCK_COST = 1000000
 private const val MAX_NUM_INPUT_BOXES = 100
 
 var isErgoMainNet: Boolean = true
@@ -320,7 +319,8 @@ fun refreshNodeList(prefs: PreferencesProvider) {
 
 private fun getColdErgoClient() = ColdErgoClient(
     getErgoNetworkType(),
-    ERG_MAX_BLOCK_COST
+    Parameters.ColdClientMaxBlockCost,
+    Parameters.ColdClientBlockVersion
 )
 
 /**
