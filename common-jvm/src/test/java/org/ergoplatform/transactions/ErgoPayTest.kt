@@ -32,7 +32,7 @@ class ErgoPayTest {
             assertTrue(addressesToUse.isEmpty())
             assertEquals(MessageSeverity.NONE, messageSeverity)
 
-            val parsedTx = deserializeUnsignedTxOffline(reducedTx!!)
+            val parsedTx = ErgoFacade.deserializeUnsignedTxOffline(reducedTx!!)
             assertNotNull(parsedTx)
         }
 

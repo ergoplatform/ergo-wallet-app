@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.ApiServiceManager
-import org.ergoplatform.deserializeUnsignedTxOffline
+import org.ergoplatform.ErgoFacade
 import org.ergoplatform.utils.*
 
 /**
@@ -201,7 +201,7 @@ private fun getErgoPayHeaders() = mapOf(
  */
 suspend fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ApiServiceManager): TransactionInfo? {
     if (reducedTx == null) return null
-    val reducedTransaction = deserializeUnsignedTxOffline(reducedTx)
+    val reducedTransaction = ErgoFacade.deserializeUnsignedTxOffline(reducedTx)
     return reducedTransaction.buildTransactionInfo(ergoApiService)
 }
 

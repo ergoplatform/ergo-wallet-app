@@ -4,8 +4,8 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.ergoplatform.ErgoFacade
 import org.ergoplatform.deserializeErgobox
-import org.ergoplatform.deserializeUnsignedTxOffline
 import org.ergoplatform.ergoauth.ErgoAuthRequest
 import org.ergoplatform.ergoauth.ErgoAuthResponse
 import org.ergoplatform.ergoauth.parseErgoAuthRequestFromJson
@@ -235,7 +235,7 @@ private fun parseQrChunk(chunk: String, property: String): QrChunk {
 }
 
 fun PromptSigningResult.buildTransactionInfo(): TransactionInfo {
-    val unsignedTx = deserializeUnsignedTxOffline(serializedTx!!)
+    val unsignedTx = ErgoFacade.deserializeUnsignedTxOffline(serializedTx!!)
 
     // deserialize input boxes and store in hashmap
     val inputBoxes = HashMap<String, TransactionInfoBox>()

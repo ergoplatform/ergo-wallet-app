@@ -4,10 +4,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.ergoplatform.ErgoFacade
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletDbProvider
-import org.ergoplatform.signSerializedErgoTx
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.STRING_ERROR_COLD_QR_CODE_DOES_NOT_FIT
 import org.ergoplatform.uilogic.StringProvider
@@ -86,7 +86,7 @@ abstract class ColdWalletSigningUiLogic {
             coroutineScope.launch {
                 val ergoTxResult: SigningResult
                 withContext(Dispatchers.IO) {
-                    ergoTxResult = signSerializedErgoTx(
+                    ergoTxResult = ErgoFacade.signSerializedErgoTx(
                         signingRequest.serializedTx!!, signingSecrets,
                         derivedAddresses, texts
                     )

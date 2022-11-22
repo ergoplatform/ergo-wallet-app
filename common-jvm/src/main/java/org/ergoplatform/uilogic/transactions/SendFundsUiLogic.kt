@@ -332,7 +332,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         coroutineScope.launch {
             val ergoTxResult: SendTransactionResult
             withContext(Dispatchers.IO) {
-                val signingResult = signSerializedErgoTx(
+                val signingResult = ErgoFacade.signSerializedErgoTx(
                     preparedTransaction!!,
                     signingSecrets, getSigningDerivedAddressesIndices(), texts
                 )
@@ -342,7 +342,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                     notifyUiLocked(false)
                     notifyHasErgoTxResult(signingResult)
                 } else {
-                    ergoTxResult = sendSignedErgoTx(
+                    ergoTxResult = ErgoFacade.sendSignedErgoTx(
                         signingResult.serializedTx!!, preferences, texts
                     )
                     notifyUiLocked(false)
@@ -369,13 +369,14 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     ): PromptSigningResult {
         val serializedTx = withContext(Dispatchers.IO) {
             val derivedAddresses = getSigningDerivedAddresses()
-            prepareSerializedErgoTx(
+            ErgoFacade.prepareSerializedErgoTx(
                 Address.create(receiverAddress),
                 getActualMessageToSend(),
                 getActualAmountToSendNanoErgs(),
                 tokensChosen.values.toList(),
                 feeAmount.nanoErgs,
                 derivedAddresses.map { Address.create(it) },
+                balance.nanoErgs,
                 consolidate = !wallet!!.isReadOnly(),
                 preferences, texts
             )
