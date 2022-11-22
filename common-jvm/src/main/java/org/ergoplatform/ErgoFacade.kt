@@ -2,9 +2,11 @@ package org.ergoplatform
 
 import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.appkit.*
+import org.ergoplatform.appkit.babelfee.BabelFeeOperations
 import org.ergoplatform.appkit.impl.InputBoxImpl
 import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.restapi.client.PeersApi
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
@@ -113,35 +115,57 @@ object ErgoFacade {
         boxOperations: BoxOperations,
         recipient: Address,
         consolidate: Boolean,
+        babelSwap: BabelSwapData?
     ): UnsignedTransaction {
+        val txB: UnsignedTransactionBuilder = boxOperations.blockchainContext.newTxBuilder()
+
+        val newBox = boxOperations.prepareOutBox(txB)
+            .contract(recipient.toErgoContract()).build()
+        txB.addOutputs(newBox)
+
+        babelSwap?.let {
+            BabelFeeOperations.addBabelFeeBoxes(txB, it.babelBox, it.babelAmountNanoErg)
+
+            val tokensSend = boxOperations.tokensToSpend.toMutableList()
+            val tokenInList = tokensSend.indexOfFirst { it.id == babelSwap.tokenToSwap.id }
+            if (tokenInList >= 0)
+                tokensSend[tokenInList] = ErgoToken(
+                    tokensSend[tokenInList].id,
+                    tokensSend[tokenInList].value + babelSwap.tokenToSwap.value
+                )
+            else
+                tokensSend.add(babelSwap.tokenToSwap)
+            boxOperations.withTokensToSpend(tokensSend)
+        }
+
         val boxesLoader = RecordingBoxesLoader().apply { withAllowChainedTx(true) }
-        return boxOperations
-            .withInputBoxesLoader(boxesLoader)
+        boxOperations.withInputBoxesLoader(boxesLoader)
             .withMaxInputBoxesToSelect(MAX_NUM_INPUT_BOXES)
-            .buildTxWithDefaultInputs { txB: UnsignedTransactionBuilder ->
-                val newBox = boxOperations.prepareOutBox(txB)
-                    .contract(recipient.toErgoContract()).build()
-                txB.outputs(newBox)
 
-                if (consolidate) {
-                    val addedInputs = txB.inputBoxes
-                    if (addedInputs.size < MAX_NUM_INPUT_BOXES) {
-                        val firstSenderErgoTree =
-                            boxOperations.senders.first().toErgoContract().ergoTree
-                        val extraInputBoxes = boxesLoader.allBoxesLoaded.filter {
-                            it.ergoTree == firstSenderErgoTree && !addedInputs.contains(it)
-                        }.take(MAX_NUM_INPUT_BOXES - addedInputs.size)
-                        LogUtils.logDebug(
-                            "buildUnsignedTx",
-                            "Added ${extraInputBoxes.size} extra boxes to consolidate"
-                        )
-                        if (extraInputBoxes.isNotEmpty())
-                            txB.addInputs(*extraInputBoxes.toTypedArray())
-                    }
-                }
+        val boxesToSpend: List<InputBox> = boxOperations.loadTop(babelSwap?.babelAmountNanoErg ?: 0)
 
-                txB
+        txB.addInputs(*boxesToSpend.toTypedArray())
+            .fee(boxOperations.feeAmount)
+            .sendChangeTo(boxOperations.senders[0])
+
+        if (consolidate) {
+            val addedInputs = txB.inputBoxes
+            if (addedInputs.size < MAX_NUM_INPUT_BOXES) {
+                val firstSenderErgoTree =
+                    boxOperations.senders.first().toErgoContract().ergoTree
+                val extraInputBoxes = boxesLoader.allBoxesLoaded.filter {
+                    it.ergoTree == firstSenderErgoTree && !addedInputs.contains(it)
+                }.take(MAX_NUM_INPUT_BOXES - addedInputs.size)
+                LogUtils.logDebug(
+                    "buildUnsignedTx",
+                    "Added ${extraInputBoxes.size} extra boxes to consolidate"
+                )
+                if (extraInputBoxes.isNotEmpty())
+                    txB.addInputs(*extraInputBoxes.toTypedArray())
             }
+        }
+
+        return txB.build()
     }
 
     fun buildPromptSigningResultFromErgoPayRequest(
@@ -181,20 +205,30 @@ object ErgoFacade {
         feeAmount: Long,
         senderAddresses: List<Address>,
         nanoErgBalanceSenders: Long,
+        tokenBalanceSenders: Map<String, WalletToken>,
         consolidate: Boolean,
         prefs: PreferencesProvider,
         texts: StringProvider
     ): PromptSigningResult {
         try {
-            // check if we have to use Babel Fees
-            if (amountToSend <= Parameters.MinChangeValue && tokensToSend.isNotEmpty() &&
-                nanoErgBalanceSenders <= Parameters.MinChangeValue * 2 + feeAmount
-            ) {
-                // TODO #158 babel fees
-            }
-
             val ergoClient = getRestErgoClient(prefs)
             return ergoClient.execute { ctx: BlockchainContext ->
+                // check if we have to use Babel Fees
+                val babelAmount = Parameters.MinChangeValue * 2 + feeAmount - nanoErgBalanceSenders
+
+                val babelSwap =
+                    if (amountToSend <= Parameters.MinChangeValue && tokensToSend.isNotEmpty()
+                        && babelAmount >= 0
+                    )
+                        BabelFees.findBabelBox(
+                            tokensToSend,
+                            tokenBalanceSenders,
+                            ctx,
+                            babelAmount,
+                            texts
+                        )
+                    else null
+
                 val unsigned = buildUnsignedTx(
                     BoxOperations.createForSenders(senderAddresses, ctx)
                         .withAmountToSpend(amountToSend)
@@ -203,6 +237,7 @@ object ErgoFacade {
                         .withMessage(message),
                     recipient,
                     consolidate,
+                    babelSwap,
                 )
 
                 val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
@@ -378,6 +413,8 @@ object ErgoFacade {
         } else if (t is AssertionError && t.message?.contains("Tree root should be real") == true) {
             // ProverInterpreter.scala
             texts.getString(STRING_ERROR_PROVER_CANT_SIGN)
+        } else if (t is BabelFeeSwapException) {
+            t.message
         } else {
             t.getMessageOrName() + msgUseOtherNodeSuffix
         }
