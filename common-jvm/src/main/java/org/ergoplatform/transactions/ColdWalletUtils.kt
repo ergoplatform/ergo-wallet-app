@@ -9,6 +9,7 @@ import org.ergoplatform.deserializeErgobox
 import org.ergoplatform.ergoauth.ErgoAuthRequest
 import org.ergoplatform.ergoauth.ErgoAuthResponse
 import org.ergoplatform.ergoauth.parseErgoAuthRequestFromJson
+import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.utils.Base64Coder
 
 private const val JSON_FIELD_REDUCED_TX = "reducedTx"
@@ -234,7 +235,7 @@ private fun parseQrChunk(chunk: String, property: String): QrChunk {
     return QrChunk(index, pages, jsonTree.get(property).asString)
 }
 
-fun PromptSigningResult.buildTransactionInfo(): TransactionInfo {
+fun PromptSigningResult.buildTransactionInfo(tokenMap: Map<String, WalletToken>? = null): TransactionInfo {
     val unsignedTx = ErgoFacade.deserializeUnsignedTxOffline(serializedTx!!)
 
     // deserialize input boxes and store in hashmap
@@ -243,7 +244,7 @@ fun PromptSigningResult.buildTransactionInfo(): TransactionInfo {
         try {
             val ergoBox = deserializeErgobox(input)
             ergoBox?.let {
-                val inboxInfo = it.toTransactionInfoBox()
+                val inboxInfo = it.toTransactionInfoBox(tokenMap)
                 inputBoxes.put(inboxInfo.boxId, inboxInfo)
             }
         } catch (t: Throwable) {

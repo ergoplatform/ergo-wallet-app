@@ -73,29 +73,6 @@ fun Transaction.buildTransactionInfo(inputBoxes: HashMap<String, TransactionInfo
     )
 }
 
-fun UnsignedTransaction.buildTransactionInfo(tokens: List<WalletToken>?): TransactionInfo {
-    val inputBoxes = HashMap<String, TransactionInfoBox>()
-    inputs.forEach { input ->
-        val inboxInfo = input.toTransactionInfoBox()
-        // use wallet tokens to set decimal and name information of tokens sent
-        tokens?.let {
-            inboxInfo.tokens.forEach { assetInfo ->
-                tokens.firstOrNull { it.tokenId == assetInfo.tokenId }?.let { walletToken ->
-                    assetInfo.name = walletToken.name
-                    assetInfo.decimals = walletToken.decimals
-                }
-            }
-        }
-        inputBoxes[inboxInfo.boxId] = inboxInfo
-    }
-    return buildTransactionInfo(
-        inputBoxes,
-        inputBoxesIds,
-        outputs,
-        id
-    )
-}
-
 private fun buildTransactionInfo(
     inputBoxes: HashMap<String, TransactionInfoBox>,
     inputBoxesIds: List<String>,
@@ -165,12 +142,12 @@ private fun buildTransactionInfo(
 /**
  * @return TransactionInfoBox, which is more Kotlin-friendly to work with
  */
-fun InputBox.toTransactionInfoBox(): TransactionInfoBox {
+fun InputBox.toTransactionInfoBox(walletTokens: Map<String, WalletToken>?): TransactionInfoBox {
     return TransactionInfoBox(
         id.toString(),
         Address.fromErgoTree(ergoTree, getErgoNetworkType()).toString(),
         value,
-        getAssetInstanceInfosFromErgoBoxToken(tokens)
+        getAssetInstanceInfosFromErgoBoxToken(tokens, walletTokens)
     )
 }
 
@@ -190,17 +167,30 @@ fun ErgoTransactionOutput.toTransactionInfoBox(): TransactionInfoBox =
         Address.fromErgoTree(JavaHelpers.decodeStringToErgoTree(ergoTree), getErgoNetworkType())
             .toString(),
         value,
-        assets.map { nodeAsset -> AssetInstanceInfo().apply {
-            amount = nodeAsset.amount
-            tokenId = nodeAsset.tokenId
-        } }
+        assets.map { nodeAsset ->
+            AssetInstanceInfo().apply {
+                amount = nodeAsset.amount
+                tokenId = nodeAsset.tokenId
+            }
+        }
     )
 
-private fun getAssetInstanceInfosFromErgoBoxToken(tokens: List<ErgoToken>): List<AssetInstanceInfo> {
+private fun getAssetInstanceInfosFromErgoBoxToken(
+    tokens: List<ErgoToken>,
+    walletTokens: Map<String, WalletToken>? = null,
+): List<AssetInstanceInfo> {
     return tokens.map {
         val tokenInfo = AssetInstanceInfo()
         tokenInfo.amount = it.value
         tokenInfo.tokenId = it.id.toString()
+
+        // use wallet tokens to set decimal and name information of tokens sent
+        walletTokens?.let {
+            walletTokens[tokenInfo.tokenId]?.let { walletToken ->
+                tokenInfo.name = walletToken.name
+                tokenInfo.decimals = walletToken.decimals
+            }
+        }
 
         tokenInfo
     }

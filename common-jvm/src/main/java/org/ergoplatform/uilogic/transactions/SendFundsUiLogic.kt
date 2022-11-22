@@ -306,6 +306,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     }
 
     private var preparedTransaction: ByteArray? = null
+    private var transactionInfo: TransactionInfo? = null
     fun prepareTransactionForSigning(preferences: PreferencesProvider, texts: StringProvider) {
         preparedTransaction = null
         wallet?.let { wallet ->
@@ -314,8 +315,10 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 val serializedTx = prepareSerializedTx(preferences, texts)
                 notifyUiLocked(false)
                 preparedTransaction = serializedTx.serializedTx
-                if (serializedTx.success)
-                    notifyHasPreparedTx(serializedTx.buildTransactionInfo().reduceBoxes())
+                if (serializedTx.success) {
+                    transactionInfo = serializedTx.buildTransactionInfo(tokensAvail)
+                    notifyHasPreparedTx(transactionInfo!!.reduceBoxes())
+                }
                 notifyHasErgoTxResult(serializedTx)
             }
         }
@@ -346,8 +349,14 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                         signingResult.serializedTx!!, preferences, texts
                     )
                     notifyUiLocked(false)
-                    transactionSubmitted(ergoTxResult, db.transactionDbProvider, preferences)
+                    transactionSubmitted(
+                        ergoTxResult,
+                        db.transactionDbProvider,
+                        preferences,
+                        transactionInfo
+                    )
                 }
+                transactionInfo = null
             }
         }
     }
