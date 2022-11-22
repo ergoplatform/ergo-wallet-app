@@ -451,8 +451,8 @@ class SendFundsViewController(
                 tokensError.isHidden = true
                 val walletStateSyncManager = WalletStateSyncManager.getInstance()
                 uiLogic.tokensChosen.forEach {
-                    val ergoId = it.key
-                    tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenEntity ->
+                    val tokenId = it.key
+                    tokensAvail[tokenId]?.let { tokenEntity ->
                         val tokenEntry =
                             SendTokenEntryView(
                                 uiLogic,

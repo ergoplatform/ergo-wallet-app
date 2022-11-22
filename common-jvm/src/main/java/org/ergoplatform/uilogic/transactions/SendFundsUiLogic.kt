@@ -56,7 +56,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     var balance: ErgoAmount = ErgoAmount.ZERO
         private set
 
-    val tokensAvail: ArrayList<WalletToken> = ArrayList()
+    val tokensAvail: HashMap<String, WalletToken> = HashMap()
     val tokensChosen: HashMap<String, ErgoToken> = HashMap()
     val tokensInfo: HashMap<String, TokenInformation> = HashMap()
 
@@ -211,12 +211,12 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         tokensAvail.clear()
         val tokensList = address?.let { wallet?.getTokensForAddress(address) }
             ?: wallet?.getTokensForAllAddresses()
-        tokensList?.let { tokensAvail.addAll(it) }
+        tokensList?.forEach { tokensAvail[it.tokenId ?: ""] = it }
         // remove from chosen what's not available
         // toMutableList copies the list, so we don't get a ConcurrentModificationException when
         // removing elements from the HashMap
         tokensChosen.keys.toMutableList().forEach { tokenId ->
-            if (tokensAvail.find { it.tokenId.equals(tokenId) } == null)
+            if (!tokensAvail.containsKey(tokenId))
                 tokensChosen.remove(tokenId)
         }
 
@@ -388,7 +388,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
      * @return list of tokens to choose from, that means available on the wallet and not already chosen
      */
     fun getTokensToChooseFrom(): List<WalletToken> {
-        return tokensAvail.filter {
+        return tokensAvail.values.filter {
             !tokensChosen.containsKey(it.tokenId)
         }.sortedBy { it.name?.lowercase() }
     }
@@ -397,8 +397,8 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
      * called by UI when user wants to add a token
      */
     fun newTokenChosen(tokenId: String) {
-        tokensAvail.firstOrNull { it.tokenId.equals(tokenId) }?.let {
-            tokensChosen.put(tokenId, ErgoToken(tokenId, if (it.isSingularToken()) 1 else 0))
+        tokensAvail[tokenId]?.let {
+            tokensChosen[tokenId] = ErgoToken(tokenId, if (it.isSingularToken()) 1 else 0)
             notifyTokensChosenChanged()
         }
     }
@@ -438,16 +438,16 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         // have no impact on showing warnings messages.
 
         var changed = false
-        tokens.forEach {
-            val tokenId = it.key
-            val amount = it.value
+        tokens.forEach { token ->
+            val tokenId = token.key
+            val amount = token.value
 
             // we need to check for existence here, QR code might have any String, not an ID
-            tokensAvail.firstOrNull { it.tokenId.equals(tokenId) }?.let {
+            tokensAvail[tokenId]?.let {
                 val amountFromRequest = amount.toTokenAmount(it.decimals)?.rawValue ?: 0
                 val amountToUse =
                     if (amountFromRequest == 0L && it.isSingularToken()) 1 else amountFromRequest
-                tokensChosen.put(tokenId, ErgoToken(tokenId, amountToUse))
+                tokensChosen[tokenId] = ErgoToken(tokenId, amountToUse)
                 changed = true
                 if (amountToUse != amountFromRequest) {
                     addPaymentRequestWarning(

@@ -224,18 +224,17 @@ fun SendFundsScreen(
                     textAlign = TextAlign.Center,
                 )
 
-                tokensChosen.forEach { ergoId ->
-                    uiLogic.tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }
-                        ?.let { tokenDbEntity ->
-                            key(tokenDbEntity.tokenId) {
-                                SendTokenItem(
-                                    tokenDbEntity,
-                                    tokensError,
-                                    uiLogic,
-                                    onRemove = { uiLogic.removeToken(tokenDbEntity.tokenId!!) }
-                                )
-                            }
+                tokensChosen.forEach { tokenId ->
+                    uiLogic.tokensAvail[tokenId]?.let { tokenDbEntity ->
+                        key(tokenDbEntity.tokenId) {
+                            SendTokenItem(
+                                tokenDbEntity,
+                                tokensError,
+                                uiLogic,
+                                onRemove = { uiLogic.removeToken(tokenDbEntity.tokenId!!) }
+                            )
                         }
+                    }
                 }
                 if (tokensError.value) {
                     Text(
