@@ -7,7 +7,6 @@ import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
-import java.lang.Double.max
 import kotlin.random.Random
 
 data class BabelSwapData(
@@ -163,7 +162,7 @@ object BabelFees {
         // the best price. If it is 2.0, we accept babel fee boxes with only half of the price.
         // By this, we ensure that not only the cheapest box is used which will lead to double
         // spending problems, but also ensure that we are not paying to much (1.33 in average)
-        val randomFactor = max(1.0, Random.nextDouble(2.0))
+        val randomFactor = kotlin.math.max(1.0, Random.nextDouble(2.0))
 
         val bestPrice = boxesToUse.firstOrNull()?.first?.pricePerToken ?: 0
         val acceptedPrice = ((1.0 / randomFactor) * bestPrice).toLong()

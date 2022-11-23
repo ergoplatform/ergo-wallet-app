@@ -126,10 +126,17 @@ open class SigningTransactionContainer(
     override val titleOutboxes get() = STRING_TITLE_OUTBOXES
     override val descOutboxes get() = STRING_DESC_OUTBOXES
 
+    private val hintMessageLabel = Body1Label().apply {
+        textAlignment = NSTextAlignment.Center
+    }
+
     init {
-        this.insertArrangedSubview(Body2BoldLabel().apply {
+        this.insertArrangedSubview(Body1BoldLabel().apply {
             text = texts.get(STRING_DESC_SIGNING_REQUEST)
+            textAlignment = NSTextAlignment.Center
         }, 0)
+
+        this.insertArrangedSubview(hintMessageLabel, 1)
 
         val signButton = PrimaryButton(texts.get(STRING_LABEL_CONFIRM)).apply {
             addOnTouchUpInsideListener { _, _ ->
@@ -142,5 +149,16 @@ open class SigningTransactionContainer(
                 .topToSuperview(topInset = DEFAULT_MARGIN * 2)
         }
         this.addArrangedSubview(buttonContainer)
+    }
+
+    override fun bindTransaction(
+        transactionInfo: TransactionInfo,
+        tokenClickListener: ((String) -> Unit)?,
+        addressLabelHandler: ((String, (String) -> Unit) -> Unit)?,
+        tokenLabelHandler: ((String, (String) -> Unit) -> Unit)?
+    ) {
+        super.bindTransaction(transactionInfo, tokenClickListener, addressLabelHandler, tokenLabelHandler)
+
+        hintMessageLabel.text = transactionInfo.hintMsg ?: ""
     }
 }
