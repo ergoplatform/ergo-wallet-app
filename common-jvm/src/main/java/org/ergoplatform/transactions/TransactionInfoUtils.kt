@@ -16,12 +16,13 @@ import kotlin.math.min
 
 /**
  * describes a transaction with its ID and lists of inputs (boxes to spend) and outputs (boxes
- * to issue)
+ * to issue) and an optional hint message to show to the user
  */
 data class TransactionInfo(
     val id: String,
     val inputs: List<InputInfo>,
-    val outputs: List<OutputInfo>
+    val outputs: List<OutputInfo>,
+    val hintMsg: String? = null,
 )
 
 /**
@@ -64,12 +65,16 @@ suspend fun Transaction.buildTransactionInfo(ergoApiService: ApiServiceManager):
  *         holds information for the boxes to spend
  *         and more information for tokens on the boxes to issue.
  */
-fun Transaction.buildTransactionInfo(inputBoxes: HashMap<String, TransactionInfoBox>): TransactionInfo {
+fun Transaction.buildTransactionInfo(
+    inputBoxes: HashMap<String, TransactionInfoBox>,
+    hintMsg: String? = null
+): TransactionInfo {
     return buildTransactionInfo(
         inputBoxes,
         inputBoxesIds,
         outputs,
-        id
+        id,
+        hintMsg
     )
 }
 
@@ -78,6 +83,7 @@ private fun buildTransactionInfo(
     inputBoxesIds: List<String>,
     outboxes: List<TransactionBox>,
     txId: String,
+    hintMsg: String?,
 ): TransactionInfo {
     val inputsList = ArrayList<InputInfo>()
     val outputsList = ArrayList<OutputInfo>()
@@ -136,7 +142,7 @@ private fun buildTransactionInfo(
         }
     }
 
-    return TransactionInfo(txId, inputsList, outputsList)
+    return TransactionInfo(txId, inputsList, outputsList, hintMsg)
 }
 
 /**
@@ -272,7 +278,7 @@ fun TransactionInfo.reduceBoxes(): TransactionInfo {
             outputsList.add(it)
     }
 
-    return TransactionInfo(id, inputsList, outputsList)
+    return TransactionInfo(id, inputsList, outputsList, hintMsg)
 }
 
 /**

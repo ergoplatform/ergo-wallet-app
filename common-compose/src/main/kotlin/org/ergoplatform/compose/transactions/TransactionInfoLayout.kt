@@ -1,4 +1,4 @@
-package org.ergoplatform.desktop.transactions
+package org.ergoplatform.compose.transactions
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -50,8 +50,17 @@ fun SignTransactionInfoLayout(
             remember { texts.getString(STRING_DESC_SIGNING_REQUEST) },
             Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            style = labelStyle(LabelStyle.BODY2BOLD),
+            style = labelStyle(LabelStyle.BODY1BOLD),
         )
+
+        transactionInfo.hintMsg?.let { message ->
+            Text(
+                message,
+                Modifier.fillMaxWidth().padding(top = defaultPadding / 2),
+                textAlign = TextAlign.Center,
+                style = labelStyle(LabelStyle.BODY1)
+            )
+        }
 
         Divider(
             Modifier.padding(vertical = defaultPadding / 2),

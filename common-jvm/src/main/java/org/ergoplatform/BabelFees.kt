@@ -168,7 +168,14 @@ object BabelFees {
         val bestPrice = boxesToUse.firstOrNull()?.first?.pricePerToken ?: 0
         val acceptedPrice = ((1.0 / randomFactor) * bestPrice).toLong()
 
-        return boxesToUse.filter { it.first.pricePerToken >= acceptedPrice }.randomOrNull()
+        val acceptedBoxes = boxesToUse.filter { it.first.pricePerToken >= acceptedPrice }
+
+        LogUtils.logDebug(
+            "BabelFee",
+            "Best price is $bestPrice, accepted price is $acceptedPrice, ${acceptedBoxes.size} boxes accepted"
+        )
+
+        return acceptedBoxes.randomOrNull()
     }
 }
 

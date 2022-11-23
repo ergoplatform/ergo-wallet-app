@@ -252,7 +252,7 @@ fun PromptSigningResult.buildTransactionInfo(tokenMap: Map<String, WalletToken>?
         }
     }
 
-    return unsignedTx.buildTransactionInfo(inputBoxes)
+    return unsignedTx.buildTransactionInfo(inputBoxes, hintMsg)
 }
 
 class QrCodePagesCollector(private val parser: (String) -> QrChunk?) {

@@ -247,11 +247,27 @@ object ErgoFacade {
                 }
 
                 val reduced = ctx.newProverBuilder().build().reduce(unsigned, ERG_BASE_COST)
+
+                val hintMsg = babelSwap?.let {
+                    tokenBalanceSenders[babelSwap.tokenToSwap.id.toString()]?.let { walletToken ->
+                        texts.getString(
+                            STRING_BABELFEE_USED,
+                            ErgoAmount(babelSwap.babelAmountNanoErg).toStringTrimTrailingZeros(),
+                            TokenAmount(
+                                babelSwap.tokenToSwap.value,
+                                walletToken.decimals
+                            ).toStringUsFormatted(),
+                            walletToken.name ?: "",
+                        )
+                    }
+                }
+
                 return@execute PromptSigningResult(
                     true,
                     reduced.toBytes(),
                     inputs,
-                    senderAddresses.first().ergoAddress.toString()
+                    senderAddresses.first().ergoAddress.toString(),
+                    hintMsg = hintMsg
                 )
             }
         } catch (t: Throwable) {

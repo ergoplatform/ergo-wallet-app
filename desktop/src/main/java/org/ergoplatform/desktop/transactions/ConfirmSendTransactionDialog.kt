@@ -7,6 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.ergoplatform.Application
+import org.ergoplatform.compose.transactions.SignTransactionInfoLayout
 import org.ergoplatform.desktop.ui.AppDialog
 import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.transactions.TransactionInfo

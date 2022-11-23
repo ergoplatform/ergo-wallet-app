@@ -28,7 +28,8 @@ data class PromptSigningResult(
     val serializedTx: ByteArray? = null,
     val serializedInputs: List<ByteArray>? = null,
     val address: String? = null,
-    override val errorMsg: String? = null
+    override val errorMsg: String? = null,
+    val hintMsg: String? = null,
 ) : TransactionResult
 
 /**

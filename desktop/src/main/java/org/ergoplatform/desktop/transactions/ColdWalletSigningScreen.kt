@@ -15,6 +15,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.AppProgressIndicator
 import org.ergoplatform.compose.settings.primaryButtonColors
+import org.ergoplatform.compose.transactions.SignTransactionInfoLayout
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle

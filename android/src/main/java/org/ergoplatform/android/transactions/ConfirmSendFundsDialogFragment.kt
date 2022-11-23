@@ -8,7 +8,7 @@ import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.ui.AbstractComposeBottomSheetDialogFragment
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.compose.settings.defaultPadding
-import org.ergoplatform.desktop.transactions.SignTransactionInfoLayout
+import org.ergoplatform.compose.transactions.SignTransactionInfoLayout
 
 class ConfirmSendFundsDialogFragment : AbstractComposeBottomSheetDialogFragment() {
 
