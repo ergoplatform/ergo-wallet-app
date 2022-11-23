@@ -219,6 +219,7 @@ object ErgoFacade {
                 val babelSwap =
                     if (amountToSend <= Parameters.MinChangeValue && tokensToSend.isNotEmpty()
                         && babelAmount >= 0
+                        && BabelFees.isEnabled
                     )
                         BabelFees.findBabelBox(
                             tokensToSend,

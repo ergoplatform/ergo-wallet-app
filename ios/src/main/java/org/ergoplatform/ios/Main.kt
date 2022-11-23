@@ -3,6 +3,7 @@ package org.ergoplatform.ios
 import SQLite.JDBCDriver
 import com.badlogic.gdx.utils.I18NBundle
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+import org.ergoplatform.BabelFees
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.ios.ui.CoroutineViewController
@@ -45,6 +46,10 @@ class Main : UIApplicationDelegateAdapter() {
         // activate for testnet: isErgoMainNet = false
         LogUtils.logDebug = !isErgoMainNet
         AesEncryptionManager.isOnLegacyApi = true
+
+        // FIXME Babel Fees iOS is enabled due to Java7 incompatibility. Recheck after 5.0
+        //  activation or robovm libcore 10 upgrade
+        BabelFees.isEnabled = false
 
         CrashHandler.registerUncaughtExceptionHandler()
         LogUtils.stackTraceLogger = { CrashHandler.writeToDebugFile(it) }
