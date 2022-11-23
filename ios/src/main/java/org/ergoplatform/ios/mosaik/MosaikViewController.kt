@@ -148,9 +148,12 @@ class MosaikViewController(
             org.ergoplatform.ios.ui.runOnMainThread {
                 title = manifest.appName
                 scrollView.scrollToTop(false)
-                favoriteButton.isEnabled = true
-                favoriteButton.image = if (isFavoriteApp) imageFavorite else imageNoFavorite
             }
+        }
+
+        override fun onRefreshFavorite() {
+            favoriteButton.isEnabled = canSwitchFavorite()
+            favoriteButton.image = if (isFavoriteApp) imageFavorite else imageNoFavorite
         }
 
         override fun appNotLoaded(cause: Throwable) {
@@ -158,7 +161,6 @@ class MosaikViewController(
                 noAppLoadedView.errorLabel.text = getUserErrorMessage(cause)
                 noAppLoadedView.isHidden = false
                 scrollView.isHidden = true
-                favoriteButton.isEnabled = false
             }
         }
 

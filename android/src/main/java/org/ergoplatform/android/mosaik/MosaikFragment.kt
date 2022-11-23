@@ -273,8 +273,9 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
                 if (viewModel.mosaikRuntime.isFavoriteApp) R.drawable.ic_favorite_24
                 else R.drawable.ic_favorite_no_24
             )
-            isEnabled = viewModel.mosaikRuntime.appUrl != null
+            isEnabled = viewModel.mosaikRuntime.canSwitchFavorite()
         }
+        menu.findItem(R.id.menu_delete_data).isEnabled = viewModel.mosaikRuntime.appUrl != null
     }
 
     override fun onResume() {
@@ -285,6 +286,10 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_switch_favorite) {
             viewModel.mosaikRuntime.switchFavorite()
+            return true
+        } else if (item.itemId == R.id.menu_delete_data) {
+            viewModel.mosaikRuntime.resetAppData()
+            return true
         }
 
         return super.onOptionsItemSelected(item)

@@ -362,6 +362,7 @@ const val STRING_MATERIAL_MOTION_EASING_STANDARD = "material_motion_easing_stand
 const val STRING_MATERIAL_TIMEPICKER_CLOCK_MODE_DESCRIPTION = "material_timepicker_clock_mode_description"
 const val STRING_MATERIAL_TIMEPICKER_TEXT_INPUT_MODE_DESCRIPTION = "material_timepicker_text_input_mode_description"
 const val STRING_MENU_ADD_WALLET = "menu_add_wallet"
+const val STRING_MENU_DELETE_DATA = "menu_delete_data"
 const val STRING_MENU_FAVORITE = "menu_favorite"
 const val STRING_MESSAGE_SWITCHED_INPUT_MODE_ERG = "message_switched_input_mode_erg"
 const val STRING_MESSAGE_SWITCHED_INPUT_MODE_FIAT = "message_switched_input_mode_fiat"
