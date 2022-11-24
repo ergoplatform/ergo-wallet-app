@@ -6,6 +6,7 @@
     <string name="format_erg" translatable="false">###,##0.0000</string>
     <string name="format_erg_more_precise" translatable="false">###,##0.000000</string>
     <string name="format_fiat" translatable="false">###,##0.00</string>
+    <string name="button_unlock">Unlock app</string>
 
     <string name="hint_password">Please enter your spending password</string>
     <string name="label_forgot_password">Forgot your password?</string>
@@ -385,4 +386,8 @@
     <string name="button_balance_notif_hourly">Every hour</string>
     <string name="button_balance_notif_xhourly">Every %1$s hours</string>
     <string name="desc_balance_notification">Your wallet balance changed</string>
+    <string name="title_app_lock">Biometric App Lock</string>
+    <string name="desc_app_lock">Requires a biometric login when opening the application or after some inactivity time.\n
+        Protects from unwanted looks. Your secrets are stored safely in any case.\n\n
+    Only available when biometric authentication is set up for this device.</string>
 </resources>

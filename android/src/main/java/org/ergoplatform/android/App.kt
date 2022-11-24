@@ -6,6 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.biometric.BiometricManager
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.NetworkType
 import org.ergoplatform.isErgoMainNet
@@ -30,6 +31,15 @@ class App : Application() {
         LogUtils.logDebug = BuildConfig.DEBUG
 
         createNotificationChannel()
+
+        if (preferences.enableAppLock) {
+            val context = applicationContext
+            val bmm = BiometricManager.from(context)
+            if (bmm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+                == BiometricManager.BIOMETRIC_SUCCESS
+            )
+                shouldLockApp = true
+        }
     }
 
     private fun createNotificationChannel() {
@@ -49,5 +59,21 @@ class App : Application() {
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    private var lastInteraction = 0L
+    var shouldLockApp = false
+        private set
+
+    fun isAppLocked(): Boolean =
+        shouldLockApp && System.currentTimeMillis() - lastInteraction >= 2L * 60 * 1000L
+
+    fun appUnlocked() {
+        lastInteraction = System.currentTimeMillis()
+    }
+
+    fun userInteracted() {
+        if (!isAppLocked())
+            lastInteraction = System.currentTimeMillis()
     }
 }

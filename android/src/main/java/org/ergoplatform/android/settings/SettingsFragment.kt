@@ -87,11 +87,25 @@ class SettingsFragment : Fragment() {
             preferences.downloadNftContent = !preferences.downloadNftContent
             setButtonDownloadContentText()
         }
+
+        setAppLockButtonText()
+        binding.buttonAppLock.setOnClickListener {
+            val preferences = Preferences(requireContext())
+            preferences.enableAppLock = !preferences.enableAppLock
+            setAppLockButtonText()
+        }
     }
 
     private fun setButtonDownloadContentText() {
         binding.buttonDownloadContent.setText(
             if (Preferences(requireContext()).downloadNftContent) R.string.button_download_content_off
+            else R.string.button_download_content_on
+        )
+    }
+
+    private fun setAppLockButtonText() {
+        binding.buttonAppLock.setText(
+            if (Preferences(requireContext()).enableAppLock) R.string.button_download_content_off
             else R.string.button_download_content_on
         )
     }
