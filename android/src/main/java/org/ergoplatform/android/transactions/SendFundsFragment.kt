@@ -263,8 +263,8 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
             this.removeAllViews()
             val walletStateSyncManager = WalletStateSyncManager.getInstance()
             tokensChosen.forEach {
-                val ergoId = it.key
-                tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenDbEntity ->
+                val tokenId = it.key
+                tokensAvail[tokenId]?.let { tokenDbEntity ->
                     val itemBinding =
                         FragmentSendFundsTokenItemBinding.inflate(layoutInflater, this, true)
                     itemBinding.tvTokenName.text =
@@ -312,7 +312,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
 
                     itemBinding.buttonTokenRemove.setOnClickListener {
                         if (isSingular || itemBinding.inputTokenAmount.text.isEmpty()) {
-                            viewModel.uiLogic.removeToken(ergoId)
+                            viewModel.uiLogic.removeToken(tokenId)
                         } else {
                             itemBinding.inputTokenAmount.text = null
                             itemBinding.inputTokenAmount.requestFocus()

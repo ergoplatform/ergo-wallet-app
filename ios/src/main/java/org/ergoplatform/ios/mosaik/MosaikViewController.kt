@@ -21,6 +21,7 @@ import org.ergoplatform.mosaik.model.actions.ErgoPayAction
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_BUTTON_RETRY
 import org.robovm.apple.coregraphics.CGRect
+import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
 class MosaikViewController(
@@ -33,6 +34,7 @@ class MosaikViewController(
     private lateinit var scrollView: UIScrollView
     private lateinit var noAppLoadedView: NoAppLoadedView
     private lateinit var favoriteButton: UIBarButtonItem
+    private lateinit var resetDataButton: UIBarButtonItem
     private lateinit var imageNoFavorite: UIImage
     private lateinit var imageFavorite: UIImage
 
@@ -88,8 +90,15 @@ class MosaikViewController(
         favoriteButton.setOnClickListener {
             mosaikRuntime.switchFavorite()
         }
-        navigationController.topViewController.navigationItem.rightBarButtonItem = favoriteButton
-
+        resetDataButton =
+            UIBarButtonItem(getIosSystemImage(IMAGE_RESET_DATA, UIImageSymbolScale.Small)!!, UIBarButtonItemStyle.Plain)
+        resetDataButton.setOnClickListener { mosaikRuntime.resetAppData() }
+        resetDataButton.isEnabled = false
+        navigationController.topViewController.navigationItem.rightBarButtonItems =
+            NSArray(
+                resetDataButton,
+                favoriteButton
+            )
 
     }
 
@@ -148,7 +157,13 @@ class MosaikViewController(
             org.ergoplatform.ios.ui.runOnMainThread {
                 title = manifest.appName
                 scrollView.scrollToTop(false)
-                favoriteButton.isEnabled = true
+                resetDataButton.isEnabled = true
+            }
+        }
+
+        override fun onRefreshFavorite() {
+            org.ergoplatform.ios.ui.runOnMainThread {
+                favoriteButton.isEnabled = canSwitchFavorite()
                 favoriteButton.image = if (isFavoriteApp) imageFavorite else imageNoFavorite
             }
         }
@@ -158,7 +173,7 @@ class MosaikViewController(
                 noAppLoadedView.errorLabel.text = getUserErrorMessage(cause)
                 noAppLoadedView.isHidden = false
                 scrollView.isHidden = true
-                favoriteButton.isEnabled = false
+                resetDataButton.isEnabled = false
             }
         }
 

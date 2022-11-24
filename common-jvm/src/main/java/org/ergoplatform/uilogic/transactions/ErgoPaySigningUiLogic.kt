@@ -249,13 +249,13 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
             coroutineScope.launch {
                 val ergoTxResult: SendTransactionResult
                 withContext(Dispatchers.IO) {
-                    val signingResult = signSerializedErgoTx(
+                    val signingResult = ErgoFacade.signSerializedErgoTx(
                         signingRequest, signingSecrets,
                         derivedAddresses, texts
                     )
                     signingSecrets.clearMemory()
                     if (signingResult.success) {
-                        ergoTxResult = sendSignedErgoTx(
+                        ergoTxResult = ErgoFacade.sendSignedErgoTx(
                             signingResult.serializedTx!!,
                             preferences, texts
                         )
@@ -283,7 +283,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         epsr?.reducedTx?.let {
             notifyUiLocked(true)
             coroutineScope.launch(Dispatchers.IO) {
-                val serializedTx = buildPromptSigningResultFromErgoPayRequest(
+                val serializedTx = ErgoFacade.buildPromptSigningResultFromErgoPayRequest(
                     it,
                     getSigningDerivedAddresses().first(),
                     preferences,

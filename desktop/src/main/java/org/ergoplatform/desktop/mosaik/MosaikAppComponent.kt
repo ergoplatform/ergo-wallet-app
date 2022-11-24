@@ -3,11 +3,13 @@ package org.ergoplatform.desktop.mosaik
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.PermContactCalendar
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.push
 import com.arkivanov.essenty.lifecycle.doOnResume
@@ -35,6 +37,7 @@ import org.ergoplatform.mosaik.model.ui.input.ErgAddressInputField
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_LABEL_COPIED
+import org.ergoplatform.uilogic.STRING_MENU_DELETE_DATA
 
 class MosaikAppComponent(
     private val appTitle: String?,
@@ -54,12 +57,22 @@ class MosaikAppComponent(
         get() = {
             IconButton(
                 mosaikRuntime::switchFavorite,
-                enabled = mosaikRuntime.appUrl != null,
+                enabled = mosaikRuntime.canSwitchFavorite(),
             ) {
                 Icon(
                     if (isFavoriteState.value) Icons.Default.Star
                     else Icons.Default.StarBorder,
                     null
+                )
+            }
+
+            IconButton(
+                mosaikRuntime::resetAppData,
+                enabled = mosaikRuntime.appUrl != null,
+            ) {
+                Icon(
+                    Icons.Default.LinkOff,
+                    remember { Application.texts.getString(STRING_MENU_DELETE_DATA) }
                 )
             }
         }
@@ -135,6 +148,9 @@ class MosaikAppComponent(
 
         override fun onAppNavigated(manifest: MosaikManifest) {
             manifestState.value = manifest
+        }
+
+        override fun onRefreshFavorite() {
             isFavoriteState.value = isFavoriteApp
         }
 

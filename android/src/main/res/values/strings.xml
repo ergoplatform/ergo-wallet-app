@@ -237,6 +237,14 @@
     <string name="label_fee_slow">Slow</string>
     <string name="label_fee_execution_time">Execution time ≈ %1$s min</string>
 
+    <!-- Send funds babel -->
+    <string name="babelfee_hint">You have not enough ERG to cover transaction fees.</string>
+    <string name="babelfee_hint_none">None of your tokens is suitable to cover transaction fees.</string>
+    <string name="babelfee_hint_some">Some of your tokens are suitable to cover transaction fees. You have the following options:</string>
+    <string name="babelfee_reduce_amount">Reduce amount of %2$s tokens sent so that an amount of %1$s is left to use for fees.</string>
+    <string name="babelfee_need_amount">%1$s %2$s tokens can cover fees. However, you only have a balance of %3$s.</string>
+    <string name="babelfee_used">To cover transaction fees of %1$s ERG, %2$s %3$s tokens are used in this transaction.</string>
+
     <!-- Cold wallet signing request screen -->
     <string name="title_signing_request">Sign</string>
     <string name="desc_signing_request">Please check the details of the transaction to issue.</string>
@@ -323,6 +331,7 @@
     <string name="title_suggestions">Suggested apps</string>
     <string name="desc_none">None yet</string>
     <string name="menu_favorite">Favorite</string>
+    <string name="menu_delete_data">Reset app data</string>
     <string name="button_choose_address">Choose address…</string>
     <string name="button_choose_wallet">Choose wallet…</string>
     <string name="dropdown_choose_option">(please choose)</string>

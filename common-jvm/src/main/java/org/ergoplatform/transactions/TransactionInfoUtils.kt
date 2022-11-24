@@ -16,12 +16,13 @@ import kotlin.math.min
 
 /**
  * describes a transaction with its ID and lists of inputs (boxes to spend) and outputs (boxes
- * to issue)
+ * to issue) and an optional hint message to show to the user
  */
 data class TransactionInfo(
     val id: String,
     val inputs: List<InputInfo>,
-    val outputs: List<OutputInfo>
+    val outputs: List<OutputInfo>,
+    val hintMsg: String? = null,
 )
 
 /**
@@ -64,35 +65,16 @@ suspend fun Transaction.buildTransactionInfo(ergoApiService: ApiServiceManager):
  *         holds information for the boxes to spend
  *         and more information for tokens on the boxes to issue.
  */
-fun Transaction.buildTransactionInfo(inputBoxes: HashMap<String, TransactionInfoBox>): TransactionInfo {
+fun Transaction.buildTransactionInfo(
+    inputBoxes: HashMap<String, TransactionInfoBox>,
+    hintMsg: String? = null
+): TransactionInfo {
     return buildTransactionInfo(
         inputBoxes,
         inputBoxesIds,
         outputs,
-        id
-    )
-}
-
-fun UnsignedTransaction.buildTransactionInfo(tokens: List<WalletToken>?): TransactionInfo {
-    val inputBoxes = HashMap<String, TransactionInfoBox>()
-    inputs.forEach { input ->
-        val inboxInfo = input.toTransactionInfoBox()
-        // use wallet tokens to set decimal and name information of tokens sent
-        tokens?.let {
-            inboxInfo.tokens.forEach { assetInfo ->
-                tokens.firstOrNull { it.tokenId == assetInfo.tokenId }?.let { walletToken ->
-                    assetInfo.name = walletToken.name
-                    assetInfo.decimals = walletToken.decimals
-                }
-            }
-        }
-        inputBoxes[inboxInfo.boxId] = inboxInfo
-    }
-    return buildTransactionInfo(
-        inputBoxes,
-        inputBoxesIds,
-        outputs,
-        id
+        id,
+        hintMsg
     )
 }
 
@@ -101,6 +83,7 @@ private fun buildTransactionInfo(
     inputBoxesIds: List<String>,
     outboxes: List<TransactionBox>,
     txId: String,
+    hintMsg: String?,
 ): TransactionInfo {
     val inputsList = ArrayList<InputInfo>()
     val outputsList = ArrayList<OutputInfo>()
@@ -159,18 +142,18 @@ private fun buildTransactionInfo(
         }
     }
 
-    return TransactionInfo(txId, inputsList, outputsList)
+    return TransactionInfo(txId, inputsList, outputsList, hintMsg)
 }
 
 /**
  * @return TransactionInfoBox, which is more Kotlin-friendly to work with
  */
-fun InputBox.toTransactionInfoBox(): TransactionInfoBox {
+fun InputBox.toTransactionInfoBox(walletTokens: Map<String, WalletToken>?): TransactionInfoBox {
     return TransactionInfoBox(
         id.toString(),
         Address.fromErgoTree(ergoTree, getErgoNetworkType()).toString(),
         value,
-        getAssetInstanceInfosFromErgoBoxToken(tokens)
+        getAssetInstanceInfosFromErgoBoxToken(tokens, walletTokens)
     )
 }
 
@@ -190,17 +173,30 @@ fun ErgoTransactionOutput.toTransactionInfoBox(): TransactionInfoBox =
         Address.fromErgoTree(JavaHelpers.decodeStringToErgoTree(ergoTree), getErgoNetworkType())
             .toString(),
         value,
-        assets.map { nodeAsset -> AssetInstanceInfo().apply {
-            amount = nodeAsset.amount
-            tokenId = nodeAsset.tokenId
-        } }
+        assets.map { nodeAsset ->
+            AssetInstanceInfo().apply {
+                amount = nodeAsset.amount
+                tokenId = nodeAsset.tokenId
+            }
+        }
     )
 
-private fun getAssetInstanceInfosFromErgoBoxToken(tokens: List<ErgoToken>): List<AssetInstanceInfo> {
+private fun getAssetInstanceInfosFromErgoBoxToken(
+    tokens: List<ErgoToken>,
+    walletTokens: Map<String, WalletToken>? = null,
+): List<AssetInstanceInfo> {
     return tokens.map {
         val tokenInfo = AssetInstanceInfo()
         tokenInfo.amount = it.value
         tokenInfo.tokenId = it.id.toString()
+
+        // use wallet tokens to set decimal and name information of tokens sent
+        walletTokens?.let {
+            walletTokens[tokenInfo.tokenId]?.let { walletToken ->
+                tokenInfo.name = walletToken.name
+                tokenInfo.decimals = walletToken.decimals
+            }
+        }
 
         tokenInfo
     }
@@ -282,7 +278,7 @@ fun TransactionInfo.reduceBoxes(): TransactionInfo {
             outputsList.add(it)
     }
 
-    return TransactionInfo(id, inputsList, outputsList)
+    return TransactionInfo(id, inputsList, outputsList, hintMsg)
 }
 
 /**

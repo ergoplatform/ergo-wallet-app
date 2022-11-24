@@ -58,7 +58,9 @@ abstract class AppMosaikRuntime(
         appLoaded = { manifest ->
             coroutineScope.launch {
                 saveVisitToDb(manifest)
+                appNotLoadedUrl = null
                 onAppNavigated(manifest)
+                onRefreshFavorite()
             }
         }
     }
@@ -120,6 +122,8 @@ abstract class AppMosaikRuntime(
 
     abstract fun onAppNavigated(manifest: MosaikManifest)
 
+    abstract fun onRefreshFavorite()
+
     abstract fun appNotLoaded(cause: Throwable)
 
     fun loadUrlEnteredByUser(appUrl: String) {
@@ -132,14 +136,19 @@ abstract class AppMosaikRuntime(
         loadMosaikApp(loadUrl)
     }
 
+    fun canSwitchFavorite(): Boolean =
+        normalizedAppUrl != null || appNotLoadedUrl != null && isFavoriteApp
+
     fun switchFavorite() {
-        normalizedAppUrl?.let { appUrl ->
+        val appUrlToUse = appNotLoadedUrl?.let { normalizeUrl(it) } ?: normalizedAppUrl
+
+        appUrlToUse?.let { appUrl ->
             coroutineScope.launch {
                 appDatabase.mosaikDbProvider.loadAppEntry(appUrl)?.let { appEntry ->
                     val newEntry = appEntry.copy(favorite = !appEntry.favorite)
                     appDatabase.mosaikDbProvider.insertOrUpdateAppEntry(newEntry)
                     isFavoriteApp = newEntry.favorite
-                    onAppNavigated(appManifest!!)
+                    onRefreshFavorite()
                 }
 
             }
@@ -158,8 +167,14 @@ abstract class AppMosaikRuntime(
     private var appNotLoadedUrl: String? = null
 
     override fun appNotLoadedError(appUrl: String, error: Throwable) {
-        appNotLoadedUrl = appUrl
-        appNotLoaded(error)
+        runBlocking {
+            val appDbEntry = appDatabase.mosaikDbProvider.loadAppEntry(normalizeUrl(appUrl))
+            isFavoriteApp = appDbEntry?.favorite ?: false
+            appNotLoadedUrl = appUrl
+
+            appNotLoaded(error)
+            onRefreshFavorite()
+        }
     }
 
     fun retryLoadingLastAppNotLoaded() {
@@ -284,6 +299,15 @@ abstract class AppMosaikRuntime(
         setValue(valueIdAddressChosen!!, walletForAddressChooser!!.getDerivedAddress(addressIdx))
         valueIdAddressChosen = null
     }
+
+    fun resetAppData() {
+        appUrl?.let {
+            coroutineScope.launch {
+                guidManager.resetAppData(getHostname(it))
+                loadMosaikApp(it)
+            }
+        }
+    }
 }
 
 class MosaikGuidManager {
@@ -305,10 +329,22 @@ class MosaikGuidManager {
             return if (hostInfo != null) {
                 hostInfo.guid
             } else {
-                val guid = UUID.randomUUID().toString()
-                guidMap[hostname] = guid
+                val guid = createNewGuid(hostname)
                 guid
             }
+        }
+    }
+
+    private fun createNewGuid(hostname: String): String {
+        val guid = UUID.randomUUID().toString()
+        guidMap[hostname] = guid
+        return guid
+    }
+
+    suspend fun resetAppData(hostname: String) {
+        appDatabase.mosaikDbProvider.getMosaikHostInfo(hostname)?.let {
+            val newGuid = createNewGuid(hostname)
+            appDatabase.mosaikDbProvider.insertOrUpdateAppHost(it.copy(guid = newGuid))
         }
     }
 }
