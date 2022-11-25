@@ -68,6 +68,9 @@ class SettingsViewController : CoroutineViewController() {
         // NFT settings
         val nftSettingsContainer = buildNftSettings(texts, preferences)
 
+        // App Lock settings
+        val appLockSettingsContainer = buildAppLockSettings(texts, preferences)
+
         // Containers, StackView, Scrollview
 
         val container = UIView()
@@ -83,6 +86,8 @@ class SettingsViewController : CoroutineViewController() {
                     fiatCurrencyContainer,
                     createHorizontalSeparator(),
                     nftSettingsContainer,
+                    createHorizontalSeparator(),
+                    appLockSettingsContainer,
                     createHorizontalSeparator(),
                     expertSettingsContainer,
                     createHorizontalSeparator(),
@@ -168,6 +173,40 @@ class SettingsViewController : CoroutineViewController() {
             .widthMatchesSuperview()
         descNftDownload.topToBottomOf(descTokenVerification, DEFAULT_MARGIN * 2.5).widthMatchesSuperview()
         button.bottomToSuperview().topToBottomOf(descNftDownload, inset = DEFAULT_MARGIN)
+            .widthMatchesSuperview()
+        return container
+    }
+
+    private fun buildAppLockSettings(texts: I18NBundle, preferences: Preferences): UIView {
+        val container = UIView(CGRect.Zero())
+        val titleAppLock = Body1BoldLabel().apply {
+            text = texts.get(STRING_TITLE_APP_LOCK)
+            textAlignment = NSTextAlignment.Center
+        }
+        val descAppLock = UITextView(CGRect.Zero()).apply {
+            setHtmlText(texts.get(STRING_DESC_APP_LOCK))
+            textAlignment = NSTextAlignment.Center
+            font = UIFont.getSystemFont(FONT_SIZE_BODY1, UIFontWeight.Regular)
+        }
+        val getButtonLabel = {
+            texts.get(
+                if (preferences.enableAppLock) STRING_BUTTON_DOWNLOAD_CONTENT_OFF
+                else STRING_BUTTON_DOWNLOAD_CONTENT_ON
+            )
+        }
+        val button = TextButton(getButtonLabel())
+        button.addOnTouchUpInsideListener { _, _ ->
+            preferences.enableAppLock = !preferences.enableAppLock
+            button.setTitle(getButtonLabel(), UIControlState.Normal)
+        }
+
+        container.addSubview(titleAppLock)
+        container.addSubview(descAppLock)
+        container.addSubview(button)
+        titleAppLock.topToSuperview(topInset = DEFAULT_MARGIN).widthMatchesSuperview()
+        descAppLock.topToBottomOf(titleAppLock, DEFAULT_MARGIN)
+            .widthMatchesSuperview()
+        button.bottomToSuperview().topToBottomOf(descAppLock, inset = DEFAULT_MARGIN)
             .widthMatchesSuperview()
         return container
     }
