@@ -387,7 +387,7 @@
     <string name="button_balance_notif_xhourly">Every %1$s hours</string>
     <string name="desc_balance_notification">Your wallet balance changed</string>
     <string name="title_app_lock">Biometric App Lock</string>
-    <string name="desc_app_lock">Requires a biometric login when opening the application or after some inactivity time.\n
-        Protects from unwanted looks. Your secrets are stored safely in any case.\n\n
-    Only available when biometric authentication is set up for this device.</string>
+    <string name="desc_app_lock">Requires a biometric authentication when opening the application and after some inactivity time.\n\n
+        Only available when biometric authentication is set up for this device. Your secrets are always stored safely, even without activating this option.\n
+        Protects from unwanted looks of others using this device. We strongly recommend using a device lock screen instead.</string>
 </resources>
