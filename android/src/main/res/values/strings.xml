@@ -250,8 +250,12 @@
     <string name="title_signing_request">Sign</string>
     <string name="desc_signing_request">Please check the details of the transaction to issue.</string>
     <string name="title_inboxes">Amounts to spent</string>
+    <string name="title_inputs_spent">Boxes to be spent</string>
     <string name="desc_inboxes">These amounts will be spent when the transaction is processed.</string>
     <string name="title_outboxes">Outgoing amounts</string>
+    <string name="title_outputs_created">Boxes to be created</string>
+    <string name="button_switch_to_boxes">Switch to detailed box information</string>
+    <string name="button_switch_to_amounts">Switch to summarized amounts view</string>
     <string name="label_qr_pages_info">%1$s of %2$s</string>
     <string name="desc_outboxes">These amounts will be sent when the transaction is processed.</string>
     <string name="desc_show_signed">Your transaction was signed and needs to be sent to the network.
