@@ -96,7 +96,8 @@ fun SignTransactionInfoLayout(
             remember(showReduced) {
                 texts.getString(
                     if (showReduced) STRING_TITLE_INBOXES
-                    else STRING_TITLE_INPUTS_SPENT
+                    else STRING_TITLE_INPUTS_SPENT,
+                    transactionInfo.inputs.size
                 )
             },
             style = labelStyle(LabelStyle.BODY1BOLD),
@@ -133,7 +134,8 @@ fun SignTransactionInfoLayout(
             remember(showReduced) {
                 texts.getString(
                     if (showReduced) STRING_TITLE_OUTBOXES
-                    else STRING_TITLE_OUTPUTS_CREATED
+                    else STRING_TITLE_OUTPUTS_CREATED,
+                    transactionInfo.outputs.size
                 )
             },
             style = labelStyle(LabelStyle.BODY1BOLD),

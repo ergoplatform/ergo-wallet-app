@@ -3,22 +3,21 @@ package org.ergoplatform.android.transactions
 import android.animation.LayoutTransition
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
-import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentTransactionInfoBinding
-import org.ergoplatform.android.ui.AndroidStringProvider
-import org.ergoplatform.android.ui.copyStringToClipboard
-import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.android.ui.shareText
+import org.ergoplatform.android.ui.*
+import org.ergoplatform.compose.settings.defaultPadding
+import org.ergoplatform.compose.transactions.TransactionInfoLayout
 import org.ergoplatform.getExplorerTxUrl
 import org.ergoplatform.transactions.TransactionInfo
 
@@ -55,48 +54,39 @@ class TransactionInfoFragment : Fragment() {
             refreshScreenState(txInfo)
 
             txInfo?.let {
-                binding.labelTransactionId.text = txInfo.id
-                val purpose = viewModel.uiLogic.transactionPurpose
-                binding.labelTransactionPurpose.text = purpose
-                binding.labelTransactionPurpose.visibility =
-                    if (purpose == null) View.GONE else View.VISIBLE
-                binding.labelTransactionTimestamp.text =
-                    viewModel.uiLogic.getTransactionExecutionState(
-                        AndroidStringProvider(requireContext())
-                    )
-
-                bindTransactionInfo(
-                    txInfo,
-                    binding.layoutInboxes,
-                    binding.layoutOutboxes,
-                    tokenClickListener = { tokenId ->
-                        findNavController().navigateSafe(
-                            TransactionInfoFragmentDirections.actionTransactionInfoFragmentToTokenInformationDialogFragment(
-                                tokenId
+                binding.tiComposeView.apply {
+                    setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+                    setContent {
+                        AppComposeTheme {
+                            val context = requireContext()
+                            TransactionInfoLayout(
+                                modifier = Modifier.padding(defaultPadding),
+                                uiLogic = viewModel.uiLogic,
+                                txInfo,
+                                onTxIdClicked = {
+                                    copyStringToClipboard(
+                                        txInfo.id,
+                                        requireContext(),
+                                        this
+                                    )
+                                },
+                                onTokenClick = { tokenId ->
+                                    findNavController().navigateSafe(
+                                        TransactionInfoFragmentDirections.actionTransactionInfoFragmentToTokenInformationDialogFragment(
+                                            tokenId
+                                        )
+                                    )
+                                },
+                                texts = AndroidStringProvider(context),
+                                getDb = { AppDatabase.getInstance(context) }
                             )
-                        )
-                    },
-                    layoutInflater,
-                    addressLabelHandler = { address, callback ->
-                        context?.let { context ->
-                            viewLifecycleOwner.lifecycleScope.launch {
-                                getAddressLabelFromDatabase(
-                                    AppDatabase.getInstance(context),
-                                    address,
-                                    AndroidStringProvider(context)
-                                )?.let { callback(it) }
-                            }
                         }
                     }
-                )
+                }
 
                 binding.layoutTxinfo.layoutTransition = LayoutTransition()
                 binding.layoutTxinfo.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
             }
-        }
-
-        binding.labelTransactionId.setOnClickListener {
-            copyStringToClipboard(binding.labelTransactionId.text.toString(), requireContext(), it)
         }
     }
 
