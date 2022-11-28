@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -46,7 +47,7 @@ fun SignTransactionInfoLayout(
     getDb: () -> IAppDatabase,
 ) {
 
-    val reducedViewState = remember(origTransactionInfo) { mutableStateOf(true) }
+    val reducedViewState = rememberSaveable(origTransactionInfo) { mutableStateOf(true) }
     val showReduced = reducedViewState.value
     val transactionInfo = remember(origTransactionInfo, showReduced) {
         if (showReduced)
