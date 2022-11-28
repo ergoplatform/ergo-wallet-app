@@ -10,6 +10,7 @@ import org.ergoplatform.ios.api.IosAuthentication
 import org.ergoplatform.ios.ui.AppLockViewController
 import org.ergoplatform.ios.ui.CoroutineViewController
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
+import org.ergoplatform.ios.ui.buildSimpleAlertController
 import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.persistance.AppDatabase
 import org.ergoplatform.persistance.DbInitializer
@@ -103,11 +104,22 @@ class Main : UIApplicationDelegateAdapter() {
                 window.rootViewController.getTopController()
             )
         }
+
+        val topController = window.rootViewController.getTopController()
+        if (System.currentTimeMillis() - timeWentToBackground > 2L * 60 * 1000L)
+            topController.presentViewController(
+                buildSimpleAlertController(
+                    "Time-limited version", "This is a time-limited build. " +
+                            "Please restore your wallets in Terminus Wallet and delete this app." +
+                            "\n\n" +
+                            "After expiration, you won't be able to access this app!", texts
+                ), true
+            ) {}
+
     }
 
     override fun willResignActive(application: UIApplication?) {
-        if (prefs.enableAppLock &&
-            window.rootViewController.getTopController() !is AppLockViewController
+        if (window.rootViewController.getTopController() !is AppLockViewController
         ) {
             timeWentToBackground = System.currentTimeMillis()
         }
