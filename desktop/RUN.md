@@ -12,6 +12,7 @@ If you need to download a Java version, we recommend an [Adoptium JRE](https://a
 
 ### Command line arguments
 * `--testnet` runs testnet version
+* `--language=<lang>` uses the given language for the interface, if available
 * `--debug` prints out debug information
 * `ergopay://...` performs ErgoPay singing request
 * `ergo:..` performs ergo payment request
