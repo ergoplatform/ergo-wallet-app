@@ -63,7 +63,7 @@ class ColdWalletSigningViewController(
 
         scanningContainer.refreshTexts(uiLogic.qrPagesCollector, uiLogic.lastErrorMessage)
 
-        uiLogic.transactionInfo?.reduceBoxes()?.let {
+        uiLogic.transactionInfo?.let {
             transactionContainer.bindTransaction(it, null,
                 addressLabelHandler = { address, callback ->
                     viewControllerScope.launch {

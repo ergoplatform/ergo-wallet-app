@@ -571,7 +571,7 @@ class SendFundsViewController(
         override fun notifyHasPreparedTx(preparedTx: TransactionInfo) {
             runOnMainThread {
                 presentViewController(
-                    ConfirmSendFundsDialogViewController(preparedTx.reduceBoxes()) {
+                    ConfirmSendFundsDialogViewController(preparedTx) {
                         startPayment()
                     },
                     true
