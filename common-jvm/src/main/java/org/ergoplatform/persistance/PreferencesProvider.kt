@@ -156,7 +156,7 @@ abstract class PreferencesProvider {
         }
 
     var balanceSyncInterval: Long
-        get() = getLong(KEY_BALANCE_SYNC_INTERVAL, 24)
+        get() = getLong(KEY_BALANCE_SYNC_INTERVAL, 0L)
         set(value) {
             saveLong(KEY_BALANCE_SYNC_INTERVAL, value)
         }
