@@ -4,6 +4,7 @@ import android.animation.LayoutTransition
 import android.os.Bundle
 import android.view.*
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -50,40 +51,43 @@ class TransactionInfoFragment : Fragment() {
 
         loadTxInfo()
 
-        viewModel.txInfo.observe(viewLifecycleOwner) { txInfo ->
-            refreshScreenState(txInfo)
+        binding.tiComposeView.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
-            txInfo?.let {
-                binding.tiComposeView.apply {
-                    setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-                    setContent {
-                        AppComposeTheme {
-                            val context = requireContext()
-                            TransactionInfoLayout(
-                                modifier = Modifier.padding(defaultPadding),
-                                uiLogic = viewModel.uiLogic,
-                                txInfo,
-                                onTxIdClicked = {
-                                    copyStringToClipboard(
-                                        txInfo.id,
-                                        requireContext(),
-                                        this
+            setContent {
+                AppComposeTheme {
+                    val txInfoState = viewModel.txInfo.observeAsState()
+                    txInfoState.value?.let { txInfo ->
+                        val context = requireContext()
+                        TransactionInfoLayout(
+                            modifier = Modifier.padding(defaultPadding),
+                            uiLogic = viewModel.uiLogic,
+                            txInfo,
+                            onTxIdClicked = {
+                                copyStringToClipboard(
+                                    txInfo.id,
+                                    requireContext(),
+                                    this
+                                )
+                            },
+                            onTokenClick = { tokenId ->
+                                findNavController().navigateSafe(
+                                    TransactionInfoFragmentDirections.actionTransactionInfoFragmentToTokenInformationDialogFragment(
+                                        tokenId
                                     )
-                                },
-                                onTokenClick = { tokenId ->
-                                    findNavController().navigateSafe(
-                                        TransactionInfoFragmentDirections.actionTransactionInfoFragmentToTokenInformationDialogFragment(
-                                            tokenId
-                                        )
-                                    )
-                                },
-                                texts = AndroidStringProvider(context),
-                                getDb = { AppDatabase.getInstance(context) }
-                            )
-                        }
+                                )
+                            },
+                            texts = AndroidStringProvider(context),
+                            getDb = { AppDatabase.getInstance(context) }
+                        )
                     }
                 }
+            }
+        }
 
+        viewModel.txInfo.observe(viewLifecycleOwner) { txInfo ->
+            refreshScreenState(txInfo)
+            txInfo?.let {
                 binding.layoutTxinfo.layoutTransition = LayoutTransition()
                 binding.layoutTxinfo.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
             }

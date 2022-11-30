@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TokenAmount
 import org.ergoplatform.addressbook.getAddressLabelFromDatabase
@@ -291,8 +293,10 @@ fun TransactionInfoBox(
 ) {
     val addressLabelState = remember(address) { mutableStateOf<String?>(null) }
     LaunchedEffect(address) {
-        getAddressLabelFromDatabase(getDb(), address, texts)?.let {
-            addressLabelState.value = it
+        withContext(Dispatchers.IO) {
+            getAddressLabelFromDatabase(getDb(), address, texts)?.let {
+                addressLabelState.value = it
+            }
         }
     }
 
@@ -322,14 +326,17 @@ fun TransactionInfoBox(
 
         assets?.let {
             Column(
-                Modifier.padding(horizontal = defaultPadding / 2).padding(top = defaultPadding / 2)
+                Modifier.padding(horizontal = defaultPadding / 2)
+                    .padding(top = if (nanoErgs > 0) defaultPadding / 2 else 0.dp)
             ) {
                 assets.forEach { token ->
                     val tokenNameState = remember(token.tokenId) { mutableStateOf(token.name) }
                     if (tokenNameState.value == null)
                         LaunchedEffect(token.tokenId) {
-                            getDb().tokenDbProvider.loadTokenInformation(token.tokenId)?.displayName?.let {
-                                tokenNameState.value = it
+                            withContext(Dispatchers.IO) {
+                                getDb().tokenDbProvider.loadTokenInformation(token.tokenId)?.displayName?.let {
+                                    tokenNameState.value = it
+                                }
                             }
                         }
 
