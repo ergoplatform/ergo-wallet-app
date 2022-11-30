@@ -20,7 +20,7 @@ java {
 }
 
 task convertStrings {
-    def source = '../android/build/intermediates/incremental/mergeErgomainnetDebugResources/merged.dir/values{l}/values{l}.xml'
+    def source = '../android/build/intermediates/incremental/ergomainnetDebug/mergeErgomainnetDebugResources/merged.dir/values{l}/values{l}.xml'
     def dest = 'resources/i18n/strings{l}.properties'
     def dest2 = '../common-jvm/src/main/java/org/ergoplatform/uilogic/StringResources.kt'
 
