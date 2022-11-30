@@ -70,6 +70,7 @@ const val IMAGE_ARROW_RIGHT = "arrow.right"
 const val IMAGE_STAR_OUTLINED = "star"
 const val IMAGE_STAR_FILLED = "star.fill"
 const val IMAGE_SHARE = "square.and.arrow.up"
+const val IMAGE_PASTE = "doc.on.clipboard"
 val IMAGE_RESET_DATA = if (Foundation.getMajorSystemVersion() >= 14) "leaf.arrow.triangle.circlepath" else "flame"
 
 const val FONT_SIZE_BODY1 = 18.0
