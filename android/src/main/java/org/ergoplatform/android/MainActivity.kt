@@ -8,6 +8,7 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricPrompt
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -20,9 +21,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.android.transactions.ChooseSpendingWalletFragmentDialog
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.postDelayed
@@ -30,6 +32,8 @@ import org.ergoplatform.android.wallet.WalletFragmentDirections
 import org.ergoplatform.uilogic.MainAppUiLogic
 
 class MainActivity : AppCompatActivity() {
+    private val _keyboardStateFlow = MutableStateFlow(false)
+    val keyboardStateFlow: StateFlow<Boolean> get() = _keyboardStateFlow
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,9 +54,14 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        KeyboardVisibilityEvent.registerEventListener(this, { isOpen ->
+        // check if soft keyboard is open and hide bottom nav bar
+        window.decorView.setOnApplyWindowInsetsListener { view, insets ->
+            val insetsCompat = WindowInsetsCompat.toWindowInsetsCompat(insets, view)
+            val isOpen = insetsCompat.isVisible(WindowInsetsCompat.Type.ime())
             navView.visibility = if (isOpen) View.GONE else View.VISIBLE
-        })
+            _keyboardStateFlow.value = isOpen
+            view.onApplyWindowInsets(insets)
+        }
 
         if (savedInstanceState == null) {
             handleIntent(navController)
