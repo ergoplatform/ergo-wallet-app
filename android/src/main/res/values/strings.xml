@@ -269,7 +269,7 @@
     <string name="error_accessing_webcam">Error accessing webcam</string>
     <string name="error_accessing_webcam_macos">On MacOS, accessing the webcam does not work due to security restrictions. If you are using an M1 mac, you can use the iOS Ergo Wallet App which can access the cam.</string>
     <string name="hint_no_webcam">As an alternative, you can copy a QR code image to the clipboard and press the button below, or copy the QR code contents and paste them below.</string>
-    <string name="error_no_image_clipboard">No image found in system clipboard.</string>
+    <string name="error_no_image_clipboard">No image found in system clipboard.\n\nIf you want to paste text, paste into the text field below.</string>
     <string name="error_no_qrcode_image_clipboard">No QR code found in image.\n\nMake sure to copy QR code with a margin.</string>
 
     <!-- Ergo Pay Signing -->
