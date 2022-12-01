@@ -230,7 +230,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_scan_qr) {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            QrScannerActivity.startFromFragment(this)
             return true
         } else {
             return super.onOptionsItemSelected(item)

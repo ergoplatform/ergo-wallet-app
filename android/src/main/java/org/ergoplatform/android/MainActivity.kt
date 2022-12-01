@@ -27,6 +27,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.transactions.ChooseSpendingWalletFragmentDialog
 import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.QrScannerActivity
 import org.ergoplatform.android.ui.postDelayed
 import org.ergoplatform.android.wallet.WalletFragmentDirections
 import org.ergoplatform.uilogic.MainAppUiLogic
@@ -102,7 +103,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun scanQrCode() {
-        IntentIntegrator(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+        QrScannerActivity.startFromActivity(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

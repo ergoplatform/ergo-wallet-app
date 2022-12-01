@@ -93,7 +93,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
 
         // Button click listeners
         binding.cardScanMore.buttonScanMore.setOnClickListener {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            QrScannerActivity.startFromFragment(this)
         }
 
         setupSigningResultCardBinding(

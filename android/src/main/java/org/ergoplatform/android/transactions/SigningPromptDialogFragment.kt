@@ -12,6 +12,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPromptSigningDialogBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.QrPagerAdapter
+import org.ergoplatform.android.ui.QrScannerActivity
 import org.ergoplatform.android.ui.expandBottomSheetOnShow
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
@@ -53,7 +54,7 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
             }
         })
         binding.buttonScanSignedTx.setOnClickListener {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            QrScannerActivity.startFromFragment(this)
         }
         binding.buttonScanNextQr.setOnClickListener {
             binding.qrCodePager.currentItem = binding.qrCodePager.currentItem + 1
