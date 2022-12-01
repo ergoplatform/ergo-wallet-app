@@ -319,7 +319,7 @@ fun TransactionInfoBox(
         val nanoErgs = value ?: 0
         if (nanoErgs > 0)
             Text(
-                ErgoAmount(nanoErgs).toComposableText(texts),
+                ErgoAmount(nanoErgs).toComposableText(texts, trimTrailingZeros = true),
                 Modifier.padding(horizontal = defaultPadding / 2),
                 style = labelStyle(LabelStyle.BODY1BOLD),
             )
