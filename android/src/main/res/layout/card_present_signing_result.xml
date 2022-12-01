@@ -50,16 +50,32 @@
             android:text="@string/button_next"
             android:visibility="gone" />
 
-        <Button
-            android:id="@+id/button_dismiss"
-            style="?attr/materialButtonStyle"
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:layout_marginBottom="24dp"
-            android:minWidth="120dp"
-            android:text="@string/button_done" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_dismiss"
+                style="?attr/materialButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:minWidth="120dp"
+                android:text="@string/button_done" />
+
+            <ImageView
+                android:id="@+id/button_share"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                android:background="?selectableItemBackgroundBorderless"
+                android:padding="@dimen/half_horizontal_margin"
+                android:src="@drawable/ic_share_24" />
+        </FrameLayout>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

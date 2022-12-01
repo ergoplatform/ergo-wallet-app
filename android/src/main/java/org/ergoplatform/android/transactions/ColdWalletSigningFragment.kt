@@ -103,6 +103,11 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
                 setQrData()
             },
         )
+        binding.cardSigningResult.buttonShare.setOnClickListener {
+            viewModel.signedQrCode?.let {
+                shareText(coldSigningResponseToQrChunks(it, Int.MAX_VALUE).first())
+            }
+        }
     }
 
     private fun setQrData() {

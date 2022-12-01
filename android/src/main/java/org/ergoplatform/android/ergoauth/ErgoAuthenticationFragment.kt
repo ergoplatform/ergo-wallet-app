@@ -109,6 +109,11 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
             lastPageDesc = R.string.desc_response_cold_auth,
             pageDesc = R.string.desc_response_cold_auth_multiple,
         )
+        binding.cardSigningResult.buttonShare.setOnClickListener {
+            viewModel.uiLogic.coldSerializedAuthResponse?.let {
+                shareText(ergoAuthResponseToQrChunks(it, Int.MAX_VALUE).first())
+            }
+        }
 
         binding.cardScanMore.buttonScanMore.setOnClickListener {
             QrScannerActivity.startFromFragment(this)
@@ -201,7 +206,7 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
         get() = viewModel.uiLogic.signingPromptDialogConfig
 
     companion object {
-        val ergoAuthActionRequestKey = "KEY_ERGOAUTH_FRAGMENT"
-        val ergoAuthActionCompletedBundleKey = "KEY_ERGOAUTH_COMPLETED"
+        const val ergoAuthActionRequestKey = "KEY_ERGOAUTH_FRAGMENT"
+        const val ergoAuthActionCompletedBundleKey = "KEY_ERGOAUTH_COMPLETED"
     }
 }
