@@ -81,6 +81,7 @@ class MosaikAppComponent(
         "Ergo Wallet App (Desktop)",
         appVersionString,
         { MosaikContext.Platform.DESKTOP },
+        { Application.texts.locale },
         MosaikGuidManager().apply {
             appDatabase = Application.database
         },

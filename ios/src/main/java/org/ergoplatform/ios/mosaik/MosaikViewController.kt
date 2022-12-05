@@ -91,7 +91,10 @@ class MosaikViewController(
             mosaikRuntime.switchFavorite()
         }
         resetDataButton =
-            UIBarButtonItem(getIosSystemImage(IMAGE_RESET_DATA, UIImageSymbolScale.Small)!!, UIBarButtonItemStyle.Plain)
+            UIBarButtonItem(
+                getIosSystemImage(IMAGE_RESET_DATA, UIImageSymbolScale.Small)!!,
+                UIBarButtonItemStyle.Plain
+            )
         resetDataButton.setOnClickListener { mosaikRuntime.resetAppData() }
         resetDataButton.isEnabled = false
         navigationController.topViewController.navigationItem.rightBarButtonItems =
@@ -149,6 +152,7 @@ class MosaikViewController(
                 else -> org.ergoplatform.mosaik.model.MosaikContext.Platform.DESKTOP
             }
         },
+        { getAppDelegate().texts.locale },
         MosaikGuidManager().apply {
             appDatabase = getAppDelegate().database
         }
@@ -256,7 +260,10 @@ class MosaikViewController(
             presentViewController(
                 ChooseWalletViewController { walletConfig ->
                     viewControllerScope.launch(Dispatchers.IO) {
-                        val wallet = getAppDelegate().database.walletDbProvider.loadWalletWithStateById(walletConfig.id)
+                        val wallet =
+                            getAppDelegate().database.walletDbProvider.loadWalletWithStateById(
+                                walletConfig.id
+                            )
                         runOnMainThread {
                             onWalletChosen(wallet!!)
                         }
@@ -267,7 +274,10 @@ class MosaikViewController(
 
         override fun startAddressIdxChooser() {
             presentViewController(
-                ChooseAddressListDialogViewController(walletForAddressChooser!!.walletConfig.id, false) {
+                ChooseAddressListDialogViewController(
+                    walletForAddressChooser!!.walletConfig.id,
+                    false
+                ) {
                     onAddressChosen(it!!)
                 }, true
             ) {}

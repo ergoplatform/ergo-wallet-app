@@ -28,6 +28,7 @@ abstract class AppMosaikRuntime(
     val appName: String,
     val appVersionName: String,
     val platformType: () -> MosaikContext.Platform,
+    val getLocale: () -> Locale?,
     val guidManager: MosaikGuidManager,
 ) : MosaikRuntime(
     OkHttpBackendConnector(
@@ -36,7 +37,7 @@ abstract class AppMosaikRuntime(
             MosaikContext(
                 MosaikContext.LIBRARY_MOSAIK_VERSION,
                 guidManager.getGuidForHost(getHostname(url)),
-                Locale.getDefault().language,
+                (getLocale() ?: Locale.getDefault()).language,
                 appName,
                 appVersionName,
                 platformType(),
