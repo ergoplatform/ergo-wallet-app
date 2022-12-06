@@ -6,6 +6,8 @@ import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import org.ergoplatform.BabelFees
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.api.AesEncryptionManager
+import org.ergoplatform.ios.api.IosAuthentication
+import org.ergoplatform.ios.ui.AppLockViewController
 import org.ergoplatform.ios.ui.CoroutineViewController
 import org.ergoplatform.ios.ui.ViewControllerWithKeyboardLayoutGuide
 import org.ergoplatform.isErgoMainNet
@@ -47,10 +49,6 @@ class Main : UIApplicationDelegateAdapter() {
         LogUtils.logDebug = !isErgoMainNet
         AesEncryptionManager.isOnLegacyApi = true
 
-        // FIXME Babel Fees iOS is enabled due to Java7 incompatibility. Recheck after 5.0
-        //  activation or robovm libcore 10 upgrade
-        BabelFees.isEnabled = false
-
         CrashHandler.registerUncaughtExceptionHandler()
         LogUtils.stackTraceLogger = { CrashHandler.writeToDebugFile(it) }
         database = SqlDelightAppDb(setupDatabase())
@@ -87,9 +85,34 @@ class Main : UIApplicationDelegateAdapter() {
         return super.openURL(app, url, options)
     }
 
+    private var timeWentToBackground = 0L
+
     override fun didBecomeActive(application: UIApplication?) {
         super.didBecomeActive(application)
         appActiveObservers.forEach { it.onResume() }
+
+        if (prefs.enableAppLock &&
+            System.currentTimeMillis() - timeWentToBackground > 2L * 60 * 1000L &&
+            IosAuthentication.canAuthenticate()
+        ) {
+            AppLockViewController().presentModalAbove(
+                window.rootViewController.getTopController()
+            )
+        }
+    }
+
+    override fun willResignActive(application: UIApplication?) {
+        if (prefs.enableAppLock &&
+            window.rootViewController.getTopController() !is AppLockViewController
+        ) {
+            timeWentToBackground = System.currentTimeMillis()
+        }
+
+        super.willResignActive(application)
+    }
+
+    fun appUnlocked() {
+        timeWentToBackground = System.currentTimeMillis()
     }
 
     private fun startKeyboardObserver() {
@@ -142,13 +165,27 @@ class Main : UIApplicationDelegateAdapter() {
         return AppDatabase(driver)
     }
 
+    private fun UIViewController.getTopController(): UIViewController {
+        return when (this) {
+            is UINavigationController ->
+                this.visibleViewController.getTopController()
+
+            else -> {
+                if (presentedViewController != null)
+                    presentedViewController.getTopController()
+                else
+                    this
+            }
+        }
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            NSAutoreleasePool().use { _ ->
+            NSAutoreleasePool().use {
                 UIApplication.main(
                     args,
-                    null as? Class<UIApplication>,
+                    null as? Class<UIApplication>?,
                     Main::class.java
                 )
             }

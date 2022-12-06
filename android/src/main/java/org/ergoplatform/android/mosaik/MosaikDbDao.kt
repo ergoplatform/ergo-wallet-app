@@ -28,6 +28,4 @@ interface MosaikDbDao {
 
     @Query("SELECT * FROM mosaik_host WHERE hostName = :hostname")
     suspend fun getMosaikHostInfo(hostname: String): MosaikHostDbEntity?
-
-    // TODO Mosaik delete host info
 }

@@ -317,7 +317,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                 preparedTransaction = serializedTx.serializedTx
                 if (serializedTx.success) {
                     transactionInfo = serializedTx.buildTransactionInfo(tokensAvail)
-                    notifyHasPreparedTx(transactionInfo!!.reduceBoxes())
+                    notifyHasPreparedTx(transactionInfo!!)
                 }
                 notifyHasErgoTxResult(serializedTx)
             }

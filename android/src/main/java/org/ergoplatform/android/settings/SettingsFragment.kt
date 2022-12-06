@@ -1,11 +1,15 @@
 package org.ergoplatform.android.settings
 
+import android.Manifest.permission.POST_NOTIFICATIONS
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -25,6 +29,14 @@ class SettingsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: SettingsViewModel by navGraphViewModels(R.id.navigation_settings)
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            // we can react on user's choice
+            println(isGranted)
+        }
 
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
@@ -61,6 +73,15 @@ class SettingsFragment : Fragment() {
             viewModel.uiLogic.changeBalanceSyncInterval(prefs)
             BackgroundSync.rescheduleJob(context)
             setBalanceNotifButtonTitle()
+
+            if (prefs.balanceSyncInterval != 0L &&
+                ContextCompat.checkSelfPermission(
+                    context,
+                    POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(POST_NOTIFICATIONS)
+            }
         }
 
         setDayNightModeButtonColor(AppCompatDelegate.getDefaultNightMode())
@@ -87,11 +108,25 @@ class SettingsFragment : Fragment() {
             preferences.downloadNftContent = !preferences.downloadNftContent
             setButtonDownloadContentText()
         }
+
+        setAppLockButtonText()
+        binding.buttonAppLock.setOnClickListener {
+            val preferences = Preferences(requireContext())
+            preferences.enableAppLock = !preferences.enableAppLock
+            setAppLockButtonText()
+        }
     }
 
     private fun setButtonDownloadContentText() {
         binding.buttonDownloadContent.setText(
             if (Preferences(requireContext()).downloadNftContent) R.string.button_download_content_off
+            else R.string.button_download_content_on
+        )
+    }
+
+    private fun setAppLockButtonText() {
+        binding.buttonAppLock.setText(
+            if (Preferences(requireContext()).enableAppLock) R.string.button_download_content_off
             else R.string.button_download_content_on
         )
     }

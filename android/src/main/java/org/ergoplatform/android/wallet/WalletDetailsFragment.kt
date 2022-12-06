@@ -29,6 +29,7 @@ import org.ergoplatform.android.tokens.WalletDetailsTokenEntryView
 import org.ergoplatform.android.tokens.setTokenPrice
 import org.ergoplatform.android.transactions.inflateAddressTransactionEntry
 import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.QrScannerActivity
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.postDelayed
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
@@ -144,7 +145,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         }
 
         binding.buttonScan.setOnClickListener {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            QrScannerActivity.startFromFragment(this)
         }
 
         // enable layout change animations after a short wait time

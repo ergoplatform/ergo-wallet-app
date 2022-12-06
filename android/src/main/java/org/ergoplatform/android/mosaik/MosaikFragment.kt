@@ -163,8 +163,7 @@ class MosaikFragment : Fragment(), WalletChooserCallback, AddressChooserCallback
         }
         viewModel.scanQrCodeEvent.observe(viewLifecycleOwner) { qrScanActionId ->
             qrScanActionId?.let {
-                IntentIntegrator.forSupportFragment(this)
-                    .initiateScan(setOf(IntentIntegrator.QR_CODE))
+                QrScannerActivity.startFromFragment(this)
             }
         }
         viewModel.showTokenInfoEvent.observe(viewLifecycleOwner) { tokenId ->

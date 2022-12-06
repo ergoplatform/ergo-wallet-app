@@ -9,8 +9,10 @@ import android.text.TextWatcher
 import android.view.*
 import android.widget.EditText
 import androidx.core.view.descendants
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -18,10 +20,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.launch
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.*
 import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.MainActivity
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.addressbook.ChooseAddressDialogCallback
@@ -210,14 +212,15 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
             if (hasFocus)
                 ensureAmountVisibleDelayed()
         }
-        KeyboardVisibilityEvent.setEventListener(
-            requireActivity(),
-            viewLifecycleOwner,
-            { keyboardOpen ->
-                if (keyboardOpen && binding.amount.editText?.hasFocus() == true) {
-                    ensureAmountVisibleDelayed()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                (activity as? MainActivity)?.keyboardStateFlow?.collect { keyboardOpen ->
+                    if (keyboardOpen && binding.amount.editText?.hasFocus() == true) {
+                        ensureAmountVisibleDelayed()
+                    }
                 }
-            })
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -227,7 +230,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_scan_qr) {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            QrScannerActivity.startFromFragment(this)
             return true
         } else {
             return super.onOptionsItemSelected(item)

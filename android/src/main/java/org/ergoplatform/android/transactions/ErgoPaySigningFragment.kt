@@ -3,27 +3,25 @@ package org.ergoplatform.android.transactions
 import android.os.Bundle
 import android.view.*
 import androidx.activity.addCallback
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import kotlinx.coroutines.launch
-import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentErgoPaySigningBinding
-import org.ergoplatform.android.ui.AndroidStringProvider
-import org.ergoplatform.android.ui.getSeverityDrawableResId
-import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.android.ui.openStorePage
+import org.ergoplatform.android.ui.*
 import org.ergoplatform.android.wallet.ChooseWalletListBottomSheetDialog
 import org.ergoplatform.android.wallet.WalletChooserCallback
+import org.ergoplatform.compose.settings.defaultPadding
+import org.ergoplatform.compose.transactions.SignTransactionInfoLayout
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.MessageSeverity
-import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
@@ -34,8 +32,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
 
     private val args: ErgoPaySigningFragmentArgs by navArgs()
 
-    override val viewModel: ErgoPaySigningViewModel
-        get() = ViewModelProvider(this).get(ErgoPaySigningViewModel::class.java)
+    override val viewModel: ErgoPaySigningViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,9 +103,6 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
         }
 
         // Click listeners
-        binding.transactionInfo.buttonSignTx.setOnClickListener {
-            startAuthFlow()
-        }
         binding.buttonDismiss.setOnClickListener {
             if (args.closeApp) {
                 requireActivity().finish()
@@ -238,24 +232,27 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
     private fun showTransactionInfo() {
         val uiLogic = viewModel.uiLogic
         val context = requireContext()
-        binding.transactionInfo.bindTransactionInfo(
-            uiLogic.transactionInfo!!.reduceBoxes(),
-            { tokenId ->
-                findNavController().navigateSafe(
-                    ErgoPaySigningFragmentDirections.actionErgoPaySigningToTokenInformation(tokenId)
-                )
-            },
-            layoutInflater,
-            addressLabelHandler = { address, callback ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    getAddressLabelFromDatabase(
-                        AppDatabase.getInstance(context),
-                        address,
-                        AndroidStringProvider(context)
-                    )?.let { callback(it) }
+        binding.tiComposeView.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                AppComposeTheme {
+                    SignTransactionInfoLayout(
+                        modifier = Modifier.padding(defaultPadding),
+                        origTransactionInfo = uiLogic.transactionInfo!!,
+                        onConfirm = { startAuthFlow() },
+                        onTokenClick = { tokenId ->
+                            findNavController().navigateSafe(
+                                ErgoPaySigningFragmentDirections.actionErgoPaySigningToTokenInformation(
+                                    tokenId
+                                )
+                            )
+                        },
+                        texts = AndroidStringProvider(context),
+                        getDb = { AppDatabase.getInstance(context) }
+                    )
                 }
             }
-        )
+        }
         binding.layoutTiMessage.visibility = uiLogic.epsr?.message?.let {
             binding.tvTiMessage.text = getString(R.string.label_message_from_dapp, it)
             val severityResId =
@@ -272,7 +269,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
     }
 
     companion object {
-        val ergoPayActionRequestKey = "KEY_ERGOPAY_SIGNING_FRAGMENT"
-        val ergoPayActionCompletedBundleKey = "KEY_ERGOPAY_SUBMITTED_DONE"
+        const val ergoPayActionRequestKey = "KEY_ERGOPAY_SIGNING_FRAGMENT"
+        const val ergoPayActionCompletedBundleKey = "KEY_ERGOPAY_SUBMITTED_DONE"
     }
 }

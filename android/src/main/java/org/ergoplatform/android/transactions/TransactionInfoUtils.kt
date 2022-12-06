@@ -1,124 +1,15 @@
 package org.ergoplatform.android.transactions
 
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.transition.TransitionManager
-import org.ergoplatform.ErgoAmount
-import org.ergoplatform.TokenAmount
 import org.ergoplatform.android.R
-import org.ergoplatform.android.databinding.CardTransactionInfoBinding
 import org.ergoplatform.android.databinding.EntryAddressTransactionBinding
-import org.ergoplatform.android.databinding.EntryTransactionBoxBinding
 import org.ergoplatform.android.databinding.EntryWalletTokenBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
-import org.ergoplatform.android.ui.copyStringToClipboard
-import org.ergoplatform.explorer.client.model.AssetInstanceInfo
-import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 import org.ergoplatform.uilogic.transactions.getTransactionStateString
 import org.ergoplatform.utils.millisecondsToLocalTime
-
-fun CardTransactionInfoBinding.bindTransactionInfo(
-    ti: TransactionInfo,
-    tokenClickListener: ((String) -> Unit)?,
-    layoutInflater: LayoutInflater,
-    addressLabelHandler: ((String, ((String) -> Unit)) -> Unit)? = null
-) =
-    bindTransactionInfo(ti, layoutInboxes, layoutOutboxes, tokenClickListener, layoutInflater, addressLabelHandler)
-
-fun bindTransactionInfo(
-    ti: TransactionInfo,
-    layoutInboxes: ViewGroup,
-    layoutOutboxes: ViewGroup,
-    tokenClickListener: ((String) -> Unit)?,
-    layoutInflater: LayoutInflater,
-    addressLabelHandler: ((String, ((String) -> Unit)) -> Unit)? = null
-) {
-    layoutInboxes.apply {
-        removeAllViews()
-
-        ti.inputs.forEach { input ->
-            bindBoxView(
-                this,
-                input.value,
-                input.address ?: input.boxId,
-                input.assets,
-                tokenClickListener,
-                layoutInflater,
-                addressLabelHandler
-            )
-        }
-    }
-
-    layoutOutboxes.apply {
-        removeAllViews()
-
-        ti.outputs.forEach { output ->
-            bindBoxView(
-                this,
-                output.value,
-                output.address,
-                output.assets,
-                tokenClickListener,
-                layoutInflater,
-                addressLabelHandler
-            )
-        }
-    }
-}
-
-private fun bindBoxView(
-    container: ViewGroup,
-    value: Long?,
-    address: String,
-    assets: List<AssetInstanceInfo>?,
-    tokenClickListener: ((String) -> Unit)?,
-    layoutInflater: LayoutInflater,
-    addressLabelHandler: ((String, ((String) -> Unit)) -> Unit)? = null
-) {
-    val boxBinding = EntryTransactionBoxBinding.inflate(layoutInflater, container, true)
-    boxBinding.boxErgAmount.text = container.context.getString(
-        R.string.label_erg_amount,
-        ErgoAmount(value ?: 0).toStringTrimTrailingZeros()
-    )
-    boxBinding.boxErgAmount.visibility =
-        if (value == null || value == 0L) View.GONE else View.VISIBLE
-    boxBinding.labelBoxAddress.text = address
-    boxBinding.labelBoxAddress.setOnClickListener {
-        TransitionManager.beginDelayedTransition(container)
-        boxBinding.labelBoxAddress.maxLines =
-            if (boxBinding.labelBoxAddress.maxLines == 1) 10 else 1
-    }
-    boxBinding.labelBoxAddress.setOnLongClickListener {
-        copyStringToClipboard(address, it.context, it)
-        true
-    }
-
-    boxBinding.boxTokenEntries.apply {
-        removeAllViews()
-        visibility = View.GONE
-
-        assets?.forEach { token ->
-            visibility = View.VISIBLE
-            val tokenBinding =
-                EntryWalletTokenBinding.inflate(layoutInflater, this, true)
-            // we use the token id here, we don't have the name in the cold wallet context
-            tokenBinding.labelTokenName.text = token.name ?: token.tokenId
-            tokenBinding.labelTokenVal.text =
-                TokenAmount(token.amount, token.decimals ?: 0).toStringUsFormatted()
-            tokenClickListener?.let {
-                tokenBinding.root.setOnClickListener { tokenClickListener(token.tokenId) }
-            }
-        }
-    }
-
-    addressLabelHandler?.invoke(address) { label ->
-        boxBinding.labelBoxAddress.text = label
-        boxBinding.labelBoxAddress.ellipsize = TextUtils.TruncateAt.END
-    }
-}
 
 fun inflateAddressTransactionEntry(
     layoutInflater: LayoutInflater,

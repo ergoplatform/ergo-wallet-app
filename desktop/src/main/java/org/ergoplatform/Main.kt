@@ -48,7 +48,9 @@ fun main(args: Array<String>) {
     val bringToTop = mutableStateOf(false)
 
     Application.texts =
-        DesktopStringProvider(I18NBundle.createBundle(ResourceWrapper("/i18n/strings")))
+        DesktopStringProvider(I18NBundle.createBundleWithLanguage(ResourceWrapper("/i18n/strings"),
+            args.firstOrNull { it.startsWith("--language=") }?.substringAfter('=')
+        ))
 
     val appDirs = AppDirsFactory.getInstance()
     val cacheDir = appDirs.getUserCacheDir("ergowallet", null, null)

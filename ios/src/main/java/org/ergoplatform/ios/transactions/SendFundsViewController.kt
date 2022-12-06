@@ -9,6 +9,7 @@ import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.TransactionResult
+import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.utils.LogUtils

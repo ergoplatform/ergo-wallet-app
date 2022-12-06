@@ -325,7 +325,7 @@ class ErgoPaySigningViewController(
         }
 
         fun showTransactionInfo() {
-            bindTransaction(uiLogic.transactionInfo!!.reduceBoxes(),
+            bindTransaction(uiLogic.transactionInfo!!,
                 tokenClickListener = { tokenId ->
                     presentViewController(TokenInformationViewController(tokenId, null), true) {}
                 },

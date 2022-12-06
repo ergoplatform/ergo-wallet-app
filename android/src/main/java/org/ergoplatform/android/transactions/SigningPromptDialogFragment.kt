@@ -10,9 +10,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPromptSigningDialogBinding
-import org.ergoplatform.android.ui.AndroidStringProvider
-import org.ergoplatform.android.ui.QrPagerAdapter
-import org.ergoplatform.android.ui.expandBottomSheetOnShow
+import org.ergoplatform.android.ui.*
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
 import org.ergoplatform.transactions.QrCodePagesCollector
@@ -42,9 +40,7 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val dataSource = getDataSource()
-        dataSource.signingPromptData?.let {
-            setQrCodePagerData(it)
-        }
+        setQrCodePagerData(dataSource.signingPromptData)
         binding.qrCodePager.registerOnPageChangeCallback(object :
             ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
@@ -53,16 +49,20 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
             }
         })
         binding.buttonScanSignedTx.setOnClickListener {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            QrScannerActivity.startFromFragment(this)
         }
         binding.buttonScanNextQr.setOnClickListener {
             binding.qrCodePager.currentItem = binding.qrCodePager.currentItem + 1
         }
         binding.switchResolution.setOnClickListener {
-            dataSource.signingPromptData?.let {
-                scaleDown = !scaleDown
-                setQrCodePagerData(it)
-            }
+            scaleDown = !scaleDown
+            setQrCodePagerData(dataSource.signingPromptData)
+        }
+        binding.buttonShare.setOnClickListener {
+            shareText(
+                dataSource.signingRequestToQrChunks(dataSource.signingPromptData, Int.MAX_VALUE)
+                    .first()
+            )
         }
 
         binding.buttonScanSignedTx.text =
@@ -117,8 +117,8 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
         if (result != null) {
             result.contents?.let { qrCode ->
                 val dataSource = getDataSource()
-                dataSource.responsePagesCollector?.addPage(qrCode)
-                if (dataSource.responsePagesCollector?.hasAllPages() == true) {
+                dataSource.responsePagesCollector.addPage(qrCode)
+                if (dataSource.responsePagesCollector.hasAllPages()) {
                     getSigningPromptDialogParent().onSigningPromptResponseScanComplete()
                     dismiss()
                 } else {

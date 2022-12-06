@@ -5,23 +5,24 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
-import kotlinx.coroutines.launch
 import org.ergoplatform.SigningSecrets
-import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentColdWalletSigningBinding
 import org.ergoplatform.android.ui.*
+import org.ergoplatform.compose.settings.defaultPadding
+import org.ergoplatform.compose.transactions.SignTransactionInfoLayout
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
 import org.ergoplatform.transactions.coldSigningResponseToQrChunks
-import org.ergoplatform.transactions.reduceBoxes
 
 /**
  * Scans cold wallet signing request qr codes, signs the transaction, presents a qr code to go back
@@ -43,10 +44,7 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
         return binding.root
     }
 
-    private val viewModel: ColdWalletSigningViewModel
-        get() {
-            return ViewModelProvider(this).get(ColdWalletSigningViewModel::class.java)
-        }
+    private val viewModel: ColdWalletSigningViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -62,9 +60,9 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
                 ProgressBottomSheetDialogFragment.dismissProgressDialog(childFragmentManager)
         })
 
-        viewModel.signingResult.observe(viewLifecycleOwner, {
+        viewModel.signingResult.observe(viewLifecycleOwner) {
             if (it?.success == true && viewModel.signedQrCode != null) {
-                binding.transactionInfo.root.visibility = View.GONE
+                binding.transactionInfo.visibility = View.GONE
                 binding.cardSigningResult.root.visibility = View.VISIBLE
                 binding.cardScanMore.root.visibility = View.GONE
 
@@ -91,17 +89,11 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
                     snackbar.setAnchorView(R.id.nav_view).show()
                 }
             }
-        })
-
-        // Button click listeners
-        binding.transactionInfo.buttonSignTx.setOnClickListener {
-            viewModel.wallet?.let {
-                startAuthFlow()
-            }
         }
 
+        // Button click listeners
         binding.cardScanMore.buttonScanMore.setOnClickListener {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            QrScannerActivity.startFromFragment(this)
         }
 
         setupSigningResultCardBinding(
@@ -111,6 +103,11 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
                 setQrData()
             },
         )
+        binding.cardSigningResult.buttonShare.setOnClickListener {
+            viewModel.signedQrCode?.let {
+                shareText(coldSigningResponseToQrChunks(it, Int.MAX_VALUE).first())
+            }
+        }
     }
 
     private fun setQrData() {
@@ -148,22 +145,30 @@ class ColdWalletSigningFragment : AbstractAuthenticationFragment() {
             )
         }
 
-        transactionInfo?.reduceBoxes()?.let {
-            binding.transactionInfo.root.visibility = View.VISIBLE
+        transactionInfo?.let { ti ->
+            binding.transactionInfo.visibility = View.VISIBLE
             binding.cardScanMore.root.visibility = View.GONE
 
             val context = requireContext()
-            binding.transactionInfo.bindTransactionInfo(it, null, layoutInflater,
-                addressLabelHandler = { address, callback ->
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        getAddressLabelFromDatabase(
-                            AppDatabase.getInstance(context),
-                            address,
-                            AndroidStringProvider(context)
-                        )?.let { callback(it) }
+            binding.tiComposeView.apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+                setContent {
+                    AppComposeTheme {
+                        SignTransactionInfoLayout(
+                            modifier = Modifier.padding(defaultPadding),
+                            origTransactionInfo = ti,
+                            onConfirm = {
+                                viewModel.wallet?.let {
+                                    startAuthFlow()
+                                }
+                            },
+                            onTokenClick = null,
+                            texts = AndroidStringProvider(context),
+                            getDb = { AppDatabase.getInstance(context) }
+                        )
                     }
                 }
-            )
+            }
         }
     }
 

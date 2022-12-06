@@ -6,10 +6,7 @@ import org.robovm.apple.audiotoolbox.AudioServices
 import org.robovm.apple.avfoundation.*
 import org.robovm.apple.dispatch.DispatchQueue
 import org.robovm.apple.foundation.NSArray
-import org.robovm.apple.uikit.NSTextAlignment
-import org.robovm.apple.uikit.UIColor
-import org.robovm.apple.uikit.UIInterfaceOrientationMask
-import org.robovm.apple.uikit.UIViewController
+import org.robovm.apple.uikit.*
 
 /**
  * Shows a view for scanning QR codes
@@ -72,10 +69,22 @@ class QrScannerViewController(
 
         addCloseButton()
 
+        val pasteButton = UIImageView(getIosSystemImage(IMAGE_PASTE, UIImageSymbolScale.Small)).apply {
+            isUserInteractionEnabled = true
+            tintColor = UIColor.white()
+            addGestureRecognizer(UITapGestureRecognizer {
+                UIPasteboard.getGeneralPasteboard().string?.let {
+                    didScanQrCode(it)
+                }
+            })
+        }
+        view.addSubview(pasteButton)
+        pasteButton.topToSuperview(topInset = DEFAULT_MARGIN).rightToSuperview(inset = DEFAULT_MARGIN)
+
         captureSession.startRunning()
     }
 
-    fun failed() {
+    private fun failed() {
         val label = Body1BoldLabel().apply {
             textColor = UIColor.white()
             text = getAppDelegate().texts.get(STRING_ERROR_CAMERA)

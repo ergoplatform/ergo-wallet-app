@@ -38,4 +38,39 @@
         app:layout_constraintTop_toTopOf="parent"
         app:titleTextColor="@android:color/transparent" />
 
+    <FrameLayout
+        android:id="@+id/layout_app_locked"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/cardview_background"
+        android:elevation="50dp"
+        android:padding="@dimen/margin_and_half"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginBottom="@dimen/margin_and_half"
+                android:src="@drawable/ic_ergologo"
+                app:tint="@color/primary" />
+
+            <Button
+                android:id="@+id/button_unlock"
+                style="@style/Widget.App.Button.PrimaryTint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="@dimen/activity_horizontal_margin"
+                android:text="@string/button_unlock" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

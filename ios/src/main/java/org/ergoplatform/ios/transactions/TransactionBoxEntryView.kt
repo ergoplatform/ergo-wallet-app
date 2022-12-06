@@ -3,6 +3,7 @@ package org.ergoplatform.ios.transactions
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TokenAmount
+import org.ergoplatform.explorer.client.model.AdditionalRegisters
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.ios.tokens.TokenEntryView
 import org.ergoplatform.ios.ui.*
@@ -31,6 +32,9 @@ class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.
     private val tokensList = UIStackView().apply {
         axis = UILayoutConstraintAxis.Vertical
     }
+    private val registerList = UIStackView().apply {
+        axis = UILayoutConstraintAxis.Vertical
+    }
 
     init {
         layoutMargins = UIEdgeInsets.Zero()
@@ -38,16 +42,19 @@ class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.
         addSubview(labelBoxAddress)
         addSubview(labelErgAmount)
         addSubview(tokensList)
+        addSubview(registerList)
 
         labelBoxAddress.topToSuperview(topInset = DEFAULT_MARGIN).widthMatchesSuperview(inset = DEFAULT_MARGIN)
         labelErgAmount.topToBottomOf(labelBoxAddress).widthMatchesSuperview(inset = DEFAULT_MARGIN * 2)
-        tokensList.topToBottomOf(labelErgAmount).widthMatchesSuperview(inset = DEFAULT_MARGIN * 2).bottomToSuperview()
+        tokensList.topToBottomOf(labelErgAmount).widthMatchesSuperview(inset = DEFAULT_MARGIN * 2)
+        registerList.topToBottomOf(tokensList).widthMatchesSuperview(inset = DEFAULT_MARGIN * 2).bottomToSuperview()
     }
 
     fun bindBoxView(
         value: Long?,
         address: String,
         assets: List<AssetInstanceInfo>?,
+        registers: AdditionalRegisters?,
         tokenClickListener: ((String) -> Unit)?,
         addressLabelHandler: ((String, (String) -> Unit) -> Unit)?,
         tokenLabelHandler: ((String, (String) -> Unit) -> Unit)?,
@@ -78,6 +85,17 @@ class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.
                     if (token.name == null && tokenLabelHandler != null) {
                         tokenLabelHandler.invoke(token.tokenId) { displayName -> setTokenName(displayName) }
                     }
+                })
+            }
+        }
+
+        registerList.apply {
+            clearArrangedSubviews()
+            registers?.entries?.sortedBy { it.key }?.forEach {
+                addArrangedSubview(Body2Label().apply {
+                    text = it.key + ": " + it.value.sigmaType + ", " + it.value.renderedValue
+                    numberOfLines = 3
+                    lineBreakMode = NSLineBreakMode.TruncatingTail
                 })
             }
         }

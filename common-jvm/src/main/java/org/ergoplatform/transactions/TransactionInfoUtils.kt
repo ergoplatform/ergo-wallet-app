@@ -6,12 +6,12 @@ import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.BoxAttachmentBuilder
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
-import org.ergoplatform.explorer.client.model.AssetInstanceInfo
-import org.ergoplatform.explorer.client.model.InputInfo
-import org.ergoplatform.explorer.client.model.OutputInfo
+import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.getErgoNetworkType
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.restapi.client.ErgoTransactionOutput
+import org.ergoplatform.utils.Base64Coder
+import special.collection.Coll
 import kotlin.math.min
 
 /**
@@ -140,6 +140,8 @@ private fun buildTransactionInfo(
                 }
             }
         }
+
+        outputInfo.additionalRegisters(getAdditionalRegisters(transactionBox.registers))
     }
 
     return TransactionInfo(txId, inputsList, outputsList, hintMsg)
@@ -200,6 +202,26 @@ private fun getAssetInstanceInfosFromErgoBoxToken(
 
         tokenInfo
     }
+}
+
+private fun getAdditionalRegisters(
+    registers: List<ErgoValue<*>>
+): AdditionalRegisters {
+    val registerMap = AdditionalRegisters()
+    registers.forEachIndexed { idx, ev ->
+        registerMap["R${idx + 4}"] = AdditionalRegister().apply {
+            val value = ev.value
+            renderedValue = try {
+                if (value is Coll<*> && value.size() > 0 && value.apply(0) is Byte)
+                    String(Base64Coder.encode(ScalaHelpers.collByteToByteArray(value as Coll<Byte>)))
+                else value.toString()
+            } catch (t: Throwable) {
+                value.toString()
+            }
+            sigmaType = ev.type.rType.name()
+        }
+    }
+    return registerMap
 }
 
 /**

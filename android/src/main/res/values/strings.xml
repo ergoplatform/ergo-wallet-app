@@ -6,6 +6,7 @@
     <string name="format_erg" translatable="false">###,##0.0000</string>
     <string name="format_erg_more_precise" translatable="false">###,##0.000000</string>
     <string name="format_fiat" translatable="false">###,##0.00</string>
+    <string name="button_unlock">Unlock app</string>
 
     <string name="hint_password">Please enter your spending password</string>
     <string name="label_forgot_password">Forgot your password?</string>
@@ -210,6 +211,8 @@
     <string name="button_scan_signed_tx">Scan signed tx</string>
     <string name="button_next">Next</string>
     <string name="title_authenticate">Authentication required</string>
+    <string name="error_device_security_save_wallet">Could not store secrets device-encrypted: %1$s\n\nPlease check if you have set up
+        biometric authentication on this device.</string>
     <string name="error_device_security">Security error: %1$s\n\nMost likely this is caused by a change in device\'s authentication settings.
         If this error persists, please restore this wallet with the mnemonic you have noted.</string>
     <string name="error_device_security_cloud_hint">The information to decrypt your secrets could not be read. Please note
@@ -249,8 +252,12 @@
     <string name="title_signing_request">Sign</string>
     <string name="desc_signing_request">Please check the details of the transaction to issue.</string>
     <string name="title_inboxes">Amounts to spent</string>
+    <string name="title_inputs_spent">%1$s boxes to be spent</string>
     <string name="desc_inboxes">These amounts will be spent when the transaction is processed.</string>
     <string name="title_outboxes">Outgoing amounts</string>
+    <string name="title_outputs_created">%1$s boxes to be created</string>
+    <string name="button_switch_to_boxes">Switch to detailed box information</string>
+    <string name="button_switch_to_amounts">Switch to summarized amounts view</string>
     <string name="label_qr_pages_info">%1$s of %2$s</string>
     <string name="desc_outboxes">These amounts will be sent when the transaction is processed.</string>
     <string name="desc_show_signed">Your transaction was signed and needs to be sent to the network.
@@ -264,7 +271,7 @@
     <string name="error_accessing_webcam">Error accessing webcam</string>
     <string name="error_accessing_webcam_macos">On MacOS, accessing the webcam does not work due to security restrictions. If you are using an M1 mac, you can use the iOS Ergo Wallet App which can access the cam.</string>
     <string name="hint_no_webcam">As an alternative, you can copy a QR code image to the clipboard and press the button below, or copy the QR code contents and paste them below.</string>
-    <string name="error_no_image_clipboard">No image found in system clipboard.</string>
+    <string name="error_no_image_clipboard">No image found in system clipboard.\n\nIf you want to paste text, paste into the text field below.</string>
     <string name="error_no_qrcode_image_clipboard">No QR code found in image.\n\nMake sure to copy QR code with a margin.</string>
 
     <!-- Ergo Pay Signing -->
@@ -385,4 +392,8 @@
     <string name="button_balance_notif_hourly">Every hour</string>
     <string name="button_balance_notif_xhourly">Every %1$s hours</string>
     <string name="desc_balance_notification">Your wallet balance changed</string>
+    <string name="title_app_lock">Biometric App Lock</string>
+    <string name="desc_app_lock">Requires a biometric authentication when opening the application and after some inactivity time.\n\n
+        Only available when biometric authentication is set up for this device. Your secrets are always stored safely, even without activating this option.\n
+        Protects from unwanted looks of others using this device. We strongly recommend using a device lock screen instead.</string>
 </resources>

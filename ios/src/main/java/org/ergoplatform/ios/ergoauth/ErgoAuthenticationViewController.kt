@@ -239,6 +239,8 @@ class ErgoAuthenticationViewController(
         override fun continueButtonPressed() {
             navigationController.popViewController(true)
         }
+
+        override val parentVc: UIViewController get() = this@ErgoAuthenticationViewController
     }
 
     inner class IosUiLogic : ErgoAuthUiLogic() {
