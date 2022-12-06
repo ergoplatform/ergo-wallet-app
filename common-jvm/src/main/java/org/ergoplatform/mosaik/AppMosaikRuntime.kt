@@ -105,6 +105,7 @@ abstract class AppMosaikRuntime(
             iconFile = fileName,
             timeStampNow,
             favorite = formerAppEntry?.favorite ?: false,
+            manifest.notificationCheckUrl,
         )
 
         isFavoriteApp = newAppEntry.favorite

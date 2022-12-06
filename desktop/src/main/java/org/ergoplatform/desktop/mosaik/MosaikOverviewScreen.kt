@@ -102,7 +102,8 @@ fun MosaikOverviewScreen(
                         it.appDescription,
                         null,
                         0,
-                        false
+                        false,
+                        notificationUrl = null,
                     )
                 }, onAppClicked)
             }

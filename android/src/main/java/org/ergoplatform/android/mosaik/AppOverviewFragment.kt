@@ -90,7 +90,15 @@ class AppOverviewFragment : Fragment() {
             suggestions.forEach {
                 addAppEntry(
                     this,
-                    MosaikAppEntry(it.appUrl, it.appName, it.appDescription, null, 0, false)
+                    MosaikAppEntry(
+                        it.appUrl,
+                        it.appName,
+                        it.appDescription,
+                        null,
+                        0,
+                        false,
+                        notificationUrl = null,
+                    )
                 )
             }
         }
