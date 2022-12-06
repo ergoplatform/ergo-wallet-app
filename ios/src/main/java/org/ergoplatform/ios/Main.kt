@@ -49,10 +49,6 @@ class Main : UIApplicationDelegateAdapter() {
         LogUtils.logDebug = !isErgoMainNet
         AesEncryptionManager.isOnLegacyApi = true
 
-        // FIXME Babel Fees iOS is enabled due to Java7 incompatibility. Recheck after 5.0
-        //  activation or robovm libcore 10 upgrade
-        BabelFees.isEnabled = false
-
         CrashHandler.registerUncaughtExceptionHandler()
         LogUtils.stackTraceLogger = { CrashHandler.writeToDebugFile(it) }
         database = SqlDelightAppDb(setupDatabase())
