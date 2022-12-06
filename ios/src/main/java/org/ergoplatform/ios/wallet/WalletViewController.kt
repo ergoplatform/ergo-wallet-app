@@ -71,6 +71,7 @@ class WalletViewController : CoroutineViewController() {
                 WalletStateSyncManager.getInstance().refreshByUser(
                     appDelegate.prefs,
                     appDelegate.database,
+                    IosStringProvider(appDelegate.texts),
                     rescheduleRefreshJob = null
                 )
             }
@@ -159,6 +160,7 @@ class WalletViewController : CoroutineViewController() {
         WalletStateSyncManager.getInstance().refreshWhenNeeded(
             appDelegate.prefs,
             appDelegate.database,
+            IosStringProvider(appDelegate.texts),
             rescheduleRefreshJob = null
         )
     }

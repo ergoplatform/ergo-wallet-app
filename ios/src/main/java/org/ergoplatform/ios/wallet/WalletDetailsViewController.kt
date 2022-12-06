@@ -92,6 +92,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 uiLogic.refreshByUser(
                     appDelegate.prefs,
                     appDelegate.database,
+                    IosStringProvider(appDelegate.texts),
                     rescheduleRefreshJob = null
                 )
             }
@@ -134,6 +135,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         uiLogic.refreshWhenNeeded(
             appDelegate.prefs,
             appDelegate.database,
+            IosStringProvider(appDelegate.texts),
             rescheduleRefreshJob = null
         )
     }
