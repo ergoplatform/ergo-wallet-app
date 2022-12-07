@@ -23,6 +23,7 @@ import org.ergoplatform.wallet.getSortedDerivedAddressesList
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
+import kotlin.math.max
 
 abstract class AppMosaikRuntime(
     val appName: String,
@@ -106,6 +107,13 @@ abstract class AppMosaikRuntime(
             timeStampNow,
             favorite = formerAppEntry?.favorite ?: false,
             manifest.notificationCheckUrl,
+            formerAppEntry?.lastNotificationMessage,
+            lastNotificationMs = formerAppEntry?.lastNotificationMs ?: 0,
+            nextNotificationCheck = max(
+                formerAppEntry?.nextNotificationCheck ?: 0,
+                System.currentTimeMillis() + MosaikNotificationSyncManager.MIN_CHECK_INTERVAL_MINUTES * 1000L * 60
+            ),
+            notificationUnread = false,
         )
 
         isFavoriteApp = newAppEntry.favorite

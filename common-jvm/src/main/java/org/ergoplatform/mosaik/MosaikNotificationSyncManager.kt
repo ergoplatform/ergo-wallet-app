@@ -10,7 +10,7 @@ import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getHostname
 import java.util.*
-import kotlin.math.min
+import kotlin.math.max
 
 object MosaikNotificationSyncManager {
     val refreshingNotifications = MutableStateFlow(false)
@@ -103,7 +103,7 @@ object MosaikNotificationSyncManager {
                     freshLoadedEntry.copy(
                         lastNotificationMessage = response.message,
                         nextNotificationCheck = System.currentTimeMillis()
-                                + min(response.nextCheck, 15) * 1000L * 60,
+                                + max(response.nextCheck, MIN_CHECK_INTERVAL_MINUTES) * 1000L * 60,
                         lastNotificationMs = response.messageTs,
                         notificationUnread = unread
                     )
@@ -112,4 +112,9 @@ object MosaikNotificationSyncManager {
                 unread && !freshLoadedEntry.notificationUnread
             } ?: false
     }
+
+    const val MIN_CHECK_INTERVAL_MINUTES = 15
 }
+
+fun List<MosaikAppEntry>.getUnreadNotificationCount() =
+    filter { it.favorite && it.notificationUnread }.size
