@@ -5,6 +5,11 @@ CREATE TABLE IF NOT EXISTS `mosaik_app` (
     `iconFile` TEXT,
     `last_visited` INTEGER NOT NULL,
     `favorite` INTEGER AS Boolean NOT NULL,
+    `notificationUrl` TEXT,
+    `lastNotificationMessage` TEXT,
+    `lastNotificationMs` INTEGER NOT NULL,
+    `nextNotificationCheck` INTEGER NOT NULL,
+    `notificationUnread` INTEGER AS Boolean NOT NULL,
     PRIMARY KEY(`url`)
 );
 
@@ -12,7 +17,8 @@ CREATE INDEX IF NOT EXISTS `index_mosaik_app_favorite_name` ON `mosaik_app` (`fa
 
 insertOrReplace:
 INSERT OR REPLACE INTO `mosaik_app` (
-    `url`,`name`,`description`,`iconFile`,`last_visited`,`favorite`
+    `url`,`name`,`description`,`iconFile`,`last_visited`,`favorite`,
+    `notificationUrl`, `lastNotificationMessage`, `lastNotificationMs`, `nextNotificationCheck`, `notificationUnread`
 ) VALUES ?;
 
 deleteOldest:

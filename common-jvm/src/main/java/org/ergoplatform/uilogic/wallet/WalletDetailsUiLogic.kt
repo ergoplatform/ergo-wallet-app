@@ -123,21 +123,23 @@ abstract class WalletDetailsUiLogic {
     fun refreshWhenNeeded(
         prefs: PreferencesProvider,
         database: IAppDatabase,
+        texts: StringProvider,
         rescheduleRefreshJob: (() -> Unit)?
     ) {
         WalletStateSyncManager.getInstance()
-            .refreshWhenNeeded(prefs, database, rescheduleRefreshJob)
+            .refreshWhenNeeded(prefs, database, texts, rescheduleRefreshJob)
         refreshAddressTransactionsWhenNeeded(prefs, database)
     }
 
     fun refreshByUser(
         prefs: PreferencesProvider,
         database: IAppDatabase,
+        texts: StringProvider,
         rescheduleRefreshJob: (() -> Unit)?
     ): Boolean {
         refreshAddressTransactionsWhenNeeded(prefs, database)
         return WalletStateSyncManager.getInstance()
-            .refreshByUser(prefs, database, rescheduleRefreshJob)
+            .refreshByUser(prefs, database, texts, rescheduleRefreshJob)
     }
 
     fun gatherTokenInformation(tokenDbProvider: TokenDbProvider, apiService: ApiServiceManager) {

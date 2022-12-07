@@ -23,13 +23,16 @@ import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.transactions.ChooseSpendingWalletFragmentDialog
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.QrScannerActivity
+import org.ergoplatform.android.ui.dpToPx
 import org.ergoplatform.android.ui.postDelayed
 import org.ergoplatform.android.wallet.WalletFragmentDirections
+import org.ergoplatform.mosaik.getUnreadNotificationCount
 import org.ergoplatform.uilogic.MainAppUiLogic
 
 class MainActivity : AppCompatActivity() {
@@ -55,6 +58,21 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        // set up badge
+        val badge = navView.getOrCreateBadge(R.id.navigation_mosaik)
+        badge.verticalOffset = 4.dpToPx(resources)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                AppDatabase.getInstance(this@MainActivity).mosaikDbProvider.getAllAppFavoritesByLastVisited()
+                    .collectLatest {
+                        val notifications = it.getUnreadNotificationCount()
+                        badge.isVisible = notifications > 0
+                        badge.number = notifications
+                    }
+            }
+        }
+
+
         // check if soft keyboard is open and hide bottom nav bar
         window.decorView.setOnApplyWindowInsetsListener { view, insets ->
             val insetsCompat = WindowInsetsCompat.toWindowInsetsCompat(insets, view)
@@ -68,6 +86,7 @@ class MainActivity : AppCompatActivity() {
             handleIntent(navController)
         }
 
+        // set up app lock
         findViewById<Button>(R.id.button_unlock).setOnClickListener { showBiometricPrompt() }
 
         if (walletApp?.shouldLockApp == true)
@@ -86,7 +105,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         // removes pending notifications from system bar
-        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_SYNC)
+        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_BALANCE)
+        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_DAPP)
 
         if (walletApp?.isAppLocked() == false)
             unlockApp()
