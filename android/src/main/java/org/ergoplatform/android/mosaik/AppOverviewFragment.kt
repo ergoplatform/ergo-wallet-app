@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -14,10 +15,12 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.launch
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
+import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentAppOverviewBinding
 import org.ergoplatform.android.databinding.FragmentAppOverviewItemBinding
 import org.ergoplatform.android.persistence.AndroidCacheFiles
 import org.ergoplatform.android.ui.decodeSampledBitmapFromByteArray
+import org.ergoplatform.android.ui.dpToPx
 import org.ergoplatform.android.ui.hideForcedSoftKeyboard
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.mosaik.MosaikAppEntry
@@ -127,10 +130,24 @@ class AppOverviewFragment : Fragment() {
     private fun addAppEntry(linearLayout: LinearLayout, mosaikApp: MosaikAppEntry) {
         val binding = FragmentAppOverviewItemBinding.inflate(layoutInflater, linearLayout, true)
         binding.labelAppTitle.text = mosaikApp.name
-        binding.labelAppDesc.text =
-            if (mosaikApp.description.isNullOrBlank()) mosaikApp.url else mosaikApp.description
-        binding.labelAppDesc.maxLines = if (mosaikApp.description.isNullOrBlank()) 1 else 3
+
+        binding.labelAppDesc.apply {
+            if (mosaikApp.favorite && mosaikApp.notificationUnread && mosaikApp.lastNotificationMessage != null) {
+                text = mosaikApp.lastNotificationMessage
+                maxLines = 3
+                setBackgroundResource(R.drawable.background_emphasize)
+                setPadding(4.dpToPx(resources))
+            } else {
+                text =
+                    if (mosaikApp.description.isNullOrBlank()) mosaikApp.url else mosaikApp.description
+                maxLines = if (mosaikApp.description.isNullOrBlank()) 1 else 3
+                background = null
+                setPadding(0)
+            }
+        }
+
         binding.root.setOnClickListener { navigateToApp(mosaikApp.url, mosaikApp.name) }
+
 
         // set icon, if we have one
         mosaikApp.iconFile?.let { fileId ->
