@@ -105,7 +105,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         // removes pending notifications from system bar
-        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_SYNC)
+        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_BALANCE)
+        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_DAPP)
 
         if (walletApp?.isAppLocked() == false)
             unlockApp()

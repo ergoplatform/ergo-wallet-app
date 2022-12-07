@@ -30,15 +30,18 @@ object MosaikNotificationSyncManager {
         }
     }
 
-    private suspend fun updateMosaikNotifications(
+    suspend fun updateMosaikNotifications(
         database: IAppDatabase,
         texts: StringProvider,
+        onlyCheckForNew: Boolean = false,
     ): Boolean {
         var hasNewUnread = false
 
         val appsToCheck =
-            database.mosaikDbProvider.getAllAppFavoritesByLastVisited().firstOrNull()
-                ?.filter { it.notificationUrl != null && it.nextNotificationCheck < System.currentTimeMillis() }
+            database.mosaikDbProvider.getAllAppFavoritesByLastVisited().firstOrNull()?.filter {
+                it.notificationUrl != null && it.nextNotificationCheck < System.currentTimeMillis()
+                        && (!onlyCheckForNew || !it.notificationUnread)
+            }
         LogUtils.logDebug(
             "MosaikNotifications",
             "${appsToCheck?.size ?: 0} Mosaik App notifications to check"
