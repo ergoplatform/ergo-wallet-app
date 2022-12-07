@@ -59,9 +59,9 @@ object MosaikNotificationSyncManager {
                         MosaikContext.LIBRARY_MOSAIK_VERSION,
                         guidManager.getGuidForHost(getHostname(url)),
                         texts.locale.language,
-                        "Ergo Wallet App", // FIXME should report correct value
-                        "BG Job", // FIXME should report correct value
-                        MosaikContext.Platform.PHONE, // FIXME should report correct value
+                        "Ergo Wallet App", // not the full OS information, but it does not matter for background checks
+                        "", // app version is also not needed for background checks
+                        MosaikContext.Platform.PHONE, // and the same
                         (TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 60000),
                     )
                 })
