@@ -8,6 +8,7 @@ const val KEY_FIAT_CURRENCY = "fiatCurrency"
 const val KEY_FIAT_VALUE = "fiatValue"
 const val KEY_NODE_URL = "nodeUrl"
 const val KEY_NODE_LIST = "nodeList"
+const val KEY_BLOCK_HEIGHT = "blockHeight"
 const val KEY_EXPLORER_API_URL = "explorerApiUrl"
 const val KEY_IPFS_GATEWAY_URL = "ipfsGatewayUrl"
 const val KEY_TOKEN_VERIFY_URL = "tokenVerificationUrl"
@@ -67,6 +68,13 @@ abstract class PreferencesProvider {
             saveString(KEY_NODE_LIST, value.joinToString(","))
             saveLong(KEY_LASTNODELISTREFRESH, System.currentTimeMillis())
         }
+
+    /**
+     * blockchain block height last seen when interacting with the rest client
+     */
+    var lastBlockHeight: Long
+        get() = getLong(KEY_BLOCK_HEIGHT, 0)
+        set(value) = saveLong(KEY_BLOCK_HEIGHT, value)
 
     fun getDefaultNodeApiUrl() =
         if (isErgoMainNet) "http://159.65.11.55:9053/"

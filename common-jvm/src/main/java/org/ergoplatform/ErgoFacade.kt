@@ -178,6 +178,7 @@ object ErgoFacade {
 
         try {
             return getRestErgoClient(prefs).execute { ctx ->
+                prefs.lastBlockHeight = ctx.height.toLong()
                 val reducedTx = ctx.parseReducedTransaction(serializedTx)
                 val dataSource = ctx.dataSource
                 val inputs = reducedTx.inputBoxesIds.map { boxId ->
@@ -214,6 +215,8 @@ object ErgoFacade {
         try {
             val ergoClient = getRestErgoClient(prefs)
             return ergoClient.execute { ctx: BlockchainContext ->
+                prefs.lastBlockHeight = ctx.height.toLong()
+
                 // check if we have to use Babel Fees
                 val babelAmount = Parameters.MinChangeValue * 2 + feeAmount - nanoErgBalanceSenders
 
@@ -410,6 +413,7 @@ object ErgoFacade {
         try {
             val ergoClient = getRestErgoClient(prefs)
             return ergoClient.execute { ctx ->
+                prefs.lastBlockHeight = ctx.height.toLong()
                 val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
                 val txId = ctx.sendTransaction(signedTx).trim('"')
                 SendTransactionResult(txId.isNotEmpty(), txId, signedTx)

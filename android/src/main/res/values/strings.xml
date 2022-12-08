@@ -288,6 +288,8 @@
     <string name="label_ergo_pay_choose_wallet">Please choose a wallet to process the Ergo Pay Request.</string>
     <string name="title_choose_wallet">Choose a wallet</string>
     <string name="error_prover_cant_sign">The transaction or message could not be signed with this wallet\'s keys.</string>
+    <string name="warning_old_creation_height">The transaction contains output boxes with a self-reported age of more than a year.</string>
+    <string name="warning_burning_tokens">The transaction burns tokens.</string>
 
     <!-- Ergo Auth Signing -->
     <string name="intro_auth_request">dApp on %1$s\nrequests your authentication to\n%2$s.\n\nAuthenticate
