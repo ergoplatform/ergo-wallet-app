@@ -20,18 +20,19 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.addressbook.AddressBookDialogStateHandler
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
+import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.TransactionResult
-import org.ergoplatform.uilogic.STRING_BUTTON_SEND
+import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.uilogic.transactions.SuggestedFee
 import org.ergoplatform.wallet.isReadOnly
 
 class SendFundsComponent(
     componentContext: ComponentContext,
-    navHost: NavHostComponent,
+    private val navHost: NavHostComponent,
     private val walletConfig: WalletConfig,
     private val derivationIdx: Int = -1,
     private val paymentRequest: String? = null,
@@ -74,6 +75,7 @@ class SendFundsComponent(
                 walletConfig,
                 walletAddressState.value,
                 recipientAddress,
+                purposeMessage,
                 amountToSend,
                 amountsChangedCount.value,
                 recipientError,
@@ -91,6 +93,7 @@ class SendFundsComponent(
                     uiLogic.fetchSuggestedFeeData(ApiServiceManager.getOrInit(Application.prefs))
                 },
                 onChooseRecipientAddress = { addressBookDialogState.showChooseAddressDialog() },
+                onPurposeMessageInfoClicked = ::showPurposeMessageInfoDialog,
             )
 
             if (addTokenDialogState.value) {
@@ -120,7 +123,8 @@ class SendFundsComponent(
             )
 
             preparedTransactionInfoState.value?.let {
-                ConfirmSendFundsDialog(it,
+                ConfirmSendFundsDialog(
+                    it,
                     onDismissRequest = { preparedTransactionInfoState.value = null },
                     onConfirm = {
                         preparedTransactionInfoState.value = null
@@ -145,7 +149,7 @@ class SendFundsComponent(
                 uiLogic.receiverAddress = address
                 amountToSend.value = TextFieldValue(amount?.toStringTrimTrailingZeros() ?: "")
                 uiLogic.inputAmountChanged(amountToSend.value.text)
-                // TODO purpose message
+                message?.let { purposeMessage.value = TextFieldValue(message) }
             })
     }
 
@@ -154,12 +158,11 @@ class SendFundsComponent(
 
         recipientError.value = checkResponse.receiverError
         amountError.value = checkResponse.amountError
-        // TODO purpose message inputMessage.setHasError(checkResponse.messageError)
         // TODO focus
         tokensError.value = checkResponse.tokenError
 
         if (checkResponse.messageError) {
-            // TODO purpose message not implemented
+            showPurposeMessageInfoDialog(startPayment = true)
         }
 
         if (checkResponse.canPay) {
@@ -168,6 +171,21 @@ class SendFundsComponent(
             else
                 startPayment()
         }
+    }
+
+    private fun showPurposeMessageInfoDialog(startPayment: Boolean = false) {
+        navHost.dialogHandler.showDialog(
+            MosaikDialog(
+                Application.texts.getString(STRING_INFO_PURPOSE_MESSAGE),
+                Application.texts.getString(STRING_INFO_PURPOSE_MESSAGE_ACCEPT),
+                Application.texts.getString(STRING_INFO_PURPOSE_MESSAGE_DECLINE),
+                positiveButtonClicked = {
+                    Application.prefs.sendTxMessages = true
+                    if (startPayment) checkAndStartPayment()
+                },
+                negativeButtonClicked = { Application.prefs.sendTxMessages = false },
+            )
+        )
     }
 
     override val uiLogic = object : SendFundsUiLogic() {
@@ -235,6 +253,7 @@ class SendFundsComponent(
     }
 
     private val amountToSend = mutableStateOf(TextFieldValue(uiLogic.inputAmountString))
+    private val purposeMessage = mutableStateOf(TextFieldValue(uiLogic.message))
     private val recipientAddress = mutableStateOf(TextFieldValue(uiLogic.receiverAddress))
     private val editableFeeList: MutableState<List<SuggestedFee>> =
         mutableStateOf(uiLogic.suggestedFeeItems)

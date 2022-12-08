@@ -117,7 +117,7 @@ class SendFundsViewController(
             returnKeyType = UIReturnKeyType.Next
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
-                    inputAmount.becomeFirstResponder() // TODO node 5.0 inputMessage.becomeFirstResponder()
+                    inputMessage.becomeFirstResponder()
                     return true
                 }
 
@@ -291,7 +291,7 @@ class SendFundsViewController(
                 readOnlyHint,
                 introLabel,
                 inputReceiver,
-                // TODO node 5.0 inputMessage,
+                inputMessage,
                 inputAmount,
                 otherCurrencyContainer,
                 feeLabel,
