@@ -149,6 +149,7 @@ open class SigningTransactionContainer(
     private val hintMessageLabel = Body1Label().apply {
         textAlignment = NSTextAlignment.Center
     }
+    private val hintMessageContainer = UIView(CGRect.Zero())
 
     private val switchReducedModeLabel = Body2BoldLabel().apply {
         textAlignment = NSTextAlignment.Center
@@ -168,8 +169,11 @@ open class SigningTransactionContainer(
             textAlignment = NSTextAlignment.Center
         }, 0)
 
-        this.insertArrangedSubview(hintMessageLabel, 1)
+        this.insertArrangedSubview(hintMessageContainer, 1)
         this.insertArrangedSubview(switchReducedModeLabel, 2)
+
+        hintMessageContainer.addSubview(hintMessageLabel)
+        hintMessageLabel.edgesToSuperview()
 
         val signButton = PrimaryButton(texts.get(STRING_LABEL_CONFIRM)).apply {
             addOnTouchUpInsideListener { _, _ ->
@@ -207,7 +211,7 @@ open class SigningTransactionContainer(
         tiToUse.hintMsg?.let { (message, severity) ->
             hintMessageLabel.text = message
             val warning = severity == MessageSeverity.WARNING || severity == MessageSeverity.ERROR
-            hintMessageLabel.layer.apply {
+            hintMessageContainer.layer.apply {
                 if (warning) {
                     borderColor = uiColorErgo.cgColor
                     borderWidth = 1.0
@@ -217,8 +221,9 @@ open class SigningTransactionContainer(
                     cornerRadius = 0.0
                 }
             }
+            hintMessageContainer.isHidden = false
         }
         if (tiToUse.hintMsg == null)
-            hintMessageLabel.text = ""
+            hintMessageContainer.isHidden = true
     }
 }
