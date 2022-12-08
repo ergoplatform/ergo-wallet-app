@@ -221,6 +221,9 @@
     <string name="label_send_all">Send all</string>
     <string name="title_add_token">Choose token to send</string>
     <string name="error_token_amount">Please enter valid token amounts or remove the invalid token entries</string>
+    <string name="warning_send_to_contract">The address you have specified is a contract address, not a personal wallet address.
+      Please do only proceed if you are sure the contract can process the payment. Sending to contracts manually can make funds
+        become unspendable!</string>
     <string name="error_balance_erg">There is not enough balance to send the specified amount: only %1$s ERG available.</string>
     <string name="error_changebox_amount">You need to withhold a small amount of ERG to store your tokens remaining.</string>
     <string name="error_request_token_not_found">Could not add token \'%1$s\'</string>

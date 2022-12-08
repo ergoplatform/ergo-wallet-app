@@ -1,5 +1,6 @@
 package org.ergoplatform.compose.transactions
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +35,7 @@ import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
@@ -67,10 +69,15 @@ fun SignTransactionInfoLayout(
             style = labelStyle(LabelStyle.BODY1BOLD),
         )
 
-        transactionInfo.hintMsg?.let { message ->
+        transactionInfo.hintMsg?.let { (message, severity) ->
+            val warning = severity == MessageSeverity.WARNING || severity == MessageSeverity.ERROR
             Text(
                 message,
-                Modifier.fillMaxWidth().padding(top = defaultPadding / 2),
+                Modifier.fillMaxWidth().padding(top = defaultPadding / 2).then(
+                    if (warning) Modifier.border(1.dp, MosaikStyleConfig.primaryLabelColor)
+                        .padding(defaultPadding / 4)
+                    else Modifier
+                ),
                 textAlign = TextAlign.Center,
                 style = labelStyle(LabelStyle.BODY1)
             )

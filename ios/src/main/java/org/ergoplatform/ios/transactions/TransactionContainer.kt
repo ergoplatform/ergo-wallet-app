@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
@@ -203,6 +204,21 @@ open class SigningTransactionContainer(
 
         super.bindTransaction(tiToUse, tokenClickListener, addressLabelHandler, tokenLabelHandler)
 
-        hintMessageLabel.text = tiToUse.hintMsg ?: ""
+        tiToUse.hintMsg?.let { (message, severity) ->
+            hintMessageLabel.text = message
+            val warning = severity == MessageSeverity.WARNING || severity == MessageSeverity.ERROR
+            hintMessageLabel.layer.apply {
+                if (warning) {
+                    borderColor = uiColorErgo.cgColor
+                    borderWidth = 1.0
+                    cornerRadius = 4.0
+                } else {
+                    borderWidth = 0.0
+                    cornerRadius = 0.0
+                }
+            }
+        }
+        if (tiToUse.hintMsg == null)
+            hintMessageLabel.text = ""
     }
 }

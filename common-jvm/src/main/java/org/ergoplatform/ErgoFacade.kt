@@ -8,6 +8,7 @@ import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.restapi.client.PeersApi
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
@@ -247,16 +248,26 @@ object ErgoFacade {
 
                 val reduced = ctx.newProverBuilder().build().reduce(unsigned, ERG_BASE_COST)
 
-                val hintMsg = babelSwap?.let {
+                val hintMsgs = ArrayList<String>()
+                var hintSeverity = MessageSeverity.NONE
+
+                if (!recipient.isP2PK) {
+                    hintMsgs.add(texts.getString(STRING_WARNING_SEND_TO_CONTRACT))
+                    hintSeverity = MessageSeverity.WARNING
+                }
+
+                babelSwap?.let {
                     tokenBalanceSenders[babelSwap.tokenToSwap.id.toString()]?.let { walletToken ->
-                        texts.getString(
-                            STRING_BABELFEE_USED,
-                            ErgoAmount(babelSwap.babelAmountNanoErg).toStringTrimTrailingZeros(),
-                            TokenAmount(
-                                babelSwap.tokenToSwap.value,
-                                walletToken.decimals
-                            ).toStringUsFormatted(),
-                            walletToken.name ?: "",
+                        hintMsgs.add(
+                            texts.getString(
+                                STRING_BABELFEE_USED,
+                                ErgoAmount(babelSwap.babelAmountNanoErg).toStringTrimTrailingZeros(),
+                                TokenAmount(
+                                    babelSwap.tokenToSwap.value,
+                                    walletToken.decimals
+                                ).toStringUsFormatted(),
+                                walletToken.name ?: "",
+                            )
                         )
                     }
                 }
@@ -266,7 +277,9 @@ object ErgoFacade {
                     reduced.toBytes(),
                     inputs,
                     senderAddresses.first().ergoAddress.toString(),
-                    hintMsg = hintMsg
+                    hintMsg = if (hintMsgs.isNotEmpty())
+                        Pair(hintMsgs.joinToString("\n"), hintSeverity)
+                    else null
                 )
             }
         } catch (t: Throwable) {

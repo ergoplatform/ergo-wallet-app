@@ -22,7 +22,7 @@ data class TransactionInfo(
     val id: String,
     val inputs: List<InputInfo>,
     val outputs: List<OutputInfo>,
-    val hintMsg: String? = null,
+    val hintMsg: Pair<String, MessageSeverity>? = null,
 )
 
 /**
@@ -67,7 +67,7 @@ suspend fun Transaction.buildTransactionInfo(ergoApiService: ApiServiceManager):
  */
 fun Transaction.buildTransactionInfo(
     inputBoxes: HashMap<String, TransactionInfoBox>,
-    hintMsg: String? = null
+    hintMsg: Pair<String, MessageSeverity>? = null
 ): TransactionInfo {
     return buildTransactionInfo(
         inputBoxes,
@@ -83,7 +83,7 @@ private fun buildTransactionInfo(
     inputBoxesIds: List<String>,
     outboxes: List<TransactionBox>,
     txId: String,
-    hintMsg: String?,
+    hintMsg: Pair<String, MessageSeverity>?,
 ): TransactionInfo {
     val inputsList = ArrayList<InputInfo>()
     val outputsList = ArrayList<OutputInfo>()
