@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // set up app lock
-        findViewById<Button>(R.id.button_unlock).setOnClickListener { showBiometricPrompt() }
+        findViewById<Button>(R.id.button_unlock).setOnClickListener { unlockWithBiometricPrompt() }
 
         if (walletApp?.shouldLockApp == true)
             lifecycleScope.launch {
@@ -203,7 +203,14 @@ class MainActivity : AppCompatActivity() {
         walletApp?.userInteracted()
     }
 
-    private fun showBiometricPrompt() {
+    private fun unlockWithBiometricPrompt() {
+        showBiometricPrompt {
+            walletApp?.appUnlocked()
+            unlockApp()
+        }
+    }
+
+    fun showBiometricPrompt(authSucceeded: () -> Unit) {
 
         // setDeviceCredentialAllowed is deprecated, but needed for older SDK level
         @Suppress("DEPRECATION") val promptInfo = BiometricPrompt.PromptInfo.Builder()
@@ -214,8 +221,7 @@ class MainActivity : AppCompatActivity() {
 
         val callback = object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                walletApp?.appUnlocked()
-                unlockApp()
+                authSucceeded()
             }
         }
 

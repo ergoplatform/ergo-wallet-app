@@ -112,8 +112,10 @@ class SettingsFragment : Fragment() {
         setAppLockButtonText()
         binding.buttonAppLock.setOnClickListener {
             val preferences = Preferences(requireContext())
-            preferences.enableAppLock = !preferences.enableAppLock
-            setAppLockButtonText()
+            (activity as? MainActivity)?.showBiometricPrompt {
+                preferences.enableAppLock = !preferences.enableAppLock
+                setAppLockButtonText()
+            }
         }
     }
 
