@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +36,7 @@ fun SendFundsScreen(
     walletConfig: WalletConfig,
     walletAddress: WalletAddress?,
     recipientAddress: MutableState<TextFieldValue>,
+    purposeMessage: MutableState<TextFieldValue>,
     amountToSend: MutableState<TextFieldValue>,
     amountsChangedCount: Int,
     recipientError: MutableState<Boolean>,
@@ -47,6 +49,7 @@ fun SendFundsScreen(
     onSendClicked: () -> Unit,
     onChooseFeeClicked: () -> Unit,
     onChooseRecipientAddress: () -> Unit,
+    onPurposeMessageInfoClicked: () -> Unit,
 ) {
     AppScrollingLayout {
         Card(
@@ -147,6 +150,23 @@ fun SendFundsScreen(
                             }
                     },
                     readOnly = readOnly,
+                )
+
+                OutlinedTextField(
+                    purposeMessage.value,
+                    onValueChange = {
+                        purposeMessage.value = it
+                        uiLogic.message = it.text
+                    },
+                    Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    label = { Text(remember { Application.texts.getString(STRING_LABEL_PURPOSE) }) },
+                    trailingIcon = {
+                        IconButton(onClick = onPurposeMessageInfoClicked) {
+                            Icon(Icons.Outlined.Info, null)
+                        }
+                    },
+                    colors = appTextFieldColors(),
                 )
 
                 OutlinedTextField(

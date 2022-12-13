@@ -8,8 +8,12 @@ import org.ergoplatform.appkit.impl.BoxAttachmentBuilder
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.getErgoNetworkType
+import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.restapi.client.ErgoTransactionOutput
+import org.ergoplatform.uilogic.STRING_WARNING_BURNING_TOKENS
+import org.ergoplatform.uilogic.STRING_WARNING_OLD_CREATION_HEIGHT
+import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.Base64Coder
 import special.collection.Coll
 import kotlin.math.min
@@ -22,7 +26,7 @@ data class TransactionInfo(
     val id: String,
     val inputs: List<InputInfo>,
     val outputs: List<OutputInfo>,
-    val hintMsg: String? = null,
+    val hintMsg: Pair<String, MessageSeverity>? = null,
 )
 
 /**
@@ -39,10 +43,18 @@ data class TransactionInfoBox(
 /**
  * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
  * use within an applicable try/catch phrase
+ * if StringProvider is provided, warnings for user will be generated
  */
-suspend fun Transaction.buildTransactionInfo(ergoApiService: ApiServiceManager): TransactionInfo {
+suspend fun Transaction.buildTransactionInfo(
+    ergoApiService: ApiServiceManager,
+    prefs: PreferencesProvider,
+    texts: StringProvider? = null,
+): TransactionInfo {
     return withContext(Dispatchers.IO) {
         val inputsMap = HashMap<String, TransactionInfoBox>()
+        // check for burned tokens
+        val tokensMap = HashMap<String, Long>()
+
         inputBoxesIds.forEach { boxId ->
             val boxInfo = ergoApiService.getExplorerBoxInformation(boxId).execute().body()
 
@@ -55,8 +67,42 @@ suspend fun Transaction.buildTransactionInfo(ergoApiService: ApiServiceManager):
                 throw IllegalStateException("Could not retrieve information for box $boxId")
             else
                 inputsMap[transactionInfoBox.boxId] = transactionInfoBox
+
+            transactionInfoBox.tokens.forEach { token ->
+                val tokenId = token.tokenId
+                tokensMap[tokenId] = (tokensMap[tokenId] ?: 0) + (token.amount ?: 0)
+            }
         }
-        buildTransactionInfo(inputsMap)
+        outputs.forEach {
+            it.tokens.forEach { token ->
+                val tokenId = token.id.toString()
+                tokensMap[tokenId] = (tokensMap[tokenId] ?: 0) - token.value
+            }
+        }
+
+        // check for warnings
+        val warningMsgs = ArrayList<String>()
+        if (texts != null) {
+            // check for too old output block heights
+            val blockHeight = prefs.lastBlockHeight
+            val warningBlockHeight =
+                blockHeight - org.ergoplatform.wallet.protocol.Constants.BlocksPerYear()
+            if (outputs.any { it.creationHeight < warningBlockHeight }) {
+                warningMsgs.add(texts.getString(STRING_WARNING_OLD_CREATION_HEIGHT))
+            }
+
+            // check for burned tokens
+            if (tokensMap.values.any { it > 0 }) {
+                warningMsgs.add(texts.getString(STRING_WARNING_BURNING_TOKENS))
+            }
+        }
+
+        buildTransactionInfo(
+            inputsMap,
+            hintMsg = if (warningMsgs.isNotEmpty())
+                Pair(warningMsgs.joinToString("\n"), MessageSeverity.WARNING)
+            else null
+        )
     }
 }
 
@@ -67,7 +113,7 @@ suspend fun Transaction.buildTransactionInfo(ergoApiService: ApiServiceManager):
  */
 fun Transaction.buildTransactionInfo(
     inputBoxes: HashMap<String, TransactionInfoBox>,
-    hintMsg: String? = null
+    hintMsg: Pair<String, MessageSeverity>? = null
 ): TransactionInfo {
     return buildTransactionInfo(
         inputBoxes,
@@ -83,7 +129,7 @@ private fun buildTransactionInfo(
     inputBoxesIds: List<String>,
     outboxes: List<TransactionBox>,
     txId: String,
-    hintMsg: String?,
+    hintMsg: Pair<String, MessageSeverity>?,
 ): TransactionInfo {
     val inputsList = ArrayList<InputInfo>()
     val outputsList = ArrayList<OutputInfo>()

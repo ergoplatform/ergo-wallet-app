@@ -102,9 +102,7 @@ class Main : UIApplicationDelegateAdapter() {
     }
 
     override fun willResignActive(application: UIApplication?) {
-        if (prefs.enableAppLock &&
-            window.rootViewController.getTopController() !is AppLockViewController
-        ) {
+        if (window.rootViewController.getTopController() !is AppLockViewController) {
             timeWentToBackground = System.currentTimeMillis()
         }
 

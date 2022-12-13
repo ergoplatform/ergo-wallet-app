@@ -221,6 +221,9 @@
     <string name="label_send_all">Send all</string>
     <string name="title_add_token">Choose token to send</string>
     <string name="error_token_amount">Please enter valid token amounts or remove the invalid token entries</string>
+    <string name="warning_send_to_contract">The address you have specified is a contract address, not a personal wallet address.
+      Please do only proceed if you are sure the contract can process the payment. Sending to contracts manually can make funds
+        become unspendable!</string>
     <string name="error_balance_erg">There is not enough balance to send the specified amount: only %1$s ERG available.</string>
     <string name="error_changebox_amount">You need to withhold a small amount of ERG to store your tokens remaining.</string>
     <string name="error_request_token_not_found">Could not add token \'%1$s\'</string>
@@ -285,6 +288,8 @@
     <string name="label_ergo_pay_choose_wallet">Please choose a wallet to process the Ergo Pay Request.</string>
     <string name="title_choose_wallet">Choose a wallet</string>
     <string name="error_prover_cant_sign">The transaction or message could not be signed with this wallet\'s keys.</string>
+    <string name="warning_old_creation_height">The transaction contains output boxes with a self-reported age of more than a year.</string>
+    <string name="warning_burning_tokens">The transaction burns tokens.</string>
 
     <!-- Ergo Auth Signing -->
     <string name="intro_auth_request">dApp on %1$s\nrequests your authentication to\n%2$s.\n\nAuthenticate
@@ -386,14 +391,18 @@
     <string name="label_ipfs_http_gateway">IPFS HTTP gateway</string>
     <string name="desc_register_handler">You can register this application to handle Ergo specific protocols like ErgoPay and ErgoAuth.</string>
     <string name="button_register_handler">Register as Ergo protocol handler</string>
-    <string name="title_balance_notification">Changed balance notification</string>
-    <string name="desc_balance_notif_set">Check balance and notify on changes</string>
+    <string name="title_background_sync">Check balance and dApp messages and notify on changes</string>
     <string name="button_balance_notif_never">Never</string>
     <string name="button_balance_notif_hourly">Every hour</string>
     <string name="button_balance_notif_xhourly">Every %1$s hours</string>
-    <string name="desc_balance_notification">Your wallet balance changed</string>
     <string name="title_app_lock">Biometric App Lock</string>
     <string name="desc_app_lock">Requires a biometric authentication when opening the application and after some inactivity time.\n\n
         Only available when biometric authentication is set up for this device. Your secrets are always stored safely, even without activating this option.\n
         Protects from unwanted looks of others using this device. We strongly recommend using a device lock screen instead.</string>
+
+    <!-- Notifications -->
+    <string name="title_balance_notification">Changed balance notification</string>
+    <string name="title_mosaik_app_notification">dApp notification</string>
+    <string name="desc_balance_notification">Your wallet balance changed</string>
+    <string name="desc_mosaik_app_notification">New message from a dApp</string>
 </resources>

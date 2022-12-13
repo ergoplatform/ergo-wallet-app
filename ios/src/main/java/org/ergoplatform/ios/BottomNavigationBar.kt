@@ -2,6 +2,7 @@ package org.ergoplatform.ios
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
 import org.ergoplatform.ios.mosaik.AppOverviewViewController
@@ -12,6 +13,7 @@ import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
 import org.ergoplatform.ios.transactions.SendFundsViewController
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.ios.wallet.WalletViewController
+import org.ergoplatform.mosaik.getUnreadNotificationCount
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.MainAppUiLogic
 import org.ergoplatform.uilogic.STRING_TITLE_MOSAIK
@@ -26,7 +28,13 @@ class BottomNavigationBar : UITabBarController() {
 
     private fun setupVcs() {
         val appDelegate = getAppDelegate()
+        val viewcontrollerScope = CoroutineScope(Dispatchers.Default)
 
+        val mosaikItem = createNavController(
+            AppOverviewViewController(),
+            appDelegate.texts.get(STRING_TITLE_MOSAIK),
+            UIImage.systemImageNamed(IMAGE_MOSAIK)
+        )
         setViewControllers(
             NSArray(
                 listOf(
@@ -35,11 +43,7 @@ class BottomNavigationBar : UITabBarController() {
                         appDelegate.texts.get(STRING_TITLE_WALLETS),
                         UIImage.systemImageNamed(IMAGE_WALLET)
                     ),
-                    createNavController(
-                        AppOverviewViewController(),
-                        appDelegate.texts.get(STRING_TITLE_MOSAIK),
-                        UIImage.systemImageNamed(IMAGE_MOSAIK)
-                    ),
+                    mosaikItem,
                     createNavController(
                         SettingsViewController(),
                         appDelegate.texts.get(STRING_TITLE_SETTINGS),
@@ -48,6 +52,16 @@ class BottomNavigationBar : UITabBarController() {
                 )
             )
         )
+
+        // set up badges
+        viewcontrollerScope.launch {
+            appDelegate.database.mosaikDbProvider.getAllAppFavoritesByLastVisited().collectLatest {
+                val notifications = it.getUnreadNotificationCount()
+                val newBadgeValue = if (notifications > 0) notifications.toString() else null
+                if (newBadgeValue != mosaikItem.tabBarItem.badgeValue)
+                    runOnMainThread { mosaikItem.tabBarItem.badgeValue = newBadgeValue }
+            }
+        }
     }
 
     private fun createNavController(

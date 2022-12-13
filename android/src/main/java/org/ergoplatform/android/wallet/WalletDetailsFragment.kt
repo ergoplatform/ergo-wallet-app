@@ -76,6 +76,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             if (!walletDetailsViewModel.uiLogic.refreshByUser(
                     Preferences(context),
                     AppDatabase.getInstance(context),
+                    AndroidStringProvider(context),
                     rescheduleRefreshJob = { BackgroundSync.rescheduleJob(context) }
                 )
             ) {
@@ -385,6 +386,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         walletDetailsViewModel.uiLogic.refreshWhenNeeded(
             Preferences(context),
             AppDatabase.getInstance(context),
+            AndroidStringProvider(context),
             rescheduleRefreshJob = { BackgroundSync.rescheduleJob(context) }
         )
     }

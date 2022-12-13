@@ -117,7 +117,7 @@ class SendFundsViewController(
             returnKeyType = UIReturnKeyType.Next
             delegate = object : UITextFieldDelegateAdapter() {
                 override fun shouldReturn(textField: UITextField?): Boolean {
-                    inputAmount.becomeFirstResponder() // TODO node 5.0 inputMessage.becomeFirstResponder()
+                    inputMessage.becomeFirstResponder()
                     return true
                 }
 
@@ -291,7 +291,7 @@ class SendFundsViewController(
                 readOnlyHint,
                 introLabel,
                 inputReceiver,
-                // TODO node 5.0 inputMessage,
+                inputMessage,
                 inputAmount,
                 otherCurrencyContainer,
                 feeLabel,
@@ -381,6 +381,9 @@ class SendFundsViewController(
     }
 
     private fun checkAndStartPayment() {
+        // auto correct could have changed the message after the last change event
+        uiLogic.message = inputMessage.text
+
         val checkResponse = uiLogic.checkCanMakePayment(getAppDelegate().prefs)
 
         inputReceiver.setHasError(checkResponse.receiverError)

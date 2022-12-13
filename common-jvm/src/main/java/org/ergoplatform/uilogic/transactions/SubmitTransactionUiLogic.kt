@@ -131,7 +131,8 @@ abstract class SubmitTransactionUiLogic {
                 // save submitted transaction to every address
                 val txInfoToSave = (transactionInfo
                     ?: ergoTxResult.sentTransaction?.buildTransactionInfo(
-                        ApiServiceManager.getOrInit(preferences)
+                        ApiServiceManager.getOrInit(preferences),
+                        preferences
                     ))
 
                 txInfoToSave?.let {

@@ -8,6 +8,7 @@ import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.restapi.client.PeersApi
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.PromptSigningResult
 import org.ergoplatform.transactions.SendTransactionResult
 import org.ergoplatform.transactions.SigningResult
@@ -177,6 +178,7 @@ object ErgoFacade {
 
         try {
             return getRestErgoClient(prefs).execute { ctx ->
+                prefs.lastBlockHeight = ctx.height.toLong()
                 val reducedTx = ctx.parseReducedTransaction(serializedTx)
                 val dataSource = ctx.dataSource
                 val inputs = reducedTx.inputBoxesIds.map { boxId ->
@@ -213,6 +215,8 @@ object ErgoFacade {
         try {
             val ergoClient = getRestErgoClient(prefs)
             return ergoClient.execute { ctx: BlockchainContext ->
+                prefs.lastBlockHeight = ctx.height.toLong()
+
                 // check if we have to use Babel Fees
                 val babelAmount = Parameters.MinChangeValue * 2 + feeAmount - nanoErgBalanceSenders
 
@@ -247,16 +251,26 @@ object ErgoFacade {
 
                 val reduced = ctx.newProverBuilder().build().reduce(unsigned, ERG_BASE_COST)
 
-                val hintMsg = babelSwap?.let {
+                val hintMsgs = ArrayList<String>()
+                var hintSeverity = MessageSeverity.NONE
+
+                if (!recipient.isP2PK) {
+                    hintMsgs.add(texts.getString(STRING_WARNING_SEND_TO_CONTRACT))
+                    hintSeverity = MessageSeverity.WARNING
+                }
+
+                babelSwap?.let {
                     tokenBalanceSenders[babelSwap.tokenToSwap.id.toString()]?.let { walletToken ->
-                        texts.getString(
-                            STRING_BABELFEE_USED,
-                            ErgoAmount(babelSwap.babelAmountNanoErg).toStringTrimTrailingZeros(),
-                            TokenAmount(
-                                babelSwap.tokenToSwap.value,
-                                walletToken.decimals
-                            ).toStringUsFormatted(),
-                            walletToken.name ?: "",
+                        hintMsgs.add(
+                            texts.getString(
+                                STRING_BABELFEE_USED,
+                                ErgoAmount(babelSwap.babelAmountNanoErg).toStringTrimTrailingZeros(),
+                                TokenAmount(
+                                    babelSwap.tokenToSwap.value,
+                                    walletToken.decimals
+                                ).toStringUsFormatted(),
+                                walletToken.name ?: "",
+                            )
                         )
                     }
                 }
@@ -266,7 +280,9 @@ object ErgoFacade {
                     reduced.toBytes(),
                     inputs,
                     senderAddresses.first().ergoAddress.toString(),
-                    hintMsg = hintMsg
+                    hintMsg = if (hintMsgs.isNotEmpty())
+                        Pair(hintMsgs.joinToString("\n"), hintSeverity)
+                    else null
                 )
             }
         } catch (t: Throwable) {
@@ -397,6 +413,7 @@ object ErgoFacade {
         try {
             val ergoClient = getRestErgoClient(prefs)
             return ergoClient.execute { ctx ->
+                prefs.lastBlockHeight = ctx.height.toLong()
                 val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
                 val txId = ctx.sendTransaction(signedTx).trim('"')
                 SendTransactionResult(txId.isNotEmpty(), txId, signedTx)

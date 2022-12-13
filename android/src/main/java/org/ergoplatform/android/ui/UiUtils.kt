@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -12,9 +13,9 @@ import android.os.Handler
 import android.os.Looper
 import android.text.method.LinkMovementMethod
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.IdRes
@@ -254,3 +255,7 @@ private fun calculateInSampleSize(
 
     return inSampleSize
 }
+
+fun Number.dpToPx(resources: Resources) =
+    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), resources.displayMetrics)
+        .toInt()

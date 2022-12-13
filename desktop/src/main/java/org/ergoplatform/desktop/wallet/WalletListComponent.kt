@@ -67,6 +67,7 @@ class WalletListComponent(
                     syncManager.refreshByUser(
                         Application.prefs,
                         Application.database,
+                        Application.texts,
                         rescheduleRefreshJob = null
                     )
                 }
@@ -119,6 +120,7 @@ class WalletListComponent(
                     .refreshWhenNeeded(
                         Application.prefs,
                         Application.database,
+                        Application.texts,
                         rescheduleRefreshJob = null
                     )
                 processStartUpArguments()

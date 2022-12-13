@@ -148,10 +148,34 @@ fun Address_transaction_token.toModel() =
     )
 
 fun MosaikAppEntry.toDbEntity() =
-    Mosaik_app(url, name, description, iconFile, lastVisited, favorite)
+    Mosaik_app(
+        url,
+        name,
+        description,
+        iconFile,
+        lastVisited,
+        favorite,
+        notificationUrl,
+        lastNotificationMessage,
+        lastNotificationMs,
+        nextNotificationCheck,
+        notificationUnread,
+    )
 
 fun Mosaik_app.toModel() =
-    MosaikAppEntry(url, name, description, iconFile, last_visited, favorite)
+    MosaikAppEntry(
+        url,
+        name,
+        description,
+        iconFile,
+        last_visited,
+        favorite,
+        notificationUrl,
+        lastNotificationMessage,
+        lastNotificationMs,
+        nextNotificationCheck,
+        notificationUnread,
+    )
 
 fun MosaikAppHost.toDbEntity() =
     Mosaik_host(hostName, guid)

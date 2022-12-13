@@ -162,7 +162,8 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                     epsr = getErgoPaySigningRequest(
                         request,
                         wallet?.let { getSigningDerivedAddresses() } ?: emptyList())
-                    transactionInfo = epsr?.buildTransactionInfo(getErgoApiService(prefs))
+                    transactionInfo =
+                        epsr?.buildTransactionInfo(getErgoApiService(prefs), prefs, texts)
 
                     transitionToNextStep(texts, database)
                 } catch (t: Throwable) {

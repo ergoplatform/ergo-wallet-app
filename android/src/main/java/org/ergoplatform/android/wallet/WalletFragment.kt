@@ -117,6 +117,7 @@ class WalletFragment : Fragment() {
             if (!nodeConnector.refreshByUser(
                     Preferences(context),
                     AppDatabase.getInstance(context),
+                    AndroidStringProvider(context),
                     rescheduleRefreshJob = { BackgroundSync.rescheduleJob(context) }
                 )
             ) {
@@ -194,6 +195,7 @@ class WalletFragment : Fragment() {
         WalletStateSyncManager.getInstance().refreshWhenNeeded(
             Preferences(context),
             AppDatabase.getInstance(context),
+            AndroidStringProvider(context),
             rescheduleRefreshJob = { BackgroundSync.rescheduleJob(context) }
         )
     }
