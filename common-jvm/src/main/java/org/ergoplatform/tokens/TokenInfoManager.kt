@@ -158,33 +158,44 @@ class TokenInfoManager {
         val tokenInfo = boxInfo.assets.find { it.tokenId == tokenId }!!
 
         val eip4Token = try {
-            Eip4TokenBuilder.buildFromAdditionalRegisters(
-                tokenId,
-                tokenInfo.amount,
-                boxInfo.additionalRegisters
-            )
-        } catch (iea: IllegalArgumentException) {
-            // IllegalArgumentException can be caused when R7+ are invalid, retry with R4-R6 only
-            Eip4TokenBuilder.buildFromAdditionalRegisters(
-                tokenId,
-                tokenInfo.amount,
-                AdditionalRegisters().apply {
-                    putAll(boxInfo.additionalRegisters.filter { listOf("R4", "R5", "R6").contains(it.key) })
-                }
-            )
+            try {
+                Eip4TokenBuilder.buildFromAdditionalRegisters(
+                    tokenId,
+                    tokenInfo.amount,
+                    boxInfo.additionalRegisters
+                )
+            } catch (iea: IllegalArgumentException) {
+                // IllegalArgumentException can be caused when R7+ are invalid, retry with R4-R6 only
+                Eip4TokenBuilder.buildFromAdditionalRegisters(
+                    tokenId,
+                    tokenInfo.amount,
+                    AdditionalRegisters().apply {
+                        putAll(boxInfo.additionalRegisters.filter {
+                            listOf(
+                                "R4",
+                                "R5",
+                                "R6"
+                            ).contains(it.key)
+                        })
+                    }
+                )
+            }
+        } catch (t: Throwable) {
+            // not an EIP-4 compliant token
+            null
         }
 
         return TokenInformation(
             tokenId,
             issuingBoxId,
             boxInfo.transactionId,
-            eip4Token.tokenName,
-            eip4Token.tokenDescription,
-            eip4Token.decimals,
-            eip4Token.value,
-            eip4Token.mintingBoxR7?.toHex(),
-            eip4Token.mintingBoxR8?.toHex(),
-            eip4Token.mintingBoxR9?.toHex(),
+            eip4Token?.tokenName ?: tokenId,
+            eip4Token?.tokenDescription ?: "",
+            eip4Token?.decimals ?: 0,
+            eip4Token?.value ?: tokenInfo.amount,
+            eip4Token?.mintingBoxR7?.toHex(),
+            eip4Token?.mintingBoxR8?.toHex(),
+            eip4Token?.mintingBoxR9?.toHex(),
         )
     }
 
