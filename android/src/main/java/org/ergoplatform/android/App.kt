@@ -15,6 +15,9 @@ import org.ergoplatform.utils.LogUtils
 class App : Application() {
 
     companion object {
+        // Inactivity interval after which the app will be locked
+        const val appLockMs = 2L * 60 * 1000L
+
         var lastStackTrace: String? = null
             private set
     }
@@ -77,7 +80,7 @@ class App : Application() {
         private set
 
     fun isAppLocked(): Boolean =
-        shouldLockApp && System.currentTimeMillis() - lastInteraction >= 2L * 60 * 1000L
+        shouldLockApp && System.currentTimeMillis() - lastInteraction >= appLockMs
 
     fun appUnlocked() {
         lastInteraction = System.currentTimeMillis()
