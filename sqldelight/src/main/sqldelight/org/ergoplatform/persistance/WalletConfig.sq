@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS `wallet_configs` (
     `enc_type` INTEGER AS Int,
     `secret_storage` BLOB,
     `unfold_tokens` INTEGER AS Boolean NOT NULL,
-    `xpubkey` TEXT
+    `xpubkey` TEXT,
+    `wallet_type` INTEGER AS Int
 );
 
 selectAll:
@@ -27,8 +28,8 @@ UPDATE wallet_configs SET unfold_tokens = ? WHERE id = ?;
 
 insertOrReplace:
 INSERT OR REPLACE INTO `wallet_configs` (
-    `id`,`display_name`,`public_address`,`enc_type`,`secret_storage`,`unfold_tokens`, `xpubkey`
-) VALUES (?,?,?,?,?,?,?);
+    `id`,`display_name`,`public_address`,`enc_type`,`secret_storage`,`unfold_tokens`, `xpubkey`, `wallet_type`
+) VALUES (?,?,?,?,?,?,?, ?);
 
 deleteWalletById:
 DELETE FROM wallet_configs WHERE id = ?;

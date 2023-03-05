@@ -6,6 +6,7 @@ import org.ergoplatform.SigningSecrets
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
+import org.ergoplatform.persistance.WALLET_TYPE_NORMAL
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletDbProvider
@@ -122,6 +123,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
                 existingWallet.firstAddress,
                 encType,
                 secretStorage,
+                walletType = WALLET_TYPE_NORMAL,
                 extendedPublicKey = null
             )
             walletDbProvider.updateWalletConfig(walletConfig)
@@ -133,6 +135,7 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
                     publicAddress,
                     encType,
                     secretStorage,
+                    walletType = WALLET_TYPE_NORMAL,
                     extendedPublicKey = null
                 )
             walletDbProvider.insertWalletConfig(walletConfig)

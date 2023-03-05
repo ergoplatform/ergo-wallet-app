@@ -16,6 +16,7 @@ import org.ergoplatform.android.mosaik.MosaikAppDbEntity
 import org.ergoplatform.android.mosaik.MosaikDbDao
 import org.ergoplatform.android.mosaik.MosaikHostDbEntity
 import org.ergoplatform.android.mosaik.toDbEntity
+import org.ergoplatform.android.multisig.MultisigTransactionDbEntity
 import org.ergoplatform.android.tokens.TokenDbDao
 import org.ergoplatform.android.tokens.TokenInformationDbEntity
 import org.ergoplatform.android.tokens.TokenPriceDbEntity
@@ -43,8 +44,9 @@ import org.ergoplatform.persistance.*
         MosaikAppDbEntity::class,
         MosaikHostDbEntity::class,
         AddressBookEntryEntity::class,
+        MultisigTransactionDbEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase(), IAppDatabase {
@@ -77,6 +79,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 .addMigrations(MIGRATION_7_8)
                 .addMigrations(MIGRATION_8_9)
                 .addMigrations(MIGRATION_9_10)
+                .addMigrations(MIGRATION_10_11)
                 .build()
         }
 
@@ -156,6 +159,14 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 database.execSQL("ALTER TABLE mosaik_app ADD COLUMN `lastNotificationMs` INTEGER NOT NULL DEFAULT 0")
                 database.execSQL("ALTER TABLE mosaik_app ADD COLUMN `nextNotificationCheck` INTEGER NOT NULL DEFAULT 0")
                 database.execSQL("ALTER TABLE mosaik_app ADD COLUMN `notificationUnread` INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE wallet_configs ADD COLUMN `wallet_type` INTEGER")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `multisig_transaction` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `address` TEXT NOT NULL, `tx_id` TEXT NOT NULL, `last_change` INTEGER NOT NULL, `memo` TEXT, `data` TEXT, `state` INTEGER NOT NULL)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_multisig_transaction_address_last_change` ON `multisig_transaction` (`address` ASC, `last_change` DESC)")
             }
         }
 

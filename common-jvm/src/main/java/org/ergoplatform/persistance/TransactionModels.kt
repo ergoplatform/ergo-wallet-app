@@ -109,3 +109,38 @@ data class AddressTransactionToken(
      */
     val tokenAmount: TokenAmount
 )
+
+
+/**
+ * Holds state of an incomplete multisig transaction
+ */
+data class MultisigTransaction(
+    /**
+     * DB id
+     */
+    val id: Int,
+    /**
+     * address this transaction is saved for
+     */
+    val address: String,
+    /**
+     * transaction id of this transaction
+     */
+    val txId: String,
+    /**
+     * timestamp of last change to the data, to sort transactions
+     */
+    val lastChange: Long,
+    /**
+     * message that is saved to the transaction, set by the creator
+     */
+    val memo: String?,
+    /**
+     * serialized state of the transaction
+     */
+    val data: String?,
+    /**
+     * state this transaction TODO states to be defined
+     */
+    val state: Int,
+)

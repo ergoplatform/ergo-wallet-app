@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.*
+import org.ergoplatform.persistance.WALLET_TYPE_NORMAL
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.uilogic.STRING_ERROR_ADDRESS_ALREADY_ADDED
@@ -53,6 +54,7 @@ abstract class AddReadOnlyWalletUiLogic {
             walletAddress,
             0,
             null,
+            walletType = WALLET_TYPE_NORMAL,
             extendedPublicKey = xpubkey?.let { userInput }
         )
 

@@ -24,7 +24,8 @@ abstract class WalletConfigUiLogic {
                 it.encryptionType,
                 it.secretStorage,
                 it.unfoldTokens,
-                it.extendedPublicKey
+                it.extendedPublicKey,
+                it.walletType,
             )
 
             db.updateWalletConfig(newWalletConfig)

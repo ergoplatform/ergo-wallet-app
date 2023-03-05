@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS `multisig_transaction` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `address` TEXT NOT NULL,
+    `tx_id` TEXT NOT NULL,
+    `last_change` INTEGER NOT NULL,
+    `memo` TEXT,
+    `data` TEXT,
+    `state` INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS `index_multisig_transaction_address_last_change` ON `multisig_transaction` (`address` ASC, `last_change` DESC);

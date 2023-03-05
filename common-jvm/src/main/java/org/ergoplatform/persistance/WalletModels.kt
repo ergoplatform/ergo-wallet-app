@@ -7,6 +7,16 @@ const val ENC_TYPE_PASSWORD = 1
  */
 const val ENC_TYPE_DEVICE = 2
 
+/**
+ * a "normal" wallet: p2pk and signing if secretStorage is filled, read-only if not
+ */
+const val WALLET_TYPE_NORMAL = 0
+
+/**
+ * a multisig wallet. will never have secretStorage filled and won't have derived addresses
+ */
+const val WALLET_TYPE_MULTISIG = 10
+
 data class WalletConfig(
     val id: Int,
     val displayName: String?,
@@ -15,6 +25,7 @@ data class WalletConfig(
     val secretStorage: ByteArray?,
     val unfoldTokens: Boolean = false,
     val extendedPublicKey: String?,
+    val walletType: Int,
 )
 
 data class WalletState(

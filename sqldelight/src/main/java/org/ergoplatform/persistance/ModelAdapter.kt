@@ -14,7 +14,8 @@ fun Wallet_configs.toModel(): WalletConfig {
         enc_type,
         secret_storage,
         unfold_tokens,
-        xpubkey
+        xpubkey,
+        wallet_type ?: WALLET_TYPE_NORMAL,
     )
 }
 
@@ -26,7 +27,8 @@ fun WalletConfig.toDbEntity(): Wallet_configs {
         encryptionType,
         secretStorage,
         unfoldTokens,
-        extendedPublicKey
+        extendedPublicKey,
+        walletType,
     )
 }
 
@@ -188,3 +190,9 @@ fun Address_book.toModel() =
 
 fun AddressBookEntry.toDbEntity() =
     Address_book(id.toLong(), label, address, signedData)
+
+fun Multisig_transaction.toModel() =
+    MultisigTransaction(id.toInt(), address, tx_id, last_change, memo, data_, state.toInt())
+
+fun MultisigTransaction.toDbEntity() =
+    Multisig_transaction(id.toLong(), address, txId, lastChange, memo, data, state.toLong())

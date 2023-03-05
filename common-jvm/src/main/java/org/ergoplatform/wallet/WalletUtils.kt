@@ -35,7 +35,7 @@ fun Wallet.getTokensForAllAddresses(): List<WalletToken> {
 }
 
 fun Wallet.getTokensForAddress(address: String): List<WalletToken> {
-    return tokens.filter { it.publicAddress.equals(address) }
+    return tokens.filter { it.publicAddress == address }
 }
 
 /**
@@ -79,11 +79,14 @@ fun Wallet.getNumOfAddresses(): Int {
 }
 
 fun Wallet.getStateForAddress(address: String): WalletState? {
-    return state.filter { it.publicAddress.equals(address) }.firstOrNull()
+    return state.firstOrNull { it.publicAddress == address }
 }
 
 fun WalletConfig.isReadOnly(): Boolean = secretStorage == null
 
 fun Wallet.isReadOnly(): Boolean = walletConfig.isReadOnly()
 
-fun List<Wallet>.sortedByDisplayName(): List<Wallet> = sortedBy { it.walletConfig.displayName?.lowercase() }
+fun WalletConfig.isMultisig(): Boolean = walletType == WALLET_TYPE_MULTISIG
+
+fun List<Wallet>.sortedByDisplayName(): List<Wallet> =
+    sortedBy { it.walletConfig.displayName?.lowercase() }
