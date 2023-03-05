@@ -9,6 +9,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.PeopleAlt
 import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.runtime.Composable
@@ -73,6 +74,13 @@ fun AddWalletChooser(gotoScreen: (ScreenConfig) -> Unit) {
             Application.texts.getString(STRING_LABEL_READONLY_WALLET),
             Application.texts.getString(STRING_DESC_READONLY_WALLET),
             Icons.Default.ZoomIn
+        )
+
+        ChooserEntry(
+            { gotoScreen(ScreenConfig.CreateMultisigAddress) },
+            Application.texts.getString(STRING_LABEL_MULTISIG_WALLET),
+            Application.texts.getString(STRING_DESC_MULTISIG_WALLET),
+            Icons.Default.PeopleAlt
         )
 
     }

@@ -77,6 +77,8 @@
     <string name="desc_import_wallet">Use an exported or saved wallet file to import an existing wallet (keys and addresses).</string>
     <string name="label_readonly_wallet">Read-only wallet</string>
     <string name="desc_readonly_wallet">Add a wallet address in read-only mode. This won\'t save any secrets on this device.</string>
+    <string name="label_multisig_wallet">Multisig wallet</string>
+    <string name="desc_multisig_wallet">Set up a smart contract address that needs multiple wallet holders to sign transactions.</string>
 
     <!-- add readonly wallet -->
     <string name="intro_add_readonly">Enter your public wallet address or your extended public key to add the

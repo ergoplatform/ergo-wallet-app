@@ -41,6 +41,11 @@ class AddWalletChooserFragmentDialog : FullScreenFragmentDialog() {
                 .navigateSafe(AddWalletChooserFragmentDialogDirections.actionAddWalletChooserFragmentToAddReadOnlyWalletFragmentDialog())
         }
 
+        binding.cardMultisigWallet.setOnClickListener {
+            NavHostFragment.findNavController(requireParentFragment())
+                .navigateSafe(AddWalletChooserFragmentDialogDirections.actionAddWalletChooserFragmentToCreateMultisigAddressFragmentDialog())
+        }
+
         // Inflate the layout for this fragment
         return binding.root
     }

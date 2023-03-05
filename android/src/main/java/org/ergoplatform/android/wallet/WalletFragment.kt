@@ -83,6 +83,10 @@ class WalletFragment : Fragment() {
             NavHostFragment.findNavController(requireParentFragment())
                 .navigate(R.id.addReadOnlyWalletFragmentDialog)
         }
+        binding.emptyView.cardReadonlyWallet.setOnClickListener {
+            NavHostFragment.findNavController(requireParentFragment())
+                .navigate(R.id.createMultisigAddressFragmentDialog)
+        }
 
         binding.emptyView.cardCreateWallet.setOnClickListener {
             NavHostFragment.findNavController(requireParentFragment())

@@ -160,6 +160,9 @@
         <action
             android:id="@+id/action_addWalletChooserFragment_to_addReadOnlyWalletFragmentDialog"
             app:destination="@id/addReadOnlyWalletFragmentDialog" />
+        <action
+            android:id="@+id/action_addWalletChooserFragment_to_createMultisigAddressFragmentDialog"
+            app:destination="@id/createMultisigAddressFragmentDialog" />
     </dialog>
     <dialog
         android:id="@+id/createWalletDialog"
@@ -482,4 +485,8 @@
             android:id="@+id/connectionSettingsDialogFragment"
             android:name="org.ergoplatform.android.settings.ConnectionSettingsDialogFragment" />
     </navigation>
+    <dialog
+        android:id="@+id/createMultisigAddressFragmentDialog"
+        android:name="org.ergoplatform.android.multisig.CreateMultisigAddressFragmentDialog"
+        android:label="CreateMultisigAddressFragmentDialog" />
 </navigation>

@@ -210,6 +210,53 @@
 
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_multisig_wallet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/half_horizontal_margin">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:background="?selectableItemBackgroundBorderless">
+
+                <TextView
+                    android:id="@+id/title_multisig_wallet"
+                    style="@style/TextAppearance.App.HeadlineCardView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:text="@string/label_multisig_wallet"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/image_multisig_wallet"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/image_multisig_wallet"
+                    android:layout_width="@dimen/big_icon_size"
+                    android:layout_height="@dimen/big_icon_size"
+                    android:src="@drawable/ic_people_alt_24"
+                    app:layout_constraintBottom_toBottomOf="@id/desc_multisig_wallet"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/title_multisig_wallet" />
+
+                <TextView
+                    android:id="@+id/desc_multisig_wallet"
+                    style="@style/TextAppearance.App.Body1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/desc_multisig_wallet"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/title_multisig_wallet"
+                    app:layout_constraintTop_toBottomOf="@id/title_multisig_wallet" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>

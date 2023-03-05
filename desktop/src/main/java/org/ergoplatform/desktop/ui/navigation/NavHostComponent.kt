@@ -21,6 +21,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.ergoauth.ErgoAuthComponent
 import org.ergoplatform.desktop.mosaik.MosaikAppComponent
 import org.ergoplatform.desktop.mosaik.MosaikOverviewComponent
+import org.ergoplatform.desktop.multisig.CreateMultisigAddressComponent
 import org.ergoplatform.desktop.settings.SettingsComponent
 import org.ergoplatform.desktop.tokens.TokenInformationComponent
 import org.ergoplatform.desktop.transactions.*
@@ -94,6 +95,9 @@ class NavHostComponent(
 
             is ScreenConfig.AddReadOnlyWallet ->
                 AddReadOnlyWalletComponent(componentContext, this)
+
+            is ScreenConfig.CreateMultisigAddress ->
+                CreateMultisigAddressComponent(componentContext, this)
 
             is ScreenConfig.CreateWallet ->
                 CreateWalletComponent(componentContext, this)
