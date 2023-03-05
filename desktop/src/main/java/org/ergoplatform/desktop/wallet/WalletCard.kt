@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.PeopleAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.runtime.Composable
@@ -30,10 +31,7 @@ import org.ergoplatform.tokens.getTokenErgoValueSum
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.utils.formatTokenPriceToString
-import org.ergoplatform.wallet.getBalanceForAllAddresses
-import org.ergoplatform.wallet.getTokensForAllAddresses
-import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
-import org.ergoplatform.wallet.isReadOnly
+import org.ergoplatform.wallet.*
 
 @Composable
 fun WalletCard(
@@ -63,7 +61,11 @@ fun WalletCard(
                 Row {
 
                     Icon(
-                        if (wallet.isReadOnly()) Icons.Default.ZoomIn else Icons.Default.AccountBalanceWallet,
+                        when {
+                            wallet.isMultisig() -> Icons.Default.PeopleAlt
+                            wallet.isReadOnly() -> Icons.Default.ZoomIn
+                            else -> Icons.Default.AccountBalanceWallet
+                        },
                         null,
                         Modifier.align(Alignment.Top).size(bigIconSize)
                     )

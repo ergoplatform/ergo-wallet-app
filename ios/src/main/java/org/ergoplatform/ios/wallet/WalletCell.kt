@@ -14,10 +14,7 @@ import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.utils.formatTokenPriceToString
-import org.ergoplatform.wallet.getBalanceForAllAddresses
-import org.ergoplatform.wallet.getTokensForAllAddresses
-import org.ergoplatform.wallet.getUnconfirmedBalanceForAllAddresses
-import org.ergoplatform.wallet.isReadOnly
+import org.ergoplatform.wallet.*
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -83,14 +80,17 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
             layoutMargins = UIEdgeInsets.Zero()
             addSubview(tokenCount)
             addSubview(tokenValueBalance)
-            tokenCount.leftToSuperview().topToSuperview().bottomToSuperview().enforceKeepIntrinsicWidth()
-            tokenValueBalance.centerVerticallyTo(tokenCount).leftToRightOf(tokenCount, DEFAULT_MARGIN * 1.5f)
+            tokenCount.leftToSuperview().topToSuperview().bottomToSuperview()
+                .enforceKeepIntrinsicWidth()
+            tokenValueBalance.centerVerticallyTo(tokenCount)
+                .leftToRightOf(tokenCount, DEFAULT_MARGIN * 1.5f)
                 .rightToSuperview()
         }
 
-        configButton = UIImageView(getIosSystemImage(IMAGE_SETTINGS, UIImageSymbolScale.Small)).apply {
-            tintColor = UIColor.label()
-        }
+        configButton =
+            UIImageView(getIosSystemImage(IMAGE_SETTINGS, UIImageSymbolScale.Small)).apply {
+                tintColor = UIColor.label()
+            }
 
         detailsButton = CommonButton(textBundle.get(STRING_LABEL_DETAILS))
         receiveButton = CommonButton(textBundle.get(STRING_BUTTON_RECEIVE))
@@ -152,7 +152,8 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
 
         configButton.topToSuperview().rightToSuperview()
 
-        unfoldTokensButton.centerVerticallyTo(tokenTitles).rightToLeftOf(tokenTitles, DEFAULT_MARGIN)
+        unfoldTokensButton.centerVerticallyTo(tokenTitles)
+            .rightToLeftOf(tokenTitles, DEFAULT_MARGIN)
 
         cardView.contentView.isUserInteractionEnabled = true
         cardView.contentView.addGestureRecognizer(UITapGestureRecognizer {
@@ -199,7 +200,11 @@ class WalletCell : AbstractTableViewCell(WALLET_CELL) {
         this.wallet = wallet
         nameLabel.text = wallet.walletConfig.displayName
         walletImage.image = getIosSystemImage(
-            if (wallet.isReadOnly()) IMAGE_READONLY_WALLET else IMAGE_WALLET,
+            when {
+                wallet.isMultisig() -> IMAGE_MULTISIG
+                wallet.isReadOnly() -> IMAGE_READONLY_WALLET
+                else -> IMAGE_WALLET
+            },
             UIImageSymbolScale.Large
         )
         val ergoAmount = ErgoAmount(wallet.getBalanceForAllAddresses())

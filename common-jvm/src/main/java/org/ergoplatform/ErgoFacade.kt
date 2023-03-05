@@ -452,6 +452,13 @@ object ErgoFacade {
             t.getMessageOrName() + msgUseOtherNodeSuffix
         }
     }
+
+    fun isMultisigAddress(addressString: String): Boolean = try {
+        MultisigAddress.buildFromAddress(Address.create(addressString))
+        true
+    } catch (t: Throwable) {
+        false
+    }
 }
 
 fun getErgoNetworkType() = if (isErgoMainNet) NetworkType.MAINNET else NetworkType.TESTNET

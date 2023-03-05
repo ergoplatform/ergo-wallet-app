@@ -31,7 +31,6 @@ import org.ergoplatform.tokens.fillTokenOverview
 import org.ergoplatform.tokens.getTokenErgoValueSum
 import org.ergoplatform.utils.getTimeSpanString
 import org.ergoplatform.wallet.*
-import java.util.*
 
 
 class WalletFragment : Fragment() {
@@ -66,17 +65,16 @@ class WalletFragment : Fragment() {
         val walletAdapter = WalletAdapter(lastWalletList)
         binding.recyclerview.adapter = walletAdapter
         AppDatabase.getInstance(requireContext()).walletDao().getWalletsWithStates()
-            .observe(viewLifecycleOwner,
-                {
-                    val walletList = it.map { it.toModel() }
-                    walletAdapter.walletList = walletList.sortedByDisplayName()
-                    lastWalletList = walletAdapter.walletList
+            .observe(viewLifecycleOwner) {
+                val walletList = it.map { it.toModel() }
+                walletAdapter.walletList = walletList.sortedByDisplayName()
+                lastWalletList = walletAdapter.walletList
 
-                    binding.swipeRefreshLayout.visibility =
-                        if (walletList.isEmpty()) View.GONE else View.VISIBLE
-                    binding.emptyView.root.visibility =
-                        if (walletList.isEmpty()) View.VISIBLE else View.GONE
-                })
+                binding.swipeRefreshLayout.visibility =
+                    if (walletList.isEmpty()) View.GONE else View.VISIBLE
+                binding.emptyView.root.visibility =
+                    if (walletList.isEmpty()) View.VISIBLE else View.GONE
+            }
 
         binding.emptyView.cardRestoreWallet.setOnClickListener {
             findNavController().navigate(R.id.restoreWalletFragmentDialog)
@@ -238,7 +236,13 @@ class WalletViewHolder(val binding: CardWalletBinding) : RecyclerView.ViewHolder
         binding.walletName.text = wallet.walletConfig.displayName
         val walletBalance = ErgoAmount(wallet.getBalanceForAllAddresses())
         binding.walletBalance.setAmount(walletBalance.toBigDecimal())
-        binding.walletLogo.setImageResource(if (wallet.isReadOnly()) R.drawable.ic_add_readonly_24 else R.drawable.ic_wallet_24)
+        binding.walletLogo.setImageResource(
+            when {
+                wallet.isMultisig() -> R.drawable.ic_people_alt_24
+                wallet.isReadOnly() -> R.drawable.ic_add_readonly_24
+                else -> R.drawable.ic_wallet_24
+            }
+        )
 
         // Fill token headline
         val tokens = wallet.getTokensForAllAddresses()

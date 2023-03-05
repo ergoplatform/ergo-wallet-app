@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.*
+import org.ergoplatform.persistance.WALLET_TYPE_MULTISIG
 import org.ergoplatform.persistance.WALLET_TYPE_NORMAL
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletDbProvider
@@ -47,18 +48,19 @@ abstract class AddReadOnlyWalletUiLogic {
             return false
         }
 
-        val walletConfig = WalletConfig(
-            0,
-            if (!displayName.isNullOrBlank()) displayName
-            else stringProvider.getString(STRING_LABEL_READONLY_WALLET_DEFAULT),
-            walletAddress,
-            0,
-            null,
-            walletType = WALLET_TYPE_NORMAL,
-            extendedPublicKey = xpubkey?.let { userInput }
-        )
-
         GlobalScope.launch(Dispatchers.IO) {
+            val walletConfig = WalletConfig(
+                0,
+                if (!displayName.isNullOrBlank()) displayName
+                else stringProvider.getString(STRING_LABEL_READONLY_WALLET_DEFAULT),
+                walletAddress,
+                0,
+                null,
+                walletType = if (ErgoFacade.isMultisigAddress(walletAddress))
+                    WALLET_TYPE_MULTISIG else WALLET_TYPE_NORMAL,
+                extendedPublicKey = xpubkey?.let { userInput }
+            )
+
             walletDbProvider.insertWalletConfig(walletConfig)
             WalletStateSyncManager.getInstance().invalidateCache()
         }

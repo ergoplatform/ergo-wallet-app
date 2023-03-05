@@ -83,9 +83,9 @@ fun Wallet.getStateForAddress(address: String): WalletState? {
 }
 
 fun WalletConfig.isReadOnly(): Boolean = secretStorage == null
-
 fun Wallet.isReadOnly(): Boolean = walletConfig.isReadOnly()
 
+fun Wallet.isMultisig(): Boolean = walletConfig.isMultisig()
 fun WalletConfig.isMultisig(): Boolean = walletType == WALLET_TYPE_MULTISIG
 
 fun List<Wallet>.sortedByDisplayName(): List<Wallet> =
