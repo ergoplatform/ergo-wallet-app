@@ -488,5 +488,9 @@
     <dialog
         android:id="@+id/createMultisigAddressFragmentDialog"
         android:name="org.ergoplatform.android.multisig.CreateMultisigAddressFragmentDialog"
-        android:label="CreateMultisigAddressFragmentDialog" />
+        android:label="CreateMultisigAddressFragmentDialog" >
+        <action
+            android:id="@+id/action_createMultisigAddressFragmentDialog_to_navigation_wallet"
+            app:destination="@id/navigation_wallet" />
+    </dialog>
 </navigation>

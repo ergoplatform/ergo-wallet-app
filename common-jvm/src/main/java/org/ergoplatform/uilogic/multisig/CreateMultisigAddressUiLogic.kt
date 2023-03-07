@@ -11,33 +11,29 @@ import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.WALLET_TYPE_MULTISIG
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletDbProvider
-import org.ergoplatform.uilogic.STRING_ERROR_ADDRESS_ALREADY_ADDED
-import org.ergoplatform.uilogic.STRING_ERROR_INVALID_READONLY_INPUT
-import org.ergoplatform.uilogic.STRING_LABEL_MULTISIG_WALLET
-import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.*
 
 class CreateMultisigAddressUiLogic {
     val participants = ArrayList<Address>()
+    val minSignersNeeded = 2
 
-    fun addParticipantAddress(qrCodeOrAddress: String, texts: StringProvider) {
-        // if we have a payment request, we extract the address
-        val content = parsePaymentRequest(qrCodeOrAddress)
-        val addressToAdd = content?.address ?: qrCodeOrAddress
+    fun defaultWalletName(texts: StringProvider) = texts.getString(STRING_LABEL_MULTISIG_WALLET)
 
+    fun addParticipantAddress(addressToAdd: String, texts: StringProvider) {
         if (!isValidErgoAddress(addressToAdd))
-            throw IllegalArgumentException(texts.getString(STRING_ERROR_INVALID_READONLY_INPUT))
+            throw IllegalArgumentException(texts.getString(STRING_ERROR_RECEIVER_ADDRESS))
 
         val ergoAddress = Address.create(addressToAdd)
 
         if (!ergoAddress.isP2PK)
-            throw IllegalArgumentException(texts.getString(STRING_ERROR_INVALID_READONLY_INPUT))
+            throw IllegalArgumentException(texts.getString(STRING_ERROR_RECEIVER_ADDRESS))
 
         if (participants.none { it == ergoAddress })
             participants.add(ergoAddress)
     }
 
-    fun removeParticipantAddress(address: String) {
-        participants.removeAll { it == Address.create(address) }
+    fun removeParticipantAddress(address: Address) {
+        participants.removeAll { it == address }
     }
 
     suspend fun addWalletToDb(
@@ -46,8 +42,12 @@ class CreateMultisigAddressUiLogic {
         stringProvider: StringProvider,
         displayName: String?
     ) {
+        if (signersNeeded <= 0 || signersNeeded > participants.size)
+            throw IllegalArgumentException(stringProvider.getString(STRING_ERROR_NUM_SIGNERS))
+
         // calc address
-        val address = MultisigAddress.buildFromParticipants(signersNeeded, participants).address.toString()
+        val address =
+            MultisigAddress.buildFromParticipants(signersNeeded, participants).address.toString()
 
         val existingWallet = walletDbProvider.loadWalletByFirstAddress(address)
 
@@ -75,5 +75,11 @@ class CreateMultisigAddressUiLogic {
             walletDbProvider.insertWalletConfig(walletConfig)
             WalletStateSyncManager.getInstance().invalidateCache()
         }
+    }
+
+    fun getInputFromQrCode(qrCode: String): String {
+        // if we have a payment request, we extract the address
+        val content = parsePaymentRequest(qrCode)
+        return content?.address ?: qrCode
     }
 }

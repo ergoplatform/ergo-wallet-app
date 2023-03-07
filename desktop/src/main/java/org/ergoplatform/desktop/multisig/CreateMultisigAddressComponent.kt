@@ -2,9 +2,22 @@ package org.ergoplatform.desktop.multisig
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.pop
+import com.arkivanov.decompose.router.popWhile
+import com.arkivanov.decompose.router.push
+import org.ergoplatform.Application
+import org.ergoplatform.compose.multisig.CreateMultisigAddressLayout
+import org.ergoplatform.desktop.ui.AppScrollingLayout
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
+import org.ergoplatform.desktop.ui.navigation.ScreenConfig
+import org.ergoplatform.uilogic.multisig.CreateMultisigAddressUiLogic
 
 class CreateMultisigAddressComponent(
     private val componentContext: ComponentContext,
@@ -17,8 +30,32 @@ class CreateMultisigAddressComponent(
     override val fullScreen: Boolean
         get() = true
 
+    private val uiLogic = CreateMultisigAddressUiLogic()
+
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
-        // TODO
+        val participantAddress = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+            mutableStateOf(TextFieldValue())
+        }
+
+        AppScrollingLayout {
+            CreateMultisigAddressLayout(
+                Modifier.align(Alignment.Center),
+                Application.texts,
+                uiLogic,
+                onScanAddress = {
+                    router.push(ScreenConfig.QrCodeScanner { qrCode ->
+                        participantAddress.value =
+                            TextFieldValue(uiLogic.getInputFromQrCode(qrCode))
+                    })
+                },
+                onBack = navHost.router::pop,
+                onProceed = {
+                    router.popWhile { !(it is ScreenConfig.WalletList) }
+                },
+                getDb = { Application.database },
+                participantAddress = participantAddress,
+            )
+        }
     }
 }
