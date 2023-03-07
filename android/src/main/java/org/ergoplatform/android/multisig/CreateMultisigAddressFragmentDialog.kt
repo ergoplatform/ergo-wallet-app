@@ -13,13 +13,17 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import com.google.zxing.integration.android.IntentIntegrator
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.addressbook.ChooseAddressDialogCallback
+import org.ergoplatform.android.addressbook.ChooseAddressDialogFragment
 import org.ergoplatform.android.ui.AbstractComposeFullScreenDialogFragment
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.QrScannerActivity
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.compose.multisig.CreateMultisigAddressLayout
+import org.ergoplatform.persistance.IAddressWithLabel
 
-class CreateMultisigAddressFragmentDialog : AbstractComposeFullScreenDialogFragment() {
+class CreateMultisigAddressFragmentDialog :
+    AbstractComposeFullScreenDialogFragment(), ChooseAddressDialogCallback {
 
     private val viewModel: CreateMultisigAddressViewModel by viewModels()
 
@@ -33,6 +37,9 @@ class CreateMultisigAddressFragmentDialog : AbstractComposeFullScreenDialogFragm
                 texts = remember { AndroidStringProvider(context) },
                 uiLogic = viewModel.uiLogic,
                 onScanAddress = { QrScannerActivity.startFromFragment(this@CreateMultisigAddressFragmentDialog) },
+                onChooseRecipientAddress = {
+                    ChooseAddressDialogFragment().show(childFragmentManager, null)
+                },
                 onBack = null,
                 onProceed = {
                     NavHostFragment.findNavController(requireParentFragment())
@@ -42,6 +49,10 @@ class CreateMultisigAddressFragmentDialog : AbstractComposeFullScreenDialogFragm
                 participantAddress = viewModel.participantAddress,
             )
         }
+    }
+
+    override fun onAddressChosen(address: IAddressWithLabel) {
+        viewModel.participantAddress.value = TextFieldValue(address.address)
     }
 
     @Deprecated("Deprecated in Java")

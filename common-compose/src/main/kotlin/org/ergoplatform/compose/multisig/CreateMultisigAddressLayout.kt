@@ -7,10 +7,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -38,6 +35,7 @@ fun CreateMultisigAddressLayout(
     uiLogic: CreateMultisigAddressUiLogic,
     participantAddress: MutableState<TextFieldValue>,
     onScanAddress: () -> Unit,
+    onChooseRecipientAddress: () -> Unit,
     onBack: (() -> Unit)?,
     onProceed: () -> Unit,
     getDb: () -> IAppDatabase,
@@ -64,7 +62,9 @@ fun CreateMultisigAddressLayout(
             Spacer(Modifier.size(defaultPadding))
 
             var numberParticants by rememberSaveable { mutableStateOf(uiLogic.minSignersNeeded) }
-            var errorMsg by rememberSaveable { mutableStateOf<String?>(null) }
+            var errorMsg by rememberSaveable(participantAddress.value.text) {
+                mutableStateOf<String?>(null)
+            }
             val participants = remember { mutableStateListOf<Address>() }
 
             val onAdd: () -> Unit = {
@@ -106,11 +106,15 @@ fun CreateMultisigAddressLayout(
                 }
             }
 
-            Row(Modifier.align(Alignment.End)) {
+            Row {
+                IconButton(onClick = onChooseRecipientAddress) {
+                    Icon(Icons.Default.PermContactCalendar, null)
+                }
+                Spacer(Modifier.weight(1f))
                 IconButton(onClick = onAdd) { Icon(Icons.Default.Add, null) }
             }
 
-            Column(Modifier.animateContentSize().padding(defaultPadding)) {
+            Column(Modifier.animateContentSize().padding(horizontal = defaultPadding)) {
                 participants.forEach {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         MiddleEllipsisText(
@@ -127,6 +131,8 @@ fun CreateMultisigAddressLayout(
                     }
                 }
             }
+
+            Divider(Modifier.fillMaxWidth().padding(vertical = defaultPadding))
 
             Text(remember { texts.getString(STRING_LABEL_NUM_SIGNERS) })
 

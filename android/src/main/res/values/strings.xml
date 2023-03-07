@@ -133,7 +133,7 @@
     <string name="intro_create_multisig">Add the participants that should be able to sign transactions, and the number of signers needed to execute a transaction.\n
       Note: If you already created the address on another device, you can add it faster by using \"Add read-only wallet\".</string>
     <string name="label_signer_p2pk_address">Signer P2PK address</string>
-    <string name="label_num_signers">Number signers needed</string>
+    <string name="label_num_signers">Number of signers needed</string>
     <string name="error_num_signers">Number of signers needs to be at least 2 and lower or equal the number of participants.</string>
     <string name="button_create_multisig">Create address</string>
 

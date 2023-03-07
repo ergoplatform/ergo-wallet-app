@@ -13,6 +13,7 @@ import com.arkivanov.decompose.router.popWhile
 import com.arkivanov.decompose.router.push
 import org.ergoplatform.Application
 import org.ergoplatform.compose.multisig.CreateMultisigAddressLayout
+import org.ergoplatform.desktop.addressbook.AddressBookDialogStateHandler
 import org.ergoplatform.desktop.ui.AppScrollingLayout
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
@@ -31,6 +32,8 @@ class CreateMultisigAddressComponent(
         get() = true
 
     private val uiLogic = CreateMultisigAddressUiLogic()
+
+    private val addressBookDialogState = AddressBookDialogStateHandler()
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -55,7 +58,15 @@ class CreateMultisigAddressComponent(
                 },
                 getDb = { Application.database },
                 participantAddress = participantAddress,
+                onChooseRecipientAddress = { addressBookDialogState.showChooseAddressDialog() },
             )
         }
+
+        addressBookDialogState.AddressBookDialogs(
+            onChooseEntry = { addressWithLabel ->
+                participantAddress.value = TextFieldValue(addressWithLabel.address)
+            },
+            componentScope()
+        )
     }
 }
