@@ -1,7 +1,11 @@
 package org.ergoplatform.uilogic.wallet
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.ergoplatform.appkit.Address
+import org.ergoplatform.appkit.MultisigAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.persistance.WalletDbProvider
+import org.ergoplatform.wallet.isMultisig
 
 abstract class WalletConfigUiLogic {
 
@@ -11,8 +15,22 @@ abstract class WalletConfigUiLogic {
             onConfigChanged(value)
         }
 
+    val multisigInfoFlow = MutableStateFlow<MultisigAddress?>(null)
+
     suspend fun initForWallet(walletId: Int, db: WalletDbProvider) {
         wallet = db.loadWalletConfigById(walletId)
+
+        loadMultisigInfo()
+    }
+
+    protected suspend fun loadMultisigInfo() {
+        if (wallet?.isMultisig() == true) {
+            multisigInfoFlow.value = try {
+                MultisigAddress.buildFromAddress(Address.create(wallet!!.firstAddress))
+            } catch (t: Throwable) {
+                null
+            }
+        }
     }
 
     suspend fun saveChanges(db: WalletDbProvider, newWalletName: String?): Boolean {

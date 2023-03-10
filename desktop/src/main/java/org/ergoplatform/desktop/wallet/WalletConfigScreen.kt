@@ -13,16 +13,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
+import org.ergoplatform.appkit.MultisigAddress
 import org.ergoplatform.compose.settings.appTextFieldColors
 import org.ergoplatform.compose.settings.primaryButtonColors
 import org.ergoplatform.compose.settings.secondaryButtonColors
-import org.ergoplatform.desktop.ui.*
+import org.ergoplatform.compose.wallet.MultisigInfoSection
+import org.ergoplatform.desktop.ui.AppScrollingLayout
+import org.ergoplatform.desktop.ui.copyToClipboard
+import org.ergoplatform.desktop.ui.defaultMaxWidth
+import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.wallet.isMultisig
 import org.ergoplatform.wallet.isReadOnly
 
 @Composable
@@ -33,6 +40,7 @@ fun WalletConfigScreen(
     onShowMnemonic: () -> Unit,
     onShowXpubKey: () -> Unit,
     onAddAddresses: () -> Unit,
+    multiSigStateFlow: StateFlow<MultisigAddress?>,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -93,53 +101,74 @@ fun WalletConfigScreen(
                     Text(remember { Application.texts.getString(STRING_BUTTON_APPLY) })
                 }
 
+                Spacer(Modifier.size(defaultPadding * 1.5f))
 
+                if (walletConfig.isMultisig())
+                    MultisigInfoSection(
+                        multiSigStateFlow,
+                        Application.texts,
+                    )
+                else
+                    WalletInfoSection(
+                        onAddAddresses,
+                        onShowXpubKey,
+                        walletConfig,
+                        onShowMnemonic,
+                    )
 
-                Text(
-                    remember { Application.texts.getString(STRING_DESC_WALLET_ADDRESSES) },
-                    Modifier.padding(top = defaultPadding * 1.5f),
-                    style = labelStyle(LabelStyle.BODY1)
-                )
-                Button(
-                    onClick = onAddAddresses,
-                    colors = secondaryButtonColors(),
-                    modifier = Modifier.align(Alignment.End).padding(top = defaultPadding / 2),
-                ) {
-                    Text(remember { Application.texts.getString(STRING_TITLE_WALLET_ADDRESSES) })
-                }
-
-
-
-                Text(
-                    remember { Application.texts.getString(STRING_DESC_DISPLAY_XPUBKEY) },
-                    Modifier.padding(top = defaultPadding * 1.5f),
-                    style = labelStyle(LabelStyle.BODY1)
-                )
-                Button(
-                    onClick = onShowXpubKey,
-                    colors = secondaryButtonColors(),
-                    enabled = walletConfig.extendedPublicKey != null || !walletConfig.isReadOnly(),
-                    modifier = Modifier.align(Alignment.End).padding(top = defaultPadding / 2),
-                ) {
-                    Text(remember { Application.texts.getString(STRING_BUTTON_DISPLAY_XPUBKEY) })
-                }
-
-
-
-                Text(
-                    remember { Application.texts.getString(STRING_DESC_DISPLAY_MNEMONIC) },
-                    Modifier.padding(top = defaultPadding * 1.5f),
-                    style = labelStyle(LabelStyle.BODY1)
-                )
-                Button(
-                    onClick = onShowMnemonic,
-                    colors = secondaryButtonColors(),
-                    enabled = !walletConfig.isReadOnly(),
-                    modifier = Modifier.align(Alignment.End).padding(top = defaultPadding / 2),
-                ) {
-                    Text(remember { Application.texts.getString(STRING_BUTTON_DISPLAY_MNEMONIC) })
-                }
             }
         }
+    }
+}
+
+@Composable
+private fun ColumnScope.WalletInfoSection(
+    onAddAddresses: () -> Unit,
+    onShowXpubKey: () -> Unit,
+    walletConfig: WalletConfig,
+    onShowMnemonic: () -> Unit
+) {
+    Text(
+        remember { Application.texts.getString(STRING_DESC_WALLET_ADDRESSES) },
+        style = labelStyle(LabelStyle.BODY1)
+    )
+    Button(
+        onClick = onAddAddresses,
+        colors = secondaryButtonColors(),
+        modifier = Modifier.align(Alignment.End).padding(top = defaultPadding / 2),
+    ) {
+        Text(remember { Application.texts.getString(STRING_TITLE_WALLET_ADDRESSES) })
+    }
+
+
+
+    Text(
+        remember { Application.texts.getString(STRING_DESC_DISPLAY_XPUBKEY) },
+        Modifier.padding(top = defaultPadding * 1.5f),
+        style = labelStyle(LabelStyle.BODY1)
+    )
+    Button(
+        onClick = onShowXpubKey,
+        colors = secondaryButtonColors(),
+        enabled = walletConfig.extendedPublicKey != null || !walletConfig.isReadOnly(),
+        modifier = Modifier.align(Alignment.End).padding(top = defaultPadding / 2),
+    ) {
+        Text(remember { Application.texts.getString(STRING_BUTTON_DISPLAY_XPUBKEY) })
+    }
+
+
+
+    Text(
+        remember { Application.texts.getString(STRING_DESC_DISPLAY_MNEMONIC) },
+        Modifier.padding(top = defaultPadding * 1.5f),
+        style = labelStyle(LabelStyle.BODY1)
+    )
+    Button(
+        onClick = onShowMnemonic,
+        colors = secondaryButtonColors(),
+        enabled = !walletConfig.isReadOnly(),
+        modifier = Modifier.align(Alignment.End).padding(top = defaultPadding / 2),
+    ) {
+        Text(remember { Application.texts.getString(STRING_BUTTON_DISPLAY_MNEMONIC) })
     }
 }

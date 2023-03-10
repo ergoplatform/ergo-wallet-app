@@ -71,6 +71,7 @@ class WalletConfigComponent(
     val uiLogic = object : WalletConfigUiLogic() {
         init {
             wallet = walletConfig
+            componentScope().launch { loadMultisigInfo() }
         }
 
         override fun onConfigChanged(value: WalletConfig?) {
@@ -103,7 +104,8 @@ class WalletConfigComponent(
             },
             onShowMnemonic = {
                 passwordDialog.value = PasswordNeededFor.DISPLAY_MNEMONIC
-            }
+            },
+            multiSigStateFlow = uiLogic.multisigInfoFlow
         )
 
         if (confirmationDialogState.value) {

@@ -146,6 +146,8 @@
     <string name="button_display_mnemonic">Display mnemonic</string>
     <string name="desc_display_xpubkey">You can add this wallet as a read-only wallet to other wallet applications with your extended public key. No secrets will be shared.</string>
     <string name="button_display_xpubkey">Display public key</string>
+    <string name="label_multisig_config">This is a multi signature wallet. Transaction needs to be signed by multiple participants to get executed.</string>
+    <string name="label_multisig_participants">Participants able to sign for this address:</string>
 
     <!-- Wallet details -->
     <string name="title_wallet_balance">Balance</string>
