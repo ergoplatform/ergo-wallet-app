@@ -2,7 +2,8 @@ package org.ergoplatform.android.wallet
 
 import android.os.Bundle
 import android.view.*
-import androidx.lifecycle.ViewModelProvider
+import androidx.compose.foundation.layout.Column
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -11,9 +12,11 @@ import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentWalletConfigBinding
 import org.ergoplatform.android.ui.*
+import org.ergoplatform.compose.wallet.MultisigInfoSection
+import org.ergoplatform.compose.wallet.WalletInfoSection
 import org.ergoplatform.getSerializedXpubKeyFromMnemonic
 import org.ergoplatform.persistance.WalletConfig
-import org.ergoplatform.wallet.isReadOnly
+import org.ergoplatform.wallet.isMultisig
 
 /**
  * Shows settings and details for a wallet
@@ -22,7 +25,7 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
 
     var _binding: FragmentWalletConfigBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: WalletConfigViewModel
+    private val viewModel: WalletConfigViewModel by viewModels()
 
     private val args: WalletConfigFragmentArgs by navArgs()
 
@@ -35,9 +38,6 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel =
-            ViewModelProvider(this).get(WalletConfigViewModel::class.java)
-
         // Inflate the layout for this fragment
         _binding = FragmentWalletConfigBinding.inflate(inflater, container, false)
         return binding.root
@@ -57,17 +57,31 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
                     copyStringToClipboard(wallet.firstAddress!!, requireContext(), requireView())
                 }
 
-                binding.buttonAddresses.setOnClickListener {
-                    findNavController().navigateSafe(
-                        WalletConfigFragmentDirections.actionWalletConfigFragmentToWalletAddressesFragment(
-                            wallet.id
-                        )
-                    )
+                binding.composeView.setContent {
+                    AppComposeTheme {
+                        Column {
+                            if (wallet.isMultisig())
+                                MultisigInfoSection(
+                                    viewModel.uiLogic.multisigInfoFlow,
+                                    AndroidStringProvider(requireContext()),
+                                )
+                            else
+                                WalletInfoSection(
+                                    onAddAddresses = {
+                                        findNavController().navigateSafe(
+                                            WalletConfigFragmentDirections.actionWalletConfigFragmentToWalletAddressesFragment(
+                                                wallet.id
+                                            )
+                                        )
+                                    },
+                                    ::displayXpubkey,
+                                    wallet,
+                                    ::onShowMnemonic,
+                                    AndroidStringProvider(requireContext()),
+                                )
+                        }
+                    }
                 }
-
-                binding.buttonExport.isEnabled = !it.isReadOnly()
-                binding.buttonDisplayXpubkey.isEnabled =
-                    it.extendedPublicKey != null || !it.isReadOnly()
             }
         }
 
@@ -84,30 +98,27 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
             )
         }
 
-        binding.buttonExport.setOnClickListener {
-            viewModel.uiLogic.wallet?.let {
-                viewModel.mnemonicNeededFor =
-                    WalletConfigViewModel.MnemonicNeededFor.DISPLAY_MNEMONIC
-                startAuthFlow()
-            }
+        viewModel.snackbarEvent.observe(viewLifecycleOwner) {
+            Snackbar.make(requireView(), it, Snackbar.LENGTH_LONG)
+                .setAnchorView(R.id.nav_view).show()
         }
+    }
 
-        binding.buttonDisplayXpubkey.setOnClickListener {
-            viewModel.uiLogic.wallet?.secretStorage?.let {
-                viewModel.mnemonicNeededFor = WalletConfigViewModel.MnemonicNeededFor.SHOW_XPUB
-                startAuthFlow()
-            } ?: viewModel.uiLogic.wallet?.extendedPublicKey?.let {
-                displayXpubKey(it)
-            }
+    private fun onShowMnemonic() {
+        viewModel.uiLogic.wallet?.let {
+            viewModel.mnemonicNeededFor =
+                WalletConfigViewModel.MnemonicNeededFor.DISPLAY_MNEMONIC
+            startAuthFlow()
         }
+    }
 
-        viewModel.snackbarEvent.observe(
-            viewLifecycleOwner,
-            {
-                Snackbar.make(requireView(), it, Snackbar.LENGTH_LONG)
-                    .setAnchorView(R.id.nav_view).show()
-            }
-        )
+    private fun displayXpubkey() {
+        viewModel.uiLogic.wallet?.secretStorage?.let {
+            viewModel.mnemonicNeededFor = WalletConfigViewModel.MnemonicNeededFor.SHOW_XPUB
+            startAuthFlow()
+        } ?: viewModel.uiLogic.wallet?.extendedPublicKey?.let {
+            displayXpubKey(it)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

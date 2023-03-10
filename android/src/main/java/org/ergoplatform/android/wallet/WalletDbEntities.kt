@@ -40,7 +40,8 @@ fun WalletConfig.toDbEntity(): WalletConfigDbEntity {
         encryptionType,
         secretStorage,
         unfoldTokens,
-        extendedPublicKey
+        extendedPublicKey,
+        walletType,
     )
 }
 
