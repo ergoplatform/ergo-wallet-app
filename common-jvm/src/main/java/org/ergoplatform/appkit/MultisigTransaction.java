@@ -1,11 +1,20 @@
 package org.ergoplatform.appkit;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
+import org.ergoplatform.utils.Base64Coder;
+
 import java.util.List;
 
 /**
  * EIP-41/EIP-11 compliant multi sig transaction
  */
 public class MultisigTransaction {
+
+    ReducedTransaction tx;
+    MultisigAddress maddress;
 
     /**
      * @return transaction that is going to be signed
@@ -61,7 +70,11 @@ public class MultisigTransaction {
      * next particpant
      */
     public String toJson() {
-        throw new UnsupportedOperationException();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        JsonObject root = new JsonObject();
+        root.addProperty("reduced", new String(Base64Coder.encode(tx.toBytes())));
+        root.addProperty("maddress", maddress.getAddress().toString());
+        return gson.toJson(root);
     }
 
     /**
@@ -76,7 +89,10 @@ public class MultisigTransaction {
      * constructs a multi sig transaction from a reduced transaction
      */
     public static MultisigTransaction fromTransaction(ReducedTransaction transaction, MultisigAddress address) {
-        throw new UnsupportedOperationException();
+        MultisigTransaction mtx = new MultisigTransaction();
+        mtx.tx = transaction;
+        mtx.maddress = address;
+        return mtx;
     }
 
     /**
