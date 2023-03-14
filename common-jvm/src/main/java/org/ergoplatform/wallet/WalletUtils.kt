@@ -82,6 +82,9 @@ fun Wallet.getStateForAddress(address: String): WalletState? {
     return state.firstOrNull { it.publicAddress == address }
 }
 
+/**
+ * Wallet that can't sign, this includes multisig wallets
+ */
 fun WalletConfig.isReadOnly(): Boolean = secretStorage == null
 fun Wallet.isReadOnly(): Boolean = walletConfig.isReadOnly()
 

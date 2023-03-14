@@ -217,6 +217,7 @@ const val STRING_HIDE_BOTTOM_VIEW_ON_SCROLL_BEHAVIOR = "hide_bottom_view_on_scro
 const val STRING_HINT_AMOUNT_CURRENCY = "hint_amount_currency"
 const val STRING_HINT_APP_URL = "hint_app_url"
 const val STRING_HINT_DESKTOP_KYA = "hint_desktop_kya"
+const val STRING_HINT_MULTISIG = "hint_multisig"
 const val STRING_HINT_NO_WEBCAM = "hint_no_webcam"
 const val STRING_HINT_PASSWORD = "hint_password"
 const val STRING_HINT_READ_ONLY = "hint_read_only"

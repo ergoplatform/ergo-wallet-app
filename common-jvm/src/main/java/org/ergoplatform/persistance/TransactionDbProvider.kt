@@ -57,4 +57,6 @@ abstract class TransactionDbProvider {
             )
         }
     }
+
+    abstract suspend fun insertOrUpdateMultisigTransaction(multisigTransaction: MultisigTransaction)
 }

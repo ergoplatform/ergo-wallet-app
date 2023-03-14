@@ -88,7 +88,7 @@ class SendFundsViewModel : SubmitTransactionViewModel() {
             _lockInterface.postValue(locked)
         }
 
-        override fun notifyHasTxId(txId: String) {
+        override fun notifyHasSubmittedTxId(txId: String) {
             _txId.postValue(txId)
         }
 

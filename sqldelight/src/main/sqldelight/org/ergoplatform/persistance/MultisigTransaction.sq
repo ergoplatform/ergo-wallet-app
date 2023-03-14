@@ -9,3 +9,8 @@ CREATE TABLE IF NOT EXISTS `multisig_transaction` (
 );
 
 CREATE INDEX IF NOT EXISTS `index_multisig_transaction_address_last_change` ON `multisig_transaction` (`address` ASC, `last_change` DESC);
+
+insertOrReplace:
+INSERT OR REPLACE INTO `multisig_transaction` (
+    `id`, `address`, `tx_id`, `last_change`, `memo`, `data`, `state`
+) VALUES (?, ?, ?, ?, ?, ?, ?);

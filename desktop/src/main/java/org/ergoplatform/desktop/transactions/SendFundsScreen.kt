@@ -29,6 +29,7 @@ import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
+import org.ergoplatform.wallet.isMultisig
 import org.ergoplatform.wallet.isReadOnly
 
 @Composable
@@ -86,13 +87,16 @@ fun SendFundsScreen(
                     style = labelStyle(LabelStyle.BODY1),
                 )
 
-                if (walletConfig.isReadOnly())
+                if (walletConfig.isReadOnly() || walletConfig.isMultisig())
                     Box(Modifier.padding(top = defaultPadding)) {
                         Card(modifier = Modifier.border(1.dp, uiErgoColor)) {
                             LinkifyText(
                                 remember {
-                                    Application.texts.getString(STRING_HINT_READ_ONLY)
-                                        .replace("href=\"\"", "href=\"$URL_COLD_WALLET_HELP\"")
+                                    if (walletConfig.isMultisig())
+                                        Application.texts.getString(STRING_HINT_MULTISIG)
+                                    else
+                                        Application.texts.getString(STRING_HINT_READ_ONLY)
+                                            .replace("href=\"\"", "href=\"$URL_COLD_WALLET_HELP\"")
                                 },
                                 Modifier.padding(defaultPadding / 2),
                                 labelStyle(LabelStyle.BODY1),

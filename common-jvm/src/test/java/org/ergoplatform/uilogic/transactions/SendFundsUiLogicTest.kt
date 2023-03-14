@@ -117,7 +117,7 @@ class SendFundsUiLogicTest {
 
         }
 
-        override fun notifyHasTxId(txId: String) {
+        override fun notifyHasSubmittedTxId(txId: String) {
 
         }
 

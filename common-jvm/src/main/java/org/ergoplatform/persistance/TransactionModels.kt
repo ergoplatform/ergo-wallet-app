@@ -144,3 +144,13 @@ data class MultisigTransaction(
      */
     val state: Int,
 )
+
+/**
+ * waiting for signers
+ */
+val MULTISIG_STATE_WAITING = 0
+
+/**
+ * invalid (inputs spent, ...)
+ */
+val MULTISIG_STATE_INVALID = 90

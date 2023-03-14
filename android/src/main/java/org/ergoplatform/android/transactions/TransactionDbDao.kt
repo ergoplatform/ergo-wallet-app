@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import org.ergoplatform.android.multisig.MultisigTransactionDbEntity
 
 @Dao
 interface TransactionDbDao {
@@ -43,4 +44,7 @@ interface TransactionDbDao {
         address: String,
         txId: String
     ): List<AddressTransactionTokenDbEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrUpdateMultisigTransaction(vararg multisigTransactions: MultisigTransactionDbEntity)
 }

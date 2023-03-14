@@ -28,6 +28,7 @@ import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.uilogic.transactions.SuggestedFee
+import org.ergoplatform.wallet.isMultisig
 import org.ergoplatform.wallet.isReadOnly
 
 class SendFundsComponent(
@@ -228,13 +229,16 @@ class SendFundsComponent(
             navHost.lockScreen.value = locked
         }
 
-        override fun notifyHasTxId(txId: String) {
+        override fun notifyHasSubmittedTxId(txId: String) {
             txIdState.value = txId
         }
 
         override fun notifyHasErgoTxResult(txResult: TransactionResult) {
             if (!txResult.success) {
                 showErrorMessage(getTransactionResultErrorMessage(txResult))
+            } else if (walletConfig.isMultisig()) {
+                // TODO 167 switch to multisig details page
+                println("New tx id: " + multisigTransactionId!!)
             }
         }
 

@@ -8,10 +8,7 @@ import org.ergoplatform.*
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
-import org.ergoplatform.persistance.IAppDatabase
-import org.ergoplatform.persistance.PreferencesProvider
-import org.ergoplatform.persistance.TokenInformation
-import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.persistance.*
 import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.*
@@ -361,13 +358,17 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
         }
     }
 
-    override fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
+    override fun startColdWalletOrMultisigPayment(
+        preferences: PreferencesProvider,
+        texts: StringProvider,
+        transactionDbProvider: TransactionDbProvider,
+    ) {
         wallet?.let { wallet ->
             notifyUiLocked(true)
             coroutineScope.launch {
                 val serializedTx = prepareSerializedTx(preferences, texts)
                 notifyUiLocked(false)
-                startColdWalletPaymentPrompt(serializedTx)
+                startMultisigOrColdWalletPaymentPrompt(serializedTx, transactionDbProvider)
             }
         }
     }

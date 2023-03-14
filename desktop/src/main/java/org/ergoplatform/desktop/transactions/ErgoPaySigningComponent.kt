@@ -22,6 +22,7 @@ import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_TITLE_ERGO_PAY_REQUEST
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
 import org.ergoplatform.uilogic.transactions.SubmitTransactionUiLogic
+import org.ergoplatform.wallet.isMultisig
 
 class ErgoPaySigningComponent(
     private val request: String,
@@ -156,6 +157,9 @@ class ErgoPaySigningComponent(
         override fun notifyHasErgoTxResult(txResult: TransactionResult) {
             if (!txResult.success) {
                 navHost.showErrorDialog(getTransactionResultErrorMessage(txResult))
+            } else if (wallet!!.isMultisig()) {
+                // TODO 167 switch to multisig details page
+                println("New tx id: " + multisigTransactionId!!)
             }
         }
 

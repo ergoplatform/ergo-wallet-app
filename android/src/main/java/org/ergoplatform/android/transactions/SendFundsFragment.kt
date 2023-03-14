@@ -38,6 +38,7 @@ import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.utils.formatTokenPriceToString
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
+import org.ergoplatform.wallet.isMultisig
 import org.ergoplatform.wallet.isReadOnly
 
 
@@ -78,27 +79,29 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
         )
 
         // Add observers
-        viewModel.walletName.observe(viewLifecycleOwner, {
+        viewModel.walletName.observe(viewLifecycleOwner) {
             // when wallet is loaded, wallet name is set. we can init everything wallet specific here
             binding.walletName.text = getString(R.string.label_send_from, it)
+            val wallet = viewModel.uiLogic.wallet!!
             binding.hintReadonly.visibility =
-                if (viewModel.uiLogic.wallet!!.isReadOnly()) View.VISIBLE else View.GONE
+                if (wallet.isReadOnly() || wallet.isMultisig()) View.VISIBLE else View.GONE
+            binding.hintReadonly.setText(if (wallet.isMultisig()) R.string.hint_multisig else R.string.hint_read_only)
             enableLayoutChangeAnimations()
-        })
-        viewModel.address.observe(viewLifecycleOwner, {
+        }
+        viewModel.address.observe(viewLifecycleOwner) {
             binding.addressLabel.text =
                 it?.getAddressLabel(AndroidStringProvider(requireContext()))
                     ?: getString(
                         R.string.label_all_addresses,
                         viewModel.uiLogic.wallet?.getNumOfAddresses()
                     )
-        })
-        viewModel.walletBalance.observe(viewLifecycleOwner, {
+        }
+        viewModel.walletBalance.observe(viewLifecycleOwner) {
             binding.tvBalance.text = getString(
                 R.string.label_wallet_balance,
                 it.toStringRoundToDecimals()
             )
-        })
+        }
         viewModel.grossAmount.observe(viewLifecycleOwner) { grossAmount ->
             binding.tvFee.text =
                 viewModel.uiLogic.getFeeDescriptionLabel(AndroidStringProvider(requireContext()))
@@ -461,6 +464,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {

@@ -91,4 +91,18 @@ class SqlDelightTransactionDbProvider(private val sqlDelightAppDb: SqlDelightApp
         }
     }
 
+    override suspend fun insertOrUpdateMultisigTransaction(multisigTransaction: MultisigTransaction) {
+        sqlDelightAppDb.useIoContext {
+            val tx = multisigTransaction.toDbEntity()
+            appDatabase.multisigTransactionQueries.insertOrReplace(
+                if (tx.id > 0) tx.id else null,
+                tx.address,
+                tx.tx_id,
+                tx.last_change,
+                tx.memo,
+                tx.data_,
+                tx.state
+            )
+        }
+    }
 }

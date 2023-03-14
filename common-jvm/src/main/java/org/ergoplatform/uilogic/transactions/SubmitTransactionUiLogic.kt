@@ -8,14 +8,10 @@ import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.ErgoFacade
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.WalletStateSyncManager
-import org.ergoplatform.appkit.UnsignedTransaction
 import org.ergoplatform.persistance.*
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.StringProvider
-import org.ergoplatform.wallet.getDerivedAddress
-import org.ergoplatform.wallet.getDerivedAddressEntity
-import org.ergoplatform.wallet.getNumOfAddresses
-import org.ergoplatform.wallet.getSortedDerivedAddressesList
+import org.ergoplatform.wallet.*
 
 abstract class SubmitTransactionUiLogic {
     abstract val coroutineScope: CoroutineScope
@@ -29,6 +25,8 @@ abstract class SubmitTransactionUiLogic {
     var derivedAddress: WalletAddress? = null
         private set
     var signingPromptDialogConfig: SigningPromptDialogDataSource? = null
+        private set
+    var multisigTransactionId: String? = null
         private set
 
     protected suspend fun initWallet(
@@ -67,7 +65,14 @@ abstract class SubmitTransactionUiLogic {
         db: IAppDatabase,
     )
 
-    abstract fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider)
+    /**
+     * Starts a payment for a read only or multisig wallet
+     */
+    abstract fun startColdWalletOrMultisigPayment(
+        preferences: PreferencesProvider,
+        texts: StringProvider,
+        transactionDbProvider: TransactionDbProvider,
+    )
 
     fun getSigningDerivedAddressesIndices(): List<Int> {
         return derivedAddressIdx?.let { listOf(it) }
@@ -80,12 +85,24 @@ abstract class SubmitTransactionUiLogic {
             ?: wallet!!.getSortedDerivedAddressesList().map { it.publicAddress }
     }
 
-    fun startColdWalletPaymentPrompt(serializedTx: PromptSigningResult) {
+    /**
+     * starts the payment prompt for multisig or cold wallet
+     */
+    suspend fun startMultisigOrColdWalletPaymentPrompt(
+        serializedTx: PromptSigningResult,
+        transactionDbProvider: TransactionDbProvider,
+    ) {
         if (serializedTx.success) {
-            buildColdSigningRequest(serializedTx)?.let {
-                signingPromptDialogConfig = SigningPromptConfig(it)
-                notifyHasSigningPromptData(it)
-            }
+            if (wallet!!.isMultisig()) {
+                val data =
+                    MultisigUtils.createMultisigTransaction(wallet!!.walletConfig, serializedTx)
+                transactionDbProvider.insertOrUpdateMultisigTransaction(data)
+                multisigTransactionId = data.txId
+            } else
+                buildColdSigningRequest(serializedTx)?.let {
+                    signingPromptDialogConfig = SigningPromptConfig(it)
+                    notifyHasSigningPromptData(it)
+                }
         }
         notifyHasErgoTxResult(serializedTx)
     }
@@ -152,7 +169,7 @@ abstract class SubmitTransactionUiLogic {
                 // ignore, don't save submitted tx
             }
             WalletStateSyncManager.getInstance().invalidateCache()
-            notifyHasTxId(ergoTxResult.txId!!)
+            notifyHasSubmittedTxId(ergoTxResult.txId!!)
         }
         notifyHasErgoTxResult(ergoTxResult)
     }
@@ -160,7 +177,7 @@ abstract class SubmitTransactionUiLogic {
     abstract fun notifyWalletStateLoaded()
     abstract fun notifyDerivedAddressChanged()
     abstract fun notifyUiLocked(locked: Boolean)
-    abstract fun notifyHasTxId(txId: String)
+    abstract fun notifyHasSubmittedTxId(txId: String)
     abstract fun notifyHasErgoTxResult(txResult: TransactionResult)
     abstract fun notifyHasSigningPromptData(signingPrompt: String)
 

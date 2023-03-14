@@ -38,7 +38,11 @@ abstract class SubmitTransactionViewController : ViewControllerWithKeyboardLayou
                     appDelegate.database
                 )
             }
-        } ?: uiLogic.startColdWalletPayment(appDelegate.prefs, stringProvider)
+        } ?: uiLogic.startColdWalletOrMultisigPayment(
+            appDelegate.prefs,
+            stringProvider,
+            appDelegate.database.transactionDbProvider,
+        )
     }
 
     protected fun showSigningPromptVc(signingPrompt: String) {

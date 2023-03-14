@@ -17,6 +17,7 @@ import org.ergoplatform.android.mosaik.MosaikDbDao
 import org.ergoplatform.android.mosaik.MosaikHostDbEntity
 import org.ergoplatform.android.mosaik.toDbEntity
 import org.ergoplatform.android.multisig.MultisigTransactionDbEntity
+import org.ergoplatform.android.multisig.toDbEntity
 import org.ergoplatform.android.tokens.TokenDbDao
 import org.ergoplatform.android.tokens.TokenInformationDbEntity
 import org.ergoplatform.android.tokens.TokenPriceDbEntity
@@ -346,6 +347,9 @@ class RoomTransactionDbProvider(private val database: AppDatabase) : Transaction
             .map { it.toModel() }
     }
 
+    override suspend fun insertOrUpdateMultisigTransaction(multisigTransaction: MultisigTransaction) {
+        database.transactionDao().insertOrUpdateMultisigTransaction(multisigTransaction.toDbEntity())
+    }
 }
 
 class RoomMosaikDbProvider(private val database: AppDatabase) : MosaikDbProvider {

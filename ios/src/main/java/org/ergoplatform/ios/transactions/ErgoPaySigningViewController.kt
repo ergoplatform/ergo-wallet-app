@@ -10,11 +10,11 @@ import org.ergoplatform.ios.wallet.addresses.ChooseAddressListDialogViewControll
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.TransactionResult
-import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.ErgoPaySigningUiLogic
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
+import org.ergoplatform.wallet.isMultisig
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
@@ -419,6 +419,9 @@ class ErgoPaySigningViewController(
                 runOnMainThread {
                     showTxResultError(txResult)
                 }
+            } else if (wallet!!.isMultisig()) {
+                // TODO 167 switch to multisig details page
+                println("New tx id: " + multisigTransactionId!!)
             }
         }
 

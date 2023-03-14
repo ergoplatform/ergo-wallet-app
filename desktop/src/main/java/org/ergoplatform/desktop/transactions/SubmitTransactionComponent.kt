@@ -99,7 +99,11 @@ abstract class SubmitTransactionComponent(
         val walletConfig = uiLogic.wallet!!.walletConfig
         walletConfig.secretStorage?.let {
             passwordDialog.value = true
-        } ?: uiLogic.startColdWalletPayment(Application.prefs, Application.texts)
+        } ?: uiLogic.startColdWalletOrMultisigPayment(
+            Application.prefs,
+            Application.texts,
+            Application.database.transactionDbProvider,
+        )
     }
 
     private fun proceedFromAuthFlow(signingSecrets: SigningSecrets) {

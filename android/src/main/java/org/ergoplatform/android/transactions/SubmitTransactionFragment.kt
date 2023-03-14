@@ -15,6 +15,7 @@ import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.PromptSigningResult
+import org.ergoplatform.wallet.isMultisig
 import org.ergoplatform.wallet.isReadOnly
 
 abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
@@ -58,8 +59,13 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
     }
 
     protected open fun receivedPromptSigningResult() {
-        // if this is a prompt signing result, switch to prompt signing dialog
-        SigningPromptDialogFragment().show(childFragmentManager, null)
+        if (authenticationWalletConfig?.isMultisig() == true) {
+            // TODO 167 switch to multisig details page
+            println("New tx id: " + viewModel.uiLogic.multisigTransactionId!!)
+        } else {
+            // if this is a prompt signing result, switch to prompt signing dialog
+            SigningPromptDialogFragment().show(childFragmentManager, null)
+        }
     }
 
     fun showChooseAddressList(addShowAllEntry: Boolean) {
@@ -81,9 +87,10 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
         if (authenticationWalletConfig?.isReadOnly() != false) {
             // we have a read only wallet here, let's go to cold wallet support mode
             val context = requireContext()
-            viewModel.uiLogic.startColdWalletPayment(
+            viewModel.uiLogic.startColdWalletOrMultisigPayment(
                 Preferences(context),
-                AndroidStringProvider(context)
+                AndroidStringProvider(context),
+                AppDatabase.getInstance(context).transactionDbProvider,
             )
         } else {
             super.startAuthFlow()

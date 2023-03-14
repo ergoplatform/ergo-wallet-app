@@ -9,12 +9,12 @@ import org.ergoplatform.ios.tokens.SendTokenEntryView
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.TransactionResult
-import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.addresses.getAddressLabel
 import org.ergoplatform.wallet.getNumOfAddresses
+import org.ergoplatform.wallet.isMultisig
 import org.ergoplatform.wallet.isReadOnly
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
@@ -103,7 +103,6 @@ class SendFundsViewController(
         introLabel.text = texts.get(STRING_DESC_SEND_FUNDS)
 
         readOnlyHint = UITextView(CGRect.Zero()).apply {
-            setHtmlText(texts.get(STRING_HINT_READ_ONLY).replace("href=\"\"", "href=\"$URL_COLD_WALLET_HELP\""))
             textAlignment = NSTextAlignment.Center
             layer.borderWidth = 1.0
             layer.cornerRadius = 4.0
@@ -435,7 +434,14 @@ class SendFundsViewController(
                 // if we already have a successful tx, there is no need to refresh the ui
                 if (txDoneView == null) {
                     walletTitle.text = texts.format(STRING_LABEL_SEND_FROM, wallet!!.walletConfig.displayName)
-                    readOnlyHint.isHidden = !uiLogic.wallet!!.isReadOnly()
+                    readOnlyHint.isHidden = !wallet!!.isReadOnly() && !wallet!!.isMultisig()
+                    if (wallet!!.isMultisig())
+                        readOnlyHint.text = texts.get(STRING_HINT_MULTISIG)
+                    else if (wallet!!.isReadOnly())
+                        readOnlyHint.setHtmlText(
+                            texts.get(STRING_HINT_READ_ONLY)
+                                .replace("href=\"\"", "href=\"$URL_COLD_WALLET_HELP\"")
+                        )
                     scrollView.isHidden = false
                 }
             }
@@ -507,7 +513,7 @@ class SendFundsViewController(
             }
         }
 
-        override fun notifyHasTxId(txId: String) {
+        override fun notifyHasSubmittedTxId(txId: String) {
             LogUtils.logDebug("SendFunds", "Success, tx id $txId")
 
             runOnMainThread {
@@ -568,6 +574,9 @@ class SendFundsViewController(
                 runOnMainThread {
                     showTxResultError(txResult)
                 }
+            } else if (wallet!!.isMultisig()) {
+                // TODO 167 switch to multisig details page
+                println("New tx id: " + multisigTransactionId!!)
             }
         }
 

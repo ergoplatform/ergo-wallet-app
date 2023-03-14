@@ -7,6 +7,7 @@ import kotlinx.coroutines.withContext
 import org.ergoplatform.*
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.TransactionDbProvider
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
@@ -279,7 +280,11 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         }
     }
 
-    override fun startColdWalletPayment(preferences: PreferencesProvider, texts: StringProvider) {
+    override fun startColdWalletOrMultisigPayment(
+        preferences: PreferencesProvider,
+        texts: StringProvider,
+        transactionDbProvider: TransactionDbProvider,
+    ) {
         resetLastMessage()
         epsr?.reducedTx?.let {
             notifyUiLocked(true)
@@ -291,12 +296,12 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                     texts
                 )
                 notifyUiLocked(false)
-                startColdWalletPaymentPrompt(serializedTx)
+                startMultisigOrColdWalletPaymentPrompt(serializedTx, transactionDbProvider)
             }
         }
     }
 
-    override fun notifyHasTxId(txId: String) {
+    override fun notifyHasSubmittedTxId(txId: String) {
         this.txId = txId
         state = State.DONE
         sendReplyToDapp(txId)
