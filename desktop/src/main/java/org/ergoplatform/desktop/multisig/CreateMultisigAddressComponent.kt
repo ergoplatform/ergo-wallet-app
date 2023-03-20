@@ -2,6 +2,7 @@ package org.ergoplatform.desktop.multisig
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -12,6 +13,7 @@ import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.popWhile
 import com.arkivanov.decompose.router.push
 import org.ergoplatform.Application
+import org.ergoplatform.appkit.Address
 import org.ergoplatform.compose.multisig.CreateMultisigAddressLayout
 import org.ergoplatform.desktop.addressbook.AddressBookDialogStateHandler
 import org.ergoplatform.desktop.ui.AppScrollingLayout
@@ -32,6 +34,7 @@ class CreateMultisigAddressComponent(
         get() = true
 
     private val uiLogic = CreateMultisigAddressUiLogic()
+    private val participantsList = mutableStateListOf<Address>()
 
     private val addressBookDialogState = AddressBookDialogStateHandler()
 
@@ -59,12 +62,19 @@ class CreateMultisigAddressComponent(
                 getDb = { Application.database },
                 participantAddress = participantAddress,
                 onChooseRecipientAddress = { addressBookDialogState.showChooseAddressDialog() },
+                participants = participantsList,
             )
         }
 
         addressBookDialogState.AddressBookDialogs(
             onChooseEntry = { addressWithLabel ->
-                participantAddress.value = TextFieldValue(addressWithLabel.address)
+                try {
+                    uiLogic.addParticipantAddress(addressWithLabel.address, Application.texts)
+                    participantsList.clear()
+                    participantsList.addAll(uiLogic.participants)
+                } catch (t: Throwable) {
+                    participantAddress.value = TextFieldValue(addressWithLabel.address)
+                }
             },
             componentScope()
         )

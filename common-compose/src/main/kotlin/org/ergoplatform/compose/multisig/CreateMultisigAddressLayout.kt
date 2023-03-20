@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -34,6 +35,7 @@ fun CreateMultisigAddressLayout(
     texts: StringProvider,
     uiLogic: CreateMultisigAddressUiLogic,
     participantAddress: MutableState<TextFieldValue>,
+    participants: SnapshotStateList<Address>,
     onScanAddress: () -> Unit,
     onChooseRecipientAddress: () -> Unit,
     onBack: (() -> Unit)?,
@@ -65,7 +67,6 @@ fun CreateMultisigAddressLayout(
             var errorMsg by rememberSaveable(participantAddress.value.text) {
                 mutableStateOf<String?>(null)
             }
-            val participants = remember { mutableStateListOf<Address>() }
 
             val onAdd: () -> Unit = {
                 try {

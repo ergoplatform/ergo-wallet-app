@@ -1,9 +1,14 @@
 package org.ergoplatform.android.multisig
 
 import android.content.Intent
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +24,7 @@ import org.ergoplatform.android.ui.AbstractComposeFullScreenDialogFragment
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.QrScannerActivity
 import org.ergoplatform.android.ui.navigateSafe
+import org.ergoplatform.appkit.Address
 import org.ergoplatform.compose.multisig.CreateMultisigAddressLayout
 import org.ergoplatform.persistance.IAddressWithLabel
 
@@ -26,6 +32,18 @@ class CreateMultisigAddressFragmentDialog :
     AbstractComposeFullScreenDialogFragment(), ChooseAddressDialogCallback {
 
     private val viewModel: CreateMultisigAddressViewModel by viewModels()
+
+    private val participantsList = mutableStateListOf<Address>()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        participantsList.clear()
+        participantsList.addAll(viewModel.uiLogic.participants)
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
 
     @Composable
     override fun DialogContent() {
@@ -47,12 +65,22 @@ class CreateMultisigAddressFragmentDialog :
                 },
                 getDb = { AppDatabase.getInstance(context) },
                 participantAddress = viewModel.participantAddress,
+                participants = participantsList,
             )
         }
     }
 
     override fun onAddressChosen(address: IAddressWithLabel) {
-        viewModel.participantAddress.value = TextFieldValue(address.address)
+        try {
+            viewModel.uiLogic.addParticipantAddress(
+                address.address,
+                AndroidStringProvider(requireContext())
+            )
+            participantsList.clear()
+            participantsList.addAll(viewModel.uiLogic.participants)
+        } catch (t: Throwable) {
+            viewModel.participantAddress.value = TextFieldValue(address.address)
+        }
     }
 
     @Deprecated("Deprecated in Java")
