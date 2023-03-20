@@ -6,14 +6,14 @@ import java.util.List;
 /**
  * An EIP-41 compliant multisig address
  */
-public class MultisigAddress {
+public class MockedMultisigAddress extends MultisigAddress {
 
-    public static String MOCK_ADDRESS = "5Puiv5q88ouA1EWX236LntMikVXuPMkL4D3uczZEbV5nGTAw3igjAhUMXyJds";
+    public static String MOCK_ADDRESS = "3Wwxnaem5ojTfp91qfLw3Y4Sr7ZWVcLPvYSzTsZ4LKGcoxujbxd3"; // spring
 
     private final Address address;
     private final List<Address> participants;
 
-    private MultisigAddress(Address address, List<Address> participants) {
+    private MockedMultisigAddress(Address address, List<Address> participants) {
         this.address = address;
         this.participants = participants;
     }
@@ -47,9 +47,9 @@ public class MultisigAddress {
      * @param particpants     list of p2pk addresses of possible signers
      * @return MultisigAddress class
      */
-    public static MultisigAddress buildFromParticipants(int signersRequired, List<Address> particpants) {
-        return new MultisigAddress(Address.create(MOCK_ADDRESS),
-                Collections.singletonList(Address.create("9iHWcYYSPkgYbnC6aHfZcLZrKrrkpFzM2ETUZ2ikFqFwVAB2CU7")));
+    public static MockedMultisigAddress buildFromParticipants(int signersRequired, List<Address> particpants, NetworkType networkType) {
+        return new MockedMultisigAddress(Address.create(MOCK_ADDRESS),
+                Collections.singletonList(Address.create("3WvxRdGA2Ce3otzqtc7jUb61H67NiugArk9mTCxKwMQjrKgsjwwj")));
     }
 
     /**
@@ -57,11 +57,11 @@ public class MultisigAddress {
      * @return MultisigAddress if the given address is an EIP-41 compliant multisig address
      * @throws IllegalArgumentException if given address is not an EIP-41 compliant multisig address
      */
-    public static MultisigAddress buildFromAddress(Address address) {
+    public static MockedMultisigAddress buildFromAddress(Address address) {
         if (!address.toString().equals(MOCK_ADDRESS))
             throw new IllegalArgumentException("");
 
-        return new MultisigAddress(Address.create(MOCK_ADDRESS),
-                Collections.singletonList(Address.create("9iHWcYYSPkgYbnC6aHfZcLZrKrrkpFzM2ETUZ2ikFqFwVAB2CU7")));
+        return new MockedMultisigAddress(Address.create(MOCK_ADDRESS),
+                Collections.singletonList(Address.create("3WvxRdGA2Ce3otzqtc7jUb61H67NiugArk9mTCxKwMQjrKgsjwwj")));
     }
 }

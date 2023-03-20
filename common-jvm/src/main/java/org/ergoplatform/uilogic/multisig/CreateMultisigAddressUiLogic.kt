@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.MultisigAddress
+import org.ergoplatform.getErgoNetworkType
 import org.ergoplatform.isValidErgoAddress
 import org.ergoplatform.parsePaymentRequest
 import org.ergoplatform.persistance.WALLET_TYPE_MULTISIG
@@ -47,7 +48,11 @@ class CreateMultisigAddressUiLogic {
 
         // calc address
         val address =
-            MultisigAddress.buildFromParticipants(signersNeeded, participants).address.toString()
+            MultisigAddress.buildFromParticipants(
+                signersNeeded,
+                participants,
+                getErgoNetworkType(),
+            ).address.toString()
 
         val existingWallet = walletDbProvider.loadWalletByFirstAddress(address)
 
