@@ -17,3 +17,10 @@ fun AddressTransaction.getTransactionStateString(stringProvider: StringProvider)
         TX_STATE_CONFIRMED_UNSECURE -> STRING_TX_STATE_LOW_CONFIRMATIONS
         else -> null
     })?.let { stringProvider.getString(it) } ?: ""
+
+fun MultisigTransaction.getTransactionStateString(stringProvider: StringProvider) =
+    (when (state) {
+        MULTISIG_STATE_INVALID -> STRING_MULTISIG_TX_STATE_INVALID
+        MULTISIG_STATE_WAITING -> STRING_MULTISIG_TX_STATE_WAITING
+        else -> null
+    })?.let { stringProvider.getString(it) } ?: ""

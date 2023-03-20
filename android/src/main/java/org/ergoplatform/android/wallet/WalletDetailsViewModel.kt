@@ -1,6 +1,7 @@
 package org.ergoplatform.android.wallet
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.android.AppDatabase
@@ -24,6 +25,8 @@ class WalletDetailsViewModel(private val savedState: SavedStateHandle) : ViewMod
     private val _tokenInfo = MutableLiveData<HashMap<String, TokenInformation>>()
     val tokenInfo: LiveData<HashMap<String, TokenInformation>> = _tokenInfo
 
+    val infoVersion = mutableStateOf(0)
+
     fun init(ctx: Context, walletId: Int) {
         uiLogic.setUpWalletStateFlowCollector(
             AppDatabase.getInstance(ctx),
@@ -38,11 +41,13 @@ class WalletDetailsViewModel(private val savedState: SavedStateHandle) : ViewMod
         override fun onDataChanged() {
             savedState[addressIdxStateKey] = selectedIdx
             _address.postValue(selectedIdx?.let { wallet?.getDerivedAddress(it) })
+            infoVersion.value = infoVersion.value + 1
         }
 
         override fun onNewTokenInfoGathered(tokenInformation: TokenInformation) {
             // cause a UI refresh for tokens
             _tokenInfo.postValue(this.tokenInformation)
+            infoVersion.value = infoVersion.value + 1
         }
     }
 }

@@ -3,6 +3,7 @@ package org.ergoplatform.android.wallet
 import android.os.Bundle
 import android.view.*
 import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -57,6 +58,7 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
                     copyStringToClipboard(wallet.firstAddress!!, requireContext(), requireView())
                 }
 
+                binding.composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 binding.composeView.setContent {
                     AppComposeTheme {
                         Column {

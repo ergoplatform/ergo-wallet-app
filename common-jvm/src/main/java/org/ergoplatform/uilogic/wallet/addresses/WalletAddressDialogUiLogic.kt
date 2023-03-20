@@ -12,6 +12,7 @@ class WalletAddressDialogUiLogic {
                 walletDbProvider.deleteAddressState(publicAddress)
                 walletDbProvider.deleteTokensByAddress(publicAddress)
                 database.transactionDbProvider.deleteAddressTransactions(publicAddress)
+                database.transactionDbProvider.deleteMultisigTransactions(publicAddress)
             }
             walletDbProvider.deleteWalletAddress(addrId)
         }

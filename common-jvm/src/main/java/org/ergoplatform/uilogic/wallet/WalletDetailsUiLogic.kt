@@ -240,6 +240,9 @@ abstract class WalletDetailsUiLogic {
         }
     }
 
+    suspend fun loadMultisigTransactions(transactionDbProvider: TransactionDbProvider): List<MultisigTransaction> =
+        walletAddress?.let { transactionDbProvider.loadMultisigTransactions(it.publicAddress) } ?: emptyList()
+
     /**
      * returns true if the two lists given are not the same. use to determine if a rebinding of
      * transaction lists needs to be done

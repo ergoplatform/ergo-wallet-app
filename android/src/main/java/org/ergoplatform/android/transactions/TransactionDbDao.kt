@@ -47,4 +47,10 @@ interface TransactionDbDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateMultisigTransaction(vararg multisigTransactions: MultisigTransactionDbEntity)
+
+    @Query("SELECT * FROM multisig_transaction WHERE address = :address")
+    suspend fun loadMultisigTransactions(address: String): List<MultisigTransactionDbEntity>
+
+    @Query("DELETE FROM multisig_transaction WHERE address = :address")
+    suspend fun deleteMulisigTransactions(address: String)
 }

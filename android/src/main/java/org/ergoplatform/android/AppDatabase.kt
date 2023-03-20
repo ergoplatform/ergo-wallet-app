@@ -212,6 +212,7 @@ class RoomWalletDbProvider(private val database: AppDatabase) : WalletDbProvider
         database.walletDao().deleteTokensByWallet(firstAddress)
         database.walletDao().deleteWalletAddresses(firstAddress)
         database.transactionDbProvider.deleteAddressTransactions(firstAddress)
+        database.transactionDbProvider.deleteMultisigTransactions(firstAddress)
         (walletId ?: database.walletDao().loadWalletByFirstAddress(firstAddress)?.id)?.let { id ->
             database.walletDao().deleteWalletConfig(id)
         }
@@ -350,6 +351,12 @@ class RoomTransactionDbProvider(private val database: AppDatabase) : Transaction
     override suspend fun insertOrUpdateMultisigTransaction(multisigTransaction: MultisigTransaction) {
         database.transactionDao().insertOrUpdateMultisigTransaction(multisigTransaction.toDbEntity())
     }
+
+    override suspend fun loadMultisigTransactions(address: String): List<MultisigTransaction> =
+        database.transactionDao().loadMultisigTransactions(address).map { it.toModel() }
+
+    override suspend fun deleteMultisigTransactions(address: String) =
+        database.transactionDao().deleteMulisigTransactions(address)
 }
 
 class RoomMosaikDbProvider(private val database: AppDatabase) : MosaikDbProvider {

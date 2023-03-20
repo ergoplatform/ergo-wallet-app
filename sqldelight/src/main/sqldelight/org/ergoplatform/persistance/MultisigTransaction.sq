@@ -14,3 +14,9 @@ insertOrReplace:
 INSERT OR REPLACE INTO `multisig_transaction` (
     `id`, `address`, `tx_id`, `last_change`, `memo`, `data`, `state`
 ) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+loadMultisigTransactions:
+SELECT * FROM `multisig_transaction` WHERE address = ?;
+
+deleteByAddress:
+DELETE FROM multisig_transaction WHERE address = ?;

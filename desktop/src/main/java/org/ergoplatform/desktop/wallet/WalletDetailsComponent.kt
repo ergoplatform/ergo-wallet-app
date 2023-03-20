@@ -108,7 +108,7 @@ class WalletDetailsComponent(
         val syncingState = WalletStateSyncManager.getInstance().isRefreshing.collectAsState()
         val downloadingTransactionsState = TransactionListManager.isDownloading.collectAsState()
 
-        uiLogic.wallet?.let { wallet ->
+        uiLogic.wallet?.let {
             WalletDetailsScreen(
                 uiLogic,
                 informationVersionState.value,
@@ -141,6 +141,9 @@ class WalletDetailsComponent(
                     router.push(
                         ScreenConfig.AddressTransactions(walletConfig, uiLogic.addressIdx ?: 0)
                     )
+                },
+                onMultisigTransactionClicked = {
+                    // TODO 167
                 }
             )
         }

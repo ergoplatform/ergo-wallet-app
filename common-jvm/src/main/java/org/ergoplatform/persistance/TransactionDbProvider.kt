@@ -58,5 +58,9 @@ abstract class TransactionDbProvider {
         }
     }
 
+    abstract suspend fun loadMultisigTransactions(address: String): List<MultisigTransaction>
+
+    abstract suspend fun deleteMultisigTransactions(address: String)
+
     abstract suspend fun insertOrUpdateMultisigTransaction(multisigTransaction: MultisigTransaction)
 }

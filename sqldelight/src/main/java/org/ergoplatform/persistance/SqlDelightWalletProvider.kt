@@ -77,6 +77,7 @@ class SqlDelightWalletProvider(private val sqlDelightAppDb: SqlDelightAppDb) : W
         appDb.walletTokenQueries.deleteTokensByFirstAddress(firstAddress)
         appDb.walletAddressQueries.deleteWalletAddressByFirstAddress(firstAddress)
         sqlDelightAppDb.transactionDbProvider.deleteAddressTransactions(firstAddress)
+        appDb.multisigTransactionQueries.deleteByAddress(firstAddress)
         (walletId ?: loadWalletByFirstAddress(firstAddress)?.id)?.let { id ->
             appDb.walletConfigQueries.deleteWalletById(id.toLong())
         }

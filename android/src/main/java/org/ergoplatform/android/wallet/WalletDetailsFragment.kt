@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -28,12 +30,10 @@ import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.tokens.WalletDetailsTokenEntryView
 import org.ergoplatform.android.tokens.setTokenPrice
 import org.ergoplatform.android.transactions.inflateAddressTransactionEntry
-import org.ergoplatform.android.ui.AndroidStringProvider
-import org.ergoplatform.android.ui.QrScannerActivity
-import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.android.ui.postDelayed
+import org.ergoplatform.android.ui.*
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
+import org.ergoplatform.compose.multisig.MultisigTransactionsListLayout
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.tokens.getTokenErgoValueSum
@@ -98,6 +98,25 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                         }
                     }
                 }
+            }
+        }
+
+        binding.multisigTransactions.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        binding.multisigTransactions.setContent {
+            AppComposeTheme {
+                val downloadingTransactionsState =
+                    TransactionListManager.isDownloading.collectAsState()
+
+                MultisigTransactionsListLayout(
+                    informationVersion = walletDetailsViewModel.infoVersion.value,
+                    downloadingTransactions = downloadingTransactionsState.value,
+                    uiLogic = walletDetailsViewModel.uiLogic,
+                    onMultisigTransactionClicked = {
+                        // TODO 167
+                    },
+                    texts = AndroidStringProvider(requireContext()),
+                    getDb = { AppDatabase.getInstance(requireContext()).transactionDbProvider },
+                )
             }
         }
 

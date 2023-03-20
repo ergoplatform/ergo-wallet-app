@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.compose.multisig.MultisigTransactionsListLayout
 import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.mediumIconSize
 import org.ergoplatform.compose.settings.smallIconSize
@@ -50,6 +51,7 @@ fun WalletDetailsScreen(
     onTransactionClicked: (String, String) -> Unit,
     onViewTransactionsClicked: () -> Unit,
     onTokenClicked: (String, Long?) -> Unit,
+    onMultisigTransactionClicked: (Int) -> Unit,
 ) {
     AppScrollingLayout {
         val firstColumnContent = @Composable {
@@ -69,6 +71,15 @@ fun WalletDetailsScreen(
             }
         }
         val secondColumnContent = @Composable {
+            MultisigTransactionsListLayout(
+                informationVersion,
+                downloadingTransactions,
+                uiLogic,
+                onMultisigTransactionClicked,
+                Application.texts,
+                getDb = { Application.database.transactionDbProvider },
+            )
+
             TransactionsLayout(
                 informationVersion,
                 downloadingTransactions,
