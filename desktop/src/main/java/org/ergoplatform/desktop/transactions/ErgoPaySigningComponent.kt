@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.push
+import com.arkivanov.decompose.router.replaceCurrent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.Application
@@ -158,8 +159,7 @@ class ErgoPaySigningComponent(
             if (!txResult.success) {
                 navHost.showErrorDialog(getTransactionResultErrorMessage(txResult))
             } else if (wallet!!.isMultisig()) {
-                // TODO 167 switch to multisig details page
-                println("New tx id: " + multisigTransactionId!!)
+                router.replaceCurrent(ScreenConfig.MultisigTxDetail(multisigTransactionId!!))
             }
         }
 

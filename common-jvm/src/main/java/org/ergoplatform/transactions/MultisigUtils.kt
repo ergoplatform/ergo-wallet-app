@@ -2,6 +2,7 @@ package org.ergoplatform.transactions
 
 import org.ergoplatform.ErgoFacade
 import org.ergoplatform.appkit.Address
+import org.ergoplatform.appkit.MockedMultisigTransaction
 import org.ergoplatform.appkit.MultisigAddress
 import org.ergoplatform.persistance.MULTISIG_STATE_WAITING
 import org.ergoplatform.persistance.MultisigTransaction
@@ -15,7 +16,7 @@ object MultisigUtils {
     ): MultisigTransaction {
         val unsignedTx = ErgoFacade.deserializeUnsignedTxOffline(promptSigningResult.serializedTx!!)
 
-        val mst = org.ergoplatform.appkit.MultisigTransaction.fromTransaction(
+        val mst = MockedMultisigTransaction.fromTransaction(
             unsignedTx,
             MultisigAddress.buildFromAddress(Address.create(wallet.firstAddress!!))
         )

@@ -26,7 +26,7 @@ abstract class SubmitTransactionUiLogic {
         private set
     var signingPromptDialogConfig: SigningPromptDialogDataSource? = null
         private set
-    var multisigTransactionId: String? = null
+    var multisigTransactionId: Int? = null
         private set
 
     protected suspend fun initWallet(
@@ -97,7 +97,7 @@ abstract class SubmitTransactionUiLogic {
                 val data =
                     MultisigUtils.createMultisigTransaction(wallet!!.walletConfig, serializedTx)
                 transactionDbProvider.insertOrUpdateMultisigTransaction(data)
-                multisigTransactionId = data.txId
+                multisigTransactionId = transactionDbProvider.loadMultisigTransactionByTxId(data.txId, data.address)!!.id
             } else
                 buildColdSigningRequest(serializedTx)?.let {
                     signingPromptDialogConfig = SigningPromptConfig(it)

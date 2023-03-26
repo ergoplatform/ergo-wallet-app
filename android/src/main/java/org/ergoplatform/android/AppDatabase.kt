@@ -349,11 +349,21 @@ class RoomTransactionDbProvider(private val database: AppDatabase) : Transaction
     }
 
     override suspend fun insertOrUpdateMultisigTransaction(multisigTransaction: MultisigTransaction) {
-        database.transactionDao().insertOrUpdateMultisigTransaction(multisigTransaction.toDbEntity())
+        database.transactionDao()
+            .insertOrUpdateMultisigTransaction(multisigTransaction.toDbEntity())
     }
 
     override suspend fun loadMultisigTransactions(address: String): List<MultisigTransaction> =
         database.transactionDao().loadMultisigTransactions(address).map { it.toModel() }
+
+    override suspend fun loadMultisigTransaction(id: Int): MultisigTransaction? =
+        database.transactionDao().loadMultisigTransaction(id.toLong())?.toModel()
+
+    override suspend fun loadMultisigTransactionByTxId(
+        txId: String,
+        address: String
+    ): MultisigTransaction? =
+        database.transactionDao().loadMultisigTransaction(txId, address)?.toModel()
 
     override suspend fun deleteMultisigTransactions(address: String) =
         database.transactionDao().deleteMulisigTransactions(address)

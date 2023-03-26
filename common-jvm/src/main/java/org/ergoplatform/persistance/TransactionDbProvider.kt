@@ -58,6 +58,10 @@ abstract class TransactionDbProvider {
         }
     }
 
+    abstract suspend fun loadMultisigTransaction(id: Int): MultisigTransaction?
+
+    abstract suspend fun loadMultisigTransactionByTxId(txId: String, address: String): MultisigTransaction?
+
     abstract suspend fun loadMultisigTransactions(address: String): List<MultisigTransaction>
 
     abstract suspend fun deleteMultisigTransactions(address: String)

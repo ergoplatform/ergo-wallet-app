@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.push
+import com.arkivanov.decompose.router.replaceCurrent
 import kotlinx.coroutines.CoroutineScope
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
@@ -237,8 +238,7 @@ class SendFundsComponent(
             if (!txResult.success) {
                 showErrorMessage(getTransactionResultErrorMessage(txResult))
             } else if (walletConfig.isMultisig()) {
-                // TODO 167 switch to multisig details page
-                println("New tx id: " + multisigTransactionId!!)
+                router.replaceCurrent(ScreenConfig.MultisigTxDetail(multisigTransactionId!!))
             }
         }
 

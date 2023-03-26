@@ -113,6 +113,21 @@ class SqlDelightTransactionDbProvider(private val sqlDelightAppDb: SqlDelightApp
             ).executeAsList().map { it.toModel() }
         }
 
+    override suspend fun loadMultisigTransaction(id: Int): MultisigTransaction? =
+        sqlDelightAppDb.useIoContext {
+            appDatabase.multisigTransactionQueries.loadMultisigTransaction(id.toLong())
+                .executeAsOneOrNull()?.toModel()
+        }
+
+    override suspend fun loadMultisigTransactionByTxId(
+        txId: String,
+        address: String
+    ): MultisigTransaction? =
+        sqlDelightAppDb.useIoContext {
+            appDatabase.multisigTransactionQueries.loadMultisigTransactionTxId(txId, address)
+                .executeAsOneOrNull()?.toModel()
+        }
+
     override suspend fun deleteMultisigTransactions(address: String) =
         sqlDelightAppDb.useIoContext {
             appDatabase.multisigTransactionQueries.deleteByAddress(address)

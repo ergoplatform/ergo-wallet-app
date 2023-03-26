@@ -22,6 +22,7 @@ import org.ergoplatform.desktop.ergoauth.ErgoAuthComponent
 import org.ergoplatform.desktop.mosaik.MosaikAppComponent
 import org.ergoplatform.desktop.mosaik.MosaikOverviewComponent
 import org.ergoplatform.desktop.multisig.CreateMultisigAddressComponent
+import org.ergoplatform.desktop.multisig.MultisigTransactionComponent
 import org.ergoplatform.desktop.settings.SettingsComponent
 import org.ergoplatform.desktop.tokens.TokenInformationComponent
 import org.ergoplatform.desktop.transactions.*
@@ -173,6 +174,10 @@ class NavHostComponent(
 
             is ScreenConfig.TransactionInfo -> TransactionInfoComponent(
                 screenConfig.txId, screenConfig.address, componentContext, this
+            )
+
+            is ScreenConfig.MultisigTxDetail -> MultisigTransactionComponent(
+                screenConfig.dbId, componentContext, this
             )
 
             is ScreenConfig.TokenInformation -> TokenInformationComponent(

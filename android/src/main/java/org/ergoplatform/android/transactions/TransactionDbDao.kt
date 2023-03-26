@@ -51,6 +51,12 @@ interface TransactionDbDao {
     @Query("SELECT * FROM multisig_transaction WHERE address = :address")
     suspend fun loadMultisigTransactions(address: String): List<MultisigTransactionDbEntity>
 
+    @Query("SELECT * FROM multisig_transaction WHERE id = :id")
+    suspend fun loadMultisigTransaction(id: Long): MultisigTransactionDbEntity?
+
+    @Query("SELECT * FROM multisig_transaction WHERE tx_id = :txId AND address = :address")
+    suspend fun loadMultisigTransaction(txId: String, address: String): MultisigTransactionDbEntity?
+
     @Query("DELETE FROM multisig_transaction WHERE address = :address")
     suspend fun deleteMulisigTransactions(address: String)
 }

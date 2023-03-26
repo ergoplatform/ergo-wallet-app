@@ -112,7 +112,10 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
                     downloadingTransactions = downloadingTransactionsState.value,
                     uiLogic = walletDetailsViewModel.uiLogic,
                     onMultisigTransactionClicked = {
-                        // TODO 167
+                        findNavController().navigateSafe(
+                            WalletDetailsFragmentDirections
+                                .actionNavigationWalletDetailsToMultisigTxDetailsFragment(it)
+                        )
                     },
                     texts = AndroidStringProvider(requireContext()),
                     getDb = { AppDatabase.getInstance(requireContext()).transactionDbProvider },

@@ -143,7 +143,7 @@ class WalletDetailsComponent(
                     )
                 },
                 onMultisigTransactionClicked = {
-                    // TODO 167
+                    router.push(ScreenConfig.MultisigTxDetail(it))
                 }
             )
         }

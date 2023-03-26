@@ -142,6 +142,9 @@
             app:exitAnim="@anim/slide_out_to_left"
             app:popEnterAnim="@anim/slide_in_from_left"
             app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_navigation_wallet_details_to_multisigTxDetailsFragment"
+            app:destination="@id/multisigTxDetailsFragment" />
 
     </fragment>
 
@@ -493,4 +496,12 @@
             android:id="@+id/action_createMultisigAddressFragmentDialog_to_navigation_wallet"
             app:destination="@id/navigation_wallet" />
     </dialog>
+    <fragment
+        android:id="@+id/multisigTxDetailsFragment"
+        android:name="org.ergoplatform.android.multisig.MultisigTxDetailsFragment"
+        android:label="@string/title_multisigtx_details" >
+        <argument
+            android:name="dbId"
+            app:argType="integer" />
+    </fragment>
 </navigation>

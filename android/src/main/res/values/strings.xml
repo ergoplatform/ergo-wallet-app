@@ -155,11 +155,13 @@
     <string name="transactions_view_more">View more</string>
     <string name="transactions_none_yet">There are no transactions made for this address yet.</string>
 
-    <!-- Pending multisig transactions -->
+    <!-- Pending multisig transactions, details -->
     <string name="title_pending_multisig_tx">Pending multisig transactions</string>
     <string name="multisig_no_memo">No memo</string>
     <string name="multisig_tx_state_invalid">Invalid</string>
     <string name="multisig_tx_state_waiting">Waiting</string>
+    <string name="title_multisigtx_details">Multisig transaction</string>
+    <string name="title_multisigtx_participants">Participants</string>
 
     <!-- Transaction list -->
     <string name="tx_state_waiting">Pending</string>

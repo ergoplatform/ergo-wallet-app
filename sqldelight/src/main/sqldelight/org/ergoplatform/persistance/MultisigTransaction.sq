@@ -18,5 +18,11 @@ INSERT OR REPLACE INTO `multisig_transaction` (
 loadMultisigTransactions:
 SELECT * FROM `multisig_transaction` WHERE address = ?;
 
+loadMultisigTransaction:
+SELECT * FROM `multisig_transaction` WHERE id = ?;
+
+loadMultisigTransactionTxId:
+SELECT * FROM `multisig_transaction` WHERE tx_id = ? AND address = ?;
+
 deleteByAddress:
 DELETE FROM multisig_transaction WHERE address = ?;
