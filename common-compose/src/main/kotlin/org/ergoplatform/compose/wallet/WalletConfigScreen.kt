@@ -17,7 +17,7 @@ import org.ergoplatform.compose.settings.AppButton
 import org.ergoplatform.compose.settings.AppProgressIndicator
 import org.ergoplatform.compose.settings.defaultPadding
 import org.ergoplatform.compose.settings.secondaryButtonColors
-import org.ergoplatform.desktop.ui.ErgoAddressText
+import org.ergoplatform.compose.ErgoAddressText
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.WalletConfig

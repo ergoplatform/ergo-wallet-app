@@ -22,12 +22,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TokenAmount
-import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.compose.settings.AppButton
 import org.ergoplatform.compose.settings.defaultPadding
 import org.ergoplatform.compose.toComposableText
 import org.ergoplatform.desktop.tokens.TokenEntryView
-import org.ergoplatform.desktop.ui.ErgoAddressText
+import org.ergoplatform.compose.ErgoAddressText
 import org.ergoplatform.explorer.client.model.AdditionalRegisters
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.mosaik.MiddleEllipsisText
@@ -298,30 +297,12 @@ fun TransactionInfoBox(
     texts: StringProvider,
     getDb: () -> IAppDatabase,
 ) {
-    val addressLabelState = remember(address) { mutableStateOf<String?>(null) }
-    LaunchedEffect(address) {
-        withContext(Dispatchers.IO) {
-            getAddressLabelFromDatabase(getDb(), address, texts)?.let {
-                addressLabelState.value = it
-            }
-        }
-    }
-
     Column(Modifier.padding(vertical = defaultPadding / 2)) {
-        if (addressLabelState.value != null)
-            Text(
-                addressLabelState.value!!,
-                style = labelStyle(LabelStyle.BODY1BOLD),
-                color = MosaikStyleConfig.primaryLabelColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        else
-            ErgoAddressText(
-                address,
-                style = labelStyle(LabelStyle.BODY1BOLD),
-                color = MosaikStyleConfig.primaryLabelColor
-            )
+        ErgoAddressText(
+            address, getDb, texts,
+            style = labelStyle(LabelStyle.BODY1BOLD),
+            color = MosaikStyleConfig.primaryLabelColor,
+        )
 
         val nanoErgs = value ?: 0
         if (nanoErgs > 0)

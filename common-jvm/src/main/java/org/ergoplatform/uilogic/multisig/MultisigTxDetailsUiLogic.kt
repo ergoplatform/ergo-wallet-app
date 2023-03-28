@@ -8,6 +8,7 @@ import org.ergoplatform.appkit.MockedMultisigTransaction
 import org.ergoplatform.appkit.MultisigAddress
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.MultisigTransaction
+import org.ergoplatform.persistance.WalletConfig
 
 abstract class MultisigTxDetailsUiLogic {
     val multisigTx = MutableStateFlow<MultisigTxWithExtraInfo?>(null)
@@ -31,8 +32,15 @@ abstract class MultisigTxDetailsUiLogic {
             multisigTx.value = MultisigTxWithExtraInfo(
                 multisig,
                 multisigTxErg,
-                participantList = participantList,
-                confirmedParticipants = listOf(participantList.first())  // TODO 167 multisigTxErg.commitingParticipants,
+                participantList = participantList.map {
+                    val addrAsString = it.toString()
+                    val walletDerivedAddress = db.walletDbProvider.loadWalletAddress(addrAsString)
+                    val walletConfig = db.walletDbProvider.loadWalletByFirstAddress(
+                        walletDerivedAddress?.walletFirstAddress ?: addrAsString
+                    )
+                    addrAsString to walletConfig
+                },
+                confirmedParticipants = listOf(participantList.last()).map { it.toString() }  // TODO 167 multisigTxErg.commitingParticipants,
             )
             loading = false
         }
@@ -44,6 +52,6 @@ abstract class MultisigTxDetailsUiLogic {
 data class MultisigTxWithExtraInfo(
     val multisigTxDb: MultisigTransaction,
     val multisigTxErg: org.ergoplatform.appkit.MultisigTransaction,
-    val participantList: List<Address>,
-    val confirmedParticipants: List<Address>
+    val participantList: List<Pair<String, WalletConfig?>>,
+    val confirmedParticipants: List<String>
 )

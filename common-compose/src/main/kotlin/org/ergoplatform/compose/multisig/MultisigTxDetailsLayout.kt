@@ -5,7 +5,6 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -13,15 +12,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.ergoplatform.compose.settings.AppCard
-import org.ergoplatform.compose.settings.AppProgressIndicator
-import org.ergoplatform.compose.settings.defaultMaxWidth
-import org.ergoplatform.compose.settings.defaultPadding
-import org.ergoplatform.desktop.ui.ErgoAddressText
+import org.ergoplatform.compose.ErgoAddressText
+import org.ergoplatform.compose.settings.*
 import org.ergoplatform.mosaik.MiddleEllipsisText
 import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
+import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.uilogic.STRING_LABEL_CONFIRM
 import org.ergoplatform.uilogic.STRING_MULTISIG_NO_MEMO
 import org.ergoplatform.uilogic.STRING_TITLE_MULTISIGTX_PARTICIPANTS
 import org.ergoplatform.uilogic.StringProvider
@@ -35,6 +33,7 @@ fun MultisigTxDetailsLayout(
     multisigTxDetails: MultisigTxWithExtraInfo?,
     uiLogic: MultisigTxDetailsUiLogic,
     texts: StringProvider,
+    getDb: () -> IAppDatabase,
 ) {
     if (multisigTxDetails == null) {
         AppProgressIndicator(modifier)
@@ -50,6 +49,7 @@ fun MultisigTxDetailsLayout(
                 multisigTxDetails,
                 uiLogic,
                 texts,
+                getDb
             )
         }
     }
@@ -61,6 +61,7 @@ private fun MultisigTxDetails(
     multisigTxDetails: MultisigTxWithExtraInfo,
     uiLogic: MultisigTxDetailsUiLogic,
     texts: StringProvider,
+    getDb: () -> IAppDatabase,
 ) {
 
     Column(modifier) {
@@ -98,27 +99,35 @@ private fun MultisigTxDetails(
         )
 
         // Outboxes
-        Column(Modifier.padding(defaultPadding / 2)) {
-            multisigTxDetails.participantList.forEach {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    ErgoAddressText(
-                        it.toString(),
-                        Modifier.weight(1f).padding(vertical = defaultPadding / 2),
-                        style = labelStyle(LabelStyle.BODY1)
-                    )
+        Column(Modifier.padding(horizontal = defaultPadding / 2)) {
+            multisigTxDetails.participantList.forEach { (address, wallet) ->
+                val hasSigned = multisigTxDetails.confirmedParticipants.contains(address)
+                Column(Modifier.padding(top = defaultPadding / 2)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        ErgoAddressText(
+                            address,
+                            getDb,
+                            texts,
+                            Modifier.weight(1f),
+                            style = labelStyle(LabelStyle.BODY1)
+                        )
 
-                    Spacer(Modifier.size(defaultPadding))
+                        if (hasSigned) {
+                            Spacer(Modifier.size(defaultPadding))
 
-                    Icon(
-                        if (multisigTxDetails.confirmedParticipants.contains(it))
-                            Icons.Outlined.CheckCircle
-                        else
-                            Icons.Default.MoreHoriz,
-                        null,
-                        tint = MosaikStyleConfig.primaryLabelColor,
-                    )
-
-                    // TODO 167 sign button
+                            Icon(
+                                Icons.Outlined.CheckCircle,
+                                null,
+                                tint = MosaikStyleConfig.primaryLabelColor,
+                            )
+                        }
+                    }
+                    if (wallet != null && !hasSigned)
+                        AppButton(onClick = {
+                            // TODO 167 sign
+                        }, Modifier.align(Alignment.End).padding(bottom = defaultPadding / 2)) {
+                            Text(remember { texts.getString(STRING_LABEL_CONFIRM) })
+                        }
                 }
             }
 

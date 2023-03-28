@@ -36,6 +36,7 @@ class MultisigTransactionComponent(
                 uiLogic.multisigTx.collectAsState().value,
                 uiLogic,
                 Application.texts,
+                getDb = { Application.database }
             )
         }
 

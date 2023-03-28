@@ -36,11 +36,13 @@ class MultisigTxDetailsFragment : AbstractComposeFragment() {
 
     @Composable
     override fun FragmentContent() {
+        val context = requireContext()
         MultisigTxDetailsLayout(
             Modifier,
             multisigTxDetails = viewModel.uiLogic.multisigTx.collectAsState().value,
             uiLogic = viewModel.uiLogic,
-            texts = AndroidStringProvider(requireContext()),
+            texts = AndroidStringProvider(context),
+            getDb = { AppDatabase.getInstance(context) }
         )
     }
 }
