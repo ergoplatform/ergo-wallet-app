@@ -1,7 +1,6 @@
 package org.ergoplatform.compose.multisig
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -14,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.AppProgressIndicator
 import org.ergoplatform.compose.settings.defaultMaxWidth
 import org.ergoplatform.compose.settings.defaultPadding
@@ -40,7 +40,7 @@ fun MultisigTxDetailsLayout(
         AppProgressIndicator(modifier)
     } else {
 
-        Card(
+        AppCard(
             modifier.padding(defaultPadding)
                 .defaultMinSize(400.dp, 200.dp)
                 .widthIn(max = defaultMaxWidth)
