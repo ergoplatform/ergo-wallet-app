@@ -93,9 +93,9 @@ class MainActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.RESUMED) {
                     while (isActive) {
-                        delay(1000 * 60)
+                        delay(App.appLockMs / 2)
                         if (walletApp?.isAppLocked() == true)
-                            lockApp()
+                            lockAppUi()
                     }
                 }
             }
@@ -111,21 +111,31 @@ class MainActivity : AppCompatActivity() {
         if (walletApp?.isAppLocked() == false)
             unlockApp()
         else
-            lockApp()
+            lockAppUi()
     }
 
     private fun unlockApp() {
         findViewById<View>(R.id.layout_app_locked).visibility = View.GONE
     }
 
-    private fun lockApp() {
+    private fun lockAppUi() {
         findViewById<View>(R.id.layout_app_locked).visibility = View.VISIBLE
+
+        // dialogs stay in front of the lock screen, we need to close all of them
+        val navController = findNavController(R.id.nav_host_fragment)
+        while (navController.currentDestination?.navigatorName == "dialog") {
+            navController.popBackStack()
+        }
+        // FIXME this does not affect dialogs shown without navigation like ConfirmationDialog,
+        // AlertDialog etc.
+
     }
 
     fun scanQrCode() {
         QrScannerActivity.startFromActivity(this)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
@@ -227,7 +237,7 @@ class MainActivity : AppCompatActivity() {
 
         try {
             BiometricPrompt(this, callback).authenticate(promptInfo)
-        } catch (t: Throwable) {
+        } catch (_: Throwable) {
 
         }
     }

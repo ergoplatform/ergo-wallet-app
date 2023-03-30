@@ -72,7 +72,7 @@ class MosaikViewModel : ViewModel() {
         }
 
         override fun onRefreshFavorite() {
-            manifestLiveData.postValue(manifestLiveData.value)
+            manifestLiveData.postValue(appManifest)
         }
 
         override fun appNotLoaded(cause: Throwable) {
