@@ -505,6 +505,12 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
             })
     }
 
+    override fun navigateToMultisigDetails(multisigTxDbId: Int) {
+        findNavController().navigateSafe(
+            SendFundsFragmentDirections.actionSendFundsFragmentToMultisigTxDetailsFragment(multisigTxDbId)
+        )
+    }
+
     private fun showPaymentRequestWarnings() {
         viewModel.uiLogic.getPaymentRequestWarnings(AndroidStringProvider(requireContext()))?.let {
             MaterialAlertDialogBuilder(requireContext())

@@ -263,6 +263,13 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
         } ?: View.GONE
     }
 
+    override fun navigateToMultisigDetails(multisigTxDbId: Int) {
+        findNavController().navigateSafe(
+            ErgoPaySigningFragmentDirections
+                .actionErgoPaySigningFragmentToMultisigTxDetailsFragment(multisigTxDbId)
+        )
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

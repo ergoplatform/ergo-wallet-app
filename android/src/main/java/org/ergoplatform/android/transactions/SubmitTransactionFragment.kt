@@ -58,10 +58,11 @@ abstract class SubmitTransactionFragment : AbstractAuthenticationFragment(),
 
     }
 
+    abstract fun navigateToMultisigDetails(multisigTxDbId: Int)
+
     protected open fun receivedPromptSigningResult() {
         if (authenticationWalletConfig?.isMultisig() == true) {
-            // TODO 167 switch to multisig details page
-            println("New tx id: " + viewModel.uiLogic.multisigTransactionId!!)
+            navigateToMultisigDetails(viewModel.uiLogic.multisigTransactionId!!)
         } else {
             // if this is a prompt signing result, switch to prompt signing dialog
             SigningPromptDialogFragment().show(childFragmentManager, null)

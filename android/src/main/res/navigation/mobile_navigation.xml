@@ -245,6 +245,15 @@
             app:exitAnim="@anim/slide_out_to_left"
             app:popEnterAnim="@anim/slide_in_from_left"
             app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_sendFundsFragment_to_multisigTxDetailsFragment"
+            app:destination="@id/multisigTxDetailsFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right"
+            app:popUpTo="@id/sendFundsFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <dialog
         android:id="@+id/addReadOnlyWalletFragmentDialog"
@@ -350,6 +359,15 @@
             android:name="closeApp"
             android:defaultValue="false"
             app:argType="boolean" />
+        <action
+            android:id="@+id/action_ergoPaySigningFragment_to_multisigTxDetailsFragment"
+            app:destination="@id/multisigTxDetailsFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right"
+            app:popUpTo="@id/ergoPaySigningFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <dialog
         android:id="@+id/shareWithQrDialogFragment"
