@@ -1,8 +1,10 @@
 package org.ergoplatform.uilogic.multisig
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.MockedMultisigTransaction
 import org.ergoplatform.appkit.MultisigAddress
@@ -43,6 +45,17 @@ abstract class MultisigTxDetailsUiLogic {
                 confirmedParticipants = listOf(participantList.last()).map { it.toString() }  // TODO 167 multisigTxErg.commitingParticipants,
             )
             loading = false
+        }
+    }
+
+    fun signWith(walletConfig: WalletConfig, signingSecrets: SigningSecrets) {
+        val multisigBeforeSigning = multisigTx.value
+        multisigTx.value = null
+        coroutineScope.launch {
+            // TODO 167 - this is mocked
+            delay(1000)
+
+            multisigTx.value = multisigBeforeSigning
         }
     }
 

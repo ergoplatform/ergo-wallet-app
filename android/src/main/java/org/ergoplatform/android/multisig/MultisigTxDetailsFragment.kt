@@ -9,13 +9,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
+import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
+import org.ergoplatform.android.ui.AbstractAuthenticationFragment
 import org.ergoplatform.android.ui.AbstractComposeFragment
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.compose.multisig.MultisigTxDetailsLayout
+import org.ergoplatform.persistance.WalletConfig
 
-class MultisigTxDetailsFragment : AbstractComposeFragment() {
+class MultisigTxDetailsFragment : AbstractAuthenticationFragment() {
 
     val viewModel: MultisigTxDetailViewModel by viewModels()
     private val args: MultisigTxDetailsFragmentArgs by navArgs()
@@ -26,23 +29,35 @@ class MultisigTxDetailsFragment : AbstractComposeFragment() {
         savedInstanceState: Bundle?
     ): View {
         viewModel.uiLogic.initMultisigTx(args.dbId, AppDatabase.getInstance(requireContext()))
-        return super.onCreateView(inflater, container, savedInstanceState)
+        val binding = AbstractComposeFragment.inflateComposeViewBinding(inflater, container) {
+            FragmentContent()
+        }
+        binding.tvTitle.setText(R.string.title_multisigtx_details)
+        return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.tvTitle.setText(R.string.title_multisigtx_details)
-    }
+    override var authenticationWalletConfig: WalletConfig? = null
 
     @Composable
-    override fun FragmentContent() {
+    private fun FragmentContent() {
         val context = requireContext()
         MultisigTxDetailsLayout(
             Modifier,
             multisigTxDetails = viewModel.uiLogic.multisigTx.collectAsState().value,
             uiLogic = viewModel.uiLogic,
+            onSignWith = {
+                authenticationWalletConfig = it
+                startAuthFlow()
+            },
             texts = AndroidStringProvider(context),
             getDb = { AppDatabase.getInstance(context) }
         )
+    }
+
+    override fun proceedFromAuthFlow(secrets: SigningSecrets) {
+        authenticationWalletConfig?.let {
+            viewModel.uiLogic.signWith(it, secrets)
+        }
+        authenticationWalletConfig = null
     }
 }

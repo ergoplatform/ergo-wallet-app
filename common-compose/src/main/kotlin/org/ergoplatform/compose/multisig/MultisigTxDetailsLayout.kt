@@ -19,6 +19,7 @@ import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.uilogic.STRING_LABEL_CONFIRM
 import org.ergoplatform.uilogic.STRING_MULTISIG_NO_MEMO
 import org.ergoplatform.uilogic.STRING_TITLE_MULTISIGTX_PARTICIPANTS
@@ -32,6 +33,7 @@ fun MultisigTxDetailsLayout(
     modifier: Modifier,
     multisigTxDetails: MultisigTxWithExtraInfo?,
     uiLogic: MultisigTxDetailsUiLogic,
+    onSignWith: (WalletConfig) -> Unit,
     texts: StringProvider,
     getDb: () -> IAppDatabase,
 ) {
@@ -48,6 +50,7 @@ fun MultisigTxDetailsLayout(
                 Modifier.padding(defaultPadding),
                 multisigTxDetails,
                 uiLogic,
+                onSignWith,
                 texts,
                 getDb
             )
@@ -60,6 +63,7 @@ private fun MultisigTxDetails(
     modifier: Modifier,
     multisigTxDetails: MultisigTxWithExtraInfo,
     uiLogic: MultisigTxDetailsUiLogic,
+    onSignWith: (WalletConfig) -> Unit,
     texts: StringProvider,
     getDb: () -> IAppDatabase,
 ) {
@@ -124,7 +128,7 @@ private fun MultisigTxDetails(
                     }
                     if (wallet != null && !hasSigned)
                         AppButton(onClick = {
-                            // TODO 167 sign
+                            onSignWith(wallet)
                         }, Modifier.align(Alignment.End).padding(bottom = defaultPadding / 2)) {
                             Text(remember { texts.getString(STRING_LABEL_CONFIRM) })
                         }

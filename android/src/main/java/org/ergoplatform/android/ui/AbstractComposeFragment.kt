@@ -17,14 +17,8 @@ abstract class AbstractComposeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentComposeBinding.inflate(inflater)
-        binding.composeView.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AppComposeTheme {
-                    FragmentContent()
-                }
-            }
+        _binding = inflateComposeViewBinding(inflater, container) {
+            FragmentContent()
         }
 
         return binding.root
@@ -36,5 +30,25 @@ abstract class AbstractComposeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        fun inflateComposeViewBinding(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            content: @Composable () -> Unit
+        ): FragmentComposeBinding {
+            val binding = FragmentComposeBinding.inflate(inflater, container, false)
+            binding.composeView.apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+                setContent {
+                    AppComposeTheme {
+                        content()
+                    }
+                }
+            }
+
+            return binding
+        }
     }
 }
