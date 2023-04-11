@@ -454,8 +454,11 @@ object ErgoFacade {
     }
 
     fun isMultisigAddress(addressString: String): Boolean = try {
+        if (addressString == MockedMultisigAddress.MOCK_ADDRESS) true
+        else {
         MultisigAddress.buildFromAddress(Address.create(addressString))
         true
+        }
     } catch (t: Throwable) {
         false
     }
