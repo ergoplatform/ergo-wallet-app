@@ -4,6 +4,7 @@ import org.ergoplatform.api.*
 import org.ergoplatform.explorer.client.DefaultApi
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.restapi.client.BlockchainApi
 import org.ergoplatform.restapi.client.ErgoTransactionOutput
 import org.ergoplatform.restapi.client.Transactions
 import org.ergoplatform.restapi.client.TransactionsApi
@@ -24,9 +25,13 @@ open class ApiServiceManager(
     private val nodeBoxesApi by lazy {
         buildRetrofitForNode(UtxoApi::class.java, nodeApiUrl)
     }
+    private val nodeBlockchainApi by lazy {
+        buildRetrofitForNode(BlockchainApi::class.java, nodeApiUrl)
+    }
 
-    override fun getTotalBalanceForAddress(publicAddress: String): Call<TotalBalance> =
-        defaultApi.getApiV1AddressesP1BalanceTotal(publicAddress)
+    fun getTotalBalanceForAddress(publicAddress: String, preferNode: Boolean): Call<TotalBalance> =
+        if (preferNode) nodeBlockchainApi.getBalance(publicAddress)
+        else defaultApi.getApiV1AddressesP1BalanceTotal(publicAddress)
 
     override fun getExplorerBoxInformation(boxId: String): Call<OutputInfo> =
         defaultApi.getApiV1BoxesP1(boxId)

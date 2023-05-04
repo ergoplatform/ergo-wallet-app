@@ -249,12 +249,21 @@ class WalletStateSyncManager {
                         "Refreshing ${address.publicAddress}..."
                     )
 
-                    val balanceInfoCall =
-                        ApiServiceManager.getOrInit(preferences).getTotalBalanceForAddress(
-                            address.publicAddress
-                        ).execute()
+                    val apiServiceManager = ApiServiceManager.getOrInit(preferences)
 
-                    balanceInfoCall.body()?.let { balanceInfo ->
+                    val balanceInfoNode = if (preferences.isPreferNodeExplorer) {
+                        apiServiceManager.getTotalBalanceForAddress(
+                            address.publicAddress,
+                            preferNode = true
+                        ).execute().body()
+                    } else null
+
+                    val balanceInfo =
+                        balanceInfoNode ?: apiServiceManager.getTotalBalanceForAddress(
+                            address.publicAddress, preferNode = false
+                        ).execute().body()
+
+                    balanceInfo?.let {
 
                         val newState = WalletState(
                             address.publicAddress,
