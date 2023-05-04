@@ -91,6 +91,7 @@ const val STRING_CHARACTER_COUNTER_CONTENT_DESCRIPTION = "character_counter_cont
 const val STRING_CHARACTER_COUNTER_OVERFLOWED_CONTENT_DESCRIPTION = "character_counter_overflowed_content_description"
 const val STRING_CHARACTER_COUNTER_PATTERN = "character_counter_pattern"
 const val STRING_CHECK_CONFIRM_CREATE_WALLET = "check_confirm_create_wallet"
+const val STRING_CHECK_PREFER_NODE = "check_prefer_node"
 const val STRING_CLEAR_TEXT_END_ICON_CONTENT_DESCRIPTION = "clear_text_end_icon_content_description"
 const val STRING_CLOSE_DRAWER = "close_drawer"
 const val STRING_CLOSE_SHEET = "close_sheet"

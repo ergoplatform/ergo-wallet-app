@@ -28,6 +28,7 @@ fun AppComposeTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colors = MaterialTheme.colors.copy(
             primary = colorResource(id = R.color.primary),
+            secondary = colorResource(id = R.color.primary),
             surface = colorResource(id = R.color.cardview_background),
             onSurface = colorResource(id = R.color.text_color),
             error = colorResource(id = R.color.primary),

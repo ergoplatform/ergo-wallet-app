@@ -10,6 +10,7 @@ const val KEY_NODE_URL = "nodeUrl"
 const val KEY_NODE_LIST = "nodeList"
 const val KEY_BLOCK_HEIGHT = "blockHeight"
 const val KEY_EXPLORER_API_URL = "explorerApiUrl"
+const val KEY_PREFER_NODE_EXPLORER = "preferNodeExplorerApi"
 const val KEY_IPFS_GATEWAY_URL = "ipfsGatewayUrl"
 const val KEY_TOKEN_VERIFY_URL = "tokenVerificationUrl"
 const val KEY_DOWNLOAD_NFT_CONTENT = "downloadNftContent"
@@ -91,6 +92,12 @@ abstract class PreferencesProvider {
             }
 
             saveString(KEY_EXPLORER_API_URL, savedExplorerApiUrl)
+        }
+
+    var isPreferNodeExplorer: Boolean
+        get() = getBoolean(KEY_PREFER_NODE_EXPLORER, false)
+        set(value) {
+            saveBoolean(KEY_PREFER_NODE_EXPLORER, value)
         }
 
     val defaultIpfsGatewayUrl = DEFAULT_IPFS_GATEWAY

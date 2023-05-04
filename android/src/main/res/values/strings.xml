@@ -381,6 +381,7 @@
     <string name="button_reset_defaults">Defaults</string>
     <string name="label_explorer_api_url">Explorer API URL</string>
     <string name="label_node_url">Node URL</string>
+    <string name="check_prefer_node">Prefer Node Explorer API</string>
     <string name="label_fetching_node_list">Fetching list of available nodes…</string>
     <string name="label_checking_node">Checking %1$s…</string>
     <string name="label_node_alternatives">Alternative nodes:</string>

@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.getDefaultExplorerApiUrl
@@ -42,12 +43,15 @@ fun ColumnScope.ConnectionSettingsLayout(
         remember { mutableStateOf(TextFieldValue(preferences.prefTokenVerificationUrl)) }
     val ipfsGatewayUrl =
         remember { mutableStateOf(TextFieldValue(preferences.prefIpfsGatewayUrl)) }
+    val preferNodeExplorerApi =
+        remember { mutableStateOf(preferences.isPreferNodeExplorer) }
 
     val applySettings = {
         preferences.prefExplorerApiUrl = explorerApiUrl.value.text
         preferences.prefNodeUrl = nodeApiUrl.value.text
         preferences.prefIpfsGatewayUrl = ipfsGatewayUrl.value.text
         preferences.prefTokenVerificationUrl = tokenVerificationUrl.value.text
+        preferences.isPreferNodeExplorer = preferNodeExplorerApi.value
 
         // reset api service of NodeConnector to load new settings
         ApiServiceManager.resetApiService()
@@ -55,7 +59,28 @@ fun ColumnScope.ConnectionSettingsLayout(
         onDismissRequest()
     }
 
-    ConnectionTextField(explorerApiUrl, stringProvider, STRING_LABEL_EXPLORER_API_URL)
+    ConnectionTextField(
+        explorerApiUrl,
+        stringProvider,
+        STRING_LABEL_EXPLORER_API_URL,
+        bottomPadding = 0.dp
+    )
+
+    Row(
+        Modifier.fillMaxWidth().padding(bottom = defaultPadding),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val onCheckedChange: () -> Unit = { preferNodeExplorerApi.value = !preferNodeExplorerApi.value }
+        Checkbox(
+            preferNodeExplorerApi.value,
+            onCheckedChange = { onCheckedChange() },
+        )
+        Text(
+            remember { stringProvider.getString(STRING_CHECK_PREFER_NODE) },
+            Modifier.weight(1f).clickable { onCheckedChange() },
+            style = labelStyle(LabelStyle.BODY1)
+        )
+    }
 
     val checkNodesState = uiLogic.checkNodesState.collectAsState()
     val showList = remember { mutableStateOf(checkNodesState.value != SettingsUiLogic.CheckNodesState.Waiting) }
@@ -213,13 +238,14 @@ private fun ConnectionTextField(
     label: String,
     apply: (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
+    bottomPadding: Dp = defaultPadding,
 ) {
     OutlinedTextField(
         explorerApiUrl.value,
         { textFieldValue ->
             explorerApiUrl.value = textFieldValue
         },
-        Modifier.padding(bottom = defaultPadding).fillMaxWidth(),
+        Modifier.padding(bottom = bottomPadding).fillMaxWidth(),
         keyboardOptions = KeyboardOptions(imeAction = if (apply == null) ImeAction.Next else ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = apply?.let { { apply() } }),
         maxLines = 1,
