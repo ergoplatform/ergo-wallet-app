@@ -93,7 +93,10 @@ fun ColumnScope.ConnectionSettingsLayout(
 
                 Icon(Icons.Default.Error, null, tint = MosaikStyleConfig.primaryLabelColor)
 
-                Text(remember { stringProvider.getString(STRING_LABEL_NODE_NONE_FOUND) }, Modifier.padding(start = defaultPadding / 2))
+                Text(
+                    remember { stringProvider.getString(STRING_LABEL_NODE_NONE_FOUND) },
+                    Modifier.padding(start = defaultPadding / 2),
+                )
 
             }
         }
@@ -185,12 +188,17 @@ private fun NodeInfoEntry(
     ) {
         Column(Modifier.clickable { onChooseNode() }.padding(defaultPadding / 2)) {
             Text(nodeInfo.nodeUrl, style = labelStyle(LabelStyle.BODY1))
-            Text(
+            val infoLabel = remember(nodeInfo) {
                 stringProvider.getString(
                     STRING_LABEL_NODE_INFO,
                     nodeInfo.blockHeight,
                     nodeInfo.responseTime
-                ),
+                ) + (if (nodeInfo.isExplorer) "\n" + stringProvider.getString(
+                    STRING_LABEL_NODE_EXPLORER_API
+                ) else "")
+            }
+            Text(
+                infoLabel,
                 style = labelStyle(LabelStyle.BODY2),
                 color = foregroundColor(ForegroundColor.SECONDARY),
             )

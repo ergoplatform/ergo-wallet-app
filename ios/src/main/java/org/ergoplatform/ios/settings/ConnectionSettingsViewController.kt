@@ -246,7 +246,9 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
                 STRING_LABEL_NODE_INFO,
                 nodeInfo.blockHeight,
                 nodeInfo.responseTime
-            )
+            ) + (if (nodeInfo.isExplorer) "\n" + stringProvider.getString(
+                STRING_LABEL_NODE_EXPLORER_API
+            ) else "")
             textColor = UIColor.secondaryLabel()
         }
 
