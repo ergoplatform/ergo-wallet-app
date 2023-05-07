@@ -15,4 +15,6 @@ interface ErgoNodeApi {
     fun getNodeUnspentBoxInformation(boxId: String): Call<ErgoTransactionOutput>
 
     fun getTokenInfoNode(tokenId: String): Call<BlockchainToken>
+
+    fun getNodeBoxInformation(boxId: String): Call<ErgoTransactionOutput>
 }

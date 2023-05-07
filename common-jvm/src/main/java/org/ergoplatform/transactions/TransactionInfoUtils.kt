@@ -10,6 +10,7 @@ import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.getErgoNetworkType
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletToken
+import org.ergoplatform.restapi.client.Asset
 import org.ergoplatform.restapi.client.ErgoTransactionOutput
 import org.ergoplatform.uilogic.STRING_WARNING_BURNING_TOKENS
 import org.ergoplatform.uilogic.STRING_WARNING_OLD_CREATION_HEIGHT
@@ -56,12 +57,20 @@ suspend fun Transaction.buildTransactionInfo(
         val tokensMap = HashMap<String, Long>()
 
         inputBoxesIds.forEach { boxId ->
-            val boxInfo = ergoApiService.getExplorerBoxInformation(boxId).execute().body()
+            val boxInfoNode = if (ergoApiService.preferNodeAsExplorer) try {
+                ergoApiService.getNodeBoxInformation(boxId).execute().body()
+            } catch (t: Throwable) {
+                null
+            } else null
 
-            val transactionInfoBox = boxInfo?.toTransactionInfoBox()
-            // explorer does not return information for unconfirmed boxes, check again if available on node
-                ?: ergoApiService.getNodeUnspentBoxInformation(boxId).execute()
-                    .body()?.toTransactionInfoBox()
+            val transactionInfoBox =
+                boxInfoNode?.toTransactionInfoBox()
+                    ?: ergoApiService.getExplorerBoxInformation(boxId).execute().body()
+                        ?.toTransactionInfoBox()
+                    // blockchain api and explorer do not return information for unconfirmed boxes,
+                    // check again if available on node pool
+                    ?: ergoApiService.getNodeUnspentBoxInformation(boxId).execute()
+                        .body()?.toTransactionInfoBox()
 
             if (transactionInfoBox == null)
                 throw IllegalStateException("Could not retrieve information for box $boxId")
@@ -221,13 +230,16 @@ fun ErgoTransactionOutput.toTransactionInfoBox(): TransactionInfoBox =
         Address.fromErgoTree(JavaHelpers.decodeStringToErgoTree(ergoTree), getErgoNetworkType())
             .toString(),
         value,
-        assets.map { nodeAsset ->
-            AssetInstanceInfo().apply {
-                amount = nodeAsset.amount
-                tokenId = nodeAsset.tokenId
-            }
-        }
+        assets.map { it.toAssetInstanceInfo() }
     )
+
+fun Asset.toAssetInstanceInfo(): AssetInstanceInfo {
+    val nodeAsset = this
+    return AssetInstanceInfo().apply {
+        amount = nodeAsset.amount
+        tokenId = nodeAsset.tokenId
+    }
+}
 
 private fun getAssetInstanceInfosFromErgoBoxToken(
     tokens: List<ErgoToken>,

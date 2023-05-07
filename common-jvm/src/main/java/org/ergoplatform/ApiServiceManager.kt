@@ -36,6 +36,9 @@ open class ApiServiceManager(
         if (useNode) nodeBlockchainApi.getBalance(publicAddress)
         else defaultApi.getApiV1AddressesP1BalanceTotal(publicAddress)
 
+    override fun getNodeBoxInformation(boxId: String): Call<ErgoTransactionOutput> =
+        nodeBlockchainApi.getBoxById(boxId)
+
     override fun getExplorerBoxInformation(boxId: String): Call<OutputInfo> =
         defaultApi.getApiV1BoxesP1(boxId)
 
