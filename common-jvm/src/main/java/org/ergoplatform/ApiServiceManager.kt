@@ -12,6 +12,7 @@ import org.ergoplatform.restapi.client.UtxoApi
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
 open class ApiServiceManager(
     private val defaultApi: DefaultApi,
@@ -80,6 +81,7 @@ open class ApiServiceManager(
         fun <S> buildRetrofitForNode(serviceClass: Class<S>, nodeApiUrl: String): S {
             val retrofitNode = Retrofit.Builder()
                 .baseUrl(nodeApiUrl)
+                .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(OkHttpSingleton.getInstance())
                 .build()
