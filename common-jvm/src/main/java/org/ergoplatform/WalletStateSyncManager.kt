@@ -251,10 +251,10 @@ class WalletStateSyncManager {
 
                     val apiServiceManager = ApiServiceManager.getOrInit(preferences)
 
-                    val balanceInfoNode = if (preferences.isPreferNodeExplorer) try {
+                    val balanceInfoNode = if (apiServiceManager.preferNodeAsExplorer) try {
                         val balanceInfoNodeCall = apiServiceManager.getTotalBalanceForAddress(
                             address.publicAddress,
-                            preferNode = true
+                            useNode = true
                         ).execute()
                         if (!balanceInfoNodeCall.isSuccessful)
                             LogUtils.logDebug(
@@ -274,7 +274,7 @@ class WalletStateSyncManager {
 
                     val balanceInfo =
                         balanceInfoNode ?: apiServiceManager.getTotalBalanceForAddress(
-                            address.publicAddress, preferNode = false
+                            address.publicAddress, useNode = false
                         ).execute().body()
 
                     balanceInfo?.let {

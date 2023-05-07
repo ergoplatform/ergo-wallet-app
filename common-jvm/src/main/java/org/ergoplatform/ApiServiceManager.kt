@@ -5,6 +5,7 @@ import org.ergoplatform.explorer.client.DefaultApi
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.restapi.client.BlockchainApi
+import org.ergoplatform.restapi.client.BlockchainToken
 import org.ergoplatform.restapi.client.ErgoTransactionOutput
 import org.ergoplatform.restapi.client.Transactions
 import org.ergoplatform.restapi.client.TransactionsApi
@@ -17,6 +18,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 open class ApiServiceManager(
     private val defaultApi: DefaultApi,
     private val nodeApiUrl: String,
+    val preferNodeAsExplorer: Boolean,
     private val tokenVerificationApi: TokenVerificationApi
 ) : ErgoExplorerApi, TokenVerificationApi, ErgoNodeApi {
 
@@ -30,8 +32,8 @@ open class ApiServiceManager(
         buildRetrofitForNode(BlockchainApi::class.java, nodeApiUrl)
     }
 
-    fun getTotalBalanceForAddress(publicAddress: String, preferNode: Boolean): Call<TotalBalance> =
-        if (preferNode) nodeBlockchainApi.getBalance(publicAddress)
+    fun getTotalBalanceForAddress(publicAddress: String, useNode: Boolean): Call<TotalBalance> =
+        if (useNode) nodeBlockchainApi.getBalance(publicAddress)
         else defaultApi.getApiV1AddressesP1BalanceTotal(publicAddress)
 
     override fun getExplorerBoxInformation(boxId: String): Call<OutputInfo> =
@@ -39,6 +41,9 @@ open class ApiServiceManager(
 
     override fun getNodeUnspentBoxInformation(boxId: String): Call<ErgoTransactionOutput> =
         nodeBoxesApi.getBoxWithPoolById(boxId)
+
+    override fun getTokenInfoNode(tokenId: String): Call<BlockchainToken> =
+        nodeBlockchainApi.getTokenById(tokenId)
 
     override fun getTokenInformation(tokenId: String): Call<TokenInfo> =
         defaultApi.getApiV1TokensP1(tokenId)
@@ -109,6 +114,7 @@ open class ApiServiceManager(
                 ergoApiService = ApiServiceManager(
                     defaultApi,
                     preferences.prefNodeUrl,
+                    preferences.isPreferNodeExplorer,
                     tokenVerificationApi
                 )
             }
