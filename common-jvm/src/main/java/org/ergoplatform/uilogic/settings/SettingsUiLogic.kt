@@ -102,13 +102,15 @@ class SettingsUiLogic {
                     val nodeInfo = nodeInfoApi.nodeInfo.execute().body()!!
                     val blockHeight: Long? = nodeInfo.fullHeight?.toLong()
                     val restApiUrl: String? = nodeInfo.restApiUrl
+                    val isExplorer: Boolean = nodeInfo.isExplorer
                     val requestEnded = System.currentTimeMillis()
 
                     NodeInfo(
                         restApiUrl ?: nodeUrl,
                         true,
                         requestEnded - requestStarted,
-                        blockHeight ?: 0L
+                        blockHeight ?: 0L,
+                        isExplorer,
                     )
                 } catch (t: Throwable) {
                     NodeInfo(nodeUrl, connected = false)
@@ -128,6 +130,7 @@ class SettingsUiLogic {
         val connected: Boolean,
         val responseTime: Long = 0,
         val blockHeight: Long = 0,
+        val isExplorer: Boolean = false,
     )
 
     sealed class CheckNodesState {

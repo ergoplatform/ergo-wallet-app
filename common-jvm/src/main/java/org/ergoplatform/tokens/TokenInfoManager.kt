@@ -4,13 +4,14 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.ergoplatform.ApiServiceManager
-import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.api.TokenCheckResponse
 import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
+import org.ergoplatform.explorer.client.model.AdditionalRegister
 import org.ergoplatform.explorer.client.model.AdditionalRegisters
 import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.persistance.*
+import org.ergoplatform.transactions.toAssetInstanceInfo
 import org.ergoplatform.utils.LogUtils
 
 class TokenInfoManager {
@@ -50,7 +51,8 @@ class TokenInfoManager {
     ): TokenInformation? {
         return withContext(Dispatchers.IO) {
             val fromDB = loadTokenFromDbOrApi(tokenDbProvider, tokenId, apiService)
-            val updated = fromDB?.let { updateTokenInformationWhenNecessary(it, apiService, tokenDbProvider) }
+            val updated =
+                fromDB?.let { updateTokenInformationWhenNecessary(it, apiService, tokenDbProvider) }
 
             return@withContext updated ?: fromDB
         }
@@ -62,7 +64,7 @@ class TokenInfoManager {
     private suspend fun loadTokenFromDbOrApi(
         tokenDbProvider: TokenDbProvider,
         tokenId: String,
-        apiService: ErgoExplorerApi
+        apiService: ApiServiceManager
     ) = tokenDbProvider.loadTokenInformation(tokenId) ?: try {
         val tokenFromApi = fetchTokenInformationFromApi(apiService, tokenId)
         tokenDbProvider.insertOrReplaceTokenInformation(tokenFromApi)
@@ -86,7 +88,8 @@ class TokenInfoManager {
 
             // check if genuine
             val tokenVerifyResponse = try {
-                val checkTokenCall = apiService.checkToken(token.tokenId, token.displayName).execute()
+                val checkTokenCall =
+                    apiService.checkToken(token.tokenId, token.displayName).execute()
                 if (!checkTokenCall.isSuccessful)
                     throw IllegalStateException(checkTokenCall.errorBody()!!.string())
                 checkTokenCall.body()!!
@@ -137,7 +140,7 @@ class TokenInfoManager {
     }
 
     private fun fetchTokenInformationFromApi(
-        apiService: ErgoExplorerApi,
+        apiService: ApiServiceManager,
         tokenId: String
     ): TokenInformation {
         LogUtils.logDebug(
@@ -145,15 +148,55 @@ class TokenInfoManager {
             "Load information for token $tokenId from API"
         )
 
-        val tokenApiResponse = apiService.getTokenInformation(tokenId).execute()
+        val nodeTokenApiResponse = if (apiService.preferNodeAsExplorer)
+            try {
+                val nodeTokenApiResponse = apiService.getTokenInfoNode(tokenId).execute()
+                if (!nodeTokenApiResponse.isSuccessful)
+                    throw IllegalStateException(
+                        "Node Token API Error: ${
+                            nodeTokenApiResponse.errorBody()?.string()
+                        }"
+                    )
+                nodeTokenApiResponse.body()
+            } catch (t: Throwable) {
+                LogUtils.logDebug(
+                    this.javaClass.simpleName,
+                    "Error fetching token info from node", t
+                )
+                null
+            } else null
 
-        if (!tokenApiResponse.isSuccessful) {
-            throw IllegalStateException("No token information available for $tokenId")
+        val issuingBoxId = if (nodeTokenApiResponse?.boxId != null) nodeTokenApiResponse.boxId
+        else {
+            val tokenApiResponse = apiService.getTokenInformation(tokenId).execute()
+
+            if (!tokenApiResponse.isSuccessful) {
+                throw IllegalStateException("No token information available for $tokenId")
+            }
+
+            tokenApiResponse.body()!!.boxId
         }
 
-        val issuingBoxId = tokenApiResponse.body()!!.boxId
+        val boxInfoNode = if (apiService.preferNodeAsExplorer) try {
+            val nodeBoxInfo = apiService.getNodeBoxInformation(issuingBoxId).execute().body()!!
 
-        val boxInfo: OutputInfo = apiService.getExplorerBoxInformation(issuingBoxId).execute().body()!!
+            OutputInfo().apply {
+                assets = nodeBoxInfo.assets.map { it.toAssetInstanceInfo() }
+                transactionId = nodeBoxInfo.transactionId
+                additionalRegisters = AdditionalRegisters().apply {
+                    nodeBoxInfo.additionalRegisters.forEach { k, v ->
+                        // only serialized value is needed
+                        put(k, AdditionalRegister().apply { serializedValue = v })
+                    }
+                }
+            }
+        } catch (t: Throwable) {
+            LogUtils.logDebug(this.javaClass.simpleName, "Error fetching token info from node", t)
+            null
+        } else null
+
+        val boxInfo = boxInfoNode ?:
+            apiService.getExplorerBoxInformation(issuingBoxId).execute().body()!!
 
         val tokenInfo = boxInfo.assets.find { it.tokenId == tokenId }!!
 
