@@ -147,6 +147,7 @@ fun ColumnScope.ConnectionSettingsLayout(
                     TextFieldValue(preferences.defaultTokenVerificationUrl)
                 ipfsGatewayUrl.value =
                     TextFieldValue(preferences.defaultIpfsGatewayUrl)
+                preferNodeExplorerApi.value = false
             },
             colors = secondaryButtonColors(),
             modifier = Modifier.padding(end = defaultPadding),
