@@ -381,10 +381,12 @@
     <string name="button_reset_defaults">Defaults</string>
     <string name="label_explorer_api_url">Explorer API URL</string>
     <string name="label_node_url">Node URL</string>
+    <string name="check_prefer_node">Prefer Node Explorer API</string>
     <string name="label_fetching_node_list">Fetching list of available nodes…</string>
     <string name="label_checking_node">Checking %1$s…</string>
     <string name="label_node_alternatives">Alternative nodes:</string>
     <string name="label_node_info">Block %1$s, response time %2$s ms</string>
+    <string name="label_node_explorer_api">Explorer API enabled</string>
     <string name="label_node_none_found">No node found. Please check your connection.</string>
     <string name="label_token_verification_url">Token verification service URL</string>
     <string name="button_show_debug_info">Show debug information</string>

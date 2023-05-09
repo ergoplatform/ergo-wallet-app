@@ -4,6 +4,8 @@ import org.ergoplatform.api.*
 import org.ergoplatform.explorer.client.DefaultApi
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.restapi.client.BlockchainApi
+import org.ergoplatform.restapi.client.BlockchainToken
 import org.ergoplatform.restapi.client.ErgoTransactionOutput
 import org.ergoplatform.restapi.client.Transactions
 import org.ergoplatform.restapi.client.TransactionsApi
@@ -11,10 +13,12 @@ import org.ergoplatform.restapi.client.UtxoApi
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
 open class ApiServiceManager(
     private val defaultApi: DefaultApi,
     private val nodeApiUrl: String,
+    val preferNodeAsExplorer: Boolean,
     private val tokenVerificationApi: TokenVerificationApi
 ) : ErgoExplorerApi, TokenVerificationApi, ErgoNodeApi {
 
@@ -24,15 +28,25 @@ open class ApiServiceManager(
     private val nodeBoxesApi by lazy {
         buildRetrofitForNode(UtxoApi::class.java, nodeApiUrl)
     }
+    private val nodeBlockchainApi by lazy {
+        buildRetrofitForNode(BlockchainApi::class.java, nodeApiUrl)
+    }
 
-    override fun getTotalBalanceForAddress(publicAddress: String): Call<TotalBalance> =
-        defaultApi.getApiV1AddressesP1BalanceTotal(publicAddress)
+    fun getTotalBalanceForAddress(publicAddress: String, useNode: Boolean): Call<TotalBalance> =
+        if (useNode) nodeBlockchainApi.getBalance(publicAddress)
+        else defaultApi.getApiV1AddressesP1BalanceTotal(publicAddress)
+
+    override fun getNodeBoxInformation(boxId: String): Call<ErgoTransactionOutput> =
+        nodeBlockchainApi.getBoxById(boxId)
 
     override fun getExplorerBoxInformation(boxId: String): Call<OutputInfo> =
         defaultApi.getApiV1BoxesP1(boxId)
 
     override fun getNodeUnspentBoxInformation(boxId: String): Call<ErgoTransactionOutput> =
         nodeBoxesApi.getBoxWithPoolById(boxId)
+
+    override fun getTokenInfoNode(tokenId: String): Call<BlockchainToken> =
+        nodeBlockchainApi.getTokenById(tokenId)
 
     override fun getTokenInformation(tokenId: String): Call<TokenInfo> =
         defaultApi.getApiV1TokensP1(tokenId)
@@ -75,6 +89,7 @@ open class ApiServiceManager(
         fun <S> buildRetrofitForNode(serviceClass: Class<S>, nodeApiUrl: String): S {
             val retrofitNode = Retrofit.Builder()
                 .baseUrl(nodeApiUrl)
+                .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(OkHttpSingleton.getInstance())
                 .build()
@@ -102,6 +117,7 @@ open class ApiServiceManager(
                 ergoApiService = ApiServiceManager(
                     defaultApi,
                     preferences.prefNodeUrl,
+                    preferences.isPreferNodeExplorer,
                     tokenVerificationApi
                 )
             }

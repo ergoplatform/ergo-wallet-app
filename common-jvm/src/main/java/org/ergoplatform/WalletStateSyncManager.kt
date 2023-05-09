@@ -249,12 +249,35 @@ class WalletStateSyncManager {
                         "Refreshing ${address.publicAddress}..."
                     )
 
-                    val balanceInfoCall =
-                        ApiServiceManager.getOrInit(preferences).getTotalBalanceForAddress(
-                            address.publicAddress
-                        ).execute()
+                    val apiServiceManager = ApiServiceManager.getOrInit(preferences)
 
-                    balanceInfoCall.body()?.let { balanceInfo ->
+                    val balanceInfoNode = if (apiServiceManager.preferNodeAsExplorer) try {
+                        val balanceInfoNodeCall = apiServiceManager.getTotalBalanceForAddress(
+                            address.publicAddress,
+                            useNode = true
+                        ).execute()
+                        if (!balanceInfoNodeCall.isSuccessful)
+                            LogUtils.logDebug(
+                                this.javaClass.simpleName,
+                                "Balance info node error: ${
+                                    balanceInfoNodeCall.errorBody()?.string()
+                                }"
+                            )
+                        balanceInfoNodeCall.body()
+                    } catch (t: Throwable) {
+                        LogUtils.logDebug(
+                            this.javaClass.simpleName,
+                            "Balance info node call error", t
+                        )
+                        null
+                    } else null
+
+                    val balanceInfo =
+                        balanceInfoNode ?: apiServiceManager.getTotalBalanceForAddress(
+                            address.publicAddress, useNode = false
+                        ).execute().body()
+
+                    balanceInfo?.let {
 
                         val newState = WalletState(
                             address.publicAddress,
