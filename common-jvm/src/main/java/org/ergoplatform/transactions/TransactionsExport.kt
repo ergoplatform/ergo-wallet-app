@@ -2,19 +2,19 @@ package org.ergoplatform.transactions
 
 import org.ergoplatform.persistance.TX_STATE_CONFIRMED_UNSECURE
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
-import java.io.File
+import java.io.BufferedWriter
 import java.text.SimpleDateFormat
 import java.util.*
 
 object TransactionsExport {
-    fun exportTransactions(transactions: List<AddressTransactionWithTokens>, file: File) {
+    fun exportTransactions(transactions: List<AddressTransactionWithTokens>, getWriter: () -> BufferedWriter) {
         val filteredTx =
             transactions.filter { it.addressTransaction.state >= TX_STATE_CONFIRMED_UNSECURE }
 
         if (filteredTx.isEmpty())
             throw IllegalArgumentException("No confirmed transactions to export.")
 
-        file.bufferedWriter().use { out ->
+        getWriter().use { out ->
 
             val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ", Locale.US)
 

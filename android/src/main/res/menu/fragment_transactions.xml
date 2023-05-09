@@ -6,4 +6,9 @@
         android:icon="@drawable/ic_open_in_browser_24"
         android:title="@string/label_open"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_export"
+        android:icon="@drawable/ic_save_alt_24"
+        android:title="@string/label_export"
+        app:showAsAction="ifRoom" />
 </menu>

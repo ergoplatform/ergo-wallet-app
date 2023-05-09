@@ -82,7 +82,7 @@ class AddressTransactionsComponent(
                 val transactions = shownListState.value
                 val filename = Application.dataDir.trimEnd('/', '\\') +
                         "/transactions_${System.currentTimeMillis()}.csv"
-                TransactionsExport.exportTransactions(transactions, File(filename))
+                TransactionsExport.exportTransactions(transactions) { File(filename).bufferedWriter() }
                 navHost.showErrorDialog("Content of ${transactions.size} transactions exported to ${filename}. " +
                         "If you want to export more into the past, scroll the list to the point in time.")
             } catch (t: Throwable) {
