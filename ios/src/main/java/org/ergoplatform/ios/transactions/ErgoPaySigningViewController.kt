@@ -90,7 +90,7 @@ class ErgoPaySigningViewController(
             request,
             walletId,
             derivationIndex,
-            appDelegate.database.walletDbProvider,
+            appDelegate.database,
             appDelegate.prefs,
             IosStringProvider(texts)
         )
@@ -101,7 +101,7 @@ class ErgoPaySigningViewController(
         uiLogic.reloadFromDapp(
             appDelegate.prefs,
             IosStringProvider(appDelegate.texts),
-            appDelegate.database.walletDbProvider
+            appDelegate.database
         )
     }
 
@@ -111,7 +111,7 @@ class ErgoPaySigningViewController(
             wallet.id,
             appDelegate.prefs,
             IosStringProvider(appDelegate.texts),
-            appDelegate.database.walletDbProvider
+            appDelegate.database
         )
     }
 
@@ -122,7 +122,7 @@ class ErgoPaySigningViewController(
         uiLogic.derivedAddressIdChanged(
             appDelegate.prefs,
             IosStringProvider(appDelegate.texts),
-            appDelegate.database.walletDbProvider
+            appDelegate.database
         )
     }
 

@@ -351,7 +351,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                     notifyUiLocked(false)
                     transactionSubmitted(
                         ergoTxResult,
-                        db.transactionDbProvider,
+                        db,
                         preferences,
                         transactionInfo
                     )

@@ -57,7 +57,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
             args.request,
             args.walletId,
             args.derivationIdx,
-            RoomWalletDbProvider(AppDatabase.getInstance(context)),
+            AppDatabase.getInstance(context),
             Preferences(context),
             AndroidStringProvider(context)
         )
@@ -153,7 +153,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
         viewModel.uiLogic.reloadFromDapp(
             Preferences(context),
             AndroidStringProvider(context),
-            AppDatabase.getInstance(context).walletDbProvider
+            AppDatabase.getInstance(context)
         )
     }
 
@@ -172,7 +172,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
             walletConfig.id,
             Preferences(context),
             AndroidStringProvider(context),
-            AppDatabase.getInstance(context).walletDbProvider
+            AppDatabase.getInstance(context)
         )
     }
 
@@ -184,7 +184,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
         uiLogic.derivedAddressIdChanged(
             Preferences(context),
             AndroidStringProvider(context),
-            AppDatabase.getInstance(context).walletDbProvider,
+            AppDatabase.getInstance(context),
         )
     }
 
