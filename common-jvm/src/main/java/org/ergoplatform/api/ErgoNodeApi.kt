@@ -1,6 +1,8 @@
 package org.ergoplatform.api
 
 import org.ergoplatform.restapi.client.BlockchainToken
+import org.ergoplatform.restapi.client.BlockchainTransaction
+import org.ergoplatform.restapi.client.ErgoTransaction
 import org.ergoplatform.restapi.client.ErgoTransactionOutput
 import org.ergoplatform.restapi.client.Transactions
 import retrofit2.Call
@@ -17,4 +19,7 @@ interface ErgoNodeApi {
     fun getTokenInfoNode(tokenId: String): Call<BlockchainToken>
 
     fun getNodeBoxInformation(boxId: String): Call<ErgoTransactionOutput>
+
+    fun getTransactionInformationNode(txId: String): Call<BlockchainTransaction>
+    fun getTransactionInformationUncomfirmedNode(txId: String): Call<ErgoTransaction>
 }

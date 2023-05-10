@@ -6,6 +6,7 @@ import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.BoxAttachmentBuilder
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
+import org.ergoplatform.appkit.impl.ScalaBridge
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.getErgoNetworkType
 import org.ergoplatform.persistance.PreferencesProvider
@@ -13,6 +14,7 @@ import org.ergoplatform.persistance.TokenDbProvider
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.restapi.client.Asset
+import org.ergoplatform.restapi.client.BlockchainTransaction
 import org.ergoplatform.restapi.client.ErgoTransactionOutput
 import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.uilogic.STRING_WARNING_BURNING_TOKENS
@@ -396,6 +398,80 @@ fun combineTokens(tokens: List<AssetInstanceInfo>): List<AssetInstanceInfo> {
     }
 
     return hashmap.values.toList()
+}
+
+/**
+ * converts Node Blockchain API's transaction info to Explorer format. Needs to fetch input boxes
+ * as they don't get delivered with the call, and needs to load/fetch token information
+ */
+suspend fun BlockchainTransaction.toExplorerTransactionInfo(
+    ergoApi: ApiServiceManager,
+    getTokenInfo: (suspend (String) -> TokenInformation?)?
+): org.ergoplatform.explorer.client.model.TransactionInfo {
+    val nodeBcTx = this
+    return TransactionInfo().apply {
+        id = nodeBcTx.id
+        blockId = nodeBcTx.blockId
+        inclusionHeight = nodeBcTx.inclusionHeight
+        timestamp = nodeBcTx.timestamp
+        index = nodeBcTx.index
+        numConfirmations = nodeBcTx.numConfirmations
+        size = nodeBcTx.size.toInt()
+        inputs = nodeBcTx.inputs.map {
+            InputInfo().apply {
+                boxId = it.boxId
+                spendingProof = it.spendingProof?.proofBytes
+                ergoApi.getNodeBoxInformation(it.boxId).execute().body()
+                    ?.let { boxInfo ->
+                        value = boxInfo.value
+                        index = boxInfo.index
+
+                        ergoTree = boxInfo.ergoTree
+                        address = Address.fromErgoTree(
+                            ScalaBridge.isoStringToErgoTree()
+                                .to(boxInfo.ergoTree),
+                            getErgoNetworkType(),
+                        ).toString()
+                        assets = boxInfo.assets.map {
+                            it.toAssetInstanceInfo(getTokenInfo)
+                        }
+                        additionalRegisters = AdditionalRegisters().apply {
+                            putAll(boxInfo.additionalRegisters.mapValues {
+                                AdditionalRegister().apply {
+                                    serializedValue = it.value
+                                }
+                            })
+                        }
+                    }
+            }
+        }
+        outputs = nodeBcTx.outputs.map { it.toOutputInfo(getTokenInfo) }
+    }
+}
+
+suspend fun ErgoTransactionOutput.toOutputInfo(
+    getTokenInfo: (suspend (String) -> TokenInformation?)?
+): OutputInfo {
+    val nodeBoxInfo = this
+    return OutputInfo().apply {
+        boxId = nodeBoxInfo.boxId
+        transactionId = nodeBoxInfo.transactionId
+        value = nodeBoxInfo.value
+        index = nodeBoxInfo.index
+        creationHeight = nodeBoxInfo.creationHeight
+        ergoTree = nodeBoxInfo.ergoTree
+        address = Address.fromErgoTree(
+            ScalaBridge.isoStringToErgoTree().to(nodeBoxInfo.ergoTree),
+            getErgoNetworkType(),
+        ).toString()
+        assets = nodeBoxInfo.assets.map { it.toAssetInstanceInfo(getTokenInfo) }
+        additionalRegisters = AdditionalRegisters().apply {
+            nodeBoxInfo.additionalRegisters.forEach { k, v ->
+                // only serialized value is needed
+                put(k, AdditionalRegister().apply { serializedValue = v })
+            }
+        }
+    }
 }
 
 fun OutputInfo.getAttachmentText(): String? = additionalRegisters?.let { registers ->
