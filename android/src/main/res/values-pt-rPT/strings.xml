@@ -18,7 +18,6 @@
     <string name="hint_amount_currency">Quantidade (%1$s)</string>
     <string name="label_purpose">Finalidade</string>
     <string name="label_share">Partilhar</string>
-    <string name="label_open">Abrir</string>
     <string name="button_delete">Eliminar</string>
     <string name="button_yes">Sim</string>
     <string name="button_reload">Recarregar</string>
