@@ -139,7 +139,7 @@ class TokenInfoManager {
         } else null
     }
 
-    private fun fetchTokenInformationFromApi(
+    private suspend fun fetchTokenInformationFromApi(
         apiService: ApiServiceManager,
         tokenId: String
     ): TokenInformation {
@@ -181,7 +181,7 @@ class TokenInfoManager {
             val nodeBoxInfo = apiService.getNodeBoxInformation(issuingBoxId).execute().body()!!
 
             OutputInfo().apply {
-                assets = nodeBoxInfo.assets.map { it.toAssetInstanceInfo() }
+                assets = nodeBoxInfo.assets.map { it.toAssetInstanceInfo(getTokenInfo = null) }
                 transactionId = nodeBoxInfo.transactionId
                 additionalRegisters = AdditionalRegisters().apply {
                     nodeBoxInfo.additionalRegisters.forEach { k, v ->

@@ -6,6 +6,7 @@ import com.google.gson.JsonParser
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.ErgoFacade
 import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.TokenDbProvider
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.*
 
@@ -204,11 +205,12 @@ private fun getErgoPayHeaders() = mapOf(
 suspend fun ErgoPaySigningRequest.buildTransactionInfo(
     ergoApiService: ApiServiceManager,
     prefs: PreferencesProvider,
+    tokenDbProvider: TokenDbProvider,
     texts: StringProvider,
 ): TransactionInfo? {
     if (reducedTx == null) return null
     val reducedTransaction = ErgoFacade.deserializeUnsignedTxOffline(reducedTx)
-    return reducedTransaction.buildTransactionInfo(ergoApiService, prefs, texts)
+    return reducedTransaction.buildTransactionInfo(ergoApiService, prefs, tokenDbProvider, texts)
 }
 
 private const val JSON_FIELD_TX_ID = "txId"

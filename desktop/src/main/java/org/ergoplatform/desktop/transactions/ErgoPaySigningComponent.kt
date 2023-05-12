@@ -44,7 +44,7 @@ class ErgoPaySigningComponent(
                     ergoPayUiLogic.reloadFromDapp(
                         Application.prefs,
                         Application.texts,
-                        Application.database.walletDbProvider
+                        Application.database
                     )
                 },
                 enabled = canReloadState.value,
@@ -65,7 +65,7 @@ class ErgoPaySigningComponent(
             request,
             walletId ?: -1,
             derivationIndex ?: -1,
-            Application.database.walletDbProvider,
+            Application.database,
             Application.prefs,
             Application.texts,
         )
@@ -80,7 +80,7 @@ class ErgoPaySigningComponent(
                 ergoPayUiLogic.reloadFromDapp(
                     Application.prefs,
                     Application.texts,
-                    Application.database.walletDbProvider
+                    Application.database
                 )
             },
             onChooseAddress = {
@@ -103,7 +103,7 @@ class ErgoPaySigningComponent(
                         walletConfig.id,
                         Application.prefs,
                         Application.texts,
-                        Application.database.walletDbProvider
+                        Application.database
                     )
                 },
                 onDismiss = { chooseWalletDialog.value = null },
@@ -124,7 +124,7 @@ class ErgoPaySigningComponent(
         ergoPayUiLogic.derivedAddressIdChanged(
             Application.prefs,
             Application.texts,
-            Application.database.walletDbProvider
+            Application.database
         )
     }
 

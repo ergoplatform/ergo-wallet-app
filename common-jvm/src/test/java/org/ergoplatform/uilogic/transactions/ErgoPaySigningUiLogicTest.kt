@@ -12,8 +12,8 @@ import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.TestPreferencesProvider
 import org.ergoplatform.TestStringProvider
 import org.ergoplatform.explorer.client.model.OutputInfo
+import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.PreferencesProvider
-import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.STATIC_ERGO_PAY_URI
 import org.ergoplatform.transactions.TransactionResult
@@ -331,7 +331,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
         val walletId = 1
         val database =
             if (twoAddresses) TestUiWallet.getSingleWalletTwoAddressesDbProvider(walletId)
-            else TestUiWallet.getSingleWalletSingleAddressDbProvider(walletId).walletDbProvider
+            else TestUiWallet.getSingleWalletSingleAddressDbProvider(walletId)
 
         val uiLogic = TestErgoPaySigningUiLogic(database)
         uiLogic.ergoApiFailure = apiFailure
@@ -346,7 +346,7 @@ class ErgoPaySigningUiLogicTest : TestCase() {
         return uiLogic
     }
 
-    class TestErgoPaySigningUiLogic(val db: WalletDbProvider) : ErgoPaySigningUiLogic() {
+    class TestErgoPaySigningUiLogic(val db: IAppDatabase) : ErgoPaySigningUiLogic() {
         var ergoApiFailure = false
 
         override val coroutineScope: CoroutineScope

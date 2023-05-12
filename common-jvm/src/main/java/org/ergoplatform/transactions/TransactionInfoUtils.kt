@@ -9,9 +9,12 @@ import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.getErgoNetworkType
 import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.TokenDbProvider
+import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.restapi.client.Asset
 import org.ergoplatform.restapi.client.ErgoTransactionOutput
+import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.uilogic.STRING_WARNING_BURNING_TOKENS
 import org.ergoplatform.uilogic.STRING_WARNING_OLD_CREATION_HEIGHT
 import org.ergoplatform.uilogic.StringProvider
@@ -49,6 +52,7 @@ data class TransactionInfoBox(
 suspend fun Transaction.buildTransactionInfo(
     ergoApiService: ApiServiceManager,
     prefs: PreferencesProvider,
+    tokenDbProvider: TokenDbProvider,
     texts: StringProvider? = null,
 ): TransactionInfo {
     return withContext(Dispatchers.IO) {
@@ -63,14 +67,18 @@ suspend fun Transaction.buildTransactionInfo(
                 null
             } else null
 
+            val getTokenInfo: suspend (String) -> TokenInformation? = { tokenId ->
+                TokenInfoManager.getInstance().getTokenInformation(tokenId, tokenDbProvider, ergoApiService)
+            }
+
             val transactionInfoBox =
-                boxInfoNode?.toTransactionInfoBox()
+                boxInfoNode?.toTransactionInfoBox(getTokenInfo)
                     ?: ergoApiService.getExplorerBoxInformation(boxId).execute().body()
                         ?.toTransactionInfoBox()
                     // blockchain api and explorer do not return information for unconfirmed boxes,
                     // check again if available on node pool
                     ?: ergoApiService.getNodeUnspentBoxInformation(boxId).execute()
-                        .body()?.toTransactionInfoBox()
+                        .body()?.toTransactionInfoBox(getTokenInfo)
 
             if (transactionInfoBox == null)
                 throw IllegalStateException("Could not retrieve information for box $boxId")
@@ -224,20 +232,29 @@ fun OutputInfo.toTransactionInfoBox(): TransactionInfoBox {
 /**
  * converts Node API's box information into [TransactionInfoBox]
  */
-fun ErgoTransactionOutput.toTransactionInfoBox(): TransactionInfoBox =
+suspend fun ErgoTransactionOutput.toTransactionInfoBox(
+    getTokenInfo: suspend (String) -> TokenInformation?,
+): TransactionInfoBox =
     TransactionInfoBox(
         boxId,
         Address.fromErgoTree(JavaHelpers.decodeStringToErgoTree(ergoTree), getErgoNetworkType())
             .toString(),
         value,
-        assets.map { it.toAssetInstanceInfo() }
+        assets.map { it.toAssetInstanceInfo(getTokenInfo) }
     )
 
-fun Asset.toAssetInstanceInfo(): AssetInstanceInfo {
+suspend fun Asset.toAssetInstanceInfo(
+    getTokenInfo: (suspend (String) -> TokenInformation?)?
+): AssetInstanceInfo {
     val nodeAsset = this
     return AssetInstanceInfo().apply {
         amount = nodeAsset.amount
         tokenId = nodeAsset.tokenId
+        // if needed for the caller, we try to load or fetch the necessary token info
+        getTokenInfo?.invoke(tokenId)?.let { ti ->
+            name = ti.displayName
+            decimals = ti.decimals
+        }
     }
 }
 
