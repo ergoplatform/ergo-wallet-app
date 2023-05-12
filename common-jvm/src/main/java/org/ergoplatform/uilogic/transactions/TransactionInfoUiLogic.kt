@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.persistance.AddressTransaction
 import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.getAttachmentText
@@ -44,14 +45,17 @@ abstract class TransactionInfoUiLogic {
         coroutineScope.launch(Dispatchers.IO) {
             try {
                 val txInfoNode = if (ergoApi.preferNodeAsExplorer) try {
+                    val getTokenInfo: suspend (String) -> TokenInformation? = { tokenId ->
+                        TokenInfoManager.getInstance()
+                            .getTokenInformation(tokenId, db.tokenDbProvider, ergoApi)
+                    }
                     val blockchainTxInfo = ergoApi.getTransactionInformationNode(txId).execute()
-                    if (!blockchainTxInfo.isSuccessful && blockchainTxInfo.code() == 404)
-                        null // TODO unconfirmed transactions return error 404, see if we can try to find in mempool
-                    else blockchainTxInfo.body()
-                        ?.toExplorerTransactionInfo(ergoApi) { tokenId ->
-                            TokenInfoManager.getInstance()
-                                .getTokenInformation(tokenId, db.tokenDbProvider, ergoApi)
-                        }
+                    if (!blockchainTxInfo.isSuccessful && blockchainTxInfo.code() == 404) {
+                        ergoApi.getTransactionInformationUncomfirmedNode(txId).execute().body()
+                            ?.toExplorerTransactionInfo(ergoApi, getTokenInfo)
+                    } else {
+                        blockchainTxInfo.body()?.toExplorerTransactionInfo(ergoApi, getTokenInfo)
+                    }
 
                 } catch (t: Throwable) {
                     LogUtils.logDebug(

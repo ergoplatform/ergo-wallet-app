@@ -13,9 +13,7 @@ import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.TokenDbProvider
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
-import org.ergoplatform.restapi.client.Asset
-import org.ergoplatform.restapi.client.BlockchainTransaction
-import org.ergoplatform.restapi.client.ErgoTransactionOutput
+import org.ergoplatform.restapi.client.*
 import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.uilogic.STRING_WARNING_BURNING_TOKENS
 import org.ergoplatform.uilogic.STRING_WARNING_OLD_CREATION_HEIGHT
@@ -70,7 +68,8 @@ suspend fun Transaction.buildTransactionInfo(
             } else null
 
             val getTokenInfo: suspend (String) -> TokenInformation? = { tokenId ->
-                TokenInfoManager.getInstance().getTokenInformation(tokenId, tokenDbProvider, ergoApiService)
+                TokenInfoManager.getInstance()
+                    .getTokenInformation(tokenId, tokenDbProvider, ergoApiService)
             }
 
             val transactionInfoBox =
@@ -417,35 +416,54 @@ suspend fun BlockchainTransaction.toExplorerTransactionInfo(
         index = nodeBcTx.index
         numConfirmations = nodeBcTx.numConfirmations
         size = nodeBcTx.size.toInt()
-        inputs = nodeBcTx.inputs.map {
-            InputInfo().apply {
-                boxId = it.boxId
-                spendingProof = it.spendingProof?.proofBytes
-                ergoApi.getNodeBoxInformation(it.boxId).execute().body()
-                    ?.let { boxInfo ->
-                        value = boxInfo.value
-                        index = boxInfo.index
-
-                        ergoTree = boxInfo.ergoTree
-                        address = Address.fromErgoTree(
-                            ScalaBridge.isoStringToErgoTree()
-                                .to(boxInfo.ergoTree),
-                            getErgoNetworkType(),
-                        ).toString()
-                        assets = boxInfo.assets.map {
-                            it.toAssetInstanceInfo(getTokenInfo)
-                        }
-                        additionalRegisters = AdditionalRegisters().apply {
-                            putAll(boxInfo.additionalRegisters.mapValues {
-                                AdditionalRegister().apply {
-                                    serializedValue = it.value
-                                }
-                            })
-                        }
-                    }
-            }
-        }
+        inputs = nodeBcTx.inputs.map { it.toInputInfo(ergoApi, getTokenInfo) }
         outputs = nodeBcTx.outputs.map { it.toOutputInfo(getTokenInfo) }
+    }
+}
+
+suspend fun ErgoTransaction.toExplorerTransactionInfo(
+    ergoApi: ApiServiceManager,
+    getTokenInfo: (suspend (String) -> TokenInformation?)?
+): org.ergoplatform.explorer.client.model.TransactionInfo {
+    val nodeErgTx = this
+    return TransactionInfo().apply {
+        id = nodeErgTx.id
+        size = nodeErgTx.size.toInt()
+        inputs = nodeErgTx.inputs.map { it.toInputInfo(ergoApi, getTokenInfo) }
+        outputs = nodeErgTx.outputs.map { it.toOutputInfo(getTokenInfo) }
+    }
+}
+
+suspend fun ErgoTransactionInput.toInputInfo(
+    ergoApi: ApiServiceManager,
+    getTokenInfo: (suspend (String) -> TokenInformation?)?
+): InputInfo {
+    val nodeInputBox = this
+    return InputInfo().apply {
+        boxId = nodeInputBox.boxId
+        spendingProof = nodeInputBox.spendingProof?.proofBytes
+        ergoApi.getNodeBoxInformation(nodeInputBox.boxId).execute().body()
+            ?.let { boxInfo ->
+                value = boxInfo.value
+                index = boxInfo.index
+
+                ergoTree = boxInfo.ergoTree
+                address = Address.fromErgoTree(
+                    ScalaBridge.isoStringToErgoTree()
+                        .to(boxInfo.ergoTree),
+                    getErgoNetworkType(),
+                ).toString()
+                assets = boxInfo.assets.map {
+                    it.toAssetInstanceInfo(getTokenInfo)
+                }
+                additionalRegisters = AdditionalRegisters().apply {
+                    putAll(boxInfo.additionalRegisters.mapValues {
+                        AdditionalRegister().apply {
+                            serializedValue = it.value
+                        }
+                    })
+                }
+            }
     }
 }
 
