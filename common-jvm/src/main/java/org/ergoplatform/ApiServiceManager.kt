@@ -4,12 +4,7 @@ import org.ergoplatform.api.*
 import org.ergoplatform.explorer.client.DefaultApi
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.persistance.PreferencesProvider
-import org.ergoplatform.restapi.client.BlockchainApi
-import org.ergoplatform.restapi.client.BlockchainToken
-import org.ergoplatform.restapi.client.ErgoTransactionOutput
-import org.ergoplatform.restapi.client.Transactions
-import org.ergoplatform.restapi.client.TransactionsApi
-import org.ergoplatform.restapi.client.UtxoApi
+import org.ergoplatform.restapi.client.*
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -53,6 +48,12 @@ open class ApiServiceManager(
 
     override fun getTransactionInformation(txId: String): Call<TransactionInfo> =
         defaultApi.getApiV1TransactionsP1(txId)
+
+    override fun getTransactionInformationNode(txId: String): Call<BlockchainTransaction> =
+        nodeBlockchainApi.getTxById(txId)
+
+    override fun getTransactionInformationUncomfirmedNode(txId: String): Call<ErgoTransaction> =
+        nodeTransactionsApi.getUnconfirmedTransactionById(txId)
 
     // this is the Ergo Explorer call
     override fun getMempoolTransactionsForAddress(
