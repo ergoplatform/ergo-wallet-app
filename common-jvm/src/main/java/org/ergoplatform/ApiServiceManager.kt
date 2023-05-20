@@ -1,6 +1,7 @@
 package org.ergoplatform
 
 import org.ergoplatform.api.*
+import org.ergoplatform.appkit.Address
 import org.ergoplatform.explorer.client.DefaultApi
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.persistance.PreferencesProvider
@@ -9,6 +10,7 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import scorex.util.encode.Base16
 
 open class ApiServiceManager(
     private val defaultApi: DefaultApi,
@@ -64,6 +66,16 @@ open class ApiServiceManager(
         defaultApi.getApiV1MempoolTransactionsByaddressP1(publicAddress, offset, limit)
 
     // this is the Node API call
+    override fun getNodeMempoolTransactionsForAddress(
+        publicAddress: String,
+        limit: Int
+    ): Call<Transactions> =
+        nodeTransactionsApi.getUnconfirmedTransactionsByErgoTree(
+            "\"" + Base16.encode(Address.create(publicAddress).toPropositionBytes()) + "\"",
+            0, limit
+        )
+
+    // this is the node API call for all addresses
     override fun getUnconfirmedTransactions(limit: Int): Call<Transactions> =
         nodeTransactionsApi.getUnconfirmedTransactions(limit, 0)
 
@@ -80,6 +92,13 @@ open class ApiServiceManager(
     ): Call<Items<TransactionInfo>> =
         // TODO concise should be true when https://github.com/ergoplatform/explorer-backend/issues/193 is fixed
         defaultApi.getApiV1AddressesP1Transactions(publicAddress, offset, limit, false)
+
+    override fun getNodeConfirmedTransactionsForAddress(
+        publicAddress: String,
+        limit: Int,
+        offset: Int
+    ): Call<Items<BlockchainTransaction>> =
+        nodeBlockchainApi.getTransactionsByAddress(publicAddress, limit, offset)
 
     override fun checkToken(tokenId: String, tokenName: String): Call<TokenCheckResponse> =
         tokenVerificationApi.checkToken(tokenId, tokenName.replace("/", "-").replace("|", "-"))
