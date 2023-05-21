@@ -4,8 +4,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.ErgoFacade
 import org.ergoplatform.persistance.AddressTransaction
 import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.transactions.TransactionInfo
@@ -27,8 +29,11 @@ abstract class TransactionInfoUiLogic {
         private set
     var isLoading: Boolean = false
         private set
+
+    // despite its name, it could be fetched from node, but transformed to explorer data class
     private var explorerTxInfo: org.ergoplatform.explorer.client.model.TransactionInfo? = null
     private var localDbInfo: AddressTransaction? = null
+    private var address: String? = null
 
     fun init(
         txId: String,
@@ -41,6 +46,7 @@ abstract class TransactionInfoUiLogic {
             return
 
         this.txId = txId
+        this.address = address
         isLoading = true
         coroutineScope.launch(Dispatchers.IO) {
             try {
@@ -151,6 +157,19 @@ abstract class TransactionInfoUiLogic {
 
     fun shouldOfferReloadButton() = !isLoading &&
             explorerTxInfo == null || explorerTxInfo?.inclusionHeight == null
+
+    fun shouldOfferCancelButton() = address != null && explorerTxInfo?.inclusionHeight == null &&
+            explorerTxInfo?.inputs?.any { it.address == address } == true
+
+    suspend fun buildCancelTransaction(
+        prefs: PreferencesProvider,
+        texts: StringProvider,
+    ) = ErgoFacade.buildCancelTransaction(
+        address!!,
+        explorerTxInfo!!,
+        prefs,
+        texts,
+    )
 
     abstract fun onTransactionInformationFetched(ti: TransactionInfo?)
 }

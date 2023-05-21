@@ -12,6 +12,7 @@ import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
+import org.ergoplatform.wallet.addresses.findWalletConfigAndAddressIdx
 
 abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     private var isInitialized = false
@@ -202,16 +203,11 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                 // dApp sent info regarding address to use, lets see if we have this address
                 // and load it
                 if (wallet == null) {
-                    val walletDerivedAddress = database.loadWalletAddress(p2pkAddresses.first())
-                    val walletConfig = database.loadWalletByFirstAddress(
-                        walletDerivedAddress?.walletFirstAddress ?: p2pkAddresses.first()
-                    )
-
-                    walletConfig?.let {
+                    findWalletConfigAndAddressIdx(p2pkAddresses.first(), database)?.let {
                         initWallet(
                             database,
-                            walletConfig.id,
-                            walletDerivedAddress?.derivationIndex ?: 0
+                            it.first,
+                            it.second
                         )
                     }
                 }

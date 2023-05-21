@@ -1,5 +1,6 @@
 package org.ergoplatform.desktop.transactions
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -11,12 +12,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
+import org.ergoplatform.compose.settings.AppButton
 import org.ergoplatform.compose.settings.AppProgressIndicator
 import org.ergoplatform.compose.transactions.TransactionInfoLayout
 import org.ergoplatform.desktop.ui.AppScrollingLayout
 import org.ergoplatform.desktop.ui.defaultMaxWidth
 import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.transactions.TransactionInfo
+import org.ergoplatform.uilogic.STRING_BUTTON_CANCEL_TX
 import org.ergoplatform.uilogic.STRING_LABEL_ERROR_FETCHING
 import org.ergoplatform.uilogic.transactions.TransactionInfoUiLogic
 
@@ -27,6 +30,7 @@ fun TransactionInfoScreen(
     uiLogic: TransactionInfoUiLogic,
     onTxIdClicked: () -> Unit,
     onTokenClick: (String) -> Unit,
+    onCancelClicked: (() -> Unit)?,
 ) {
     AppScrollingLayout {
         if (loading) {
@@ -43,15 +47,26 @@ fun TransactionInfoScreen(
                     .defaultMinSize(400.dp, 200.dp)
                     .widthIn(max = defaultMaxWidth)
             ) {
-                TransactionInfoLayout(
-                    Modifier.padding(defaultPadding),
-                    uiLogic,
-                    ti,
-                    onTxIdClicked,
-                    onTokenClick,
-                    Application.texts,
-                    getDb = { Application.database }
-                )
+                Column {
+                    TransactionInfoLayout(
+                        Modifier.padding(defaultPadding),
+                        uiLogic,
+                        ti,
+                        onTxIdClicked,
+                        onTokenClick,
+                        Application.texts,
+                        getDb = { Application.database }
+                    )
+
+                    onCancelClicked?.let {
+                        AppButton(
+                            onCancelClicked,
+                            Modifier.padding(defaultPadding).align(Alignment.CenterHorizontally),
+                        ) {
+                            Text(Application.texts.getString(STRING_BUTTON_CANCEL_TX))
+                        }
+                    }
+                }
             }
         }
     }
