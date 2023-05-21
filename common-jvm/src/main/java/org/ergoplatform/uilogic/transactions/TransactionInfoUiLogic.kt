@@ -33,7 +33,8 @@ abstract class TransactionInfoUiLogic {
     // despite its name, it could be fetched from node, but transformed to explorer data class
     private var explorerTxInfo: org.ergoplatform.explorer.client.model.TransactionInfo? = null
     private var localDbInfo: AddressTransaction? = null
-    private var address: String? = null
+    var address: String? = null
+        private set
 
     fun init(
         txId: String,
