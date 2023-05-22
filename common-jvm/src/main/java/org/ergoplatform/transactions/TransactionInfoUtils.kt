@@ -484,7 +484,7 @@ suspend fun ErgoTransactionOutput.toOutputInfo(
         ).toString()
         assets = nodeBoxInfo.assets.map { it.toAssetInstanceInfo(getTokenInfo) }
         additionalRegisters = AdditionalRegisters().apply {
-            nodeBoxInfo.additionalRegisters.forEach { k, v ->
+            nodeBoxInfo.additionalRegisters.forEach { (k, v) ->
                 // only serialized value is needed
                 put(k, AdditionalRegister().apply { serializedValue = v })
             }
