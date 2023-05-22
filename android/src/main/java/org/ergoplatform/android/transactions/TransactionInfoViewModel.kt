@@ -21,7 +21,7 @@ class TransactionInfoViewModel : ViewModel() {
     val txInfo: LiveData<TransactionInfo?> get() = _txInfo
     private val _canCancel = MutableLiveData<Boolean>()
     val canCancel: LiveData<Boolean> get() = _canCancel
-    val cancelTxPromptSigning = SingleLiveEvent<PromptSigningResult>()
+    val cancelTxPromptSigning = SingleLiveEvent<PromptSigningResult?>()
     var walletConfigAndDerivedIdx: Pair<Int, Int>? = null
         private set
 

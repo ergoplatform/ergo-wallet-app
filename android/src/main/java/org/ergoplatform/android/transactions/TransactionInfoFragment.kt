@@ -132,6 +132,9 @@ class TransactionInfoFragment : Fragment() {
         }
 
         viewModel.cancelTxPromptSigning.observe(viewLifecycleOwner) { prompt ->
+            if (prompt == null)
+                return@observe
+
             if (!prompt.success)
                 MaterialAlertDialogBuilder(requireContext())
                     .setMessage(prompt.errorMsg!!)
