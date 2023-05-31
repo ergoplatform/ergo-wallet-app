@@ -3,24 +3,31 @@ package org.ergoplatform.android.transactions
 import android.animation.LayoutTransition
 import android.os.Bundle
 import android.view.*
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentTransactionInfoBinding
 import org.ergoplatform.android.ui.*
+import org.ergoplatform.compose.settings.AppButton
 import org.ergoplatform.compose.settings.defaultPadding
 import org.ergoplatform.compose.transactions.TransactionInfoLayout
 import org.ergoplatform.getExplorerTxUrl
+import org.ergoplatform.transactions.ErgoPay
 import org.ergoplatform.transactions.TransactionInfo
+import org.ergoplatform.uilogic.STRING_BUTTON_CANCEL_TX
 
 /**
  * Shows all transaction information by fetching it from Explorer by its transactionId
@@ -46,6 +53,22 @@ class TransactionInfoFragment : Fragment() {
         return binding.root
     }
 
+    private fun onCancelTx() {
+        val context = requireContext()
+        MaterialAlertDialogBuilder(context)
+            .setMessage(R.string.info_cancel_tx)
+            .setPositiveButton(
+                R.string.zxing_button_ok
+            ) { _, _ ->
+                viewModel.doCancelTx(
+                    AppDatabase.getInstance(context).walletDbProvider,
+                    Preferences(context),
+                    AndroidStringProvider(context),
+                )
+            }
+            .show()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -57,29 +80,44 @@ class TransactionInfoFragment : Fragment() {
             setContent {
                 AppComposeTheme {
                     val txInfoState = viewModel.txInfo.observeAsState()
+                    val canCancel = viewModel.canCancel.observeAsState(false)
                     txInfoState.value?.let { txInfo ->
                         val context = requireContext()
-                        TransactionInfoLayout(
-                            modifier = Modifier.padding(defaultPadding),
-                            uiLogic = viewModel.uiLogic,
-                            txInfo,
-                            onTxIdClicked = {
-                                copyStringToClipboard(
-                                    txInfo.id,
-                                    requireContext(),
-                                    this
-                                )
-                            },
-                            onTokenClick = { tokenId ->
-                                findNavController().navigateSafe(
-                                    TransactionInfoFragmentDirections.actionTransactionInfoFragmentToTokenInformationDialogFragment(
-                                        tokenId
+                        Column {
+                            val texts = AndroidStringProvider(context)
+                            TransactionInfoLayout(
+                                modifier = Modifier.padding(defaultPadding),
+                                uiLogic = viewModel.uiLogic,
+                                txInfo,
+                                onTxIdClicked = {
+                                    copyStringToClipboard(
+                                        txInfo.id,
+                                        requireContext(),
+                                        this@apply
                                     )
-                                )
-                            },
-                            texts = AndroidStringProvider(context),
-                            getDb = { AppDatabase.getInstance(context) }
-                        )
+                                },
+                                onTokenClick = { tokenId ->
+                                    findNavController().navigateSafe(
+                                        TransactionInfoFragmentDirections.actionTransactionInfoFragmentToTokenInformationDialogFragment(
+                                            tokenId
+                                        )
+                                    )
+                                },
+                                texts = texts,
+                                getDb = { AppDatabase.getInstance(context) }
+                            )
+
+                            if (canCancel.value) {
+                                AppButton(
+                                    ::onCancelTx,
+                                    Modifier
+                                        .padding(defaultPadding)
+                                        .align(Alignment.CenterHorizontally),
+                                ) {
+                                    Text(texts.getString(STRING_BUTTON_CANCEL_TX))
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -90,6 +128,27 @@ class TransactionInfoFragment : Fragment() {
             txInfo?.let {
                 binding.layoutTxinfo.layoutTransition = LayoutTransition()
                 binding.layoutTxinfo.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+            }
+        }
+
+        viewModel.cancelTxPromptSigning.observe(viewLifecycleOwner) { prompt ->
+            if (prompt == null)
+                return@observe
+
+            if (!prompt.success)
+                MaterialAlertDialogBuilder(requireContext())
+                    .setMessage(prompt.errorMsg!!)
+                    .setPositiveButton(R.string.zxing_button_ok, null)
+                    .show()
+            else {
+                val walletConfigAndDerivedIdx = viewModel.walletConfigAndDerivedIdx
+                findNavController().navigateSafe(
+                    TransactionInfoFragmentDirections.actionTransactionInfoFragmentToErgoPaySigningFragment(
+                        ErgoPay.buildStaticSigningRequest(prompt.serializedTx!!),
+                        walletConfigAndDerivedIdx?.first ?: -1,
+                        walletConfigAndDerivedIdx?.second ?: -1,
+                    )
+                )
             }
         }
     }

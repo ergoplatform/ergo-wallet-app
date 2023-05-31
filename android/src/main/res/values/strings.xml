@@ -23,7 +23,7 @@
     <string name="hint_amount_currency">Amount (%1$s)</string>
     <string name="label_purpose">Purpose</string>
     <string name="label_share">Share</string>
-    <string name="label_open">Open</string>
+    <string name="label_open_in_explorer">Open in Explorer</string>
     <string name="button_delete">Delete</string>
     <string name="label_export">Export</string>
     <string name="button_yes">Yes</string>
@@ -162,6 +162,10 @@
     <string name="desc_transaction_outboxes">These amounts were sent by this transaction.</string>
     <string name="desc_transaction_waiting">Waiting for execution</string>
     <string name="desc_transaction_execution_time">Executed at %1$s</string>
+    <string name="button_cancel_tx">Cancel transaction</string>
+    <string name="info_cancel_tx">To cancel the transaction, it is needed to confirm a new transaction with a higher fee than the one to be cancelled, sending
+        back the amounts to yourself.\n
+      There is no guarantee that the new cancel transaction will be executed first. Observe the transaction states in the wallet details screen.</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Addresses</string>

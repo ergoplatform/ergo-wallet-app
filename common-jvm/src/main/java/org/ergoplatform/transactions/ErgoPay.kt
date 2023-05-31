@@ -231,3 +231,8 @@ fun ErgoPaySigningRequest.sendReplyToDApp(txId: String) {
         httpPostStringSync(it, jsonString, MEDIA_TYPE_JSON)
     }
 }
+
+object ErgoPay {
+    fun buildStaticSigningRequest(reducedTx: ByteArray) =
+        uriSchemePrefix + String(Base64Coder.encode(reducedTx, Base64Coder.urlsafeMap))
+}

@@ -3,12 +3,17 @@ package org.ergoplatform.uilogic.transactions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.ergoplatform.api.ErgoExplorerApi
+import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.ErgoFacade
 import org.ergoplatform.persistance.AddressTransaction
 import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.TokenInformation
+import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.getAttachmentText
 import org.ergoplatform.transactions.reduceBoxes
+import org.ergoplatform.transactions.toExplorerTransactionInfo
 import org.ergoplatform.uilogic.STRING_DESC_TRANSACTION_EXECUTION_TIME
 import org.ergoplatform.uilogic.STRING_DESC_TRANSACTION_WAITING
 import org.ergoplatform.uilogic.StringProvider
@@ -24,38 +29,68 @@ abstract class TransactionInfoUiLogic {
         private set
     var isLoading: Boolean = false
         private set
+
+    // despite its name, it could be fetched from node, but transformed to explorer data class
     private var explorerTxInfo: org.ergoplatform.explorer.client.model.TransactionInfo? = null
     private var localDbInfo: AddressTransaction? = null
+    var address: String? = null
+        private set
 
     fun init(
         txId: String,
         address: String?, // the address is used to fetch unconfirmed transactions, see below
-        ergoApi: ErgoExplorerApi,
-        db: IAppDatabase?, // when given and transaction is not found on Explorer, it is loaded from DB
+        ergoApi: ApiServiceManager,
+        db: IAppDatabase,
         forceReload: Boolean = false,
     ) {
         if (this.txId != null && !forceReload || isLoading)
             return
 
         this.txId = txId
+        this.address = address
         isLoading = true
         coroutineScope.launch(Dispatchers.IO) {
             try {
+                val txInfoNode = if (ergoApi.preferNodeAsExplorer) try {
+                    val getTokenInfo: suspend (String) -> TokenInformation? = { tokenId ->
+                        TokenInfoManager.getInstance()
+                            .getTokenInformation(tokenId, db.tokenDbProvider, ergoApi)
+                    }
+                    val blockchainTxInfo = ergoApi.getTransactionInformationNode(txId).execute()
+                    if (!blockchainTxInfo.isSuccessful && blockchainTxInfo.code() == 404) {
+                        ergoApi.getTransactionInformationUncomfirmedNode(txId).execute().body()
+                            ?.toExplorerTransactionInfo(ergoApi, getTokenInfo)
+                    } else {
+                        blockchainTxInfo.body()?.toExplorerTransactionInfo(ergoApi, getTokenInfo)
+                    }
 
-                val txCall = ergoApi.getTransactionInformation(txId).execute()
-
-                val txInfo = if (txCall.isSuccessful)
-                    txCall.body()
-                else if (!txCall.isSuccessful && txCall.code() == 404 && address != null) {
-                    // tx might still be unconfirmed, but Explorer API has no documented endpoint to
-                    // fetch unconfirmed tx by id. The undocumented API the frontend is calling
-                    // does not return assets for inboxes and has a different formatting in nuances,
-                    // so we trick here by fetching all unconfirmed transactions for an address
-                    // and filter the result
-                    val mempoolCall =
-                        ergoApi.getMempoolTransactionsForAddress(address, 5, 0).execute()
-                    mempoolCall.body()?.items?.firstOrNull { it.id == txId }
+                } catch (t: Throwable) {
+                    LogUtils.logDebug(
+                        this.javaClass.simpleName,
+                        "Error fetching tx info from node",
+                        t
+                    )
+                    null
                 } else null
+
+                val txInfo = if (txInfoNode != null)
+                    txInfoNode
+                else {
+                    val txCall = ergoApi.getTransactionInformation(txId).execute()
+
+                    if (txCall.isSuccessful)
+                        txCall.body()
+                    else if (!txCall.isSuccessful && txCall.code() == 404 && address != null) {
+                        // tx might still be unconfirmed, but Explorer API has no documented endpoint to
+                        // fetch unconfirmed tx by id. The undocumented API the frontend is calling
+                        // does not return assets for inboxes and has a different formatting in nuances,
+                        // so we trick here by fetching all unconfirmed transactions for an address
+                        // and filter the result
+                        val mempoolCall =
+                            ergoApi.getMempoolTransactionsForAddress(address, 5, 0).execute()
+                        mempoolCall.body()?.items?.firstOrNull { it.id == txId }
+                    } else null
+                }
 
                 explorerTxInfo = txInfo
                 localDbInfo = null
@@ -65,8 +100,8 @@ abstract class TransactionInfoUiLogic {
                     onTransactionInformationFetched(
                         TransactionInfo(
                             txId,
-                            explorerTxInfo!!.inputs,
-                            explorerTxInfo!!.outputs
+                            txInfo.inputs,
+                            txInfo.outputs
                         ).reduceBoxes().let {
                             TransactionInfo(
                                 it.id,
@@ -75,7 +110,7 @@ abstract class TransactionInfoUiLogic {
                             )
                         }
                     )
-                } else if (db != null && address != null) {
+                } else if (address != null) {
                     // if we could not load the transaction from explorer, check if we have it
                     // in local DB to show at least some locally saved information
                     // to show details of cancelled transactions
@@ -123,6 +158,19 @@ abstract class TransactionInfoUiLogic {
 
     fun shouldOfferReloadButton() = !isLoading &&
             explorerTxInfo == null || explorerTxInfo?.inclusionHeight == null
+
+    fun shouldOfferCancelButton() = address != null && explorerTxInfo?.inclusionHeight == null &&
+            explorerTxInfo?.inputs?.any { it.address == address } == true
+
+    suspend fun buildCancelTransaction(
+        prefs: PreferencesProvider,
+        texts: StringProvider,
+    ) = ErgoFacade.buildCancelTransaction(
+        address!!,
+        explorerTxInfo!!,
+        prefs,
+        texts,
+    )
 
     abstract fun onTransactionInformationFetched(ti: TransactionInfo?)
 }

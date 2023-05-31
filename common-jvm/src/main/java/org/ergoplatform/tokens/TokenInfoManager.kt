@@ -7,11 +7,9 @@ import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.api.TokenCheckResponse
 import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
-import org.ergoplatform.explorer.client.model.AdditionalRegister
 import org.ergoplatform.explorer.client.model.AdditionalRegisters
-import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.persistance.*
-import org.ergoplatform.transactions.toAssetInstanceInfo
+import org.ergoplatform.transactions.toOutputInfo
 import org.ergoplatform.utils.LogUtils
 
 class TokenInfoManager {
@@ -178,25 +176,15 @@ class TokenInfoManager {
         }
 
         val boxInfoNode = if (apiService.preferNodeAsExplorer) try {
-            val nodeBoxInfo = apiService.getNodeBoxInformation(issuingBoxId).execute().body()!!
-
-            OutputInfo().apply {
-                assets = nodeBoxInfo.assets.map { it.toAssetInstanceInfo(getTokenInfo = null) }
-                transactionId = nodeBoxInfo.transactionId
-                additionalRegisters = AdditionalRegisters().apply {
-                    nodeBoxInfo.additionalRegisters.forEach { k, v ->
-                        // only serialized value is needed
-                        put(k, AdditionalRegister().apply { serializedValue = v })
-                    }
-                }
-            }
+            apiService.getNodeBoxInformation(issuingBoxId).execute().body()!!
+                .toOutputInfo(getTokenInfo = null)
         } catch (t: Throwable) {
             LogUtils.logDebug(this.javaClass.simpleName, "Error fetching token info from node", t)
             null
         } else null
 
-        val boxInfo = boxInfoNode ?:
-            apiService.getExplorerBoxInformation(issuingBoxId).execute().body()!!
+        val boxInfo =
+            boxInfoNode ?: apiService.getExplorerBoxInformation(issuingBoxId).execute().body()!!
 
         val tokenInfo = boxInfo.assets.find { it.tokenId == tokenId }!!
 

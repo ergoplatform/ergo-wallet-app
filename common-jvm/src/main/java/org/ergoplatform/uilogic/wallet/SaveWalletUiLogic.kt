@@ -67,9 +67,23 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
                     while (histFound) {
                         val derivedAddress =
                             getPublicErgoAddressFromMnemonic(signingSecrets, derivedAddressIdx)
-                        histFound =
-                            ergoApiService.getConfirmedTransactionsForAddress(derivedAddress, 1, 0)
-                                .execute().body()!!.items.isNotEmpty() && isActive
+
+                        val nodeHistFound = if (ergoApiService.preferNodeAsExplorer) try {
+                            ergoApiService.getNodeConfirmedTransactionsForAddress(
+                                derivedAddress, 1, 0
+                            ).execute().body()!!.items.isNotEmpty() && isActive
+                        } catch (t: Throwable) {
+                            false
+                        }
+                        else false
+
+                        histFound = nodeHistFound ||
+                                ergoApiService.getConfirmedTransactionsForAddress(
+                                    derivedAddress,
+                                    1,
+                                    0
+                                )
+                                    .execute().body()!!.items.isNotEmpty() && isActive
 
                         if (histFound) {
                             derivedAddressesFound.add(derivedAddress)
@@ -78,7 +92,10 @@ class SaveWalletUiLogic(val mnemonic: SecretString, private val fromRestore: Boo
                         }
                     }
                 } catch (t: Throwable) {
-                    LogUtils.logDebug(this.javaClass.simpleName, "Error searching derived addresses: ${t.message}", t)
+                    LogUtils.logDebug(
+                        this.javaClass.simpleName,
+                        "Error searching derived addresses: ${t.message}", t
+                    )
                 }
             }
         }
