@@ -16,8 +16,6 @@ data class BabelSwapData(
 )
 
 object BabelFees {
-    var isEnabled = true
-
     fun findBabelBox(
         tokensToSend: List<ErgoToken>,
         tokenBalanceSenders: Map<String, WalletToken>,

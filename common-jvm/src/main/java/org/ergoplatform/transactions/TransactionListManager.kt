@@ -11,6 +11,9 @@ import org.ergoplatform.TokenAmount
 import org.ergoplatform.explorer.client.model.AssetInstanceInfo
 import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.persistance.*
+import org.ergoplatform.restapi.client.ErgoTransactionInput
+import org.ergoplatform.restapi.client.ErgoTransactionOutput
+import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.utils.LogUtils
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.math.max
@@ -97,6 +100,20 @@ object TransactionListManager {
     }
 
     /**
+     * we fetch data from node or explorer. this wrapper holds the data object actually received,
+     * and holds fields for the data needed for every comparison
+     */
+    private data class TransactionInfoWrapper(
+        val id: String,
+        val inclusionHeight: Int?,
+        val timestamp: Long?,
+        val numConfirmations: Int?,
+        val explorerData: TransactionInfo?,
+        val nodeInputs: List<ErgoTransactionInput> = emptyList(),
+        val nodeOutputs: List<ErgoTransactionOutput> = emptyList(),
+    )
+
+    /**
      * determines how many transactions must be fetched from Explorer, fetches it and calls
      * helper methods to merge the downloaded and current data
      */
@@ -141,17 +158,42 @@ object TransactionListManager {
                     this.javaClass.simpleName,
                     "Fetching address $address transactions page $page"
                 )
-                val transactionsCall = ergoApi.getConfirmedTransactionsForAddress(
-                    address,
-                    txPerPage,
-                    txPerPage * page
-                ).execute()
 
-                if (!transactionsCall.isSuccessful) {
-                    throw IllegalStateException(transactionsCall.errorBody()!!.string())
+                val transactions = if (ergoApi.preferNodeAsExplorer) {
+                    val transactionsCall = ergoApi.getNodeConfirmedTransactionsForAddress(
+                        address, txPerPage, txPerPage * page
+                    ).execute()
+
+                    if (!transactionsCall.isSuccessful) {
+                        throw IllegalStateException(transactionsCall.errorBody()!!.string())
+                    }
+
+                    transactionsCall.body()!!.items.map {
+                        TransactionInfoWrapper(
+                            it.id,
+                            it.inclusionHeight,
+                            it.timestamp,
+                            it.numConfirmations,
+                            explorerData = null,
+                            it.inputs,
+                            it.outputs
+                        )
+                    }
+                } else {
+                    val transactionsCall = ergoApi.getConfirmedTransactionsForAddress(
+                        address, txPerPage, txPerPage * page
+                    ).execute()
+
+                    if (!transactionsCall.isSuccessful) {
+                        throw IllegalStateException(transactionsCall.errorBody()!!.string())
+                    }
+
+                    transactionsCall.body()!!.items.map {
+                        TransactionInfoWrapper(
+                            it.id, it.inclusionHeight, it.timestamp, it.numConfirmations, it
+                        )
+                    }
                 }
-
-                val transactions = transactionsCall.body()!!.items
                 page++
                 txLoaded += transactions.size
                 downloadProgress.value = txLoaded
@@ -165,31 +207,55 @@ object TransactionListManager {
                 mergeTransactionsWithExistingAndSaveToDb(
                     address,
                     db,
+                    ergoApi,
                     notSecurelyConfirmedTransactions,
                     // filter the transactions, otherwise we might get duplicates for securely confirmed
                     heightToLoadFrom?.let {
-                        transactions.filter { it.inclusionHeight > heightToLoadFrom }
+                        transactions.filter {
+                            it.inclusionHeight != null && it.inclusionHeight > heightToLoadFrom
+                        }
                     } ?: transactions,
                     true
                 )
             }
 
             // now unconfirmed
-            val transactionsMempoolCall = ergoApi.getMempoolTransactionsForAddress(
-                address,
-                100,
-                0
-            ).execute()
+            val mempoolTransactions = if (ergoApi.preferNodeAsExplorer) {
+                ergoApi.getNodeMempoolTransactionsForAddress(address, 100).execute().body()?.map {
+                    TransactionInfoWrapper(
+                        it.id,
+                        null,
+                        null,
+                        null,
+                        null,
+                        it.inputs,
+                        it.outputs,
+                    )
+                } ?: emptyList()
+            } else {
+                val transactionsMempoolCall = ergoApi.getMempoolTransactionsForAddress(
+                    address, 100, 0
+                ).execute()
 
-            val mempoolTransactionsExplorer = if (transactionsMempoolCall.isSuccessful) {
-                transactionsMempoolCall.body()!!.items
-            } else emptyList()
+                if (transactionsMempoolCall.isSuccessful) {
+                    transactionsMempoolCall.body()!!.items.map {
+                        TransactionInfoWrapper(
+                            it.id,
+                            it.inclusionHeight,
+                            it.timestamp,
+                            it.numConfirmations,
+                            it,
+                        )
+                    }
+                } else emptyList()
+            }
 
             mergeTransactionsWithExistingAndSaveToDb(
                 address,
                 db,
+                ergoApi,
                 notSecurelyConfirmedTransactions,
-                mempoolTransactionsExplorer,
+                mempoolTransactions,
                 false
             )
 
@@ -240,17 +306,21 @@ object TransactionListManager {
     private suspend fun mergeTransactionsWithExistingAndSaveToDb(
         address: String,
         db: IAppDatabase,
+        ergoApi: ApiServiceManager,
         existingTransactions: java.util.HashMap<String, AddressTransaction>,
-        newTransactions: List<TransactionInfo>,
+        newTransactions: List<TransactionInfoWrapper>,
         newConfirmed: Boolean
     ) {
         newTransactions.forEach { newTransaction ->
             val existingTransaction = existingTransactions.remove(newTransaction.id)
 
             val newState =
-                if (!newConfirmed) TX_STATE_WAITING else if (newTransaction.numConfirmations < CONFIRMATIONS_NUM_SECURE) TX_STATE_CONFIRMED_UNSECURE else TX_STATE_CONFIRMED_SECURE
+                if (!newConfirmed || newTransaction.numConfirmations == null) TX_STATE_WAITING
+                else if (newTransaction.numConfirmations < CONFIRMATIONS_NUM_SECURE) TX_STATE_CONFIRMED_UNSECURE
+                else TX_STATE_CONFIRMED_SECURE
             val newInclusionHeight =
-                if (newConfirmed) newTransaction.inclusionHeight.toLong() else INCLUSION_HEIGHT_UNCONFIRMED
+                if (newConfirmed && newTransaction.inclusionHeight != null) newTransaction.inclusionHeight.toLong()
+                else INCLUSION_HEIGHT_UNCONFIRMED
 
             val transactionToMerge = if (
                 existingTransaction?.state == TX_STATE_SUBMITTED ||
@@ -264,7 +334,7 @@ object TransactionListManager {
             } else existingTransaction
 
             transactionToMerge?.let {
-                val mergedTransaction = if (newConfirmed) {
+                val mergedTransaction = if (newConfirmed && newTransaction.timestamp != null) {
                     // if the transaction is confirmed, use timestamp from its including block
                     transactionToMerge.copy(
                         inclusionHeight = newInclusionHeight,
@@ -282,17 +352,25 @@ object TransactionListManager {
             } ?: run {
                 // convert new transaction into db entities and save
 
-                val txInfo = TransactionInfo(
+                val getTokenInfo: suspend (String) -> TokenInformation? = { tokenId ->
+                    TokenInfoManager.getInstance()
+                        .getTokenInformation(tokenId, db.tokenDbProvider, ergoApi)
+                }
+                val txInfo = if (newTransaction.explorerData != null) TransactionInfo(
                     newTransaction.id,
-                    newTransaction.inputs,
-                    newTransaction.outputs
+                    newTransaction.explorerData.inputs,
+                    newTransaction.explorerData.outputs
+                ) else TransactionInfo(
+                    newTransaction.id,
+                    newTransaction.nodeInputs.map { it.toInputInfo(ergoApi, getTokenInfo) },
+                    newTransaction.nodeOutputs.map { it.toOutputInfo(getTokenInfo) }
                 )
 
                 convertAndSaveTransactionInfoToDb(
                     txInfo,
                     address,
-                    if (newConfirmed) newTransaction.timestamp else (existingTransaction?.timestamp
-                        ?: System.currentTimeMillis()),
+                    if (newConfirmed && newTransaction.timestamp != null) newTransaction.timestamp
+                    else (existingTransaction?.timestamp ?: System.currentTimeMillis()),
                     newInclusionHeight,
                     newState,
                     db.transactionDbProvider

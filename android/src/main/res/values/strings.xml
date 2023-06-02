@@ -23,8 +23,9 @@
     <string name="hint_amount_currency">Amount (%1$s)</string>
     <string name="label_purpose">Purpose</string>
     <string name="label_share">Share</string>
-    <string name="label_open">Open</string>
+    <string name="label_open_in_explorer">Open in Explorer</string>
     <string name="button_delete">Delete</string>
+    <string name="label_export">Export</string>
     <string name="button_yes">Yes</string>
     <string name="button_reload">Reload</string>
     <string name="button_retry">Retry</string>
@@ -152,6 +153,7 @@
     <string name="tx_download_progress">%1$s transactions downloaded</string>
     <string name="transactions_load_all_desc">End of downloaded transactions. Wallet App can reload all your transactions. This may take a long time.</string>
     <string name="transactions_load_all_button">Load all transactions</string>
+    <string name="info_export">Successfully exported %1$s transactions.\nIf you want to export more into the past, scroll the list to the point in time.</string>
 
     <!-- Transaction information -->
     <string name="title_transaction">Transaction</string>
@@ -160,6 +162,10 @@
     <string name="desc_transaction_outboxes">These amounts were sent by this transaction.</string>
     <string name="desc_transaction_waiting">Waiting for execution</string>
     <string name="desc_transaction_execution_time">Executed at %1$s</string>
+    <string name="button_cancel_tx">Cancel transaction</string>
+    <string name="info_cancel_tx">To cancel the transaction, it is needed to confirm a new transaction with a higher fee than the one to be cancelled, sending
+        back the amounts to yourself.\n
+      There is no guarantee that the new cancel transaction will be executed first. Observe the transaction states in the wallet details screen.</string>
 
     <!-- Wallet addresses -->
     <string name="title_wallet_addresses">Addresses</string>
@@ -211,6 +217,8 @@
     <string name="button_scan_signed_tx">Scan signed tx</string>
     <string name="button_next">Next</string>
     <string name="title_authenticate">Authentication required</string>
+    <string name="error_device_security_save_wallet">Could not store secrets device-encrypted: %1$s\n\nPlease check if you have set up
+        biometric authentication on this device.</string>
     <string name="error_device_security">Security error: %1$s\n\nMost likely this is caused by a change in device\'s authentication settings.
         If this error persists, please restore this wallet with the mnemonic you have noted.</string>
     <string name="error_device_security_cloud_hint">The information to decrypt your secrets could not be read. Please note
@@ -219,6 +227,9 @@
     <string name="label_send_all">Send all</string>
     <string name="title_add_token">Choose token to send</string>
     <string name="error_token_amount">Please enter valid token amounts or remove the invalid token entries</string>
+    <string name="warning_send_to_contract">The address you have specified is a contract address, not a personal wallet address.
+      Please do only proceed if you are sure the contract can process the payment. Sending to contracts manually can make funds
+        become unspendable!</string>
     <string name="error_balance_erg">There is not enough balance to send the specified amount: only %1$s ERG available.</string>
     <string name="error_changebox_amount">You need to withhold a small amount of ERG to store your tokens remaining.</string>
     <string name="error_request_token_not_found">Could not add token \'%1$s\'</string>
@@ -269,7 +280,7 @@
     <string name="error_accessing_webcam">Error accessing webcam</string>
     <string name="error_accessing_webcam_macos">On MacOS, accessing the webcam does not work due to security restrictions. If you are using an M1 mac, you can use the iOS Ergo Wallet App which can access the cam.</string>
     <string name="hint_no_webcam">As an alternative, you can copy a QR code image to the clipboard and press the button below, or copy the QR code contents and paste them below.</string>
-    <string name="error_no_image_clipboard">No image found in system clipboard.</string>
+    <string name="error_no_image_clipboard">No image found in system clipboard.\n\nIf you want to paste text, paste into the text field below.</string>
     <string name="error_no_qrcode_image_clipboard">No QR code found in image.\n\nMake sure to copy QR code with a margin.</string>
 
     <!-- Ergo Pay Signing -->
@@ -283,6 +294,8 @@
     <string name="label_ergo_pay_choose_wallet">Please choose a wallet to process the Ergo Pay Request.</string>
     <string name="title_choose_wallet">Choose a wallet</string>
     <string name="error_prover_cant_sign">The transaction or message could not be signed with this wallet\'s keys.</string>
+    <string name="warning_old_creation_height">The transaction contains output boxes with a self-reported age of more than a year.</string>
+    <string name="warning_burning_tokens">The transaction burns tokens.</string>
 
     <!-- Ergo Auth Signing -->
     <string name="intro_auth_request">dApp on %1$s\nrequests your authentication to\n%2$s.\n\nAuthenticate
@@ -356,7 +369,7 @@
 
     <!-- Settings -->
     <string name="desc_about">Brought to you by Benjamin Schulte, %1$s</string>
-    <string name="about_year" translatable="false">2022</string>
+    <string name="about_year" translatable="false">2023</string>
     <string name="desc_about_moreinfo">Licensed under <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Apache 2 License</a>\n
         This project is <a href="https://github.com/ergoplatform/ergo-wallet-app">open source software</a>\n
     Find help on <a href="https://discord.gg/kj7s7nb">Discord</a> or <a href="https://t.me/ErgoWalletApp">Telegram</a></string>
@@ -374,24 +387,30 @@
     <string name="button_reset_defaults">Defaults</string>
     <string name="label_explorer_api_url">Explorer API URL</string>
     <string name="label_node_url">Node URL</string>
+    <string name="check_prefer_node">Prefer Node Explorer API</string>
     <string name="label_fetching_node_list">Fetching list of available nodes…</string>
     <string name="label_checking_node">Checking %1$s…</string>
     <string name="label_node_alternatives">Alternative nodes:</string>
     <string name="label_node_info">Block %1$s, response time %2$s ms</string>
+    <string name="label_node_explorer_api">Explorer API enabled</string>
     <string name="label_node_none_found">No node found. Please check your connection.</string>
     <string name="label_token_verification_url">Token verification service URL</string>
     <string name="button_show_debug_info">Show debug information</string>
     <string name="label_ipfs_http_gateway">IPFS HTTP gateway</string>
     <string name="desc_register_handler">You can register this application to handle Ergo specific protocols like ErgoPay and ErgoAuth.</string>
     <string name="button_register_handler">Register as Ergo protocol handler</string>
-    <string name="title_balance_notification">Changed balance notification</string>
-    <string name="desc_balance_notif_set">Check balance and notify on changes</string>
+    <string name="title_background_sync">Check balance and dApp messages and notify on changes</string>
     <string name="button_balance_notif_never">Never</string>
     <string name="button_balance_notif_hourly">Every hour</string>
     <string name="button_balance_notif_xhourly">Every %1$s hours</string>
-    <string name="desc_balance_notification">Your wallet balance changed</string>
     <string name="title_app_lock">Biometric App Lock</string>
     <string name="desc_app_lock">Requires a biometric authentication when opening the application and after some inactivity time.\n\n
         Only available when biometric authentication is set up for this device. Your secrets are always stored safely, even without activating this option.\n
         Protects from unwanted looks of others using this device. We strongly recommend using a device lock screen instead.</string>
+
+    <!-- Notifications -->
+    <string name="title_balance_notification">Changed balance notification</string>
+    <string name="title_mosaik_app_notification">dApp notification</string>
+    <string name="desc_balance_notification">Your wallet balance changed</string>
+    <string name="desc_mosaik_app_notification">New message from a dApp</string>
 </resources>

@@ -1,15 +1,18 @@
 package org.ergoplatform.ios.transactions
 
 import com.badlogic.gdx.utils.I18NBundle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.getExplorerTxUrl
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.ui.*
+import org.ergoplatform.transactions.ErgoPay
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.TransactionInfoUiLogic
+import org.ergoplatform.wallet.addresses.findWalletConfigAndAddressIdx
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.uikit.*
 
@@ -61,6 +64,51 @@ class TransactionInfoViewController(
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
         loadTx()
+    }
+
+    private fun onCancelTx() {
+        val texts = getAppDelegate().texts
+        val uac =
+            UIAlertController("", texts.get(STRING_INFO_CANCEL_TX), UIAlertControllerStyle.Alert)
+        uac.addAction(
+            UIAlertAction(
+                texts.get(STRING_ZXING_BUTTON_OK),
+                UIAlertActionStyle.Default
+            ) {
+                doCancelTx()
+            })
+
+        presentViewController(uac, true) {}
+    }
+
+    private fun doCancelTx() {
+        viewControllerScope.launch(Dispatchers.IO) {
+            val appDelegate = getAppDelegate()
+            val prompt = uiLogic.buildCancelTransaction(
+                appDelegate.prefs,
+                IosStringProvider(appDelegate.texts)
+            )
+
+            if (prompt.success) {
+                val walletConfigAndDerivedIdx = findWalletConfigAndAddressIdx(
+                    uiLogic.address!!, appDelegate.database.walletDbProvider
+                )
+
+                runOnMainThread {
+                    navigationController.pushViewController(
+                        ErgoPaySigningViewController(
+                            ErgoPay.buildStaticSigningRequest(prompt.serializedTx!!),
+                            walletConfigAndDerivedIdx?.first ?: -1,
+                            walletConfigAndDerivedIdx?.second ?: -1
+                        ),
+                        true
+                    )
+                }
+
+            } else runOnMainThread {
+                buildSimpleAlertController("", prompt.errorMsg!!, appDelegate.texts)
+            }
+        }
     }
 
     private fun loadTx(forceReload: Boolean = false) {
@@ -144,6 +192,7 @@ class TransactionInfoViewController(
         }
 
         private val refreshButtonContainer = UIView(CGRect.Zero())
+        private val cancelButtonContainer = UIView(CGRect.Zero())
 
         init {
             val introContainer = UIView(CGRect.Zero())
@@ -167,8 +216,14 @@ class TransactionInfoViewController(
                 loadTx(forceReload = true)
             }
 
+            val cancelButton = PrimaryButton(texts.get(STRING_BUTTON_CANCEL_TX))
+            cancelButtonContainer.addSubview(cancelButton)
+            cancelButton.centerHorizontal(true).topToSuperview().bottomToSuperview()
+            cancelButton.addOnTouchUpInsideListener { _, _ -> onCancelTx() }
+
             insertArrangedSubview(introContainer, 0)
             insertArrangedSubview(refreshButtonContainer, 1)
+            addArrangedSubview(cancelButtonContainer)
         }
 
         override fun bindTransaction(
@@ -183,6 +238,7 @@ class TransactionInfoViewController(
             purposeLabel.text = uiLogic.transactionPurpose
             txTimestampLabel.text = uiLogic.getTransactionExecutionState(IosStringProvider(texts))
             refreshButtonContainer.isHidden = !uiLogic.shouldOfferReloadButton()
+            cancelButtonContainer.isHidden = !uiLogic.shouldOfferCancelButton()
         }
     }
 }

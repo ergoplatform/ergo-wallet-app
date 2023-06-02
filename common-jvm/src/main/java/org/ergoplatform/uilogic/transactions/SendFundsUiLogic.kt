@@ -287,7 +287,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     }
 
     private fun getActualMessageToSend(): String? {
-        return null // TODO bring back for node 5.0 return if (message.isBlank()) null else message.take(maxMessageLength)
+        return if (message.isBlank()) null else message.take(maxMessageLength)
     }
 
     fun checkCanMakePayment(preferences: PreferencesProvider): CheckCanPayResponse {
@@ -351,7 +351,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
                     notifyUiLocked(false)
                     transactionSubmitted(
                         ergoTxResult,
-                        db.transactionDbProvider,
+                        db,
                         preferences,
                         transactionInfo
                     )

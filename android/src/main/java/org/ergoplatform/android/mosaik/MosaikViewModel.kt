@@ -19,6 +19,7 @@ import org.ergoplatform.persistance.CacheFileManager
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.StringProvider
+import java.util.Locale
 
 class MosaikViewModel : ViewModel() {
     val browserEvent = SingleLiveEvent<String?>()
@@ -44,6 +45,7 @@ class MosaikViewModel : ViewModel() {
         "Ergo Wallet App (Android)",
         BuildConfig.VERSION_NAME,
         { platformType!! },
+        { currentLocale },
         MosaikGuidManager(),
     ) {
         override val coroutineScope: CoroutineScope
@@ -70,7 +72,7 @@ class MosaikViewModel : ViewModel() {
         }
 
         override fun onRefreshFavorite() {
-            manifestLiveData.postValue(manifestLiveData.value)
+            manifestLiveData.postValue(appManifest)
         }
 
         override fun appNotLoaded(cause: Throwable) {
@@ -114,6 +116,7 @@ class MosaikViewModel : ViewModel() {
     }
 
     var platformType: MosaikContext.Platform? = null
+    private var currentLocale: Locale? = null
 
     fun initialize(
         appUrl: String,
@@ -124,6 +127,7 @@ class MosaikViewModel : ViewModel() {
         cacheFileManager: CacheFileManager?
     ) {
         this.platformType = platformType
+        this.currentLocale = stringProvider.locale
         mosaikRuntime.appDatabase = appDb
         mosaikRuntime.guidManager.appDatabase = appDb
         mosaikRuntime.cacheFileManager = cacheFileManager

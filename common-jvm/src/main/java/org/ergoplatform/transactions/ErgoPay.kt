@@ -5,6 +5,9 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.ErgoFacade
+import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.TokenDbProvider
+import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.*
 
 /**
@@ -199,10 +202,15 @@ private fun getErgoPayHeaders() = mapOf(
  * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
  * switches to non-UI thread, use within an applicable try/catch phrase
  */
-suspend fun ErgoPaySigningRequest.buildTransactionInfo(ergoApiService: ApiServiceManager): TransactionInfo? {
+suspend fun ErgoPaySigningRequest.buildTransactionInfo(
+    ergoApiService: ApiServiceManager,
+    prefs: PreferencesProvider,
+    tokenDbProvider: TokenDbProvider,
+    texts: StringProvider,
+): TransactionInfo? {
     if (reducedTx == null) return null
     val reducedTransaction = ErgoFacade.deserializeUnsignedTxOffline(reducedTx)
-    return reducedTransaction.buildTransactionInfo(ergoApiService)
+    return reducedTransaction.buildTransactionInfo(ergoApiService, prefs, tokenDbProvider, texts)
 }
 
 private const val JSON_FIELD_TX_ID = "txId"
@@ -222,4 +230,9 @@ fun ErgoPaySigningRequest.sendReplyToDApp(txId: String) {
 
         httpPostStringSync(it, jsonString, MEDIA_TYPE_JSON)
     }
+}
+
+object ErgoPay {
+    fun buildStaticSigningRequest(reducedTx: ByteArray) =
+        uriSchemePrefix + String(Base64Coder.encode(reducedTx, Base64Coder.urlsafeMap))
 }

@@ -57,6 +57,7 @@ fun main(args: Array<String>) {
     val dataDir = appDirs.getUserDataDir("ergowallet", null, null)
 
     Application.filesCache = DesktopCacheFileManager(cacheDir)
+    Application.dataDir = dataDir
 
     // Process CLI arguments and check for existing appliation instance
     if (args.any { it.equals("--testnet", true) }) {
@@ -179,6 +180,7 @@ object Application {
     lateinit var database: SqlDelightAppDb
     lateinit var prefs: PreferencesProvider
     lateinit var filesCache: CacheFileManager
+    var dataDir: String = ""
 
     var startUpArguments: List<String>? = null
 }

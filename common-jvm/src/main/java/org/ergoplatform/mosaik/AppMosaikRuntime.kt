@@ -23,11 +23,13 @@ import org.ergoplatform.wallet.getSortedDerivedAddressesList
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
+import kotlin.math.max
 
 abstract class AppMosaikRuntime(
     val appName: String,
     val appVersionName: String,
     val platformType: () -> MosaikContext.Platform,
+    val getLocale: () -> Locale?,
     val guidManager: MosaikGuidManager,
 ) : MosaikRuntime(
     OkHttpBackendConnector(
@@ -36,7 +38,7 @@ abstract class AppMosaikRuntime(
             MosaikContext(
                 MosaikContext.LIBRARY_MOSAIK_VERSION,
                 guidManager.getGuidForHost(getHostname(url)),
-                Locale.getDefault().language,
+                (getLocale() ?: Locale.getDefault()).language,
                 appName,
                 appVersionName,
                 platformType(),
@@ -104,6 +106,14 @@ abstract class AppMosaikRuntime(
             iconFile = fileName,
             timeStampNow,
             favorite = formerAppEntry?.favorite ?: false,
+            manifest.notificationCheckUrl,
+            formerAppEntry?.lastNotificationMessage,
+            lastNotificationMs = formerAppEntry?.lastNotificationMs ?: 0,
+            nextNotificationCheck = max(
+                formerAppEntry?.nextNotificationCheck ?: 0,
+                System.currentTimeMillis() + MosaikNotificationSyncManager.MIN_CHECK_INTERVAL_MINUTES * 1000L * 60
+            ),
+            notificationUnread = false,
         )
 
         isFavoriteApp = newAppEntry.favorite

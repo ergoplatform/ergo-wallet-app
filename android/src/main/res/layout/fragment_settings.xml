@@ -127,7 +127,7 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/half_horizontal_margin"
                         android:gravity="center"
-                        android:text="@string/desc_balance_notif_set" />
+                        android:text="@string/title_background_sync" />
 
                     <Button
                         android:id="@+id/balance_notification"

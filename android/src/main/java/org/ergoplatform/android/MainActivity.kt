@@ -8,6 +8,7 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricPrompt
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -20,16 +21,23 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.android.transactions.ChooseSpendingWalletFragmentDialog
 import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.QrScannerActivity
+import org.ergoplatform.android.ui.dpToPx
 import org.ergoplatform.android.ui.postDelayed
 import org.ergoplatform.android.wallet.WalletFragmentDirections
+import org.ergoplatform.mosaik.getUnreadNotificationCount
 import org.ergoplatform.uilogic.MainAppUiLogic
 
 class MainActivity : AppCompatActivity() {
+    private val _keyboardStateFlow = MutableStateFlow(false)
+    val keyboardStateFlow: StateFlow<Boolean> get() = _keyboardStateFlow
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,23 +58,44 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        KeyboardVisibilityEvent.registerEventListener(this, { isOpen ->
+        // set up badge
+        val badge = navView.getOrCreateBadge(R.id.navigation_mosaik)
+        badge.verticalOffset = 4.dpToPx(resources)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                AppDatabase.getInstance(this@MainActivity).mosaikDbProvider.getAllAppFavoritesByLastVisited()
+                    .collectLatest {
+                        val notifications = it.getUnreadNotificationCount()
+                        badge.isVisible = notifications > 0
+                        badge.number = notifications
+                    }
+            }
+        }
+
+
+        // check if soft keyboard is open and hide bottom nav bar
+        window.decorView.setOnApplyWindowInsetsListener { view, insets ->
+            val insetsCompat = WindowInsetsCompat.toWindowInsetsCompat(insets, view)
+            val isOpen = insetsCompat.isVisible(WindowInsetsCompat.Type.ime())
             navView.visibility = if (isOpen) View.GONE else View.VISIBLE
-        })
+            _keyboardStateFlow.value = isOpen
+            view.onApplyWindowInsets(insets)
+        }
 
         if (savedInstanceState == null) {
             handleIntent(navController)
         }
 
-        findViewById<Button>(R.id.button_unlock).setOnClickListener { showBiometricPrompt() }
+        // set up app lock
+        findViewById<Button>(R.id.button_unlock).setOnClickListener { unlockWithBiometricPrompt() }
 
         if (walletApp?.shouldLockApp == true)
             lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.RESUMED) {
                     while (isActive) {
-                        delay(1000 * 60)
+                        delay(App.appLockMs / 2)
                         if (walletApp?.isAppLocked() == true)
-                            lockApp()
+                            lockAppUi()
                     }
                 }
             }
@@ -76,26 +105,37 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         // removes pending notifications from system bar
-        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_SYNC)
+        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_BALANCE)
+        NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_DAPP)
 
         if (walletApp?.isAppLocked() == false)
             unlockApp()
         else
-            lockApp()
+            lockAppUi()
     }
 
     private fun unlockApp() {
         findViewById<View>(R.id.layout_app_locked).visibility = View.GONE
     }
 
-    private fun lockApp() {
+    private fun lockAppUi() {
         findViewById<View>(R.id.layout_app_locked).visibility = View.VISIBLE
+
+        // dialogs stay in front of the lock screen, we need to close all of them
+        val navController = findNavController(R.id.nav_host_fragment)
+        while (navController.currentDestination?.navigatorName == "dialog") {
+            navController.popBackStack()
+        }
+        // FIXME this does not affect dialogs shown without navigation like ConfirmationDialog,
+        // AlertDialog etc.
+
     }
 
     fun scanQrCode() {
-        IntentIntegrator(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+        QrScannerActivity.startFromActivity(this)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
@@ -173,7 +213,14 @@ class MainActivity : AppCompatActivity() {
         walletApp?.userInteracted()
     }
 
-    private fun showBiometricPrompt() {
+    private fun unlockWithBiometricPrompt() {
+        showBiometricPrompt {
+            walletApp?.appUnlocked()
+            unlockApp()
+        }
+    }
+
+    fun showBiometricPrompt(authSucceeded: () -> Unit) {
 
         // setDeviceCredentialAllowed is deprecated, but needed for older SDK level
         @Suppress("DEPRECATION") val promptInfo = BiometricPrompt.PromptInfo.Builder()
@@ -184,14 +231,13 @@ class MainActivity : AppCompatActivity() {
 
         val callback = object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                walletApp?.appUnlocked()
-                unlockApp()
+                authSucceeded()
             }
         }
 
         try {
             BiometricPrompt(this, callback).authenticate(promptInfo)
-        } catch (t: Throwable) {
+        } catch (_: Throwable) {
 
         }
     }

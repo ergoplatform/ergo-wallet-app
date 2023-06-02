@@ -4,13 +4,12 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.ergoplatform.ApiServiceManager
-import org.ergoplatform.api.ErgoExplorerApi
 import org.ergoplatform.api.TokenCheckResponse
 import org.ergoplatform.appkit.Eip4Token
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.explorer.client.model.AdditionalRegisters
-import org.ergoplatform.explorer.client.model.OutputInfo
 import org.ergoplatform.persistance.*
+import org.ergoplatform.transactions.toOutputInfo
 import org.ergoplatform.utils.LogUtils
 
 class TokenInfoManager {
@@ -50,7 +49,8 @@ class TokenInfoManager {
     ): TokenInformation? {
         return withContext(Dispatchers.IO) {
             val fromDB = loadTokenFromDbOrApi(tokenDbProvider, tokenId, apiService)
-            val updated = fromDB?.let { updateTokenInformationWhenNecessary(it, apiService, tokenDbProvider) }
+            val updated =
+                fromDB?.let { updateTokenInformationWhenNecessary(it, apiService, tokenDbProvider) }
 
             return@withContext updated ?: fromDB
         }
@@ -62,7 +62,7 @@ class TokenInfoManager {
     private suspend fun loadTokenFromDbOrApi(
         tokenDbProvider: TokenDbProvider,
         tokenId: String,
-        apiService: ErgoExplorerApi
+        apiService: ApiServiceManager
     ) = tokenDbProvider.loadTokenInformation(tokenId) ?: try {
         val tokenFromApi = fetchTokenInformationFromApi(apiService, tokenId)
         tokenDbProvider.insertOrReplaceTokenInformation(tokenFromApi)
@@ -86,7 +86,8 @@ class TokenInfoManager {
 
             // check if genuine
             val tokenVerifyResponse = try {
-                val checkTokenCall = apiService.checkToken(token.tokenId, token.displayName).execute()
+                val checkTokenCall =
+                    apiService.checkToken(token.tokenId, token.displayName).execute()
                 if (!checkTokenCall.isSuccessful)
                     throw IllegalStateException(checkTokenCall.errorBody()!!.string())
                 checkTokenCall.body()!!
@@ -136,8 +137,8 @@ class TokenInfoManager {
         } else null
     }
 
-    private fun fetchTokenInformationFromApi(
-        apiService: ErgoExplorerApi,
+    private suspend fun fetchTokenInformationFromApi(
+        apiService: ApiServiceManager,
         tokenId: String
     ): TokenInformation {
         LogUtils.logDebug(
@@ -145,46 +146,87 @@ class TokenInfoManager {
             "Load information for token $tokenId from API"
         )
 
-        val tokenApiResponse = apiService.getTokenInformation(tokenId).execute()
+        val nodeTokenApiResponse = if (apiService.preferNodeAsExplorer)
+            try {
+                val nodeTokenApiResponse = apiService.getTokenInfoNode(tokenId).execute()
+                if (!nodeTokenApiResponse.isSuccessful)
+                    throw IllegalStateException(
+                        "Node Token API Error: ${
+                            nodeTokenApiResponse.errorBody()?.string()
+                        }"
+                    )
+                nodeTokenApiResponse.body()
+            } catch (t: Throwable) {
+                LogUtils.logDebug(
+                    this.javaClass.simpleName,
+                    "Error fetching token info from node", t
+                )
+                null
+            } else null
 
-        if (!tokenApiResponse.isSuccessful) {
-            throw IllegalStateException("No token information available for $tokenId")
+        val issuingBoxId = if (nodeTokenApiResponse?.boxId != null) nodeTokenApiResponse.boxId
+        else {
+            val tokenApiResponse = apiService.getTokenInformation(tokenId).execute()
+
+            if (!tokenApiResponse.isSuccessful) {
+                throw IllegalStateException("No token information available for $tokenId")
+            }
+
+            tokenApiResponse.body()!!.boxId
         }
 
-        val issuingBoxId = tokenApiResponse.body()!!.boxId
+        val boxInfoNode = if (apiService.preferNodeAsExplorer) try {
+            apiService.getNodeBoxInformation(issuingBoxId).execute().body()!!
+                .toOutputInfo(getTokenInfo = null)
+        } catch (t: Throwable) {
+            LogUtils.logDebug(this.javaClass.simpleName, "Error fetching token info from node", t)
+            null
+        } else null
 
-        val boxInfo: OutputInfo = apiService.getExplorerBoxInformation(issuingBoxId).execute().body()!!
+        val boxInfo =
+            boxInfoNode ?: apiService.getExplorerBoxInformation(issuingBoxId).execute().body()!!
 
         val tokenInfo = boxInfo.assets.find { it.tokenId == tokenId }!!
 
         val eip4Token = try {
-            Eip4TokenBuilder.buildFromAdditionalRegisters(
-                tokenId,
-                tokenInfo.amount,
-                boxInfo.additionalRegisters
-            )
-        } catch (iea: IllegalArgumentException) {
-            // IllegalArgumentException can be caused when R7+ are invalid, retry with R4-R6 only
-            Eip4TokenBuilder.buildFromAdditionalRegisters(
-                tokenId,
-                tokenInfo.amount,
-                AdditionalRegisters().apply {
-                    putAll(boxInfo.additionalRegisters.filter { listOf("R4", "R5", "R6").contains(it.key) })
-                }
-            )
+            try {
+                Eip4TokenBuilder.buildFromAdditionalRegisters(
+                    tokenId,
+                    tokenInfo.amount,
+                    boxInfo.additionalRegisters
+                )
+            } catch (iea: IllegalArgumentException) {
+                // IllegalArgumentException can be caused when R7+ are invalid, retry with R4-R6 only
+                Eip4TokenBuilder.buildFromAdditionalRegisters(
+                    tokenId,
+                    tokenInfo.amount,
+                    AdditionalRegisters().apply {
+                        putAll(boxInfo.additionalRegisters.filter {
+                            listOf(
+                                "R4",
+                                "R5",
+                                "R6"
+                            ).contains(it.key)
+                        })
+                    }
+                )
+            }
+        } catch (t: Throwable) {
+            // not an EIP-4 compliant token
+            null
         }
 
         return TokenInformation(
             tokenId,
             issuingBoxId,
             boxInfo.transactionId,
-            eip4Token.tokenName,
-            eip4Token.tokenDescription,
-            eip4Token.decimals,
-            eip4Token.value,
-            eip4Token.mintingBoxR7?.toHex(),
-            eip4Token.mintingBoxR8?.toHex(),
-            eip4Token.mintingBoxR9?.toHex(),
+            eip4Token?.tokenName ?: tokenId,
+            eip4Token?.tokenDescription ?: "",
+            eip4Token?.decimals ?: 0,
+            eip4Token?.value ?: tokenInfo.amount,
+            eip4Token?.mintingBoxR7?.toHex(),
+            eip4Token?.mintingBoxR8?.toHex(),
+            eip4Token?.mintingBoxR9?.toHex(),
         )
     }
 

@@ -6,10 +6,18 @@ import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.BoxAttachmentBuilder
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
+import org.ergoplatform.appkit.impl.ScalaBridge
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.getErgoNetworkType
+import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.TokenDbProvider
+import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
-import org.ergoplatform.restapi.client.ErgoTransactionOutput
+import org.ergoplatform.restapi.client.*
+import org.ergoplatform.tokens.TokenInfoManager
+import org.ergoplatform.uilogic.STRING_WARNING_BURNING_TOKENS
+import org.ergoplatform.uilogic.STRING_WARNING_OLD_CREATION_HEIGHT
+import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.Base64Coder
 import special.collection.Coll
 import kotlin.math.min
@@ -22,7 +30,7 @@ data class TransactionInfo(
     val id: String,
     val inputs: List<InputInfo>,
     val outputs: List<OutputInfo>,
-    val hintMsg: String? = null,
+    val hintMsg: Pair<String, MessageSeverity>? = null,
 )
 
 /**
@@ -39,24 +47,80 @@ data class TransactionInfoBox(
 /**
  * builds transaction info from Ergo Pay Signing Request, fetches necessary boxes data
  * use within an applicable try/catch phrase
+ * if StringProvider is provided, warnings for user will be generated
  */
-suspend fun Transaction.buildTransactionInfo(ergoApiService: ApiServiceManager): TransactionInfo {
+suspend fun Transaction.buildTransactionInfo(
+    ergoApiService: ApiServiceManager,
+    prefs: PreferencesProvider,
+    tokenDbProvider: TokenDbProvider,
+    texts: StringProvider? = null,
+): TransactionInfo {
     return withContext(Dispatchers.IO) {
         val inputsMap = HashMap<String, TransactionInfoBox>()
-        inputBoxesIds.forEach { boxId ->
-            val boxInfo = ergoApiService.getExplorerBoxInformation(boxId).execute().body()
+        // check for burned tokens
+        val tokensMap = HashMap<String, Long>()
 
-            val transactionInfoBox = boxInfo?.toTransactionInfoBox()
-            // explorer does not return information for unconfirmed boxes, check again if available on node
-                ?: ergoApiService.getNodeUnspentBoxInformation(boxId).execute()
-                    .body()?.toTransactionInfoBox()
+        inputBoxesIds.forEach { boxId ->
+            val boxInfoNode = if (ergoApiService.preferNodeAsExplorer) try {
+                ergoApiService.getNodeBoxInformation(boxId).execute().body()
+            } catch (t: Throwable) {
+                null
+            } else null
+
+            val getTokenInfo: suspend (String) -> TokenInformation? = { tokenId ->
+                TokenInfoManager.getInstance()
+                    .getTokenInformation(tokenId, tokenDbProvider, ergoApiService)
+            }
+
+            val transactionInfoBox =
+                boxInfoNode?.toTransactionInfoBox(getTokenInfo)
+                    ?: ergoApiService.getExplorerBoxInformation(boxId).execute().body()
+                        ?.toTransactionInfoBox()
+                    // blockchain api and explorer do not return information for unconfirmed boxes,
+                    // check again if available on node pool
+                    ?: ergoApiService.getNodeUnspentBoxInformation(boxId).execute()
+                        .body()?.toTransactionInfoBox(getTokenInfo)
 
             if (transactionInfoBox == null)
                 throw IllegalStateException("Could not retrieve information for box $boxId")
             else
                 inputsMap[transactionInfoBox.boxId] = transactionInfoBox
+
+            transactionInfoBox.tokens.forEach { token ->
+                val tokenId = token.tokenId
+                tokensMap[tokenId] = (tokensMap[tokenId] ?: 0) + (token.amount ?: 0)
+            }
         }
-        buildTransactionInfo(inputsMap)
+        outputs.forEach {
+            it.tokens.forEach { token ->
+                val tokenId = token.id.toString()
+                tokensMap[tokenId] = (tokensMap[tokenId] ?: 0) - token.value
+            }
+        }
+
+        // check for warnings
+        val warningMsgs = ArrayList<String>()
+        if (texts != null) {
+            // check for too old output block heights
+            val blockHeight = prefs.lastBlockHeight
+            val warningBlockHeight =
+                blockHeight - org.ergoplatform.wallet.protocol.Constants.BlocksPerYear()
+            if (outputs.any { it.creationHeight < warningBlockHeight }) {
+                warningMsgs.add(texts.getString(STRING_WARNING_OLD_CREATION_HEIGHT))
+            }
+
+            // check for burned tokens
+            if (tokensMap.values.any { it > 0 }) {
+                warningMsgs.add(texts.getString(STRING_WARNING_BURNING_TOKENS))
+            }
+        }
+
+        buildTransactionInfo(
+            inputsMap,
+            hintMsg = if (warningMsgs.isNotEmpty())
+                Pair(warningMsgs.joinToString("\n"), MessageSeverity.WARNING)
+            else null
+        )
     }
 }
 
@@ -67,7 +131,7 @@ suspend fun Transaction.buildTransactionInfo(ergoApiService: ApiServiceManager):
  */
 fun Transaction.buildTransactionInfo(
     inputBoxes: HashMap<String, TransactionInfoBox>,
-    hintMsg: String? = null
+    hintMsg: Pair<String, MessageSeverity>? = null
 ): TransactionInfo {
     return buildTransactionInfo(
         inputBoxes,
@@ -83,7 +147,7 @@ private fun buildTransactionInfo(
     inputBoxesIds: List<String>,
     outboxes: List<TransactionBox>,
     txId: String,
-    hintMsg: String?,
+    hintMsg: Pair<String, MessageSeverity>?,
 ): TransactionInfo {
     val inputsList = ArrayList<InputInfo>()
     val outputsList = ArrayList<OutputInfo>()
@@ -169,19 +233,31 @@ fun OutputInfo.toTransactionInfoBox(): TransactionInfoBox {
 /**
  * converts Node API's box information into [TransactionInfoBox]
  */
-fun ErgoTransactionOutput.toTransactionInfoBox(): TransactionInfoBox =
+suspend fun ErgoTransactionOutput.toTransactionInfoBox(
+    getTokenInfo: suspend (String) -> TokenInformation?,
+): TransactionInfoBox =
     TransactionInfoBox(
         boxId,
         Address.fromErgoTree(JavaHelpers.decodeStringToErgoTree(ergoTree), getErgoNetworkType())
             .toString(),
         value,
-        assets.map { nodeAsset ->
-            AssetInstanceInfo().apply {
-                amount = nodeAsset.amount
-                tokenId = nodeAsset.tokenId
-            }
-        }
+        assets.map { it.toAssetInstanceInfo(getTokenInfo) }
     )
+
+suspend fun Asset.toAssetInstanceInfo(
+    getTokenInfo: (suspend (String) -> TokenInformation?)?
+): AssetInstanceInfo {
+    val nodeAsset = this
+    return AssetInstanceInfo().apply {
+        amount = nodeAsset.amount
+        tokenId = nodeAsset.tokenId
+        // if needed for the caller, we try to load or fetch the necessary token info
+        getTokenInfo?.invoke(tokenId)?.let { ti ->
+            name = ti.displayName
+            decimals = ti.decimals
+        }
+    }
+}
 
 private fun getAssetInstanceInfosFromErgoBoxToken(
     tokens: List<ErgoToken>,
@@ -321,6 +397,99 @@ fun combineTokens(tokens: List<AssetInstanceInfo>): List<AssetInstanceInfo> {
     }
 
     return hashmap.values.toList()
+}
+
+/**
+ * converts Node Blockchain API's transaction info to Explorer format. Needs to fetch input boxes
+ * as they don't get delivered with the call, and needs to load/fetch token information
+ */
+suspend fun BlockchainTransaction.toExplorerTransactionInfo(
+    ergoApi: ApiServiceManager,
+    getTokenInfo: (suspend (String) -> TokenInformation?)?
+): org.ergoplatform.explorer.client.model.TransactionInfo {
+    val nodeBcTx = this
+    return TransactionInfo().apply {
+        id = nodeBcTx.id
+        blockId = nodeBcTx.blockId
+        inclusionHeight = nodeBcTx.inclusionHeight
+        timestamp = nodeBcTx.timestamp
+        index = nodeBcTx.index
+        numConfirmations = nodeBcTx.numConfirmations
+        size = nodeBcTx.size.toInt()
+        inputs = nodeBcTx.inputs.map { it.toInputInfo(ergoApi, getTokenInfo) }
+        outputs = nodeBcTx.outputs.map { it.toOutputInfo(getTokenInfo) }
+    }
+}
+
+suspend fun ErgoTransaction.toExplorerTransactionInfo(
+    ergoApi: ApiServiceManager,
+    getTokenInfo: (suspend (String) -> TokenInformation?)?
+): org.ergoplatform.explorer.client.model.TransactionInfo {
+    val nodeErgTx = this
+    return TransactionInfo().apply {
+        id = nodeErgTx.id
+        size = nodeErgTx.size.toInt()
+        inputs = nodeErgTx.inputs.map { it.toInputInfo(ergoApi, getTokenInfo) }
+        outputs = nodeErgTx.outputs.map { it.toOutputInfo(getTokenInfo) }
+    }
+}
+
+suspend fun ErgoTransactionInput.toInputInfo(
+    ergoApi: ApiServiceManager,
+    getTokenInfo: (suspend (String) -> TokenInformation?)?
+): InputInfo {
+    val nodeInputBox = this
+    return InputInfo().apply {
+        boxId = nodeInputBox.boxId
+        spendingProof = nodeInputBox.spendingProof?.proofBytes
+        ergoApi.getNodeBoxInformation(nodeInputBox.boxId).execute().body()
+            ?.let { boxInfo ->
+                value = boxInfo.value
+                index = boxInfo.index
+
+                ergoTree = boxInfo.ergoTree
+                address = Address.fromErgoTree(
+                    ScalaBridge.isoStringToErgoTree()
+                        .to(boxInfo.ergoTree),
+                    getErgoNetworkType(),
+                ).toString()
+                assets = boxInfo.assets.map {
+                    it.toAssetInstanceInfo(getTokenInfo)
+                }
+                additionalRegisters = AdditionalRegisters().apply {
+                    putAll(boxInfo.additionalRegisters.mapValues {
+                        AdditionalRegister().apply {
+                            serializedValue = it.value
+                        }
+                    })
+                }
+            }
+    }
+}
+
+suspend fun ErgoTransactionOutput.toOutputInfo(
+    getTokenInfo: (suspend (String) -> TokenInformation?)?
+): OutputInfo {
+    val nodeBoxInfo = this
+    return OutputInfo().apply {
+        boxId = nodeBoxInfo.boxId
+        transactionId = nodeBoxInfo.transactionId
+        value = nodeBoxInfo.value
+        index = nodeBoxInfo.index
+        creationHeight = nodeBoxInfo.creationHeight
+        ergoTree = nodeBoxInfo.ergoTree
+        address = Address.fromErgoTree(
+            ScalaBridge.isoStringToErgoTree().to(nodeBoxInfo.ergoTree),
+            getErgoNetworkType(),
+        ).toString()
+        assets = nodeBoxInfo.assets.map { it.toAssetInstanceInfo(getTokenInfo) }
+        additionalRegisters = AdditionalRegisters().apply {
+            nodeBoxInfo.additionalRegisters.forEach { (k, v) ->
+                // only serialized value is needed
+                put(k, AdditionalRegister().apply { serializedValue = v })
+            }
+        }
+    }
 }
 
 fun OutputInfo.getAttachmentText(): String? = additionalRegisters?.let { registers ->

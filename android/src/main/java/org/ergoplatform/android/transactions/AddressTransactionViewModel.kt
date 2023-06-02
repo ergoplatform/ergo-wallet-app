@@ -9,12 +9,16 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import kotlinx.coroutines.launch
+import org.ergoplatform.android.ui.SingleLiveEvent
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.TransactionDbProvider
 import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.transactions.TransactionsExport
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
+import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.getDerivedAddress
 import org.ergoplatform.wallet.getDerivedAddressEntity
+import java.io.BufferedWriter
 
 class AddressTransactionViewModel : ViewModel() {
 
@@ -25,6 +29,8 @@ class AddressTransactionViewModel : ViewModel() {
     var derivationIdx = 0
 
     val derivedAddress get() = wallet?.getDerivedAddressEntity(derivationIdx)
+
+    val exportedNumLiveData = SingleLiveEvent<Int?>()
 
     fun init(walletId: Int, derivationIdx: Int, db: IAppDatabase) {
         if (wallet == null) {
@@ -46,6 +52,24 @@ class AddressTransactionViewModel : ViewModel() {
             wallet?.getDerivedAddress(derivationIdx) ?: ""
         )
     }.flow
+
+    fun exportTransactions(
+        transactionDbProvider: TransactionDbProvider,
+        limit: Int,
+        getWriter: () -> BufferedWriter
+    ) {
+        viewModelScope.launch {
+            try {
+                val tx = transactionDbProvider.loadAddressTransactionsWithTokens(
+                    wallet?.getDerivedAddress(derivationIdx) ?: "", limit, 0
+                )
+                TransactionsExport.exportTransactions(tx, getWriter)
+                exportedNumLiveData.postValue(tx.size)
+            } catch (t: Throwable) {
+                LogUtils.logDebug(this.javaClass.simpleName, "Error exporting transactions", t)
+            }
+        }
+    }
 
 
     class TransactionPagedSource(

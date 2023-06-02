@@ -44,7 +44,7 @@ import org.ergoplatform.persistance.*
         MosaikHostDbEntity::class,
         AddressBookEntryEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase(), IAppDatabase {
@@ -76,6 +76,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 .addMigrations(MIGRATION_6_7)
                 .addMigrations(MIGRATION_7_8)
                 .addMigrations(MIGRATION_8_9)
+                .addMigrations(MIGRATION_9_10)
                 .build()
         }
 
@@ -145,6 +146,16 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
         private val MIGRATION_8_9 = object : Migration(8, 9) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `address_book` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `label` TEXT NOT NULL, `address` TEXT NOT NULL, `signed_data` BLOB)")
+            }
+        }
+
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE mosaik_app ADD COLUMN `notificationUrl` TEXT")
+                database.execSQL("ALTER TABLE mosaik_app ADD COLUMN `lastNotificationMessage` TEXT")
+                database.execSQL("ALTER TABLE mosaik_app ADD COLUMN `lastNotificationMs` INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE mosaik_app ADD COLUMN `nextNotificationCheck` INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE mosaik_app ADD COLUMN `notificationUnread` INTEGER NOT NULL DEFAULT 0")
             }
         }
 

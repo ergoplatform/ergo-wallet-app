@@ -1,5 +1,6 @@
 package org.ergoplatform.compose.transactions
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TokenAmount
 import org.ergoplatform.addressbook.getAddressLabelFromDatabase
@@ -32,6 +35,7 @@ import org.ergoplatform.mosaik.MosaikStyleConfig
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.reduceBoxes
 import org.ergoplatform.uilogic.*
@@ -65,10 +69,15 @@ fun SignTransactionInfoLayout(
             style = labelStyle(LabelStyle.BODY1BOLD),
         )
 
-        transactionInfo.hintMsg?.let { message ->
+        transactionInfo.hintMsg?.let { (message, severity) ->
+            val warning = severity == MessageSeverity.WARNING || severity == MessageSeverity.ERROR
             Text(
                 message,
-                Modifier.fillMaxWidth().padding(top = defaultPadding / 2),
+                Modifier.fillMaxWidth().padding(top = defaultPadding / 2).then(
+                    if (warning) Modifier.border(1.dp, MosaikStyleConfig.primaryLabelColor)
+                        .padding(defaultPadding / 4)
+                    else Modifier
+                ),
                 textAlign = TextAlign.Center,
                 style = labelStyle(LabelStyle.BODY1)
             )
@@ -291,8 +300,10 @@ fun TransactionInfoBox(
 ) {
     val addressLabelState = remember(address) { mutableStateOf<String?>(null) }
     LaunchedEffect(address) {
-        getAddressLabelFromDatabase(getDb(), address, texts)?.let {
-            addressLabelState.value = it
+        withContext(Dispatchers.IO) {
+            getAddressLabelFromDatabase(getDb(), address, texts)?.let {
+                addressLabelState.value = it
+            }
         }
     }
 
@@ -315,21 +326,24 @@ fun TransactionInfoBox(
         val nanoErgs = value ?: 0
         if (nanoErgs > 0)
             Text(
-                ErgoAmount(nanoErgs).toComposableText(texts),
+                ErgoAmount(nanoErgs).toComposableText(texts, trimTrailingZeros = true),
                 Modifier.padding(horizontal = defaultPadding / 2),
                 style = labelStyle(LabelStyle.BODY1BOLD),
             )
 
         assets?.let {
             Column(
-                Modifier.padding(horizontal = defaultPadding / 2).padding(top = defaultPadding / 2)
+                Modifier.padding(horizontal = defaultPadding / 2)
+                    .padding(top = if (nanoErgs > 0) defaultPadding / 2 else 0.dp)
             ) {
                 assets.forEach { token ->
                     val tokenNameState = remember(token.tokenId) { mutableStateOf(token.name) }
                     if (tokenNameState.value == null)
                         LaunchedEffect(token.tokenId) {
-                            getDb().tokenDbProvider.loadTokenInformation(token.tokenId)?.displayName?.let {
-                                tokenNameState.value = it
+                            withContext(Dispatchers.IO) {
+                                getDb().tokenDbProvider.loadTokenInformation(token.tokenId)?.displayName?.let {
+                                    tokenNameState.value = it
+                                }
                             }
                         }
 

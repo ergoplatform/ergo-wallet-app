@@ -15,6 +15,9 @@ import org.ergoplatform.utils.LogUtils
 class App : Application() {
 
     companion object {
+        // Inactivity interval after which the app will be locked
+        const val appLockMs = 2L * 60 * 1000L
+
         var lastStackTrace: String? = null
             private set
     }
@@ -30,7 +33,7 @@ class App : Application() {
         LogUtils.stackTraceLogger = { lastStackTrace = it }
         LogUtils.logDebug = BuildConfig.DEBUG
 
-        createNotificationChannel()
+        createNotificationChannels()
 
         if (preferences.enableAppLock) {
             val context = applicationContext
@@ -42,23 +45,34 @@ class App : Application() {
         }
     }
 
-    private fun createNotificationChannel() {
+    private fun createNotificationChannels() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name: CharSequence = getString(R.string.title_balance_notification)
-            val description = getString(R.string.title_balance_notification)
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(
-                BackgroundSync.NOTIF_CHANNEL_ID_SYNC,
-                name, importance
-            )
-            channel.description = description
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
             val notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(channel)
+            notificationManager.createNotificationChannel(
+                BackgroundSync.NOTIF_CHANNEL_ID_BALANCE,
+                getString(R.string.title_balance_notification),
+            )
+            notificationManager.createNotificationChannel(
+                BackgroundSync.NOTIF_CHANNEL_ID_DAPPS,
+                getString(R.string.title_mosaik_app_notification),
+            )
         }
+    }
+
+    private fun NotificationManager.createNotificationChannel(
+        channelId: String,
+        title: String,
+    ) {
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(
+            channelId, title, importance
+        )
+        channel.description = title
+        // Register the channel with the system; you can't change the importance
+        // or other notification behaviors after this
+        createNotificationChannel(channel)
     }
 
     private var lastInteraction = 0L
@@ -66,7 +80,7 @@ class App : Application() {
         private set
 
     fun isAppLocked(): Boolean =
-        shouldLockApp && System.currentTimeMillis() - lastInteraction >= 2L * 60 * 1000L
+        shouldLockApp && System.currentTimeMillis() - lastInteraction >= appLockMs
 
     fun appUnlocked() {
         lastInteraction = System.currentTimeMillis()

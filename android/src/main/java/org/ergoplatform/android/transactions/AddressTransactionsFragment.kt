@@ -1,5 +1,6 @@
 package org.ergoplatform.android.transactions
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -13,6 +14,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
@@ -42,6 +44,8 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
     private var adapterFinishedLoading = false
 
     private var wallet: Wallet? = null
+
+    private val rcExportCsv = 4711
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,6 +102,15 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
             }
         }
 
+        viewModel.exportedNumLiveData.observe(viewLifecycleOwner) { num ->
+            num?.let {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setMessage(getString(R.string.info_export, num))
+                    .setPositiveButton(R.string.zxing_button_ok, null)
+                    .show()
+            }
+        }
+
         // Click listener
         binding.addressLabel.setOnClickListener {
             wallet?.let { wallet ->
@@ -132,16 +145,29 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return if (item.itemId == R.id.menu_open) {
+        return when (item.itemId) {
 
-            openUrlWithBrowser(
-                binding.root.context,
-                getExplorerAddressUrl(viewModel.derivedAddress!!.publicAddress)
-            )
-
-            true
-        } else
-            super.onOptionsItemSelected(item)
+            R.id.menu_open -> {
+                openUrlWithBrowser(
+                    binding.root.context,
+                    getExplorerAddressUrl(viewModel.derivedAddress!!.publicAddress)
+                )
+                true
+            }
+            R.id.menu_export -> {
+                val intent = Intent()
+                intent.action = Intent.ACTION_CREATE_DOCUMENT
+                intent.addCategory(Intent.CATEGORY_OPENABLE)
+                intent.putExtra(
+                    Intent.EXTRA_TITLE,
+                    "transactions_${wallet?.walletConfig?.displayName}-${binding.addressLabel.text}.csv"
+                )
+                intent.type = "text/plain"
+                startActivityForResult(intent, rcExportCsv)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onAddressChosen(addressDerivationIdx: Int?) {
@@ -193,6 +219,21 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
 
     private fun isRecyclerViewAtTop() =
         (binding.recyclerview.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() <= 0
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == rcExportCsv && data?.data != null) {
+            val currentUri = data.data!!
+            val context = requireActivity()
+            val contentResolver = context.contentResolver
+            viewModel.exportTransactions(
+                AppDatabase.getInstance(context).transactionDbProvider,
+                (binding.recyclerview.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() + 20,
+            ) { contentResolver.openOutputStream(currentUri)!!.writer().buffered() }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

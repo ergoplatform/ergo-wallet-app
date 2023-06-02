@@ -5,12 +5,11 @@ import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.babelfee.BabelFeeOperations
 import org.ergoplatform.appkit.impl.InputBoxImpl
 import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
+import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.restapi.client.PeersApi
-import org.ergoplatform.transactions.PromptSigningResult
-import org.ergoplatform.transactions.SendTransactionResult
-import org.ergoplatform.transactions.SigningResult
+import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
@@ -21,6 +20,8 @@ import scala.collection.JavaConversions
 import sigmastate.interpreter.HintsBag
 import sigmastate.serialization.`SigmaSerializer$`
 import java.nio.charset.StandardCharsets
+import java.util.HashMap
+import kotlin.math.max
 
 const val MNEMONIC_WORDS_COUNT = 15
 const val MNEMONIC_MIN_WORDS_COUNT = 12
@@ -38,11 +39,11 @@ fun isValidErgoAddress(addressString: String): Boolean {
     if (addressString.isEmpty())
         return false
 
-    try {
+    return try {
         val address = Address.create(addressString)
-        return if (isErgoMainNet) address.isMainnet else !address.isMainnet
+        if (isErgoMainNet) address.isMainnet else !address.isMainnet
     } catch (t: Throwable) {
-        return false
+        false
     }
 
 }
@@ -111,6 +112,82 @@ fun loadAppKitMnemonicWordList(): List<String> {
 }
 
 object ErgoFacade {
+    /**
+     * constructs a cancel transaction for the given transaction and address by sending all
+     * address input boxes back to the address itself, outbidding the tx fee
+     */
+    fun buildCancelTransaction(
+        address: String,
+        transaction: TransactionInfo,
+        prefs: PreferencesProvider,
+        texts: StringProvider,
+    ): PromptSigningResult {
+        try {
+            val inputsToUse = transaction.inputs.filter { it.address == address }
+            val orgTxFee =
+                transaction.outputs.find { it.address == getFeeAddressAsString() }!!.value
+
+            val ergoClient = getRestErgoClient(prefs)
+            return ergoClient.execute { ctx: BlockchainContext ->
+                val newTxFee = orgTxFee + (Parameters.MinFee / 10)
+
+                var completeValue = 0L
+                // we send all tokens from the input boxes
+                val tokenMap: HashMap<String, Long> = HashMap()
+                inputsToUse.forEach { input ->
+                    completeValue += input.value
+                    input.assets.forEach { token ->
+                        val tokenIdString = token.tokenId
+                        val et = tokenMap[tokenIdString] ?: 0L
+                        tokenMap[tokenIdString] = et + token.amount
+                    }
+                }
+                val tokenList = tokenMap.map { ErgoToken(it.key, it.value) }
+
+                // we send the amount that is covered by the boxes minus the fee, or the min value when
+                // we don't have enough
+                val amountToSend = max(completeValue - newTxFee, Parameters.MinChangeValue)
+
+                val ergoAddress = Address.create(address)
+                val unsignedTx = BoxOperations.createForSender(ergoAddress, ctx)
+                    .withAmountToSpend(amountToSend)
+                    .withTokensToSpend(tokenList)
+                    .withInputBoxesLoader(object : ExplorerAndPoolUnspentBoxesLoader() {
+                        // important to not allow tx chaining
+                        override fun loadBoxesPage(
+                            ctx: BlockchainContext,
+                            sender: Address,
+                            page: Int
+                        ): MutableList<InputBox> {
+                            return if (page == 0) {
+                                // first page: return the boxes we want to spent
+                                inputsToUse.map {
+                                    ctx.dataSource.getBoxById(
+                                        it.boxId,
+                                        false,
+                                        false
+                                    )
+                                }.toMutableList()
+                            } else
+                                super.loadBoxesPage(ctx, sender, page - 1)
+                        }
+                    })
+                    .putToContractTxUnsigned(ergoAddress.toErgoContract())
+
+                PromptSigningResult(
+                    true,
+                    ctx.newProverBuilder().build().reduce(unsignedTx, ERG_BASE_COST).toBytes()
+                )
+            }
+        } catch (t: Throwable) {
+            LogUtils.logDebug("buildCancelTransaction", "Error caught", t)
+            return PromptSigningResult(
+                false,
+                errorMsg = getErrorMessage(t, texts)
+            )
+        }
+    }
+
     private fun buildUnsignedTx(
         boxOperations: BoxOperations,
         recipient: Address,
@@ -177,6 +254,7 @@ object ErgoFacade {
 
         try {
             return getRestErgoClient(prefs).execute { ctx ->
+                prefs.lastBlockHeight = ctx.height.toLong()
                 val reducedTx = ctx.parseReducedTransaction(serializedTx)
                 val dataSource = ctx.dataSource
                 val inputs = reducedTx.inputBoxesIds.map { boxId ->
@@ -213,13 +291,14 @@ object ErgoFacade {
         try {
             val ergoClient = getRestErgoClient(prefs)
             return ergoClient.execute { ctx: BlockchainContext ->
+                prefs.lastBlockHeight = ctx.height.toLong()
+
                 // check if we have to use Babel Fees
                 val babelAmount = Parameters.MinChangeValue * 2 + feeAmount - nanoErgBalanceSenders
 
                 val babelSwap =
                     if (amountToSend <= Parameters.MinChangeValue && tokensToSend.isNotEmpty()
                         && babelAmount >= 0
-                        && BabelFees.isEnabled
                     )
                         BabelFees.findBabelBox(
                             tokensToSend,
@@ -248,16 +327,26 @@ object ErgoFacade {
 
                 val reduced = ctx.newProverBuilder().build().reduce(unsigned, ERG_BASE_COST)
 
-                val hintMsg = babelSwap?.let {
+                val hintMsgs = ArrayList<String>()
+                var hintSeverity = MessageSeverity.NONE
+
+                if (!recipient.isP2PK) {
+                    hintMsgs.add(texts.getString(STRING_WARNING_SEND_TO_CONTRACT))
+                    hintSeverity = MessageSeverity.WARNING
+                }
+
+                babelSwap?.let {
                     tokenBalanceSenders[babelSwap.tokenToSwap.id.toString()]?.let { walletToken ->
-                        texts.getString(
-                            STRING_BABELFEE_USED,
-                            ErgoAmount(babelSwap.babelAmountNanoErg).toStringTrimTrailingZeros(),
-                            TokenAmount(
-                                babelSwap.tokenToSwap.value,
-                                walletToken.decimals
-                            ).toStringUsFormatted(),
-                            walletToken.name ?: "",
+                        hintMsgs.add(
+                            texts.getString(
+                                STRING_BABELFEE_USED,
+                                ErgoAmount(babelSwap.babelAmountNanoErg).toStringTrimTrailingZeros(),
+                                TokenAmount(
+                                    babelSwap.tokenToSwap.value,
+                                    walletToken.decimals
+                                ).toStringUsFormatted(),
+                                walletToken.name ?: "",
+                            )
                         )
                     }
                 }
@@ -267,7 +356,9 @@ object ErgoFacade {
                     reduced.toBytes(),
                     inputs,
                     senderAddresses.first().ergoAddress.toString(),
-                    hintMsg = hintMsg
+                    hintMsg = if (hintMsgs.isNotEmpty())
+                        Pair(hintMsgs.joinToString("\n"), hintSeverity)
+                    else null
                 )
             }
         } catch (t: Throwable) {
@@ -322,8 +413,7 @@ object ErgoFacade {
         derivedKeyIndices.forEach {
             proverBuilder.withEip3Secret(it)
         }
-        val prover = proverBuilder.build()
-        return prover
+        return proverBuilder.build()
     }
 
 
@@ -398,6 +488,7 @@ object ErgoFacade {
         try {
             val ergoClient = getRestErgoClient(prefs)
             return ergoClient.execute { ctx ->
+                prefs.lastBlockHeight = ctx.height.toLong()
                 val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
                 val txId = ctx.sendTransaction(signedTx).trim('"')
                 SendTransactionResult(txId.isNotEmpty(), txId, signedTx)

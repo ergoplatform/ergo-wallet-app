@@ -114,7 +114,7 @@ abstract class SubmitTransactionUiLogic {
                     ergoTxResult = SendTransactionResult(false, errorMsg = signingResult.errorMsg)
                 }
                 notifyUiLocked(false)
-                transactionSubmitted(ergoTxResult, db.transactionDbProvider, preferences)
+                transactionSubmitted(ergoTxResult, db, preferences)
             }
         }
 
@@ -122,7 +122,7 @@ abstract class SubmitTransactionUiLogic {
 
     protected suspend fun transactionSubmitted(
         ergoTxResult: SendTransactionResult,
-        db: TransactionDbProvider,
+        db: IAppDatabase,
         preferences: PreferencesProvider,
         transactionInfo: TransactionInfo? = null
     ) {
@@ -131,7 +131,9 @@ abstract class SubmitTransactionUiLogic {
                 // save submitted transaction to every address
                 val txInfoToSave = (transactionInfo
                     ?: ergoTxResult.sentTransaction?.buildTransactionInfo(
-                        ApiServiceManager.getOrInit(preferences)
+                        ApiServiceManager.getOrInit(preferences),
+                        preferences,
+                        db.tokenDbProvider,
                     ))
 
                 txInfoToSave?.let {
@@ -142,7 +144,7 @@ abstract class SubmitTransactionUiLogic {
                             System.currentTimeMillis(),
                             INCLUSION_HEIGHT_UNCONFIRMED,
                             TX_STATE_SUBMITTED,
-                            db
+                            db.transactionDbProvider,
                         )
                     }
                 }

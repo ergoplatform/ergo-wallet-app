@@ -93,7 +93,6 @@ fun ColdSigningResultLayout(
                 modifier = Modifier.padding(top = defaultPadding * 1.5f)
             )
 
-            // TODO cold wallet save/load functionality
             if (qrCodeData.length > QR_DATA_LENGTH_LOW_RES)
                 IconButton({ lowRes = !lowRes }, Modifier.align(Alignment.TopEnd)) {
                     Icon(Icons.Default.BurstMode, null)

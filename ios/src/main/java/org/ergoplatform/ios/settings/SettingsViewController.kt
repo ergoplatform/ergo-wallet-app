@@ -4,12 +4,14 @@ import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.ios.CrashHandler
 import org.ergoplatform.ios.Preferences
+import org.ergoplatform.ios.api.IosAuthentication
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.settings.SettingsUiLogic
 import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
+import org.robovm.apple.localauthentication.LAContext
 import org.robovm.apple.uikit.*
 
 class SettingsViewController : CoroutineViewController() {
@@ -196,8 +198,25 @@ class SettingsViewController : CoroutineViewController() {
         }
         val button = TextButton(getButtonLabel())
         button.addOnTouchUpInsideListener { _, _ ->
-            preferences.enableAppLock = !preferences.enableAppLock
-            button.setTitle(getButtonLabel(), UIControlState.Normal)
+            IosAuthentication.authenticate(getAppDelegate().texts.get(STRING_BUTTON_UNLOCK),
+                object : IosAuthentication.IosAuthCallback {
+                    override fun onAuthenticationSucceeded(context: LAContext) {
+                        runOnMainThread {
+                            preferences.enableAppLock = !preferences.enableAppLock
+                            button.setTitle(getButtonLabel(), UIControlState.Normal)
+                        }
+                    }
+
+                    override fun onAuthenticationError(error: String) {
+
+                    }
+
+                    override fun onAuthenticationCancelled() {
+
+                    }
+
+                }
+            )
         }
 
         container.addSubview(titleAppLock)

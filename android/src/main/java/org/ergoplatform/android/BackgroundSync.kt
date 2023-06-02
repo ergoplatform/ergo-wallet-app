@@ -10,6 +10,8 @@ import androidx.work.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ergoplatform.WalletStateSyncManager
+import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.mosaik.MosaikNotificationSyncManager
 import org.ergoplatform.utils.LogUtils
 import java.util.concurrent.TimeUnit
 
@@ -27,8 +29,27 @@ class BackgroundSync(appContext: Context, workerParams: WorkerParameters) :
                 )
 
                 if (result == WalletStateSyncManager.RefreshResult.DidSyncHasChange) {
-                    showBalanceChangeNotification(context)
+                    showAppNotification(
+                        context,
+                        NOTIF_CHANNEL_ID_BALANCE,
+                        NOTIF_ID_BALANCE,
+                        context.getString(R.string.desc_balance_notification)
+                    )
                 }
+
+                val newUnread = MosaikNotificationSyncManager.updateMosaikNotifications(
+                    AppDatabase.getInstance(context),
+                    AndroidStringProvider(context),
+                    onlyCheckForNew = true
+                )
+
+                if (newUnread)
+                    showAppNotification(
+                        context,
+                        NOTIF_CHANNEL_ID_DAPPS,
+                        NOTIF_ID_DAPP,
+                        context.getString(R.string.desc_mosaik_app_notification)
+                    )
 
                 Result.success()
             } catch (t: Throwable) {
@@ -38,7 +59,12 @@ class BackgroundSync(appContext: Context, workerParams: WorkerParameters) :
         }
     }
 
-    private fun showBalanceChangeNotification(context: Context) {
+    private fun showAppNotification(
+        context: Context,
+        channelId: String,
+        notificationId: Int,
+        text: String,
+    ) {
         val intent = Intent(context, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         val pendingIntent = PendingIntent.getActivity(
@@ -50,22 +76,24 @@ class BackgroundSync(appContext: Context, workerParams: WorkerParameters) :
         )
 
         val mBuilder: NotificationCompat.Builder = NotificationCompat.Builder(
-            context, NOTIF_CHANNEL_ID_SYNC
+            context, channelId,
         ).setSmallIcon(R.drawable.ic_ergologo)
             .setContentTitle(context.getString(R.string.app_name))
-            .setContentText(context.getString(R.string.desc_balance_notification))
+            .setContentText(text)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         val notificationManager = NotificationManagerCompat.from(context)
         notificationManager.notify(
-            NOTIF_ID_SYNC, mBuilder.build()
+            notificationId, mBuilder.build()
         )
     }
 
     companion object {
-        const val NOTIF_CHANNEL_ID_SYNC = "syncNotif"
-        const val NOTIF_ID_SYNC = 4711
+        const val NOTIF_CHANNEL_ID_BALANCE = "syncNotif"
+        const val NOTIF_CHANNEL_ID_DAPPS = "mosaikAppNotif"
+        const val NOTIF_ID_BALANCE = 4711
+        const val NOTIF_ID_DAPP = 4712
         private const val JOB_TAG = "sync"
 
         fun rescheduleJob(context: Context) {

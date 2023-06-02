@@ -2,9 +2,11 @@ package org.ergoplatform.ios.wallet
 
 import org.ergoplatform.appkit.SecretString
 import org.ergoplatform.ios.ui.*
-import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.STRING_CHECK_CONFIRM_CREATE_WALLET
+import org.ergoplatform.uilogic.STRING_INTRO_CONFIRM_CREATE_WALLET
+import org.ergoplatform.uilogic.STRING_LABEL_CREATE_WALLET
+import org.ergoplatform.uilogic.STRING_LABEL_WORD_CONFIRM_CREATE_WALLET
 import org.ergoplatform.uilogic.wallet.ConfirmCreateWalletUiLogic
-import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.uikit.*
 
@@ -60,16 +62,8 @@ class ConfirmCreateWalletViewController(val mnemonic: SecretString) : ViewContro
             }
         }
 
-        val confirmationCheck = UISwitch(CGRect.Zero())
-        val confirmationText = Body1Label()
-        confirmationText.text = texts.get(STRING_CHECK_CONFIRM_CREATE_WALLET)
-        val confirmationContainer = UIView()
-        confirmationContainer.addSubview(confirmationCheck)
-        confirmationContainer.addSubview(confirmationText)
-        // Fixed width needed on UISwitch, does not support auto layout out of the box...
-        confirmationCheck.leftToSuperview().centerVertical().rightToLeftOf(confirmationText, DEFAULT_MARGIN * 2)
-            .fixedWidth(50.0)
-        confirmationText.topToSuperview().bottomToSuperview().rightToSuperview()
+        val confirmationContainer = UiSwitchWithLabel(texts.get(STRING_CHECK_CONFIRM_CREATE_WALLET))
+        val confirmationCheck = confirmationContainer.switch
 
         val verticalStack = UIStackView(
             NSArray(

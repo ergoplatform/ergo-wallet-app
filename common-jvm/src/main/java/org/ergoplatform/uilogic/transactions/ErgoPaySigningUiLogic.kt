@@ -12,6 +12,7 @@ import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
+import org.ergoplatform.wallet.addresses.findWalletConfigAndAddressIdx
 
 abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     private var isInitialized = false
@@ -39,7 +40,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         request: String,
         walletId: Int,
         derivationIndex: Int,
-        database: WalletDbProvider,
+        database: IAppDatabase,
         prefs: PreferencesProvider,
         texts: StringProvider
     ) {
@@ -52,12 +53,16 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
 
         coroutineScope.launch {
             if (walletId >= 0) {
-                initWallet(database, walletId, derivationIndex)
+                initWallet(database.walletDbProvider, walletId, derivationIndex)
             } else {
                 // if there is only a single wallet configured, we can auto-choose
                 withContext(Dispatchers.IO) {
-                    val allConfigs = database.getAllWalletConfigsSynchronous()
-                    if (allConfigs.size == 1) initWallet(database, allConfigs.first().id, -1)
+                    val allConfigs = database.walletDbProvider.getAllWalletConfigsSynchronous()
+                    if (allConfigs.size == 1) initWallet(
+                        database.walletDbProvider,
+                        allConfigs.first().id,
+                        -1
+                    )
                 }
             }
 
@@ -71,7 +76,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     fun reloadFromDapp(
         prefs: PreferencesProvider,
         texts: StringProvider,
-        database: WalletDbProvider
+        database: IAppDatabase
     ) {
         if (!canReloadFromDapp())
             return
@@ -87,15 +92,15 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         walletId: Int,
         prefs: PreferencesProvider,
         texts: StringProvider,
-        database: WalletDbProvider
+        database: IAppDatabase
     ) {
         if (wallet != null && wallet?.walletConfig?.id != walletId)
             throw IllegalArgumentException("Cannot change wallet id when ui logic already initialized")
 
         coroutineScope.launch {
-            initWallet(database, walletId, -1)
+            initWallet(database.walletDbProvider, walletId, -1)
             if (epsr != null)
-                transitionToNextStep(texts, database)
+                transitionToNextStep(texts, database.walletDbProvider)
             else if (derivedAddress != null) {
                 derivedAddressIdChanged(prefs, texts, database)
             } else {
@@ -112,7 +117,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     fun derivedAddressIdChanged(
         prefs: PreferencesProvider,
         texts: StringProvider,
-        database: WalletDbProvider
+        database: IAppDatabase
     ) {
         addressIdxSet = true
         if (lastRequest != null && epsr == null) {
@@ -139,7 +144,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
         request: String,
         prefs: PreferencesProvider,
         texts: StringProvider,
-        database: WalletDbProvider
+        database: IAppDatabase
     ) {
         // reset if we already have a request
         txId = null
@@ -162,9 +167,15 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                     epsr = getErgoPaySigningRequest(
                         request,
                         wallet?.let { getSigningDerivedAddresses() } ?: emptyList())
-                    transactionInfo = epsr?.buildTransactionInfo(getErgoApiService(prefs))
+                    transactionInfo =
+                        epsr?.buildTransactionInfo(
+                            getErgoApiService(prefs),
+                            prefs,
+                            database.tokenDbProvider,
+                            texts
+                        )
 
-                    transitionToNextStep(texts, database)
+                    transitionToNextStep(texts, database.walletDbProvider)
                 } catch (t: Throwable) {
                     LogUtils.logDebug("ErgoPay", "Error getting signing request", t)
                     lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, t.getMessageOrName())
@@ -192,16 +203,11 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                 // dApp sent info regarding address to use, lets see if we have this address
                 // and load it
                 if (wallet == null) {
-                    val walletDerivedAddress = database.loadWalletAddress(p2pkAddresses.first())
-                    val walletConfig = database.loadWalletByFirstAddress(
-                        walletDerivedAddress?.walletFirstAddress ?: p2pkAddresses.first()
-                    )
-
-                    walletConfig?.let {
+                    findWalletConfigAndAddressIdx(p2pkAddresses.first(), database)?.let {
                         initWallet(
                             database,
-                            walletConfig.id,
-                            walletDerivedAddress?.derivationIndex ?: 0
+                            it.first,
+                            it.second
                         )
                     }
                 }
@@ -267,7 +273,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                     notifyUiLocked(false)
                     transactionSubmitted(
                         ergoTxResult,
-                        db.transactionDbProvider,
+                        db,
                         preferences,
                         transactionInfo
                     )
