@@ -178,7 +178,10 @@ class TransactionInfoViewController(
             textAlignment = NSTextAlignment.Center
             isUserInteractionEnabled = true
             addGestureRecognizer(UILongPressGestureRecognizer {
-                this@TransactionInfoViewController.shareText(text, this)
+                if (it.state == UIGestureRecognizerState.Began) {
+                    HapticFeedback().perform(UIImpactFeedbackStyle.Medium)
+                    this@TransactionInfoViewController.shareText(text, this)
+                }
             })
         }
 
