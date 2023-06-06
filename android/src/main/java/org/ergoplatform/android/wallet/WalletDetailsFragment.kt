@@ -231,7 +231,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
         // tokens
         val tokensList = walletDetailsViewModel.uiLogic.tokensList
-        binding.cardviewTokens.visibility = if (tokensList.isNotEmpty()) View.VISIBLE else View.GONE
+        binding.cardviewTokens.visibility = if (walletDetailsViewModel.uiLogic.hasTokens) View.VISIBLE else View.GONE
         binding.walletTokenNum.text = tokensList.size.toString()
 
         binding.walletTokenEntries.apply {

@@ -4,8 +4,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import org.ergoplatform.ErgoAmount
 import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.ErgoAmount
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.parsePaymentRequest
@@ -19,11 +19,12 @@ import org.ergoplatform.uilogic.STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
 import org.ergoplatform.uilogic.STRING_HINT_READONLY_SIGNING_REQUEST
 import org.ergoplatform.uilogic.STRING_LABEL_ALL_ADDRESSES
 import org.ergoplatform.uilogic.StringProvider
+import org.ergoplatform.uilogic.tokens.FilterTokenListUiLogic
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 import org.ergoplatform.wallet.*
 import org.ergoplatform.wallet.addresses.getAddressLabel
 
-abstract class WalletDetailsUiLogic {
+abstract class WalletDetailsUiLogic: FilterTokenListUiLogic {
     val maxTransactionsToShow = 5
 
     var wallet: Wallet? = null
@@ -32,8 +33,11 @@ abstract class WalletDetailsUiLogic {
         private set
     var walletAddress: WalletAddress? = null
         private set
-    var tokensList: List<WalletToken> = emptyList()
-        private set
+    private var fullTokensList: List<WalletToken> = emptyList()
+    val hasTokens get() = fullTokensList.isNotEmpty()
+    val tokensList
+        get() = fullTokensList.filter { isTokenInFilter(tokenInformation[it.tokenId]) }
+    override val tokenFilterMap: MutableMap<Int, Boolean> = HashMap()
 
     private var tokenInformationJob: Job? = null
     val tokenInformation: HashMap<String, TokenInformation> = HashMap()
@@ -100,7 +104,7 @@ abstract class WalletDetailsUiLogic {
 
     private fun refreshAddress() {
         walletAddress = addressIdx?.let { wallet?.getDerivedAddressEntity(it) }
-        tokensList = (walletAddress?.let { wallet?.getTokensForAddress(it.publicAddress) }
+        fullTokensList = (walletAddress?.let { wallet?.getTokensForAddress(it.publicAddress) }
             ?: wallet?.getTokensForAllAddresses() ?: emptyList()).sortedBy { it.name?.lowercase() }
 
         onDataChanged()
@@ -148,7 +152,7 @@ abstract class WalletDetailsUiLogic {
         tokenInformationJob?.cancel()
 
         // copy to an own list to prevent race conditions
-        val tokensList = this.tokensList.toMutableList()
+        val tokensList = this.fullTokensList.toMutableList()
 
         // start gathering token information
         if (tokensList.isNotEmpty()) {
@@ -257,6 +261,10 @@ abstract class WalletDetailsUiLogic {
 
     private fun getSelectedAddresses(): List<WalletAddress>? {
         return walletAddress?.let { listOf(it) } ?: wallet?.getSortedDerivedAddressesList()
+    }
+
+    override fun onFilterChanged() {
+        onDataChanged()
     }
 
     abstract fun onDataChanged()

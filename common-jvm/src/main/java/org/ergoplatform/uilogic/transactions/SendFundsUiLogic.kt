@@ -16,12 +16,13 @@ import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.tokens.FilterTokenListUiLogic
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.*
 import kotlin.math.max
 
-abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
+abstract class SendFundsUiLogic : SubmitTransactionUiLogic(), FilterTokenListUiLogic {
 
     var receiverAddress: String = ""
         set(value) {
@@ -59,6 +60,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     val tokensAvail: HashMap<String, WalletToken> = HashMap()
     val tokensChosen: HashMap<String, ErgoToken> = HashMap()
     val tokensInfo: HashMap<String, TokenInformation> = HashMap()
+    override val tokenFilterMap: MutableMap<Int, Boolean> = HashMap()
 
     private val paymentRequestWarnings = ArrayList<PaymentRequestWarning>()
 
@@ -399,7 +401,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
      */
     fun getTokensToChooseFrom(): List<WalletToken> {
         return tokensAvail.values.filter {
-            !tokensChosen.containsKey(it.tokenId)
+            !tokensChosen.containsKey(it.tokenId) && isTokenInFilter(tokensInfo[it.tokenId])
         }.sortedBy { it.name?.lowercase() }
     }
 

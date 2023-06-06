@@ -6,10 +6,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
@@ -25,7 +22,10 @@ import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.TransactionResult
-import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.STRING_BUTTON_SEND
+import org.ergoplatform.uilogic.STRING_INFO_PURPOSE_MESSAGE
+import org.ergoplatform.uilogic.STRING_INFO_PURPOSE_MESSAGE_ACCEPT
+import org.ergoplatform.uilogic.STRING_INFO_PURPOSE_MESSAGE_DECLINE
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.uilogic.transactions.SuggestedFee
 import org.ergoplatform.wallet.isReadOnly
@@ -65,6 +65,7 @@ class SendFundsComponent(
     private val editFeeDialogState = mutableStateOf(false)
     private val addressBookDialogState = AddressBookDialogStateHandler()
     private val preparedTransactionInfoState = mutableStateOf<TransactionInfo?>(null)
+    private var tokenFilterRefresh by mutableStateOf(0)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -98,9 +99,8 @@ class SendFundsComponent(
 
             if (addTokenDialogState.value) {
                 ChooseTokenListDialog(
-                    remember { uiLogic.getTokensToChooseFrom() },
-                    uiLogic.tokensInfo,
-                    onTokenChosen = { uiLogic.newTokenChosen(it.tokenId!!) },
+                    uiLogic,
+                    tokenFilterRefresh,
                     onDismissRequest = { addTokenDialogState.value = false }
                 )
             }
@@ -240,6 +240,10 @@ class SendFundsComponent(
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
             showSigningPrompt(signingPrompt)
+        }
+
+        override fun onFilterChanged() {
+            tokenFilterRefresh++
         }
 
         override fun notifyHasPreparedTx(preparedTx: TransactionInfo) {

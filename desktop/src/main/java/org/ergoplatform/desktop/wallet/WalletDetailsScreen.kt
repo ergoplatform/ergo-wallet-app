@@ -2,10 +2,7 @@ package org.ergoplatform.desktop.wallet
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
@@ -22,6 +19,7 @@ import org.ergoplatform.compose.settings.smallIconSize
 import org.ergoplatform.compose.tokens.TokenEntryViewData
 import org.ergoplatform.compose.tokens.TokenLabel
 import org.ergoplatform.desktop.tokens.TokenEntryView
+import org.ergoplatform.desktop.tokens.TokenFilterMenu
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.desktop.wallet.addresses.ChooseAddressButton
 import org.ergoplatform.mosaik.MiddleEllipsisText
@@ -64,7 +62,7 @@ fun WalletDetailsScreen(
 
             ErgoBalanceLayout(uiLogic)
 
-            if (uiLogic.tokensList.isNotEmpty()) {
+            if (uiLogic.hasTokens) {
                 WalletTokensLayout(uiLogic, onTokenClicked)
             }
         }
@@ -225,7 +223,7 @@ private fun WalletTokensLayout(
         Column(Modifier.padding(defaultPadding)) {
 
             // HEADER
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painterResource("ic_tokenlogo.xml"), null,
                     Modifier.requiredSize(mediumIconSize)
@@ -233,15 +231,13 @@ private fun WalletTokensLayout(
 
                 Text(
                     uiLogic.tokensList.size.toString(),
-                    Modifier.padding(start = defaultPadding)
-                        .align(Alignment.CenterVertically),
+                    Modifier.padding(start = defaultPadding),
                     style = labelStyle(LabelStyle.HEADLINE2),
                 )
 
                 Text(
                     Application.texts.getString(STRING_LABEL_TOKENS),
-                    Modifier.padding(start = defaultPadding / 2).weight(1f)
-                        .align(Alignment.CenterVertically),
+                    Modifier.padding(start = defaultPadding / 2).weight(1f),
                     style = labelStyle(LabelStyle.BODY1BOLD),
                     color = uiErgoColor
                 )
@@ -261,9 +257,11 @@ private fun WalletTokensLayout(
                         style = labelStyle(LabelStyle.BODY1),
                         color = MosaikStyleConfig.secondaryLabelColor,
                         modifier = Modifier.align(Alignment.CenterVertically)
-                            .padding(start = defaultPadding / 2),
+                            .padding(horizontal = defaultPadding / 2),
                     )
                 }
+
+                TokenFilterMenu(uiLogic)
             }
 
             // TOKENS LIST
