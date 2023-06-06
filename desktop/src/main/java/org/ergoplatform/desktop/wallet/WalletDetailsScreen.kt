@@ -227,7 +227,7 @@ private fun WalletTokensLayout(
             // HEADER
             Row {
                 Icon(
-                    painterResource("ic_erglogo_filled.xml"), null,
+                    painterResource("ic_tokenlogo.xml"), null,
                     Modifier.requiredSize(mediumIconSize)
                 )
 
