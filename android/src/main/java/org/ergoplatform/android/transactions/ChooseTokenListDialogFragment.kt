@@ -12,6 +12,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.ergoplatform.android.databinding.FragmentChooseTokenDialogBinding
 import org.ergoplatform.android.databinding.FragmentChooseTokenDialogItemBinding
 import org.ergoplatform.android.tokens.ChooseTokenEntryView
+import org.ergoplatform.android.tokens.showTokenFilterPopup
+import org.ergoplatform.persistance.THUMBNAIL_TYPE_NFT_IMG
 import org.ergoplatform.persistance.WalletToken
 
 /**
@@ -41,8 +43,13 @@ class ChooseTokenListDialogFragment : BottomSheetDialogFragment() {
         binding.list.layoutManager =
             LinearLayoutManager(context)
 
-        val tokensToChooseFrom = viewModel.uiLogic.getTokensToChooseFrom()
-        binding.list.adapter = DisplayTokenAdapter(tokensToChooseFrom)
+        binding.list.adapter = DisplayTokenAdapter(viewModel.uiLogic.getTokensToChooseFrom())
+        binding.filterTokens.setOnClickListener {
+            showTokenFilterPopup(viewModel.uiLogic, requireContext(), it) {
+                binding.list.adapter =
+                    DisplayTokenAdapter(viewModel.uiLogic.getTokensToChooseFrom())
+            }
+        }
     }
 
     private fun onChooseToken(tokenId: String) {
