@@ -67,6 +67,8 @@
     <string name="hint_readonly_signing_request">You scanned a signing request, but the wallet is
         set up as read only. Please restore with your mnemonic.</string>
     <string name="error_qr_code_content_unknown">The scanned QR code was not of a known format.</string>
+    <string name="hint_auth_request">It looks like you scanned an auth request, but this is for sending funds.
+        Please scan auth requests from the main screen or wallet details screen.</string>
 
     <!-- add wallet -->
     <string name="menu_add_wallet">Add wallet</string>

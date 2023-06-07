@@ -8,6 +8,7 @@ import org.ergoplatform.*
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
+import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.TokenInformation
@@ -514,18 +515,20 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic(), FilterTokenListUiL
             )
         } else {
             val content = parsePaymentRequest(qrCodeData)
-            content?.let {
+            if (content != null) {
                 setPaymentRequestDataToUi.invoke(
                     content.address,
                     content.amount.let { amount -> if (amount.nanoErgs > 0) amount else null },
                     if (content.description.isNotBlank()) content.description else null
                 )
                 addTokensFromPaymentRequest(content.tokens)
-            } ?: showErrorMessage(
-                stringProvider.getString(
-                    STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
+            } else if (isErgoAuthRequestChunk(qrCodeData) || isErgoAuthRequestUri(qrCodeData)) {
+                showErrorMessage(stringProvider.getString(STRING_HINT_AUTH_REQUEST))
+            } else {
+                showErrorMessage(
+                    stringProvider.getString(STRING_ERROR_QR_CODE_CONTENT_UNKNOWN)
                 )
-            )
+            }
         }
     }
 
