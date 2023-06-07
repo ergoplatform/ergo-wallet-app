@@ -2,15 +2,85 @@ package org.ergoplatform.ios.transactions
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.ergoplatform.*
+import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.ErgoAmount
+import org.ergoplatform.URL_COLD_WALLET_HELP
+import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.addressbook.getAddressLabelFromDatabase
+import org.ergoplatform.getExplorerTxUrl
 import org.ergoplatform.ios.addressbook.ChooseAddressDialogViewController
 import org.ergoplatform.ios.tokens.SendTokenEntryView
-import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.ui.Body1BoldLabel
+import org.ergoplatform.ios.ui.Body1Label
+import org.ergoplatform.ios.ui.CardView
+import org.ergoplatform.ios.ui.CommonButton
+import org.ergoplatform.ios.ui.DEFAULT_MARGIN
+import org.ergoplatform.ios.ui.EndIconTextField
+import org.ergoplatform.ios.ui.ErgoAmountView
+import org.ergoplatform.ios.ui.FONT_SIZE_BODY1
+import org.ergoplatform.ios.ui.FONT_SIZE_HEADLINE1
+import org.ergoplatform.ios.ui.IMAGE_ADDRESSBOOK
+import org.ergoplatform.ios.ui.IMAGE_EDIT_CIRCLE
+import org.ergoplatform.ios.ui.IMAGE_FULL_AMOUNT
+import org.ergoplatform.ios.ui.IMAGE_INFORMATION
+import org.ergoplatform.ios.ui.IMAGE_PLUS
+import org.ergoplatform.ios.ui.IMAGE_QR_SCAN
+import org.ergoplatform.ios.ui.IMAGE_SEND
+import org.ergoplatform.ios.ui.IMAGE_TX_DONE
+import org.ergoplatform.ios.ui.IosStringProvider
+import org.ergoplatform.ios.ui.MAX_WIDTH
+import org.ergoplatform.ios.ui.OnlyNumericInputTextFieldDelegate
+import org.ergoplatform.ios.ui.PrimaryButton
+import org.ergoplatform.ios.ui.ProgressViewController
+import org.ergoplatform.ios.ui.QrScannerViewController
+import org.ergoplatform.ios.ui.TextButton
+import org.ergoplatform.ios.ui.animateLayoutChanges
+import org.ergoplatform.ios.ui.bottomToKeyboard
+import org.ergoplatform.ios.ui.bottomToSuperview
+import org.ergoplatform.ios.ui.buildAddressSelectorView
+import org.ergoplatform.ios.ui.buildSimpleAlertController
+import org.ergoplatform.ios.ui.centerHorizontal
+import org.ergoplatform.ios.ui.centerVertical
+import org.ergoplatform.ios.ui.centerVerticallyTo
+import org.ergoplatform.ios.ui.clearArrangedSubviews
+import org.ergoplatform.ios.ui.edgesToSuperview
+import org.ergoplatform.ios.ui.fixedHeight
+import org.ergoplatform.ios.ui.fixedWidth
+import org.ergoplatform.ios.ui.getAppDelegate
+import org.ergoplatform.ios.ui.getIosSystemImage
+import org.ergoplatform.ios.ui.leftToSuperview
+import org.ergoplatform.ios.ui.openStorePage
+import org.ergoplatform.ios.ui.rightToSuperview
+import org.ergoplatform.ios.ui.runOnMainThread
+import org.ergoplatform.ios.ui.setHiddenAnimated
+import org.ergoplatform.ios.ui.setHtmlText
+import org.ergoplatform.ios.ui.shareText
+import org.ergoplatform.ios.ui.topToSuperview
+import org.ergoplatform.ios.ui.uiColorErgo
+import org.ergoplatform.ios.ui.widthMatchesSuperview
+import org.ergoplatform.ios.ui.wrapInVerticalScrollView
+import org.ergoplatform.ios.ui.wrapWithTrailingImage
 import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.TransactionResult
-import org.ergoplatform.transactions.reduceBoxes
-import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.STRING_BUTTON_DONE
+import org.ergoplatform.uilogic.STRING_BUTTON_PLEASE_RATE
+import org.ergoplatform.uilogic.STRING_BUTTON_SEND
+import org.ergoplatform.uilogic.STRING_DESC_PLEASE_RATE
+import org.ergoplatform.uilogic.STRING_DESC_SEND_FUNDS
+import org.ergoplatform.uilogic.STRING_DESC_TRANSACTION_SEND
+import org.ergoplatform.uilogic.STRING_ERROR_TOKEN_AMOUNT
+import org.ergoplatform.uilogic.STRING_HINT_AMOUNT_CURRENCY
+import org.ergoplatform.uilogic.STRING_HINT_READ_ONLY
+import org.ergoplatform.uilogic.STRING_INFO_PURPOSE_MESSAGE
+import org.ergoplatform.uilogic.STRING_INFO_PURPOSE_MESSAGE_ACCEPT
+import org.ergoplatform.uilogic.STRING_INFO_PURPOSE_MESSAGE_DECLINE
+import org.ergoplatform.uilogic.STRING_LABEL_ADD_TOKEN
+import org.ergoplatform.uilogic.STRING_LABEL_ALL_ADDRESSES
+import org.ergoplatform.uilogic.STRING_LABEL_AMOUNT
+import org.ergoplatform.uilogic.STRING_LABEL_PURPOSE
+import org.ergoplatform.uilogic.STRING_LABEL_RECEIVER_ADDRESS
+import org.ergoplatform.uilogic.STRING_LABEL_SEND_FROM
+import org.ergoplatform.uilogic.STRING_LABEL_WALLET_BALANCE
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.addresses.getAddressLabel
@@ -18,7 +88,33 @@ import org.ergoplatform.wallet.getNumOfAddresses
 import org.ergoplatform.wallet.isReadOnly
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
-import org.robovm.apple.uikit.*
+import org.robovm.apple.uikit.NSTextAlignment
+import org.robovm.apple.uikit.UIAlertAction
+import org.robovm.apple.uikit.UIAlertActionStyle
+import org.robovm.apple.uikit.UIAlertController
+import org.robovm.apple.uikit.UIAlertControllerStyle
+import org.robovm.apple.uikit.UIBarButtonItem
+import org.robovm.apple.uikit.UIBarButtonItemStyle
+import org.robovm.apple.uikit.UIButton
+import org.robovm.apple.uikit.UIColor
+import org.robovm.apple.uikit.UIControlEvents
+import org.robovm.apple.uikit.UIEdgeInsets
+import org.robovm.apple.uikit.UIFont
+import org.robovm.apple.uikit.UIFontWeight
+import org.robovm.apple.uikit.UIImageSymbolScale
+import org.robovm.apple.uikit.UIImageView
+import org.robovm.apple.uikit.UIKeyboardType
+import org.robovm.apple.uikit.UILabel
+import org.robovm.apple.uikit.UILayoutConstraintAxis
+import org.robovm.apple.uikit.UIReturnKeyType
+import org.robovm.apple.uikit.UIStackView
+import org.robovm.apple.uikit.UITapGestureRecognizer
+import org.robovm.apple.uikit.UITextField
+import org.robovm.apple.uikit.UITextFieldDelegateAdapter
+import org.robovm.apple.uikit.UITextFieldViewMode
+import org.robovm.apple.uikit.UITextView
+import org.robovm.apple.uikit.UIView
+import org.robovm.apple.uikit.UIViewContentMode
 
 class SendFundsViewController(
     private val walletId: Int,
@@ -266,9 +362,7 @@ class SendFundsViewController(
         addTokenButton.isHidden = true
         addTokenButton.addOnTouchUpInsideListener { _, _ ->
             presentViewController(
-                ChooseTokenListViewController(
-                    uiLogic.getTokensToChooseFrom(), uiLogic.tokensInfo
-                ) { tokenToAdd ->
+                ChooseTokenListViewController(uiLogic) { tokenToAdd ->
                     tokensUiList.superview.animateLayoutChanges {
                         uiLogic.newTokenChosen(tokenToAdd)
                     }

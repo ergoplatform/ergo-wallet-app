@@ -17,7 +17,6 @@ interface FilterTokenListUiLogic {
         tokenFilterMap[filterType] ?: false
 
     fun isTokenInFilter(ti: TokenInformation?): Boolean {
-        println(tokenFilterMap.values)
         return tokenFilterMap.values.none { it }
                 || ti?.thumbnailType?.let { tokenFilterMap[it] == true } ?: false
     }
