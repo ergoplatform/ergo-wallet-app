@@ -70,6 +70,7 @@ class ReceiveToWalletViewController(private val walletId: Int, derivationIdx: In
             ).apply {
                 isUserInteractionEnabled = true
                 addGestureRecognizer(UITapGestureRecognizer {
+                    HapticFeedback().perform(UIImpactFeedbackStyle.Medium)
                     shareText(addressLabel.text, addressLabel)
                 })
             }

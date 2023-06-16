@@ -8,6 +8,7 @@ import org.ergoplatform.*
 import org.ergoplatform.appkit.Address
 import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
+import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.TokenInformation
@@ -16,12 +17,13 @@ import org.ergoplatform.tokens.TokenInfoManager
 import org.ergoplatform.tokens.isSingularToken
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.tokens.FilterTokenListUiLogic
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.*
 import kotlin.math.max
 
-abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
+abstract class SendFundsUiLogic : SubmitTransactionUiLogic(), FilterTokenListUiLogic {
 
     var receiverAddress: String = ""
         set(value) {
@@ -59,6 +61,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
     val tokensAvail: HashMap<String, WalletToken> = HashMap()
     val tokensChosen: HashMap<String, ErgoToken> = HashMap()
     val tokensInfo: HashMap<String, TokenInformation> = HashMap()
+    override val tokenFilterMap: MutableMap<Int, Boolean> = HashMap()
 
     private val paymentRequestWarnings = ArrayList<PaymentRequestWarning>()
 
@@ -399,7 +402,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
      */
     fun getTokensToChooseFrom(): List<WalletToken> {
         return tokensAvail.values.filter {
-            !tokensChosen.containsKey(it.tokenId)
+            !tokensChosen.containsKey(it.tokenId) && isTokenInFilter(tokensInfo[it.tokenId])
         }.sortedBy { it.name?.lowercase() }
     }
 
@@ -512,18 +515,20 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic() {
             )
         } else {
             val content = parsePaymentRequest(qrCodeData)
-            content?.let {
+            if (content != null) {
                 setPaymentRequestDataToUi.invoke(
                     content.address,
                     content.amount.let { amount -> if (amount.nanoErgs > 0) amount else null },
                     if (content.description.isNotBlank()) content.description else null
                 )
                 addTokensFromPaymentRequest(content.tokens)
-            } ?: showErrorMessage(
-                stringProvider.getString(
-                    STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
+            } else if (isErgoAuthRequestChunk(qrCodeData) || isErgoAuthRequestUri(qrCodeData)) {
+                showErrorMessage(stringProvider.getString(STRING_HINT_AUTH_REQUEST))
+            } else {
+                showErrorMessage(
+                    stringProvider.getString(STRING_ERROR_QR_CODE_CONTENT_UNKNOWN)
                 )
-            )
+            }
         }
     }
 

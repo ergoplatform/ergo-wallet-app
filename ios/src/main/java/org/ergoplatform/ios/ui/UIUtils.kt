@@ -72,6 +72,7 @@ const val IMAGE_STAR_FILLED = "star.fill"
 const val IMAGE_SHARE = "square.and.arrow.up"
 const val IMAGE_PASTE = "doc.on.clipboard"
 val IMAGE_RESET_DATA = if (Foundation.getMajorSystemVersion() >= 14) "leaf.arrow.triangle.circlepath" else "flame"
+const val IMAGE_FILTER = "slider.horizontal.3"
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0

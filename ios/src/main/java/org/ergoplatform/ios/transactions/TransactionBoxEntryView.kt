@@ -23,7 +23,10 @@ class TransactionBoxEntryView(private val vc: UIViewController) : UIView(CGRect.
             numberOfLines = if (numberOfLines == 1L) 10 else 1
         })
         addGestureRecognizer(UILongPressGestureRecognizer {
-            address?.let { vc.shareText(it, this) }
+            if (it.state == UIGestureRecognizerState.Began) {
+                HapticFeedback().perform(UIImpactFeedbackStyle.Medium)
+                address?.let { vc.shareText(it, this) }
+            }
         })
     }
     private val labelErgAmount = Body1BoldLabel().apply {

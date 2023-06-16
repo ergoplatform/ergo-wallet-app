@@ -7,15 +7,80 @@ import kotlinx.coroutines.runBlocking
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.ios.ergoauth.ErgoAuthenticationViewController
+import org.ergoplatform.ios.tokens.TokenFilterButton
 import org.ergoplatform.ios.tokens.TokenInformationViewController
 import org.ergoplatform.ios.tokens.WalletDetailsTokenEntryView
-import org.ergoplatform.ios.transactions.*
-import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.transactions.AddressTransactionEntryView
+import org.ergoplatform.ios.transactions.AddressTransactionsViewController
+import org.ergoplatform.ios.transactions.ColdWalletSigningViewController
+import org.ergoplatform.ios.transactions.ErgoPaySigningViewController
+import org.ergoplatform.ios.transactions.ReceiveToWalletViewController
+import org.ergoplatform.ios.transactions.SendFundsViewController
+import org.ergoplatform.ios.transactions.TransactionInfoViewController
+import org.ergoplatform.ios.ui.Body1BoldLabel
+import org.ergoplatform.ios.ui.Body1Label
+import org.ergoplatform.ios.ui.CardView
+import org.ergoplatform.ios.ui.CoroutineViewController
+import org.ergoplatform.ios.ui.DEFAULT_MARGIN
+import org.ergoplatform.ios.ui.ErgoAmountView
+import org.ergoplatform.ios.ui.FONT_SIZE_HEADLINE1
+import org.ergoplatform.ios.ui.FONT_SIZE_TEXTBUTTON
+import org.ergoplatform.ios.ui.Headline2Label
+import org.ergoplatform.ios.ui.IMAGE_ADDRESS
+import org.ergoplatform.ios.ui.IMAGE_ADDRESS_LIST
+import org.ergoplatform.ios.ui.IMAGE_CHEVRON_DOWN
+import org.ergoplatform.ios.ui.IMAGE_CHEVRON_UP
+import org.ergoplatform.ios.ui.IMAGE_QR_SCAN
+import org.ergoplatform.ios.ui.IMAGE_RECEIVE
+import org.ergoplatform.ios.ui.IMAGE_SEND
+import org.ergoplatform.ios.ui.IMAGE_SETTINGS
+import org.ergoplatform.ios.ui.IMAGE_TRANSACTIONS
+import org.ergoplatform.ios.ui.IosStringProvider
+import org.ergoplatform.ios.ui.MAX_WIDTH
+import org.ergoplatform.ios.ui.QrScannerViewController
+import org.ergoplatform.ios.ui.ThemedLabel
+import org.ergoplatform.ios.ui.animateLayoutChanges
+import org.ergoplatform.ios.ui.bottomToBottomOf
+import org.ergoplatform.ios.ui.bottomToSuperview
+import org.ergoplatform.ios.ui.buildAddressSelectorView
+import org.ergoplatform.ios.ui.buildSimpleAlertController
+import org.ergoplatform.ios.ui.centerInSuperviewWhenSmaller
+import org.ergoplatform.ios.ui.centerVerticallyTo
+import org.ergoplatform.ios.ui.clearArrangedSubviews
+import org.ergoplatform.ios.ui.createHorizontalSeparator
+import org.ergoplatform.ios.ui.edgesToSuperview
+import org.ergoplatform.ios.ui.enforceKeepIntrinsicWidth
+import org.ergoplatform.ios.ui.ergoLogoFilledImage
+import org.ergoplatform.ios.ui.fixedHeight
+import org.ergoplatform.ios.ui.fixedWidth
+import org.ergoplatform.ios.ui.getAppDelegate
+import org.ergoplatform.ios.ui.getIosSystemImage
+import org.ergoplatform.ios.ui.leftToLeftOf
+import org.ergoplatform.ios.ui.leftToRightOf
+import org.ergoplatform.ios.ui.leftToSuperview
+import org.ergoplatform.ios.ui.minHeight
+import org.ergoplatform.ios.ui.rightToLeftOf
+import org.ergoplatform.ios.ui.rightToSuperview
+import org.ergoplatform.ios.ui.runOnMainThread
+import org.ergoplatform.ios.ui.superViewWrapsHeight
+import org.ergoplatform.ios.ui.tokenLogoImage
+import org.ergoplatform.ios.ui.topToBottomOf
+import org.ergoplatform.ios.ui.topToSuperview
+import org.ergoplatform.ios.ui.uiColorErgo
+import org.ergoplatform.ios.ui.widthMatchesSuperview
+import org.ergoplatform.ios.ui.wrapInVerticalScrollView
 import org.ergoplatform.ios.wallet.addresses.WalletAddressesViewController
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.tokens.getTokenErgoValueSum
 import org.ergoplatform.transactions.TransactionListManager
-import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.STRING_LABEL_ERG_AMOUNT
+import org.ergoplatform.uilogic.STRING_LABEL_TOKENS
+import org.ergoplatform.uilogic.STRING_LABEL_UNCONFIRMED
+import org.ergoplatform.uilogic.STRING_TITLE_TRANSACTIONS
+import org.ergoplatform.uilogic.STRING_TITLE_WALLET_ADDRESS
+import org.ergoplatform.uilogic.STRING_TITLE_WALLET_BALANCE
+import org.ergoplatform.uilogic.STRING_TRANSACTIONS_NONE_YET
+import org.ergoplatform.uilogic.STRING_TRANSACTIONS_VIEW_MORE
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 import org.ergoplatform.uilogic.wallet.WalletDetailsUiLogic
 import org.ergoplatform.utils.LogUtils
@@ -23,7 +88,24 @@ import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.utils.formatTokenPriceToString
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
-import org.robovm.apple.uikit.*
+import org.robovm.apple.uikit.NSTextAlignment
+import org.robovm.apple.uikit.UIActivityIndicatorView
+import org.robovm.apple.uikit.UIActivityIndicatorViewStyle
+import org.robovm.apple.uikit.UIBarButtonItem
+import org.robovm.apple.uikit.UIBarButtonItemStyle
+import org.robovm.apple.uikit.UIColor
+import org.robovm.apple.uikit.UIEdgeInsets
+import org.robovm.apple.uikit.UIImageSymbolScale
+import org.robovm.apple.uikit.UIImageView
+import org.robovm.apple.uikit.UILabel
+import org.robovm.apple.uikit.UILayoutConstraintAxis
+import org.robovm.apple.uikit.UIRefreshControl
+import org.robovm.apple.uikit.UIStackView
+import org.robovm.apple.uikit.UIStackViewAlignment
+import org.robovm.apple.uikit.UIStackViewDistribution
+import org.robovm.apple.uikit.UITapGestureRecognizer
+import org.robovm.apple.uikit.UIView
+import org.robovm.apple.uikit.UIViewContentMode
 
 const val WIDTH_ICONS = 40.0
 
@@ -392,6 +474,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         private val expandButton = UIImageView().apply {
             tintColor = UIColor.label()
         }
+        private val filterButton = TokenFilterButton(uiLogic)
         private val tokenValueLabel = Body1Label().apply {
             textColor = UIColor.secondaryLabel()
             numberOfLines = 1
@@ -415,6 +498,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             addSubview(tokenValueLabel)
             addSubview(tokensListStack)
             addSubview(expandButton)
+            addSubview(filterButton)
 
             isUserInteractionEnabled = true
             addGestureRecognizer(UITapGestureRecognizer {
@@ -425,8 +509,11 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
             tokensNumLabel.leftToRightOf(tokenImage, DEFAULT_MARGIN * 2).centerVerticallyTo(tokenImage)
                 .enforceKeepIntrinsicWidth()
             tokensTitle.leftToRightOf(tokensNumLabel, DEFAULT_MARGIN).centerVerticallyTo(tokensNumLabel)
-            expandButton.rightToSuperview(inset = -DEFAULT_MARGIN).leftToRightOf(tokensTitle)
+            expandButton.rightToSuperview(inset = -DEFAULT_MARGIN)
                 .centerVerticallyTo(tokensTitle).enforceKeepIntrinsicWidth()
+            filterButton.rightToLeftOf(expandButton, inset = DEFAULT_MARGIN * 2).centerVerticallyTo(tokensTitle)
+                .leftToRightOf(tokensTitle)
+                .enforceKeepIntrinsicWidth()
             tokensListStack.topToBottomOf(tokenImage).bottomToSuperview()
                 .widthMatchesSuperview(inset = DEFAULT_MARGIN * 2)
             tokenValueLabel.topToBottomOf(tokenImage).leftToLeftOf(tokensNumLabel).rightToSuperview()
@@ -448,7 +535,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
         fun refresh() {
             val tokensList = uiLogic.tokensList
             val infoHashMap = uiLogic.tokenInformation
-            isHidden = tokensList.isEmpty()
+            isHidden = !uiLogic.hasTokens
             tokensNumLabel.text = tokensList.size.toString()
 
             tokensListStack.clearArrangedSubviews()
@@ -492,6 +579,7 @@ class WalletDetailsViewController(private val walletId: Int) : CoroutineViewCont
                 UIImageSymbolScale.Small,
                 20.0
             )
+            filterButton.isHidden = !listExpanded
         }
 
         fun addTokenInfo(tokenInformation: TokenInformation) {
