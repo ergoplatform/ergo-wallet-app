@@ -386,7 +386,7 @@ Temukan bantuan di <a href="https://discord.gg/kj7s7nb">Discord</a> atau <a href
     <string name="button_dark_mode_night">Gelap</string>
     <string name="desc_token_settings">Pengaturan Token dan NFT</string>
     <string name="desc_token_verification">Ergo Wallet memverifikasi keaslian token dengan menggunakan layanan <a href="https://www.tokenjay.app">TokenJay</a>.
-Anda dapat menyetel untuk menggunakan layanan lain di\n\\'Koneksi Node dan API\'.</string>
+      Anda dapat menyetel untuk menggunakan layanan lain di\n\'Koneksi Node dan API\'.</string>
     <string name="desc_expert_settings">Pengaturan Lanjutan</string>
     <string name="button_connection_settings">Koneksi node dan API</string>
     <string name="button_reset_defaults">Default</string>
