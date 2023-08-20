@@ -76,12 +76,12 @@
                         app:layout_constraintHeight_min="100dp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        tools:src="@drawable/ic_ergologo" />
+                        tools:src="@drawable/ic_ergologo"/>
 
                     <ProgressBar
                         android:id="@+id/preview_progress"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="44dp"
+                        android:layout_height="47dp"
                         android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"

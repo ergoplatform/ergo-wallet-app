@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#ff453a</color>
-    <color name="secondary">#FFFFFFFF</color>
-    <color name="textcolor">#FF000000</color>
+    <color name="primary">#ff5555</color>
+    <color name="secondary">#00adbe</color>
+    <color name="textcolor">#FFFFFFFF</color>
     <color name="lightgrey">#888888</color>
     <color name="darkgrey">#BBBBBB</color>
-    <color name="windowbackground">#333333</color>
+    <color name="windowbackground">#600000</color>
     <color name="cardview_background">@color/cardview_dark_background</color>
 </resources>

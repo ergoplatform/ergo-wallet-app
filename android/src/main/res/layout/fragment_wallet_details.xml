@@ -191,6 +191,7 @@
                             android:layout_width="@dimen/medium_icon_size"
                             android:layout_height="@dimen/medium_icon_size"
                             android:contentDescription="@null"
+                            android:src="@drawable/ic_erglogo_filled"
                             app:layout_constraintBottom_toBottomOf="@id/wallet_balance"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="@id/wallet_balance"

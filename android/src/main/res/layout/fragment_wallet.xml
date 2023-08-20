@@ -27,8 +27,8 @@
 
                 <ImageView
                     android:id="@+id/ergo_logo_back"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_ergologo_bg" />
 
@@ -36,7 +36,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_ergologo_sigma" />
+                     />
 
                 <ImageView
                     android:id="@+id/connection_error"

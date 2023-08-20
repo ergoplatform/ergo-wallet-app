@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#ff3b30</color>
+    <color name="primary">#ff5555ff</color>
     <color name="secondary">#FF000000</color>
-    <color name="textcolor">#FFFFFFFF</color>
+    <color name="textcolor">#ffac0e</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="lightgrey">#BBBBBB</color>
+    <color name="lightgrey">#aa6f00</color>
     <color name="windowbackground">#EEEEEE</color>
     <color name="cardview_background">@color/cardview_light_background</color>
-    <color name="darkgrey">#888888</color>
+    <color name="darkgrey">#ffd3ed</color>
 </resources>
