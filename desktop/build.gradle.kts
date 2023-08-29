@@ -57,7 +57,7 @@ compose.desktop {
     }
 }
 
-project.version = "2.4.2304"
+project.version = "2.4.2305"
 
 tasks {
     processResources {
