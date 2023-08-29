@@ -110,7 +110,7 @@ task convertStrings {
         convertFile("it")
         convertFile("tr")
         convertFile("ru")
-        convertFile("id")
+        convertFile("in")
     }
 }
 

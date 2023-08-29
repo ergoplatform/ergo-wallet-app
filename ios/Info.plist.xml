@@ -18,7 +18,7 @@
             <string>tr</string>
             <string>ru</string>
             <string>zh</string>
-            <string>id</string>
+            <string>in</string>
         </array>
         <key>CFBundleIdentifier</key>
         <string>${app.id}</string>
