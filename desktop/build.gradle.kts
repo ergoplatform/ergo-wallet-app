@@ -13,6 +13,13 @@ java {
     sourceSets["main"].java { srcDir(generatedSourceDir) } // add generated source dir to main source set
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
+    }
+}
+
 val osArch = if (project.hasProperty("osarch")) project.property("osarch") as? String else null
 
 dependencies {

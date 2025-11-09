@@ -7,7 +7,7 @@ import org.ergoplatform.SigningSecrets
 import org.ergoplatform.android.R
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.api.AndroidEncryptionManager
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
 import org.ergoplatform.persistance.WalletConfig

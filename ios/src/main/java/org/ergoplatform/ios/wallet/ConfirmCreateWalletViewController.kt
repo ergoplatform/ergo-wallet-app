@@ -1,6 +1,6 @@
 package org.ergoplatform.ios.wallet
 
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_CHECK_CONFIRM_CREATE_WALLET
 import org.ergoplatform.uilogic.STRING_INTRO_CONFIRM_CREATE_WALLET
