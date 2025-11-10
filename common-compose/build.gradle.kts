@@ -1,6 +1,6 @@
 plugins {
     id("kotlin")
-    id("org.jetbrains.compose") version "1.1.0"
+    id("org.jetbrains.compose") version "1.3.1"
 }
 
 val mosaik_version: String by rootProject.extra

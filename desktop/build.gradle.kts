@@ -1,6 +1,6 @@
 plugins {
     id("kotlin")
-    id("org.jetbrains.compose") version "1.1.0"
+    id("org.jetbrains.compose") version "1.3.1"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
@@ -15,7 +15,7 @@ java {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
         freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
     }
 }
@@ -121,7 +121,7 @@ obfuscate.configure {
     injars(tasks.shadowJar)
     outjars(base.libsDirectory.file("ergo-wallet-app-${project.version}_$fileNameOsArch.jar"))
 
-    libraryjars("${compose.desktop.application.javaHome ?: System.getProperty("java.home")}/jmods")
+    libraryjars("${compose.desktop.application.javaHome}/jmods")
 
     configuration(listOf("proguard-rules.pro", "../android/proguard-rules.pro"))
 }
