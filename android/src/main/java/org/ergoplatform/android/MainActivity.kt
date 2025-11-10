@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
             presentUserMessage = {
                 MaterialAlertDialogBuilder(this)
                     .setMessage(it)
-                    .setPositiveButton(R.string.zxing_button_ok, null)
+                    .setPositiveButton(android.R.string.ok, null)
                     .show()
             })
     }

@@ -204,6 +204,8 @@ private fun buildTransactionInfo(
                     it.name = tokenInfo.tokenName
                     it.decimals = tokenInfo.decimals
                 }
+            } else {
+
             }
         }
 

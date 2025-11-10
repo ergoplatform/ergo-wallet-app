@@ -61,7 +61,7 @@ abstract class AbstractAuthenticationFragment : Fragment(), PasswordDialogCallba
     private fun showBiometricPromptError(errorMessage: String) {
         MaterialAlertDialogBuilder(requireContext())
             .setMessage(getString(R.string.error_device_security, errorMessage))
-            .setPositiveButton(R.string.zxing_button_ok, null)
+            .setPositiveButton(android.R.string.ok, null)
             .show()
     }
 

@@ -166,7 +166,7 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     private fun showSecurityErrorSnackbar(t: Throwable) {
         MaterialAlertDialogBuilder(requireContext())
             .setMessage(getString(R.string.error_device_security_save_wallet, t.message))
-            .setPositiveButton(R.string.zxing_button_ok, null)
+            .setPositiveButton(android.R.string.ok, null)
             .show()
     }
 

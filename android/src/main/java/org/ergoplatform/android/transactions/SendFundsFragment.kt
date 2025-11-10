@@ -115,7 +115,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
         viewModel.errorMessageLiveData.observe(viewLifecycleOwner, {
             MaterialAlertDialogBuilder(requireContext())
                 .setMessage(it)
-                .setPositiveButton(R.string.zxing_button_ok, null)
+                .setPositiveButton(android.R.string.ok, null)
                 .show()
         })
         viewModel.txId.observe(viewLifecycleOwner, {
@@ -505,7 +505,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
         viewModel.uiLogic.getPaymentRequestWarnings(AndroidStringProvider(requireContext()))?.let {
             MaterialAlertDialogBuilder(requireContext())
                 .setMessage(it)
-                .setPositiveButton(R.string.zxing_button_ok, null)
+                .setPositiveButton(android.R.string.ok, null)
                 .show()
         }
     }
