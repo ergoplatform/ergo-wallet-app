@@ -7,7 +7,7 @@
          <trust group="com.android.tools.build" name="aapt2"/>
          <trust group="com.android.tools.build" name="aapt2" version="8.2.0-10154469"/>
          <trust group="org.junit" name="junit-bom" version="5.7.2"/>
-         <trust group="org.jetbrains.kotlinx" name="kotlinx-coroutines-bom" version="1.6.0"/>
+         <trust group="org.jetbrains.kotlinx" name="kotlinx-coroutines-bom" version="1.6.1"/>
       </trusted-artifacts>
    </configuration>
    <components>
