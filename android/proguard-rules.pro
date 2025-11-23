@@ -56,6 +56,11 @@
     @com.google.gson.annotations.SerializedName <fields>;
 }
 
+-keep class org.ergoplatform.explorer.client.model.** { *; }
+-keepclasseswithmembers class org.ergoplatform.explorer.client.model.** {
+    <init>(...);
+}
+
 -keep class sigmastate.** { *; }
 -keep class sigma.** { *; }
 -keep class scalan.** { *; }
