@@ -167,26 +167,62 @@ abstract class ErgoAuthUiLogic {
 
                 notifyStateChanged(State.FETCHING_DATA)
 
-                val prefix = PasswordGenerator.generatePassword(20)
-                val suffix = PasswordGenerator.generatePassword(20)
-                val signedMessage =
-                    prefix + ergAuthRequest.signingMessage + ergAuthRequest.requestHost + suffix
-                val signature = ErgoFacade.signMessage(
-                    secrets,
-                    walletAddresses.map { it.derivationIndex },
-                    ergAuthRequest.sigmaBoolean!!,
-                    signedMessage
-                )
-                val ergoAuthResponse = ErgoAuthResponse(signedMessage, signature)
-
-                if (isColdAuth) {
-                    coldSerializedAuthResponse = ergoAuthResponse.toJson()
+                // Handle address generation requests
+                if (ergAuthRequest.isAddressRequest) {
+                    val prefix = PasswordGenerator.generatePassword(20)
+                    val suffix = PasswordGenerator.generatePassword(20)
+                    
+                    // Create a unique signing message for address proof
+                    val addressList = walletAddresses.map { it.publicAddress }
+                    val changeAddress = addressList.first() // Use first address as change address
+                    val signedMessage = prefix + "ADDRESS_REQUEST" + ergAuthRequest.requestHost + suffix
+                    
+                    // Create a simple signature proof - for address requests, we just prove ownership
+                    val signature = ErgoFacade.signMessage(
+                        secrets,
+                        listOf(walletAddresses.first().derivationIndex),
+                        null, // No sigma boolean needed for address requests
+                        signedMessage
+                    )
+                    
+                    val addressResponse = ErgoAuthAddressResponse(
+                        signedMessage = signedMessage,
+                        proof = signature,
+                        changeAddress = changeAddress,
+                        addresses = addressList
+                    )
+                    
+                    if (isColdAuth) {
+                        coldSerializedAuthResponse = addressResponse.toJson()
+                    } else {
+                        postErgoAuthAddressResponse(ergAuthRequest.replyToUrl!!, addressResponse)
+                    }
+                    
+                    lastMessage = null
+                    lastMessageSeverity = MessageSeverity.INFORMATION
                 } else {
-                    postErgoAuthResponse(ergAuthRequest.replyToUrl!!, ergoAuthResponse)
-                }
+                    // Handle regular signing requests
+                    val prefix = PasswordGenerator.generatePassword(20)
+                    val suffix = PasswordGenerator.generatePassword(20)
+                    val signedMessage =
+                        prefix + ergAuthRequest.signingMessage + ergAuthRequest.requestHost + suffix
+                    val signature = ErgoFacade.signMessage(
+                        secrets,
+                        walletAddresses.map { it.derivationIndex },
+                        ergAuthRequest.sigmaBoolean!!,
+                        signedMessage
+                    )
+                    val ergoAuthResponse = ErgoAuthResponse(signedMessage, signature)
 
-                lastMessage = null
-                lastMessageSeverity = MessageSeverity.INFORMATION
+                    if (isColdAuth) {
+                        coldSerializedAuthResponse = ergoAuthResponse.toJson()
+                    } else {
+                        postErgoAuthResponse(ergAuthRequest.replyToUrl!!, ergoAuthResponse)
+                    }
+
+                    lastMessage = null
+                    lastMessageSeverity = MessageSeverity.INFORMATION
+                }
 
             } catch (t: Throwable) {
                 LogUtils.logDebug(this.javaClass.simpleName, "Error on auth response", t)
@@ -199,6 +235,17 @@ abstract class ErgoAuthUiLogic {
     }
 
     fun getAuthenticationMessage(texts: StringProvider): String {
+        // Handle address generation requests
+        if (ergAuthRequest?.isAddressRequest == true) {
+            val secConnectionMessage = ergAuthRequest?.sslValidatedBy?.let {
+                texts.getString(STRING_DESC_SECURE_CONN, it)
+            } ?: texts.getString(STRING_DESC_INSECURE_CONN)
+            return texts.getString(
+                STRING_INTRO_ADDRESS_REQUEST,
+                ergAuthRequest!!.requestHost + " ($secConnectionMessage)"
+            )
+        }
+        
         val authReason =
             getErgoAuthReason(ergAuthRequest!!) ?: texts.getString(STRING_ERROR_NO_AUTH_REASON)
         val introMessage = if (isColdAuth) {

@@ -300,12 +300,14 @@
     <string name="warning_burning_tokens">The transaction burns tokens.</string>
 
     <!-- Ergo Auth Signing -->
+    <string name="intro_address_request">dApp on %1$s\nrequests your wallet address.\n\nProvide your address only when you trust this dApp.</string>
     <string name="intro_auth_request">dApp on %1$s\nrequests your authentication to\n%2$s.\n\nAuthenticate
         only when you consent to this.</string>
     <string name="intro_cold_auth_request">A dApp requests your authentication to\n%1$s.\n\nAuthenticate
         only when you consent to this.</string>
     <string name="desc_secure_conn">Secure connection verified by %1$s</string>
     <string name="desc_insecure_conn">Secure connection failed!</string>
+    <string name="desc_select_address">Select the wallet address to share with this dApp</string>
     <string name="title_ergo_auth_request">Authentication Request</string>
     <string name="error_no_auth_reason">(no reason provided)</string>
     <string name="button_authenticate">Authenticate</string>
