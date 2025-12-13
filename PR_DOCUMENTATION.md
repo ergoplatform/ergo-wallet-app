@@ -1,11 +1,11 @@
 # Pull Request
 
 ## Title
-Fix dependency issues, prepare F-Droid submission, and add ErgoAuth address generation feature
+Fix critical issues: dependency, JVM launch, F-Droid prep, and add ErgoAuth address generation
 
 ## Description
 
-This PR addresses multiple important improvements to the Ergo Wallet application:
+This PR addresses multiple critical improvements and bug fixes to the Ergo Wallet application:
 
 ### 1. Dependency Fix (Issue #181)
 - **Problem**: Build failure due to unavailable `ergo-appkit` SNAPSHOT version (`develop-44fddd97-SNAPSHOT`)
@@ -16,7 +16,24 @@ This PR addresses multiple important improvements to the Ergo Wallet application
   - Verified checksums in `gradle/verification-metadata.xml` (already present)
 - **Documentation**: Created `DEPENDENCY_FIX.md` with detailed fix information
 
-### 2. Scala Version Upgrade Strategy
+### 2. Windows Desktop JVM Launch Fix (CRITICAL)
+- **Problem**: Windows x64 desktop application fails to start with "Failed to launch JVM" error
+- **Impact**: Users unable to access wallets on Windows after upgrade
+- **Solution**: Added JVM options to jpackage configuration
+- **Changes**:
+  - Added memory allocation: `-Xmx2048m` (max heap) and `-Xms512m` (initial heap)
+  - Added module access flags for Java 11+ compatibility:
+    - `--add-opens=java.desktop/sun.awt=ALL-UNNAMED`
+    - `--add-opens=java.desktop/java.awt.peer=ALL-UNNAMED`
+  - Updated `desktop/deploy/jpackage.cfg`
+- **Benefits**:
+  - Proper JVM initialization on Windows
+  - Adequate memory for blockchain operations
+  - Native UI components work correctly
+  - Prevents OutOfMemoryErrors during wallet sync
+- **Documentation**: Created `WINDOWS_JVM_LAUNCH_FIX.md`
+
+### 3. Scala Version Upgrade Strategy
 - **Problem**: RoboVM dependency locks project to Scala 2.11, blocking ecosystem upgrades
 - **Solution**: Comprehensive documentation of 5 upgrade paths
 - **Documentation**: Created `SCALA_UPGRADE_SOLUTION.md` detailing:
@@ -27,7 +44,7 @@ This PR addresses multiple important improvements to the Ergo Wallet application
   5. Maintain dual build system
 - **Impact**: Provides roadmap for future modernization efforts
 
-### 3. F-Droid Submission Preparation
+### 4. F-Droid Submission Preparation
 - **Goal**: Make Ergo Wallet available on F-Droid with reproducible builds
 - **Changes**:
   - Added F-Droid metadata: `metadata/org.ergoplatform.android.yml`
@@ -40,7 +57,7 @@ This PR addresses multiple important improvements to the Ergo Wallet application
   - `FDROID_QUICKSTART.md` - Quick reference
 - **Status**: Ready for F-Droid submission
 
-### 4. ErgoAuth Address Generation Feature (NEW)
+### 5. ErgoAuth Address Generation Feature (NEW)
 - **Problem**: Poor UX requiring manual address entry or double QR scanning
 - **Solution**: New `generateAddressLink` feature for ErgoAuth protocol
 - **URI Pattern**: `ergoauth://${url}/generateAddressLink/${uuid}/#P2PK_ADDRESS#/`
@@ -57,7 +74,7 @@ This PR addresses multiple important improvements to the Ergo Wallet application
   - New response class: `ErgoAuthAddressResponse`
 - **Documentation**: Created `ERGOAUTH_ADDRESS_GENERATION.md`
 
-### 5. Error Message Handling Documentation
+### 6. Error Message Handling Documentation
 - **Documentation**: Created `ERROR_MESSAGE_FIX.md` for PictoPy project reference
 - **Note**: This is documentation for a separate project, not changes to Ergo Wallet
 
@@ -67,6 +84,14 @@ This PR addresses multiple important improvements to the Ergo Wallet application
 - [x] Project builds successfully with new dependency
 - [x] All existing functionality works as expected
 - [x] Verification metadata matches
+
+### Windows JVM Launch Fix
+- [ ] Test fresh installation on Windows 10
+- [ ] Test fresh installation on Windows 11
+- [ ] Verify application launches without JVM errors
+- [ ] Test wallet operations after launch
+- [ ] Verify memory allocation is adequate
+- [ ] Test with bundled JRE
 
 ### F-Droid Preparation
 - [x] Build scripts execute successfully
@@ -86,6 +111,9 @@ This PR addresses multiple important improvements to the Ergo Wallet application
 - `common-jvm/build.gradle` - Updated ergo-appkit to 5.0.0
 - `build.gradle` - Removed Snapshots repository
 
+### Desktop Windows Fix
+- `desktop/deploy/jpackage.cfg` - Added JVM options for Windows launcher
+
 ### F-Droid Submission
 - `metadata/org.ergoplatform.android.yml` - F-Droid app metadata
 - `fastlane/metadata/android/en-US/*` - App store listings
@@ -102,6 +130,7 @@ This PR addresses multiple important improvements to the Ergo Wallet application
 
 ### Documentation
 - `DEPENDENCY_FIX.md` - Dependency fix details
+- `WINDOWS_JVM_LAUNCH_FIX.md` - Windows JVM launch fix
 - `SCALA_UPGRADE_SOLUTION.md` - Scala upgrade strategies
 - `FDROID_SUBMISSION.md` - F-Droid submission guide
 - `FDROID_QUICKSTART.md` - Quick F-Droid reference
@@ -123,6 +152,9 @@ This PR addresses multiple important improvements to the Ergo Wallet application
 Fixes #181 - ergo-appkit dependency issue
 
 ## Additional Notes
+
+### Critical Bug Fix
+The Windows JVM launch fix is critical and addresses a blocking issue that prevents Windows users from accessing their wallets after upgrading. This should be prioritized for immediate release.
 
 ### Migration Path
 The Scala upgrade documentation provides clear paths for future modernization when RoboVM replacement becomes necessary. This is a strategic planning document for long-term maintenance.
