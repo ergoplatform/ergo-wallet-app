@@ -8,10 +8,30 @@ import org.ergoplatform.transactions.MessageSeverity
 import org.ergoplatform.utils.*
 
 private const val uriSchemePrefix = "ergoauth://"
+private const val generateAddressLinkPath = "/generateAddressLink/"
+private const val placeHolderP2Pk = "#P2PK_ADDRESS#"
 
 fun isErgoAuthRequestUri(uri: String) = uri.startsWith(uriSchemePrefix, true)
 
+fun isErgoAuthAddressRequest(uri: String) = 
+    isErgoAuthRequestUri(uri) && uri.contains(generateAddressLinkPath, true) && 
+    uri.contains(placeHolderP2Pk)
+
 fun getErgoAuthRequest(ergoAuthUrl: String): ErgoAuthRequest {
+    // Check if this is an address generation request
+    if (isErgoAuthAddressRequest(ergoAuthUrl)) {
+        return ErgoAuthRequest(
+            signingMessage = null,
+            sigmaBoolean = null,
+            userMessage = null,
+            messageSeverity = MessageSeverity.NONE,
+            replyToUrl = ergoAuthUrl, // Use the full URL for address requests
+            requestHost = extractHostFromAuthUrl(ergoAuthUrl),
+            sslValidatedBy = null,
+            isAddressRequest = true
+        )
+    }
+    
     val httpProtocolPrefix = if (isLocalOrIpAddress(ergoAuthUrl)) "http://" else "https://"
     val httpUrl = httpProtocolPrefix + ergoAuthUrl.substringAfter(uriSchemePrefix)
 
@@ -32,8 +52,19 @@ fun getErgoAuthRequest(ergoAuthUrl: String): ErgoAuthRequest {
     return ergoAuthRequest
 }
 
+private fun extractHostFromAuthUrl(ergoAuthUrl: String): String {
+    val httpProtocolPrefix = if (isLocalOrIpAddress(ergoAuthUrl)) "http://" else "https://"
+    return httpProtocolPrefix + ergoAuthUrl.substringAfter(uriSchemePrefix).substringBefore('/')
+}
+
 fun postErgoAuthResponse(replyUrl: String, authResponse: ErgoAuthResponse) {
     httpPostStringSync(replyUrl, authResponse.toJson(), MEDIA_TYPE_JSON)
+}
+
+fun postErgoAuthAddressResponse(replyUrl: String, authResponse: ErgoAuthAddressResponse) {
+    // For address requests, replace placeholder with actual address in URL
+    val finalUrl = replyUrl.replace(placeHolderP2Pk, authResponse.changeAddress)
+    httpPostStringSync(finalUrl, authResponse.toJson(), MEDIA_TYPE_JSON)
 }
 
 private const val JSON_KEY_SIGMABOOLEAN = "sigmaBoolean"
@@ -71,7 +102,8 @@ data class ErgoAuthRequest(
     val messageSeverity: MessageSeverity = MessageSeverity.NONE,
     val replyToUrl: String? = null,
     val requestHost: String,
-    val sslValidatedBy: String?
+    val sslValidatedBy: String?,
+    val isAddressRequest: Boolean = false
 ) {
     fun toColdAuthRequest(): String {
         val gson = GsonBuilder().disableHtmlEscaping().create()
@@ -102,6 +134,8 @@ fun getErgoAuthReason(ergoAuthRequest: ErgoAuthRequest): String? {
 
 private const val JSON_KEY_PROOF = "proof"
 private const val JSON_KEY_SIGNEDMESSAGE = "signedMessage"
+private const val JSON_KEY_CHANGEADDRESS = "changeAddress"
+private const val JSON_KEY_ADDRESSES = "addresses"
 
 data class ErgoAuthResponse(
     val signedMessage: String,
@@ -123,5 +157,23 @@ data class ErgoAuthResponse(
                 Base64Coder.decode(jsonTree.get(JSON_KEY_PROOF).asString, false)
             )
         }
+    }
+}
+
+data class ErgoAuthAddressResponse(
+    val signedMessage: String,
+    val proof: ByteArray,
+    val changeAddress: String,
+    val addresses: List<String>
+) {
+    fun toJson(): String {
+        val gson = GsonBuilder().disableHtmlEscaping().create()
+        val root = JsonObject()
+        root.addProperty(JSON_KEY_SIGNEDMESSAGE, signedMessage)
+        root.addProperty(JSON_KEY_PROOF, String(Base64Coder.encode(proof)))
+        root.addProperty(JSON_KEY_CHANGEADDRESS, changeAddress)
+        val addressesArray = gson.toJsonTree(addresses).asJsonArray
+        root.add(JSON_KEY_ADDRESSES, addressesArray)
+        return gson.toJson(root)
     }
 }

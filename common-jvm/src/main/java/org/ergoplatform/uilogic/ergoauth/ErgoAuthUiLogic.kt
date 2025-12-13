@@ -113,6 +113,15 @@ abstract class ErgoAuthUiLogic {
     }
 
     private fun onAuthRequestAvailable(ergoAuthRequest: ErgoAuthRequest, texts: StringProvider) {
+        // Check if this is an address generation request
+        if (ergoAuthRequest.isAddressRequest) {
+            ergAuthRequest = ergoAuthRequest
+            lastMessage = texts.getString(STRING_DESC_SELECT_ADDRESS)
+            lastMessageSeverity = MessageSeverity.INFORMATION
+            notifyStateChanged(State.WAIT_FOR_AUTH)
+            return
+        }
+        
         if (ergoAuthRequest.sigmaBoolean == null || ergoAuthRequest.signingMessage == null
             || ergoAuthRequest.replyToUrl == null && !isColdAuth
         ) {
