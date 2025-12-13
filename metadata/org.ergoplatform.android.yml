@@ -1,0 +1,71 @@
+Categories:
+  - Money
+License: Apache-2.0
+AuthorName: Ergo Platform
+AuthorEmail: team@ergoplatform.org
+AuthorWebSite: https://ergoplatform.org
+WebSite: https://ergoplatform.org
+SourceCode: https://github.com/ergoplatform/ergo-wallet-app
+IssueTracker: https://github.com/ergoplatform/ergo-wallet-app/issues
+Changelog: https://github.com/ergoplatform/ergo-wallet-app/releases
+
+AutoName: Ergo Wallet
+Description: |-
+    Official Ergo Wallet App - Your secure gateway to the Ergo blockchain.
+    
+    Features:
+    * Generate new wallets or restore existing wallets (compatible with Yoroi and Ergo node)
+    * Add read-only wallets to watch balances without exposing secrets
+    * Lightweight client - no full blockchain sync needed
+    * Request payments via QR code or shareable links
+    * Send payments manually or by scanning QR codes
+    * Display and send tokens and NFTs
+    * Password-encrypted or biometric-protected storage
+    * Multi-wallet support with configurable fiat currency comparison
+    * Cold wallet support for enhanced security
+    * ErgoPay protocol support
+    * ErgoAuth authentication support
+    
+    Security & Privacy:
+    * Your private keys never leave your device
+    * All secrets stored encrypted
+    * Open source - fully auditable code
+    * No analytics or tracking
+    * Reproducible builds
+    
+    Ergo is a resilient, open-source blockchain platform designed for developing 
+    efficient, secure, and user-friendly decentralized applications. Built on 
+    research-backed principles with advanced cryptographic features.
+
+RepoType: git
+Repo: https://github.com/ergoplatform/ergo-wallet-app
+
+Builds:
+  - versionName: 2.4.2305
+    versionCode: 2305
+    commit: v2.4.2305
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - ergomainnet
+    output: build/outputs/apk/ergomainnet/release/android-ergomainnet-release-unsigned.apk
+    prebuild:
+      - sdkmanager 'platforms;android-33' 'build-tools;33.0.1'
+    scanignore:
+      - gradle/verification-metadata.xml
+    scandelete:
+      - ios
+      - desktop
+    rm:
+      - ios/**/*
+      - desktop/**/*
+    build:
+      - gradle assembleErgomainnetRelease
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 2.4.2305
+CurrentVersionCode: 2305

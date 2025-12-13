@@ -1,0 +1,4 @@
+• Improved wallet security
+• Enhanced transaction handling
+• Bug fixes and performance improvements
+• UI/UX enhancements

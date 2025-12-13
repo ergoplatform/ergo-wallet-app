@@ -6,6 +6,7 @@ Official Ergo Wallet App ([official announcement](https://ergoplatform.org/en/bl
 
 <a href="https://play.google.com/store/apps/details?id=org.ergoplatform.android"><img alt="Get it on Google Play" src="https://user-images.githubusercontent.com/11427267/75923897-483f3b00-5e66-11ea-8ec7-e86887afea51.png"></a>
 <a href="https://apps.apple.com/app/terminus-wallet-ergo/id1643137927"><img alt="Download App Store" src="https://user-images.githubusercontent.com/11427267/75923896-47a6a480-5e66-11ea-87c1-3ec73ebcf7a5.png"></a>
+<a href="https://f-droid.org/packages/org.ergoplatform.android"><img alt="Get it on F-Droid" src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75"></a>
 
 Desktop downloads on [releases page](https://github.com/ergoplatform/ergo-wallet-app/releases).
 

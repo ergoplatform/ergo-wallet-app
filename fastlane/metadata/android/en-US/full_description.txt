@@ -1,0 +1,30 @@
+Official Ergo Wallet App - Your secure gateway to the Ergo blockchain
+
+Features:
+• Generate new wallets or restore existing wallets (compatible with Yoroi and Ergo node)
+• Add read-only wallets to watch balances without exposing secrets
+• Lightweight client - no full blockchain sync needed
+• Request payments via QR code or shareable links
+• Send payments manually or by scanning QR codes
+• Display and send tokens and NFTs
+• Password-encrypted or biometric-protected storage
+• Multi-wallet support with configurable fiat currency comparison
+• Cold wallet support for enhanced security
+• ErgoPay protocol support
+• ErgoAuth authentication support
+
+Security & Privacy:
+• Your private keys never leave your device
+• All secrets stored encrypted
+• Open source - fully auditable code
+• No analytics or tracking
+• Reproducible builds
+
+Ergo is a resilient, open-source blockchain platform designed for developing efficient, secure, and user-friendly decentralized applications. Built on research-backed principles with advanced cryptographic features like Sigma Protocols.
+
+Minimum Requirements:
+• Android 7.0 or higher
+
+Source Code: https://github.com/ergoplatform/ergo-wallet-app
+Website: https://ergoplatform.org
+Discord: https://discord.gg/kj7s7nb
