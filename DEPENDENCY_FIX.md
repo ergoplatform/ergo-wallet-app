@@ -57,6 +57,66 @@ The project uses Gradle's dependency verification feature via `gradle/verificati
 
 This means **no additional verification metadata updates are required**.
 
+## Alternative Solution (Using JitPack)
+
+If you prefer to use JitPack or if Maven Central has issues, here's an alternative approach:
+
+### Step 1: Update Dependency Format
+
+**File:** `common-jvm/build.gradle`
+
+```gradle
+api('com.github.ergoplatform:ergo-appkit:5.0.4') {
+    exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
+    exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
+    exclude group: 'com.google.guava', module: 'guava'
+}
+```
+
+**Note:** JitPack uses a different group ID format:
+- Maven Central: `org.ergoplatform:ergo-appkit_2.11:5.0.0`
+- JitPack: `com.github.ergoplatform:ergo-appkit:5.0.4`
+
+### Step 2: Update Verification Metadata
+
+Since JitPack builds have different checksums, you'll need to update the verification metadata:
+
+```bash
+# Generate new verification metadata for JitPack version
+./gradlew --write-verification-metadata sha256 help
+
+# Or trust the specific artifact
+./gradlew build --dependency-verification lenient
+```
+
+### Step 3: Verify JitPack Repository Exists
+
+Ensure `build.gradle` contains JitPack repository (already present):
+```gradle
+allprojects {
+    repositories {
+        google()
+        mavenLocal()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }  // ← Required for JitPack
+    }
+}
+```
+
+### Pros and Cons
+
+**Maven Central (Current Solution)**
+- ✅ No verification metadata changes needed
+- ✅ Official stable releases
+- ✅ Better compatibility with existing setup
+- ❌ May have older versions
+
+**JitPack Alternative**
+- ✅ Can access more recent versions
+- ✅ Direct GitHub releases
+- ❌ Requires verification metadata update
+- ❌ Different artifact naming convention
+
 ## Testing the Fix
 
 ### Option 1: Test Dependency Resolution
