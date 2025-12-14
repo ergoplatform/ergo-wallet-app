@@ -282,6 +282,10 @@
     <string name="button_reset_defaults">Значения по умолчанию</string>
     <string name="label_explorer_api_url">URL-адрес API проводника</string>
     <string name="label_node_url">URL узла (ноды)</string>
+    <string name="check_prefer_node">Предпочитать API Проводника узлов</string>
+    <string name="check_prefer_node_blockchain">Предпочитать Blockchain API узла</string>
+    <string name="label_node_blockchain_api">Blockchain API включен</string>
+    <string name="label_node_explorer_api">API Проводника включен</string>
     <string name="label_token_verification_url">URL-адрес службы проверки токенов</string>
     <string name="button_show_debug_info">Отображение отладочной информации</string>
     <string name="label_ipfs_http_gateway">HTTP-шлюз IPFS</string>

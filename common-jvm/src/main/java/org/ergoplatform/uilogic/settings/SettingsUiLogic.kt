@@ -104,6 +104,23 @@ class SettingsUiLogic {
                     val restApiUrl: String? = nodeInfo.restApiUrl
                     val isExplorer: Boolean = nodeInfo.isExplorer
                     val requestEnded = System.currentTimeMillis()
+                    
+                    // Test blockchain API availability
+                    val hasBlockchainApi = try {
+                        val blockchainApi = ApiServiceManager.buildRetrofitForNode(
+                            org.ergoplatform.restapi.client.BlockchainApi::class.java,
+                            nodeApiUrl
+                        )
+                        // Test with a known mainnet address or testnet address
+                        val testAddress = if (isErgoMainNet) 
+                            "9f4QF8AD1nQ3nJahQVkMj8hFSVVzVom77b52JU7EW71Zexg6N8v"
+                        else
+                            "3WwjaerfwDqYvFwvPRVJBJx7YXt3NP6WCLtq9Y9kxS8aNdC4P7vU"
+                        val balanceResponse = blockchainApi.getBalance(testAddress).execute()
+                        balanceResponse.isSuccessful || balanceResponse.code() == 404
+                    } catch (t: Throwable) {
+                        false
+                    }
 
                     NodeInfo(
                         restApiUrl ?: nodeUrl,
@@ -111,6 +128,7 @@ class SettingsUiLogic {
                         requestEnded - requestStarted,
                         blockHeight ?: 0L,
                         isExplorer,
+                        hasBlockchainApi
                     )
                 } catch (t: Throwable) {
                     NodeInfo(nodeUrl, connected = false)
@@ -131,6 +149,7 @@ class SettingsUiLogic {
         val responseTime: Long = 0,
         val blockHeight: Long = 0,
         val isExplorer: Boolean = false,
+        val hasBlockchainApi: Boolean = false,
     )
 
     sealed class CheckNodesState {

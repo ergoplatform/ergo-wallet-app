@@ -187,5 +187,9 @@
     <string name="button_reset_defaults">Por defecto</string>
     <string name="label_explorer_api_url">URL de la API del explorador</string>
     <string name="label_node_url">URL del nodo</string>
+    <string name="check_prefer_node">Preferir API de explorador de nodo</string>
+    <string name="check_prefer_node_blockchain">Preferir API de Blockchain de nodo</string>
+    <string name="label_node_blockchain_api">API de Blockchain habilitada</string>
+    <string name="label_node_explorer_api">API de explorador habilitada</string>
     <string name="button_show_debug_info">Mostrar información de depuración</string>
 </resources>

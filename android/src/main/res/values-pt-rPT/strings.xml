@@ -304,6 +304,10 @@
     <string name="button_reset_defaults">Repor Padrão</string>
     <string name="label_explorer_api_url">Explorador API URL</string>
     <string name="label_node_url">Node URL</string>
+    <string name="check_prefer_node">Preferir API do Explorer de nós</string>
+    <string name="check_prefer_node_blockchain">Preferir API de Blockchain de nós</string>
+    <string name="label_node_blockchain_api">API de Blockchain ativada</string>
+    <string name="label_node_explorer_api">API do Explorer ativada</string>
     <string name="label_token_verification_url">Serviço de verificação de tokens URL</string>
     <string name="button_show_debug_info">Visualizar informação para debug</string>
     <string name="label_ipfs_http_gateway">Gateway IPFS HTTP</string>

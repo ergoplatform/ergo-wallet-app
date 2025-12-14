@@ -188,5 +188,9 @@
     <string name="button_reset_defaults">Padrões</string>
     <string name="label_explorer_api_url">URL da API do explorador</string>
     <string name="label_node_url">URL do nó</string>
+    <string name="check_prefer_node">Preferir API do Explorer de nós</string>
+    <string name="check_prefer_node_blockchain">Preferir API de Blockchain de nós</string>
+    <string name="label_node_blockchain_api">API de Blockchain habilitada</string>
+    <string name="label_node_explorer_api">API do Explorer habilitada</string>
     <string name="button_show_debug_info">Mostrar informações de debug</string>
 </resources>
