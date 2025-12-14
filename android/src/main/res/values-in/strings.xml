@@ -179,6 +179,8 @@ Tidak ada jaminan bahwa transaksi pembatalan baru akan dieksekusi terlebih dahul
     <string name="label_wallet_main_address">Alamat utama</string>
     <string name="label_wallet_address_derived">Alamat turunan %1$s</string>
     <string name="label_wallet_token_balance">%1$s token</string>
+    <string name="label_last_sync">Sinkronisasi terakhir: %1$s</string>
+    <string name="label_never_synced">Belum pernah disinkronkan</string>
     <string name="desc_wallet_addresses">Dompet dapat memiliki beberapa alamat publik yang berasal dari alamat utama.</string>
     <string name="button_add_address">Tambahkan alamat</string>
     <string name="button_add_addresses">Tambahkan %1$d alamat</string>

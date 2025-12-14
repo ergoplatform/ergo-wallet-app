@@ -162,8 +162,8 @@
     <string name="title_wallet_address">Показать содержимое для</string>
     <string name="label_wallet_main_address">Основной адрес</string>
     <string name="label_wallet_address_derived">Производный адрес %1$s</string>
-    <string name="label_wallet_token_balance">%1$s токены</string>
-    <string name="desc_wallet_addresses">Кошелек может иметь несколько общедоступных адресов, производных от основного адреса.</string>
+    <string name="label_wallet_token_balance">%1$s токены</string>    <string name="label_last_sync">Последняя синхронизация: %1$s</string>
+    <string name="label_never_synced">Никогда не синхронизировалось</string>    <string name="desc_wallet_addresses">Кошелек может иметь несколько общедоступных адресов, производных от основного адреса.</string>
     <string name="button_add_address">Добавить адрес</string>
     <string name="button_add_addresses">Добавить %1$d адресов</string>
     <string name="desc_wallet_addr_label">Установите описательную метку (видимую только вам) для этого адреса:</string>

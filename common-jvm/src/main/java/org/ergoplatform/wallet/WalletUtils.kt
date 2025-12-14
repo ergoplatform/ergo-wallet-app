@@ -97,4 +97,22 @@ fun Wallet.isReadOnly(): Boolean = walletConfig.isReadOnly()
 
 fun Wallet.isMultisig(): Boolean = walletConfig.isMultisig()
 
+/**
+ * Returns the oldest (minimum) lastSyncTime from all wallet addresses
+ * Used to display when the wallet was last fully synced
+ * @return timestamp in milliseconds, or null if no addresses have been synced
+ */
+fun Wallet.getOldestSyncTime(): Long? {
+    return state.mapNotNull { it.lastSyncTime }.minOrNull()
+}
+
+/**
+ * Returns the lastSyncTime for a specific address
+ * @param address the public address to check
+ * @return timestamp in milliseconds, or null if address hasn't been synced
+ */
+fun Wallet.getSyncTimeForAddress(address: String): Long? {
+    return getStateForAddress(address)?.lastSyncTime
+}
+
 fun List<Wallet>.sortedByDisplayName(): List<Wallet> = sortedBy { it.walletConfig.displayName?.lowercase() }

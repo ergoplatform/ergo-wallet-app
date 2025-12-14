@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS `wallet_states` (
     `wallet_first_address` TEXT NOT NULL,
     `balance` INTEGER,
     `unconfirmed_balance` INTEGER,
+    `last_sync_time` INTEGER,
     PRIMARY KEY(`public_address`)
 );
 
@@ -12,7 +13,7 @@ CREATE INDEX IF NOT EXISTS `index_wallet_states_wallet_first_address` ON `wallet
 
 insertOrReplace:
 INSERT OR REPLACE INTO `wallet_states` (
-    `public_address`,`wallet_first_address`,`balance`,`unconfirmed_balance`
+    `public_address`,`wallet_first_address`,`balance`,`unconfirmed_balance`,`last_sync_time`
 ) VALUES ?;
 
 loadWalletStates:

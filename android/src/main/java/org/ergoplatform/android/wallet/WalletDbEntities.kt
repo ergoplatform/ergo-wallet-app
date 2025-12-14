@@ -54,15 +54,16 @@ data class WalletStateDbEntity(
     @PrimaryKey @ColumnInfo(name = "public_address") val publicAddress: String,
     @ColumnInfo(name = "wallet_first_address") val walletFirstAddress: String,
     val balance: Long?,
-    @ColumnInfo(name = "unconfirmed_balance") val unconfirmedBalance: Long?
+    @ColumnInfo(name = "unconfirmed_balance") val unconfirmedBalance: Long?,
+    @ColumnInfo(name = "last_sync_time") val lastSyncTime: Long? = null
 ) {
     fun toModel(): WalletState {
-        return WalletState(publicAddress, walletFirstAddress, balance, unconfirmedBalance)
+        return WalletState(publicAddress, walletFirstAddress, balance, unconfirmedBalance, lastSyncTime)
     }
 }
 
 fun WalletState.toDbEntity(): WalletStateDbEntity {
-    return WalletStateDbEntity(publicAddress, walletFirstAddress, balance, unconfirmedBalance)
+    return WalletStateDbEntity(publicAddress, walletFirstAddress, balance, unconfirmedBalance, lastSyncTime)
 }
 
 @Entity(tableName = "wallet_tokens", indices = [Index("wallet_first_address"), Index("public_address")])

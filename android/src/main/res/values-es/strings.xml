@@ -120,6 +120,8 @@
     <string name="label_wallet_main_address">Direccion principal</string>
     <string name="label_wallet_address_derived">Dirección derivada %1$s</string>
     <string name="label_wallet_token_balance">%1$s tokens</string>
+    <string name="label_last_sync">Última sincronización: %1$s</string>
+    <string name="label_never_synced">Nunca sincronizado</string>
     <string name="desc_wallet_addresses">Una billetera puede tener varias direcciones públicas derivadas de la dirección principal.</string>
     <string name="button_add_address">Añadir dirección</string>
     <string name="button_add_addresses">Añadir %1$d direcciones</string>

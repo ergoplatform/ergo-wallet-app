@@ -19,6 +19,8 @@ import org.ergoplatform.uilogic.STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
 import org.ergoplatform.uilogic.STRING_HINT_READONLY_SIGNING_REQUEST
 import org.ergoplatform.uilogic.STRING_LABEL_ALL_ADDRESSES
 import org.ergoplatform.uilogic.STRING_LABEL_BALANCE_HIDDEN
+import org.ergoplatform.uilogic.STRING_LABEL_LAST_SYNC
+import org.ergoplatform.uilogic.STRING_LABEL_NEVER_SYNCED
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.uilogic.tokens.FilterTokenListUiLogic
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens

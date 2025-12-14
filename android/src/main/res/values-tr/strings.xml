@@ -131,8 +131,8 @@
     <string name="title_wallet_address">Şunun için içeriği göster</string>
     <string name="label_wallet_main_address">Ana adres</string>
     <string name="label_wallet_address_derived">Türetilmiş adres %1$s</string>
-    <string name="label_wallet_token_balance">%1$s tokens</string>
-    <string name="desc_wallet_addresses">Bir cüzdanın ana adresten türetilmiş birden çok genel adresi olabilir.</string>
+    <string name="label_wallet_token_balance">%1$s tokens</string>    <string name="label_last_sync">Son senkronizasyon: %1$s</string>
+    <string name="label_never_synced">Hiç senkronize edilmedi</string>    <string name="desc_wallet_addresses">Bir cüzdanın ana adresten türetilmiş birden çok genel adresi olabilir.</string>
     <string name="button_add_address">Adres ekle</string>
     <string name="button_add_addresses">%1$d adres eklendi.</string>
     <string name="desc_wallet_addr_label">Bu adres için açıklayıcı bir etiket (yalnızca sizin tarafınızdan görülebilir) ayarlayın:</string>

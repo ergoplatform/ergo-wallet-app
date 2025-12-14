@@ -35,11 +35,11 @@ fun WalletConfig.toDbEntity(): Wallet_configs {
 }
 
 fun WalletState.toDbEntity(): Wallet_states {
-    return Wallet_states(publicAddress, walletFirstAddress, balance, unconfirmedBalance)
+    return Wallet_states(publicAddress, walletFirstAddress, balance, unconfirmedBalance, lastSyncTime)
 }
 
 fun Wallet_states.toModel(): WalletState {
-    return WalletState(public_address, wallet_first_address, balance, unconfirmed_balance)
+    return WalletState(public_address, wallet_first_address, balance, unconfirmed_balance, last_sync_time)
 }
 
 fun Wallet_addresses.toModel(): WalletAddress {

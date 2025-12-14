@@ -240,8 +240,17 @@ class WalletStateSyncManager {
                 )
 
                 val refreshAddresses =
-                    if (addressFilter.isEmpty()) allAddresses
-                    else allAddresses.filter { addressFilter.contains(it.publicAddress) }
+                    if (addressFilter.isEmpty()) {
+                        // Sort addresses by last sync time ascending (oldest first)
+                        allAddresses.sortedBy { addr ->
+                            walletState.getStateForAddress(addr.publicAddress)?.lastSyncTime ?: 0
+                        }
+                    } else {
+                        allAddresses.filter { addressFilter.contains(it.publicAddress) }
+                            .sortedBy { addr ->
+                                walletState.getStateForAddress(addr.publicAddress)?.lastSyncTime ?: 0
+                            }
+                    }
 
                 refreshAddresses.forEach { address ->
                     LogUtils.logDebug(
@@ -283,7 +292,8 @@ class WalletStateSyncManager {
                             address.publicAddress,
                             address.walletFirstAddress,
                             balanceInfo.confirmed?.nanoErgs,
-                            balanceInfo.unconfirmed?.nanoErgs
+                            balanceInfo.unconfirmed?.nanoErgs,
+                            System.currentTimeMillis()  // Record successful sync time
                         )
                         hasChange = hasChange || (newState.balance ?: 0) !=
                                 (walletState.getStateForAddress(address.publicAddress)?.balance

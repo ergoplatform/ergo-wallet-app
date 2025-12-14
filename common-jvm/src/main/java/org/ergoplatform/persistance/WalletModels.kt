@@ -30,7 +30,8 @@ data class WalletState(
     val publicAddress: String,
     val walletFirstAddress: String,
     val balance: Long?,
-    val unconfirmedBalance: Long?
+    val unconfirmedBalance: Long?,
+    val lastSyncTime: Long? = null
 )
 
 data class WalletToken(

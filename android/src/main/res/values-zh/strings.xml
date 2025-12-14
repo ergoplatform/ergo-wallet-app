@@ -121,6 +121,8 @@
     <string name="label_wallet_main_address">主地址</string>
     <string name="label_wallet_address_derived">派生地址 %1$s</string>
     <string name="label_wallet_token_balance">%1$s 代币</string>
+    <string name="label_last_sync">上次同步: %1$s</string>
+    <string name="label_never_synced">从未同步</string>
     <string name="desc_wallet_addresses">一个钱包可以有多个从主地址派生的公共地址。</string>
     <string name="button_add_address">添加地址</string>
     <string name="button_add_addresses">添加 %1$d 地址</string>

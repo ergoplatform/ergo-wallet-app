@@ -121,6 +121,8 @@
     <string name="label_wallet_main_address">Endereço principal</string>
     <string name="label_wallet_address_derived">Endereço derivado %1$s</string>
     <string name="label_wallet_token_balance">%1$s tokens</string>
+    <string name="label_last_sync">Última sincronização: %1$s</string>
+    <string name="label_never_synced">Nunca sincronizado</string>
     <string name="desc_wallet_addresses">Uma carteira pode ter múltiplos endereços públicos derivados a partir do endereço principal.</string>
     <string name="button_add_address">Adicionar endereço</string>
     <string name="button_add_addresses">Adicionar %1$d endereços</string>
