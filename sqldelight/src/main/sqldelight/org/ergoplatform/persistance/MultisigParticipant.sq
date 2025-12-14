@@ -1,0 +1,26 @@
+import java.lang.Boolean;
+
+CREATE TABLE IF NOT EXISTS `multisig_participants` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `wallet_first_address` TEXT NOT NULL,
+    `address` TEXT NOT NULL,
+    `order_index` INTEGER AS Int NOT NULL,
+    `has_signed` INTEGER AS Boolean NOT NULL DEFAULT 0
+);
+
+selectAll:
+SELECT * FROM multisig_participants;
+
+loadByWalletAddress:
+SELECT * FROM multisig_participants WHERE wallet_first_address = ? ORDER BY order_index;
+
+insertOrReplace:
+INSERT OR REPLACE INTO `multisig_participants` (
+    `id`,`wallet_first_address`,`address`,`order_index`,`has_signed`
+) VALUES (?,?,?,?,?);
+
+deleteByWalletAddress:
+DELETE FROM multisig_participants WHERE wallet_first_address = ?;
+
+updateSignatureStatus:
+UPDATE multisig_participants SET has_signed = ? WHERE id = ?;

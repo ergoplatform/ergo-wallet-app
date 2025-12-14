@@ -204,5 +204,9 @@
     <string name="button_reset_defaults">Varsayılanlar</string>
     <string name="label_explorer_api_url">Explorer API URL\'si</string>
     <string name="label_node_url">Düğüm URL\'si</string>
+    <string name="check_prefer_node">Düğüm Gezgini API\'sini Tercih Et</string>
+    <string name="check_prefer_node_blockchain">Düğüm Blockchain API\'sini Tercih Et</string>
+    <string name="label_node_blockchain_api">Blockchain API\'si etkin</string>
+    <string name="label_node_explorer_api">Gezgin API\'si etkin</string>
     <string name="button_show_debug_info">Hata ayıklama bilgilerini göster</string>
 </resources>

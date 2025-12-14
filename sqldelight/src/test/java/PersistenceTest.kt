@@ -28,7 +28,8 @@ class PersistenceTest {
                     0,
                     null,
                     false,
-                    null
+                    null,
+                    WALLET_TYPE_P2PK
                 )
             )
         }
@@ -39,7 +40,7 @@ class PersistenceTest {
         runBlocking {
             try {
                 database.withTransaction {
-                    database.insertWalletConfig(WalletConfig(0, "Test2", "x9x", 0, null, false, null))
+                    database.insertWalletConfig(WalletConfig(0, "Test2", "x9x", 0, null, false, null, WALLET_TYPE_P2PK))
 
                     val entities = database.getAllWalletConfigsSynchronous()
                     println(entities.toString())
@@ -78,7 +79,8 @@ class PersistenceTest {
                     0,
                     null,
                     false,
-                    null
+                    null,
+                    WALLET_TYPE_P2PK
                 )
             )
             delay(500)
@@ -92,7 +94,8 @@ class PersistenceTest {
                         0,
                         null,
                         false,
-                        null
+                        null,
+                        WALLET_TYPE_P2PK
                     )
                 )
                 database.insertWalletConfig(
@@ -103,7 +106,8 @@ class PersistenceTest {
                         0,
                         null,
                         false,
-                        null
+                        null,
+                        WALLET_TYPE_P2PK
                     )
                 )
 
@@ -123,7 +127,8 @@ class PersistenceTest {
                     0,
                     null,
                     false,
-                    null
+                    null,
+                    WALLET_TYPE_P2PK
                 )
             )
 
@@ -149,7 +154,7 @@ class PersistenceTest {
         whenever(prefs.prefExplorerApiUrl).thenReturn(getDefaultExplorerApiUrl())
 
         runBlocking {
-            db.walletDbProvider.insertWalletConfig(WalletConfig(0, "Test2", "3Wwxnaem5ojTfp91qfLw3Y4Sr7ZWVcLPvYSzTsZ4LKGcoxujbxd3", 0, null, false, null))
+            db.walletDbProvider.insertWalletConfig(WalletConfig(0, "Test2", "3Wwxnaem5ojTfp91qfLw3Y4Sr7ZWVcLPvYSzTsZ4LKGcoxujbxd3", 0, null, false, null, WALLET_TYPE_P2PK))
             WalletStateSyncManager.getInstance()
                 .refreshByUser(prefs, db, texts, rescheduleRefreshJob = null)
             delay(10000)

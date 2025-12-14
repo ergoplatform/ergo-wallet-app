@@ -184,5 +184,9 @@
     <string name="button_reset_defaults">默认值</string>
     <string name="label_explorer_api_url">浏览器 API URL</string>
     <string name="label_node_url">节点 URL</string>
+    <string name="check_prefer_node">首选节点浏览器 API</string>
+    <string name="check_prefer_node_blockchain">首选节点区块链 API</string>
+    <string name="label_node_blockchain_api">区块链 API 已启用</string>
+    <string name="label_node_explorer_api">浏览器 API 已启用</string>
     <string name="button_show_debug_info">显示调试信息</string>
 </resources>

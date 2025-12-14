@@ -43,8 +43,10 @@ import org.ergoplatform.persistance.*
         MosaikAppDbEntity::class,
         MosaikHostDbEntity::class,
         AddressBookEntryEntity::class,
+        MultisigTransactionDbEntity::class,
+        MultisigParticipantDbEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase(), IAppDatabase {
@@ -77,6 +79,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 .addMigrations(MIGRATION_7_8)
                 .addMigrations(MIGRATION_8_9)
                 .addMigrations(MIGRATION_9_10)
+                .addMigrations(MIGRATION_10_11)
                 .build()
         }
 
@@ -156,6 +159,21 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 database.execSQL("ALTER TABLE mosaik_app ADD COLUMN `lastNotificationMs` INTEGER NOT NULL DEFAULT 0")
                 database.execSQL("ALTER TABLE mosaik_app ADD COLUMN `nextNotificationCheck` INTEGER NOT NULL DEFAULT 0")
                 database.execSQL("ALTER TABLE mosaik_app ADD COLUMN `notificationUnread` INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Add wallet_type column to wallet_configs
+                database.execSQL("ALTER TABLE wallet_configs ADD COLUMN `wallet_type` INTEGER NOT NULL DEFAULT 0")
+                
+                // Create multisig_transactions table
+                database.execSQL("CREATE TABLE IF NOT EXISTS `multisig_transactions` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wallet_first_address` TEXT NOT NULL, `tx_id` TEXT, `state` INTEGER NOT NULL, `memo` TEXT, `last_json` TEXT, `depends_on_tx_ids` TEXT, `last_change` INTEGER NOT NULL)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_multisig_transactions_wallet_first_address` ON `multisig_transactions` (`wallet_first_address`)")
+                
+                // Create multisig_participants table
+                database.execSQL("CREATE TABLE IF NOT EXISTS `multisig_participants` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wallet_first_address` TEXT NOT NULL, `address` TEXT NOT NULL, `order_index` INTEGER NOT NULL, `has_signed` INTEGER NOT NULL DEFAULT 0)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_multisig_participants_wallet_first_address` ON `multisig_participants` (`wallet_first_address`)")
             }
         }
 

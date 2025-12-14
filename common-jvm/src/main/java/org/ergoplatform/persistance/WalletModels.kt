@@ -7,6 +7,13 @@ const val ENC_TYPE_PASSWORD = 1
  */
 const val ENC_TYPE_DEVICE = 2
 
+/**
+ * Wallet types for different wallet configurations
+ */
+const val WALLET_TYPE_P2PK = 0
+const val WALLET_TYPE_READ_ONLY = 1
+const val WALLET_TYPE_MULTISIG = 2
+
 data class WalletConfig(
     val id: Int,
     val displayName: String?,
@@ -15,6 +22,7 @@ data class WalletConfig(
     val secretStorage: ByteArray?,
     val unfoldTokens: Boolean = false,
     val extendedPublicKey: String?,
+    val walletType: Int = WALLET_TYPE_P2PK,
 )
 
 data class WalletState(
@@ -43,6 +51,40 @@ data class WalletAddress(
 ) : IAddressWithLabel {
     override val address: String get() = publicAddress
 }
+
+/**
+ * Multisig transaction state constants
+ */
+const val MULTISIG_TX_STATE_DRAFT = 0
+const val MULTISIG_TX_STATE_WAITING_SIGNATURES = 1
+const val MULTISIG_TX_STATE_READY = 2
+const val MULTISIG_TX_STATE_SUBMITTED = 3
+const val MULTISIG_TX_STATE_INVALID = 4
+
+/**
+ * Multisig transaction record
+ */
+data class MultisigTransaction(
+    val id: Long,
+    val walletFirstAddress: String,
+    val txId: String?,
+    val state: Int,
+    val memo: String?,
+    val lastJson: String?,
+    val dependsOnTxIds: String?,  // comma-separated list of tx ids
+    val lastChange: Long
+)
+
+/**
+ * Multisig wallet participant
+ */
+data class MultisigParticipant(
+    val id: Long,
+    val walletFirstAddress: String,
+    val address: String,
+    val orderIndex: Int,
+    val hasSigned: Boolean = false
+)
 
 data class Wallet(
     val walletConfig: WalletConfig,

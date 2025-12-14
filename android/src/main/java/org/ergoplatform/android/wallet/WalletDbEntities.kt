@@ -16,6 +16,7 @@ data class WalletConfigDbEntity(
     @ColumnInfo(name = "secret_storage") val secretStorage: ByteArray?,
     @ColumnInfo(name = "unfold_tokens") val unfoldTokens: Boolean = false,
     @ColumnInfo(name = "xpubkey") val extendedPublicKey: String? = null,
+    @ColumnInfo(name = "wallet_type") val walletType: Int = WALLET_TYPE_P2PK,
 ) {
     fun toModel(): WalletConfig {
         return WalletConfig(
@@ -25,7 +26,8 @@ data class WalletConfigDbEntity(
             encryptionType,
             secretStorage,
             unfoldTokens,
-            extendedPublicKey
+            extendedPublicKey,
+            walletType
         )
     }
 }
@@ -38,7 +40,8 @@ fun WalletConfig.toDbEntity(): WalletConfigDbEntity {
         encryptionType,
         secretStorage,
         unfoldTokens,
-        extendedPublicKey
+        extendedPublicKey,
+        walletType
     )
 }
 
@@ -142,4 +145,45 @@ data class WalletDbEntity(
             tokens.map { it.toModel() },
             addresses.map { it.toModel() })
     }
+}
+
+@Entity(tableName = "multisig_transactions", indices = [Index("wallet_first_address")])
+data class MultisigTransactionDbEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long,
+    @ColumnInfo(name = "wallet_first_address") val walletFirstAddress: String,
+    @ColumnInfo(name = "tx_id") val txId: String?,
+    val state: Int,
+    val memo: String?,
+    @ColumnInfo(name = "last_json") val lastJson: String?,
+    @ColumnInfo(name = "depends_on_tx_ids") val dependsOnTxIds: String?,
+    @ColumnInfo(name = "last_change") val lastChange: Long
+) {
+    fun toModel(): MultisigTransaction {
+        return MultisigTransaction(id, walletFirstAddress, txId, state, memo, lastJson, dependsOnTxIds, lastChange)
+    }
+}
+
+fun MultisigTransaction.toDbEntity(): MultisigTransactionDbEntity {
+    return MultisigTransactionDbEntity(
+        id, walletFirstAddress, txId, state, memo, lastJson, dependsOnTxIds, lastChange
+    )
+}
+
+@Entity(tableName = "multisig_participants", indices = [Index("wallet_first_address")])
+data class MultisigParticipantDbEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long,
+    @ColumnInfo(name = "wallet_first_address") val walletFirstAddress: String,
+    val address: String,
+    @ColumnInfo(name = "order_index") val orderIndex: Int,
+    @ColumnInfo(name = "has_signed") val hasSigned: Boolean = false
+) {
+    fun toModel(): MultisigParticipant {
+        return MultisigParticipant(id, walletFirstAddress, address, orderIndex, hasSigned)
+    }
+}
+
+fun MultisigParticipant.toDbEntity(): MultisigParticipantDbEntity {
+    return MultisigParticipantDbEntity(
+        id, walletFirstAddress, address, orderIndex, hasSigned
+    )
 }
