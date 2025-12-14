@@ -1,8 +1,5 @@
 <resources>
     <string name="title_transactions">Transacções</string>
-    <string name="title_transactions_filter">Filtrar transacções</string>
-    <string name="label_transactions_filter_all">Todas as transacções</string>
-    <string name="label_transactions_filter_erg_only">Apenas ERG</string>
     <string name="title_wallets">Carteiras</string>
     <string name="title_settings">Definições</string>
 
@@ -12,8 +9,6 @@
     <string name="label_password">Password</string>
     <string name="label_password_confirm">Confirmar password</string>
     <string name="err_password_confirm">As passwords introduzidas não coincidem</string>
-    <string name="desc_show_password">Mostrar password</string>
-    <string name="desc_hide_password">Ocultar password</string>
     <string name="button_done">Terminado.</string>
     <string name="button_apply">Aplicado.</string>
     <string name="button_copy">Copiar</string>
@@ -49,9 +44,6 @@
 
     <!-- Wallet -->
     <string name="label_tokens">tokens</string>
-    <string name="label_regular_tokens">Tokens</string>
-    <string name="label_nfts">NFTs</string>
-    <string name="label_audio_nfts">NFTs de Áudio</string>
     <string name="label_more_tokens">mais tokens</string>
     <string name="label_unnamed_token">(token desconhecido)</string>
     <string name="label_unconfirmed">não confirmado</string>
@@ -123,12 +115,6 @@
     <string name="device_enc_security_pass">Password, PIN ou padrão</string>
     <string name="device_enc_security_biometric_strong">Biométrica com forte segurança</string>
     <string name="device_enc_security_biometric_weak">Biométrica, Classe 2</string>
-    <string name="warning_device_security_change">⚠️ Aviso: Alterar as definições de autenticação do seu dispositivo (biométrica, PIN, palavra-passe) pode causar perda de acesso à sua carteira. Certifique-se de que tem a sua frase mnemónica guardada com segurança.</string>
-    
-    <!-- Storage rent info -->
-    <string name="title_storage_rent_info">Renda de Armazenamento Activada</string>
-    <string name="desc_storage_rent_info">A renda de armazenamento está agora activa na blockchain Ergo. Cada caixa (UTXO) requer uma quantidade mínima de ERG para cobrir os custos de armazenamento ao longo do tempo. Mantenha pelo menos 0.001 ERG por caixa para evitar que os seus fundos fiquem bloqueados. Saiba mais em ergoplatform.org/docs</string>
-    <string name="button_dont_show_again">Não mostrar novamente</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">Configuração da carteira</string>
@@ -170,8 +156,6 @@
     <string name="label_wallet_main_address">Endereço principal</string>
     <string name="label_wallet_address_derived">Endereço derivado %1$s</string>
     <string name="label_wallet_token_balance">%1$s tokens</string>
-    <string name="label_last_sync">Última sincronização: %1$s</string>
-    <string name="label_never_synced">Nunca sincronizado</string>
     <string name="desc_wallet_addresses">Uma carteira pode ter múltiplos endereços públicos derivados do mesmo endereço principal.</string>
     <string name="button_add_address">Adicionar endereço</string>
     <string name="button_add_addresses">Adicionar %1$d endereços</string>
@@ -190,7 +174,6 @@
     <string name="desc_send_funds">Introduza o endereço do destinatário e a quantidade a enviar, ou realizar o scan o código QR.</string>
     <string name="label_send_from">Desde: %1$s</string>
     <string name="label_wallet_balance">Saldo: %1$s ERG</string>
-    <string name="label_balance_hidden">****</string>
     <string name="label_receiver_address">Endereço do destinatário</string>
     <string name="label_scan_qr">Realizar o scan do código QR</string>
     <string name="desc_fee">Taxa: %1$s ERG</string>
@@ -312,11 +295,6 @@
     <string name="button_reset_defaults">Repor Padrão</string>
     <string name="label_explorer_api_url">Explorador API URL</string>
     <string name="label_node_url">Node URL</string>
-    <string name="check_prefer_node">Preferir API do Explorer de nós</string>
-    <string name="check_prefer_node_blockchain">Preferir API de Blockchain de nós</string>
-    <string name="check_hide_balance">Ocultar saldo da carteira</string>
-    <string name="label_node_blockchain_api">API de Blockchain ativada</string>
-    <string name="label_node_explorer_api">API do Explorer ativada</string>
     <string name="label_token_verification_url">Serviço de verificação de tokens URL</string>
     <string name="button_show_debug_info">Visualizar informação para debug</string>
     <string name="label_ipfs_http_gateway">Gateway IPFS HTTP</string>

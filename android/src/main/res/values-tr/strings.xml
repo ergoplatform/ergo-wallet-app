@@ -1,8 +1,5 @@
 <resources>
     <string name="title_transactions">İşlemler</string>
-    <string name="title_transactions_filter">İşlemleri filtrele</string>
-    <string name="label_transactions_filter_all">Tüm işlemler</string>
-    <string name="label_transactions_filter_erg_only">Yalnızca ERG</string>
     <string name="title_wallets">Cüzdanlar</string>
     <string name="title_settings">Ayarlar</string>
 
@@ -12,8 +9,6 @@
     <string name="label_password">Parola</string>
     <string name="label_password_confirm">Parolayı Onaylayın</string>
     <string name="err_password_confirm">Parolayı onaylayın</string>
-    <string name="desc_show_password">Parolayı göster</string>
-    <string name="desc_hide_password">Parolayı gizle</string>
     <string name="button_done">Tamamlandı</string>
     <string name="button_apply">Uygula</string>
     <string name="button_copy">Kopyala</string>
@@ -42,9 +37,6 @@
 
     <!-- Wallet -->
     <string name="label_tokens">token</string>
-    <string name="label_regular_tokens">Tokenler</string>
-    <string name="label_nfts">NFT\'ler</string>
-    <string name="label_audio_nfts">Ses NFT\'leri</string>
     <string name="label_more_tokens">daha fazla token</string>
     <string name="label_unnamed_token">(adsız token)</string>
     <string name="label_unconfirmed">doğrulanmamış</string>
@@ -110,12 +102,6 @@
     <string name="device_enc_security_pass">Şifre, PIN veya desen</string>
     <string name="device_enc_security_biometric_strong">Yüksek güvenlikli biyometrik</string>
     <string name="device_enc_security_biometric_weak">Biyometrik, Sınıf 2</string>
-    <string name="warning_device_security_change">⚠️ Uyarı: Cihazınızın kimlik doğrulama ayarlarını değiştirmek (biyometrik, PIN, şifre) cüzdanınıza erişiminizi kaybetmenize neden olabilir. Anımsatıcı ifadenizin güvenli bir şekilde saklandığından emin olun.</string>
-    
-    <!-- Storage rent info -->
-    <string name="title_storage_rent_info">Depolama Kirası Etkinleştirildi</string>
-    <string name="desc_storage_rent_info">Depolama kirası artık Ergo blockchain\'inde aktif. Her kutu (UTXO), zaman içinde depolama maliyetlerini karşılamak için minimum miktarda ERG gerektirir. Fonlarınızın kilitlenmesini önlemek için kutu başına en az 0.001 ERG bulundurun. Daha fazla bilgi için ergoplatform.org/docs</string>
-    <string name="button_dont_show_again">Bir daha gösterme</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">Cüzdan yapılandırması</string>
@@ -136,8 +122,8 @@
     <string name="title_wallet_address">Şunun için içeriği göster</string>
     <string name="label_wallet_main_address">Ana adres</string>
     <string name="label_wallet_address_derived">Türetilmiş adres %1$s</string>
-    <string name="label_wallet_token_balance">%1$s tokens</string>    <string name="label_last_sync">Son senkronizasyon: %1$s</string>
-    <string name="label_never_synced">Hiç senkronize edilmedi</string>    <string name="desc_wallet_addresses">Bir cüzdanın ana adresten türetilmiş birden çok genel adresi olabilir.</string>
+    <string name="label_wallet_token_balance">%1$s tokens</string>
+    <string name="desc_wallet_addresses">Bir cüzdanın ana adresten türetilmiş birden çok genel adresi olabilir.</string>
     <string name="button_add_address">Adres ekle</string>
     <string name="button_add_addresses">%1$d adres eklendi.</string>
     <string name="desc_wallet_addr_label">Bu adres için açıklayıcı bir etiket (yalnızca sizin tarafınızdan görülebilir) ayarlayın:</string>
@@ -152,7 +138,6 @@
     <string name="desc_send_funds">Gönderilecek alıcı adresini ve miktarını girin veya bir QR kodu tarayın.</string>
     <string name="label_send_from">Kaynak: %1$s</string>
     <string name="label_wallet_balance">Bakiye: %1$s ERG</string>
-    <string name="label_balance_hidden">****</string>
     <string name="label_receiver_address">Alıcı adresi</string>
     <string name="label_scan_qr">QR kodunu tara</string>
     <string name="desc_fee">Komisyon: %1$s ERG</string>
@@ -210,10 +195,5 @@
     <string name="button_reset_defaults">Varsayılanlar</string>
     <string name="label_explorer_api_url">Explorer API URL\'si</string>
     <string name="label_node_url">Düğüm URL\'si</string>
-    <string name="check_prefer_node">Düğüm Gezgini API\'sini Tercih Et</string>
-    <string name="check_prefer_node_blockchain">Düğüm Blockchain API\'sini Tercih Et</string>
-    <string name="check_hide_balance">Cüzdan bakiyesini gizle</string>
-    <string name="label_node_blockchain_api">Blockchain API\'si etkin</string>
-    <string name="label_node_explorer_api">Gezgin API\'si etkin</string>
     <string name="button_show_debug_info">Hata ayıklama bilgilerini göster</string>
 </resources>

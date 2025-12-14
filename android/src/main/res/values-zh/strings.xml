@@ -1,9 +1,6 @@
 <resources>
     <string name="app_name">Ergo钱包</string>
     <string name="title_transactions">交易</string>
-    <string name="title_transactions_filter">筛选交易</string>
-    <string name="label_transactions_filter_all">所有交易</string>
-    <string name="label_transactions_filter_erg_only">仅ERG</string>
     <string name="title_wallets">钱包</string>
     <string name="title_settings">设置</string>
 
@@ -13,8 +10,6 @@
     <string name="label_password">密码</string>
     <string name="label_password_confirm">确认密码</string>
     <string name="err_password_confirm">密码不匹配</string>
-    <string name="desc_show_password">显示密码</string>
-    <string name="desc_hide_password">隐藏密码</string>
     <string name="button_done">完成</string>
     <string name="button_apply">应用</string>
     <string name="button_copy">复制</string>
@@ -41,9 +36,6 @@
 
     <!-- Wallet -->
     <string name="label_tokens">代币</string>
-    <string name="label_regular_tokens">代币</string>
-    <string name="label_nfts">NFT</string>
-    <string name="label_audio_nfts">音频NFT</string>
     <string name="label_more_tokens">更多代币</string>
     <string name="label_unconfirmed">未确认</string>
     <string name="button_receive">接收</string>
@@ -101,12 +93,6 @@
     <string name="device_enc_security_pass">密码、PIN 或图案</string>
     <string name="device_enc_security_biometric_strong">安全性强的生物认证</string>
     <string name="device_enc_security_biometric_weak">生物认证，2 类</string>
-    <string name="warning_device_security_change">⚠️ 警告：更改设备的身份验证设置（生物识别、PIN、密码）可能导致无法访问您的钱包。确保您已安全存储助记词。</string>
-    
-    <!-- Storage rent info -->
-    <string name="title_storage_rent_info">存储租金已激活</string>
-    <string name="desc_storage_rent_info">存储租金现在在 Ergo 区块链上激活。每个盒子（UTXO）都需要最少量的 ERG 来覆盖随时间推移的存储成本。每个盒子至少保留 0.001 ERG 以防止您的资金被锁定。在 ergoplatform.org/docs 了解更多信息</string>
-    <string name="button_dont_show_again">不再显示</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">钱包配置</string>
@@ -126,8 +112,6 @@
     <string name="label_wallet_main_address">主地址</string>
     <string name="label_wallet_address_derived">派生地址 %1$s</string>
     <string name="label_wallet_token_balance">%1$s 代币</string>
-    <string name="label_last_sync">上次同步: %1$s</string>
-    <string name="label_never_synced">从未同步</string>
     <string name="desc_wallet_addresses">一个钱包可以有多个从主地址派生的公共地址。</string>
     <string name="button_add_address">添加地址</string>
     <string name="button_add_addresses">添加 %1$d 地址</string>
@@ -144,7 +128,6 @@
     <string name="desc_send_funds">输入接收方地址和发送金额，或扫描二维码。</string>
     <string name="label_send_from">从：%1$s</string>
     <string name="label_wallet_balance">余额：%1$s ERG</string>
-    <string name="label_balance_hidden">****</string>
     <string name="label_receiver_address">接收方地址</string>
     <string name="label_scan_qr">扫描二维码</string>
     <string name="desc_fee">手续费：%1$s ERG</string>
@@ -192,10 +175,5 @@
     <string name="button_reset_defaults">默认值</string>
     <string name="label_explorer_api_url">浏览器 API URL</string>
     <string name="label_node_url">节点 URL</string>
-    <string name="check_prefer_node">首选节点浏览器 API</string>
-    <string name="check_prefer_node_blockchain">首选节点区块链 API</string>
-    <string name="check_hide_balance">隐藏钱包余额</string>
-    <string name="label_node_blockchain_api">区块链 API 已启用</string>
-    <string name="label_node_explorer_api">浏览器 API 已启用</string>
     <string name="button_show_debug_info">显示调试信息</string>
 </resources>

@@ -1,6 +1,6 @@
 plugins {
     id("kotlin")
-    id("org.jetbrains.compose") version "1.1.0"
+    id("org.jetbrains.compose") version "1.6.11"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
@@ -8,8 +8,8 @@ val generatedDir = "build/generated"
 val generatedSourceDir = "$generatedDir/src/java"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     sourceSets["main"].java { srcDir(generatedSourceDir) } // add generated source dir to main source set
 }
 

@@ -18,9 +18,6 @@ import org.ergoplatform.transactions.isErgoPaySigningRequest
 import org.ergoplatform.uilogic.STRING_ERROR_QR_CODE_CONTENT_UNKNOWN
 import org.ergoplatform.uilogic.STRING_HINT_READONLY_SIGNING_REQUEST
 import org.ergoplatform.uilogic.STRING_LABEL_ALL_ADDRESSES
-import org.ergoplatform.uilogic.STRING_LABEL_BALANCE_HIDDEN
-import org.ergoplatform.uilogic.STRING_LABEL_LAST_SYNC
-import org.ergoplatform.uilogic.STRING_LABEL_NEVER_SYNCED
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.uilogic.tokens.FilterTokenListUiLogic
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
@@ -212,35 +209,6 @@ abstract class WalletDetailsUiLogic: FilterTokenListUiLogic {
     fun getUnconfirmedErgoBalance() = ErgoAmount(
         getAddressState()?.unconfirmedBalance ?: wallet?.getUnconfirmedBalanceForAllAddresses() ?: 0
     )
-
-    /**
-     * Returns true if balance should be hidden for this wallet
-     */
-    fun shouldHideBalance(): Boolean {
-        return wallet?.walletConfig?.hideBalance ?: false
-    }
-
-    /**
-     * Returns the ERG balance formatted for display, respecting the hideBalance setting
-     */
-    fun getDisplayableErgoBalance(texts: StringProvider): String {
-        return if (shouldHideBalance()) {
-            texts.getString(STRING_LABEL_BALANCE_HIDDEN)
-        } else {
-            getErgoBalance().toStringRoundToDecimals()
-        }
-    }
-
-    /**
-     * Returns the unconfirmed ERG balance formatted for display, respecting the hideBalance setting
-     */
-    fun getDisplayableUnconfirmedBalance(texts: StringProvider): String {
-        return if (shouldHideBalance()) {
-            texts.getString(STRING_LABEL_BALANCE_HIDDEN)
-        } else {
-            getUnconfirmedErgoBalance().toStringRoundToDecimals()
-        }
-    }
 
     fun qrCodeScanned(
         qrCodeData: String,

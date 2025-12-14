@@ -13,8 +13,12 @@
 
         <!-- Status bar color. -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">?attr/colorSurface</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">@bool/isLight</item>
+        <item name="android:windowLightNavigationBar">@bool/isLight</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
+        <item name="android:enforceStatusBarContrast" tools:targetApi="q">false</item>
 
         <!-- Buttons -->
         <item name="borderlessButtonStyle">@style/Widget.App.Button.TextButton</item>

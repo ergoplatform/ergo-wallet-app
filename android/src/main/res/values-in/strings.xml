@@ -1,8 +1,5 @@
 <resources>
     <string name="title_transactions">Transaksi</string>
-    <string name="title_transactions_filter">Filter transaksi</string>
-    <string name="label_transactions_filter_all">Semua transaksi</string>
-    <string name="label_transactions_filter_erg_only">Hanya ERG</string>
     <string name="title_wallets">Dompet</string>
     <string name="title_settings">Pengaturan</string>
     <string name="button_unlock">Buka kunci aplikasi</string>
@@ -12,8 +9,8 @@
     <string name="err_password">Panjang kata sandi minimal harus 8 karakter</string>
     <string name="label_password">Kata sandi</string>
     <string name="label_password_confirm">Konfirmasi Kata sandi</string>
-    <string name="err_password_confirm">Kata Sandi tidak cocok</string>    <string name="desc_show_password">Tampilkan kata sandi</string>
-    <string name="desc_hide_password">Sembunyikan kata sandi</string>    <string name="button_done">Selesai</string>
+    <string name="err_password_confirm">Kata Sandi tidak cocok</string>
+    <string name="button_done">Selesai</string>
     <string name="button_apply">Terapkan</string>
     <string name="button_copy">Salin</string>
     <string name="label_copied">Disalin!</string>
@@ -50,9 +47,6 @@ data papan klip. Anda melakukan ini dengan risiko Anda sendiri.</string>
 
     <!-- Wallet -->
     <string name="label_tokens">token</string>
-    <string name="label_regular_tokens">Token</string>
-    <string name="label_nfts">NFT</string>
-    <string name="label_audio_nfts">NFT Audio</string>
     <string name="label_more_tokens">lebih banyak token</string>
     <string name="label_unnamed_token">(token tanpa nama)</string>
     <string name="label_unconfirmed">belum dikonfirmasi</string>
@@ -130,12 +124,6 @@ tentang menyimpan rahasia Anda</a>. Untuk keamanan terbaik, gunakan <a href="htt
     <string name="device_enc_security_pass">Kata sandi, PIN atau pola</string>
     <string name="device_enc_security_biometric_strong">Biometrik dengan keamanan yang kuat</string>
     <string name="device_enc_security_biometric_weak">Biometrik, Kelas 2</string>
-    <string name="warning_device_security_change">⚠️ Peringatan: Mengubah pengaturan autentikasi perangkat Anda (biometrik, PIN, kata sandi) dapat menyebabkan hilangnya akses ke dompet Anda. Pastikan Anda memiliki frasa mnemonic yang tersimpan dengan aman.</string>
-    
-    <!-- Storage rent info -->
-    <string name="title_storage_rent_info">Sewa Penyimpanan Diaktifkan</string>
-    <string name="desc_storage_rent_info">Sewa penyimpanan sekarang aktif di blockchain Ergo. Setiap kotak (UTXO) memerlukan jumlah minimum ERG untuk menutupi biaya penyimpanan dari waktu ke waktu. Simpan setidaknya 0.001 ERG per kotak untuk mencegah dana Anda terkunci. Pelajari lebih lanjut di ergoplatform.org/docs</string>
-    <string name="button_dont_show_again">Jangan tampilkan lagi</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">Konfigurasi dompet</string>
@@ -182,8 +170,6 @@ Tidak ada jaminan bahwa transaksi pembatalan baru akan dieksekusi terlebih dahul
     <string name="label_wallet_main_address">Alamat utama</string>
     <string name="label_wallet_address_derived">Alamat turunan %1$s</string>
     <string name="label_wallet_token_balance">%1$s token</string>
-    <string name="label_last_sync">Sinkronisasi terakhir: %1$s</string>
-    <string name="label_never_synced">Belum pernah disinkronkan</string>
     <string name="desc_wallet_addresses">Dompet dapat memiliki beberapa alamat publik yang berasal dari alamat utama.</string>
     <string name="button_add_address">Tambahkan alamat</string>
     <string name="button_add_addresses">Tambahkan %1$d alamat</string>
@@ -202,7 +188,6 @@ di Jaringan Ergo, dapat menerima pembayaran dan menyimpan saldo. Anda dapat mena
     <string name="desc_send_funds">Masukkan alamat penerima dan jumlah yang akan dikirim, atau pindai kode QR.</string>
     <string name="label_send_from">Dari: %1$s</string>
     <string name="label_wallet_balance">Saldo: %1$s ERG</string>
-    <string name="label_balance_hidden">****</string>
     <string name="label_receiver_address">Alamat penerima</string>
     <string name="label_scan_qr">Pindai kode QR</string>
     <string name="desc_fee">Biaya: %1$s ERG</string>
@@ -403,13 +388,10 @@ Temukan bantuan di <a href="https://discord.gg/kj7s7nb">Discord</a> atau <a href
     <string name="label_explorer_api_url">URL API Penjelajah</string>
     <string name="label_node_url">Node URL</string>
     <string name="check_prefer_node">Lebih suka Node API Penjelajah</string>
-    <string name="check_prefer_node_blockchain">Pilih API Blockchain Node</string>
-    <string name="check_hide_balance">Sembunyikan saldo dompet</string>
     <string name="label_fetching_node_list">Mengambil daftar node yang tersedia…</string>
     <string name="label_checking_node">Memeriksa %1$s…</string>
     <string name="label_node_alternatives">Node alternatif:</string>
     <string name="label_node_info">Blokir %1$s, waktu respons %2$s mdtk</string>
-    <string name="label_node_blockchain_api">API Blockchain diaktifkan</string>
     <string name="label_node_explorer_api">API Penjelajah telah diaktifkan</string>
     <string name="label_node_none_found">Node tidak ditemukan. Silakan periksa koneksi Anda.</string>
     <string name="label_token_verification_url">URL layanan verifikasi token</string>

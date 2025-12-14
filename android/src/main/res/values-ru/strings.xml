@@ -1,8 +1,5 @@
 <resources>
     <string name="title_transactions">Транзакции</string>
-    <string name="title_transactions_filter">Фильтр транзакций</string>
-    <string name="label_transactions_filter_all">Все транзакции</string>
-    <string name="label_transactions_filter_erg_only">Только ERG</string>
     <string name="title_wallets">Кошельки</string>
     <string name="title_settings">Настройки</string>
 
@@ -12,8 +9,6 @@
     <string name="label_password">Пароль</string>
     <string name="label_password_confirm">Подтвердите пароль</string>
     <string name="err_password_confirm">Пароли не совпадают</string>
-    <string name="desc_show_password">Показать пароль</string>
-    <string name="desc_hide_password">Скрыть пароль</string>
     <string name="button_done">Готово</string>
     <string name="button_apply">Применить</string>
     <string name="button_copy">Копировать</string>
@@ -48,9 +43,6 @@
 
     <!-- Wallet -->
     <string name="label_tokens">токены</string>
-    <string name="label_regular_tokens">Токены</string>
-    <string name="label_nfts">NFT</string>
-    <string name="label_audio_nfts">Аудио NFT</string>
     <string name="label_more_tokens">дополнительные токены</string>
     <string name="label_unnamed_token">(безымянный токен)</string>
     <string name="label_unconfirmed">неподтвержденный</string>
@@ -121,12 +113,6 @@
     <string name="device_enc_security_pass">Пароль, PIN-код или шаблон</string>
     <string name="device_enc_security_biometric_strong">Биометрические данные с высокой степенью безопасности</string>
     <string name="device_enc_security_biometric_weak">Биометрические данные 2 класса</string>
-    <string name="warning_device_security_change">⚠️ Предупреждение: Изменение настроек аутентификации вашего устройства (биометрические данные, PIN-код, пароль) может привести к потере доступа к вашему кошельку. Убедитесь, что ваша мнемоническая фраза надежно сохранена.</string>
-    
-    <!-- Storage rent info -->
-    <string name="title_storage_rent_info">Арендная Плата за Хранение Активирована</string>
-    <string name="desc_storage_rent_info">Арендная плата за хранение теперь активна в блокчейне Ergo. Каждый бокс (UTXO) требует минимального количества ERG для покрытия затрат на хранение со временем. Держите не менее 0.001 ERG на бокс, чтобы предотвратить блокировку ваших средств. Узнайте больше на ergoplatform.org/docs</string>
-    <string name="button_dont_show_again">Больше не показывать</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">Конфигурация кошелька</string>
@@ -167,8 +153,8 @@
     <string name="title_wallet_address">Показать содержимое для</string>
     <string name="label_wallet_main_address">Основной адрес</string>
     <string name="label_wallet_address_derived">Производный адрес %1$s</string>
-    <string name="label_wallet_token_balance">%1$s токены</string>    <string name="label_last_sync">Последняя синхронизация: %1$s</string>
-    <string name="label_never_synced">Никогда не синхронизировалось</string>    <string name="desc_wallet_addresses">Кошелек может иметь несколько общедоступных адресов, производных от основного адреса.</string>
+    <string name="label_wallet_token_balance">%1$s токены</string>
+    <string name="desc_wallet_addresses">Кошелек может иметь несколько общедоступных адресов, производных от основного адреса.</string>
     <string name="button_add_address">Добавить адрес</string>
     <string name="button_add_addresses">Добавить %1$d адресов</string>
     <string name="desc_wallet_addr_label">Установите описательную метку (видимую только вам) для этого адреса:</string>
@@ -186,7 +172,6 @@
     <string name="desc_send_funds">Введите адрес получателя и сумму для отправки или отсканируйте QR-код.</string>
     <string name="label_send_from">От: %1$s</string>
     <string name="label_wallet_balance">Баланс: %1$s ERG</string>
-    <string name="label_balance_hidden">****</string>
     <string name="label_receiver_address">Адрес получателя</string>
     <string name="label_scan_qr">Сканировать QR-код</string>
     <string name="desc_fee">Комиссия: %1$s ERG</string>
@@ -288,11 +273,6 @@
     <string name="button_reset_defaults">Значения по умолчанию</string>
     <string name="label_explorer_api_url">URL-адрес API проводника</string>
     <string name="label_node_url">URL узла (ноды)</string>
-    <string name="check_prefer_node">Предпочитать API Проводника узлов</string>
-    <string name="check_prefer_node_blockchain">Предпочитать Blockchain API узла</string>
-    <string name="check_hide_balance">Скрыть баланс кошелька</string>
-    <string name="label_node_blockchain_api">Blockchain API включен</string>
-    <string name="label_node_explorer_api">API Проводника включен</string>
     <string name="label_token_verification_url">URL-адрес службы проверки токенов</string>
     <string name="button_show_debug_info">Отображение отладочной информации</string>
     <string name="label_ipfs_http_gateway">HTTP-шлюз IPFS</string>

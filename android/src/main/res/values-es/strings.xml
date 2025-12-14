@@ -1,8 +1,5 @@
 <resources>
     <string name="title_transactions">Transacciones</string>
-    <string name="title_transactions_filter">Filtrar transacciones</string>
-    <string name="label_transactions_filter_all">Todas las transacciones</string>
-    <string name="label_transactions_filter_erg_only">Solo ERG</string>
     <string name="title_wallets">Billeteras</string>
     <string name="title_settings">Opciones</string>
 
@@ -12,8 +9,6 @@
     <string name="label_password">Contraseña</string>
     <string name="label_password_confirm">Confirmar contraseña</string>
     <string name="err_password_confirm">Las contraseñas no coinciden</string>
-    <string name="desc_show_password">Mostrar contraseña</string>
-    <string name="desc_hide_password">Ocultar contraseña</string>
     <string name="button_done">Hecho</string>
     <string name="button_apply">Guardar</string>
     <string name="button_copy">Copiar</string>
@@ -40,9 +35,6 @@
 
     <!-- Wallet -->
     <string name="label_tokens">tokens</string>
-    <string name="label_regular_tokens">Tokens</string>
-    <string name="label_nfts">NFTs</string>
-    <string name="label_audio_nfts">NFTs de Audio</string>
     <string name="label_more_tokens">más tokens</string>
     <string name="label_unconfirmed">no confirmado</string>
     <string name="button_receive">Recibir</string>
@@ -100,12 +92,6 @@
     <string name="device_enc_security_pass">Contraseña, PIN o patrón</string>
     <string name="device_enc_security_biometric_strong">Biométrico con fuerte seguridad</string>
     <string name="device_enc_security_biometric_weak">Biométrico, Clase 2</string>
-    <string name="warning_device_security_change">⚠️ Advertencia: Cambiar la configuración de autenticación de su dispositivo (biométrico, PIN, contraseña) puede causar la pérdida de acceso a su billetera. Asegúrese de tener su frase mnemónica guardada de forma segura.</string>
-    
-    <!-- Storage rent info -->
-    <string name="title_storage_rent_info">Renta de Almacenamiento Activada</string>
-    <string name="desc_storage_rent_info">La renta de almacenamiento está ahora activa en la blockchain de Ergo. Cada caja (UTXO) requiere una cantidad mínima de ERG para cubrir los costos de almacenamiento con el tiempo. Mantenga al menos 0.001 ERG por caja para evitar que sus fondos queden bloqueados. Más información en ergoplatform.org/docs</string>
-    <string name="button_dont_show_again">No mostrar de nuevo</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">Configura la wallet</string>
@@ -125,8 +111,6 @@
     <string name="label_wallet_main_address">Direccion principal</string>
     <string name="label_wallet_address_derived">Dirección derivada %1$s</string>
     <string name="label_wallet_token_balance">%1$s tokens</string>
-    <string name="label_last_sync">Última sincronización: %1$s</string>
-    <string name="label_never_synced">Nunca sincronizado</string>
     <string name="desc_wallet_addresses">Una billetera puede tener varias direcciones públicas derivadas de la dirección principal.</string>
     <string name="button_add_address">Añadir dirección</string>
     <string name="button_add_addresses">Añadir %1$d direcciones</string>
@@ -143,7 +127,6 @@
     <string name="desc_send_funds">Ingrese la dirección del destinatario y la cantidad a enviar, o escanee un código QR.</string>
     <string name="label_send_from">De: %1$s</string>
     <string name="label_wallet_balance">Saldo: %1$s ERG</string>
-    <string name="label_balance_hidden">****</string>
     <string name="label_receiver_address">Dirección del destinatario</string>
     <string name="label_scan_qr">Scan QR code</string>
     <string name="desc_fee">Comisión: %1$s ERG</string>
@@ -195,10 +178,5 @@
     <string name="button_reset_defaults">Por defecto</string>
     <string name="label_explorer_api_url">URL de la API del explorador</string>
     <string name="label_node_url">URL del nodo</string>
-    <string name="check_prefer_node">Preferir API de explorador de nodo</string>
-    <string name="check_prefer_node_blockchain">Preferir API de Blockchain de nodo</string>
-    <string name="check_hide_balance">Ocultar saldo de la billetera</string>
-    <string name="label_node_blockchain_api">API de Blockchain habilitada</string>
-    <string name="label_node_explorer_api">API de explorador habilitada</string>
     <string name="button_show_debug_info">Mostrar información de depuración</string>
 </resources>
