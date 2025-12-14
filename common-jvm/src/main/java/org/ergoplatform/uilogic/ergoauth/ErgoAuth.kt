@@ -72,6 +72,7 @@ private const val JSON_KEY_SIGNINGMESSAGE = "signingMessage"
 private const val JSON_KEY_USERMESSAGE = "userMessage"
 private const val JSON_KEY_MESSAGE_SEVERITY = "messageSeverity"
 private const val JSON_KEY_REPLY_TO = "replyTo"
+private const val JSON_KEY_REQUEST_HOST = "requestHost"
 
 fun parseErgoAuthRequestFromJson(
     jsonString: String,
@@ -83,6 +84,9 @@ fun parseErgoAuthRequestFromJson(
         SigmaProp.parseFromBytes(Base64Coder.decode(it, false))
     }
 
+    // For cold wallet requests, requestHost comes from JSON. Otherwise use parameter.
+    val finalRequestHost = jsonObject.get(JSON_KEY_REQUEST_HOST)?.asString ?: requestHost
+
     return ErgoAuthRequest(
         jsonObject.get(JSON_KEY_SIGNINGMESSAGE)?.asString,
         sigmaBoolean,
@@ -90,7 +94,7 @@ fun parseErgoAuthRequestFromJson(
         jsonObject.get(JSON_KEY_MESSAGE_SEVERITY)?.asString?.let { MessageSeverity.valueOf(it) }
             ?: MessageSeverity.NONE,
         jsonObject.get(JSON_KEY_REPLY_TO)?.asString,
-        requestHost,
+        finalRequestHost,
         sslValidatedBy
     )
 }
@@ -117,6 +121,7 @@ data class ErgoAuthRequest(
         }
         userMessage?.let { root.addProperty(JSON_KEY_USERMESSAGE, userMessage) }
         root.addProperty(JSON_KEY_MESSAGE_SEVERITY, messageSeverity.toString())
+        root.addProperty(JSON_KEY_REQUEST_HOST, requestHost)  // Include requestHost for signature consistency
         return gson.toJson(root)
     }
 }
