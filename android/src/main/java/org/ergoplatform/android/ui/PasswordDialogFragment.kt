@@ -89,12 +89,37 @@ class PasswordDialogFragment : BottomSheetDialogFragment() {
             (parentFragment as? PasswordDialogCallback)?.onPasswordEntered(password)
         password?.erase()
 
-        if (error != null)
+        if (error != null) {
             binding.editPassword.error = error
-        else {
-            hideForcedSoftKeyboard(requireContext(), binding.editPassword.editText!!)
-            dismiss()
+        } else {
+            // If no immediate error, assume async processing
+            // Dialog will be dismissed later by calling dismissPasswordDialog()
         }
+    }
+    
+    /**
+     * Show/hide progress indicator during password verification
+     */
+    fun showProgress(show: Boolean) {
+        binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
+        binding.buttonDone.isEnabled = !show
+        binding.editPassword.isEnabled = !show
+        binding.editPasswordConfirm.isEnabled = !show
+    }
+    
+    /**
+     * Show error message in password input
+     */
+    fun showError(errorMessage: String) {
+        binding.editPassword.error = errorMessage
+    }
+    
+    /**
+     * Dismiss the password dialog after successful authentication
+     */
+    fun dismissPasswordDialog() {
+        hideForcedSoftKeyboard(requireContext(), binding.editPassword.editText!!)
+        dismiss()
     }
 
     private fun EditText.getSecretString(): SecretString {

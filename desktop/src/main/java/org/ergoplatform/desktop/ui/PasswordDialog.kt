@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -21,6 +23,9 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.ergoplatform.Application
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.URL_FORGOT_PASSWORD_HELP
@@ -46,6 +51,8 @@ fun PasswordDialog(
     val confirmationFieldState = remember { mutableStateOf(TextFieldValue()) }
     val errorString = remember { mutableStateOf<String?>(null) }
     val focusRequester = remember { FocusRequester() }
+    val isProcessing = remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     val onDone = {
         val passwordString = passwordFieldState.value.text
@@ -70,13 +77,19 @@ fun PasswordDialog(
         } else true
 
         if (proceed) {
-            val error = onPasswordEntered(password)
-            password?.erase()
+            isProcessing.value = true
+            coroutineScope.launch {
+                val error = withContext(Dispatchers.IO) {
+                    onPasswordEntered(password)
+                }
+                password?.erase()
 
-            if (error != null)
-                errorString.value = error
-            else {
-                onDismissRequest()
+                isProcessing.value = false
+                if (error != null) {
+                    errorString.value = error
+                } else {
+                    onDismissRequest()
+                }
             }
         }
     }
@@ -144,18 +157,26 @@ fun PasswordDialog(
                 )
 
             Row(Modifier.align(Alignment.End).padding(top = defaultPadding)) {
+                if (isProcessing.value) {
+                    CircularProgressIndicator(
+                        Modifier.padding(end = defaultPadding)
+                    )
+                }
+                
                 Button(
                     onClick = {
                         onDismissRequest()
                     },
                     colors = secondaryButtonColors(),
                     modifier = Modifier.padding(end = defaultPadding * 2),
+                    enabled = !isProcessing.value
                 ) {
                     Text(Application.texts.getString(STRING_LABEL_CANCEL))
                 }
                 Button(
                     onClick = onDone,
                     colors = primaryButtonColors(),
+                    enabled = !isProcessing.value
                 ) {
                     Text(Application.texts.getString(STRING_BUTTON_DONE))
                 }
