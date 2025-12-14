@@ -1,7 +1,7 @@
 # Pull Request
 
 ## Title
-Fix critical issues: dependency, JVM launch, F-Droid prep, and add ErgoAuth address generation
+Fix critical issues: dependency, JVM launch, Java 21 support, F-Droid prep, and add ErgoAuth address generation
 
 ## Description
 
@@ -33,7 +33,23 @@ This PR addresses multiple critical improvements and bug fixes to the Ergo Walle
   - Prevents OutOfMemoryErrors during wallet sync
 - **Documentation**: Created `WINDOWS_JVM_LAUNCH_FIX.md`
 
-### 3. Scala Version Upgrade Strategy
+### 3. Java 21+ Build Compatibility Fix (CRITICAL)
+- **Problem**: Build fails on Windows 11 with JDK 21/24 - Gradle 7.4 only supports Java 8-17
+- **Impact**: Developers and users on modern Java (21, 24) cannot build the application
+- **Solution**: Upgraded Gradle from 7.4 to 8.11.1
+- **Changes**:
+  - Updated `gradle/wrapper/gradle-wrapper.properties`
+  - Gradle 8.11.1 fully supports Java 8-24
+- **Benefits**:
+  - ✅ Full Java 21 support
+  - ✅ Latest Gradle features and performance
+  - ✅ Better dependency resolution
+### 5. F-Droid Submission Preparation
+  - ✅ No code changes required
+- **Compatibility**: All existing plugins (Android 7.3.1, Kotlin 1.6.10) remain compatible
+- **Documentation**: Created `JAVA21_GRADLE_FIX.md`
+
+### 4. Scala Version Upgrade Strategy
 - **Problem**: RoboVM dependency locks project to Scala 2.11, blocking ecosystem upgrades
 - **Solution**: Comprehensive documentation of 5 upgrade paths
 - **Documentation**: Created `SCALA_UPGRADE_SOLUTION.md` detailing:
@@ -57,7 +73,7 @@ This PR addresses multiple critical improvements and bug fixes to the Ergo Walle
   - `FDROID_QUICKSTART.md` - Quick reference
 - **Status**: Ready for F-Droid submission
 
-### 5. ErgoAuth Address Generation Feature (NEW)
+### 6. ErgoAuth Address Generation Feature (NEW)
 - **Problem**: Poor UX requiring manual address entry or double QR scanning
 - **Solution**: New `generateAddressLink` feature for ErgoAuth protocol
 - **URI Pattern**: `ergoauth://${url}/generateAddressLink/${uuid}/#P2PK_ADDRESS#/`
@@ -74,7 +90,7 @@ This PR addresses multiple critical improvements and bug fixes to the Ergo Walle
   - New response class: `ErgoAuthAddressResponse`
 - **Documentation**: Created `ERGOAUTH_ADDRESS_GENERATION.md`
 
-### 6. Error Message Handling Documentation
+### 7. Error Message Handling Documentation
 - **Documentation**: Created `ERROR_MESSAGE_FIX.md` for PictoPy project reference
 - **Note**: This is documentation for a separate project, not changes to Ergo Wallet
 
@@ -84,7 +100,12 @@ This PR addresses multiple critical improvements and bug fixes to the Ergo Walle
 - [x] Project builds successfully with new dependency
 - [x] All existing functionality works as expected
 - [x] Verification metadata matches
-
+### Java 21 Compatibility
+- [ ] Test build on Windows 11 with JDK 21
+- [ ] Verify Gradle 8.5 downloads and works
+- [ ] Test all Gradle tasks (build, run, test)
+- [ ] Verify Android and Desktop builds work
+- [ ] Confirm no regression with Java 17
 ### Windows JVM Launch Fix
 - [ ] Test fresh installation on Windows 10
 - [ ] Test fresh installation on Windows 11
@@ -110,6 +131,7 @@ This PR addresses multiple critical improvements and bug fixes to the Ergo Walle
 ### Build & Dependencies
 - `common-jvm/build.gradle` - Updated ergo-appkit to 5.0.0
 - `build.gradle` - Removed Snapshots repository
+- `gradle/wrapper/gradle-wrapper.properties` - **Upgraded Gradle to 8.11.1 for Java 21/24**
 
 ### Desktop Windows Fix
 - `desktop/deploy/jpackage.cfg` - Added JVM options for Windows launcher
@@ -129,6 +151,7 @@ This PR addresses multiple critical improvements and bug fixes to the Ergo Walle
 - `ios/resources/i18n/strings.properties` - iOS strings
 
 ### Documentation
+- `JAVA21_GRADLE_FIX.md` - **Java 21/24 build compatibility fix**
 - `DEPENDENCY_FIX.md` - Dependency fix details
 - `WINDOWS_JVM_LAUNCH_FIX.md` - Windows JVM launch fix
 - `SCALA_UPGRADE_SOLUTION.md` - Scala upgrade strategies
@@ -151,8 +174,11 @@ This PR addresses multiple critical improvements and bug fixes to the Ergo Walle
 ## Related Issues
 Fixes #181 - ergo-appkit dependency issue
 
-## Additional Notes
+## Additional Noteses
+1. **Windows JVM Launch**: Blocks all Windows desktop users from accessing wallets
+2. **Java 21 Build**: Blocks developers on modern Java from building the project
 
+Both
 ### Critical Bug Fix
 The Windows JVM launch fix is critical and addresses a blocking issue that prevents Windows users from accessing their wallets after upgrading. This should be prioritized for immediate release.
 

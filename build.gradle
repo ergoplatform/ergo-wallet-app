@@ -32,6 +32,15 @@ allprojects {
         mavenCentral()
         maven { url 'https://jitpack.io' }
     }
+    
+    // Configure Java toolchain to use Java 17 for compilation when running on newer Java
+    plugins.withId('java') {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(17)
+            }
+        }
+    }
 }
 
 task clean(type: Delete) {
