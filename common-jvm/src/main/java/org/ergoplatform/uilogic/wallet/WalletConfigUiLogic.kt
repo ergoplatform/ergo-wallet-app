@@ -15,7 +15,7 @@ abstract class WalletConfigUiLogic {
         wallet = db.loadWalletConfigById(walletId)
     }
 
-    suspend fun saveChanges(db: WalletDbProvider, newWalletName: String?): Boolean {
+    suspend fun saveChanges(db: WalletDbProvider, newWalletName: String?, newHideBalance: Boolean? = null): Boolean {
         return wallet?.let {
             val newWalletConfig = WalletConfig(
                 it.id,
@@ -25,7 +25,8 @@ abstract class WalletConfigUiLogic {
                 it.secretStorage,
                 it.unfoldTokens,
                 it.extendedPublicKey,
-                it.walletType
+                it.walletType,
+                newHideBalance ?: it.hideBalance
             )
 
             db.updateWalletConfig(newWalletConfig)

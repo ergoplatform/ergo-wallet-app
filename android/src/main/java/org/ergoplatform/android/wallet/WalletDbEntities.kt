@@ -17,6 +17,7 @@ data class WalletConfigDbEntity(
     @ColumnInfo(name = "unfold_tokens") val unfoldTokens: Boolean = false,
     @ColumnInfo(name = "xpubkey") val extendedPublicKey: String? = null,
     @ColumnInfo(name = "wallet_type") val walletType: Int = WALLET_TYPE_P2PK,
+    @ColumnInfo(name = "hide_balance") val hideBalance: Boolean = false,
 ) {
     fun toModel(): WalletConfig {
         return WalletConfig(
@@ -27,7 +28,8 @@ data class WalletConfigDbEntity(
             secretStorage,
             unfoldTokens,
             extendedPublicKey,
-            walletType
+            walletType,
+            hideBalance
         )
     }
 }
@@ -41,7 +43,8 @@ fun WalletConfig.toDbEntity(): WalletConfigDbEntity {
         secretStorage,
         unfoldTokens,
         extendedPublicKey,
-        walletType
+        walletType,
+        hideBalance
     )
 }
 

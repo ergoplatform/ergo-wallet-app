@@ -50,7 +50,8 @@ class SqlDelightWalletProvider(private val sqlDelightAppDb: SqlDelightAppDb) : W
                 walletConfig.secretStorage,
                 walletConfig.unfoldTokens,
                 walletConfig.extendedPublicKey,
-                walletConfig.walletType
+                walletConfig.walletType,
+                walletConfig.hideBalance
             )
         }
     }

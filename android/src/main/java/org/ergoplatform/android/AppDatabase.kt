@@ -46,7 +46,7 @@ import org.ergoplatform.persistance.*
         MultisigTransactionDbEntity::class,
         MultisigParticipantDbEntity::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase(), IAppDatabase {
@@ -80,6 +80,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 .addMigrations(MIGRATION_8_9)
                 .addMigrations(MIGRATION_9_10)
                 .addMigrations(MIGRATION_10_11)
+                .addMigrations(MIGRATION_11_12)
                 .build()
         }
 
@@ -176,7 +177,14 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 database.execSQL("CREATE INDEX IF NOT EXISTS `index_multisig_participants_wallet_first_address` ON `multisig_participants` (`wallet_first_address`)")
             }
         }
+    private val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Add hide_balance column to wallet_configs for privacy feature
+                database.execSQL("ALTER TABLE wallet_configs ADD COLUMN `hide_balance` INTEGER NOT NULL DEFAULT 0")
+            }
+        }
 
+    
     }
 
     override val tokenDbProvider get() = RoomTokenDbProvider(this)

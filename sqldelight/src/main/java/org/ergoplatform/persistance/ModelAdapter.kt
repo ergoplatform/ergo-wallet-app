@@ -15,7 +15,8 @@ fun Wallet_configs.toModel(): WalletConfig {
         secret_storage,
         unfold_tokens,
         xpubkey,
-        wallet_type ?: WALLET_TYPE_P2PK
+        wallet_type ?: WALLET_TYPE_P2PK,
+        hide_balance ?: false
     )
 }
 
@@ -28,7 +29,8 @@ fun WalletConfig.toDbEntity(): Wallet_configs {
         secretStorage,
         unfoldTokens,
         extendedPublicKey,
-        walletType
+        walletType,
+        hideBalance
     )
 }
 

@@ -95,6 +95,16 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/input_wallet_name" />
 
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/check_hide_balance"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_and_half"
+                        android:text="@string/check_hide_balance"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/button_apply" />
+
                     <TextView
                         android:id="@+id/desc_wallet_addresses"
                         style="@style/TextAppearance.App.Body1"
@@ -104,7 +114,7 @@
                         android:text="@string/desc_wallet_addresses"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/button_apply" />
+                        app:layout_constraintTop_toBottomOf="@id/check_hide_balance" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_addresses"

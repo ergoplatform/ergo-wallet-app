@@ -23,6 +23,7 @@ data class WalletConfig(
     val unfoldTokens: Boolean = false,
     val extendedPublicKey: String?,
     val walletType: Int = WALLET_TYPE_P2PK,
+    val hideBalance: Boolean = false,
 )
 
 data class WalletState(

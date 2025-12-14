@@ -52,6 +52,7 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
             wallet?.let {
                 binding.publicAddress.text = wallet.firstAddress
                 binding.inputWalletName.editText?.setText(wallet.displayName)
+                binding.checkHideBalance.isChecked = wallet.hideBalance
 
                 binding.buttonCopy.setOnClickListener {
                     copyStringToClipboard(wallet.firstAddress!!, requireContext(), requireView())
@@ -80,7 +81,8 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
             hideForcedSoftKeyboard(requireContext(), binding.inputWalletName.editText!!)
             viewModel.saveChanges(
                 requireContext(),
-                binding.inputWalletName.editText?.text?.toString()
+                binding.inputWalletName.editText?.text?.toString(),
+                binding.checkHideBalance.isChecked
             )
         }
 

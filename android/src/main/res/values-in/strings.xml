@@ -197,6 +197,7 @@ di Jaringan Ergo, dapat menerima pembayaran dan menyimpan saldo. Anda dapat mena
     <string name="desc_send_funds">Masukkan alamat penerima dan jumlah yang akan dikirim, atau pindai kode QR.</string>
     <string name="label_send_from">Dari: %1$s</string>
     <string name="label_wallet_balance">Saldo: %1$s ERG</string>
+    <string name="label_balance_hidden">****</string>
     <string name="label_receiver_address">Alamat penerima</string>
     <string name="label_scan_qr">Pindai kode QR</string>
     <string name="desc_fee">Biaya: %1$s ERG</string>
@@ -398,6 +399,7 @@ Temukan bantuan di <a href="https://discord.gg/kj7s7nb">Discord</a> atau <a href
     <string name="label_node_url">Node URL</string>
     <string name="check_prefer_node">Lebih suka Node API Penjelajah</string>
     <string name="check_prefer_node_blockchain">Pilih API Blockchain Node</string>
+    <string name="check_hide_balance">Sembunyikan saldo dompet</string>
     <string name="label_fetching_node_list">Mengambil daftar node yang tersedia…</string>
     <string name="label_checking_node">Memeriksa %1$s…</string>
     <string name="label_node_alternatives">Node alternatif:</string>

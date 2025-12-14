@@ -147,6 +147,7 @@
     <string name="desc_send_funds">Gönderilecek alıcı adresini ve miktarını girin veya bir QR kodu tarayın.</string>
     <string name="label_send_from">Kaynak: %1$s</string>
     <string name="label_wallet_balance">Bakiye: %1$s ERG</string>
+    <string name="label_balance_hidden">****</string>
     <string name="label_receiver_address">Alıcı adresi</string>
     <string name="label_scan_qr">QR kodunu tara</string>
     <string name="desc_fee">Komisyon: %1$s ERG</string>
@@ -206,6 +207,7 @@
     <string name="label_node_url">Düğüm URL\'si</string>
     <string name="check_prefer_node">Düğüm Gezgini API\'sini Tercih Et</string>
     <string name="check_prefer_node_blockchain">Düğüm Blockchain API\'sini Tercih Et</string>
+    <string name="check_hide_balance">Cüzdan bakiyesini gizle</string>
     <string name="label_node_blockchain_api">Blockchain API\'si etkin</string>
     <string name="label_node_explorer_api">Gezgin API\'si etkin</string>
     <string name="button_show_debug_info">Hata ayıklama bilgilerini göster</string>

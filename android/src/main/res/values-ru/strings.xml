@@ -181,6 +181,7 @@
     <string name="desc_send_funds">Введите адрес получателя и сумму для отправки или отсканируйте QR-код.</string>
     <string name="label_send_from">От: %1$s</string>
     <string name="label_wallet_balance">Баланс: %1$s ERG</string>
+    <string name="label_balance_hidden">****</string>
     <string name="label_receiver_address">Адрес получателя</string>
     <string name="label_scan_qr">Сканировать QR-код</string>
     <string name="desc_fee">Комиссия: %1$s ERG</string>
@@ -284,6 +285,7 @@
     <string name="label_node_url">URL узла (ноды)</string>
     <string name="check_prefer_node">Предпочитать API Проводника узлов</string>
     <string name="check_prefer_node_blockchain">Предпочитать Blockchain API узла</string>
+    <string name="check_hide_balance">Скрыть баланс кошелька</string>
     <string name="label_node_blockchain_api">Blockchain API включен</string>
     <string name="label_node_explorer_api">API Проводника включен</string>
     <string name="label_token_verification_url">URL-адрес службы проверки токенов</string>

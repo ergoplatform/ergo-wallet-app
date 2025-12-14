@@ -137,6 +137,7 @@
     <string name="desc_send_funds">输入接收方地址和发送金额，或扫描二维码。</string>
     <string name="label_send_from">从：%1$s</string>
     <string name="label_wallet_balance">余额：%1$s ERG</string>
+    <string name="label_balance_hidden">****</string>
     <string name="label_receiver_address">接收方地址</string>
     <string name="label_scan_qr">扫描二维码</string>
     <string name="desc_fee">手续费：%1$s ERG</string>
@@ -186,6 +187,7 @@
     <string name="label_node_url">节点 URL</string>
     <string name="check_prefer_node">首选节点浏览器 API</string>
     <string name="check_prefer_node_blockchain">首选节点区块链 API</string>
+    <string name="check_hide_balance">隐藏钱包余额</string>
     <string name="label_node_blockchain_api">区块链 API 已启用</string>
     <string name="label_node_explorer_api">浏览器 API 已启用</string>
     <string name="button_show_debug_info">显示调试信息</string>

@@ -137,6 +137,7 @@
     <string name="desc_send_funds">Insira o endereço do destinatário e a quantia a ser enviada, ou escaneie um código QR.</string>
     <string name="label_send_from">De: %1$s</string>
     <string name="label_wallet_balance">Saldo: %1$s ERG</string>
+    <string name="label_balance_hidden">****</string>
     <string name="label_receiver_address">Endereço do destinatário</string>
     <string name="label_scan_qr">Escaneie o código QR</string>
     <string name="desc_fee">Taxa: %1$s ERG</string>
@@ -190,6 +191,7 @@
     <string name="label_node_url">URL do nó</string>
     <string name="check_prefer_node">Preferir API do Explorer de nós</string>
     <string name="check_prefer_node_blockchain">Preferir API de Blockchain de nós</string>
+    <string name="check_hide_balance">Ocultar saldo da carteira</string>
     <string name="label_node_blockchain_api">API de Blockchain habilitada</string>
     <string name="label_node_explorer_api">API do Explorer habilitada</string>
     <string name="button_show_debug_info">Mostrar informações de debug</string>
