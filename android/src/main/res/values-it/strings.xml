@@ -93,6 +93,12 @@
     <string name="device_enc_security_pass">Password, PIN o sequenza</string>
     <string name="device_enc_security_biometric_strong">Biometrico con forte sicurezza</string>
     <string name="device_enc_security_biometric_weak">Biometrico, Classe 2</string>
+    <string name="warning_device_security_change">⚠️ Attenzione: La modifica delle impostazioni di autenticazione del dispositivo (biometrico, PIN, password) può causare la perdita dell\'accesso al portafoglio. Assicurati di avere la tua frase mnemonica archiviata in modo sicuro.</string>
+    
+    <!-- Storage rent info -->
+    <string name="title_storage_rent_info">Affitto di Archiviazione Attivato</string>
+    <string name="desc_storage_rent_info">L\'affitto di archiviazione è ora attivo sulla blockchain Ergo. Ogni box (UTXO) richiede una quantità minima di ERG per coprire i costi di archiviazione nel tempo. Mantieni almeno 0.001 ERG per box per evitare che i tuoi fondi vengano bloccati. Scopri di più su ergoplatform.org/docs</string>
+    <string name="button_dont_show_again">Non mostrare più</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">Configurazione del portafoglio</string>

@@ -113,6 +113,12 @@
     <string name="device_enc_security_pass">Пароль, PIN-код или шаблон</string>
     <string name="device_enc_security_biometric_strong">Биометрические данные с высокой степенью безопасности</string>
     <string name="device_enc_security_biometric_weak">Биометрические данные 2 класса</string>
+    <string name="warning_device_security_change">⚠️ Предупреждение: Изменение настроек аутентификации вашего устройства (биометрические данные, PIN-код, пароль) может привести к потере доступа к вашему кошельку. Убедитесь, что ваша мнемоническая фраза надежно сохранена.</string>
+    
+    <!-- Storage rent info -->
+    <string name="title_storage_rent_info">Арендная Плата за Хранение Активирована</string>
+    <string name="desc_storage_rent_info">Арендная плата за хранение теперь активна в блокчейне Ergo. Каждый бокс (UTXO) требует минимального количества ERG для покрытия затрат на хранение со временем. Держите не менее 0.001 ERG на бокс, чтобы предотвратить блокировку ваших средств. Узнайте больше на ergoplatform.org/docs</string>
+    <string name="button_dont_show_again">Больше не показывать</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">Конфигурация кошелька</string>

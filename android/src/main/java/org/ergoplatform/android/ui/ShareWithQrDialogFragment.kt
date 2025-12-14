@@ -31,6 +31,12 @@ class ShareWithQrDialogFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Prevent screenshots when displaying sensitive data (xpubkey)
+        dialog?.window?.setFlags(
+            android.view.WindowManager.LayoutParams.FLAG_SECURE,
+            android.view.WindowManager.LayoutParams.FLAG_SECURE
+        )
+
         binding.buttonDone.setOnClickListener { buttonDone() }
 
         val dataToShare = args.dateToShare

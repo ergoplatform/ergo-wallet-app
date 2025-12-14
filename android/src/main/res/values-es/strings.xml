@@ -92,6 +92,12 @@
     <string name="device_enc_security_pass">Contraseña, PIN o patrón</string>
     <string name="device_enc_security_biometric_strong">Biométrico con fuerte seguridad</string>
     <string name="device_enc_security_biometric_weak">Biométrico, Clase 2</string>
+    <string name="warning_device_security_change">⚠️ Advertencia: Cambiar la configuración de autenticación de su dispositivo (biométrico, PIN, contraseña) puede causar la pérdida de acceso a su billetera. Asegúrese de tener su frase mnemónica guardada de forma segura.</string>
+    
+    <!-- Storage rent info -->
+    <string name="title_storage_rent_info">Renta de Almacenamiento Activada</string>
+    <string name="desc_storage_rent_info">La renta de almacenamiento está ahora activa en la blockchain de Ergo. Cada caja (UTXO) requiere una cantidad mínima de ERG para cubrir los costos de almacenamiento con el tiempo. Mantenga al menos 0.001 ERG por caja para evitar que sus fondos queden bloqueados. Más información en ergoplatform.org/docs</string>
+    <string name="button_dont_show_again">No mostrar de nuevo</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">Configura la wallet</string>

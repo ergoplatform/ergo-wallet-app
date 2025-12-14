@@ -124,6 +124,12 @@ tentang menyimpan rahasia Anda</a>. Untuk keamanan terbaik, gunakan <a href="htt
     <string name="device_enc_security_pass">Kata sandi, PIN atau pola</string>
     <string name="device_enc_security_biometric_strong">Biometrik dengan keamanan yang kuat</string>
     <string name="device_enc_security_biometric_weak">Biometrik, Kelas 2</string>
+    <string name="warning_device_security_change">⚠️ Peringatan: Mengubah pengaturan autentikasi perangkat Anda (biometrik, PIN, kata sandi) dapat menyebabkan hilangnya akses ke dompet Anda. Pastikan Anda memiliki frasa mnemonic yang tersimpan dengan aman.</string>
+    
+    <!-- Storage rent info -->
+    <string name="title_storage_rent_info">Sewa Penyimpanan Diaktifkan</string>
+    <string name="desc_storage_rent_info">Sewa penyimpanan sekarang aktif di blockchain Ergo. Setiap kotak (UTXO) memerlukan jumlah minimum ERG untuk menutupi biaya penyimpanan dari waktu ke waktu. Simpan setidaknya 0.001 ERG per kotak untuk mencegah dana Anda terkunci. Pelajari lebih lanjut di ergoplatform.org/docs</string>
+    <string name="button_dont_show_again">Jangan tampilkan lagi</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">Konfigurasi dompet</string>

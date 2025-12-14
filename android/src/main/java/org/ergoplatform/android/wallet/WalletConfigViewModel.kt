@@ -74,5 +74,5 @@ class WalletConfigViewModel : ViewModel() {
 
     }
 
-    enum class MnemonicNeededFor { DISPLAY_MNEMONIC, SHOW_XPUB }
+    enum class MnemonicNeededFor { DISPLAY_MNEMONIC, SHOW_XPUB, DELETE_WALLET }
 }

@@ -129,6 +129,12 @@
     <string name="device_enc_security_pass">Password, PIN or pattern</string>
     <string name="device_enc_security_biometric_strong">Biometric with strong security</string>
     <string name="device_enc_security_biometric_weak">Biometric, Class 2</string>
+    <string name="warning_device_security_change">⚠️ Warning: Changing your device\'s authentication settings (biometric, PIN, password) may cause loss of access to your wallet. Ensure you have your mnemonic phrase safely stored.</string>
+    
+    <!-- Storage rent info -->
+    <string name="title_storage_rent_info">Storage Rent Activated</string>
+    <string name="desc_storage_rent_info">Storage rent is now active on the Ergo blockchain. Every box (UTXO) requires a minimum amount of ERG to cover storage costs over time. Keep at least 0.001 ERG per box to prevent your funds from being locked. Learn more at ergoplatform.org/docs</string>
+    <string name="button_dont_show_again">Don\'t show again</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">Wallet configuration</string>

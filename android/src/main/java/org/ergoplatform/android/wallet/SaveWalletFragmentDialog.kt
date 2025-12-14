@@ -111,6 +111,9 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
 
         if (methodDesc == R.string.device_enc_security_none) {
             binding.buttonSaveDeviceenc.isEnabled = false
+            binding.warningDeviceSecurity.visibility = View.GONE
+        } else {
+            binding.warningDeviceSecurity.visibility = View.VISIBLE
         }
 
         binding.buttonSavePassenc.setOnClickListener {

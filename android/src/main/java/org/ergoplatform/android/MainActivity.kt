@@ -108,10 +108,29 @@ class MainActivity : AppCompatActivity() {
         NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_BALANCE)
         NotificationManagerCompat.from(this).cancel(BackgroundSync.NOTIF_ID_DAPP)
 
-        if (walletApp?.isAppLocked() == false)
+        if (walletApp?.isAppLocked() == false) {
             unlockApp()
-        else
+            // Show storage rent info popup on first launch
+            showStorageRentInfoIfNeeded()
+        } else
             lockAppUi()
+    }
+    
+    private fun showStorageRentInfoIfNeeded() {
+        val prefs = Preferences(this)
+        if (!prefs.storageRentShown) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.title_storage_rent_info)
+                .setMessage(R.string.desc_storage_rent_info)
+                .setPositiveButton(R.string.zxing_button_ok) { _, _ ->
+                    prefs.storageRentShown = true
+                }
+                .setNegativeButton(R.string.button_dont_show_again) { _, _ ->
+                    prefs.storageRentShown = true
+                }
+                .setCancelable(false)
+                .show()
+        }
     }
 
     private fun unlockApp() {

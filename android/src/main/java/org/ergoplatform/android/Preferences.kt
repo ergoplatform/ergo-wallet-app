@@ -7,6 +7,7 @@ import org.ergoplatform.persistance.*
 
 const val KEY_DAYNIGHTMODE = "dayNightMode"
 const val KEY_APPLOCK = "appLock"
+const val KEY_STORAGE_RENT_SHOWN = "storageRentShown"
 
 class Preferences(context: Context) : PreferencesProvider() {
     private val prefs: SharedPreferences =
@@ -51,4 +52,8 @@ class Preferences(context: Context) : PreferencesProvider() {
     var enableAppLock: Boolean
         get() = getBoolean(KEY_APPLOCK, false)
         set(value) = saveBoolean(KEY_APPLOCK, value)
+    
+    var storageRentShown: Boolean
+        get() = getBoolean(KEY_STORAGE_RENT_SHOWN, false)
+        set(value) = saveBoolean(KEY_STORAGE_RENT_SHOWN, value)
 }

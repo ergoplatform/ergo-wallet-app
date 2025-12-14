@@ -117,16 +117,23 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_delete) {
-            val confirmationDialogFragment = ConfirmationDialogFragment()
-            val args = Bundle()
-            args.putString(ARG_CONFIRMATION_TEXT, getString(R.string.label_confirm_delete))
-            args.putString(ARG_BUTTON_YES_LABEL, getString(R.string.button_delete))
-            confirmationDialogFragment.arguments = args
-            confirmationDialogFragment.show(childFragmentManager, null)
-
+            // Require authentication before allowing wallet deletion
+            viewModel.uiLogic.wallet?.let {
+                viewModel.mnemonicNeededFor = WalletConfigViewModel.MnemonicNeededFor.DELETE_WALLET
+                startAuthFlow()
+            }
             return true
         } else
             return super.onOptionsItemSelected(item)
+    }
+    
+    private fun showDeleteConfirmationDialog() {
+        val confirmationDialogFragment = ConfirmationDialogFragment()
+        val args = Bundle()
+        args.putString(ARG_CONFIRMATION_TEXT, getString(R.string.label_confirm_delete))
+        args.putString(ARG_BUTTON_YES_LABEL, getString(R.string.button_delete))
+        confirmationDialogFragment.arguments = args
+        confirmationDialogFragment.show(childFragmentManager, null)
     }
 
     override fun onConfirm() {
@@ -139,10 +146,18 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
         get() = viewModel.uiLogic.wallet
 
     override fun proceedFromAuthFlow(secrets: SigningSecrets) {
-        if (viewModel.mnemonicNeededFor == WalletConfigViewModel.MnemonicNeededFor.DISPLAY_MNEMONIC) {
-            displayMnemonic(secrets)
-        } else {
-            displayXpubKeyFromMnemonic(secrets)
+        when (viewModel.mnemonicNeededFor) {
+            WalletConfigViewModel.MnemonicNeededFor.DISPLAY_MNEMONIC -> {
+                displayMnemonic(secrets)
+            }
+            WalletConfigViewModel.MnemonicNeededFor.SHOW_XPUB -> {
+                displayXpubKeyFromMnemonic(secrets)
+            }
+            WalletConfigViewModel.MnemonicNeededFor.DELETE_WALLET -> {
+                secrets.clearMemory()
+                showDeleteConfirmationDialog()
+            }
+            else -> {}
         }
     }
 
@@ -164,13 +179,21 @@ class WalletConfigFragment : AbstractAuthenticationFragment(), ConfirmationCallb
         val mnemonic = signingSecrets.mnemonic.toStringUnsecure()
         signingSecrets.clearMemory()
 
-        MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(requireContext())
             .setMessage(mnemonic)
             .setPositiveButton(R.string.button_copy) { _, _ ->
                 showSensitiveDataCopyDialog(requireContext(), mnemonic)
             }
             .setNegativeButton(R.string.label_dismiss, null)
-            .show()
+            .create()
+        
+        // Prevent screenshots when displaying mnemonic
+        dialog.window?.setFlags(
+            android.view.WindowManager.LayoutParams.FLAG_SECURE,
+            android.view.WindowManager.LayoutParams.FLAG_SECURE
+        )
+        
+        dialog.show()
     }
 
     override fun onDestroyView() {

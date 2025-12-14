@@ -93,6 +93,12 @@
     <string name="device_enc_security_pass">密码、PIN 或图案</string>
     <string name="device_enc_security_biometric_strong">安全性强的生物认证</string>
     <string name="device_enc_security_biometric_weak">生物认证，2 类</string>
+    <string name="warning_device_security_change">⚠️ 警告：更改设备的身份验证设置（生物识别、PIN、密码）可能导致无法访问您的钱包。确保您已安全存储助记词。</string>
+    
+    <!-- Storage rent info -->
+    <string name="title_storage_rent_info">存储租金已激活</string>
+    <string name="desc_storage_rent_info">存储租金现在在 Ergo 区块链上激活。每个盒子（UTXO）都需要最少量的 ERG 来覆盖随时间推移的存储成本。每个盒子至少保留 0.001 ERG 以防止您的资金被锁定。在 ergoplatform.org/docs 了解更多信息</string>
+    <string name="button_dont_show_again">不再显示</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">钱包配置</string>

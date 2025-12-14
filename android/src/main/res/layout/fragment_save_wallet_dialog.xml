@@ -125,6 +125,17 @@
                     android:layout_height="wrap_content"
                     android:text="@string/desc_save_device_encrypted" />
 
+                <TextView
+                    android:id="@+id/warning_device_security"
+                    style="@style/TextAppearance.App.Body2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/half_horizontal_margin"
+                    android:layout_marginBottom="@dimen/margin_and_half"
+                    android:textColor="?attr/colorError"
+                    android:text="@string/warning_device_security_change"
+                    android:visibility="gone" />
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
     </androidx.core.widget.NestedScrollView>

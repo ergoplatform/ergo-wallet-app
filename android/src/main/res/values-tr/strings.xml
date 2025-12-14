@@ -102,6 +102,12 @@
     <string name="device_enc_security_pass">Şifre, PIN veya desen</string>
     <string name="device_enc_security_biometric_strong">Yüksek güvenlikli biyometrik</string>
     <string name="device_enc_security_biometric_weak">Biyometrik, Sınıf 2</string>
+    <string name="warning_device_security_change">⚠️ Uyarı: Cihazınızın kimlik doğrulama ayarlarını değiştirmek (biyometrik, PIN, şifre) cüzdanınıza erişiminizi kaybetmenize neden olabilir. Anımsatıcı ifadenizin güvenli bir şekilde saklandığından emin olun.</string>
+    
+    <!-- Storage rent info -->
+    <string name="title_storage_rent_info">Depolama Kirası Etkinleştirildi</string>
+    <string name="desc_storage_rent_info">Depolama kirası artık Ergo blockchain\'inde aktif. Her kutu (UTXO), zaman içinde depolama maliyetlerini karşılamak için minimum miktarda ERG gerektirir. Fonlarınızın kilitlenmesini önlemek için kutu başına en az 0.001 ERG bulundurun. Daha fazla bilgi için ergoplatform.org/docs</string>
+    <string name="button_dont_show_again">Bir daha gösterme</string>
 
     <!-- Wallet config -->
     <string name="title_wallet_details">Cüzdan yapılandırması</string>
