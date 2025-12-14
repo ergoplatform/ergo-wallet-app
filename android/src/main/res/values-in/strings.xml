@@ -1,5 +1,8 @@
 <resources>
     <string name="title_transactions">Transaksi</string>
+    <string name="title_transactions_filter">Filter transaksi</string>
+    <string name="label_transactions_filter_all">Semua transaksi</string>
+    <string name="label_transactions_filter_erg_only">Hanya ERG</string>
     <string name="title_wallets">Dompet</string>
     <string name="title_settings">Pengaturan</string>
     <string name="button_unlock">Buka kunci aplikasi</string>

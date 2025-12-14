@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Ergo钱包</string>
     <string name="title_transactions">交易</string>
+    <string name="title_transactions_filter">筛选交易</string>
+    <string name="label_transactions_filter_all">所有交易</string>
+    <string name="label_transactions_filter_erg_only">仅ERG</string>
     <string name="title_wallets">钱包</string>
     <string name="title_settings">设置</string>
 

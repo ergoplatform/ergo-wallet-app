@@ -1,5 +1,8 @@
 <resources>
     <string name="title_transactions">İşlemler</string>
+    <string name="title_transactions_filter">İşlemleri filtrele</string>
+    <string name="label_transactions_filter_all">Tüm işlemler</string>
+    <string name="label_transactions_filter_erg_only">Yalnızca ERG</string>
     <string name="title_wallets">Cüzdanlar</string>
     <string name="title_settings">Ayarlar</string>
 

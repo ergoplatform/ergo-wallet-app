@@ -1,5 +1,8 @@
 <resources>
     <string name="title_transactions">Транзакции</string>
+    <string name="title_transactions_filter">Фильтр транзакций</string>
+    <string name="label_transactions_filter_all">Все транзакции</string>
+    <string name="label_transactions_filter_erg_only">Только ERG</string>
     <string name="title_wallets">Кошельки</string>
     <string name="title_settings">Настройки</string>
 

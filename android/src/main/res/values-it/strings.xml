@@ -1,5 +1,8 @@
 <resources>
     <string name="title_transactions">Transazioni</string>
+    <string name="title_transactions_filter">Filtra transazioni</string>
+    <string name="label_transactions_filter_all">Tutte le transazioni</string>
+    <string name="label_transactions_filter_erg_only">Solo ERG</string>
     <string name="title_wallets">Portafogli</string>
     <string name="title_settings">Impostazioni</string>
 
