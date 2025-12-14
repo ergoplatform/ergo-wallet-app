@@ -11,8 +11,8 @@
     <string name="err_password">Senhas devem conter pelo menos 8 caracteres</string>
     <string name="label_password">Senha</string>
     <string name="label_password_confirm">Confirmar senha</string>
-    <string name="err_password_confirm">Senhas não coincidem</string>
-    <string name="button_done">Pronto</string>
+    <string name="err_password_confirm">Senhas não coincidem</string>    <string name="desc_show_password">Mostrar senha</string>
+    <string name="desc_hide_password">Ocultar senha</string>    <string name="button_done">Pronto</string>
     <string name="button_apply">Guardar</string>
     <string name="button_copy">Copiar</string>
     <string name="label_copied">Copiado!</string>

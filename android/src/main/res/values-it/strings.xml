@@ -12,6 +12,8 @@
     <string name="label_password">Password</string>
     <string name="label_password_confirm">Conferma la password</string>
     <string name="err_password_confirm">Passwords diverse</string>
+    <string name="desc_show_password">Mostra password</string>
+    <string name="desc_hide_password">Nascondi password</string>
     <string name="button_done">Fatto</string>
     <string name="button_apply">Applica</string>
     <string name="button_copy">Copia</string>

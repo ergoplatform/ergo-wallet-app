@@ -12,6 +12,8 @@
     <string name="label_password">Parola</string>
     <string name="label_password_confirm">Parolayı Onaylayın</string>
     <string name="err_password_confirm">Parolayı onaylayın</string>
+    <string name="desc_show_password">Parolayı göster</string>
+    <string name="desc_hide_password">Parolayı gizle</string>
     <string name="button_done">Tamamlandı</string>
     <string name="button_apply">Uygula</string>
     <string name="button_copy">Kopyala</string>

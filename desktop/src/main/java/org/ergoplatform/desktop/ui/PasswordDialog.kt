@@ -7,8 +7,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +27,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,6 +59,8 @@ fun PasswordDialog(
     val focusRequester = remember { FocusRequester() }
     val isProcessing = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val passwordVisible = remember { mutableStateOf(false) }
+    val confirmPasswordVisible = remember { mutableStateOf(false) }
 
     val onDone = {
         val passwordString = passwordFieldState.value.text
@@ -126,12 +134,20 @@ fun PasswordDialog(
                         true
                     } else false
                 },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
                 maxLines = 1,
                 isError = hasError,
                 singleLine = true,
                 label = { Text(Application.texts.getString(STRING_LABEL_PASSWORD)) },
                 colors = appTextFieldColors(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
+                        Icon(
+                            imageVector = if (passwordVisible.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = if (passwordVisible.value) "Hide password" else "Show password"
+                        )
+                    }
+                }
             )
 
             if (hasError)
@@ -149,11 +165,19 @@ fun PasswordDialog(
                         confirmationFieldState.value = it
                     },
                     Modifier.fillMaxWidth().padding(bottom = defaultPadding),
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (confirmPasswordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
                     maxLines = 1,
                     singleLine = true,
                     label = { Text(Application.texts.getString(STRING_LABEL_PASSWORD_CONFIRM)) },
                     colors = appTextFieldColors(),
+                    trailingIcon = {
+                        IconButton(onClick = { confirmPasswordVisible.value = !confirmPasswordVisible.value }) {
+                            Icon(
+                                imageVector = if (confirmPasswordVisible.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                contentDescription = if (confirmPasswordVisible.value) "Hide password" else "Show password"
+                            )
+                        }
+                    }
                 )
 
             Row(Modifier.align(Alignment.End).padding(top = defaultPadding)) {

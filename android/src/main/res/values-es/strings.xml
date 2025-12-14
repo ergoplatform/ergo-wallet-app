@@ -12,6 +12,8 @@
     <string name="label_password">Contraseña</string>
     <string name="label_password_confirm">Confirmar contraseña</string>
     <string name="err_password_confirm">Las contraseñas no coinciden</string>
+    <string name="desc_show_password">Mostrar contraseña</string>
+    <string name="desc_hide_password">Ocultar contraseña</string>
     <string name="button_done">Hecho</string>
     <string name="button_apply">Guardar</string>
     <string name="button_copy">Copiar</string>

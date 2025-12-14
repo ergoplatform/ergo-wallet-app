@@ -12,8 +12,8 @@
     <string name="err_password">Panjang kata sandi minimal harus 8 karakter</string>
     <string name="label_password">Kata sandi</string>
     <string name="label_password_confirm">Konfirmasi Kata sandi</string>
-    <string name="err_password_confirm">Kata Sandi tidak cocok</string>
-    <string name="button_done">Selesai</string>
+    <string name="err_password_confirm">Kata Sandi tidak cocok</string>    <string name="desc_show_password">Tampilkan kata sandi</string>
+    <string name="desc_hide_password">Sembunyikan kata sandi</string>    <string name="button_done">Selesai</string>
     <string name="button_apply">Terapkan</string>
     <string name="button_copy">Salin</string>
     <string name="label_copied">Disalin!</string>

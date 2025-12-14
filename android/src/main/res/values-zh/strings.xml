@@ -13,6 +13,8 @@
     <string name="label_password">密码</string>
     <string name="label_password_confirm">确认密码</string>
     <string name="err_password_confirm">密码不匹配</string>
+    <string name="desc_show_password">显示密码</string>
+    <string name="desc_hide_password">隐藏密码</string>
     <string name="button_done">完成</string>
     <string name="button_apply">应用</string>
     <string name="button_copy">复制</string>

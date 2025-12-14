@@ -17,6 +17,8 @@
     <string name="label_password">Password</string>
     <string name="label_password_confirm">Confirm password</string>
     <string name="err_password_confirm">Passwords do not match</string>
+    <string name="desc_show_password">Show password</string>
+    <string name="desc_hide_password">Hide password</string>
     <string name="button_done">Done</string>
     <string name="button_apply">Apply</string>
     <string name="button_copy">Copy</string>

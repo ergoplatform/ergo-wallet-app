@@ -12,6 +12,8 @@
     <string name="label_password">Пароль</string>
     <string name="label_password_confirm">Подтвердите пароль</string>
     <string name="err_password_confirm">Пароли не совпадают</string>
+    <string name="desc_show_password">Показать пароль</string>
+    <string name="desc_hide_password">Скрыть пароль</string>
     <string name="button_done">Готово</string>
     <string name="button_apply">Применить</string>
     <string name="button_copy">Копировать</string>
