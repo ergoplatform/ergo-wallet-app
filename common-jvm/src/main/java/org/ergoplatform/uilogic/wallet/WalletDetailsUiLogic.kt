@@ -37,6 +37,27 @@ abstract class WalletDetailsUiLogic: FilterTokenListUiLogic {
     val hasTokens get() = fullTokensList.isNotEmpty()
     val tokensList
         get() = fullTokensList.filter { isTokenInFilter(tokenInformation[it.tokenId]) }
+    
+    // Separate token lists by category
+    val regularTokensList
+        get() = fullTokensList.filter { 
+            val tokenInfo = tokenInformation[it.tokenId]
+            tokenInfo == null || tokenInfo.thumbnailType == THUMBNAIL_TYPE_NONE
+        }
+    
+    val nftsList
+        get() = fullTokensList.filter {
+            val tokenInfo = tokenInformation[it.tokenId]
+            tokenInfo != null && (tokenInfo.thumbnailType == THUMBNAIL_TYPE_NFT_IMG || 
+                                  tokenInfo.thumbnailType == THUMBNAIL_TYPE_NFT_VID)
+        }
+    
+    val audioNftsList
+        get() = fullTokensList.filter {
+            val tokenInfo = tokenInformation[it.tokenId]
+            tokenInfo != null && tokenInfo.thumbnailType == THUMBNAIL_TYPE_NFT_AUDIO
+        }
+    
     override val tokenFilterMap: MutableMap<Int, Boolean> = HashMap()
 
     private var tokenInformationJob: Job? = null

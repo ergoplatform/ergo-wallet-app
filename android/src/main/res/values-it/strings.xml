@@ -35,6 +35,9 @@
 
     <!-- Wallet -->
     <string name="label_tokens">Tokens</string>
+    <string name="label_regular_tokens">Gettoni</string>
+    <string name="label_nfts">NFT</string>
+    <string name="label_audio_nfts">NFT Audio</string>
     <string name="label_more_tokens">altri token</string>
     <string name="label_unconfirmed">non confermato</string>
     <string name="button_receive">Ricevi</string>

@@ -47,6 +47,9 @@ data papan klip. Anda melakukan ini dengan risiko Anda sendiri.</string>
 
     <!-- Wallet -->
     <string name="label_tokens">token</string>
+    <string name="label_regular_tokens">Token</string>
+    <string name="label_nfts">NFT</string>
+    <string name="label_audio_nfts">NFT Audio</string>
     <string name="label_more_tokens">lebih banyak token</string>
     <string name="label_unnamed_token">(token tanpa nama)</string>
     <string name="label_unconfirmed">belum dikonfirmasi</string>

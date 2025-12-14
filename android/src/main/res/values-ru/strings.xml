@@ -43,6 +43,9 @@
 
     <!-- Wallet -->
     <string name="label_tokens">токены</string>
+    <string name="label_regular_tokens">Токены</string>
+    <string name="label_nfts">NFT</string>
+    <string name="label_audio_nfts">Аудио NFT</string>
     <string name="label_more_tokens">дополнительные токены</string>
     <string name="label_unnamed_token">(безымянный токен)</string>
     <string name="label_unconfirmed">неподтвержденный</string>

@@ -37,6 +37,9 @@
 
     <!-- Wallet -->
     <string name="label_tokens">token</string>
+    <string name="label_regular_tokens">Tokenler</string>
+    <string name="label_nfts">NFT\'ler</string>
+    <string name="label_audio_nfts">Ses NFT\'leri</string>
     <string name="label_more_tokens">daha fazla token</string>
     <string name="label_unnamed_token">(adsız token)</string>
     <string name="label_unconfirmed">doğrulanmamış</string>

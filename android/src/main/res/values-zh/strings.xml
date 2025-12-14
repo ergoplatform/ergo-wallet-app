@@ -36,6 +36,9 @@
 
     <!-- Wallet -->
     <string name="label_tokens">代币</string>
+    <string name="label_regular_tokens">代币</string>
+    <string name="label_nfts">NFT</string>
+    <string name="label_audio_nfts">音频NFT</string>
     <string name="label_more_tokens">更多代币</string>
     <string name="label_unconfirmed">未确认</string>
     <string name="button_receive">接收</string>
