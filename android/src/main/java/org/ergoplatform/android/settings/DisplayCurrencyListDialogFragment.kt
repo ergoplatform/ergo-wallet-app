@@ -104,7 +104,7 @@ class DisplayCurrencyListDialogFragment : BottomSheetDialogFragment() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val currency = items.get(position)
             holder.text.text =
-                if (currency.isEmpty()) getString(R.string.label_none) else currency.toUpperCase(
+                if (currency.isEmpty()) getString(R.string.label_none) else currency.uppercase(
                     Locale.getDefault()
                 )
             holder.text.setOnClickListener { onChooseCurrency(currency) }

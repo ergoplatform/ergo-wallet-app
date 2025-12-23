@@ -19,6 +19,13 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs += '-opt-in=kotlin.RequiresOptIn'
+    }
+}
+
 task convertStrings {
     def source = '../android/build/intermediates/incremental/ergomainnetDebug/mergeErgomainnetDebugResources/merged.dir/values{l}/values{l}.xml'
     def dest = 'resources/i18n/strings{l}.properties'

@@ -1,7 +1,7 @@
 package org.ergoplatform.desktop.ui.navigation
 
 import com.arkivanov.essenty.parcelable.Parcelable
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.persistance.WalletConfig
 
 sealed class ScreenConfig : Parcelable {

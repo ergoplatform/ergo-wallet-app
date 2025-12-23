@@ -2,7 +2,7 @@ package org.ergoplatform
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import java.nio.ByteBuffer
 import java.nio.CharBuffer
 import java.util.*
