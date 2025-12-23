@@ -6,7 +6,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.*
 import org.ergoplatform.appkit.Address
-import org.ergoplatform.appkit.ErgoToken
+import org.ergoplatform.sdk.ErgoToken
 import org.ergoplatform.appkit.Parameters
 import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.persistance.IAppDatabase

@@ -1,7 +1,7 @@
 package org.ergoplatform.ios.wallet
 
 import org.ergoplatform.appkit.Mnemonic
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.*
 import org.robovm.apple.coregraphics.CGRect

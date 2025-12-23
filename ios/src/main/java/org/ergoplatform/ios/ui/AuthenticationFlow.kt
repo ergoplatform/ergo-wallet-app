@@ -2,7 +2,7 @@ package org.ergoplatform.ios.ui
 
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.api.AesEncryptionManager
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.ios.api.IosAuthentication
 import org.ergoplatform.ios.api.IosEncryptionManager
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE

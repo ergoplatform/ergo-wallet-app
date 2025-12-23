@@ -4,33 +4,26 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_7
-    targetCompatibility = JavaVersion.VERSION_1_7
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs += '-opt-in=kotlin.RequiresOptIn'
+    }
 }
 
 dependencies {
-    api('org.ergoplatform:ergo-appkit_2.11:develop-44fddd97-SNAPSHOT') {
+    api('org.ergoplatform:ergo-appkit_2.11:5.0.3') {
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
-        exclude group: 'org.bitbucket.inkytonik.kiama', module: 'kiama_2.11'
-        exclude group: 'com.google.guava', module: 'guava'
     }
-    // kiama needs an own build for JRE7 compatibility
-    api ('com.github.MrStahlfelge.kiama:core_2.11:2.1.1') {
-        exclude group: 'com.google.guava', module: 'guava'
-    }
-    api ('com.github.MrStahlfelge.kiama:library_2.11:2.1.1') {
-        exclude group: 'com.google.guava', module: 'guava'
-    }
-    // stick to 20 for JRE7 compatibility
-    api "com.google.guava:guava:20.0"
-    api "org.bouncycastle:bcprov-jdk15to18:1.66"
 
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$coroutines_version"
-
-    // Mosaik runtime
     api "com.github.MrStahlfelge.mosaik:common-runtime:$mosaik_version"
     api "com.github.MrStahlfelge.mosaik:clientconnector-okhttp:$mosaik_version"
-
+    
     testImplementation "junit:junit:$junit_version"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_version"
     testImplementation "com.squareup.okhttp3:mockwebserver:3.12.0"
