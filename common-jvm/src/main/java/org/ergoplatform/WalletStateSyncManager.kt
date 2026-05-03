@@ -33,6 +33,11 @@ class WalletStateSyncManager {
     var fiatCurrency: String = ""
         private set
     val hasFiatValue get() = fiatValue.value > 0f && fiatCurrency.isNotEmpty()
+
+    // WAL integration: injectable, defaults to NoOp for Desktop/iOS
+    var pendingTxDbProvider: PendingTransactionDbProvider = NoOpPendingTransactionDbProvider
+    private val walReconcileIntervalMs = 5L * 60 * 1000 // 5 minutes
+
     private val coinGeckoApi: CoinGeckoApi
 
     private val tokenPrices: HashMap<String, TokenPrice> = HashMap()
@@ -131,6 +136,18 @@ class WalletStateSyncManager {
 
                 refreshFiatValueJob.join()
                 refreshTokenPriceJob?.join()
+
+                // WAL Fast-Track Reconciliation
+                if (!hadError && didSync) {
+                    try {
+                        reconcilePendingTransactions(preferences, database)
+                    } catch (t: Throwable) {
+                        LogUtils.logDebug(
+                            this.javaClass.simpleName,
+                            "WAL reconciliation error: " + t.message, t
+                        )
+                    }
+                }
 
                 if (!hadError && didSync) {
                     lastRefreshMs = System.currentTimeMillis()
@@ -354,6 +371,133 @@ class WalletStateSyncManager {
 
         GlobalScope.launch {
             fillTokenPriceHashMap(appDatabase.tokenDbProvider.loadTokenPrices())
+        }
+    }
+
+    /**
+     * WAL Reconciliation: tri-state Oracle logic using the Ergo Node.
+     *
+     * For each pending TX, we determine one of three states:
+     * 1. CONFIRMED — input box is spent on-chain → purge WAL entry
+     * 2. STILL PENDING — TX is alive in the Node mempool → renew lease
+     * 3. DROPPED — input is unspent AND TX not in mempool → purge WAL entry
+     *
+     * We use the Node UTXO API (not Explorer) because the Explorer returns box info
+     * for both spent and unspent boxes, making it useless for spent detection.
+     * Network errors are always treated as "still pending" (paranoid safety).
+     */
+    private suspend fun reconcilePendingTransactions(
+        preferences: PreferencesProvider,
+        database: IAppDatabase
+    ) {
+        val allWallets = database.walletDbProvider.getAllWalletConfigsSynchronous()
+        val apiService = ApiServiceManager.getOrInit(preferences)
+
+        for (walletConfig in allWallets) {
+            val firstAddress = walletConfig.firstAddress ?: continue
+            val pending = pendingTxDbProvider.loadActivePendingTxs(firstAddress)
+
+            for (ptx in pending) {
+                // Hard TTL: purge WAL entries older than 72 hours.
+                // Ergo nodes discard mempool TXs after ~72h, so any WAL entry
+                // this old will never be mined and should be garbage-collected.
+                val maxTtlMs = 72L * 60 * 60 * 1000
+                if (System.currentTimeMillis() - ptx.submittedAtMs > maxTtlMs) {
+                    LogUtils.logDebug(
+                        this.javaClass.simpleName,
+                        "WAL: TX id=${ptx.id} exceeded 72h TTL. Purging stale entry."
+                    )
+                    pendingTxDbProvider.deletePendingTx(ptx.id.toLong())
+                    continue
+                }
+
+                val firstInputId = ptx.inputBoxIds.split(",").firstOrNull {
+                    it.isNotBlank()
+                } ?: continue
+
+                // Step 1: Is the TX alive in the Node mempool?
+                // MEMPOOL-FIRST strategy: In the 95% happy path (TX pending),
+                // this single HTTP call is all we need. Only if the TX has
+                // disappeared (404) do we proceed to the heavier UTXO check.
+                val isAliveInMempool = try {
+                    val response = apiService.getTransactionInformationUncomfirmedNode(ptx.txId!!).execute()
+                    if (response.isSuccessful && response.body() != null) {
+                        true // Found in mempool
+                    } else if (response.code() == 404) {
+                        false // Definitively NOT in mempool
+                    } else {
+                        throw Exception("Node HTTP ${response.code()}")
+                    }
+                } catch (_: Throwable) {
+                    // Network error → paranoid: assume still alive
+                    true
+                }
+
+                if (isAliveInMempool) {
+                    // TX is alive in mempool, network is just slow. Renew lease.
+                    LogUtils.logDebug(
+                        this.javaClass.simpleName,
+                        "WAL: TX ${ptx.txId} alive in mempool. Renewing lease for id=${ptx.id}"
+                    )
+                    pendingTxDbProvider.renewSubmittedAt(
+                        ptx.id.toLong(),
+                        System.currentTimeMillis()
+                    )
+                    continue // ← SKIP the UTXO check entirely (O(1) fast path)
+                }
+
+                // Step 2: TX is NOT in mempool. Two possibilities:
+                //   a) TX was confirmed on-chain (input consumed) → purge
+                //   b) TX was evicted/dropped (input still unspent) → purge after grace
+                // PARANOIA HTTP: Only HTTP 404 = definitively spent.
+                val isInputStillUnspent = try {
+                    val response = apiService.getNodeUnspentBoxInformation(firstInputId).execute()
+                    if (response.isSuccessful && response.body() != null) {
+                        true // 2xx with body = box exists in UTXO set
+                    } else if (response.code() == 404) {
+                        false // 404 = THE ONLY definitive proof of spend
+                    } else {
+                        // 429/500/502/etc → NOT proof of spend. Skip this entry.
+                        throw Exception("Node HTTP ${response.code()}")
+                    }
+                } catch (_: Throwable) {
+                    // Network error OR non-404 HTTP error → paranoid: assume still pending
+                    LogUtils.logDebug(
+                        this.javaClass.simpleName,
+                        "WAL: Network/HTTP error checking UTXO for input=$firstInputId, keeping WAL entry"
+                    )
+                    continue
+                }
+
+                if (!isInputStillUnspent) {
+                    // Input consumed on-chain = TX confirmed. Safe to purge.
+                    LogUtils.logDebug(
+                        this.javaClass.simpleName,
+                        "WAL: Input $firstInputId spent on-chain. Purging confirmed TX id=${ptx.id}"
+                    )
+                    pendingTxDbProvider.deletePendingTx(ptx.id.toLong())
+                    continue
+                }
+
+                // Step 3: Input unspent AND TX not in mempool = likely evicted/dropped.
+                // GRACE PERIOD: Don't purge if TX is younger than 10 minutes.
+                // Load balancers (api.ergoplatform.com) may have propagation lag.
+                val txAgeMs = System.currentTimeMillis() - ptx.submittedAtMs
+                val propagationGraceMs = 10 * 60 * 1000L // 10 minutes
+
+                if (txAgeMs > propagationGraceMs) {
+                    LogUtils.logDebug(
+                        this.javaClass.simpleName,
+                        "WAL: TX ${ptx.txId} evicted from mempool (age=${txAgeMs / 1000}s). Purging id=${ptx.id}"
+                    )
+                    pendingTxDbProvider.deletePendingTx(ptx.id.toLong())
+                } else {
+                    LogUtils.logDebug(
+                        this.javaClass.simpleName,
+                        "WAL: TX ${ptx.txId} not in mempool but within grace period (${txAgeMs / 1000}s). Keeping."
+                    )
+                }
+            }
         }
     }
 

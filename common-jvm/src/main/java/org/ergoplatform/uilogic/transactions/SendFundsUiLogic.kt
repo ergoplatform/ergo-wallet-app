@@ -10,6 +10,9 @@ import org.ergoplatform.appkit.ErgoToken
 import org.ergoplatform.appkit.Parameters
 import org.ergoplatform.ergoauth.isErgoAuthRequestUri
 import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.persistance.NoOpPendingTransactionDbProvider
+import org.ergoplatform.persistance.PendingTransaction
+import org.ergoplatform.persistance.PendingTransactionDbProvider
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
@@ -310,6 +313,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic(), FilterTokenListUiL
 
     private var preparedTransaction: ByteArray? = null
     private var transactionInfo: TransactionInfo? = null
+
     fun prepareTransactionForSigning(preferences: PreferencesProvider, texts: StringProvider) {
         preparedTransaction = null
         wallet?.let { wallet ->
@@ -381,6 +385,13 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic(), FilterTokenListUiL
     ): PromptSigningResult {
         val serializedTx = withContext(Dispatchers.IO) {
             val derivedAddresses = getSigningDerivedAddresses()
+            // Load pending TXs defensively — WAL miss = legacy behavior
+            val activePendingTxs: List<PendingTransaction> = try {
+                wallet?.walletConfig?.firstAddress?.let {
+                    pendingTxDbProvider.loadActivePendingTxs(it)
+                } ?: emptyList()
+            } catch (_: Throwable) { emptyList() }
+
             ErgoFacade.prepareSerializedErgoTx(
                 Address.create(receiverAddress),
                 getActualMessageToSend(),
@@ -391,7 +402,8 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic(), FilterTokenListUiL
                 balance.nanoErgs,
                 tokensAvail,
                 consolidate = !wallet!!.isReadOnly(),
-                preferences, texts
+                preferences, texts,
+                activePendingTxs
             )
         }
         return serializedTx

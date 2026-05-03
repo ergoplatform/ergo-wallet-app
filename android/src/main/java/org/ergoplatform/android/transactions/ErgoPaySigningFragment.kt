@@ -53,6 +53,7 @@ class ErgoPaySigningFragment : SubmitTransactionFragment(), WalletChooserCallbac
 
         val viewModel = this.viewModel
         val context = requireContext()
+        viewModel.uiLogic.pendingTxDbProvider = AppDatabase.getInstance(context).pendingTxDbProvider
         viewModel.uiLogic.init(
             args.request,
             args.walletId,
