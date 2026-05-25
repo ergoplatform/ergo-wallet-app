@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         val lockedBasePaddingTop = lockedView.paddingTop
         val lockedBasePaddingBottom = lockedView.paddingBottom
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.container)) { _, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, insets ->
             val bars = insets.getInsets(
                 WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
             )
@@ -103,6 +103,7 @@ class MainActivity : AppCompatActivity() {
 
             insets
         }
+        ViewCompat.requestApplyInsets(window.decorView)
 
         if (savedInstanceState == null) {
             handleIntent(navController)
