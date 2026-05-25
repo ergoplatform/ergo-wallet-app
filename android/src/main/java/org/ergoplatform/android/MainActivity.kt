@@ -78,9 +78,15 @@ class MainActivity : AppCompatActivity() {
         // Edge-to-edge is enforced from Android 15 (targetSdk 35), so the window draws
         // behind the status bar and gesture/navigation bar. Apply system bar insets as
         // padding on the chrome views so content does not overlap with them.
+        //
+        // The nav_host_fragment is anchored to the top of the parent (not below the
+        // toolbar), so each fragment's own top header draws at y=0 and overlaps the
+        // status bar unless we add the top inset to the host container too.
         val toolbar = findViewById<View>(R.id.toolbar)
+        val navHostFragmentView = findViewById<View>(R.id.nav_host_fragment)
         val lockedView = findViewById<View>(R.id.layout_app_locked)
         val toolbarBasePaddingTop = toolbar.paddingTop
+        val navHostBasePaddingTop = navHostFragmentView.paddingTop
         val navViewBasePaddingBottom = navView.paddingBottom
         val lockedBasePaddingTop = lockedView.paddingTop
         val lockedBasePaddingBottom = lockedView.paddingBottom
@@ -90,6 +96,7 @@ class MainActivity : AppCompatActivity() {
                 WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
             )
             toolbar.updatePadding(top = toolbarBasePaddingTop + bars.top)
+            navHostFragmentView.updatePadding(top = navHostBasePaddingTop + bars.top)
             navView.updatePadding(bottom = navViewBasePaddingBottom + bars.bottom)
             lockedView.updatePadding(
                 top = lockedBasePaddingTop + bars.top,
