@@ -29,6 +29,8 @@ class App : Application() {
         AppCompatDelegate.setDefaultNightMode(preferences.dayNightMode)
         WalletStateSyncManager.getInstance()
             .loadPreferenceValues(preferences, AppDatabase.getInstance(applicationContext))
+        WalletStateSyncManager.getInstance().pendingTxDbProvider =
+            AppDatabase.getInstance(applicationContext).pendingTxDbProvider
 
         LogUtils.stackTraceLogger = { lastStackTrace = it }
         LogUtils.logDebug = BuildConfig.DEBUG

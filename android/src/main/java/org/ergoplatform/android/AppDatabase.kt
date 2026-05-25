@@ -22,6 +22,9 @@ import org.ergoplatform.android.tokens.TokenPriceDbEntity
 import org.ergoplatform.android.tokens.toDbEntity
 import org.ergoplatform.android.transactions.AddressTransactionDbEntity
 import org.ergoplatform.android.transactions.AddressTransactionTokenDbEntity
+import org.ergoplatform.android.transactions.PendingTransactionDao
+import org.ergoplatform.android.transactions.PendingTransactionDbEntity
+import org.ergoplatform.android.transactions.RoomPendingTransactionDbProvider
 import org.ergoplatform.android.transactions.TransactionDbDao
 import org.ergoplatform.android.transactions.toDbEntity
 import org.ergoplatform.android.wallet.*
@@ -43,8 +46,9 @@ import org.ergoplatform.persistance.*
         MosaikAppDbEntity::class,
         MosaikHostDbEntity::class,
         AddressBookEntryEntity::class,
+        PendingTransactionDbEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase(), IAppDatabase {
@@ -53,6 +57,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
     abstract fun transactionDao(): TransactionDbDao
     abstract fun mosaikDao(): MosaikDbDao
     abstract fun addressBookDao(): AddressBookDao
+    abstract fun pendingTransactionDao(): PendingTransactionDao
 
     companion object {
 
@@ -77,6 +82,7 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
                 .addMigrations(MIGRATION_7_8)
                 .addMigrations(MIGRATION_8_9)
                 .addMigrations(MIGRATION_9_10)
+                .addMigrations(MIGRATION_10_11)
                 .build()
         }
 
@@ -159,6 +165,27 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
             }
         }
 
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `pending_transactions` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`wallet_first_address` TEXT NOT NULL, " +
+                        "`signing_address` TEXT NOT NULL, " +
+                        "`submitted_at_ms` INTEGER NOT NULL, " +
+                        "`tx_id` TEXT, " +
+                        "`state` INTEGER NOT NULL, " +
+                        "`input_box_ids` TEXT NOT NULL, " +
+                        "`change_box_ids` TEXT NOT NULL, " +
+                        "`output_box_bytes` TEXT NOT NULL, " +
+                        "`erg_delta_nanoerg` INTEGER NOT NULL, " +
+                        "`token_deltas_json` TEXT NOT NULL)"
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_pending_transactions_wallet_first_address` ON `pending_transactions` (`wallet_first_address`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_pending_transactions_signing_address` ON `pending_transactions` (`signing_address`)")
+            }
+        }
+
     }
 
     override val tokenDbProvider get() = RoomTokenDbProvider(this)
@@ -169,6 +196,8 @@ abstract class AppDatabase : RoomDatabase(), IAppDatabase {
         get() = RoomMosaikDbProvider(this)
     override val addressBookDbProvider: AddressBookDbProvider
         get() = RoomAddressBookProvider(this)
+    val pendingTxDbProvider: PendingTransactionDbProvider
+        get() = RoomPendingTransactionDbProvider(this)
 }
 
 class RoomWalletDbProvider(private val database: AppDatabase) : WalletDbProvider {

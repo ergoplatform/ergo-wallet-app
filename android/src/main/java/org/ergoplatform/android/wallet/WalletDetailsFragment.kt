@@ -227,6 +227,26 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         binding.walletUnconfirmed.visibility = if (unconfirmed.isZero()) View.GONE else View.VISIBLE
         binding.labelWalletUnconfirmed.visibility = binding.walletUnconfirmed.visibility
 
+        // Pending WAL balance (async query)
+        val walletFirstAddress = wallet.walletConfig.firstAddress
+        if (walletFirstAddress != null) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val pendingDeltaNanoErg = try {
+                    AppDatabase.getInstance(requireContext())
+                        .pendingTxDbProvider
+                        .sumActiveErgDeltaForWallet(walletFirstAddress)
+                } catch (_: Throwable) { 0L }
+                val pendingAmount = org.ergoplatform.ErgoAmount(pendingDeltaNanoErg)
+                binding.walletPending.setAmount(pendingAmount.toBigDecimal())
+                binding.walletPending.visibility =
+                    if (pendingAmount.isZero()) View.GONE else View.VISIBLE
+                binding.labelWalletPending.visibility = binding.walletPending.visibility
+            }
+        } else {
+            binding.walletPending.visibility = View.GONE
+            binding.labelWalletPending.visibility = View.GONE
+        }
+
         // Fill fiat value
         val nodeConnector = WalletStateSyncManager.getInstance()
         if (!nodeConnector.hasFiatValue) {

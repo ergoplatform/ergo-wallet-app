@@ -45,6 +45,7 @@ class SendFundsViewModel : SubmitTransactionViewModel() {
         private set
 
     fun initWallet(ctx: Context, walletId: Int, derivationIdx: Int, paymentRequest: String?) {
+        uiLogic.pendingTxDbProvider = AppDatabase.getInstance(ctx).pendingTxDbProvider
         uiLogic.initWallet(
             AppDatabase.getInstance(ctx),
             ApiServiceManager.getOrInit(Preferences(ctx)),
