@@ -333,7 +333,7 @@ Pindai kode QR ini untuk melanjutkan.</string>
     <string name="label_content_hash">Konten Hash</string>
     <string name="button_validate">Mengesahkan</string>
     <string name="desc_download_content">Dompet Ergo dapat menampilkan pratinjau konten yang ditautkan ke token NFT.
-Perlu diketahui bahwa konten ini dibuat oleh pihak ketiga dan mungkin tidak diinginkan.</string>
+        Perlu diketahui bahwa konten ini dibuat oleh pihak ketiga dan mungkin tidak diinginkan.</string>
     <string name="button_download_content_on">Mengaktifkan</string>
     <string name="button_download_content_off">Menonaktifkan</string>
     <string name="label_token_generic">Umum</string>
@@ -345,10 +345,10 @@ Perlu diketahui bahwa konten ini dibuat oleh pihak ketiga dan mungkin tidak diin
     <string name="title_mosaik">dApps</string>
     <string name="hint_app_url">URL aplikasi</string>
     <string name="desc_mosaik">Anda dapat menggunakan dan menambahkan dApps yang mendukung integrasi dompet di sini.
-Aplikasi terdesentralisasi (dApps) adalah plug-in pihak ketiga yang menghubungkan dompet Anda dengan smart
-kontrak. Mereka mungkin mengumpulkan informasi yang Anda berikan di layar mereka. Sebelum menambahkan dApp,
-harap konfirmasikan URL aplikasi, dan tinjau persyaratan penggunaan dan kebijakan privasinya. dApps tidak
-berafiliasi dengan Dompet Ergo. Gunakan sesuai kebijaksanaan Anda.</string>
+        Aplikasi terdesentralisasi (dApps) adalah plug-in pihak ketiga yang menghubungkan dompet Anda dengan smart
+        kontrak. Mereka mungkin mengumpulkan informasi yang Anda berikan di layar mereka. Sebelum menambahkan dApp,
+        harap konfirmasikan URL aplikasi, dan tinjau persyaratan penggunaan dan kebijakan privasinya. dApps tidak
+        berafiliasi dengan Dompet Ergo. Gunakan sesuai kebijaksanaan Anda.</string>
     <string name="error_loading_mosaik_app">Tidak dapat memuat aplikasi.\nAlasan:\n%1$s</string>
     <string name="title_last_visited">Terakhir dikunjungi</string>
     <string name="title_favorites">Favorit</string>
@@ -377,8 +377,8 @@ berafiliasi dengan Dompet Ergo. Gunakan sesuai kebijaksanaan Anda.</string>
     <string name="desc_about">Dipersembahkan oleh Benjamin Schulte, %1$s</string>
     <string name="about_year" translatable="false">2023</string>
     <string name="desc_about_moreinfo">Dilisensikan di bawah <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Lisensi Apache 2</a>\n
-Proyek ini adalah <a href="https://github.com/ergoplatform/ergo-wallet-app">perangkat lunak sumber terbuka</a>\n
-Temukan bantuan di <a href="https://discord.gg/kj7s7nb">Discord</a> atau <a href="https://t.me/ErgoWalletApp">Telegram</a></string>
+        Proyek ini adalah <a href="https://github.com/ergoplatform/ergo-wallet-app">perangkat lunak sumber terbuka</a>\n
+    Temukan bantuan di <a href="https://discord.gg/kj7s7nb">Discord</a> atau <a href="https://t.me/ErgoWalletApp">Telegram</a></string>
     <string name="desc_coingecko">Harga ergo didukung oleh <a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a></string>
     <string name="label_cg_conn_error">Terjadi kesalahan saat menghubungkan ke CoinGecko, harap coba lagi nanti.</string>
     <string name="desc_dark_mode">Mode gelap atau terang?</string>
@@ -411,8 +411,8 @@ Temukan bantuan di <a href="https://discord.gg/kj7s7nb">Discord</a> atau <a href
     <string name="button_balance_notif_xhourly">Setiap %1$s jam</string>
     <string name="title_app_lock">Kunci Aplikasi Biometrik</string>
     <string name="desc_app_lock">Memerlukan autentikasi biometrik saat membuka aplikasi dan setelah beberapa saat tidak aktif.\n\n
-Hanya tersedia jika autentikasi biometrik disiapkan untuk perangkat ini. Rahasia Anda selalu tersimpan dengan aman, bahkan tanpa mengaktifkan opsi ini.\n
-Melindungi dari tampilan yang tidak diinginkan dari orang lain yang menggunakan perangkat ini. Kami sangat menyarankan menggunakan layar kunci perangkat sebagai gantinya.</string>
+        Hanya tersedia jika autentikasi biometrik disiapkan untuk perangkat ini. Rahasia Anda selalu tersimpan dengan aman, bahkan tanpa mengaktifkan opsi ini.\n
+        Melindungi dari tampilan yang tidak diinginkan dari orang lain yang menggunakan perangkat ini. Kami sangat menyarankan menggunakan layar kunci perangkat sebagai gantinya.</string>
 
     <!-- Notifications -->
     <string name="title_balance_notification">Pemberitahuan saldo berubah</string>
