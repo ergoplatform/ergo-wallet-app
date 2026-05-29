@@ -1,7 +1,11 @@
 <resources>
+    <string name="app_name" translatable="false">Dompet Ergo</string>
     <string name="title_transactions">Transaksi</string>
     <string name="title_wallets">Dompet</string>
     <string name="title_settings">Pengaturan</string>
+    <string name="format_erg" translatable="false">###,##0.0000</string>
+    <string name="format_erg_more_precise" translatable="false">###,##0.000000</string>
+    <string name="format_fiat" translatable="false">###,##0.00</string>
     <string name="button_unlock">Buka kunci aplikasi</string>
 
     <string name="hint_password">Silakan masukkan kata sandi pembelanjaan Anda</string>
@@ -98,15 +102,16 @@ Ini adalah satu-satunya cara untuk mengakses dompet saya jika kunci yang disimpa
     <!-- Restore wallet -->
     <string name="intro_restore_wallet">Masukkan mnemonik dompet Ergo Anda untuk membuat ulang dompet.</string>
     <string name="label_restore_wallet_word_list">Masalah membaca catatan Anda?
-<a href="https://github.com/ergoplatform/ergo/blob/master/ergo-wallet/src/main/resources/wordlist/english.txt">Lihat daftar kata</a>
-dan bandingkan.</string>
+        <a href="https://github.com/ergoplatform/ergo/blob/master/ergo-wallet/src/main/resources/wordlist/english.txt">Lihat daftar kata</a>
+            dan bandingkan.</string>
     <string name="button_restore">Pulihkan dompet</string>
     <string name="mnemonic_length_not_enough">Beberapa kata hilang dari mnemonik Anda. Tambahkan setidaknya %1$s lagi.</string>
     <string name="mnemonic_unknown_words">Mnemonik berisi kata-kata yang tidak valid. Periksa salah ketik.</string>
     <string name="mnemonic_invalid">Validasi mnemonik gagal. Jika Anda yakin telah memasukkannya dengan benar, Anda dapat mengetuk lagi untuk melanjutkan.</string>
 
     <string name="hint_desktop_kya">Mohon dibaca dan di pahami <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/develop/desktop/RUN.md#know-your-assumptions">KYA kami
-tentang menyimpan rahasia Anda</a>. Untuk keamanan terbaik, gunakan <a href="https://github.com/ergoplatform/ergo-wallet-app/wiki/Cold-wallet">cold wallet</a>.</string>
+            tentang menyimpan rahasia Anda</a>. Untuk keamanan terbaik, gunakan <a href="https://github.com/ergoplatform/ergo-wallet-app/wiki/Cold-wallet">cold wallet</a>.
+    </string>
 
     <!-- Save wallet -->
     <string name="intro_save_wallet">Alamat publik utama dompet Anda adalah:</string>
@@ -328,7 +333,7 @@ Pindai kode QR ini untuk melanjutkan.</string>
     <string name="label_content_hash">Konten Hash</string>
     <string name="button_validate">Mengesahkan</string>
     <string name="desc_download_content">Dompet Ergo dapat menampilkan pratinjau konten yang ditautkan ke token NFT.
-Perlu diketahui bahwa konten ini dibuat oleh pihak ketiga dan mungkin tidak diinginkan.</string>
+        Perlu diketahui bahwa konten ini dibuat oleh pihak ketiga dan mungkin tidak diinginkan.</string>
     <string name="button_download_content_on">Mengaktifkan</string>
     <string name="button_download_content_off">Menonaktifkan</string>
     <string name="label_token_generic">Umum</string>
@@ -340,10 +345,10 @@ Perlu diketahui bahwa konten ini dibuat oleh pihak ketiga dan mungkin tidak diin
     <string name="title_mosaik">dApps</string>
     <string name="hint_app_url">URL aplikasi</string>
     <string name="desc_mosaik">Anda dapat menggunakan dan menambahkan dApps yang mendukung integrasi dompet di sini.
-Aplikasi terdesentralisasi (dApps) adalah plug-in pihak ketiga yang menghubungkan dompet Anda dengan smart
-kontrak. Mereka mungkin mengumpulkan informasi yang Anda berikan di layar mereka. Sebelum menambahkan dApp,
-harap konfirmasikan URL aplikasi, dan tinjau persyaratan penggunaan dan kebijakan privasinya. dApps tidak
-berafiliasi dengan Dompet Ergo. Gunakan sesuai kebijaksanaan Anda.</string>
+        Aplikasi terdesentralisasi (dApps) adalah plug-in pihak ketiga yang menghubungkan dompet Anda dengan smart
+        kontrak. Mereka mungkin mengumpulkan informasi yang Anda berikan di layar mereka. Sebelum menambahkan dApp,
+        harap konfirmasikan URL aplikasi, dan tinjau persyaratan penggunaan dan kebijakan privasinya. dApps tidak
+        berafiliasi dengan Dompet Ergo. Gunakan sesuai kebijaksanaan Anda.</string>
     <string name="error_loading_mosaik_app">Tidak dapat memuat aplikasi.\nAlasan:\n%1$s</string>
     <string name="title_last_visited">Terakhir dikunjungi</string>
     <string name="title_favorites">Favorit</string>
@@ -370,9 +375,10 @@ berafiliasi dengan Dompet Ergo. Gunakan sesuai kebijaksanaan Anda.</string>
 
     <!-- Settings -->
     <string name="desc_about">Dipersembahkan oleh Benjamin Schulte, %1$s</string>
+    <string name="about_year" translatable="false">2023</string>
     <string name="desc_about_moreinfo">Dilisensikan di bawah <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Lisensi Apache 2</a>\n
-Proyek ini adalah <a href="https://github.com/ergoplatform/ergo-wallet-app">perangkat lunak sumber terbuka</a>\n
-Temukan bantuan di <a href="https://discord.gg/kj7s7nb">Discord</a> atau <a href="https://t.me/ErgoWalletApp">Telegram</a></string>
+        Proyek ini adalah <a href="https://github.com/ergoplatform/ergo-wallet-app">perangkat lunak sumber terbuka</a>\n
+    Temukan bantuan di <a href="https://discord.gg/kj7s7nb">Discord</a> atau <a href="https://t.me/ErgoWalletApp">Telegram</a></string>
     <string name="desc_coingecko">Harga ergo didukung oleh <a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a></string>
     <string name="label_cg_conn_error">Terjadi kesalahan saat menghubungkan ke CoinGecko, harap coba lagi nanti.</string>
     <string name="desc_dark_mode">Mode gelap atau terang?</string>
@@ -405,8 +411,8 @@ Temukan bantuan di <a href="https://discord.gg/kj7s7nb">Discord</a> atau <a href
     <string name="button_balance_notif_xhourly">Setiap %1$s jam</string>
     <string name="title_app_lock">Kunci Aplikasi Biometrik</string>
     <string name="desc_app_lock">Memerlukan autentikasi biometrik saat membuka aplikasi dan setelah beberapa saat tidak aktif.\n\n
-Hanya tersedia jika autentikasi biometrik disiapkan untuk perangkat ini. Rahasia Anda selalu tersimpan dengan aman, bahkan tanpa mengaktifkan opsi ini.\n
-Melindungi dari tampilan yang tidak diinginkan dari orang lain yang menggunakan perangkat ini. Kami sangat menyarankan menggunakan layar kunci perangkat sebagai gantinya.</string>
+        Hanya tersedia jika autentikasi biometrik disiapkan untuk perangkat ini. Rahasia Anda selalu tersimpan dengan aman, bahkan tanpa mengaktifkan opsi ini.\n
+        Melindungi dari tampilan yang tidak diinginkan dari orang lain yang menggunakan perangkat ini. Kami sangat menyarankan menggunakan layar kunci perangkat sebagai gantinya.</string>
 
     <!-- Notifications -->
     <string name="title_balance_notification">Pemberitahuan saldo berubah</string>
