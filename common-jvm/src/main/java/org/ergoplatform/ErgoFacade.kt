@@ -19,6 +19,7 @@ import org.ergoplatform.wallet.secrets.ExtendedPublicKey
 import scala.collection.JavaConversions
 import sigmastate.interpreter.HintsBag
 import sigmastate.serialization.`SigmaSerializer$`
+import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.HashMap
 import kotlin.math.max
@@ -435,16 +436,22 @@ object ErgoFacade {
     }
 
     private fun getRestErgoClient(prefs: PreferencesProvider): ErgoClient {
-        val nodeToConnectTo = prefs.prefNodeUrl
-        val ergoClient = RestApiErgoClient.createWithHttpClientBuilder(
-            nodeToConnectTo,
+        val ergoClient = createRestErgoClient(prefs.prefNodeUrl, prefs)
+        refreshNodeListWhenNeeded(prefs)
+        return ergoClient
+    }
+
+    private fun createRestErgoClient(
+        nodeUrl: String,
+        prefs: PreferencesProvider
+    ): ErgoClient {
+        return RestApiErgoClient.createWithHttpClientBuilder(
+            nodeUrl,
             getErgoNetworkType(),
             "",
             prefs.prefExplorerApiUrl,
             OkHttpSingleton.getInstance().newBuilder()
         )
-        refreshNodeListWhenNeeded(prefs)
-        return ergoClient
     }
 
     private fun refreshNodeListWhenNeeded(prefs: PreferencesProvider) {
@@ -486,14 +493,20 @@ object ErgoFacade {
         texts: StringProvider
     ): SendTransactionResult {
         try {
-            val ergoClient = getRestErgoClient(prefs)
-            return ergoClient.execute { ctx ->
-                prefs.lastBlockHeight = ctx.height.toLong()
-                val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
-                val txId = ctx.sendTransaction(signedTx).trim('"')
-                SendTransactionResult(txId.isNotEmpty(), txId, signedTx)
-            }
+            refreshNodeListWhenNeeded(prefs)
+            val nodeUrls = buildNodeFallbackList(prefs.prefNodeUrl, prefs.knownNodesList)
 
+            return executeWithNodeFallback(nodeUrls) { nodeUrl ->
+                createRestErgoClient(nodeUrl, prefs).execute { ctx ->
+                    prefs.lastBlockHeight = ctx.height.toLong()
+                    val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
+                    val txId = ctx.sendTransaction(signedTx).trim('"')
+                    if (txId.isEmpty()) {
+                        throw IOException("Node $nodeUrl returned an empty transaction ID")
+                    }
+                    SendTransactionResult(true, txId, signedTx)
+                }
+            }
         } catch (t: Throwable) {
             return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
         }
