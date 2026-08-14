@@ -33,6 +33,31 @@ const val URL_FORGOT_PASSWORD_HELP =
 const val ERG_BASE_COST = 0
 private const val MAX_NUM_INPUT_BOXES = 100
 
+internal fun buildNodeBroadcastSequence(
+    preferredNodeUrl: String,
+    knownNodeUrls: List<String>
+): List<String> = (listOf(preferredNodeUrl) + knownNodeUrls)
+    .map { it.trim().trimEnd('/') }
+    .filter { it.isNotEmpty() }
+    .distinct()
+
+internal fun <T> sendToFirstAvailableNode(
+    nodeUrls: List<String>,
+    send: (String) -> T
+): T {
+    var lastFailure: Exception? = null
+
+    nodeUrls.forEach { nodeUrl ->
+        try {
+            return send(nodeUrl)
+        } catch (e: Exception) {
+            lastFailure = e
+        }
+    }
+
+    throw lastFailure ?: IllegalStateException("No node URL configured")
+}
+
 var isErgoMainNet: Boolean = true
 
 fun isValidErgoAddress(addressString: String): Boolean {
@@ -435,17 +460,21 @@ object ErgoFacade {
     }
 
     private fun getRestErgoClient(prefs: PreferencesProvider): ErgoClient {
-        val nodeToConnectTo = prefs.prefNodeUrl
-        val ergoClient = RestApiErgoClient.createWithHttpClientBuilder(
-            nodeToConnectTo,
-            getErgoNetworkType(),
-            "",
-            prefs.prefExplorerApiUrl,
-            OkHttpSingleton.getInstance().newBuilder()
-        )
+        val ergoClient = getRestErgoClient(prefs.prefNodeUrl, prefs)
         refreshNodeListWhenNeeded(prefs)
         return ergoClient
     }
+
+    private fun getRestErgoClient(
+        nodeToConnectTo: String,
+        prefs: PreferencesProvider
+    ): ErgoClient = RestApiErgoClient.createWithHttpClientBuilder(
+        nodeToConnectTo,
+        getErgoNetworkType(),
+        "",
+        prefs.prefExplorerApiUrl,
+        OkHttpSingleton.getInstance().newBuilder()
+    )
 
     private fun refreshNodeListWhenNeeded(prefs: PreferencesProvider) {
         if (System.currentTimeMillis() - prefs.lastNodeListRefreshMs > 1000L * 60 * 60 * 24) {
@@ -486,14 +515,20 @@ object ErgoFacade {
         texts: StringProvider
     ): SendTransactionResult {
         try {
-            val ergoClient = getRestErgoClient(prefs)
-            return ergoClient.execute { ctx ->
-                prefs.lastBlockHeight = ctx.height.toLong()
-                val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
-                val txId = ctx.sendTransaction(signedTx).trim('"')
-                SendTransactionResult(txId.isNotEmpty(), txId, signedTx)
-            }
+            refreshNodeListWhenNeeded(prefs)
+            val nodeUrls = buildNodeBroadcastSequence(prefs.prefNodeUrl, prefs.knownNodesList)
 
+            return sendToFirstAvailableNode(nodeUrls) { nodeUrl ->
+                val ergoClient = getRestErgoClient(nodeUrl, prefs)
+                ergoClient.execute { ctx ->
+                    prefs.lastBlockHeight = ctx.height.toLong()
+                    val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
+                    val txId = ctx.sendTransaction(signedTx).trim('"')
+                    if (txId.isEmpty())
+                        throw IllegalStateException("Node returned an empty transaction id")
+                    SendTransactionResult(true, txId, signedTx)
+                }
+            }
         } catch (t: Throwable) {
             return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
         }
