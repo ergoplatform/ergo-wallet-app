@@ -15,7 +15,6 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">?attr/colorSurface</item>
         <item name="android:windowLightStatusBar">@bool/isLight</item>
-	<item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
 
         <!-- Buttons -->
         <item name="borderlessButtonStyle">@style/Widget.App.Button.TextButton</item>
