@@ -14,3 +14,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Signing material — never commit
+ergosigningkey
+encrypted_key.zip
+encryption_public_key.pem
+pepk.jar
+gradle/verification-metadata.xml.bak

@@ -8,7 +8,9 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricPrompt
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -73,14 +75,42 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        // check if soft keyboard is open and hide bottom nav bar
-        window.decorView.setOnApplyWindowInsetsListener { view, insets ->
-            val insetsCompat = WindowInsetsCompat.toWindowInsetsCompat(insets, view)
-            val isOpen = insetsCompat.isVisible(WindowInsetsCompat.Type.ime())
-            navView.visibility = if (isOpen) View.GONE else View.VISIBLE
-            _keyboardStateFlow.value = isOpen
-            view.onApplyWindowInsets(insets)
+        // Edge-to-edge is enforced from Android 15 (targetSdk 35), so the window draws
+        // behind the status bar and gesture/navigation bar. Apply system bar insets as
+        // padding on the chrome views so content does not overlap with them.
+        //
+        // The nav_host_fragment is anchored to the top of the parent (not below the
+        // toolbar), so each fragment's own top header draws at y=0 and overlaps the
+        // status bar unless we add the top inset to the host container too.
+        val toolbar = findViewById<View>(R.id.toolbar)
+        val navHostFragmentView = findViewById<View>(R.id.nav_host_fragment)
+        val lockedView = findViewById<View>(R.id.layout_app_locked)
+        val toolbarBasePaddingTop = toolbar.paddingTop
+        val navHostBasePaddingTop = navHostFragmentView.paddingTop
+        val navViewBasePaddingBottom = navView.paddingBottom
+        val lockedBasePaddingTop = lockedView.paddingTop
+        val lockedBasePaddingBottom = lockedView.paddingBottom
+
+        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            toolbar.updatePadding(top = toolbarBasePaddingTop + bars.top)
+            navHostFragmentView.updatePadding(top = navHostBasePaddingTop + bars.top)
+            navView.updatePadding(bottom = navViewBasePaddingBottom + bars.bottom)
+            lockedView.updatePadding(
+                top = lockedBasePaddingTop + bars.top,
+                bottom = lockedBasePaddingBottom + bars.bottom,
+            )
+
+            // hide bottom nav bar while soft keyboard is open
+            val isImeOpen = insets.isVisible(WindowInsetsCompat.Type.ime())
+            navView.visibility = if (isImeOpen) View.GONE else View.VISIBLE
+            _keyboardStateFlow.value = isImeOpen
+
+            insets
         }
+        ViewCompat.requestApplyInsets(window.decorView)
 
         if (savedInstanceState == null) {
             handleIntent(navController)
