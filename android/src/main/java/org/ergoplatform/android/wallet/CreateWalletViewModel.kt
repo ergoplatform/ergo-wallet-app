@@ -2,7 +2,7 @@ package org.ergoplatform.android.wallet
 
 import androidx.lifecycle.ViewModel
 import org.ergoplatform.appkit.Mnemonic
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 
 class CreateWalletViewModel : ViewModel() {
     private var _mnemonic: SecretString? = null

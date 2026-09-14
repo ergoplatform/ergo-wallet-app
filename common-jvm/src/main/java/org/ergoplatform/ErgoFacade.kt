@@ -2,9 +2,11 @@ package org.ergoplatform
 
 import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.appkit.*
+import org.ergoplatform.sdk.ErgoToken
 import org.ergoplatform.appkit.babelfee.BabelFeeOperations
 import org.ergoplatform.appkit.impl.InputBoxImpl
 import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
+import org.ergoplatform.sdk.JavaHelpers
 import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletToken
@@ -15,7 +17,7 @@ import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
-import org.ergoplatform.wallet.secrets.ExtendedPublicKey
+import org.ergoplatform.sdk.wallet.secrets.ExtendedPublicKey;
 import scala.collection.JavaConversions
 import sigmastate.interpreter.HintsBag
 import sigmastate.serialization.`SigmaSerializer$`

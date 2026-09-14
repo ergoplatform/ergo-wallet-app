@@ -3,6 +3,7 @@ package org.ergoplatform.android.transactions
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,7 +47,7 @@ class SigningPromptDialogFragment : BottomSheetDialogFragment() {
             ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                Handler().post { refreshButtonState() }
+                Handler(Looper.getMainLooper()).post { refreshButtonState() }
             }
         })
         binding.buttonScanSignedTx.setOnClickListener {

@@ -1,6 +1,6 @@
 package org.ergoplatform.ios.wallet
 
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.STRING_INTRO_RESTORE_WALLET
 import org.ergoplatform.uilogic.STRING_LABEL_RESTORE_WALLET

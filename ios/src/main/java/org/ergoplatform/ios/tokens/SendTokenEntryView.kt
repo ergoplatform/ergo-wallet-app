@@ -3,7 +3,7 @@ package org.ergoplatform.ios.tokens
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.TokenAmount
 import org.ergoplatform.WalletStateSyncManager
-import org.ergoplatform.appkit.ErgoToken
+import org.ergoplatform.sdk.ErgoToken
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.persistance.TokenPrice
 import org.ergoplatform.persistance.WalletToken

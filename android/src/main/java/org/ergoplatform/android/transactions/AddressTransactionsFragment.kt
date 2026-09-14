@@ -106,7 +106,7 @@ class AddressTransactionsFragment : Fragment(), AddressChooserCallback {
             num?.let {
                 MaterialAlertDialogBuilder(requireContext())
                     .setMessage(getString(R.string.info_export, num))
-                    .setPositiveButton(R.string.zxing_button_ok, null)
+                    .setPositiveButton(android.R.string.ok, null)
                     .show()
             }
         }

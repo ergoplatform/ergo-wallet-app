@@ -10,7 +10,7 @@ import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentConfirmCreateWalletBinding
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
 import org.ergoplatform.android.ui.navigateSafe
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.uilogic.wallet.ConfirmCreateWalletUiLogic
 
 /**

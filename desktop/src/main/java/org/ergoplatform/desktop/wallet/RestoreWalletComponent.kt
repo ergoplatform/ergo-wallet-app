@@ -8,7 +8,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.push
 import org.ergoplatform.Application
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
