@@ -18,9 +18,9 @@ import org.ergoplatform.utils.getMessageOrName
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
 import org.ergoplatform.sdk.wallet.secrets.ExtendedPublicKey;
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters
 import sigmastate.interpreter.HintsBag
-import sigmastate.serialization.`SigmaSerializer$`
+import sigma.serialization.`SigmaSerializer$`
 import java.nio.charset.StandardCharsets
 import java.util.HashMap
 import kotlin.math.max
@@ -110,7 +110,7 @@ fun getSerializedXpubKeyFromMnemonic(signingSecrets: SigningSecrets) =
  * loads the word list used to generate new mnemonics into a list
  */
 fun loadAppKitMnemonicWordList(): List<String> {
-    return JavaConversions.seqAsJavaList(WordList.load(Mnemonic.LANGUAGE_ID_ENGLISH).get().words())
+    return JavaConverters.seqAsJavaList(WordList.load(Mnemonic.LANGUAGE_ID_ENGLISH).get().words())
 }
 
 object ErgoFacade {
