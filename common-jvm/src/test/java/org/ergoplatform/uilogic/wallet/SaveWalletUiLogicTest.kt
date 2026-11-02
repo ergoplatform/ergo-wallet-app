@@ -1,6 +1,6 @@
 package org.ergoplatform.uilogic.wallet
 
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.isErgoMainNet
 import org.junit.Assert.assertEquals

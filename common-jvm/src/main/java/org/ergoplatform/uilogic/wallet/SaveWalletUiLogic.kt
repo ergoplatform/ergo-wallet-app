@@ -4,7 +4,7 @@ import kotlinx.coroutines.*
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.WalletStateSyncManager
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.getPublicErgoAddressFromMnemonic
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig

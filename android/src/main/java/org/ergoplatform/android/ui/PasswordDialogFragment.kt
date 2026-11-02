@@ -13,7 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.ergoplatform.URL_FORGOT_PASSWORD_HELP
 import org.ergoplatform.android.R
 import org.ergoplatform.android.databinding.FragmentPasswordDialogBinding
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 
 const val ARG_SHOW_CONFIRMATION = "ARG_SHOW_CONFIRMATION"
 

@@ -1,7 +1,7 @@
 package org.ergoplatform.uilogic.wallet
 
 import org.ergoplatform.MNEMONIC_WORDS_COUNT
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import kotlin.random.Random
 
 class ConfirmCreateWalletUiLogic() {

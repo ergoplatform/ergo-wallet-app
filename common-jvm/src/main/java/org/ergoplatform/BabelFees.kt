@@ -1,6 +1,8 @@
 package org.ergoplatform
 
 import org.ergoplatform.appkit.*
+import org.ergoplatform.sdk.ErgoToken
+import org.ergoplatform.sdk.ErgoId
 import org.ergoplatform.appkit.babelfee.BabelFeeBoxContract
 import org.ergoplatform.appkit.babelfee.BabelFeeBoxState
 import org.ergoplatform.appkit.impl.ErgoTreeContract

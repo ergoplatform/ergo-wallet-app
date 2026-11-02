@@ -457,7 +457,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             },
             showErrorMessage = {
                 MaterialAlertDialogBuilder(requireContext()).setMessage(it)
-                    .setPositiveButton(R.string.zxing_button_ok, null)
+                    .setPositiveButton(android.R.string.ok, null)
                     .show()
             })
     }

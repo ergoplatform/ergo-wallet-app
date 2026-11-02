@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.Preferences
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.uilogic.wallet.SaveWalletUiLogic
 
 class SaveWalletViewModel : ViewModel() {

@@ -6,7 +6,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.api.AesEncryptionManager
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.ios.api.IosAuthentication
 import org.ergoplatform.ios.api.IosEncryptionManager
 import org.ergoplatform.ios.ui.*

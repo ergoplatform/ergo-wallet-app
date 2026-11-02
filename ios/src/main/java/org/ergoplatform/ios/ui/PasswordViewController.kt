@@ -1,7 +1,7 @@
 package org.ergoplatform.ios.ui
 
 import org.ergoplatform.URL_FORGOT_PASSWORD_HELP
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.uilogic.*
 import org.robovm.apple.uikit.*
 
