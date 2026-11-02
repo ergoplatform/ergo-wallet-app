@@ -112,6 +112,7 @@ task convertStrings {
         convertFile("ru")
         convertFile("in")
         convertFile("ms")
+        convertFile("jv")
     }
 }
 
