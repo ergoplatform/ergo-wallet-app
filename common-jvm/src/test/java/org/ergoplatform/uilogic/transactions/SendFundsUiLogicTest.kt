@@ -1,8 +1,10 @@
 package org.ergoplatform.uilogic.transactions
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TestPreferencesProvider
@@ -13,9 +15,40 @@ import org.ergoplatform.uilogic.TestUiWallet
 import org.junit.Assert.*
 import org.junit.Test
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import retrofit2.Call
+import retrofit2.Response
 import kotlin.coroutines.EmptyCoroutineContext
 
 class SendFundsUiLogicTest {
+
+    @Test
+    fun convertsWaitMillisecondsBeforeNarrowingToMinutes() {
+        assertEquals(0, waitTimeMillisToMinutes(0L))
+        assertEquals(1, waitTimeMillisToMinutes(60_000L))
+        assertEquals(3, waitTimeMillisToMinutes(120_001L))
+        assertEquals(35_792, waitTimeMillisToMinutes(Int.MAX_VALUE.toLong() + 1L))
+        assertEquals(Int.MAX_VALUE, waitTimeMillisToMinutes(Long.MAX_VALUE))
+    }
+
+    @Test
+    fun appliesNodeWaitMillisecondsToSelectedFee() {
+        val waitTimeCall = mock<Call<Long>>()
+        whenever(waitTimeCall.execute()).thenReturn(Response.success(Int.MAX_VALUE.toLong() + 1L))
+        val apiService = mock<ApiServiceManager>()
+        val selectedFee = Parameters.MinFee + 1L
+        whenever(apiService.getExpectedWaitTime(selectedFee, 1000)).thenReturn(waitTimeCall)
+
+        val uiLogic = TestSendFundsUiLogic()
+        uiLogic.setNewFeeAmount(ErgoAmount(selectedFee), apiService)
+        val observedMinutes = runBlocking {
+            withTimeout(5_000L) { uiLogic.feeWaitTimeReady.await() }
+        }
+
+        assertEquals(35_792, observedMinutes)
+        assertEquals(35_792, uiLogic.feeMinutesToWait)
+        assertEquals(selectedFee, uiLogic.feeAmount.nanoErgs)
+    }
 
     @Test
     fun checkCanMakePayment() {
@@ -86,6 +119,8 @@ class SendFundsUiLogicTest {
 
     class TestSendFundsUiLogic : SendFundsUiLogic() {
 
+        val feeWaitTimeReady = CompletableDeferred<Int>()
+
         override val coroutineScope: CoroutineScope
             get() = CoroutineScope(EmptyCoroutineContext)
 
@@ -106,7 +141,7 @@ class SendFundsUiLogicTest {
         }
 
         override fun notifyAmountsChanged() {
-
+            feeMinutesToWait?.let { feeWaitTimeReady.complete(it) }
         }
 
         override fun notifyBalanceChanged() {
