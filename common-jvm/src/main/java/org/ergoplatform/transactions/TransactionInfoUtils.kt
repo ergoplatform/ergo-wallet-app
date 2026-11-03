@@ -21,7 +21,7 @@ import org.ergoplatform.uilogic.STRING_WARNING_BURNING_TOKENS
 import org.ergoplatform.uilogic.STRING_WARNING_OLD_CREATION_HEIGHT
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.Base64Coder
-import special.collection.Coll
+import sigma.Coll
 import kotlin.math.min
 
 /**

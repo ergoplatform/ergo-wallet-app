@@ -19,6 +19,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+sourceSets {
+    bootCompat {
+        java.srcDirs = ['src/bootCompat/java']
+    }
+}
+
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         jvmTarget = "1.8"
@@ -126,8 +132,8 @@ dependencies {
     implementation(project(path: ':common-jvm')){
         // normal compile no change iOS: 90 sec
         // exclude kiama, sigma-state, ergo-wallet: 20 sec
-        // exclude group: 'org.scorexfoundation', module: 'sigma-state_2.11'
-        //exclude group: 'org.ergoplatform', module: 'ergo-wallet_2.11'
+        // exclude group: 'org.scorexfoundation', module: 'sigma-state_2.12'
+        //exclude group: 'org.ergoplatform', module: 'ergo-wallet_2.12'
     }
 
     implementation project(path: ':sqldelight')
@@ -139,4 +145,84 @@ dependencies {
     // Mosaik
     implementation "com.github.MrStahlfelge.mosaik:common-abstractui:$mosaik_version"
     implementation "org.jetbrains:markdown-jvm:0.3.1"
+
+    bootCompatCompileOnly "com.mobidevelop.robovm:robovm-rt:${robovm_version}"
+}
+
+tasks.named("classes") {
+    dependsOn("bootCompatClasses")
+}
+
+tasks.withType(org.robovm.gradle.tasks.AbstractRoboVMTask).configureEach {
+    dependsOn("bootCompatClasses", configurations.runtimeClasspath)
+}
+
+class RoboVmSmokeTestTask extends org.robovm.gradle.tasks.AbstractRoboVMTask {
+    @Override
+    protected org.robovm.compiler.config.Config.Builder configure(org.robovm.compiler.config.Config.Builder builder) {
+        super.configure(builder)
+        project.sourceSets.test.output.classesDirs.files.each { dir ->
+            if (dir.exists()) {
+                builder.addClasspathEntry(dir)
+            }
+        }
+        def testRes = project.sourceSets.test.output.resourcesDir
+        if (testRes != null && testRes.exists()) {
+            builder.addClasspathEntry(testRes)
+        }
+        // Console smoke test uses no Swift libraries; disabling Swift library discovery
+        // avoids MobiVM 3.0.0 Executor.execCapture() racing xcode-select stdout on macOS.
+        builder.read(
+                new StringReader("<config><swiftSupport><enable>false</enable></swiftSupport></config>"),
+                project.projectDir
+        )
+        builder.mainClass("org.ergoplatform.ios.IosMobiVmSmokeTest")
+        return builder
+    }
+
+    @org.gradle.api.tasks.TaskAction
+    @Override
+    void invoke() {
+        def arch = org.robovm.compiler.config.Arch.getDefaultArch()
+        if (extension.arch != null) {
+            arch = org.robovm.compiler.config.Arch.parse(extension.arch)
+        }
+        def smokeInstallDir = new File(project.buildDir, "robovm-smoke")
+        def builder = configure(new org.robovm.compiler.config.Config.Builder())
+                .os(org.robovm.compiler.config.OS.getDefaultOS())
+                .arch(arch)
+                .targetType("console")
+                .skipInstall(false)
+                .installDir(smokeInstallDir)
+        def config = builder.build()
+        def compiler = new org.robovm.compiler.AppCompiler(config)
+        compiler.build()
+        compiler.install()
+
+        def executable = new File(smokeInstallDir, config.executableName)
+        def proc = new ProcessBuilder(executable.absolutePath)
+                .directory(smokeInstallDir)
+                .redirectErrorStream(true)
+                .start()
+        def outputPump = Thread.startDaemon("robovm-smoke-stdout") {
+            proc.inputStream.eachLine("UTF-8") { line ->
+                logger.lifecycle(line)
+            }
+        }
+        boolean finished = proc.waitFor(180, java.util.concurrent.TimeUnit.SECONDS)
+        if (!finished) {
+            proc.destroyForcibly()
+            throw new GradleException("MobiVM native smoke test timed out after 180 seconds")
+        }
+        outputPump.join(5000)
+        int exitCode = proc.exitValue()
+        if (exitCode != 0) {
+            throw new GradleException("MobiVM native smoke test failed with exit code " + exitCode)
+        }
+    }
+}
+
+tasks.register("robovmSmokeTest", RoboVmSmokeTestTask) {
+    description = "Compiles and executes the headless MobiVM native runtime smoke test"
+    dependsOn("build", "testClasses", configurations.runtimeClasspath, configurations.testRuntimeClasspath)
 }

@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId "org.ergoplatform.android"
-        minSdk 24
+        minSdk 26
         targetSdk 35
         versionCode 2609
         versionName "2.5.0"
