@@ -23,6 +23,14 @@ import org.ergoplatform.utils.formatFiatToString
 import org.ergoplatform.wallet.*
 import kotlin.math.max
 
+internal fun waitTimeMillisToMinutes(waitTimeMillis: Long): Int {
+    if (waitTimeMillis <= 0L) return 0
+
+    // Round up a positive estimate without overflowing Long before narrowing to the UI's Int.
+    val minutes = (waitTimeMillis - 1L) / 60_000L + 1L
+    return minutes.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+}
+
 abstract class SendFundsUiLogic : SubmitTransactionUiLogic(), FilterTokenListUiLogic {
 
     var receiverAddress: String = ""
@@ -120,7 +128,7 @@ abstract class SendFundsUiLogic : SubmitTransactionUiLogic(), FilterTokenListUiL
                 ergoApiService.getExpectedWaitTime(
                     feeAmount.nanoErgs,
                     feeTxSize
-                ).execute().body()?.toInt()
+                ).execute().body()?.let(::waitTimeMillisToMinutes)
             } catch (t: Throwable) {
                 LogUtils.logDebug(
                     this.javaClass.simpleName,
