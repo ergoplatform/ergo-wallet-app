@@ -437,16 +437,69 @@ object ErgoFacade {
     }
 
     private fun getRestErgoClient(prefs: PreferencesProvider): ErgoClient {
-        val nodeToConnectTo = prefs.prefNodeUrl
-        val ergoClient = RestApiErgoClient.createWithHttpClientBuilder(
-            nodeToConnectTo,
+        refreshNodeListWhenNeeded(prefs)
+        return createRestErgoClient(prefs.prefNodeUrl, prefs)
+    }
+
+    private fun createRestErgoClient(nodeUrl: String, prefs: PreferencesProvider): ErgoClient {
+        return RestApiErgoClient.createWithHttpClientBuilder(
+            asNodeApiUrl(nodeUrl),
             getErgoNetworkType(),
             "",
             prefs.prefExplorerApiUrl,
             OkHttpSingleton.getInstance().newBuilder()
         )
-        refreshNodeListWhenNeeded(prefs)
-        return ergoClient
+    }
+
+    /**
+     * Node REST API urls a transaction should be broadcast to, in the order they should be
+     * tried: the preferred node first, then the known nodes. Duplicates and trailing slashes
+     * are removed.
+     */
+    internal fun getNodeCandidates(prefs: PreferencesProvider): List<String> {
+        // The preferred node is stored with a trailing slash, while peer nodes usually come
+        // without one, so normalize both forms before comparing and de-duplicating them.
+        return (listOf(prefs.prefNodeUrl) + prefs.knownNodesList)
+            .map { it.trim().trimEnd('/') }
+            .filter { it.isNotEmpty() }
+            .distinct()
+    }
+
+    // appkit builds REST paths from this base url, so it has to end with a slash
+    private fun asNodeApiUrl(nodeUrl: String) =
+        if (nodeUrl.endsWith("/")) nodeUrl else "$nodeUrl/"
+
+    /**
+     * Tries [attempt] for every node in order and returns the first successful result.
+     * When no node accepts the transaction, the result carries the last error.
+     */
+    internal fun broadcastToNodes(
+        nodes: List<String>,
+        texts: StringProvider,
+        attempt: (String) -> SendTransactionResult
+    ): SendTransactionResult {
+        var lastError: Throwable? = null
+        nodes.forEach { nodeUrl ->
+            try {
+                val result = attempt(nodeUrl)
+                // A node may answer with an empty transaction id. Treat that as a failed
+                // attempt and let the next node accept the same signed transaction.
+                if (result.success && !result.txId.isNullOrEmpty()) return result
+                lastError = IllegalStateException(
+                    result.errorMsg ?: "Node $nodeUrl did not return a transaction id"
+                )
+            } catch (t: Throwable) {
+                // Keep the latest error so the user sees the most recent failure reason.
+                lastError = t
+            }
+        }
+        return SendTransactionResult(
+            false,
+            errorMsg = getErrorMessage(
+                lastError ?: IllegalStateException("No node available to send the transaction"),
+                texts
+            )
+        )
     }
 
     private fun refreshNodeListWhenNeeded(prefs: PreferencesProvider) {
@@ -481,23 +534,26 @@ object ErgoFacade {
 
     /**
      * Sends a serialized and signed transaction
+     *
+     * The transaction is broadcast to the preferred node first and, if that node is not
+     * available or rejects it, to the known nodes in order. The transaction is parsed and
+     * sent on every attempt, but it is signed only once by the caller, so no double spending
+     * can happen: the same bytes are submitted to every node until one accepts them.
      */
     fun sendSignedErgoTx(
         signedTxSerialized: ByteArray,
         prefs: PreferencesProvider,
         texts: StringProvider
     ): SendTransactionResult {
-        try {
-            val ergoClient = getRestErgoClient(prefs)
-            return ergoClient.execute { ctx ->
+        refreshNodeListWhenNeeded(prefs)
+        return broadcastToNodes(getNodeCandidates(prefs), texts) { nodeUrl ->
+            val ergoClient = createRestErgoClient(nodeUrl, prefs)
+            ergoClient.execute { ctx ->
                 prefs.lastBlockHeight = ctx.height.toLong()
                 val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
                 val txId = ctx.sendTransaction(signedTx).trim('"')
                 SendTransactionResult(txId.isNotEmpty(), txId, signedTx)
             }
-
-        } catch (t: Throwable) {
-            return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
         }
     }
 
