@@ -1,0 +1,421 @@
+<resources>
+    <string name="app_name" translatable="false">Ergo Wallet</string>
+    <string name="title_transactions">Transaksi</string>
+    <string name="title_wallets">Dompet</string>
+    <string name="title_settings">Tetapan</string>
+    <string name="format_erg" translatable="false">###,##0.0000</string>
+    <string name="format_erg_more_precise" translatable="false">###,##0.000000</string>
+    <string name="format_fiat" translatable="false">###,##0.00</string>
+    <string name="button_unlock">Buka kunci aplikasi</string>
+
+    <string name="hint_password">Sila masukkan kata laluan perbelanjaan anda</string>
+    <string name="label_forgot_password">Lupa kata laluan anda?</string>
+    <string name="err_password">Kata laluan mestilah sekurang-kurangnya 8 aksara panjang</string>
+    <string name="label_password">Kata laluan</string>
+    <string name="label_password_confirm">Sahkan kata laluan</string>
+    <string name="err_password_confirm">Kata laluan tidak sepadan</string>
+    <string name="button_done">Selesai</string>
+    <string name="button_apply">Guna</string>
+    <string name="button_copy">Salin</string>
+    <string name="label_copied">Disalin!</string>
+    <string name="label_qr_code">Kod QR</string>
+    <string name="label_amount">Jumlah</string>
+    <string name="hint_amount_currency">Jumlah (%1$s)</string>
+    <string name="label_purpose">Tujuan</string>
+    <string name="label_share">Kongsi</string>
+    <string name="label_open_in_explorer">Buka dalam Explorer</string>
+    <string name="button_delete">Padam</string>
+    <string name="label_export">Eksport</string>
+    <string name="button_yes">Ya</string>
+    <string name="button_reload">Muat semula</string>
+    <string name="button_retry">Cuba semula</string>
+    <string name="label_cancel">Batal</string>
+    <string name="label_none">Tiada</string>
+    <string name="label_details">Butiran</string>
+    <string name="label_dismiss">Tolak</string>
+    <string name="label_remove">Alih keluar</string>
+    <string name="label_confirm">Sahkan</string>
+    <string name="button_back">Kembali</string>
+    <string name="label_erg_amount">%1$s ERG</string>
+    <string name="label_time_span_just_now">baru sahaja</string>
+    <string name="label_time_span_moments_ago">beberapa ketika yang lalu</string>
+    <string name="label_time_span_minutes_ago">%1$s minit yang lalu</string>
+    <string name="label_time_span_hours_ago">%1$s jam yang lalu</string>
+    <string name="label_time_span_days_ago">%1$s hari yang lalu</string>
+    <string name="error_camera">Ralat memulakan kamera. Sila semak tetapan privasi anda.</string>
+    <string name="desc_copy_sensitive_data">Sila ambil perhatian bahawa dengan menyalin data ke papan 
+        keratan peranti, setiap aplikasi yang berjalan pada peranti ini boleh mengaksesnya selagi anda tidak menulis 
+        ganti data papan keratan tersebut. Anda melakukan ini atas risiko sendiri.</string>
+    <string name="button_copy_sensitive_data">Salin dan terima risiko</string>
+    <string name="error_no_wallet">Belum ada dompet yang ditambahkan pada aplikasi ini lagi.</string>
+
+    <!-- Wallet -->
+    <string name="label_tokens">token</string>
+    <string name="label_more_tokens">lebih banyak token</string>
+    <string name="label_unnamed_token">(token tanpa nama)</string>
+    <string name="label_unconfirmed">tidak disahkan</string>
+    <string name="button_receive">Terima</string>
+    <string name="button_send">Hantar</string>
+    <string name="button_display_currency">Paparkan mata wang: %1$s</string>
+    <string name="label_last_sync">disinkronkan %1$s</string>
+    <string name="label_erg_price">1 ERG ≈</string>
+    <string name="label_fiat_amount">≈ %1$s</string>
+    <string name="label_wallet_default">Dompet saya</string>
+    <string name="label_readonly_wallet_default">Dompet saya (Baca sahaja)</string>
+    <string name="hint_signing_request">Sila imbas permintaan penandatanganan daripada skrin 
+       Hantar dana Dompet yang sesuai.</string>
+    <string name="hint_readonly_signing_request">Anda mengimbas permintaan penandatanganan, tetapi dompet ini 
+        ditetapkan sebagai baca sahaja. Sila pulihkan menggunakan mnemonik anda.</string>
+    <string name="error_qr_code_content_unknown">Kod QR yang diimbas bukan daripada format yang dikenali.</string>
+    <string name="hint_auth_request">Nampaknya anda mengimbas permintaan pengesahan, tetapi bahagian ini adalah untuk menghantar dana. 
+        Sila imbas permintaan pengesahan dari skrin utama atau skrin butiran dompet.</string>
+
+    <!-- add wallet -->
+    <string name="menu_add_wallet">Tambah dompet</string>
+    <string name="label_create_wallet">Dompet baharu</string>
+    <string name="desc_create_wallet">Mencipta dompet (kunci dan alamat) daripada mnemonik yang dijana secara rawak.</string>
+    <string name="label_restore_wallet">Pulihkan dompet</string>
+    <string name="desc_restore_wallet">Memulihkan kunci dan alamat dompet daripada frasa mnemonik.</string>
+    <string name="label_import_wallet">Import dompet</string>
+    <string name="desc_import_wallet">Gunakan fail dompet yang dieksport atau disimpan untuk mengimport dompet sedia ada (kunci dan alamat).</string>
+    <string name="label_readonly_wallet">Dompet baca sahaja</string>
+    <string name="desc_readonly_wallet">Tambah alamat dompet dalam mod baca sahaja. Ini tidak akan menyimpan sebarang rahsia pada peranti ini.</string>
+
+    <!-- add readonly wallet -->
+    <string name="intro_add_readonly">Masukkan alamat dompet awam atau kunci awam lanjutan anda untuk menambah 
+        dompet dalam mod baca sahaja.</string>
+    <string name="label_wallet_address">Alamat dompet atau kunci</string>
+    <string name="error_address_already_added">Alamat telah ditambahkan pada \'%1$s\'</string>
+    <string name="error_invalid_readonly_input">Bukan alamat ERG atau kunci awam yang sah</string>
+
+    <!-- Create wallet -->
+    <string name="intro_create_wallet">Ini ialah mnemonik dompet Ergo 15 perkataan anda. Perkataan ini juga dikenali sebagai frasa benih atau 
+        kunci kertas. 
+        Dengan 15 perkataan ini, anda boleh memulihkan dompet anda pada peranti lain jika anda kehilangan akses kepada peranti ini.\nSangat penting 
+    untuk anda menyalin kesemua 15 perkataan dengan teliti (menggunakan pen dan kertas) dan menyimpannya di tempat yang selamat.</string>
+    <string name="intro_confirm_create_wallet">To mengesahkan bahawa mnemonik tulisan tangan anda adalah betul, masukkan dua perkataan daripada frasa tersebut sekarang:</string>
+    <string name="check_confirm_create_wallet">Saya faham bahawa saya bertanggungjawab untuk menyimpan mnemonik saya di tempat yang selamat. 
+    Ia merupakan satu-satunya cara untuk mengakses dompet saya jika kunci yang disimpan pada peranti ini hilang atau tidak boleh diakses.</string>
+    <string name="label_word_confirm_create_wallet">Perkataan %1$s</string>
+    <string name="error_word_confirm_create_wallet">Perkataan tidak betul</string>
+
+    <!-- Restore wallet -->
+    <string name="intro_restore_wallet">Masukkan mnemonik dompet Ergo anda untuk menjana semula dompet tersebut.</string>
+    <string name="label_restore_wallet_word_list">Menghadapi masalah membaca nota anda? 
+        <a href="https://github.com/ergoplatform/ergo/blob/master/ergo-wallet/src/main/resources/wordlist/english.txt">Semak senarai perkataan</a> 
+            dan bandingkan.</string>
+    <string name="button_restore">Pulihkan dompet</string>
+    <string name="mnemonic_length_not_enough">Beberapa perkataan hilang daripada mnemonik anda. Tambah sekurang-kurangnya %1$s lagi.</string>
+    <string name="mnemonic_unknown_words">Mnemonik mengandungi perkataan yang tidak sah. Semak jika ada kesilapan ejaan.</string>
+    <string name="mnemonic_invalid">Pengesahan mnemonik gagal. Jika anda pasti anda telah memasukkannya dengan betul, anda boleh ketik sekali lagi untuk meneruskan.</string>
+
+    <string name="hint_desktop_kya">Sila baca dan fahami KYA (Kenali Andaian Anda) kami <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/develop/desktop/RUN.md#know-your-assumptions">mengenai penyimpanan rahsia anda</a>. Untuk keselamatan terbaik, gunakan <a href="https://github.com/ergoplatform/ergo-wallet-app/wiki/Cold-wallet">dompet sejuk (cold wallet)</a>.
+    </string>
+
+    <!-- Save wallet -->
+    <string name="intro_save_wallet">Alamat awam utama dompet anda ialah:</string>
+    <string name="intro_save_wallet2">Anda boleh menambah alamat tambahan kemudian.</string>
+    <string name="intro_save_wallet_derived_addresses_num">Menemui %1$s jumlah alamat yang digunakan.</string>
+    <string name="intro_save_wallet3">Pilih cara dompet dan kunci harus disimpan pada peranti ini.</string>
+    <string name="button_alt_address">Ini bukan alamat saya</string>
+    <string name="button_save_password_encrypted">Simpan dengan penyulitan kata laluan</string>
+    <string name="desc_save_password_encrypted">Masukkan frasa kata laluan yang perlu anda masukkan semula setiap kali anda ingin menghantar dana.</string>
+    <string name="button_save_device_encrypted">Simpan dengan penyulitan peranti</string>
+    <string name="desc_save_device_encrypted">Sahkan pada peranti anda untuk menyimpan dompet dan menghantar dana.\nKaedah pengesahan semasa: %1$s</string>
+    <string name="button_save_keychain">Simpan dalam rantai kunci</string>
+    <string name="desc_save_keychain">Sahkan pada peranti anda untuk menghantar dana.</string>
+    <string name="device_enc_security_none">Tiada</string>
+    <string name="device_enc_security_pass">Kata laluan, PIN atau corak</string>
+    <string name="device_enc_security_biometric_strong">Biometrik dengan keselamatan tinggi</string>
+    <string name="device_enc_security_biometric_weak">Biometrik, Kelas 2</string>
+
+    <!-- Wallet config -->
+    <string name="title_wallet_details">Konfigurasi dompet</string>
+    <string name="label_wallet_name">Nama dompet deskriptif</string>
+    <string name="label_changes_saved">Perubahan disimpan</string>
+    <string name="label_confirm_delete">Adakah anda pasti ingin memadamkan dompet daripada peranti ini?\nTindakan ini tidak boleh ditarik balik.</string>
+    <string name="desc_display_mnemonic">Anda boleh memaparkan mnemonik anda (frasa benih, kunci kertas) sekiranya anda kehilangan sandaran anda, atau untuk mengesahkan bahawa sandaran anda adalah betul.</string>
+    <string name="button_display_mnemonic">Paparkan mnemonik</string>
+    <string name="desc_display_xpubkey">Anda boleh menambah dompet ini sebagai dompet baca sahaja pada aplikasi dompet lain menggunakan kunci awam lanjutan anda. Tiada maklumat rahsia akan dikongsi.</string>
+    <string name="button_display_xpubkey">Paparkan kunci awam</string>
+
+    <!-- Wallet details -->
+    <string name="title_wallet_balance">Baki</string>
+    <string name="label_all_addresses">Kesemua %1$d alamat</string>
+    <string name="transactions_view_more">Lihat lagi</string>
+    <string name="transactions_none_yet">Belum ada transaksi yang dilakukan untuk alamat ini lagi.</string>
+
+    <!-- Transaction list -->
+    <string name="tx_state_waiting">Belum selesai</string>
+    <string name="tx_state_cancelled">Dibatalkan</string>
+    <string name="tx_state_submitted">Dihantar</string>
+    <string name="tx_state_low_confirmations">Dijalankan</string>
+    <string name="tx_state_high_confirmations">Disahkan</string>
+    <string name="tx_download_progress">%1$s transaksi dimuat turun</string>
+    <string name="transactions_load_all_desc">Hujung transaksi yang dimuat turun. Aplikasi Dompet boleh memuat semula semua transaksi anda. Ini mungkin mengambil lama.</string>
+    <string name="transactions_load_all_button">Muat semua transaksi</string>
+    <string name="info_export">Berjaya mengeksport %1$s transaksi.\nJika anda ingin mengeksport lebih banyak transaksi yang terdahulu, skrol senarai mengikut urutan masa.</string>
+
+    <!-- Transaction information -->
+    <string name="title_transaction">Transaksi</string>
+    <string name="title_transaction_inboxes">Jumlah yang dibelanjakan</string>
+    <string name="desc_transaction_inboxes">Jumlah ini telah dibelanjakan oleh transaksi ini.</string>
+    <string name="desc_transaction_outboxes">Jumlah ini telah dihantar oleh transaksi ini.</string>
+    <string name="desc_transaction_waiting">Menunggu pelaksanaan</string>
+    <string name="desc_transaction_execution_time">Dijalankan pada %1$s</string>
+    <string name="button_cancel_tx">Batalkan transaksi</string>
+    <string name="info_cancel_tx">Untuk membatalkan transaksi, anda perlu mengesahkan transaksi baharu dengan yuran yang lebih tinggi daripada transaksi yang ingin dibatalkan, bagi menghantar 
+        semula jumlah tersebut kepada diri anda sendiri.\n
+      Tiada jaminan bahawa transaksi pembatalan baharu akan dijalankan terlebih dahulu. Perhatikan status transaksi pada skrin butiran dompet.</string>
+
+    <!-- Wallet addresses -->
+    <string name="title_wallet_addresses">Alamat</string>
+    <string name="title_wallet_address">Papar kandungan untuk</string>
+    <string name="label_wallet_main_address">Alamat utama</string>
+    <string name="label_wallet_address_derived">Alamat terbitan %1$s</string>
+    <string name="label_wallet_token_balance">%1$s token</string>
+    <string name="desc_wallet_addresses">Sebuah dompet boleh mempunyai pelbagai alamat awam yang diterbitkan daripada alamat utama.</string>
+    <string name="button_add_address">Tambah alamat</string>
+    <string name="button_add_addresses">Tambah %1$d alamat</string>
+    <string name="desc_wallet_addr_label">Tetapkan label deskriptif (hanya kelihatan oleh anda) untuk alamat ini:</string>
+    <string name="hint_wallet_addr_label">Label deskriptif (pilihan)</string>
+    <string name="desc_wallet_addr_remove">Anda boleh mengalih keluar alamat ini daripada paparan aplikasi ini. Ia masih tersedia 
+        di Rangkaian Ergo, boleh menerima pembayaran dan menyimpan baki. Anda boleh menambahkannya semula pada bila-bila masa.</string>
+    <string name="title_choose_address">Pilih alamat</string>
+
+    <!-- Send funds -->
+    <string name="message_switched_input_mode_fiat">Mod input ditukar kepada: Jumlah Fiat</string>
+    <string name="message_switched_input_mode_erg">Mod input ditukar kepada: Jumlah ERG</string>
+    <string name="desc_choose_wallet">Sila pilih dompet untuk menghantar:</string>
+    <string name="label_to">kepada</string>
+    <string name="hint_read_only">Ini ialah dompet baca sahaja. Untuk menghantar dana, anda memerlukan peranti untuk menandatangani transaksi anda. <a href="">Ketahui lebih lanjut.</a></string>
+    <string name="desc_send_funds">Masukkan alamat penerima dan jumlah yang ingin dihantar, atau imbas kod QR.</string>
+    <string name="label_send_from">Daripada: %1$s</string>
+    <string name="label_wallet_balance">Baki: %1$s ERG</string>
+    <string name="label_receiver_address">Alamat penerima</string>
+    <string name="label_scan_qr">Scan QR code</string>
+    <string name="desc_fee">Yuran: %1$s ERG</string>
+    <string name="desc_fee_execution_time">(≈%1$sm)</string>
+    <string name="info_purpose_message">Sila ambil perhatian bahawa mesej tujuan yang dimasukkan akan dilampirkan 
+        pada transaksi keluar dan adalah umum pada rantaian blok.\nJangan 
+        masukkan maklumat sulit atau peribadi.</string>
+    <string name="info_purpose_message_accept">Terima</string>
+    <string name="info_purpose_message_decline">Tolak</string>
+    <string name="error_purpose_message">Terima syarat sebelum menghantar transaksi.</string>
+    <string name="error_receiver_address">Sila masukkan alamat ERG yang sah</string>
+    <string name="error_amount">Sila masukkan jumlah yang sah</string>
+    <string name="error_send_transaction">Tidak dapat menghantar transaksi</string>
+    <string name="error_prepare_transaction">Tidak dapat menyediakan transaksi</string>
+    <string name="error_use_other_node">Beberapa masalah mungkin disebabkan oleh sambungan ke nod yang tidak seiring (out of sync). Anda boleh menyemak dan menukar Nod Ergo pada skrin Tetapan - Tetapan pakar.</string>
+    <string name="error_password_empty">Sila masukkan kata laluan yang sah</string>
+    <string name="error_password_wrong">Kata laluan salah</string>
+    <string name="desc_transaction_send">Transaksi telah berjaya dihantar dan sedang menunggu pengesahan. ID Transaksi:</string>
+    <string name="desc_prompt_signing">Transaksi anda telah disediakan. Imbas kod QR ini 
+       dengan peranti penandatanganan anda untuk meneruskan. Jika anda mengalami masalah mengimbas, kurangkan resolusi menggunakan ikon di bahagian atas.\n\n 
+        Apabila tersedia, imbas kod QR transaksi yang ditandatangani untuk dihantar ke rangkaian.</string>
+    <string name="desc_prompt_signing_multiple">Transaksi anda telah disediakan. Imbas kod-kod QR ini 
+       dengan peranti penandatanganan anda untuk meneruskan. Jika anda mengalami masalah mengimbas, kurangkan resolusi menggunakan ikon di bahagian atas.</string>
+    <string name="button_scan_signed_tx">Imbas tx yang ditandatangani</string>
+    <string name="button_next">Seterusnya</string>
+    <string name="title_authenticate">Pengesahan diperlukan</string>
+    <string name="error_device_security_save_wallet">Tidak dapat menyimpan rahsia dengan penyulitan peranti: %1$s\n\nSila semak sama ada anda telah menetapkan 
+        pengesahan biometrik pada peranti ini.</string>
+    <string name="error_device_security">Ralat keselamatan: %1$s\n\nKemungkinan besar ini disebabkan oleh perubahan dalam tetapan pengesahan peranti. 
+        Jika ralat ini berterusan, sila pulihkan dompet ini dengan mnemonik yang telah anda catat.</string>
+    <string name="error_device_security_cloud_hint">Maklumat untuk menyahsulit rahsia anda tidak dapat dibaca. Sila ambil perhatian 
+        bahawa maklumat ini tidak disandarkan bersama sandaran awan.</string>
+    <string name="label_add_token">Token</string>
+    <string name="label_send_all">Hantar semua</string>
+    <string name="title_add_token">Pilih token untuk dihantar</string>
+    <string name="error_token_amount">Sila masukkan jumlah token yang sah atau alih keluar entri token yang tidak sah</string>
+    <string name="warning_send_to_contract">Alamat yang anda nyatakan ialah alamat kontrak, bukan alamat dompet peribadi. 
+      Sila teruskan hanya jika anda pasti kontrak tersebut boleh memproses pembayaran. Menghantar ke kontrak secara manual boleh menyebabkan dana 
+        tidak boleh dibelanjakan lagi!</string>
+    <string name="error_balance_erg">Baki tidak mencukupi untuk menghantar jumlah yang dinyatakan: hanya %1$s ERG yang tersedia.</string>
+    <string name="error_changebox_amount">Anda perlu menahan sejumlah kecil ERG untuk menyimpan baki token anda yang tinggal.</string>
+    <string name="error_request_token_not_found">Tidak dapat menambah token \'%1$s\'</string>
+    <string name="error_request_token_amount">Tidak dapat menetapkan jumlah yang diminta untuk token \'%1$s\'</string>
+    <string name="error_request_token_but_no_erg">Token diminta, tetapi tiada jumlah ERG. Jumlah lalai akan dihantar.</string>
+    <string name="error_too_many_input_boxes_less_erg">Transaksi yang diminta melebihi had kotak input. Sila kurangkan 
+        jumlah kepada %1$s ERG atau kurang dan cuba lagi.</string>
+    <string name="error_too_many_input_boxes_generic">Transaksi yang diminta melebihi had kotak input. 
+        Sila kurangkan jumlah untuk dihantar dan cuba lagi.</string>
+    <string name="desc_please_rate">Jika anda menyukai aplikasi ini, sila tinggalkan penilaian di kedai aplikasi untuk dilihat oleh orang lain.</string>
+    <string name="button_please_rate">Nilaikan di kedai aplikasi</string>
+
+    <!-- Send funds fee chooser -->
+    <string name="label_fee_custom">Jumlah yuran</string>
+    <string name="label_fee_fast">Pantas</string>
+    <string name="label_fee_medium">Sederhana</string>
+    <string name="label_fee_slow">Perlahan</string>
+    <string name="label_fee_execution_time">Masa pelaksanaan ≈ %1$s min</string>
+
+    <!-- Send funds babel -->
+    <string name="babelfee_hint">Anda tidak mempunyai ERG yang mencukupi untuk menampung yuran transaksi.</string>
+    <string name="babelfee_hint_none">Tiada satu pun daripada token anda yang sesuai untuk menampung yuran transaksi.</string>
+    <string name="babelfee_hint_some">Sebahagian daripada token anda sesuai untuk menampung yuran transaksi. Anda mempunyai pilihan berikut:</string>
+    <string name="babelfee_reduce_amount">Kurangkan jumlah token %2$s yang dihantar supaya jumlah sebanyak %1$s berbaki untuk digunakan sebagai yuran.</string>
+    <string name="babelfee_need_amount">%1$s %2$s token boleh menampung yuran. Walau bagaimanapun, anda hanya mempunyai baki sebanyak %3$s.</string>
+    <string name="babelfee_used">Untuk menampung yuran transaksi sebanyak %1$s ERG, %2$s %3$s token digunakan dalam transaksi ini.</string>
+
+    <!-- Cold wallet signing request screen -->
+    <string name="title_signing_request">Tandatangan</string>
+    <string name="desc_signing_request">Sila semak butiran transaksi yang akan dikeluarkan.</string>
+    <string name="title_inboxes">Jumlah untuk dibelanjakan</string>
+    <string name="title_inputs_spent">%1$s kotak yang akan dibelanjakan</string>
+    <string name="desc_inboxes">Jumlah ini akan dibelanjakan apabila transaksi diproses.</string>
+    <string name="title_outboxes">Jumlah keluar</string>
+    <string name="title_outputs_created">%1$s kotak yang akan dicipta</string>
+    <string name="button_switch_to_boxes">Tukar ke maklumat kotak terperinci</string>
+    <string name="button_switch_to_amounts">Tukar ke paparan jumlah ringkasan</string>
+    <string name="label_qr_pages_info">%1$s daripada %2$s</string>
+    <string name="desc_outboxes">Jumlah ini akan dihantar apabila transaksi diproses.</string>
+    <string name="desc_show_signed">Transaksi anda telah ditandatangani dan perlu dihantar ke rangkaian. 
+        Imbas kod QR ini untuk meneruskan.</string>
+    <string name="desc_show_signed_multiple">Transaksi anda telah ditandatangani dan perlu dihantar ke rangkaian. 
+        Imbas kod-kod QR ini untuk meneruskan.</string>
+
+    <!-- Qr code screen -->
+    <string name="button_image_from_clipboard">Tampal imej dari papan keratan</string>
+    <string name="input_enter_or_paste_manually">atau masukkan/tampal secara manual</string>
+    <string name="error_accessing_webcam">Ralat mengakses kamera web</string>
+    <string name="error_accessing_webcam_macos">Pada MacOS, akses ke kamera web tidak berfungsi disebabkan oleh sekatan keselamatan. Jika anda menggunakan Mac M1, anda boleh menggunakan Aplikasi Ergo Wallet iOS yang boleh mengakses kamera.</string>
+    <string name="hint_no_webcam">Sebagai alternatif, anda boleh menyalin imej kod QR ke papan keratan dan tekan butang di bawah, atau salin kandungan kod QR dan tampalkannya di bawah.</string>
+    <string name="error_no_image_clipboard">Tiada imej ditemui pada papan keratan sistem.\n\nJika anda ingin menampal teks, tampal ke dalam medan teks di bawah.</string>
+    <string name="error_no_qrcode_image_clipboard">Tiada kod QR ditemui dalam imej.\n\nPastikan anda menyalin kod QR bersama margin (ruang tepi).</string>
+
+    <!-- Ergo Pay Signing -->
+    <string name="title_ergo_pay_request">Permintaan Ergo Pay</string>
+    <string name="label_sign_with">Tandatangan dengan: %1$s (%2$s)</string>
+    <string name="label_fetching_data">Meminta data daripada dApp…</string>
+    <string name="label_message_from_dapp">Mesej daripada dApp:\n%1$s</string>
+    <string name="label_error_occured">Ralat telah berlaku:\n%1$s</string>
+    <string name="label_ergo_pay_wrong_address">Permintaan Penandatanganan diterima untuk alamat %1$s, yang tidak tergolong dalam pilihan semasa.</string>
+    <string name="label_ergo_pay_choose_address">Sila pilih alamat untuk memproses Permintaan Ergo Pay.</string>
+    <string name="label_ergo_pay_choose_wallet">Sila pilih dompet untuk memproses Permintaan Ergo Pay.</string>
+    <string name="title_choose_wallet">Pilih dompet</string>
+    <string name="error_prover_cant_sign">Transaksi atau mesej tidak dapat ditandatangani dengan kunci dompet ini.</string>
+    <string name="warning_old_creation_height">Transaksi ini mengandungi kotak output dengan jangka masa lapor diri yang melebihi setahun.</string>
+    <string name="warning_burning_tokens">Transaksi ini membakar token.</string>
+
+    <!-- Ergo Auth Signing -->
+    <string name="intro_auth_request">dApp pada %1$s\nmeminta pengesahan anda untuk\n%2$s.\n\nSahkan 
+        hanya jika anda bersetuju dengan perkara ini.</string>
+    <string name="intro_cold_auth_request">Sebuah dApp meminta pengesahan anda untuk\n%1$s.\n\nSahkan 
+        hanya jika anda bersetuju dengan perkara ini.</string>
+    <string name="desc_secure_conn">Sambungan selamat disahkan oleh %1$s</string>
+    <string name="desc_insecure_conn">Sambungan selamat gagal!</string>
+    <string name="title_ergo_auth_request">Permintaan Pengesahan</string>
+    <string name="error_no_auth_reason">(tiada sebab diberikan)</string>
+    <string name="button_authenticate">Sahkan</string>
+    <string name="desc_authentication_wallet">Dompet yang digunakan untuk pengesahan:</string>
+    <string name="desc_auth_response_send">Pengesahan telah berjaya dihantar ke dApp.</string>
+    <string name="desc_prompt_cold_auth">Imbas kod QR ini 
+       dengan peranti penandatanganan anda untuk mengesahkan. Jika anda mengalami masalah mengimbas, kurangkan resolusi menggunakan ikon di bahagian atas.\n\n 
+        Apabila tersedia, imbas kod QR mesej yang ditandatangani untuk dihantar ke dApp.</string>
+    <string name="desc_prompt_cold_auth_multiple">Imbas kod-kod QR ini 
+       dengan peranti penandatanganan anda untuk mengesahkan. Jika anda mengalami masalah mengimbas, kurangkan resolusi menggunakan ikon di bahagian atas.</string>
+    <string name="button_scan_signed_msg">Imbas mesej yang ditandatangani</string>
+    <string name="error_cold_qr_code_does_not_fit">Kod QR tidak tergolong dalam kod yang diimbas sebelum ini</string>
+    <string name="desc_response_cold_auth">Mesej pengesahan anda telah disediakan dan perlu dihantar ke dApp. 
+        Imbas kod QR ini untuk meneruskan.</string>
+    <string name="desc_response_cold_auth_multiple">Mesej pengesahan anda telah disediakan dan perlu dihantar ke dApp. 
+        Imbas kod-kod QR ini untuk meneruskan.</string>
+
+    <!-- Token information dialog -->
+    <string name="label_minting_tx">Transaksi penempaan (Minting)</string>
+    <string name="label_token_description">Deskripsi token</string>
+    <string name="label_no_description">Tiada</string>
+    <string name="label_token_supply">Jumlah bekalan penuh</string>
+    <string name="label_error_fetching">Tidak dapat mengambil maklumat yang diminta</string>
+    <string name="label_content_link">Pautan kandungan</string>
+    <string name="label_content_hash">Hesy Kandungan</string>
+    <string name="button_validate">Sahkan</string>
+    <string name="desc_download_content">Ergo Wallet boleh memaparkan pratonton kandungan yang dipautkan ke token NFT. 
+        Sila ambil perhatian bahawa kandungan ini dicipta oleh pihak ketiga dan mungkin mengandungi perkara yang tidak diingini.</string>
+    <string name="button_download_content_on">Aktifkan</string>
+    <string name="button_download_content_off">Nyahaktifkan</string>
+    <string name="label_token_generic">Generik</string>
+    <string name="label_token_image">Imej</string>
+    <string name="label_token_audio">Audio</string>
+    <string name="label_token_video">Video</string>
+
+    <!-- Mosaik view -->
+    <string name="title_mosaik">dApps</string>
+    <string name="hint_app_url">URL Aplikasi</string>
+    <string name="desc_mosaik">Anda dapat menggunakan dan menambahkan dApps yang menyokong integrasi dompet di sini. 
+        Aplikasi terpencar (dApps) ialah palam masuk pihak ketiga yang menghubungkan dompet anda ke kontrak 
+        pintar. Mereka mungkin mengumpul maklumat yang anda berikan pada skrin mereka. Sebelum menambah dApp, 
+        sila sahkan URL aplikasi tersebut, dan semak syarat penggunaan serta dasar privasinya. dApps tidak 
+        berafiliasi dengan Ergo Wallet. Gunakan atas budi bicara anda sendiri.</string>
+    <string name="error_loading_mosaik_app">Tidak dapat memuatkan aplikasi.\nSebab:\n%1$s</string>
+    <string name="title_last_visited">Terakhir dilawati</string>
+    <string name="title_favorites">Kegemaran</string>
+    <string name="title_suggestions">Aplikasi yang dicadangkan</string>
+    <string name="desc_none">Belum ada lagi</string>
+    <string name="menu_favorite">Kegemaran</string>
+    <string name="menu_delete_data">Tetapkan semula data aplikasi</string>
+    <string name="button_choose_address">Pilih alamat…</string>
+    <string name="button_choose_wallet">Pilih dompet…</string>
+    <string name="dropdown_choose_option">(sila pilih)</string>
+    <string name="error_mosaik_connection">Tidak dapat memuatkan aplikasi.\nSemak sambungan anda dan cuba lagi.</string>
+    <string name="error_no_mosaik_app">Tiada palam masuk aplikasi dompet ditemui pada alamat %1$s yang diberikan. Sila semak ejaan.</string>
+
+    <!-- Address book -->
+    <string name="label_own_addresses">Alamat anda</string>
+    <string name="label_saved_addresses">Alamat yang disimpan</string>
+    <string name="button_add_address_entry">Tambah entri alamat baharu</string>
+    <string name="button_edit_address_entry">Edit entri alamat</string>
+    <string name="label_no_entries">Belum ada entri lagi</string>
+    <string name="label_descriptive_address_name">Nama alamat deskriptif</string>
+    <string name="label_erg_address">Alamat Ergo</string>
+    <string name="button_save">Simpan</string>
+    <string name="label_address_tx_fee">Yuran transaksi</string>
+
+    <!-- Settings -->
+    <string name="desc_about">Disediakan kepada anda oleh Benjamin Schulte, %1$s</string>
+    <string name="about_year" translatable="false">2023</string>
+    <string name="desc_about_moreinfo">Dilesenkan di bawah <a href="https://github.com/ergoplatform/ergo-wallet-app/blob/master/LICENSE">Lesen Apache 2</a>\n 
+        Projek ini merupakan <a href="https://github.com/ergoplatform/ergo-wallet-app">perisian sumber terbuka</a>\n 
+    Dapatkan bantuan di <a href="https://discord.gg/kj7s7nb">Discord</a> atau <a href="https://t.me/ErgoWalletApp">Telegram</a></string>
+    <string name="desc_coingecko">Harga Ergo dikuasakan oleh <a href="https://www.coingecko.com/en/coins/ergo">CoinGecko</a></string>
+    <string name="label_cg_conn_error">Ralat menyambung ke CoinGecko, sila cuba lagi seketika nanti.</string>
+    <string name="desc_dark_mode">Mod gelap atau cerah?</string>
+    <string name="button_dark_mode_system">Lalai sistem</string>
+    <string name="button_dark_mode_day">Cerah</string>
+    <string name="button_dark_mode_night">Gelap</string>
+    <string name="desc_token_settings">Tetapan Token dan NFT</string>
+    <string name="desc_token_verification">Ergo Wallet mengesahkan ketulenan token dengan menggunakan perkhidmatan <a href="https://www.tokenjay.app">TokenJay</a>. 
+      Anda boleh menetapkan untuk menggunakan perkhidmatan lain dalam\n\'Sambungan Nod dan API\'.</string>
+    <string name="desc_expert_settings">Tetapan pakar</string>
+    <string name="button_connection_settings">Sambungan Nod dan API</string>
+    <string name="button_reset_defaults">Lalai</string>
+    <string name="label_explorer_api_url">URL API Explorer</string>
+    <string name="label_node_url">URL Nod</string>
+    <string name="check_prefer_node">Utamakan API Explorer Nod</string>
+    <string name="label_fetching_node_list">Mengambil senarai nod yang tersedia…</string>
+    <string name="label_checking_node">Menyemak %1$s…</string>
+    <string name="label_node_alternatives">Nod alternatif:</string>
+    <string name="label_node_info">Blok %1$s, masa tindak balas %2$s ms</string>
+    <string name="label_node_explorer_api">API Explorer diaktifkan</string>
+    <string name="label_node_none_found">Tiada nod ditemui. Sila semak sambungan anda.</string>
+    <string name="label_token_verification_url">URL perkhidmatan pengesahan token</string>
+    <string name="button_show_debug_info">Paparkan maklumat nyahpijat</string>
+    <string name="label_ipfs_http_gateway">Gerbang HTTP IPFS</string>
+    <string name="desc_register_handler">Anda boleh mendaftarkan aplikasi ini untuk mengendalikan protokol khusus Ergo seperti ErgoPay dan ErgoAuth.</string>
+    <string name="button_register_handler">Daftar sebagai pengendali protokol Ergo</string>
+    <string name="title_background_sync">Semak baki serta mesej dApp dan beri tahu jika ada perubahan</string>
+    <string name="button_balance_notif_never">Tidak pernah</string>
+    <string name="button_balance_notif_hourly">Setiap jam</string>
+    <string name="button_balance_notif_xhourly">Setiap %1$s jam</string>
+    <string name="title_app_lock">Kunci Aplikasi Biometrik</string>
+    <string name="desc_app_lock">Memerlukan pengesahan biometrik apabila membuka aplikasi dan selepas beberapa ketika tidak aktif.\n\n 
+        Hanya tersedia apabila pengesahan biometrik telah disediakan untuk peranti ini. Your secrets are always stored safely, even without activating this option.\n 
+        Melindungi daripada pandangan yang tidak diingini oleh orang lain yang menggunakan peranti ini. Kami amat mengesyorkan anda menggunakan skrin kunci peranti sebagai ganti.</string>
+
+    <!-- Notifications -->
+    <string name="title_balance_notification">Pemberitahuan perubahan baki</string>
+    <string name="title_mosaik_app_notification">Pemberitahuan dApp</string>
+    <string name="desc_balance_notification">Baki dompet anda telah berubah</string>
+    <string name="desc_mosaik_app_notification">Mesej baharu daripada dApp</string>
+</resources>
