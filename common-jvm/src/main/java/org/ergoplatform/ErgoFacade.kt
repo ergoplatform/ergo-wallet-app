@@ -476,7 +476,7 @@ object ErgoFacade {
     private fun getColdErgoClient() = ColdErgoClient(
         getErgoNetworkType(),
         Parameters.ColdClientMaxBlockCost,
-        Parameters.ColdClientBlockVersion
+        4 // Parameters.ColdClientBlockVersion is 3 in appkit 6.0.1; see ergoplatform/ergo-appkit#278
     )
 
     /**
