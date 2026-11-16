@@ -7,6 +7,8 @@ import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.BoxAttachmentBuilder
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
 import org.ergoplatform.appkit.impl.ScalaBridge
+import org.ergoplatform.sdk.ErgoToken
+import org.ergoplatform.sdk.JavaHelpers
 import org.ergoplatform.explorer.client.model.*
 import org.ergoplatform.getErgoNetworkType
 import org.ergoplatform.persistance.PreferencesProvider
@@ -202,6 +204,8 @@ private fun buildTransactionInfo(
                     it.name = tokenInfo.tokenName
                     it.decimals = tokenInfo.decimals
                 }
+            } else {
+
             }
         }
 
@@ -288,9 +292,13 @@ private fun getAdditionalRegisters(
         registerMap["R${idx + 4}"] = AdditionalRegister().apply {
             val value = ev.value
             renderedValue = try {
-                if (value is Coll<*> && value.size() > 0 && value.apply(0) is Byte)
-                    String(Base64Coder.encode(ScalaHelpers.collByteToByteArray(value as Coll<Byte>)))
-                else value.toString()
+                if (value is Coll<*> && value.size() > 0 && value.apply(0) is Byte) {
+                    @Suppress("UNCHECKED_CAST")
+                    val byteCollection = value as Coll<Byte>
+                    String(Base64Coder.encode(ScalaHelpers.collByteToByteArray(byteCollection)))
+                }else{
+                    value.toString()
+                }
             } catch (t: Throwable) {
                 value.toString()
             }

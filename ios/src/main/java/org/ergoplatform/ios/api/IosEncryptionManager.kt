@@ -2,7 +2,7 @@ package org.ergoplatform.ios.api
 
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.api.PasswordGenerator
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.utils.LogUtils
 import org.robovm.apple.localauthentication.LAContext
 

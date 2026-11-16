@@ -58,7 +58,7 @@ class TransactionInfoFragment : Fragment() {
         MaterialAlertDialogBuilder(context)
             .setMessage(R.string.info_cancel_tx)
             .setPositiveButton(
-                R.string.zxing_button_ok
+                android.R.string.ok
             ) { _, _ ->
                 viewModel.doCancelTx(
                     AppDatabase.getInstance(context).walletDbProvider,
@@ -138,7 +138,7 @@ class TransactionInfoFragment : Fragment() {
             if (!prompt.success)
                 MaterialAlertDialogBuilder(requireContext())
                     .setMessage(prompt.errorMsg!!)
-                    .setPositiveButton(R.string.zxing_button_ok, null)
+                    .setPositiveButton(android.R.string.ok, null)
                     .show()
             else {
                 val walletConfigAndDerivedIdx = viewModel.walletConfigAndDerivedIdx
