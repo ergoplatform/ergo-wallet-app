@@ -12,8 +12,8 @@ android {
     defaultConfig {
         applicationId "org.ergoplatform.android"
         minSdk 24
-        targetSdk 35
-        versionCode 2610
+        targetSdk 36
+        versionCode 2611
         versionName "2.5.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
