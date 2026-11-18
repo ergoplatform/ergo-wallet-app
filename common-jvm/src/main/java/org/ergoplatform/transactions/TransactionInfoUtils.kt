@@ -3,6 +3,8 @@ package org.ergoplatform.transactions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.ErgoAddressEncoder
+import org.ergoplatform.Pay2SAddress
 import org.ergoplatform.appkit.*
 import org.ergoplatform.appkit.impl.BoxAttachmentBuilder
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder
@@ -21,6 +23,7 @@ import org.ergoplatform.uilogic.STRING_WARNING_BURNING_TOKENS
 import org.ergoplatform.uilogic.STRING_WARNING_OLD_CREATION_HEIGHT
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.Base64Coder
+import sigmastate.Values.ErgoTree
 import special.collection.Coll
 import kotlin.math.min
 
@@ -177,8 +180,7 @@ private fun buildTransactionInfo(
     outboxes.forEach { transactionBox ->
         val outputInfo = OutputInfo()
 
-        outputInfo.address =
-            Address.fromErgoTree(transactionBox.ergoTree, getErgoNetworkType()).toString()
+        outputInfo.address = ergoTreeToAddressString(transactionBox.ergoTree)
         outputInfo.value = transactionBox.value
 
         outputsList.add(outputInfo)
@@ -216,12 +218,26 @@ private fun buildTransactionInfo(
 }
 
 /**
+ * @return the address for [ergoTree]. A tree that this sigma version cannot parse (for example
+ *         an ErgoTree v3 script that uses newer operations) is kept as unparsed bytes and has no
+ *         proposition, so Address.fromErgoTree fails on it. Such a tree is shown as its P2S
+ *         address, which only needs the tree bytes.
+ */
+fun ergoTreeToAddressString(ergoTree: ErgoTree): String =
+    if (ergoTree.root().isLeft) {
+        val encoder = ErgoAddressEncoder(getErgoNetworkType().networkPrefix)
+        Pay2SAddress(ergoTree, ergoTree.bytes(), encoder).toString()
+    } else {
+        Address.fromErgoTree(ergoTree, getErgoNetworkType()).toString()
+    }
+
+/**
  * @return TransactionInfoBox, which is more Kotlin-friendly to work with
  */
 fun InputBox.toTransactionInfoBox(walletTokens: Map<String, WalletToken>?): TransactionInfoBox {
     return TransactionInfoBox(
         id.toString(),
-        Address.fromErgoTree(ergoTree, getErgoNetworkType()).toString(),
+        ergoTreeToAddressString(ergoTree),
         value,
         getAssetInstanceInfosFromErgoBoxToken(tokens, walletTokens)
     )
@@ -242,8 +258,7 @@ suspend fun ErgoTransactionOutput.toTransactionInfoBox(
 ): TransactionInfoBox =
     TransactionInfoBox(
         boxId,
-        Address.fromErgoTree(JavaHelpers.decodeStringToErgoTree(ergoTree), getErgoNetworkType())
-            .toString(),
+        ergoTreeToAddressString(JavaHelpers.decodeStringToErgoTree(ergoTree)),
         value,
         assets.map { it.toAssetInstanceInfo(getTokenInfo) }
     )
@@ -456,11 +471,9 @@ suspend fun ErgoTransactionInput.toInputInfo(
                 index = boxInfo.index
 
                 ergoTree = boxInfo.ergoTree
-                address = Address.fromErgoTree(
-                    ScalaBridge.isoStringToErgoTree()
-                        .to(boxInfo.ergoTree),
-                    getErgoNetworkType(),
-                ).toString()
+                address = ergoTreeToAddressString(
+                    ScalaBridge.isoStringToErgoTree().to(boxInfo.ergoTree)
+                )
                 assets = boxInfo.assets.map {
                     it.toAssetInstanceInfo(getTokenInfo)
                 }
@@ -486,10 +499,9 @@ suspend fun ErgoTransactionOutput.toOutputInfo(
         index = nodeBoxInfo.index
         creationHeight = nodeBoxInfo.creationHeight
         ergoTree = nodeBoxInfo.ergoTree
-        address = Address.fromErgoTree(
-            ScalaBridge.isoStringToErgoTree().to(nodeBoxInfo.ergoTree),
-            getErgoNetworkType(),
-        ).toString()
+        address = ergoTreeToAddressString(
+            ScalaBridge.isoStringToErgoTree().to(nodeBoxInfo.ergoTree)
+        )
         assets = nodeBoxInfo.assets.map { it.toAssetInstanceInfo(getTokenInfo) }
         additionalRegisters = AdditionalRegisters().apply {
             nodeBoxInfo.additionalRegisters.forEach { (k, v) ->
