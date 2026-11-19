@@ -3,6 +3,7 @@ package org.ergoplatform.android.ui
 import android.content.Context
 import android.content.res.Resources
 import org.ergoplatform.uilogic.StringProvider
+import java.util.*
 
 class AndroidStringProvider(val context: Context) : StringProvider {
     override fun getString(stringId: String): String {
@@ -17,4 +18,7 @@ class AndroidStringProvider(val context: Context) : StringProvider {
         val resources = context.resources
         return resources.getString(getAndroidStringId(resources, stringId), *formatArgs)
     }
+
+    override val locale: Locale
+        get() = Locale.getDefault()
 }

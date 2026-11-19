@@ -49,6 +49,15 @@ abstract class PagedQrCodeContainer(
             continueButtonPressed()
         }
     }
+    private val shareDataButton = UIImageView(getIosSystemImage(IMAGE_SHARE, UIImageSymbolScale.Small)!!).apply {
+        isUserInteractionEnabled = true
+        tintColor = uiColorErgo
+        addGestureRecognizer(UITapGestureRecognizer {
+            rawData?.let {
+                parentVc.shareText(calcChunksFromRawData(it, Integer.MAX_VALUE).first(), this)
+            }
+        })
+    }
 
     private val descContainer = UIView(CGRect.Zero()).apply {
         layoutMargins = UIEdgeInsets.Zero()
@@ -69,6 +78,7 @@ abstract class PagedQrCodeContainer(
         this.addSubview(descContainer)
         this.addSubview(switchResButton)
         this.addSubview(currPageLabel)
+        this.addSubview(shareDataButton)
 
         switchResButton.topToSuperview().rightToSuperview()
         pager.topToBottomOf(switchResButton, DEFAULT_MARGIN).centerHorizontal()
@@ -85,6 +95,7 @@ abstract class PagedQrCodeContainer(
             nextButton.topToBottomOf(description, DEFAULT_MARGIN * 3).centerHorizontal().fixedWidth(120.0)
             continueButton.topToTopOf(nextButton).centerHorizontal().fixedWidth(200.0)
                 .bottomToSuperview(canBeLess = true)
+            shareDataButton.centerVerticallyTo(continueButton).rightToRightOf(descContainer)
         }
 
     }
@@ -130,4 +141,6 @@ abstract class PagedQrCodeContainer(
     }
 
     abstract fun continueButtonPressed()
+
+    abstract val parentVc: UIViewController
 }

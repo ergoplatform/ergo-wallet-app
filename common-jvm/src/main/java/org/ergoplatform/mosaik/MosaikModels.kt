@@ -10,6 +10,11 @@ data class MosaikAppEntry(
     val iconFile: String?,
     val lastVisited: Long,
     val favorite: Boolean,
+    val notificationUrl: String?,
+    val lastNotificationMessage: String? = null,
+    val lastNotificationMs: Long = 0,
+    val nextNotificationCheck: Long = 0,
+    val notificationUnread: Boolean = false,
 )
 
 /**

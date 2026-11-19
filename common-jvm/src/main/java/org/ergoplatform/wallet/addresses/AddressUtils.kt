@@ -1,6 +1,7 @@
 package org.ergoplatform.wallet.addresses
 
 import org.ergoplatform.persistance.WalletAddress
+import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.uilogic.STRING_LABEL_WALLET_ADDRESS_DERIVED
 import org.ergoplatform.uilogic.STRING_LABEL_WALLET_MAIN_ADDRESS
 import org.ergoplatform.uilogic.StringProvider
@@ -36,4 +37,18 @@ fun ensureWalletAddressListHasFirstAddress(
         )
     }
     return retList
+}
+
+/**
+ * @return pair walletConfig id, derivation index of p2pkAddress, or null if not found
+ */
+suspend fun findWalletConfigAndAddressIdx(p2pkAddress: String, database: WalletDbProvider): Pair<Int, Int>? {
+    val walletDerivedAddress = database.loadWalletAddress(p2pkAddress)
+    val walletConfig = database.loadWalletByFirstAddress(
+        walletDerivedAddress?.walletFirstAddress ?: p2pkAddress
+    )
+
+    return walletConfig?.let {
+        walletConfig.id to (walletDerivedAddress?.derivationIndex ?: 0)
+    }
 }

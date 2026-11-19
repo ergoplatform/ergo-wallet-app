@@ -14,6 +14,7 @@ import org.ergoplatform.android.RoomWalletDbProvider
 import org.ergoplatform.android.databinding.FragmentAddReadOnlyWalletDialogBinding
 import org.ergoplatform.android.ui.AndroidStringProvider
 import org.ergoplatform.android.ui.FullScreenFragmentDialog
+import org.ergoplatform.android.ui.QrScannerActivity
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.uilogic.wallet.AddReadOnlyWalletUiLogic
 
@@ -58,7 +59,7 @@ class AddReadOnlyWalletFragmentDialog : FullScreenFragmentDialog() {
         }
 
         binding.tvWalletAddress.setEndIconOnClickListener {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            QrScannerActivity.startFromFragment(this)
         }
     }
 

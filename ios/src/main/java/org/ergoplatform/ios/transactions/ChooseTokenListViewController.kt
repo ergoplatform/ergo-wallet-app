@@ -3,16 +3,43 @@ package org.ergoplatform.ios.transactions
 import com.badlogic.gdx.utils.I18NBundle
 import org.ergoplatform.ios.tokens.GenuineImageContainer
 import org.ergoplatform.ios.tokens.ThumbnailContainer
-import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.tokens.TokenFilterButton
+import org.ergoplatform.ios.ui.AbstractTableViewCell
+import org.ergoplatform.ios.ui.Body1Label
+import org.ergoplatform.ios.ui.Body2Label
+import org.ergoplatform.ios.ui.DEFAULT_MARGIN
+import org.ergoplatform.ios.ui.Headline2Label
+import org.ergoplatform.ios.ui.IosStringProvider
+import org.ergoplatform.ios.ui.addCloseButton
+import org.ergoplatform.ios.ui.bottomToSuperview
+import org.ergoplatform.ios.ui.centerHorizontal
+import org.ergoplatform.ios.ui.getAppDelegate
+import org.ergoplatform.ios.ui.leftToRightOf
+import org.ergoplatform.ios.ui.leftToSuperview
+import org.ergoplatform.ios.ui.rightToSuperview
+import org.ergoplatform.ios.ui.topToBottomOf
+import org.ergoplatform.ios.ui.topToSuperview
+import org.ergoplatform.ios.ui.widthMatchesSuperview
 import org.ergoplatform.persistance.TokenInformation
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.uilogic.STRING_TITLE_ADD_TOKEN
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.uilogic.tokens.TokenEntryViewUiLogic
+import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
 import org.robovm.apple.foundation.NSIndexPath
-import org.robovm.apple.uikit.*
+import org.robovm.apple.uikit.NSLineBreakMode
+import org.robovm.apple.uikit.NSTextAlignment
+import org.robovm.apple.uikit.UIColor
+import org.robovm.apple.uikit.UILayoutConstraintAxis
+import org.robovm.apple.uikit.UIStackView
+import org.robovm.apple.uikit.UITableView
+import org.robovm.apple.uikit.UITableViewCell
+import org.robovm.apple.uikit.UITableViewCellSeparatorStyle
+import org.robovm.apple.uikit.UITableViewDataSourceAdapter
+import org.robovm.apple.uikit.UITapGestureRecognizer
+import org.robovm.apple.uikit.UIViewController
 
 const val TOKEN_CELL = "TOKEN_CELL"
 
@@ -20,12 +47,13 @@ const val TOKEN_CELL = "TOKEN_CELL"
  * Let the user choose one or more token(s) from a list of tokens
  */
 class ChooseTokenListViewController(
-    val tokensToChooseFrom: List<WalletToken>,
-    val tokenInfoMap: HashMap<String, TokenInformation>,
+    val uiLogic: SendFundsUiLogic,
     val onChoose: (String) -> Unit
 ) : UIViewController() {
 
     private val texts = getAppDelegate().texts
+    private var tokensToChooseFrom = uiLogic.getTokensToChooseFrom()
+    private val tokenInfoMap = uiLogic.tokensInfo
 
     override fun viewDidLoad() {
         super.viewDidLoad()
@@ -38,10 +66,15 @@ class ChooseTokenListViewController(
             textAlignment = NSTextAlignment.Center
         }
 
+        val filterButton = TokenFilterButton(uiLogic)
+
         view.addSubview(titleLabel)
+        view.addSubview(filterButton)
 
         titleLabel.topToSuperview(topInset = DEFAULT_MARGIN * 2)
-            .widthMatchesSuperview(inset = DEFAULT_MARGIN)
+            .leftToSuperview(inset = DEFAULT_MARGIN)
+        filterButton.topToSuperview(topInset = DEFAULT_MARGIN).rightToSuperview()
+            .leftToRightOf(titleLabel, inset = DEFAULT_MARGIN)
 
         val tableView = UITableView(CGRect.Zero())
         view.addSubview(tableView)
@@ -56,6 +89,10 @@ class ChooseTokenListViewController(
             estimatedRowHeight = UITableView.getAutomaticDimension()
         }
 
+        filterButton.onChange = {
+            tokensToChooseFrom = uiLogic.getTokensToChooseFrom()
+            tableView.reloadData()
+        }
     }
 
     inner class TokenDataSource : UITableViewDataSourceAdapter() {

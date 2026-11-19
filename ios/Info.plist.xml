@@ -18,6 +18,12 @@
             <string>tr</string>
             <string>ru</string>
             <string>zh</string>
+            <string>in</string>
+
+            <string>jv</string>
+
+            <string>ms</string>
+
         </array>
         <key>CFBundleIdentifier</key>
         <string>${app.id}</string>

@@ -6,10 +6,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.pop
@@ -20,16 +17,22 @@ import org.ergoplatform.Application
 import org.ergoplatform.desktop.addressbook.AddressBookDialogStateHandler
 import org.ergoplatform.desktop.ui.navigation.NavHostComponent
 import org.ergoplatform.desktop.ui.navigation.ScreenConfig
+import org.ergoplatform.mosaik.MosaikDialog
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.STRING_BUTTON_SEND
+import org.ergoplatform.uilogic.STRING_INFO_PURPOSE_MESSAGE
+import org.ergoplatform.uilogic.STRING_INFO_PURPOSE_MESSAGE_ACCEPT
+import org.ergoplatform.uilogic.STRING_INFO_PURPOSE_MESSAGE_DECLINE
 import org.ergoplatform.uilogic.transactions.SendFundsUiLogic
 import org.ergoplatform.uilogic.transactions.SuggestedFee
+import org.ergoplatform.wallet.isReadOnly
 
 class SendFundsComponent(
     componentContext: ComponentContext,
-    navHost: NavHostComponent,
+    private val navHost: NavHostComponent,
     private val walletConfig: WalletConfig,
     private val derivationIdx: Int = -1,
     private val paymentRequest: String? = null,
@@ -61,6 +64,8 @@ class SendFundsComponent(
     private val tokensError = mutableStateOf(false)
     private val editFeeDialogState = mutableStateOf(false)
     private val addressBookDialogState = AddressBookDialogStateHandler()
+    private val preparedTransactionInfoState = mutableStateOf<TransactionInfo?>(null)
+    private var tokenFilterRefresh by mutableStateOf(0)
 
     @Composable
     override fun renderScreenContents(scaffoldState: ScaffoldState?) {
@@ -71,6 +76,7 @@ class SendFundsComponent(
                 walletConfig,
                 walletAddressState.value,
                 recipientAddress,
+                purposeMessage,
                 amountToSend,
                 amountsChangedCount.value,
                 recipientError,
@@ -88,13 +94,13 @@ class SendFundsComponent(
                     uiLogic.fetchSuggestedFeeData(ApiServiceManager.getOrInit(Application.prefs))
                 },
                 onChooseRecipientAddress = { addressBookDialogState.showChooseAddressDialog() },
+                onPurposeMessageInfoClicked = ::showPurposeMessageInfoDialog,
             )
 
             if (addTokenDialogState.value) {
                 ChooseTokenListDialog(
-                    remember { uiLogic.getTokensToChooseFrom() },
-                    uiLogic.tokensInfo,
-                    onTokenChosen = { uiLogic.newTokenChosen(it.tokenId!!) },
+                    uiLogic,
+                    tokenFilterRefresh,
                     onDismissRequest = { addTokenDialogState.value = false }
                 )
             }
@@ -116,6 +122,17 @@ class SendFundsComponent(
                 componentScope()
             )
 
+            preparedTransactionInfoState.value?.let {
+                ConfirmSendFundsDialog(
+                    it,
+                    onDismissRequest = { preparedTransactionInfoState.value = null },
+                    onConfirm = {
+                        preparedTransactionInfoState.value = null
+                        startPayment()
+                    },
+                )
+            }
+
             SubmitTransactionOverlays()
         }
     }
@@ -132,7 +149,7 @@ class SendFundsComponent(
                 uiLogic.receiverAddress = address
                 amountToSend.value = TextFieldValue(amount?.toStringTrimTrailingZeros() ?: "")
                 uiLogic.inputAmountChanged(amountToSend.value.text)
-                // TODO purpose message
+                message?.let { purposeMessage.value = TextFieldValue(message) }
             })
     }
 
@@ -141,17 +158,34 @@ class SendFundsComponent(
 
         recipientError.value = checkResponse.receiverError
         amountError.value = checkResponse.amountError
-        // TODO purpose message inputMessage.setHasError(checkResponse.messageError)
         // TODO focus
         tokensError.value = checkResponse.tokenError
 
         if (checkResponse.messageError) {
-            // TODO purpose message not implemented
+            showPurposeMessageInfoDialog(startPayment = true)
         }
 
         if (checkResponse.canPay) {
-            startPayment()
+            if (uiLogic.wallet?.walletConfig?.isReadOnly() == false)
+                uiLogic.prepareTransactionForSigning(Application.prefs, Application.texts)
+            else
+                startPayment()
         }
+    }
+
+    private fun showPurposeMessageInfoDialog(startPayment: Boolean = false) {
+        navHost.dialogHandler.showDialog(
+            MosaikDialog(
+                Application.texts.getString(STRING_INFO_PURPOSE_MESSAGE),
+                Application.texts.getString(STRING_INFO_PURPOSE_MESSAGE_ACCEPT),
+                Application.texts.getString(STRING_INFO_PURPOSE_MESSAGE_DECLINE),
+                positiveButtonClicked = {
+                    Application.prefs.sendTxMessages = true
+                    if (startPayment) checkAndStartPayment()
+                },
+                negativeButtonClicked = { Application.prefs.sendTxMessages = false },
+            )
+        )
     }
 
     override val uiLogic = object : SendFundsUiLogic() {
@@ -208,6 +242,13 @@ class SendFundsComponent(
             showSigningPrompt(signingPrompt)
         }
 
+        override fun onFilterChanged() {
+            tokenFilterRefresh++
+        }
+
+        override fun notifyHasPreparedTx(preparedTx: TransactionInfo) {
+            preparedTransactionInfoState.value = preparedTx
+        }
     }.apply {
         initWallet(
             Application.database, ApiServiceManager.getOrInit(Application.prefs),
@@ -216,6 +257,7 @@ class SendFundsComponent(
     }
 
     private val amountToSend = mutableStateOf(TextFieldValue(uiLogic.inputAmountString))
+    private val purposeMessage = mutableStateOf(TextFieldValue(uiLogic.message))
     private val recipientAddress = mutableStateOf(TextFieldValue(uiLogic.receiverAddress))
     private val editableFeeList: MutableState<List<SuggestedFee>> =
         mutableStateOf(uiLogic.suggestedFeeItems)

@@ -27,11 +27,13 @@ import org.ergoplatform.desktop.transactions.*
 import org.ergoplatform.desktop.ui.AppBarView
 import org.ergoplatform.desktop.ui.AppLockScreen
 import org.ergoplatform.desktop.ui.QrScannerComponent
+import org.ergoplatform.desktop.ui.defaultPadding
 import org.ergoplatform.desktop.wallet.*
 import org.ergoplatform.desktop.wallet.addresses.WalletAddressesComponent
 import org.ergoplatform.mosaik.MosaikComposeDialog
 import org.ergoplatform.mosaik.MosaikComposeDialogHandler
 import org.ergoplatform.mosaik.MosaikDialog
+import org.ergoplatform.mosaik.getUnreadNotificationCount
 import org.ergoplatform.uilogic.STRING_TITLE_MOSAIK
 import org.ergoplatform.uilogic.STRING_TITLE_SETTINGS
 import org.ergoplatform.uilogic.STRING_TITLE_WALLETS
@@ -269,10 +271,30 @@ class NavHostComponent(
             )
             BottomNavigationItem(
                 icon = {
-                    Icon(
-                        Icons.Default.AutoAwesomeMosaic,
-                        contentDescription = Application.texts.getString(STRING_TITLE_MOSAIK)
-                    )
+                    val favoriteMosaikApps =
+                        Application.database.mosaikDbProvider.getAllAppFavoritesByLastVisited()
+                            .collectAsState(emptyList())
+                    val unread =
+                        remember(favoriteMosaikApps.value) { favoriteMosaikApps.value.getUnreadNotificationCount() }
+
+                    if (unread > 0)
+                        BadgedBox(badge = {
+                            Box(Modifier.padding(top = defaultPadding / 4)) {
+                                Badge { Text(unread.toString()) }
+                            }
+                        }) {
+                            Icon(
+                                Icons.Default.AutoAwesomeMosaic,
+                                contentDescription = Application.texts.getString(
+                                    STRING_TITLE_MOSAIK
+                                )
+                            )
+                        }
+                    else
+                        Icon(
+                            Icons.Default.AutoAwesomeMosaic,
+                            contentDescription = Application.texts.getString(STRING_TITLE_MOSAIK),
+                        )
                 },
                 selected = navItemState.value == NavItem.MOSAIK,
                 onClick = {

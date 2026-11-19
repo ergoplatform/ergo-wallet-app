@@ -48,13 +48,16 @@ fun main(args: Array<String>) {
     val bringToTop = mutableStateOf(false)
 
     Application.texts =
-        DesktopStringProvider(I18NBundle.createBundle(ResourceWrapper("/i18n/strings")))
+        DesktopStringProvider(I18NBundle.createBundleWithLanguage(ResourceWrapper("/i18n/strings"),
+            args.firstOrNull { it.startsWith("--language=") }?.substringAfter('=')
+        ))
 
     val appDirs = AppDirsFactory.getInstance()
     val cacheDir = appDirs.getUserCacheDir("ergowallet", null, null)
     val dataDir = appDirs.getUserDataDir("ergowallet", null, null)
 
     Application.filesCache = DesktopCacheFileManager(cacheDir)
+    Application.dataDir = dataDir
 
     // Process CLI arguments and check for existing appliation instance
     if (args.any { it.equals("--testnet", true) }) {
@@ -177,6 +180,7 @@ object Application {
     lateinit var database: SqlDelightAppDb
     lateinit var prefs: PreferencesProvider
     lateinit var filesCache: CacheFileManager
+    var dataDir: String = ""
 
     var startUpArguments: List<String>? = null
 }

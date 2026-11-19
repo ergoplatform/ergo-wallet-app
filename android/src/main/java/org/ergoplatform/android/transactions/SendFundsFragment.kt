@@ -9,8 +9,10 @@ import android.text.TextWatcher
 import android.view.*
 import android.widget.EditText
 import androidx.core.view.descendants
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -18,10 +20,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.launch
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.ergoplatform.*
 import org.ergoplatform.addressbook.getAddressLabelFromDatabase
 import org.ergoplatform.android.AppDatabase
+import org.ergoplatform.android.MainActivity
 import org.ergoplatform.android.Preferences
 import org.ergoplatform.android.R
 import org.ergoplatform.android.addressbook.ChooseAddressDialogCallback
@@ -113,7 +115,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
         viewModel.errorMessageLiveData.observe(viewLifecycleOwner, {
             MaterialAlertDialogBuilder(requireContext())
                 .setMessage(it)
-                .setPositiveButton(R.string.zxing_button_ok, null)
+                .setPositiveButton(android.R.string.ok, null)
                 .show()
         })
         viewModel.txId.observe(viewLifecycleOwner, {
@@ -210,14 +212,15 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
             if (hasFocus)
                 ensureAmountVisibleDelayed()
         }
-        KeyboardVisibilityEvent.setEventListener(
-            requireActivity(),
-            viewLifecycleOwner,
-            { keyboardOpen ->
-                if (keyboardOpen && binding.amount.editText?.hasFocus() == true) {
-                    ensureAmountVisibleDelayed()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                (activity as? MainActivity)?.keyboardStateFlow?.collect { keyboardOpen ->
+                    if (keyboardOpen && binding.amount.editText?.hasFocus() == true) {
+                        ensureAmountVisibleDelayed()
+                    }
                 }
-            })
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -227,7 +230,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_scan_qr) {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            QrScannerActivity.startFromFragment(this)
             return true
         } else {
             return super.onOptionsItemSelected(item)
@@ -263,8 +266,8 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
             this.removeAllViews()
             val walletStateSyncManager = WalletStateSyncManager.getInstance()
             tokensChosen.forEach {
-                val ergoId = it.key
-                tokensAvail.firstOrNull { it.tokenId.equals(ergoId) }?.let { tokenDbEntity ->
+                val tokenId = it.key
+                tokensAvail[tokenId]?.let { tokenDbEntity ->
                     val itemBinding =
                         FragmentSendFundsTokenItemBinding.inflate(layoutInflater, this, true)
                     itemBinding.tvTokenName.text =
@@ -312,7 +315,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
 
                     itemBinding.buttonTokenRemove.setOnClickListener {
                         if (isSingular || itemBinding.inputTokenAmount.text.isEmpty()) {
-                            viewModel.uiLogic.removeToken(ergoId)
+                            viewModel.uiLogic.removeToken(tokenId)
                         } else {
                             itemBinding.inputTokenAmount.text = null
                             itemBinding.inputTokenAmount.requestFocus()
@@ -361,8 +364,22 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
         }
 
         if (checkResponse.canPay) {
-            startAuthFlow()
+            if (authenticationWalletConfig?.isReadOnly() == false) {
+                val context = requireContext()
+                viewModel.uiLogic.prepareTransactionForSigning(
+                    Preferences(context),
+                    AndroidStringProvider(context)
+                )
+            } else
+                startAuthFlow()
         }
+    }
+
+    override fun receivedPromptSigningResult() {
+        if (authenticationWalletConfig?.isReadOnly() == false)
+            ConfirmSendFundsDialogFragment().show(childFragmentManager, null)
+        else
+            super.receivedPromptSigningResult()
     }
 
     private fun showPurposeMessageInformation(startPayment: Boolean = false) {
@@ -488,7 +505,7 @@ class SendFundsFragment : SubmitTransactionFragment(), ChooseAddressDialogCallba
         viewModel.uiLogic.getPaymentRequestWarnings(AndroidStringProvider(requireContext()))?.let {
             MaterialAlertDialogBuilder(requireContext())
                 .setMessage(it)
-                .setPositiveButton(R.string.zxing_button_ok, null)
+                .setPositiveButton(android.R.string.ok, null)
                 .show()
         }
     }

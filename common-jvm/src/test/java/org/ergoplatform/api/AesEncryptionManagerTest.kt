@@ -1,6 +1,6 @@
 package org.ergoplatform.api
 
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.junit.Assert
 import org.junit.Test
 

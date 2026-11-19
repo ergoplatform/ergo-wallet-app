@@ -18,7 +18,6 @@
     <string name="hint_amount_currency">Сумма (%1$s)</string>
     <string name="label_purpose">Назначение</string>
     <string name="label_share">Поделиться</string>
-    <string name="label_open">Открыть</string>
     <string name="button_delete">Удалить</string>
     <string name="button_yes">Да</string>
     <string name="button_reload">Перезагрузить</string>

@@ -34,7 +34,7 @@ class ColdWalletSigningComponent(
     }
 
     private val scanningState = mutableStateOf(0)
-    private val txInfoState = mutableStateOf(uiLogic.transactionInfo?.reduceBoxes())
+    private val txInfoState = mutableStateOf(uiLogic.transactionInfo)
     private val passwordInputState = mutableStateOf(false)
 
     @Composable
@@ -70,7 +70,7 @@ class ColdWalletSigningComponent(
             uiLogic.addQrCodeChunk(qrCodeChunk, Application.texts)
             scanningState.value = scanningState.value + 1
             uiLogic.transactionInfo?.let {
-                txInfoState.value = it.reduceBoxes()
+                txInfoState.value = it
             }
         })
     }

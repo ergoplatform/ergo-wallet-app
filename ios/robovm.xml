@@ -4,6 +4,9 @@
     <os>ios</os>    
     <target>ios</target>
     <iosInfoPList>Info.plist.xml</iosInfoPList>
+    <bootclasspath>
+        <classpathentry>build/classes/java/bootCompat</classpathentry>
+    </bootclasspath>
     <resources>
         <resource>
             <directory>resources</directory>
@@ -12,12 +15,14 @@
     <forceLinkClasses>
         <pattern>com.android.org.conscrypt.**</pattern>
         <pattern>com.android.org.bouncycastle.**</pattern>
-        <pattern>org.apache.harmony.security.provider.cert.DRLCertFactory</pattern>
-        <pattern>org.apache.harmony.security.provider.crypto.CryptoProvider</pattern>
-        <pattern>org.apache.harmony.security.provider.crypto.CryptoProvider</pattern>
+        <pattern>sun.security.provider.**</pattern>
         <pattern>sigmastate.**</pattern>
         <pattern>sigma.**</pattern>
         <pattern>scalan.**</pattern>
+        <pattern>org.ergoplatform.api.**</pattern>
+        <pattern>org.ergoplatform.explorer.client.model.**</pattern>
+        <pattern>org.ergoplatform.restapi.**</pattern>
+        <pattern>org.ergoplatform.mosaik.model.**</pattern>
         <pattern>SQLite.**</pattern>
     </forceLinkClasses>
     <!-- Remove comment to automatically skip compilation and linking in IDEA -->

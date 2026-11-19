@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.*
 import org.ergoplatform.android.AppDatabase
 import org.ergoplatform.android.R
@@ -22,7 +22,7 @@ import org.ergoplatform.android.databinding.FragmentSaveWalletDialogBinding
 import org.ergoplatform.android.ui.*
 import org.ergoplatform.api.AesEncryptionManager
 import org.ergoplatform.api.AndroidEncryptionManager
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.persistance.ENC_TYPE_DEVICE
 import org.ergoplatform.persistance.ENC_TYPE_PASSWORD
 
@@ -164,11 +164,10 @@ class SaveWalletFragmentDialog : FullScreenFragmentDialog(), PasswordDialogCallb
     }
 
     private fun showSecurityErrorSnackbar(t: Throwable) {
-        Snackbar.make(
-            requireView(),
-            getString(R.string.error_device_security, t.message),
-            Snackbar.LENGTH_LONG
-        ).show()
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage(getString(R.string.error_device_security_save_wallet, t.message))
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     @OptIn(DelicateCoroutinesApi::class)
