@@ -295,6 +295,17 @@
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <ImageView
+                            android:id="@+id/filter_tokens"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="?selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/label_tokens"
+                            android:paddingHorizontal="@dimen/half_horizontal_margin"
+                            android:src="@drawable/ic_filter_alt_24"
+                            app:layout_constraintEnd_toStartOf="@id/unfold_tokens"
+                            app:layout_constraintTop_toTopOf="@id/unfold_tokens" />
+
+                        <ImageView
                             android:id="@+id/tokens_logo"
                             android:layout_width="@dimen/medium_icon_size"
                             android:layout_height="@dimen/medium_icon_size"

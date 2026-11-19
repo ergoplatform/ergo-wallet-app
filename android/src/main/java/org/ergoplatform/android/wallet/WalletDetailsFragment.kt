@@ -1,10 +1,14 @@
 package org.ergoplatform.android.wallet
 
+import android.R.attr.button
 import android.animation.LayoutTransition
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import android.widget.PopupMenu
+import android.widget.Toast
+import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -27,17 +31,19 @@ import org.ergoplatform.android.databinding.EntryWalletTokenDetailsBinding
 import org.ergoplatform.android.databinding.FragmentWalletDetailsBinding
 import org.ergoplatform.android.tokens.WalletDetailsTokenEntryView
 import org.ergoplatform.android.tokens.setTokenPrice
+import org.ergoplatform.android.tokens.showTokenFilterPopup
 import org.ergoplatform.android.transactions.inflateAddressTransactionEntry
 import org.ergoplatform.android.ui.AndroidStringProvider
+import org.ergoplatform.android.ui.QrScannerActivity
 import org.ergoplatform.android.ui.navigateSafe
 import org.ergoplatform.android.ui.postDelayed
 import org.ergoplatform.android.wallet.addresses.AddressChooserCallback
 import org.ergoplatform.android.wallet.addresses.ChooseAddressListDialogFragment
-import org.ergoplatform.persistance.TokenInformation
-import org.ergoplatform.persistance.Wallet
+import org.ergoplatform.persistance.*
 import org.ergoplatform.tokens.getTokenErgoValueSum
 import org.ergoplatform.transactions.TransactionListManager
 import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
+
 
 class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
@@ -75,6 +81,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             if (!walletDetailsViewModel.uiLogic.refreshByUser(
                     Preferences(context),
                     AppDatabase.getInstance(context),
+                    AndroidStringProvider(context),
                     rescheduleRefreshJob = { BackgroundSync.rescheduleJob(context) }
                 )
             ) {
@@ -144,7 +151,11 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         }
 
         binding.buttonScan.setOnClickListener {
-            IntentIntegrator.forSupportFragment(this).initiateScan(setOf(IntentIntegrator.QR_CODE))
+            QrScannerActivity.startFromFragment(this)
+        }
+
+        binding.filterTokens.setOnClickListener {
+            showTokenFilterPopup(walletDetailsViewModel.uiLogic, requireContext(), it)
         }
 
         // enable layout change animations after a short wait time
@@ -229,7 +240,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
 
         // tokens
         val tokensList = walletDetailsViewModel.uiLogic.tokensList
-        binding.cardviewTokens.visibility = if (tokensList.isNotEmpty()) View.VISIBLE else View.GONE
+        binding.cardviewTokens.visibility =
+            if (walletDetailsViewModel.uiLogic.hasTokens) View.VISIBLE else View.GONE
         binding.walletTokenNum.text = tokensList.size.toString()
 
         binding.walletTokenEntries.apply {
@@ -271,6 +283,8 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         } else {
             binding.walletTokenValue.visibility = View.GONE
         }
+        binding.filterTokens.visibility =
+            if (wallet.walletConfig.unfoldTokens) View.VISIBLE else View.GONE
 
         binding.unfoldTokens.setImageResource(
             if (wallet.walletConfig.unfoldTokens)
@@ -384,6 +398,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
         walletDetailsViewModel.uiLogic.refreshWhenNeeded(
             Preferences(context),
             AppDatabase.getInstance(context),
+            AndroidStringProvider(context),
             rescheduleRefreshJob = { BackgroundSync.rescheduleJob(context) }
         )
     }
@@ -442,7 +457,7 @@ class WalletDetailsFragment : Fragment(), AddressChooserCallback {
             },
             showErrorMessage = {
                 MaterialAlertDialogBuilder(requireContext()).setMessage(it)
-                    .setPositiveButton(R.string.zxing_button_ok, null)
+                    .setPositiveButton(android.R.string.ok, null)
                     .show()
             })
     }

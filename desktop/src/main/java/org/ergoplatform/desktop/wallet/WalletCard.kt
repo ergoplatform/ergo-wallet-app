@@ -145,7 +145,7 @@ fun WalletCard(
                             )
 
                             tokenList.forEach { walletToken ->
-                                TokenEntryView(walletToken)
+                                TokenEntryView(walletToken, Application.texts)
                             }
 
                             moreTokenHint?.let {

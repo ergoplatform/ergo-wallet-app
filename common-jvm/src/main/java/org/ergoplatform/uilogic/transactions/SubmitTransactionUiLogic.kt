@@ -5,11 +5,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.ErgoFacade
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.appkit.UnsignedTransaction
 import org.ergoplatform.persistance.*
-import org.ergoplatform.sendSignedErgoTx
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.wallet.getDerivedAddress
@@ -106,7 +106,7 @@ abstract class SubmitTransactionUiLogic {
             withContext(Dispatchers.IO) {
                 val signingResult = coldSigningResponseFromQrChunks(qrCodes)
                 if (signingResult.success) {
-                    ergoTxResult = sendSignedErgoTx(
+                    ergoTxResult = ErgoFacade.sendSignedErgoTx(
                         signingResult.serializedTx!!,
                         preferences, texts
                     )
@@ -114,7 +114,7 @@ abstract class SubmitTransactionUiLogic {
                     ergoTxResult = SendTransactionResult(false, errorMsg = signingResult.errorMsg)
                 }
                 notifyUiLocked(false)
-                transactionSubmitted(ergoTxResult, db.transactionDbProvider, preferences)
+                transactionSubmitted(ergoTxResult, db, preferences)
             }
         }
 
@@ -122,7 +122,7 @@ abstract class SubmitTransactionUiLogic {
 
     protected suspend fun transactionSubmitted(
         ergoTxResult: SendTransactionResult,
-        db: TransactionDbProvider,
+        db: IAppDatabase,
         preferences: PreferencesProvider,
         transactionInfo: TransactionInfo? = null
     ) {
@@ -130,11 +130,10 @@ abstract class SubmitTransactionUiLogic {
             try {
                 // save submitted transaction to every address
                 val txInfoToSave = (transactionInfo
-                    ?: (ergoTxResult.sentTransaction as? UnsignedTransaction)?.buildTransactionInfo(
-                        wallet?.tokens
-                    )
                     ?: ergoTxResult.sentTransaction?.buildTransactionInfo(
-                        ApiServiceManager.getOrInit(preferences)
+                        ApiServiceManager.getOrInit(preferences),
+                        preferences,
+                        db.tokenDbProvider,
                     ))
 
                 txInfoToSave?.let {
@@ -145,7 +144,7 @@ abstract class SubmitTransactionUiLogic {
                             System.currentTimeMillis(),
                             INCLUSION_HEIGHT_UNCONFIRMED,
                             TX_STATE_SUBMITTED,
-                            db
+                            db.transactionDbProvider,
                         )
                     }
                 }

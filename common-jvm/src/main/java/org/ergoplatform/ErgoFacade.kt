@@ -2,23 +2,28 @@ package org.ergoplatform
 
 import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.appkit.*
+import org.ergoplatform.sdk.ErgoToken
+import org.ergoplatform.appkit.babelfee.BabelFeeOperations
 import org.ergoplatform.appkit.impl.InputBoxImpl
 import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
+import org.ergoplatform.sdk.JavaHelpers
+import org.ergoplatform.explorer.client.model.TransactionInfo
 import org.ergoplatform.persistance.PreferencesProvider
+import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.restapi.client.PeersApi
-import org.ergoplatform.transactions.PromptSigningResult
-import org.ergoplatform.transactions.SendTransactionResult
-import org.ergoplatform.transactions.SigningResult
+import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.utils.getMessageOrName
 import org.ergoplatform.wallet.boxes.`ErgoBoxSerializer$`
 import org.ergoplatform.wallet.mnemonic.WordList
-import org.ergoplatform.wallet.secrets.ExtendedPublicKey
-import scala.collection.JavaConversions
+import org.ergoplatform.sdk.wallet.secrets.ExtendedPublicKey;
+import scala.collection.JavaConverters
 import sigmastate.interpreter.HintsBag
-import sigmastate.serialization.`SigmaSerializer$`
+import sigma.serialization.`SigmaSerializer$`
 import java.nio.charset.StandardCharsets
+import java.util.HashMap
+import kotlin.math.max
 
 const val MNEMONIC_WORDS_COUNT = 15
 const val MNEMONIC_MIN_WORDS_COUNT = 12
@@ -28,7 +33,6 @@ const val URL_FORGOT_PASSWORD_HELP =
     "https://github.com/ergoplatform/ergo-wallet-app/wiki/FAQ#i-forgot-my-spending-password"
 
 const val ERG_BASE_COST = 0
-const val ERG_MAX_BLOCK_COST = 1000000
 private const val MAX_NUM_INPUT_BOXES = 100
 
 var isErgoMainNet: Boolean = true
@@ -37,11 +41,11 @@ fun isValidErgoAddress(addressString: String): Boolean {
     if (addressString.isEmpty())
         return false
 
-    try {
+    return try {
         val address = Address.create(addressString)
-        return if (isErgoMainNet) address.isMainnet else !address.isMainnet
+        if (isErgoMainNet) address.isMainnet else !address.isMainnet
     } catch (t: Throwable) {
-        return false
+        false
     }
 
 }
@@ -106,296 +110,424 @@ fun getSerializedXpubKeyFromMnemonic(signingSecrets: SigningSecrets) =
  * loads the word list used to generate new mnemonics into a list
  */
 fun loadAppKitMnemonicWordList(): List<String> {
-    return JavaConversions.seqAsJavaList(WordList.load(Mnemonic.LANGUAGE_ID_ENGLISH).get().words())
+    return JavaConverters.seqAsJavaList(WordList.load(Mnemonic.LANGUAGE_ID_ENGLISH).get().words())
 }
 
-/**
- * Create and send transaction creating a box with the given amount using parameters from the given config file.
- *
- * @param amountToSend   amount of NanoErg to put into new box
- */
-fun sendErgoTx(
-    recipient: Address,
-    message: String?,
-    amountToSend: Long,
-    tokensToSend: List<ErgoToken>,
-    feeAmount: Long,
-    signingSecrets: SigningSecrets,
-    derivedKeyIndices: List<Int>,
-    prefs: PreferencesProvider,
-    texts: StringProvider
-): SendTransactionResult {
-    try {
-        val ergoClient = getRestErgoClient(prefs)
-        return ergoClient.execute { ctx: BlockchainContext ->
-            val prover = buildProver(ctx, signingSecrets, derivedKeyIndices)
-            val unsignedTx = buildUnsignedTx(
-                BoxOperations.createForEip3Prover(prover, ctx),
-                recipient,
-                amountToSend,
-                feeAmount,
-                tokensToSend,
-                message
-            )
+object ErgoFacade {
+    /**
+     * constructs a cancel transaction for the given transaction and address by sending all
+     * address input boxes back to the address itself, outbidding the tx fee
+     */
+    fun buildCancelTransaction(
+        address: String,
+        transaction: TransactionInfo,
+        prefs: PreferencesProvider,
+        texts: StringProvider,
+    ): PromptSigningResult {
+        try {
+            val inputsToUse = transaction.inputs.filter { it.address == address }
+            val orgTxFee =
+                transaction.outputs.find { it.address == getFeeAddressAsString() }!!.value
 
-            val signed = prover.sign(unsignedTx)
-            ctx.sendTransaction(signed)
+            val ergoClient = getRestErgoClient(prefs)
+            return ergoClient.execute { ctx: BlockchainContext ->
+                val newTxFee = orgTxFee + (Parameters.MinFee / 10)
 
-            val txId = signed.id
+                var completeValue = 0L
+                // we send all tokens from the input boxes
+                val tokenMap: HashMap<String, Long> = HashMap()
+                inputsToUse.forEach { input ->
+                    completeValue += input.value
+                    input.assets.forEach { token ->
+                        val tokenIdString = token.tokenId
+                        val et = tokenMap[tokenIdString] ?: 0L
+                        tokenMap[tokenIdString] = et + token.amount
+                    }
+                }
+                val tokenList = tokenMap.map { ErgoToken(it.key, it.value) }
 
-            SendTransactionResult(txId.isNotEmpty(), txId, unsignedTx)
-        }
-    } catch (t: Throwable) {
-        LogUtils.logDebug("sendErgoTx", "Error caught", t)
-        return SendTransactionResult(
-            false,
-            errorMsg = getErrorMessage(t, texts, amountToSend)
-        )
-    }
-}
+                // we send the amount that is covered by the boxes minus the fee, or the min value when
+                // we don't have enough
+                val amountToSend = max(completeValue - newTxFee, Parameters.MinChangeValue)
 
-private fun buildUnsignedTx(
-    boxOperations: BoxOperations,
-    recipient: Address,
-    amountToSend: Long,
-    feeAmount: Long,
-    tokensToSend: List<ErgoToken>,
-    message: String?
-): UnsignedTransaction {
-    val contract: ErgoContract = recipient.toErgoContract()
-    return boxOperations.withAmountToSpend(amountToSend)
-        .withFeeAmount(feeAmount)
-        .withMessage(message)
-        .withInputBoxesLoader(
-            ExplorerAndPoolUnspentBoxesLoader().withAllowChainedTx(true)
-        )
-        .withMaxInputBoxesToSelect(MAX_NUM_INPUT_BOXES)
-        .withTokensToSpend(tokensToSend).putToContractTxUnsigned(contract)
-}
+                val ergoAddress = Address.create(address)
+                val unsignedTx = BoxOperations.createForSender(ergoAddress, ctx)
+                    .withAmountToSpend(amountToSend)
+                    .withTokensToSpend(tokenList)
+                    .withInputBoxesLoader(object : ExplorerAndPoolUnspentBoxesLoader() {
+                        // important to not allow tx chaining
+                        override fun loadBoxesPage(
+                            ctx: BlockchainContext,
+                            sender: Address,
+                            page: Int
+                        ): MutableList<InputBox> {
+                            return if (page == 0) {
+                                // first page: return the boxes we want to spent
+                                inputsToUse.map {
+                                    ctx.dataSource.getBoxById(
+                                        it.boxId,
+                                        false,
+                                        false
+                                    )
+                                }.toMutableList()
+                            } else
+                                super.loadBoxesPage(ctx, sender, page - 1)
+                        }
+                    })
+                    .putToContractTxUnsigned(ergoAddress.toErgoContract())
 
-fun buildPromptSigningResultFromErgoPayRequest(
-    serializedTx: ByteArray,
-    senderAddress: String,
-    prefs: PreferencesProvider,
-    texts: StringProvider
-): PromptSigningResult {
-
-    try {
-        return getRestErgoClient(prefs).execute { ctx ->
-            val reducedTx = ctx.parseReducedTransaction(serializedTx)
-            val dataSource = ctx.dataSource
-            val inputs = reducedTx.inputBoxesIds.map { boxId ->
-                (dataSource.getBoxByIdWithMemPool(boxId) as InputBoxImpl).ergoBox.bytes()
+                PromptSigningResult(
+                    true,
+                    ctx.newProverBuilder().build().reduce(unsignedTx, ERG_BASE_COST).toBytes()
+                )
             }
-
-            return@execute PromptSigningResult(
-                true, serializedTx,
-                inputs, senderAddress
+        } catch (t: Throwable) {
+            LogUtils.logDebug("buildCancelTransaction", "Error caught", t)
+            return PromptSigningResult(
+                false,
+                errorMsg = getErrorMessage(t, texts)
             )
         }
-    } catch (t: Throwable) {
-        return PromptSigningResult(false, errorMsg = getErrorMessage(t, texts))
     }
-}
 
-/**
- * Prepares and serializes a transaction to be transferred to a cold wallet (EIP19)
- */
-fun prepareSerializedErgoTx(
-    recipient: Address,
-    message: String?,
-    amountToSend: Long,
-    tokensToSend: List<ErgoToken>,
-    feeAmount: Long,
-    senderAddresses: List<Address>,
-    prefs: PreferencesProvider,
-    texts: StringProvider
-): PromptSigningResult {
-    try {
-        val ergoClient = getRestErgoClient(prefs)
-        return ergoClient.execute { ctx: BlockchainContext ->
-            val unsigned = buildUnsignedTx(
-                BoxOperations.createForSenders(senderAddresses, ctx),
-                recipient,
-                amountToSend,
-                feeAmount,
-                tokensToSend,
-                message
-            )
+    private fun buildUnsignedTx(
+        boxOperations: BoxOperations,
+        recipient: Address,
+        consolidate: Boolean,
+        babelSwap: BabelSwapData?
+    ): UnsignedTransaction {
+        val txB: UnsignedTransactionBuilder = boxOperations.blockchainContext.newTxBuilder()
 
-            val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
-                val ergoBox = box.box()
-                return@map ergoBox.bytes()
+        val newBox = boxOperations.prepareOutBox(txB)
+            .contract(recipient.toErgoContract()).build()
+        txB.addOutputs(newBox)
+
+        babelSwap?.let {
+            BabelFeeOperations.addBabelFeeBoxes(txB, it.babelBox, it.babelAmountNanoErg)
+
+            val tokensSend = boxOperations.tokensToSpend.toMutableList()
+            val tokenInList = tokensSend.indexOfFirst { it.id == babelSwap.tokenToSwap.id }
+            if (tokenInList >= 0)
+                tokensSend[tokenInList] = ErgoToken(
+                    tokensSend[tokenInList].id,
+                    tokensSend[tokenInList].value + babelSwap.tokenToSwap.value
+                )
+            else
+                tokensSend.add(babelSwap.tokenToSwap)
+            boxOperations.withTokensToSpend(tokensSend)
+        }
+
+        val boxesLoader = RecordingBoxesLoader().apply { withAllowChainedTx(true) }
+        boxOperations.withInputBoxesLoader(boxesLoader)
+            .withMaxInputBoxesToSelect(MAX_NUM_INPUT_BOXES)
+
+        val boxesToSpend: List<InputBox> = boxOperations.loadTop(babelSwap?.babelAmountNanoErg ?: 0)
+
+        txB.addInputs(*boxesToSpend.toTypedArray())
+            .fee(boxOperations.feeAmount)
+            .sendChangeTo(boxOperations.senders[0])
+
+        if (consolidate) {
+            val addedInputs = txB.inputBoxes
+            if (addedInputs.size < MAX_NUM_INPUT_BOXES) {
+                val firstSenderErgoTree =
+                    boxOperations.senders.first().toErgoContract().ergoTree
+                val extraInputBoxes = boxesLoader.allBoxesLoaded.filter {
+                    it.ergoTree == firstSenderErgoTree && !addedInputs.contains(it)
+                }.take(MAX_NUM_INPUT_BOXES - addedInputs.size)
+                LogUtils.logDebug(
+                    "buildUnsignedTx",
+                    "Added ${extraInputBoxes.size} extra boxes to consolidate"
+                )
+                if (extraInputBoxes.isNotEmpty())
+                    txB.addInputs(*extraInputBoxes.toTypedArray())
             }
+        }
 
-            val reduced = ctx.newProverBuilder().build().reduce(unsigned, ERG_BASE_COST)
-            return@execute PromptSigningResult(
-                true,
-                reduced.toBytes(),
-                inputs,
-                senderAddresses.first().ergoAddress.toString()
+        return txB.build()
+    }
+
+    fun buildPromptSigningResultFromErgoPayRequest(
+        serializedTx: ByteArray,
+        senderAddress: String,
+        prefs: PreferencesProvider,
+        texts: StringProvider
+    ): PromptSigningResult {
+
+        try {
+            return getRestErgoClient(prefs).execute { ctx ->
+                prefs.lastBlockHeight = ctx.height.toLong()
+                val reducedTx = ctx.parseReducedTransaction(serializedTx)
+                val dataSource = ctx.dataSource
+                val inputs = reducedTx.inputBoxesIds.map { boxId ->
+                    (dataSource.getBoxById(boxId, true, false) as InputBoxImpl).ergoBox.bytes()
+                }
+
+                return@execute PromptSigningResult(
+                    true, serializedTx,
+                    inputs, senderAddress
+                )
+            }
+        } catch (t: Throwable) {
+            return PromptSigningResult(false, errorMsg = getErrorMessage(t, texts))
+        }
+    }
+
+    /**
+     * Prepares and serializes a transaction to be transferred to a cold wallet (EIP19)
+     * or used for signing
+     */
+    fun prepareSerializedErgoTx(
+        recipient: Address,
+        message: String?,
+        amountToSend: Long,
+        tokensToSend: List<ErgoToken>,
+        feeAmount: Long,
+        senderAddresses: List<Address>,
+        nanoErgBalanceSenders: Long,
+        tokenBalanceSenders: Map<String, WalletToken>,
+        consolidate: Boolean,
+        prefs: PreferencesProvider,
+        texts: StringProvider
+    ): PromptSigningResult {
+        try {
+            val ergoClient = getRestErgoClient(prefs)
+            return ergoClient.execute { ctx: BlockchainContext ->
+                prefs.lastBlockHeight = ctx.height.toLong()
+
+                // check if we have to use Babel Fees
+                val babelAmount = Parameters.MinChangeValue * 2 + feeAmount - nanoErgBalanceSenders
+
+                val babelSwap =
+                    if (amountToSend <= Parameters.MinChangeValue && tokensToSend.isNotEmpty()
+                        && babelAmount >= 0
+                    )
+                        BabelFees.findBabelBox(
+                            tokensToSend,
+                            tokenBalanceSenders,
+                            ctx,
+                            babelAmount,
+                            texts
+                        )
+                    else null
+
+                val unsigned = buildUnsignedTx(
+                    BoxOperations.createForSenders(senderAddresses, ctx)
+                        .withAmountToSpend(amountToSend)
+                        .withFeeAmount(feeAmount)
+                        .withTokensToSpend(tokensToSend)
+                        .withMessage(message),
+                    recipient,
+                    consolidate,
+                    babelSwap,
+                )
+
+                val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
+                    val ergoBox = box.box()
+                    return@map ergoBox.bytes()
+                }
+
+                val reduced = ctx.newProverBuilder().build().reduce(unsigned, ERG_BASE_COST)
+
+                val hintMsgs = ArrayList<String>()
+                var hintSeverity = MessageSeverity.NONE
+
+                if (!recipient.isP2PK) {
+                    hintMsgs.add(texts.getString(STRING_WARNING_SEND_TO_CONTRACT))
+                    hintSeverity = MessageSeverity.WARNING
+                }
+
+                babelSwap?.let {
+                    tokenBalanceSenders[babelSwap.tokenToSwap.id.toString()]?.let { walletToken ->
+                        hintMsgs.add(
+                            texts.getString(
+                                STRING_BABELFEE_USED,
+                                ErgoAmount(babelSwap.babelAmountNanoErg).toStringTrimTrailingZeros(),
+                                TokenAmount(
+                                    babelSwap.tokenToSwap.value,
+                                    walletToken.decimals
+                                ).toStringUsFormatted(),
+                                walletToken.name ?: "",
+                            )
+                        )
+                    }
+                }
+
+                return@execute PromptSigningResult(
+                    true,
+                    reduced.toBytes(),
+                    inputs,
+                    senderAddresses.first().ergoAddress.toString(),
+                    hintMsg = if (hintMsgs.isNotEmpty())
+                        Pair(hintMsgs.joinToString("\n"), hintSeverity)
+                    else null
+                )
+            }
+        } catch (t: Throwable) {
+            LogUtils.logDebug("prepareSerializedErgoTx", "Error caught", t)
+            return PromptSigningResult(
+                false,
+                errorMsg = getErrorMessage(t, texts, amountToSend)
             )
         }
-    } catch (t: Throwable) {
-        LogUtils.logDebug("prepareSerializedErgoTx", "Error caught", t)
-        return PromptSigningResult(
-            false,
-            errorMsg = getErrorMessage(t, texts, amountToSend)
-        )
     }
-}
 
-fun deserializeUnsignedTxOffline(serializedTx: ByteArray): ReducedTransaction {
-    return getColdErgoClient().execute { ctx ->
-        return@execute ctx.parseReducedTransaction(serializedTx)
-    }
-}
-
-/**
- * Deserializes an unsigned transaction, signs it and serializes the signed transaction
- */
-fun signSerializedErgoTx(
-    serializedTx: ByteArray,
-    signingSecrets: SigningSecrets,
-    derivedKeyIndices: List<Int>,
-    texts: StringProvider
-): SigningResult {
-    try {
-        val signedTxSerialized = getColdErgoClient().execute { ctx ->
-            val prover = buildProver(ctx, signingSecrets, derivedKeyIndices)
-            val reducedTx = ctx.parseReducedTransaction(serializedTx)
-
-            return@execute prover.signReduced(reducedTx, ERG_BASE_COST).toBytes()
+    fun deserializeUnsignedTxOffline(serializedTx: ByteArray): ReducedTransaction {
+        return getColdErgoClient().execute { ctx ->
+            return@execute ctx.parseReducedTransaction(serializedTx)
         }
-        return SigningResult(true, signedTxSerialized)
-    } catch (t: Throwable) {
-        LogUtils.logDebug("signSerializedErgoTx", "Error caught", t)
-        return SigningResult(false, errorMsg = getErrorMessage(t, texts))
     }
-}
 
-private fun buildProver(
-    ctx: BlockchainContext,
-    signingSecrets: SigningSecrets,
-    derivedKeyIndices: List<Int>
-): ErgoProver {
-    val proverBuilder = ctx.newProverBuilder()
-        .withMnemonic(
-            signingSecrets.mnemonic,
-            signingSecrets.password,
-            signingSecrets.deprecatedDerivation
+    /**
+     * Deserializes an unsigned transaction, signs it and serializes the signed transaction
+     */
+    fun signSerializedErgoTx(
+        serializedTx: ByteArray,
+        signingSecrets: SigningSecrets,
+        derivedKeyIndices: List<Int>,
+        texts: StringProvider
+    ): SigningResult {
+        try {
+            val signedTxSerialized = getColdErgoClient().execute { ctx ->
+                val prover = buildProver(ctx, signingSecrets, derivedKeyIndices)
+                val reducedTx = ctx.parseReducedTransaction(serializedTx)
+
+                return@execute prover.signReduced(reducedTx, ERG_BASE_COST).toBytes()
+            }
+            return SigningResult(true, signedTxSerialized)
+        } catch (t: Throwable) {
+            LogUtils.logDebug("signSerializedErgoTx", "Error caught", t)
+            return SigningResult(false, errorMsg = getErrorMessage(t, texts))
+        }
+    }
+
+    private fun buildProver(
+        ctx: BlockchainContext,
+        signingSecrets: SigningSecrets,
+        derivedKeyIndices: List<Int>
+    ): ErgoProver {
+        val proverBuilder = ctx.newProverBuilder()
+            .withMnemonic(
+                signingSecrets.mnemonic,
+                signingSecrets.password,
+                signingSecrets.deprecatedDerivation
+            )
+        derivedKeyIndices.forEach {
+            proverBuilder.withEip3Secret(it)
+        }
+        return proverBuilder.build()
+    }
+
+
+    fun signMessage(
+        signingSecrets: SigningSecrets,
+        derivedKeyIndices: List<Int>,
+        sigmaBoolean: SigmaProp,
+        signingMessage: String,
+    ): ByteArray {
+        return getColdErgoClient().execute { ctx ->
+            val prover = buildProver(ctx, signingSecrets, derivedKeyIndices)
+
+            prover.signMessage(
+                sigmaBoolean,
+                signingMessage.toByteArray(StandardCharsets.UTF_8),
+                HintsBag.empty()
+            )
+        }
+    }
+
+    private fun getRestErgoClient(prefs: PreferencesProvider): ErgoClient {
+        val nodeToConnectTo = prefs.prefNodeUrl
+        val ergoClient = RestApiErgoClient.createWithHttpClientBuilder(
+            nodeToConnectTo,
+            getErgoNetworkType(),
+            "",
+            prefs.prefExplorerApiUrl,
+            OkHttpSingleton.getInstance().newBuilder()
         )
-    derivedKeyIndices.forEach {
-        proverBuilder.withEip3Secret(it)
+        refreshNodeListWhenNeeded(prefs)
+        return ergoClient
     }
-    val prover = proverBuilder.build()
-    return prover
-}
 
-
-fun signMessage(
-    signingSecrets: SigningSecrets,
-    derivedKeyIndices: List<Int>,
-    sigmaBoolean: SigmaProp,
-    signingMessage: String,
-): ByteArray {
-    return getColdErgoClient().execute { ctx ->
-        val prover = buildProver(ctx, signingSecrets, derivedKeyIndices)
-
-        prover.signMessage(
-            sigmaBoolean,
-            signingMessage.toByteArray(StandardCharsets.UTF_8),
-            HintsBag.empty()
-        )
+    private fun refreshNodeListWhenNeeded(prefs: PreferencesProvider) {
+        if (System.currentTimeMillis() - prefs.lastNodeListRefreshMs > 1000L * 60 * 60 * 24) {
+            refreshNodeList(prefs)
+        }
     }
-}
 
-private fun getRestErgoClient(prefs: PreferencesProvider): ErgoClient {
-    val nodeToConnectTo = prefs.prefNodeUrl
-    val ergoClient = RestApiErgoClient.createWithHttpClientBuilder(
-        nodeToConnectTo,
+    fun refreshNodeList(prefs: PreferencesProvider) {
+        val nodeUrl = prefs.prefNodeUrl
+        val peersApi = ApiServiceManager.buildRetrofitForNode(PeersApi::class.java, nodeUrl)
+
+        try {
+            val peerUrlList = peersApi.connectedPeers.execute().body()!!.map { it.restApiUrl }
+            val openPeers = peerUrlList.filter { !it.isNullOrBlank() && it != nodeUrl }.distinct()
+            val peersStringList =
+                openPeers.sortedBy { if (it.startsWith("https://")) 0 else 1 }.take(10)
+
+            LogUtils.logDebug("PeersApi", "Found alternative nodes to connect to: $peersStringList")
+            if (peersStringList.isNotEmpty())
+                prefs.knownNodesList = peersStringList
+        } catch (t: Throwable) {
+            LogUtils.logDebug("PeersApi", "Could not fetch connected peers of $nodeUrl")
+        }
+    }
+
+    private fun getColdErgoClient() = ColdErgoClient(
         getErgoNetworkType(),
-        "",
-        prefs.prefExplorerApiUrl,
-        OkHttpSingleton.getInstance().newBuilder()
+        Parameters.ColdClientMaxBlockCost,
+        4 // Parameters.ColdClientBlockVersion is 3 in appkit 6.0.1; see ergoplatform/ergo-appkit#278
     )
-    refreshNodeListWhenNeeded(prefs)
-    return ergoClient
-}
 
-private fun refreshNodeListWhenNeeded(prefs: PreferencesProvider) {
-    if (System.currentTimeMillis() - prefs.lastNodeListRefreshMs > 1000L * 60 * 60 * 24) {
-        refreshNodeList(prefs)
-    }
-}
+    /**
+     * Sends a serialized and signed transaction
+     */
+    fun sendSignedErgoTx(
+        signedTxSerialized: ByteArray,
+        prefs: PreferencesProvider,
+        texts: StringProvider
+    ): SendTransactionResult {
+        try {
+            val ergoClient = getRestErgoClient(prefs)
+            return ergoClient.execute { ctx ->
+                prefs.lastBlockHeight = ctx.height.toLong()
+                val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
+                val txId = ctx.sendTransaction(signedTx).trim('"')
+                SendTransactionResult(txId.isNotEmpty(), txId, signedTx)
+            }
 
-fun refreshNodeList(prefs: PreferencesProvider) {
-    val nodeUrl = prefs.prefNodeUrl
-    val peersApi = ApiServiceManager.buildRetrofitForNode(PeersApi::class.java, nodeUrl)
-
-    try {
-        val peerUrlList = peersApi.connectedPeers.execute().body()!!.map { it.restApiUrl }
-        val openPeers = peerUrlList.filter { !it.isNullOrBlank() && it != nodeUrl }.distinct()
-        val peersStringList =
-            openPeers.sortedBy { if (it.startsWith("https://")) 0 else 1 }.take(10)
-
-        LogUtils.logDebug("PeersApi", "Found alternative nodes to connect to: $peersStringList")
-        if (peersStringList.isNotEmpty())
-            prefs.knownNodesList = peersStringList
-    } catch (t: Throwable) {
-        LogUtils.logDebug("PeersApi", "Could not fetch connected peers of $nodeUrl")
-    }
-}
-
-private fun getColdErgoClient() = ColdErgoClient(
-    getErgoNetworkType(),
-    ERG_MAX_BLOCK_COST
-)
-
-/**
- * Sends a serialized and signed transaction
- */
-fun sendSignedErgoTx(
-    signedTxSerialized: ByteArray,
-    prefs: PreferencesProvider,
-    texts: StringProvider
-): SendTransactionResult {
-    try {
-        val ergoClient = getRestErgoClient(prefs)
-        return ergoClient.execute { ctx ->
-            val signedTx = ctx.parseSignedTransaction(signedTxSerialized)
-            val txId = ctx.sendTransaction(signedTx).trim('"')
-            SendTransactionResult(txId.isNotEmpty(), txId, signedTx)
+        } catch (t: Throwable) {
+            return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
         }
-
-    } catch (t: Throwable) {
-        return SendTransactionResult(false, errorMsg = getErrorMessage(t, texts))
     }
-}
 
-fun getErrorMessage(t: Throwable, texts: StringProvider, amountToSend: Long? = null): String {
-    return if (t is InputBoxesSelectionException.NotEnoughErgsException) {
-        texts.getString(
-            STRING_ERROR_BALANCE_ERG,
-            ErgoAmount(t.balanceFound).toStringTrimTrailingZeros()
-        )
-    } else if (t is InputBoxesSelectionException.NotEnoughCoinsForChangeException) {
-        texts.getString(
-            STRING_ERROR_CHANGEBOX_AMOUNT
-        )
-    } else if (t is InputBoxesSelectionException.InputBoxLimitExceededException) {
-        if (t.remainingTokens.isEmpty() && amountToSend != null)
+    fun getErrorMessage(t: Throwable, texts: StringProvider, amountToSend: Long? = null): String {
+        val msgUseOtherNodeSuffix = "\n\n" + texts.getString(STRING_ERROR_USE_OTHER_NODE)
+        return if (t is InputBoxesSelectionException.NotEnoughErgsException) {
             texts.getString(
-                STRING_ERROR_TOO_MANY_INPUT_BOXES_LESS_ERG,
-                ErgoAmount(amountToSend - t.remainingAmount).toStringTrimTrailingZeros()
-            )
-        else
-            texts.getString(STRING_ERROR_TOO_MANY_INPUT_BOXES_GENERIC)
-    } else if (t is AssertionError && t.message?.contains("Tree root should be real") == true) {
-        // ProverInterpreter.scala
-        texts.getString(STRING_ERROR_PROVER_CANT_SIGN)
-    } else {
-        t.getMessageOrName()
+                STRING_ERROR_BALANCE_ERG,
+                ErgoAmount(t.balanceFound).toStringTrimTrailingZeros()
+            ) + msgUseOtherNodeSuffix
+        } else if (t is InputBoxesSelectionException.NotEnoughCoinsForChangeException) {
+            texts.getString(
+                STRING_ERROR_CHANGEBOX_AMOUNT
+            ) + msgUseOtherNodeSuffix
+        } else if (t is InputBoxesSelectionException.InputBoxLimitExceededException) {
+            if (t.remainingTokens.isEmpty() && amountToSend != null)
+                texts.getString(
+                    STRING_ERROR_TOO_MANY_INPUT_BOXES_LESS_ERG,
+                    ErgoAmount(amountToSend - t.remainingAmount).toStringTrimTrailingZeros()
+                )
+            else
+                texts.getString(STRING_ERROR_TOO_MANY_INPUT_BOXES_GENERIC)
+        } else if (t is AssertionError && t.message?.contains("Tree root should be real") == true) {
+            // ProverInterpreter.scala
+            texts.getString(STRING_ERROR_PROVER_CANT_SIGN)
+        } else if (t is BabelFeeSwapException) {
+            t.message
+        } else {
+            t.getMessageOrName() + msgUseOtherNodeSuffix
+        }
     }
 }
 
@@ -407,3 +539,20 @@ fun deserializeErgobox(input: ByteArray): InputBox? {
     return ergoBox?.let { InputBoxImpl(it) }
 }
 
+/**
+ * RecordingBoxesLoaded is an [ExplorerAndPoolUnspentBoxesLoader] that records all input boxes
+ * fetched
+ */
+private class RecordingBoxesLoader : ExplorerAndPoolUnspentBoxesLoader() {
+    val allBoxesLoaded = ArrayList<InputBox>()
+
+    override fun loadBoxesPage(
+        ctx: BlockchainContext,
+        sender: Address,
+        page: Int
+    ): MutableList<InputBox> {
+        val boxesLoaded = super.loadBoxesPage(ctx, sender, page)
+        allBoxesLoaded.addAll(boxesLoaded)
+        return boxesLoaded
+    }
+}

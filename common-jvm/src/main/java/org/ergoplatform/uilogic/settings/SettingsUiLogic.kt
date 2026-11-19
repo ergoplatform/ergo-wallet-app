@@ -4,10 +4,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import org.ergoplatform.ApiServiceManager
+import org.ergoplatform.ErgoFacade
 import org.ergoplatform.api.tokenjay.TokenJayApiClient
 import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.persistance.PreferencesProvider
-import org.ergoplatform.refreshNodeList
 import org.ergoplatform.restapi.client.InfoApi
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.utils.LogUtils
@@ -55,7 +55,7 @@ class SettingsUiLogic {
 
         // try to connect to current node to fetch a new list
         _checkNodesState.value = CheckNodesState.FetchingNodes
-        refreshNodeList(prefs)
+        ErgoFacade.refreshNodeList(prefs)
 
         var knownNodesList = prefs.knownNodesList
 
@@ -102,13 +102,15 @@ class SettingsUiLogic {
                     val nodeInfo = nodeInfoApi.nodeInfo.execute().body()!!
                     val blockHeight: Long? = nodeInfo.fullHeight?.toLong()
                     val restApiUrl: String? = nodeInfo.restApiUrl
+                    val isExplorer: Boolean = nodeInfo.isExplorer
                     val requestEnded = System.currentTimeMillis()
 
                     NodeInfo(
                         restApiUrl ?: nodeUrl,
                         true,
                         requestEnded - requestStarted,
-                        blockHeight ?: 0L
+                        blockHeight ?: 0L,
+                        isExplorer,
                     )
                 } catch (t: Throwable) {
                     NodeInfo(nodeUrl, connected = false)
@@ -128,6 +130,7 @@ class SettingsUiLogic {
         val connected: Boolean,
         val responseTime: Long = 0,
         val blockHeight: Long = 0,
+        val isExplorer: Boolean = false,
     )
 
     sealed class CheckNodesState {

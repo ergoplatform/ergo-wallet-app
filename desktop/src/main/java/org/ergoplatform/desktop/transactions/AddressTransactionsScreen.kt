@@ -36,6 +36,7 @@ import org.ergoplatform.uilogic.transactions.AddressTransactionWithTokens
 fun AddressTransactionsScreen(
     wallet: Wallet,
     walletAddress: WalletAddress,
+    shownListState: MutableState<List<AddressTransactionWithTokens>>,
     onTransactionClicked: (AddressTransaction) -> Unit,
     onTokenClicked: (String) -> Unit,
     onChooseAddressClicked: () -> Unit
@@ -71,8 +72,6 @@ fun AddressTransactionsScreen(
         }
 
         val listState = rememberLazyListState()
-        val shownListState =
-            remember(walletAddress) { mutableStateOf(emptyList<AddressTransactionWithTokens>()) }
 
         if (shownListState.value.isNotEmpty())
             Box {

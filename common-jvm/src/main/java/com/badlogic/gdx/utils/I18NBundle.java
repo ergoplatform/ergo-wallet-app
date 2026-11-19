@@ -146,6 +146,21 @@ public class I18NBundle {
         return createBundleImpl(baseFileHandle, Locale.getDefault(), DEFAULT_ENCODING);
     }
 
+    public static I18NBundle createBundleWithLanguage(FileHandle baseFileHandle, String languageString) {
+        Locale locale;
+        if (languageString != null && !languageString.isEmpty()) {
+            String[] split = languageString.split("-");
+
+            String language = split[0];
+            String country = split.length > 1 ? split[1] : "";
+            locale = new Locale(language, country, "");
+        } else {
+            locale = Locale.getDefault();
+        }
+
+        return createBundleImpl(baseFileHandle, locale, DEFAULT_ENCODING);
+    }
+
     /**
      * Creates a new bundle using the specified <code>baseFileHandle</code> and <code>locale</code>; the default encoding "UTF-8"
      * is used.

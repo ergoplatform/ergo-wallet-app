@@ -15,6 +15,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.AppProgressIndicator
 import org.ergoplatform.compose.settings.primaryButtonColors
+import org.ergoplatform.compose.transactions.SignTransactionInfoLayout
 import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
@@ -92,7 +93,6 @@ fun ColdSigningResultLayout(
                 modifier = Modifier.padding(top = defaultPadding * 1.5f)
             )
 
-            // TODO cold wallet save/load functionality
             if (qrCodeData.length > QR_DATA_LENGTH_LOW_RES)
                 IconButton({ lowRes = !lowRes }, Modifier.align(Alignment.TopEnd)) {
                     Icon(Icons.Default.BurstMode, null)
@@ -171,7 +171,9 @@ private fun ColdSigningTransactionInfoLayout(
             Modifier.padding(defaultPadding),
             txInfoState.value!!,
             onConfirm = onConfirm,
-            onTokenClick = null
+            onTokenClick = null,
+            Application.texts,
+            getDb = { Application.database },
         )
     }
 }

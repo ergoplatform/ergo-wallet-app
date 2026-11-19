@@ -4,14 +4,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.ergoplatform.ErgoFacade
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.api.PasswordGenerator
 import org.ergoplatform.ergoauth.*
-import org.ergoplatform.getErrorMessage
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
-import org.ergoplatform.signMessage
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SigningPromptDialogDataSource
@@ -145,7 +144,7 @@ abstract class ErgoAuthUiLogic {
 
             } catch (t: Throwable) {
                 LogUtils.logDebug(this.javaClass.simpleName, "Error on auth response", t)
-                lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, getErrorMessage(t, texts))
+                lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, ErgoFacade.getErrorMessage(t, texts))
                 lastMessageSeverity = MessageSeverity.ERROR
             }
             notifyStateChanged(State.DONE)
@@ -163,7 +162,7 @@ abstract class ErgoAuthUiLogic {
                 val suffix = PasswordGenerator.generatePassword(20)
                 val signedMessage =
                     prefix + ergAuthRequest.signingMessage + ergAuthRequest.requestHost + suffix
-                val signature = signMessage(
+                val signature = ErgoFacade.signMessage(
                     secrets,
                     walletAddresses.map { it.derivationIndex },
                     ergAuthRequest.sigmaBoolean!!,
@@ -182,7 +181,7 @@ abstract class ErgoAuthUiLogic {
 
             } catch (t: Throwable) {
                 LogUtils.logDebug(this.javaClass.simpleName, "Error on auth response", t)
-                lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, getErrorMessage(t, texts))
+                lastMessage = texts.getString(STRING_LABEL_ERROR_OCCURED, ErgoFacade.getErrorMessage(t, texts))
                 lastMessageSeverity = MessageSeverity.ERROR
             }
             secrets.clearMemory()

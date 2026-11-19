@@ -5,10 +5,34 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.getExplorerAddressUrl
 import org.ergoplatform.ios.tokens.TokenInformationViewController
-import org.ergoplatform.ios.ui.*
+import org.ergoplatform.ios.ui.AbstractTableViewCell
+import org.ergoplatform.ios.ui.Body1Label
+import org.ergoplatform.ios.ui.CardView
+import org.ergoplatform.ios.ui.CoroutineViewController
+import org.ergoplatform.ios.ui.DEFAULT_MARGIN
+import org.ergoplatform.ios.ui.IosStringProvider
+import org.ergoplatform.ios.ui.MAX_WIDTH
+import org.ergoplatform.ios.ui.TextButton
+import org.ergoplatform.ios.ui.bottomToSuperview
+import org.ergoplatform.ios.ui.buildAddressSelectorView
+import org.ergoplatform.ios.ui.buildSimpleAlertController
+import org.ergoplatform.ios.ui.centerHorizontal
+import org.ergoplatform.ios.ui.centerVertical
+import org.ergoplatform.ios.ui.edgesToSuperview
+import org.ergoplatform.ios.ui.fixedWidth
+import org.ergoplatform.ios.ui.getAppDelegate
+import org.ergoplatform.ios.ui.rightToSuperview
+import org.ergoplatform.ios.ui.runOnMainThread
+import org.ergoplatform.ios.ui.shareText
+import org.ergoplatform.ios.ui.superViewWrapsHeight
+import org.ergoplatform.ios.ui.topToBottomOf
+import org.ergoplatform.ios.ui.topToSuperview
+import org.ergoplatform.ios.ui.widthMatchesSuperview
 import org.ergoplatform.persistance.Wallet
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.transactions.TransactionListManager
+import org.ergoplatform.transactions.TransactionsExport
+import org.ergoplatform.uilogic.STRING_INFO_EXPORT
 import org.ergoplatform.uilogic.STRING_TRANSACTIONS_LOAD_ALL_BUTTON
 import org.ergoplatform.uilogic.STRING_TRANSACTIONS_LOAD_ALL_DESC
 import org.ergoplatform.uilogic.STRING_TRANSACTIONS_NONE_YET
@@ -19,8 +43,31 @@ import org.ergoplatform.wallet.getDerivedAddressEntity
 import org.robovm.apple.coregraphics.CGPoint
 import org.robovm.apple.coregraphics.CGRect
 import org.robovm.apple.foundation.NSArray
+import org.robovm.apple.foundation.NSFileManager
 import org.robovm.apple.foundation.NSIndexPath
-import org.robovm.apple.uikit.*
+import org.robovm.apple.foundation.NSSearchPathDirectory
+import org.robovm.apple.foundation.NSSearchPathDomainMask
+import org.robovm.apple.foundation.NSURL
+import org.robovm.apple.uikit.NSTextAlignment
+import org.robovm.apple.uikit.UIActivityIndicatorView
+import org.robovm.apple.uikit.UIActivityIndicatorViewStyle
+import org.robovm.apple.uikit.UIBarButtonItem
+import org.robovm.apple.uikit.UIBarButtonSystemItem
+import org.robovm.apple.uikit.UIColor
+import org.robovm.apple.uikit.UIDocumentPickerDelegateAdapter
+import org.robovm.apple.uikit.UIDocumentPickerMode
+import org.robovm.apple.uikit.UIDocumentPickerViewController
+import org.robovm.apple.uikit.UIEdgeInsets
+import org.robovm.apple.uikit.UILayoutConstraintAxis
+import org.robovm.apple.uikit.UIRefreshControl
+import org.robovm.apple.uikit.UIStackView
+import org.robovm.apple.uikit.UITableView
+import org.robovm.apple.uikit.UITableViewCell
+import org.robovm.apple.uikit.UITableViewCellSeparatorStyle
+import org.robovm.apple.uikit.UITableViewDataSourceAdapter
+import org.robovm.apple.uikit.UITapGestureRecognizer
+import org.robovm.apple.uikit.UIView
+import java.io.File
 import kotlin.math.max
 
 private const val transactionCellId = "TRANSACTION_CELL"
@@ -45,8 +92,12 @@ class AddressTransactionsViewController(
     private lateinit var header: HeaderView
 
     override fun viewDidLoad() {
+        val exportButton = UIBarButtonItem(UIBarButtonSystemItem.Save).apply {
+            tintColor = UIColor.label()
+            setOnClickListener { exportToFile() }
+        }
         val shareButton = UIBarButtonItem(UIBarButtonSystemItem.Action)
-        navigationItem.rightBarButtonItem = shareButton
+        navigationItem.rightBarButtonItems = NSArray(exportButton, shareButton)
         shareButton.tintColor = UIColor.label()
         shareButton.setOnClickListener {
             shareText(getExplorerAddressUrl(shownAddress!!.publicAddress), shareButton)
@@ -74,6 +125,68 @@ class AddressTransactionsViewController(
         tableView.registerReusableCellClass(EmptyCell::class.java, emptyCellId)
         tableView.rowHeight = UITableView.getAutomaticDimension()
         tableView.estimatedRowHeight = UITableView.getAutomaticDimension()
+    }
+
+    private fun exportToFile() {
+        viewControllerScope.launch {
+            val texts = getAppDelegate().texts
+            val tx = shownData
+            try {
+                val pathUrl = NSFileManager.getDefaultManager()
+                    .getURLsForDirectory(
+                        NSSearchPathDirectory.DocumentDirectory,
+                        NSSearchPathDomainMask.UserDomainMask
+                    )
+                    .first().path
+                val file = File(
+                    pathUrl,
+                    "transactions_" + wallet!!.walletConfig.displayName + "_" + header.addressLabel.text + ".csv"
+                )
+                TransactionsExport.exportTransactions(tx) { file.bufferedWriter() }
+
+                val exportToPicker = UIDocumentPickerViewController(
+                    NSURL(file.toURI()),
+                    UIDocumentPickerMode.ExportToService
+                )
+
+                exportToPicker.delegate = object : UIDocumentPickerDelegateAdapter() {
+                    override fun didPickDocuments(
+                        controller: UIDocumentPickerViewController?,
+                        urls: NSArray<NSURL>?
+                    ) {
+                        didPickDocument(controller, urls?.firstOrNull())
+                    }
+
+                    override fun didPickDocument(
+                        controller: UIDocumentPickerViewController?,
+                        url: NSURL?
+                    ) {
+                        runOnMainThread {
+                            presentViewController(
+                                buildSimpleAlertController(
+                                    "",
+                                    texts.format(STRING_INFO_EXPORT, tx.size),
+                                    texts
+                                ), true
+                            ) {}
+                        }
+                    }
+                }
+
+                runOnMainThread { presentViewController(exportToPicker, true) {} }
+            } catch (t: Throwable) {
+                LogUtils.logDebug(this.javaClass.simpleName, "Error exporting transactions", t)
+                runOnMainThread {
+                    presentViewController(
+                        buildSimpleAlertController(
+                            "",
+                            "Error: ${t.message}",
+                            texts
+                        ), true
+                    ) {}
+                }
+            }
+        }
     }
 
     private fun refreshAddress() {

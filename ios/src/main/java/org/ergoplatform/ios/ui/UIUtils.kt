@@ -69,7 +69,10 @@ const val IMAGE_MOSAIK = "square.grid.2x2"
 const val IMAGE_ARROW_RIGHT = "arrow.right"
 const val IMAGE_STAR_OUTLINED = "star"
 const val IMAGE_STAR_FILLED = "star.fill"
-
+const val IMAGE_SHARE = "square.and.arrow.up"
+const val IMAGE_PASTE = "doc.on.clipboard"
+val IMAGE_RESET_DATA = if (Foundation.getMajorSystemVersion() >= 14) "leaf.arrow.triangle.circlepath" else "flame"
+const val IMAGE_FILTER = "slider.horizontal.3"
 
 const val FONT_SIZE_BODY1 = 18.0
 const val FONT_SIZE_HEADLINE1 = 30.0
@@ -164,7 +167,8 @@ fun UIView.wrapWithTrailingImage(
     image: UIImage,
     fixedWith: Double = 0.0,
     fixedHeight: Double = 0.0,
-    keepWidth: Boolean = false // determines if the right boundary is fixed or flexible
+    keepWidth: Boolean = false, // determines if the right boundary is fixed or flexible
+    inset: Double = DEFAULT_MARGIN * .7,
 ): TrailingImageView<UIView> {
     val imageView = UIImageView(image)
     imageView.tintColor = (this as? UILabel)?.textColor ?: this.tintColor
@@ -180,7 +184,7 @@ fun UIView.wrapWithTrailingImage(
         imageView.fixedHeight(fixedHeight)
     }
     imageView.contentMode = UIViewContentMode.ScaleAspectFit
-    imageView.centerVerticallyTo(this).leftToRightOf(this, DEFAULT_MARGIN * .7).rightToSuperview(canBeLess = !keepWidth)
+    imageView.centerVerticallyTo(this).leftToRightOf(this, inset).rightToSuperview(canBeLess = !keepWidth)
     this.leftToSuperview().topToSuperview().bottomToSuperview()
     return container
 }
