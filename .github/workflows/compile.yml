@@ -3,11 +3,12 @@ name: Compile
 on:
   push:
     branches: 
-       - '*'
+       - '**'
   pull_request:
     branches: 
        - master
        - develop
+       - v2.5.0
   workflow_dispatch: {}
 
 jobs:
@@ -34,3 +35,106 @@ jobs:
       run: ./gradlew ios:buildNeeded --stacktrace
     - name: Build desktop
       run: ./gradlew desktop:jar
+
+  test-ios-aot:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Select Xcode and guard MobiVM ToolchainUtil stdout capture
+      run: |
+        XCODE_DEV="$(/usr/bin/xcode-select -p 2>/dev/null || true)"
+        if [ -z "$XCODE_DEV" ] || [ ! -d "$XCODE_DEV/Platforms" ] || [ ! -d "$XCODE_DEV/Toolchains" ]; then
+          XCODE_APP="$(ls -d /Applications/Xcode*.app | sort -V | tail -n 1)"
+          sudo /usr/bin/xcode-select -switch "$XCODE_APP/Contents/Developer"
+        fi
+        # MobiVM 3.0.0 Executor.execCapture() does not join its daemon stdout pump thread
+        # before Process.waitFor() returns; a 50ms post-flush pause ensures non-empty capture.
+        mkdir -p "$RUNNER_TEMP/robovm-bin"
+        for tool in xcode-select xcrun; do
+          printf '#!/bin/sh\n/usr/bin/%s "$@"\nrc=$?\nsleep 0.05\nexit $rc\n' "$tool" > "$RUNNER_TEMP/robovm-bin/$tool"
+          chmod +x "$RUNNER_TEMP/robovm-bin/$tool"
+        done
+        echo "$RUNNER_TEMP/robovm-bin" >> "$GITHUB_PATH"
+        /usr/bin/xcode-select -p
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Cache Gradle & MobiVM AOT artifacts
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          ~/.m2/repository/com/mobidevelop/robovm
+          ~/.robovm/cache
+        key: ${{ runner.os }}-console-mobivm-${{ hashFiles('**/*.gradle*', 'gradle/wrapper/gradle-wrapper.properties', 'gradle/verification-metadata.xml', 'ios/robovm.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-console-mobivm-
+          ${{ runner.os }}-ios-arm64-mobivm-
+        save-always: true
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Run MobiVM 3.0.0 native AOT runtime smoke test
+      run: ./gradlew ios:robovmSmokeTest -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8" --stacktrace
+
+  build-ios:
+
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - arm64
+          - arm64-simulator
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Select Xcode and guard MobiVM ToolchainUtil stdout capture
+      run: |
+        XCODE_DEV="$(/usr/bin/xcode-select -p 2>/dev/null || true)"
+        if [ -z "$XCODE_DEV" ] || [ ! -d "$XCODE_DEV/Platforms" ] || [ ! -d "$XCODE_DEV/Toolchains" ]; then
+          XCODE_APP="$(ls -d /Applications/Xcode*.app | sort -V | tail -n 1)"
+          sudo /usr/bin/xcode-select -switch "$XCODE_APP/Contents/Developer"
+        fi
+        mkdir -p "$RUNNER_TEMP/robovm-bin"
+        for tool in xcode-select xcrun; do
+          printf '#!/bin/sh\n/usr/bin/%s "$@"\nrc=$?\nsleep 0.05\nexit $rc\n' "$tool" > "$RUNNER_TEMP/robovm-bin/$tool"
+          chmod +x "$RUNNER_TEMP/robovm-bin/$tool"
+        done
+        echo "$RUNNER_TEMP/robovm-bin" >> "$GITHUB_PATH"
+        /usr/bin/xcode-select -p
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Cache Gradle & MobiVM iOS (${{ matrix.arch }}) AOT artifacts
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          ~/.m2/repository/com/mobidevelop/robovm
+          ~/.robovm/cache
+        key: ${{ runner.os }}-ios-${{ matrix.arch }}-mobivm-${{ hashFiles('**/*.gradle*', 'gradle/wrapper/gradle-wrapper.properties', 'gradle/verification-metadata.xml', 'ios/robovm.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-ios-${{ matrix.arch }}-mobivm-
+        save-always: true
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build iOS (${{ matrix.arch }}) app bundle via MobiVM 3.0.0
+      run: |
+        ./gradlew ios:robovmInstall \
+          -Probovm.iosSkipSigning=true \
+          -Probovm.archs=${{ matrix.arch }} \
+          -Probovm.installDir="$PWD/ios/build/robovm-${{ matrix.arch }}/ErgoWallet.app" \
+          -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8" \
+          --stacktrace
+        test -x "$PWD/ios/build/robovm-${{ matrix.arch }}/ErgoWallet.app/ErgoWallet"
+        test -f "$PWD/ios/build/robovm-${{ matrix.arch }}/ErgoWallet.app/Info.plist"
+        file "$PWD/ios/build/robovm-${{ matrix.arch }}/ErgoWallet.app/ErgoWallet"
+        file "$PWD/ios/build/robovm-${{ matrix.arch }}/ErgoWallet.app/ErgoWallet" | grep -q "Mach-O 64-bit executable arm64"

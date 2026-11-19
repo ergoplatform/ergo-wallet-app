@@ -16,7 +16,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 }
 
 dependencies {
-    api('org.ergoplatform:ergo-appkit_2.11:5.0.3') {
+    api('org.ergoplatform:ergo-appkit_2.12:6.0.1') {
         exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
     }
 
