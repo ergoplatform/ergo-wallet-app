@@ -31,6 +31,9 @@ abstract class SubmitTransactionUiLogic {
     var signingPromptDialogConfig: SigningPromptDialogDataSource? = null
         private set
 
+    // WAL integration: injectable, defaults to NoOp for Desktop/iOS
+    var pendingTxDbProvider: PendingTransactionDbProvider = NoOpPendingTransactionDbProvider
+
     protected suspend fun initWallet(
         database: WalletDbProvider,
         walletId: Int,
@@ -110,6 +113,33 @@ abstract class SubmitTransactionUiLogic {
                         signingResult.serializedTx!!,
                         preferences, texts
                     )
+
+                    // Post-broadcast WAL insertion for blacklist protection.
+                    // Cold Wallet cannot do write-before-broadcast (I3) because
+                    // the signed TX bytes only arrive after the QR scan round-trip.
+                    // The QR scan itself is a physical rate-limiter against rapid-fire.
+                    if (ergoTxResult.success && ergoTxResult.sentTransaction != null) {
+                        try {
+                            val signedTx = ergoTxResult.sentTransaction
+                                as? org.ergoplatform.appkit.SignedTransaction
+                            if (signedTx != null) {
+                                val walletFirstAddress = wallet?.walletConfig?.firstAddress ?: ""
+                                val signingAddress = derivedAddress?.publicAddress ?: walletFirstAddress
+                                val walletAddresses = wallet?.getSortedDerivedAddressesList()
+                                    ?.map { it.publicAddress }?.toSet() ?: setOf(walletFirstAddress)
+
+                                val pendingTx = PendingTxHelper.buildMinimalPendingTx(
+                                    signedTx,
+                                    walletFirstAddress,
+                                    signingAddress,
+                                    walletAddresses
+                                )
+                                pendingTxDbProvider.insertPendingTx(pendingTx)
+                            }
+                        } catch (_: Throwable) {
+                            // WAL miss is non-fatal: broadcast already succeeded
+                        }
+                    }
                 } else {
                     ergoTxResult = SendTransactionResult(false, errorMsg = signingResult.errorMsg)
                 }

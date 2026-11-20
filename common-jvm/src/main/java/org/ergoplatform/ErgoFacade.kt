@@ -8,6 +8,7 @@ import org.ergoplatform.appkit.impl.InputBoxImpl
 import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.ergoplatform.sdk.JavaHelpers
 import org.ergoplatform.explorer.client.model.TransactionInfo
+import org.ergoplatform.persistance.PendingTransaction
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.restapi.client.PeersApi
@@ -194,7 +195,8 @@ object ErgoFacade {
         boxOperations: BoxOperations,
         recipient: Address,
         consolidate: Boolean,
-        babelSwap: BabelSwapData?
+        babelSwap: BabelSwapData?,
+        activePendingTxs: List<PendingTransaction> = emptyList()
     ): UnsignedTransaction {
         val txB: UnsignedTransactionBuilder = boxOperations.blockchainContext.newTxBuilder()
 
@@ -217,7 +219,8 @@ object ErgoFacade {
             boxOperations.withTokensToSpend(tokensSend)
         }
 
-        val boxesLoader = RecordingBoxesLoader().apply { withAllowChainedTx(true) }
+        val boxesLoader = LocalAwareUnspentBoxesLoader(activePendingTxs)
+            .apply { withAllowChainedTx(true) }
         boxOperations.withInputBoxesLoader(boxesLoader)
             .withMaxInputBoxesToSelect(MAX_NUM_INPUT_BOXES)
 
@@ -234,6 +237,7 @@ object ErgoFacade {
                     boxOperations.senders.first().toErgoContract().ergoTree
                 val extraInputBoxes = boxesLoader.allBoxesLoaded.filter {
                     it.ergoTree == firstSenderErgoTree && !addedInputs.contains(it)
+                        && it.id.toString() !in boxesLoader.injectedBoxIds
                 }.take(MAX_NUM_INPUT_BOXES - addedInputs.size)
                 LogUtils.logDebug(
                     "buildUnsignedTx",
@@ -288,7 +292,8 @@ object ErgoFacade {
         tokenBalanceSenders: Map<String, WalletToken>,
         consolidate: Boolean,
         prefs: PreferencesProvider,
-        texts: StringProvider
+        texts: StringProvider,
+        activePendingTxs: List<PendingTransaction> = emptyList()
     ): PromptSigningResult {
         try {
             val ergoClient = getRestErgoClient(prefs)
@@ -320,6 +325,7 @@ object ErgoFacade {
                     recipient,
                     consolidate,
                     babelSwap,
+                    activePendingTxs,
                 )
 
                 val inputs = (unsigned as UnsignedTransactionImpl).boxesToSpend.map { box ->
@@ -480,6 +486,11 @@ object ErgoFacade {
     )
 
     /**
+     * Public accessor for WAL pipeline (ErgoPaySigningUiLogic needs to parse signed TX)
+     */
+    fun getColdErgoClientForWal() = getColdErgoClient()
+
+    /**
      * Sends a serialized and signed transaction
      */
     fun sendSignedErgoTx(
@@ -539,20 +550,4 @@ fun deserializeErgobox(input: ByteArray): InputBox? {
     return ergoBox?.let { InputBoxImpl(it) }
 }
 
-/**
- * RecordingBoxesLoaded is an [ExplorerAndPoolUnspentBoxesLoader] that records all input boxes
- * fetched
- */
-private class RecordingBoxesLoader : ExplorerAndPoolUnspentBoxesLoader() {
-    val allBoxesLoaded = ArrayList<InputBox>()
-
-    override fun loadBoxesPage(
-        ctx: BlockchainContext,
-        sender: Address,
-        page: Int
-    ): MutableList<InputBox> {
-        val boxesLoaded = super.loadBoxesPage(ctx, sender, page)
-        allBoxesLoaded.addAll(boxesLoaded)
-        return boxesLoaded
-    }
-}
+// RecordingBoxesLoader removed — functionality merged into LocalAwareUnspentBoxesLoader (V11)

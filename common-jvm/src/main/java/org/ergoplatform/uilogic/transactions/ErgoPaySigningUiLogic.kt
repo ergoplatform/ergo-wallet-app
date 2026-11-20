@@ -5,7 +5,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ergoplatform.*
+import org.ergoplatform.appkit.SignedTransaction
 import org.ergoplatform.persistance.IAppDatabase
+import org.ergoplatform.persistance.NoOpPendingTransactionDbProvider
+import org.ergoplatform.persistance.PendingTransactionDbProvider
 import org.ergoplatform.persistance.PreferencesProvider
 import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.transactions.*
@@ -16,6 +19,7 @@ import org.ergoplatform.wallet.addresses.findWalletConfigAndAddressIdx
 
 abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
     private var isInitialized = false
+
     var epsr: ErgoPaySigningRequest? = null
         private set
     var transactionInfo: TransactionInfo? = null
@@ -175,6 +179,7 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                             texts
                         )
 
+
                     transitionToNextStep(texts, database.walletDbProvider)
                 } catch (t: Throwable) {
                     LogUtils.logDebug("ErgoPay", "Error getting signing request", t)
@@ -261,10 +266,45 @@ abstract class ErgoPaySigningUiLogic : SubmitTransactionUiLogic() {
                     )
                     signingSecrets.clearMemory()
                     if (signingResult.success) {
-                        ergoTxResult = ErgoFacade.sendSignedErgoTx(
-                            signingResult.serializedTx!!,
-                            preferences, texts
-                        )
+                        val walletFirstAddress = wallet?.walletConfig?.firstAddress ?: ""
+                        val signingAddress = derivedAddress?.publicAddress
+                            ?: wallet?.walletConfig?.firstAddress ?: ""
+                        val walletAddresses = wallet?.let { getSigningDerivedAddresses().toSet() } ?: emptySet()
+
+                        // Always attempt WAL pipeline for ErgoPay
+                        val pendingTx = if (walletFirstAddress.isNotEmpty()) {
+                            try {
+                                val signedTx = ErgoFacade.getColdErgoClientForWal().execute { ctx ->
+                                    ctx.parseSignedTransaction(signingResult.serializedTx!!)
+                                }
+                                // ErgoPay: no input bytes available (SigningResult, not PromptSigningResult).
+                                // Build minimal WAL entry from signed TX JSON for blacklist protection.
+                                PendingTxHelper.buildMinimalPendingTx(
+                                    signedTx, walletFirstAddress, signingAddress, walletAddresses
+                                )
+                            } catch (_: Throwable) { null }
+                        } else null
+
+                        ergoTxResult = if (pendingTx != null) {
+                            val txId = WalBroadcastPipeline.execute(
+                                pendingTx, pendingTxDbProvider
+                            ) {
+                                val result = ErgoFacade.sendSignedErgoTx(
+                                    signingResult.serializedTx!!, preferences, texts
+                                )
+                                if (result.success) result.txId else null
+                            }
+                            if (txId != null) {
+                                SendTransactionResult(true, txId)
+                            } else {
+                                SendTransactionResult(false, errorMsg = texts.getString(STRING_ERROR_SEND_TRANSACTION))
+                            }
+                        } else {
+                            // Fallback: WAL build failed, send directly
+                            ErgoFacade.sendSignedErgoTx(
+                                signingResult.serializedTx!!, preferences, texts
+                            )
+                        }
                     } else {
                         ergoTxResult =
                             SendTransactionResult(false, errorMsg = signingResult.errorMsg)
