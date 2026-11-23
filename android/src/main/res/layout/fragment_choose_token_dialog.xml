@@ -6,15 +6,31 @@
     android:orientation="vertical"
     tools:background="?attr/colorSurface">
 
-    <TextView
-        style="@style/TextAppearance.App.Body1"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:gravity="center"
-        android:paddingHorizontal="@dimen/activity_vertical_margin"
-        android:paddingVertical="@dimen/half_horizontal_margin"
-        android:text="@string/title_add_token" />
+        android:layout_height="wrap_content">
+
+        <TextView
+            style="@style/TextAppearance.App.Body1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/half_horizontal_margin"
+            android:paddingVertical="@dimen/half_horizontal_margin"
+            android:text="@string/title_add_token" />
+
+        <ImageView
+            android:id="@+id/filter_tokens"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/label_tokens"
+            android:padding="@dimen/half_horizontal_margin"
+            android:src="@drawable/ic_filter_alt_24" />
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"

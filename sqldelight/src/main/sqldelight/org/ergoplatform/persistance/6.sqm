@@ -1,0 +1,5 @@
+ALTER TABLE mosaik_app ADD COLUMN `notificationUrl` TEXT;
+ALTER TABLE mosaik_app ADD COLUMN `lastNotificationMessage` TEXT;
+ALTER TABLE mosaik_app ADD COLUMN `lastNotificationMs` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE mosaik_app ADD COLUMN `nextNotificationCheck` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE mosaik_app ADD COLUMN `notificationUnread` INTEGER NOT NULL DEFAULT 0;

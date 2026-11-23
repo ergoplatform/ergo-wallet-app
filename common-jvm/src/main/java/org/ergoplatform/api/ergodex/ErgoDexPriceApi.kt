@@ -10,12 +10,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 class ErgoDexPriceApi : TokenPriceApi {
     private val priceSource = "spectrum.fi"
     private val baseIdErg = "0000000000000000000000000000000000000000000000000000000000000000"
-    private val fetchAllPricesTimeStamp = 1653075262280
 
     private val ergoDexApi: ErgoDexApi
 
     init {
-        val retrofit = Retrofit.Builder().baseUrl("https://api.ergodex.io/")
+        val retrofit = Retrofit.Builder().baseUrl("https://api.spectrum.fi/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(OkHttpSingleton.getInstance())
             .build()
@@ -24,7 +23,7 @@ class ErgoDexPriceApi : TokenPriceApi {
 
 
     override fun getTokenPrices(): List<Pair<TokenPrice, PriceImportance>>? {
-        val swapList = ergoDexApi.getSwaps(fetchAllPricesTimeStamp).execute()
+        val swapList = ergoDexApi.swaps.execute()
 
         val ergBasePrices = swapList.body()
             ?.filter { it.baseId.equals(baseIdErg) && it.baseDisplayName.equals("ERG") }
@@ -33,11 +32,11 @@ class ErgoDexPriceApi : TokenPriceApi {
 
             val hashMap = HashMap<String, ErgoDexSwap>()
             ergBasePrices.forEach {
-                val otherEntry = hashMap.get(it.tokenId)
+                val otherEntry = hashMap[it.tokenId]
 
                 // prefer pools without more trading volume
                 if (otherEntry == null || otherEntry.baseVolume.value < it.baseVolume.value)
-                    hashMap.put(it.tokenId, it)
+                    hashMap[it.tokenId] = it
             }
 
             hashMap.values.map {

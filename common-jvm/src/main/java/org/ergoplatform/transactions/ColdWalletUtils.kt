@@ -4,11 +4,12 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.ergoplatform.ErgoFacade
 import org.ergoplatform.deserializeErgobox
-import org.ergoplatform.deserializeUnsignedTxOffline
 import org.ergoplatform.ergoauth.ErgoAuthRequest
 import org.ergoplatform.ergoauth.ErgoAuthResponse
 import org.ergoplatform.ergoauth.parseErgoAuthRequestFromJson
+import org.ergoplatform.persistance.WalletToken
 import org.ergoplatform.utils.Base64Coder
 
 private const val JSON_FIELD_REDUCED_TX = "reducedTx"
@@ -234,8 +235,8 @@ private fun parseQrChunk(chunk: String, property: String): QrChunk {
     return QrChunk(index, pages, jsonTree.get(property).asString)
 }
 
-fun PromptSigningResult.buildTransactionInfo(): TransactionInfo {
-    val unsignedTx = deserializeUnsignedTxOffline(serializedTx!!)
+fun PromptSigningResult.buildTransactionInfo(tokenMap: Map<String, WalletToken>? = null): TransactionInfo {
+    val unsignedTx = ErgoFacade.deserializeUnsignedTxOffline(serializedTx!!)
 
     // deserialize input boxes and store in hashmap
     val inputBoxes = HashMap<String, TransactionInfoBox>()
@@ -243,7 +244,7 @@ fun PromptSigningResult.buildTransactionInfo(): TransactionInfo {
         try {
             val ergoBox = deserializeErgobox(input)
             ergoBox?.let {
-                val inboxInfo = it.toTransactionInfoBox()
+                val inboxInfo = it.toTransactionInfoBox(tokenMap)
                 inputBoxes.put(inboxInfo.boxId, inboxInfo)
             }
         } catch (t: Throwable) {
@@ -251,7 +252,7 @@ fun PromptSigningResult.buildTransactionInfo(): TransactionInfo {
         }
     }
 
-    return unsignedTx.buildTransactionInfo(inputBoxes)
+    return unsignedTx.buildTransactionInfo(inputBoxes, hintMsg)
 }
 
 class QrCodePagesCollector(private val parser: (String) -> QrChunk?) {

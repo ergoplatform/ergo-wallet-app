@@ -6,6 +6,7 @@ import org.ergoplatform.WalletStateSyncManager
 import org.ergoplatform.getDefaultExplorerApiUrl
 import org.ergoplatform.isErgoMainNet
 import org.ergoplatform.persistance.*
+import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -143,13 +144,14 @@ class PersistenceTest {
 
         val prefs = mock<PreferencesProvider> {
         }
+        val texts = mock<StringProvider> {}
         whenever(prefs.prefDisplayCurrency).thenReturn("")
         whenever(prefs.prefExplorerApiUrl).thenReturn(getDefaultExplorerApiUrl())
 
         runBlocking {
             db.walletDbProvider.insertWalletConfig(WalletConfig(0, "Test2", "3Wwxnaem5ojTfp91qfLw3Y4Sr7ZWVcLPvYSzTsZ4LKGcoxujbxd3", 0, null, false, null))
             WalletStateSyncManager.getInstance()
-                .refreshByUser(prefs, db, rescheduleRefreshJob = null)
+                .refreshByUser(prefs, db, texts, rescheduleRefreshJob = null)
             delay(10000)
         }
     }

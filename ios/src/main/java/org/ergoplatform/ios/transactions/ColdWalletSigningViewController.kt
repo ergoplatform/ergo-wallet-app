@@ -63,7 +63,7 @@ class ColdWalletSigningViewController(
 
         scanningContainer.refreshTexts(uiLogic.qrPagesCollector, uiLogic.lastErrorMessage)
 
-        uiLogic.transactionInfo?.reduceBoxes()?.let {
+        uiLogic.transactionInfo?.let {
             transactionContainer.bindTransaction(it, null,
                 addressLabelHandler = { address, callback ->
                     viewControllerScope.launch {
@@ -155,6 +155,8 @@ class ColdWalletSigningViewController(
         override fun continueButtonPressed() {
             navigationController.popViewController(true)
         }
+
+        override val parentVc: UIViewController get() = this@ColdWalletSigningViewController
     }
 
     inner class IosUiLogic : ColdWalletSigningUiLogic() {

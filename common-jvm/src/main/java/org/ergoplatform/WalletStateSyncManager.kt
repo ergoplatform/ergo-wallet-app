@@ -1,21 +1,21 @@
 package org.ergoplatform
 
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import org.ergoplatform.api.OkHttpSingleton
 import org.ergoplatform.api.TokenPriceApi
 import org.ergoplatform.api.coingecko.CoinGeckoApi
 import org.ergoplatform.api.ergodex.ErgoDexPriceApi
 import org.ergoplatform.api.tokenjay.TokenJayApiClient
+import org.ergoplatform.mosaik.MosaikNotificationSyncManager
 import org.ergoplatform.persistance.*
+import org.ergoplatform.uilogic.StringProvider
 import org.ergoplatform.utils.LogUtils
 import org.ergoplatform.wallet.addresses.ensureWalletAddressListHasFirstAddress
 import org.ergoplatform.wallet.getStateForAddress
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.*
 
 /**
  * fetches Wallet balances and fiat values
@@ -66,10 +66,11 @@ class WalletStateSyncManager {
 
     fun refreshByUser(
         preferences: PreferencesProvider, database: IAppDatabase,
+        texts: StringProvider,
         rescheduleRefreshJob: (() -> Unit)?
     ): Boolean {
         return if (System.currentTimeMillis() - lastRefreshMs > 1000L * 10) {
-            refreshNow(preferences, database, rescheduleRefreshJob)
+            refreshNow(preferences, database, texts, rescheduleRefreshJob)
             true
         } else
             false
@@ -78,10 +79,11 @@ class WalletStateSyncManager {
     fun refreshWhenNeeded(
         preferences: PreferencesProvider,
         database: IAppDatabase,
+        texts: StringProvider,
         rescheduleRefreshJob: (() -> Unit)?
     ) {
         if (System.currentTimeMillis() - lastRefreshMs > 1000L * 60) {
-            refreshNow(preferences, database, rescheduleRefreshJob)
+            refreshNow(preferences, database, texts, rescheduleRefreshJob)
         }
     }
 
@@ -89,8 +91,11 @@ class WalletStateSyncManager {
     private fun refreshNow(
         preferences: PreferencesProvider,
         database: IAppDatabase,
+        texts: StringProvider,
         rescheduleRefreshJob: (() -> Unit)?
     ) {
+        MosaikNotificationSyncManager.startUpdateMosaikNotifications(database, texts)
+
         if (!(isRefreshing.value)) {
             isRefreshing.value = true
             // we reschedule any waiting background refresh job so that it does not fire now
@@ -244,12 +249,35 @@ class WalletStateSyncManager {
                         "Refreshing ${address.publicAddress}..."
                     )
 
-                    val balanceInfoCall =
-                        ApiServiceManager.getOrInit(preferences).getTotalBalanceForAddress(
-                            address.publicAddress
-                        ).execute()
+                    val apiServiceManager = ApiServiceManager.getOrInit(preferences)
 
-                    balanceInfoCall.body()?.let { balanceInfo ->
+                    val balanceInfoNode = if (apiServiceManager.preferNodeAsExplorer) try {
+                        val balanceInfoNodeCall = apiServiceManager.getTotalBalanceForAddress(
+                            address.publicAddress,
+                            useNode = true
+                        ).execute()
+                        if (!balanceInfoNodeCall.isSuccessful)
+                            LogUtils.logDebug(
+                                this.javaClass.simpleName,
+                                "Balance info node error: ${
+                                    balanceInfoNodeCall.errorBody()?.string()
+                                }"
+                            )
+                        balanceInfoNodeCall.body()
+                    } catch (t: Throwable) {
+                        LogUtils.logDebug(
+                            this.javaClass.simpleName,
+                            "Balance info node call error", t
+                        )
+                        null
+                    } else null
+
+                    val balanceInfo =
+                        balanceInfoNode ?: apiServiceManager.getTotalBalanceForAddress(
+                            address.publicAddress, useNode = false
+                        ).execute().body()
+
+                    balanceInfo?.let {
 
                         val newState = WalletState(
                             address.publicAddress,

@@ -9,10 +9,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.BurstMode
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,15 +17,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.compose.settings.primaryButtonColors
-import org.ergoplatform.desktop.ui.AppDialog
-import org.ergoplatform.desktop.ui.AppScrollbar
-import org.ergoplatform.desktop.ui.defaultPadding
-import org.ergoplatform.desktop.ui.getQrCodeImageBitmap
+import org.ergoplatform.desktop.ui.*
 import org.ergoplatform.mosaik.labelStyle
 import org.ergoplatform.mosaik.model.ui.text.LabelStyle
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LIMIT
 import org.ergoplatform.transactions.QR_DATA_LENGTH_LOW_RES
-import org.ergoplatform.uilogic.*
+import org.ergoplatform.uilogic.STRING_BUTTON_NEXT
+import org.ergoplatform.uilogic.STRING_LABEL_QR_PAGES_INFO
 import org.ergoplatform.uilogic.transactions.SigningPromptDialogDataSource
 
 @Composable
@@ -85,7 +80,6 @@ fun SigningPromptDialog(
                 IconButton(onDismissRequest, Modifier.align(Alignment.TopStart)) {
                     Icon(Icons.Default.ArrowBack, null)
                 }
-                // TODO cold wallet save/load functionality
                 if (dataSource.signingPromptData.length > QR_DATA_LENGTH_LOW_RES)
                     IconButton({ lowRes = !lowRes }, Modifier.align(Alignment.TopEnd)) {
                         Icon(Icons.Default.BurstMode, null)
@@ -156,12 +150,25 @@ fun PagedQrContainer(
                 style = labelStyle(LabelStyle.HEADLINE2),
             )
 
-        Button(
-            { if (!lastPage) page += 1 else onLastPageButtonClicked() },
-            Modifier.align(Alignment.CenterHorizontally).padding(top = defaultPadding),
-            colors = primaryButtonColors()
+        Row(
+            Modifier.padding(top = defaultPadding),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(remember(lastPage) { Application.texts.getString(if (!lastPage) STRING_BUTTON_NEXT else lastPageButtonLabel) })
+            Box(Modifier.weight(1f))
+            Button(
+                { if (!lastPage) page += 1 else onLastPageButtonClicked() },
+                colors = primaryButtonColors()
+            ) {
+                Text(remember(lastPage) { Application.texts.getString(if (!lastPage) STRING_BUTTON_NEXT else lastPageButtonLabel) })
+            }
+            Box(Modifier.weight(1f)) {
+                IconButton(
+                    onClick = { calcChunks(Integer.MAX_VALUE).first().copyToClipboard() },
+                    Modifier.align(Alignment.CenterEnd)
+                ) {
+                    Icon(Icons.Default.ContentCopy, null)
+                }
+            }
         }
     }
 

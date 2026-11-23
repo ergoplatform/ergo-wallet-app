@@ -86,5 +86,7 @@ class SigningPromptViewController(
                 }, true
             ) {}
         }
+
+        override val parentVc: UIViewController get() = this@SigningPromptViewController
     }
 }

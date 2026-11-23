@@ -7,6 +7,7 @@ import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.ErgoAmount
 import org.ergoplatform.TestPreferencesProvider
 import org.ergoplatform.appkit.Parameters
+import org.ergoplatform.transactions.TransactionInfo
 import org.ergoplatform.transactions.TransactionResult
 import org.ergoplatform.uilogic.TestUiWallet
 import org.junit.Assert.*
@@ -125,6 +126,10 @@ class SendFundsUiLogicTest {
         }
 
         override fun notifyHasSigningPromptData(signingPrompt: String) {
+
+        }
+
+        override fun notifyHasPreparedTx(preparedTx: TransactionInfo) {
 
         }
 

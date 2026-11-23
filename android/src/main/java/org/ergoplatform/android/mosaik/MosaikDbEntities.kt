@@ -15,6 +15,11 @@ data class MosaikAppDbEntity(
     val iconFile: String?,
     @ColumnInfo(name = "last_visited") val lastVisited: Long,
     val favorite: Boolean,
+    val notificationUrl: String?,
+    val lastNotificationMessage: String?,
+    val lastNotificationMs: Long,
+    val nextNotificationCheck: Long,
+    val notificationUnread: Boolean,
 ) {
     fun toModel(): MosaikAppEntry {
         return MosaikAppEntry(
@@ -24,6 +29,11 @@ data class MosaikAppDbEntity(
             iconFile = iconFile,
             lastVisited = lastVisited,
             favorite,
+            notificationUrl,
+            lastNotificationMessage,
+            lastNotificationMs,
+            nextNotificationCheck,
+            notificationUnread
         )
     }
 }
@@ -35,6 +45,11 @@ fun MosaikAppEntry.toDbEntity() = MosaikAppDbEntity(
     iconFile = iconFile,
     lastVisited = lastVisited,
     favorite,
+    notificationUrl,
+    lastNotificationMessage,
+    lastNotificationMs,
+    nextNotificationCheck,
+    notificationUnread
 )
 
 @Entity(tableName = "mosaik_host")

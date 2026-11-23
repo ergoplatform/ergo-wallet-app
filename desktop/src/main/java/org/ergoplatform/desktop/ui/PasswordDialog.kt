@@ -25,7 +25,7 @@ import org.ergoplatform.Application
 import org.ergoplatform.SigningSecrets
 import org.ergoplatform.URL_FORGOT_PASSWORD_HELP
 import org.ergoplatform.api.AesEncryptionManager
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.compose.settings.appTextFieldColors
 import org.ergoplatform.compose.settings.primaryButtonColors
 import org.ergoplatform.compose.settings.secondaryButtonColors

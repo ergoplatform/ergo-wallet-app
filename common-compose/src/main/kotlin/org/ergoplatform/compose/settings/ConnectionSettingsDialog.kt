@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.getDefaultExplorerApiUrl
@@ -42,12 +43,15 @@ fun ColumnScope.ConnectionSettingsLayout(
         remember { mutableStateOf(TextFieldValue(preferences.prefTokenVerificationUrl)) }
     val ipfsGatewayUrl =
         remember { mutableStateOf(TextFieldValue(preferences.prefIpfsGatewayUrl)) }
+    val preferNodeExplorerApi =
+        remember { mutableStateOf(preferences.isPreferNodeExplorer) }
 
     val applySettings = {
         preferences.prefExplorerApiUrl = explorerApiUrl.value.text
         preferences.prefNodeUrl = nodeApiUrl.value.text
         preferences.prefIpfsGatewayUrl = ipfsGatewayUrl.value.text
         preferences.prefTokenVerificationUrl = tokenVerificationUrl.value.text
+        preferences.isPreferNodeExplorer = preferNodeExplorerApi.value
 
         // reset api service of NodeConnector to load new settings
         ApiServiceManager.resetApiService()
@@ -55,7 +59,28 @@ fun ColumnScope.ConnectionSettingsLayout(
         onDismissRequest()
     }
 
-    ConnectionTextField(explorerApiUrl, stringProvider, STRING_LABEL_EXPLORER_API_URL)
+    ConnectionTextField(
+        explorerApiUrl,
+        stringProvider,
+        STRING_LABEL_EXPLORER_API_URL,
+        bottomPadding = 0.dp
+    )
+
+    Row(
+        Modifier.fillMaxWidth().padding(bottom = defaultPadding),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val onCheckedChange: () -> Unit = { preferNodeExplorerApi.value = !preferNodeExplorerApi.value }
+        Checkbox(
+            preferNodeExplorerApi.value,
+            onCheckedChange = { onCheckedChange() },
+        )
+        Text(
+            remember { stringProvider.getString(STRING_CHECK_PREFER_NODE) },
+            Modifier.weight(1f).clickable { onCheckedChange() },
+            style = labelStyle(LabelStyle.BODY1)
+        )
+    }
 
     val checkNodesState = uiLogic.checkNodesState.collectAsState()
     val showList = remember { mutableStateOf(checkNodesState.value != SettingsUiLogic.CheckNodesState.Waiting) }
@@ -93,7 +118,10 @@ fun ColumnScope.ConnectionSettingsLayout(
 
                 Icon(Icons.Default.Error, null, tint = MosaikStyleConfig.primaryLabelColor)
 
-                Text(remember { stringProvider.getString(STRING_LABEL_NODE_NONE_FOUND) }, Modifier.padding(start = defaultPadding / 2))
+                Text(
+                    remember { stringProvider.getString(STRING_LABEL_NODE_NONE_FOUND) },
+                    Modifier.padding(start = defaultPadding / 2),
+                )
 
             }
         }
@@ -119,6 +147,7 @@ fun ColumnScope.ConnectionSettingsLayout(
                     TextFieldValue(preferences.defaultTokenVerificationUrl)
                 ipfsGatewayUrl.value =
                     TextFieldValue(preferences.defaultIpfsGatewayUrl)
+                preferNodeExplorerApi.value = false
             },
             colors = secondaryButtonColors(),
             modifier = Modifier.padding(end = defaultPadding),
@@ -185,12 +214,17 @@ private fun NodeInfoEntry(
     ) {
         Column(Modifier.clickable { onChooseNode() }.padding(defaultPadding / 2)) {
             Text(nodeInfo.nodeUrl, style = labelStyle(LabelStyle.BODY1))
-            Text(
+            val infoLabel = remember(nodeInfo) {
                 stringProvider.getString(
                     STRING_LABEL_NODE_INFO,
                     nodeInfo.blockHeight,
                     nodeInfo.responseTime
-                ),
+                ) + (if (nodeInfo.isExplorer) "\n" + stringProvider.getString(
+                    STRING_LABEL_NODE_EXPLORER_API
+                ) else "")
+            }
+            Text(
+                infoLabel,
                 style = labelStyle(LabelStyle.BODY2),
                 color = foregroundColor(ForegroundColor.SECONDARY),
             )
@@ -205,13 +239,14 @@ private fun ConnectionTextField(
     label: String,
     apply: (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
+    bottomPadding: Dp = defaultPadding,
 ) {
     OutlinedTextField(
         explorerApiUrl.value,
         { textFieldValue ->
             explorerApiUrl.value = textFieldValue
         },
-        Modifier.padding(bottom = defaultPadding).fillMaxWidth(),
+        Modifier.padding(bottom = bottomPadding).fillMaxWidth(),
         keyboardOptions = KeyboardOptions(imeAction = if (apply == null) ImeAction.Next else ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = apply?.let { { apply() } }),
         maxLines = 1,

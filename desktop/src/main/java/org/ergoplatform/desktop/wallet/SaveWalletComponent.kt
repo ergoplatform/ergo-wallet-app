@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.Application
 import org.ergoplatform.api.AesEncryptionManager
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.desktop.ui.AppLockScreen
 import org.ergoplatform.desktop.ui.PasswordDialog
 import org.ergoplatform.desktop.ui.navigation.NavClientScreenComponent

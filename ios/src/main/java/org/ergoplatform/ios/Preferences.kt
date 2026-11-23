@@ -7,6 +7,8 @@ import org.robovm.apple.foundation.NSObject
 import org.robovm.apple.foundation.NSString
 import java.io.File
 
+const val KEY_APPLOCK = "appLock"
+
 class Preferences : PreferencesProvider() {
     private val iosPreferences: IOSPreferences
 
@@ -49,4 +51,9 @@ class Preferences : PreferencesProvider() {
     override fun saveFloat(key: String, value: Float) {
         iosPreferences.putFloat(key, value).flush()
     }
+
+    var enableAppLock: Boolean
+        get() = getBoolean(KEY_APPLOCK, false)
+        set(value) = saveBoolean(KEY_APPLOCK, value)
+
 }

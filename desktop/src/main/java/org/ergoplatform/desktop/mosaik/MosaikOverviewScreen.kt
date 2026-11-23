@@ -1,12 +1,10 @@
 package org.ergoplatform.desktop.mosaik
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesomeMosaic
@@ -19,6 +17,7 @@ import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import org.ergoplatform.Application
 import org.ergoplatform.compose.settings.AppCard
 import org.ergoplatform.compose.settings.appTextFieldColors
@@ -102,7 +101,8 @@ fun MosaikOverviewScreen(
                         it.appDescription,
                         null,
                         0,
-                        false
+                        false,
+                        notificationUrl = null,
                     )
                 }, onAppClicked)
             }
@@ -144,12 +144,24 @@ private fun MosaikAppList(
                             color = uiErgoColor,
                         )
 
-                        Text(
-                            if (mosaikApp.description.isNullOrBlank()) mosaikApp.url else mosaikApp.description!!,
-                            style = labelStyle(LabelStyle.BODY1),
-                            maxLines = if (mosaikApp.description.isNullOrBlank()) 1 else 3,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        if (mosaikApp.favorite && mosaikApp.notificationUnread && mosaikApp.lastNotificationMessage != null) {
+                            Card(modifier = Modifier.border(1.dp, uiErgoColor)) {
+                                Text(
+                                    mosaikApp.lastNotificationMessage!!,
+                                    Modifier.padding(4.dp),
+                                    style = labelStyle(LabelStyle.BODY1),
+                                    maxLines = 3,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        } else {
+                            Text(
+                                if (mosaikApp.description.isNullOrBlank()) mosaikApp.url else mosaikApp.description!!,
+                                style = labelStyle(LabelStyle.BODY1),
+                                maxLines = if (mosaikApp.description.isNullOrBlank()) 1 else 3,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
 

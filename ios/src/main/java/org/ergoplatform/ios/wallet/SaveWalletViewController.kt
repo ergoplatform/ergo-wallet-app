@@ -6,7 +6,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.api.AesEncryptionManager
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.ios.api.IosAuthentication
 import org.ergoplatform.ios.api.IosEncryptionManager
 import org.ergoplatform.ios.ui.*
@@ -126,7 +126,7 @@ class SaveWalletViewController(
                             LogUtils.logDebug("KeychainEnc", "Error encrypting mnemonic", t)
                             runOnMainThread {
                                 val uac = UIAlertController(
-                                    texts.format(STRING_ERROR_DEVICE_SECURITY, ""),
+                                    texts.format(STRING_ERROR_DEVICE_SECURITY_SAVE_WALLET, ""),
                                     t.message, UIAlertControllerStyle.Alert
                                 )
                                 uac.addAction(
@@ -143,7 +143,7 @@ class SaveWalletViewController(
                         runOnMainThread {
                             presentViewController(
                                 buildSimpleAlertController(
-                                    texts.format(STRING_ERROR_DEVICE_SECURITY, ""),
+                                    texts.format(STRING_ERROR_DEVICE_SECURITY_SAVE_WALLET, ""),
                                     error, texts
                                 ), true
                             ) {}

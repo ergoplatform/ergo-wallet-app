@@ -2,6 +2,7 @@ package org.ergoplatform.ios.settings
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.ergoplatform.ApiServiceManager
 import org.ergoplatform.getDefaultExplorerApiUrl
 import org.ergoplatform.ios.ui.*
 import org.ergoplatform.uilogic.*
@@ -17,6 +18,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
     private lateinit var tokenVerificationInput: UITextField
     private lateinit var ipfsGatewayInput: UITextField
     private lateinit var nodeDetectionState: UIStackView
+    private lateinit var preferNodeApiSwitch: UISwitch
 
     private val uiLogic = SettingsUiLogic()
     private var nodeDetectionStarted = false
@@ -44,6 +46,11 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
             prefs.prefExplorerApiUrl = explorerApiInput.text
             prefs.prefTokenVerificationUrl = tokenVerificationInput.text
             prefs.prefIpfsGatewayUrl = ipfsGatewayInput.text
+            prefs.isPreferNodeExplorer = preferNodeApiSwitch.isOn
+
+            // reset api service of NodeConnector to load new settings
+            ApiServiceManager.resetApiService()
+
             dismissViewController(true) {}
         }
 
@@ -90,6 +97,10 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
             rightViewMode = UITextFieldViewMode.UnlessEditing
         }
 
+        val preferNodeApiContainer = UiSwitchWithLabel(texts.get(STRING_CHECK_PREFER_NODE))
+        preferNodeApiSwitch = preferNodeApiContainer.switch
+        preferNodeApiSwitch.isOn = prefs.isPreferNodeExplorer
+
         val tokenVerificationLabel = Body1Label().apply {
             text = texts.get(STRING_LABEL_TOKEN_VERIFICATION_URL)
         }
@@ -132,6 +143,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
                 explorerApiInput.text = getDefaultExplorerApiUrl()
                 tokenVerificationInput.text = prefs.defaultTokenVerificationUrl
                 ipfsGatewayInput.text = prefs.defaultIpfsGatewayUrl
+                preferNodeApiSwitch.isOn = false
             }
         }
         buttonContainer.addSubview(defaultsButton)
@@ -144,6 +156,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
                     explorerApiInput,
                     nodeApiLabel,
                     nodeApiInput,
+                    preferNodeApiContainer,
                     nodeDetectionState,
                     tokenVerificationLabel,
                     tokenVerificationInput,
@@ -158,6 +171,7 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
                 isLayoutMarginsRelativeArrangement = true
                 setCustomSpacing(DEFAULT_MARGIN * 2, explorerApiInput)
                 setCustomSpacing(DEFAULT_MARGIN, nodeApiInput)
+                setCustomSpacing(DEFAULT_MARGIN * 2, preferNodeApiContainer)
                 setCustomSpacing(DEFAULT_MARGIN, nodeDetectionState)
                 setCustomSpacing(DEFAULT_MARGIN * 2, tokenVerificationInput)
             }
@@ -246,7 +260,9 @@ class ConnectionSettingsViewController : ViewControllerWithKeyboardLayoutGuide()
                 STRING_LABEL_NODE_INFO,
                 nodeInfo.blockHeight,
                 nodeInfo.responseTime
-            )
+            ) + (if (nodeInfo.isExplorer) "\n" + stringProvider.getString(
+                STRING_LABEL_NODE_EXPLORER_API
+            ) else "")
             textColor = UIColor.secondaryLabel()
         }
 

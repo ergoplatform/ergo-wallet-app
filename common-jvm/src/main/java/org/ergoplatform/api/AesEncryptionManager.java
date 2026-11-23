@@ -1,6 +1,6 @@
 package org.ergoplatform.api;
 
-import org.ergoplatform.appkit.SecretString;
+import org.ergoplatform.sdk.SecretString;
 import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.*;

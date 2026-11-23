@@ -45,7 +45,7 @@ class WalletDetailsComponent(
         get() = {
             IconButton({
                 uiLogic.refreshByUser(
-                    Application.prefs, Application.database,
+                    Application.prefs, Application.database, Application.texts,
                     rescheduleRefreshJob = null
                 )
             }) {
@@ -95,6 +95,7 @@ class WalletDetailsComponent(
         uiLogic.refreshWhenNeeded(
             Application.prefs,
             Application.database,
+            Application.texts,
             rescheduleRefreshJob = null
         )
     }

@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import org.ergoplatform.persistance.*
 
 const val KEY_DAYNIGHTMODE = "dayNightMode"
+const val KEY_APPLOCK = "appLock"
 
 class Preferences(context: Context) : PreferencesProvider() {
     private val prefs: SharedPreferences =
@@ -46,4 +47,8 @@ class Preferences(context: Context) : PreferencesProvider() {
             prefs.edit().putInt(KEY_DAYNIGHTMODE, mode).apply()
             AppCompatDelegate.setDefaultNightMode(mode)
         }
+
+    var enableAppLock: Boolean
+        get() = getBoolean(KEY_APPLOCK, false)
+        set(value) = saveBoolean(KEY_APPLOCK, value)
 }

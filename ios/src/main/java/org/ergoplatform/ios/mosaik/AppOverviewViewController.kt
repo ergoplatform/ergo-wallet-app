@@ -222,9 +222,16 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
         }
 
         fun bind(mosaikApp: MosaikAppEntry): CardView {
+            val hasUnreadNotification =
+                mosaikApp.favorite && mosaikApp.notificationUnread && mosaikApp.lastNotificationMessage != null
             bind(
                 mosaikApp.name,
-                (if (mosaikApp.description.isNullOrBlank()) mosaikApp.url else mosaikApp.description)!!,
+                (if (hasUnreadNotification)
+                    mosaikApp.lastNotificationMessage
+                else if (mosaikApp.description.isNullOrBlank())
+                    mosaikApp.url
+                else
+                    mosaikApp.description)!!,
                 mosaikApp.url,
                 try {
                     mosaikApp.iconFile?.let { fileId ->
@@ -233,7 +240,8 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
                 } catch (t: Throwable) {
                     LogUtils.logDebug("MosaikOverview", "Error accessing icon file", t)
                     null
-                }
+                },
+                hasUnreadNotification,
             )
             return this
         }
@@ -243,17 +251,21 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
                 mosaikAppSuggestion.appName,
                 mosaikAppSuggestion.appDescription,
                 mosaikAppSuggestion.appUrl,
-                image = null
+                image = null,
+                emphasizeDesc = false,
             )
             return this
         }
 
-        fun bind(title: String, description: String, url: String, image: UIImage?) {
+        fun bind(title: String, description: String, url: String, image: UIImage?, emphasizeDesc: Boolean) {
             titleLabel.text = title
             descLabel.text = description
             this.appName = title
             this.appUrl = url
             descLabel.numberOfLines = if (url == description) 1 else 3
+            cardBorderColor =
+                if (emphasizeDesc) uiColorErgo.cgColor
+                else defaultBorderColor
 
             appIconImage.image = image ?: getIosSystemImage(IMAGE_MOSAIK, UIImageSymbolScale.Medium)
             appIconImage.tintColor = if (image == null) UIColor.label() else null
@@ -261,7 +273,7 @@ class AppOverviewViewController : ViewControllerWithKeyboardLayoutGuide() {
     }
 
     inner class DisclaimerView(private val viewToShow: UIView) : UIStackView() {
-        val disclaimerLabel = Body1Label()
+        private val disclaimerLabel = Body1Label()
 
         init {
             axis = UILayoutConstraintAxis.Vertical

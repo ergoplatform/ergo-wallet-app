@@ -401,7 +401,7 @@ fun UIView.maxWidth(c: Double): UIView {
     return this
 }
 
-fun UIView.widthMatchesWidthOf(sibling: UIView, factor: Double): UIView {
+fun UIView.widthMatchesWidthOf(sibling: UIView, factor: Double = 1.0): UIView {
     setTranslatesAutoresizingMaskIntoConstraints(false)
     NSLayoutConstraint.activateConstraints(
         NSArray(this.widthAnchor.equalTo(sibling.widthAnchor, factor))
