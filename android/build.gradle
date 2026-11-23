@@ -31,7 +31,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
@@ -160,5 +160,11 @@ configurations {
         resolutionStrategy {
             disableDependencyVerification()
         }
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.guava:listenablefuture:1.0'
     }
 }
