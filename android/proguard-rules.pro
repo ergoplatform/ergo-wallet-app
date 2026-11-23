@@ -84,3 +84,7 @@
 -dontwarn scala.**
 -dontobfuscate
 -dontoptimize
+-keep class androidx.work.** { *; }
+-keep class androidx.work.impl.** { *; }
+-keep class com.google.common.util.concurrent.** { *; }
+-keep class androidx.concurrent.futures.** { *; }
