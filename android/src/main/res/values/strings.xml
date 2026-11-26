@@ -54,6 +54,7 @@
     <string name="label_more_tokens">more tokens</string>
     <string name="label_unnamed_token">(unnamed token)</string>
     <string name="label_unconfirmed">unconfirmed</string>
+    <string name="label_pending_wal">pending</string>
     <string name="button_receive">Receive</string>
     <string name="button_send">Send</string>
     <string name="button_display_currency">Display currency: %1$s</string>
