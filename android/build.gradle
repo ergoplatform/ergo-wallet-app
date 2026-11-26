@@ -13,8 +13,8 @@ android {
         applicationId "org.ergoplatform.android"
         minSdk 26
         targetSdk 36
-        versionCode 2609
-        versionName "2.5.0"
+        versionCode 2612
+        versionName "2.5.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -31,7 +31,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
