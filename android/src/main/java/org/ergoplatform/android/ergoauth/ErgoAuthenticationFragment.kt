@@ -144,7 +144,10 @@ class ErgoAuthenticationFragment : AbstractAuthenticationFragment(), WalletChoos
         get() = viewModel.uiLogic.walletConfig
 
     override fun onWalletChosen(walletConfig: WalletConfig) {
-        viewModel.uiLogic.walletConfig = walletConfig
+        viewModel.uiLogic.setWalletConfig(
+            walletConfig,
+            AppDatabase.getInstance(requireContext()).walletDbProvider
+        )
         refreshWalletLabel()
     }
 

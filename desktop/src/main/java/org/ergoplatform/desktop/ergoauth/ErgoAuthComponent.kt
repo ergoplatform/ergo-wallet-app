@@ -81,8 +81,11 @@ class ErgoAuthComponent(
             ChooseWalletListDialog(
                 walletList, true,
                 onWalletChosen = { walletConfig ->
+                    uiLogic.setWalletConfig(
+                        walletConfig,
+                        Application.database.walletDbProvider
+                    )
                     chooseWalletDialog.value = null
-                    uiLogic.walletConfig = walletConfig
                 },
                 onDismiss = { chooseWalletDialog.value = null },
             )

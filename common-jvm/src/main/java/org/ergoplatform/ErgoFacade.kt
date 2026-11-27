@@ -131,7 +131,7 @@ object ErgoFacade {
 
             val ergoClient = getRestErgoClient(prefs)
             return ergoClient.execute { ctx: BlockchainContext ->
-                val newTxFee = orgTxFee + (Parameters.MinFee / 10)
+                val newTxFee = max(orgTxFee + (Parameters.MinFee / 10), Parameters.MinFee)
 
                 var completeValue = 0L
                 // we send all tokens from the input boxes
@@ -153,6 +153,7 @@ object ErgoFacade {
                 val ergoAddress = Address.create(address)
                 val unsignedTx = BoxOperations.createForSender(ergoAddress, ctx)
                     .withAmountToSpend(amountToSend)
+                    .withFeeAmount(newTxFee)
                     .withTokensToSpend(tokenList)
                     .withInputBoxesLoader(object : ExplorerAndPoolUnspentBoxesLoader() {
                         // important to not allow tx chaining

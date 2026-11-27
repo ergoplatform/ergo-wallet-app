@@ -19,12 +19,26 @@ object IosEncryptionManager {
     }
 
     fun decryptDataWithKeychain(encryptedData: ByteArray, context: LAContext): ByteArray {
-        val key = loadOrGenerateKey(context)
+        val key = loadExistingKey(context)
         return AesEncryptionManager.decryptData(SecretString.create(key), encryptedData)
     }
 
+    private fun loadExistingKey(context: LAContext): String {
+        val existingKey =
+            IosKeychainAccess.queryPassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT, context)
+
+        if (existingKey == null) {
+            LogUtils.logDebug("IosEncryptionManager", "Key not found in keychain")
+            throw IllegalStateException("Key not found in keychain")
+        }
+
+        LogUtils.logDebug("IosEncryptionManager", "Key read from keychain")
+        return existingKey
+    }
+
     private fun loadOrGenerateKey(context: LAContext): String {
-        val existingKey = IosKeychainAccess.queryPassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT, context)
+        val existingKey =
+            IosKeychainAccess.queryPassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT, context)
 
         return if (existingKey == null) {
             LogUtils.logDebug("IosEncryptionManager", "Generating new key")

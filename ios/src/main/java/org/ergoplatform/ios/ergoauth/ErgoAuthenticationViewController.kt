@@ -192,7 +192,10 @@ class ErgoAuthenticationViewController(
                 addGestureRecognizer(UITapGestureRecognizer {
                     presentViewController(
                         ChooseWalletViewController {
-                            uiLogic.walletConfig = it
+                            uiLogic.setWalletConfig(
+                                it,
+                                getAppDelegate().database.walletDbProvider
+                            )
                             refreshAddressInfo()
                         },
                         true

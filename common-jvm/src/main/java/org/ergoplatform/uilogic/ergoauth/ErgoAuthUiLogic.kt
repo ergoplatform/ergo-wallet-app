@@ -1,8 +1,10 @@
 package org.ergoplatform.uilogic.ergoauth
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.ergoplatform.ErgoFacade
 import org.ergoplatform.SigningSecrets
@@ -11,6 +13,7 @@ import org.ergoplatform.ergoauth.*
 import org.ergoplatform.persistance.IAppDatabase
 import org.ergoplatform.persistance.WalletAddress
 import org.ergoplatform.persistance.WalletConfig
+import org.ergoplatform.persistance.WalletDbProvider
 import org.ergoplatform.transactions.*
 import org.ergoplatform.uilogic.*
 import org.ergoplatform.uilogic.transactions.SigningPromptDialogDataSource
@@ -28,8 +31,15 @@ abstract class ErgoAuthUiLogic {
         private set
     var ergAuthRequest: ErgoAuthRequest? = null
         private set
+    private val walletStateLock = Any()
+    private var walletSelectionVersion = 0L
+    @Volatile
     var walletConfig: WalletConfig? = null
-    private var walletAddresses: List<WalletAddress> = emptyList()
+        private set
+    @Volatile
+    internal var walletAddresses: List<WalletAddress> = emptyList()
+        private set
+    private var walletAddressesJob: Job? = null
     private var responseJob: Job? = null
 
     // are we on the cold device
@@ -51,23 +61,31 @@ abstract class ErgoAuthUiLogic {
             requestJob = coroutineScope.launch(Dispatchers.IO) {
                 try {
                     notifyStateChanged(State.FETCHING_DATA)
-                    walletConfig = if (walletId >= 0) {
-                        db.walletDbProvider.loadWalletConfigById(walletId)
-                    } else {
-                        db.walletDbProvider.getAllWalletConfigsSynchronous().minByOrNull {
-                            it.displayName?.lowercase() ?: ""
+                    val shouldLoadDefaultWallet = synchronized(walletStateLock) {
+                        walletSelectionVersion == 0L
+                    }
+                    if (shouldLoadDefaultWallet) {
+                        val loadedWalletConfig = if (walletId >= 0) {
+                            db.walletDbProvider.loadWalletConfigById(walletId)
+                        } else {
+                            db.walletDbProvider.getAllWalletConfigsSynchronous().minByOrNull {
+                                it.displayName?.lowercase() ?: ""
+                            }
+                        }
+
+                        if (loadedWalletConfig == null) {
+                            throw IllegalStateException(texts.getString(STRING_ERROR_NO_WALLET))
+                        }
+
+                        val loadedAddresses =
+                            loadWalletAddresses(loadedWalletConfig, db.walletDbProvider)
+                        synchronized(walletStateLock) {
+                            if (walletSelectionVersion == 0L) {
+                                walletConfig = loadedWalletConfig
+                                walletAddresses = loadedAddresses
+                            }
                         }
                     }
-
-                    if (walletConfig == null) {
-                        throw IllegalStateException(texts.getString(STRING_ERROR_NO_WALLET))
-                    }
-
-                    val firstAddress = walletConfig?.firstAddress!!
-                    walletAddresses = ensureWalletAddressListHasFirstAddress(
-                        db.walletDbProvider.loadWalletAddresses(firstAddress),
-                        firstAddress
-                    )
 
                     isColdAuth = !isErgoAuthRequestUri(ergoAuthData)
                     if (isColdAuth) {
@@ -92,6 +110,46 @@ abstract class ErgoAuthUiLogic {
                 }
             }
         }
+    }
+
+    fun setWalletConfig(walletConfig: WalletConfig, db: WalletDbProvider) {
+        val previousJob: Job?
+        synchronized(walletStateLock) {
+            val selectionVersion = ++walletSelectionVersion
+            this.walletConfig = walletConfig
+            walletAddresses = emptyList()
+            previousJob = walletAddressesJob
+            walletAddressesJob = coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    val loadedAddresses = loadWalletAddresses(walletConfig, db)
+                    synchronized(walletStateLock) {
+                        if (isActive && walletSelectionVersion == selectionVersion) {
+                            walletAddresses = loadedAddresses
+                        }
+                    }
+                } catch (t: CancellationException) {
+                    throw t
+                } catch (t: Throwable) {
+                    LogUtils.logDebug(
+                        this@ErgoAuthUiLogic.javaClass.simpleName,
+                        "Error loading wallet addresses",
+                        t
+                    )
+                }
+            }
+        }
+        previousJob?.cancel()
+    }
+
+    private suspend fun loadWalletAddresses(
+        walletConfig: WalletConfig,
+        db: WalletDbProvider
+    ): List<WalletAddress> {
+        val firstAddress = walletConfig.firstAddress ?: return emptyList()
+        return ensureWalletAddressListHasFirstAddress(
+            db.loadWalletAddresses(firstAddress),
+            firstAddress
+        )
     }
 
     fun addRequestQrPage(ergoAuthData: String, texts: StringProvider) {
@@ -157,6 +215,16 @@ abstract class ErgoAuthUiLogic {
             try {
 
                 notifyStateChanged(State.FETCHING_DATA)
+                while (true) {
+                    val addressesJob = synchronized(walletStateLock) { walletAddressesJob }
+                    if (addressesJob == null || addressesJob.isCompleted) {
+                        break
+                    }
+                    addressesJob.join()
+                }
+                val derivationIndices = synchronized(walletStateLock) {
+                    walletAddresses.map { it.derivationIndex }
+                }
 
                 val prefix = PasswordGenerator.generatePassword(20)
                 val suffix = PasswordGenerator.generatePassword(20)
@@ -164,7 +232,7 @@ abstract class ErgoAuthUiLogic {
                     prefix + ergAuthRequest.signingMessage + ergAuthRequest.requestHost + suffix
                 val signature = ErgoFacade.signMessage(
                     secrets,
-                    walletAddresses.map { it.derivationIndex },
+                    derivationIndices,
                     ergAuthRequest.sigmaBoolean!!,
                     signedMessage
                 )

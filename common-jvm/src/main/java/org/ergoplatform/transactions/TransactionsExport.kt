@@ -24,23 +24,37 @@ object TransactionsExport {
                 val ergValue = it.addressTransaction
                 val tokens = it.tokens
                 val dateFormatted = sdf.format(Date(ergValue.timestamp))
-                val messageEscaped = ergValue.message?.replace("\"", "\"\"") ?: ""
+                val messageFormatted = formatCsvTextField(ergValue.message)
 
                 if (!ergValue.ergAmount.isZero())
                     out.write(
                         "${ergValue.address};${ergValue.txId};${ergValue.inclusionHeight};"
                                 + "$dateFormatted;${ergValue.ergAmount.toStringTrimTrailingZeros()};ERG;;"
-                                + "\"$messageEscaped\"\n"
+                                + "$messageFormatted\n"
                     )
 
                 tokens.forEach { token ->
+                    val tokenNameFormatted = formatCsvTextField(token.name)
                     out.write(
                         "${token.address};${token.txId};${ergValue.inclusionHeight};"
-                                + "$dateFormatted;${token.tokenAmount.toStringTrimTrailingZeros()};${token.name};"
-                                + "${token.tokenId};\"$messageEscaped\"\n"
+                                + "$dateFormatted;${token.tokenAmount.toStringTrimTrailingZeros()};$tokenNameFormatted;"
+                                + "${token.tokenId};$messageFormatted\n"
                     )
                 }
             }
         }
+    }
+
+    // Quote and escape CSV fields containing delimiters, quotes, newlines, or leading formula characters
+    internal fun formatCsvTextField(value: String?): String {
+        val singleLine = (value ?: "")
+            .replace("\r\n", " ")
+            .replace('\r', ' ')
+            .replace('\n', ' ')
+        val prefixed = when (singleLine.firstOrNull()) {
+            '=', '+', '-', '@', '\t' -> "'$singleLine"
+            else -> singleLine
+        }
+        return "\"${prefixed.replace("\"", "\"\"")}\""
     }
 }
